@@ -10,37 +10,28 @@ name: E2E
 #   - packages/api-contract/** is INCLUDED beyond the PRD's enumerated paths
 #     because @kcvv/api-contract is a runtime dep of @kcvv/web — schema
 #     changes there can break SSR rendering without touching apps/web/src.
-
+#
+# PR-only (#3151): E2E used to also run on every push to `main`, but nothing
+# ever reads that run — the suite has no `main`-only signal like Codecov's
+# trend line, and a red run there just repeats what its PR already caught.
+# Filtering is job-level (`changes` below), not on the `on:` triggers — the
+# same trap `ci.yml`'s `changes` job avoids: a workflow that never triggers at
+# all leaves a required check "Pending" forever, so a docs/API/Studio-only PR
+# would never merge. Never move this filter back to `on:` `paths:`.
+#
+# Cost, stated plainly: branch protection's "require branches to be up to
+# date" is off (`.claude/CLAUDE.md` Git Workflow item 7, on wave cost), and
+# dropping the `main` push run removes the one signal that would have caught
+# two green PRs combining into a red `main` for E2E specifically — the #2874
+# class of merge race, this time with nothing watching. The owner accepted
+# that trade-off when ruling to drop the trigger rather than keep paying for
+# a run nothing read.
 on:
-  push:
-    branches: [main]
-    paths:
-      - "apps/web/src/**"
-      - "apps/web/public/**"
-      - "apps/web/package.json"
-      - "apps/web/test/e2e/**"
-      - "packages/api-contract/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
-      - ".nvmrc"
-      - ".github/workflows/e2e.yml"
   pull_request:
     branches: [main]
     # ready_for_review so marking a draft ready triggers the suite (job is
     # draft-gated below).
     types: [opened, synchronize, reopened, ready_for_review]
-    paths:
-      - "apps/web/src/**"
-      - "apps/web/public/**"
-      - "apps/web/package.json"
-      - "apps/web/test/e2e/**"
-      - "packages/api-contract/**"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - "pnpm-workspace.yaml"
-      - ".nvmrc"
-      - ".github/workflows/e2e.yml"
 
 # Cancel superseded e2e runs on the same ref — repeated PR pushes shouldn't each
 # pay for a full Playwright run.
@@ -55,12 +46,68 @@ env:
   TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
 jobs:
+  # Same shape and same action as `changes`/`visual-regression-changes` in
+  # ci.yml — see the comment on `on:` above for why this lives here and not on
+  # the workflow triggers.
+  changes:
+    name: Detect e2e-relevant changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # paths-filter reads the PR's file list through the REST API, which the
+    # action documents as requiring `pull-requests: read`. It survives on
+    # `contents: read` alone today only because this repo is public — the
+    # listFiles call would 403 the moment it isn't.
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      web: ${{ steps.filter.outputs.web }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Detect e2e-relevant paths
+        id: filter
+        uses: dorny/paths-filter@v4.0.3
+        with:
+          filters: |
+            web:
+              - "apps/web/src/**"
+              - "apps/web/public/**"
+              - "apps/web/package.json"
+              - "apps/web/test/e2e/**"
+              - "packages/api-contract/**"
+              - "package.json"
+              - "pnpm-lock.yaml"
+              - "pnpm-workspace.yaml"
+              - ".nvmrc"
+              - ".github/workflows/e2e.yml"
+
   e2e:
     name: E2E
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
-    environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Preview' }}
+    needs: [changes]
+    # This workflow only ever triggers on `pull_request` now (see `on:`
+    # above), so `github.event_name != 'pull_request'` can never be true —
+    # simplified to the draft guard plus the `changes` output.
+    #
+    # Known gap, same shape as `ci.yml`'s `quality-checks`: if `changes`
+    # itself fails (a `paths-filter` 403/5xx), its output is unset, this `if:`
+    # evaluates false, the job is skipped, and GitHub counts a skipped
+    # required check as passing — a web PR could merge with E2E never having
+    # run. `ci.yml`'s `visual-regression-gate` closes the equivalent hole with
+    # a dedicated `if: always()` aggregator job that fails on `changes`'
+    # failure; `quality-checks` (E2E's actual peer — one job, not a matrix)
+    # has no such aggregator and carries the same gap today. Mirroring
+    # `quality-checks` here keeps E2E consistent with the required check it
+    # actually resembles, not `visual-regression-gate`'s different shape.
+    if: |
+      needs.changes.outputs.web == 'true' &&
+      github.event.pull_request.draft == false
+    environment: Preview
     # Pinned to match @playwright/test in apps/web/package.json (1.60.0) and the
     # local Docker image used by the visual-regression suite. Bump all of these
     # together — drift between the version that runs the suite and the
@@ -108,11 +155,6 @@ jobs:
       - name: Run Playwright e2e suite
         run: pnpm --filter @kcvv/web run test:e2e
         env:
-          # The github-summary reporter writes its tally here as JSON; the
-          # red-main alert reads it back to name what failed (#3134).
-          # Relative to apps/web, not `runner.temp`: this job runs in a
-          # container, where `runner.temp` names a host path it cannot see.
-          E2E_TALLY_FILE: e2e-tally.json
           # Same env required at runtime by `next start` for SSR data fetching.
           KCVV_API_URL: ${{ vars.KCVV_API_URL }}
           NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ vars.NEXT_PUBLIC_SANITY_PROJECT_ID }}
@@ -130,17 +172,6 @@ jobs:
         with:
           name: playwright-report
           path: apps/web/playwright-report/
-          if-no-files-found: ignore
-          retention-days: 14
-
-      # Read by main-red-alert.yml by this exact name — only on a red run.
-      # One per attempt, so the alert reads the attempt it reports on.
-      - name: Upload the run's tally
-        if: failure()
-        uses: actions/upload-artifact@v7.0.1
-        with:
-          name: e2e-tally-${{ github.run_attempt }}
-          path: apps/web/e2e-tally.json
           if-no-files-found: ignore
           retention-days: 14
 
