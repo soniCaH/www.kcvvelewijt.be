@@ -4,7 +4,7 @@ Produced 2026-08-13 from a multi-agent research sweep over 130+ club websites an
 design references. **This file is the front door.** A new session should not read the whole corpus —
 it is ~7,900 lines.
 
-> **This directory holds two corpora.** Everything down to *The finding that reframes everything*
+> **This directory holds two corpora.** Everything down to _The finding that reframes everything_
 > is the **website / design** corpus (2026-08). The **test-suite** corpus (2026-09) has its own index at
 > the bottom of this file.
 
@@ -46,8 +46,9 @@ skipped 706 lines — the same failure shape as a GROQ count against a misspelle
 recorded as **D1–D17 in `decision-sheet.md` §8**. Twenty-three accepted, twenty-three rejected, four
 found already built. The comparison pages live in `docs/design/mockups/research-d-series/`.
 
-Still untriaged: `clubs-international-deep-dive.md` **Part G** (eight further ideas). §6's sixteen
-explicit rejections need no triage — each already names the locked rule it breaks.
+`clubs-international-deep-dive.md` **Part G** (eight further ideas) was ruled on #3230 — recorded as
+`decision-sheet.md` §9. Nothing in the corpus is untriaged now. §6's sixteen explicit rejections
+need no triage — each already names the locked rule it breaks.
 
 **The finding to carry into the spec:** six proposals were already shipped, and one shipped _better_
 than proposed. Three more rested on premises the code contradicts. Before accepting any "new chrome"
@@ -114,18 +115,18 @@ closed. **The map is the front door for this corpus**, not this file: it carries
 one-line gist with a link to the ticket holding the detail, plus the handoff contract for the spec
 session. Read it first; open a document here only when a ruling needs its source.
 
-| Document | What it establishes |
-| --- | --- |
-| [`test-suite-inventory.md`](./test-suite-inventory.md) | The 2026-09-22 baseline: counts, runtimes, skips, retries, where each check runs |
-| [`test-suite-flake-ledger.md`](./test-suite-flake-ledger.md) | Every known flake, its layer, root-cause class and status |
-| [`test-layer-balance.md`](./test-layer-balance.md) | What belongs in unit, component, contract, VR and E2E |
-| [`e2e-determinism.md`](./e2e-determinism.md) | Keep Playwright; move E2E onto deterministic data |
-| [`vr-tooling-and-determinism.md`](./vr-tooling-and-determinism.md) | Keep `@storybook/test-runner` and the amd64 pin; tune in place |
-| [`vitest-runner-and-environment.md`](./vitest-runner-and-environment.md) | Keep Vitest and happy-dom; two of four "gaps" are Vitest's own shim |
-| [`ci-for-a-turborepo-monorepo.md`](./ci-for-a-turborepo-monorepo.md) | Keep Actions and the one-job shape; four ordered changes |
-| [`testmode-spike.md`](./testmode-spike.md) | What `next/experimental/testmode` does and does not reach |
-| [`vr-diff-story-map.md`](./vr-diff-story-map.md) | A diff→stories map is possible, and the verdict is still *keep the full run* |
-| [`agent-layer-suite-command-sweep.md`](./agent-layer-suite-command-sweep.md) | 35 agent-facing suite commands: 7 wrong, 12 bypassing, 1 stale |
+| Document                                                                     | What it establishes                                                              |
+| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| [`test-suite-inventory.md`](./test-suite-inventory.md)                       | The 2026-09-22 baseline: counts, runtimes, skips, retries, where each check runs |
+| [`test-suite-flake-ledger.md`](./test-suite-flake-ledger.md)                 | Every known flake, its layer, root-cause class and status                        |
+| [`test-layer-balance.md`](./test-layer-balance.md)                           | What belongs in unit, component, contract, VR and E2E                            |
+| [`e2e-determinism.md`](./e2e-determinism.md)                                 | Keep Playwright; move E2E onto deterministic data                                |
+| [`vr-tooling-and-determinism.md`](./vr-tooling-and-determinism.md)           | Keep `@storybook/test-runner` and the amd64 pin; tune in place                   |
+| [`vitest-runner-and-environment.md`](./vitest-runner-and-environment.md)     | Keep Vitest and happy-dom; two of four "gaps" are Vitest's own shim              |
+| [`ci-for-a-turborepo-monorepo.md`](./ci-for-a-turborepo-monorepo.md)         | Keep Actions and the one-job shape; four ordered changes                         |
+| [`testmode-spike.md`](./testmode-spike.md)                                   | What `next/experimental/testmode` does and does not reach                        |
+| [`vr-diff-story-map.md`](./vr-diff-story-map.md)                             | A diff→stories map is possible, and the verdict is still _keep the full run_     |
+| [`agent-layer-suite-command-sweep.md`](./agent-layer-suite-command-sweep.md) | 35 agent-facing suite commands: 7 wrong, 12 bypassing, 1 stale                   |
 
 **One of these is alive; nine are frozen.** `test-suite-flake-ledger.md` is the **register of the unit
 of work** — a flake class is the unit, never an occurrence — and it is edited as classes open and

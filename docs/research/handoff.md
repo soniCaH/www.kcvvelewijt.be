@@ -117,7 +117,7 @@ Scope: named `image-loading` / `image-loaded` keyframes replacing `animate-pulse
 - **Y8** — `-0.025em → -0.035em` at the **two largest steps only**.
 - **Y6** — hanging punctuation on pull quotes. `hanging-punctuation` is Safari-only and the fallback
   is a negative `text-indent`; **the two must be mutually exclusive** or the quote hangs twice.
-- **Y3** — oversized ghost numerals. **BLOCKED — see §3.**
+- ~~**Y3** — oversized ghost numerals.~~ **Reversed before build on #3229** — decoration with no job.
 
 > **Y1 and Y8 go in `@theme` as ramp steps.** Never hand-applied `leading-*` / `tracking-*` — that
 > drift is what #2417 repaired.
@@ -145,11 +145,11 @@ Scope: named `image-loading` / `image-loaded` keyframes replacing `animate-pulse
 
 ## 3. Gates — sequence these, do not build them first
 
-| Gate                        | Blocks      | Why                                                                                                                                                                                                                        |
-| --------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **#2598** homepage overflow | **Y3** only | Ghost numerals depend on `overflow: hidden` clipping rather than overflowing — the exact unresolved defect. Y2 and S1 were the other two exposed moves and both are now rejected, so the blast radius is down to one item. |
-| **M1** Motion section       | **M4, M7**  | Two gestures are not a vocabulary until the rule exists.                                                                                                                                                                   |
-| **`matchstrip-locked.md`**  | **Unit 6**  | Locked component; needs a checkpoint, not an edit.                                                                                                                                                                         |
+| Gate                            | Blocks          | Why                                                                                                              |
+| ------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------- |
+| ~~**#2598** homepage overflow~~ | ~~**Y3** only~~ | Cleared: #2598 closed 2026-09-15 on measurement, and Y3 was reversed on #3229. Nothing is left behind this gate. |
+| **M1** Motion section           | **M4, M7**      | Two gestures are not a vocabulary until the rule exists.                                                         |
+| **`matchstrip-locked.md`**      | **Unit 6**      | Locked component; needs a checkpoint, not an edit.                                                               |
 
 **#2599 (two-line match row) is no longer a gate.** Everything that would have landed on that row
 closed on its own merits: M2 and M10 (no data for "in progress"), M3, S3 (already built), C1
@@ -180,16 +180,15 @@ scores).
 
 ---
 
-## 5. Open threads, deliberately not closed
+## 5. Open threads — closed 2026-09-28
 
-- **`clubs-international-deep-dive.md` Part G** — eight further ideas, never triaged. The only
-  remaining untriaged design material in the corpus.
-- **The agate fact-block has no surface.** Approved as a treatment (mono-caps label, 2px rules top
-  and bottom, tabulated key/value at the 10px floor, absent values as `—`) but its three proposed
-  homes were all occupied. Run the §4 check before placing it.
-- **A club-wide cancellation band** — "alle wedstrijden van dit weekend gaan niet door". Surfaced
-  while rejecting the fluoro accent. It needs no new colour, it is what a parent opens the site for
-  on a wet Saturday, and a per-match badge cannot say it. Not filed.
+- **`clubs-international-deep-dive.md` Part G** — ruled on #3230: 0 accepted, 5 rejected, 3 already
+  built. Recorded in [`decision-sheet.md` §9](./decision-sheet.md).
+- **The agate fact-block** — closed on #3231: every surface with tabulated facts already has its own
+  design. The treatment stays on record in `d11b-deck-agate.html`.
+- **A club-wide cancellation band** — rejected on #3232: ProSoccerData and the trainers already
+  announce a cancelled weekend (the `/hulp` entry "Afgelasting training of wedstrijd" says so), and
+  each Match already shows its own status.
 - **D6a's two token questions** — see Unit 5.
 
 ---

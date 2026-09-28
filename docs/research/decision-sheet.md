@@ -609,7 +609,7 @@ no layout width by construction.
 | D7c | The desktop CTA on that ground                 | **`primary → inverted`; dark-ground variant of both layouts.** `d7c-desktop-cta.html`                   |
 | D8  | `/index`, the contents page (§5C)              | **Build it, minus players, at `/inhoud`.** `d8-index-page.html`                                         |
 | D9  | Overprint on photographs (T2)                  | **B — `lighten` clamp to `jersey-deep-dark`.** `d9-overprint.html`                                      |
-| D10 | Section openers (S2 / Y3 / S6)                 | **S2 yes · Y3 yes · S6 no.** `d10-section-openers.html`                                                 |
+| D10 | Section openers (S2 / Y3 / S6)                 | **S2 yes · Y3 yes (reversed, #3229) · S6 no.** `d10-section-openers.html`                               |
 | D11 | Dense-list devices (S5 / S4 / S1)              | **S5 yes · S4 no · S1 no.** `d11-dense-lists.html`, `d11a-newspaper-heads.html`, `d11b-deck-agate.html` |
 | D12 | Small delights, group one                      | **D4 yes · D8 no · D9 no.** `d12-small-delights.html`                                                   |
 | D13 | Small delights, group two                      | **D7 yes (lineups only) · D2 no · D5 no.** `d12-small-delights.html`                                    |
@@ -893,6 +893,14 @@ an article hero; worth watching on a card grid.
   2. **Gated on #2598.** It depends on `overflow: hidden` clipping rather than overflowing, which is
      exactly the unresolved defect. Do not prototype it against the live homepage until the root
      cause is isolated.
+
+  **Reversed 2026-09-28 (#3229) — do not re-propose without reading that ruling.** The gate cleared
+  (#2598 re-measured on production 2026-09-15: no overflow at 320 / 390px), and the owner re-asked
+  whether it adds value before building. Ruled no: a homepage is not a chaptered document, so an
+  ordinal implies a sequence nobody follows; `ink/6` barely registers on a phone outdoors; 3 of the 9
+  homepage sections are conditional, so a fixed-list ordinal shows gaps (01, 02, 04); and the page
+  already carries its ornaments. Never built.
+
 - **S6 — one heavyweight frame: no.** Closed.
 
 **D11 — leader dots ship; the chip wall and the spec table do not.**
@@ -982,6 +990,12 @@ facts), and it is not a replacement for any existing hero. It is recorded here a
 treatment looking for a surface that genuinely has tabulated facts and no existing design for them.
 **Before it is placed anywhere, run the standing check above** — the three surfaces §4.4 proposed all
 turned out to be occupied, and that is the failure mode this device is most likely to repeat.
+
+**Closed 2026-09-28 (#3231): no free surface exists.** Every surface with tabulated facts already has
+its own design — `PlayerHero`'s meta row, `StaffRoles`, `OpponentSummaryCard`'s W · G · V · DV · DT
+card, and the article blocks `EventFactInline`, `TransferFactCard` and `HtmlTableBlock`. The
+treatment stays on record in `d11b-deck-agate.html`; reopen #3231 only for a new surface with
+tabulated facts and no design.
 
 Constraint it inherits: true agate is 5.5–7pt and the **11px Floor Rule** forbids it, so the block
 sets at `text-label-sm` (10px), which the sheet already records as the floor and already spent.
@@ -1106,6 +1120,10 @@ table on #2625; the earlier tally (fourteen / twenty-three / six of 43) did not 
 pattern below names six already-shipped devices because two of them, S1 and §5B's wire strip, also
 sit in the Rejected and Accepted columns.
 
+**The table records the pass, not what shipped.** Three accepted items did not survive build:
+**T3** (paper texture) was parked on #2613, **M4** (squeegee wipe) was built and deleted on #2623, and
+**Y3** (ghost numerals) was reversed before build on #3229. Each carries its ruling in place above.
+
 ### The pattern worth carrying into the spec
 
 **Six of the corpus's proposals were already shipped, and one of those shipped better than
@@ -1126,10 +1144,8 @@ exists in the contract, and `PRODUCT.md:56` forbids live scores).
 
 ### Gated on open issues — sequence these, do not build them first
 
-- **#2598 (homepage overflow):** **Y3** depends on `overflow: hidden` clipping rather than
-  overflowing. Do not prototype it against the live homepage until the root cause is isolated.
-  _(Y2 and S1 were the other two exposed moves; both are now rejected, so #2598's design blast radius
-  is down to one item.)_
+- **#2598 (homepage overflow):** closed 2026-09-15 on measurement. It gated only **Y3**, which was
+  then reversed on #3229, so this gate protects nothing any more.
 - **#2599 (two-line match row):** nothing accepted here lands on the match row — M2, M3, M10, S3 and
   C1 all closed. **The gate is now clear.**
 - **M1 is a prerequisite, not a peer:** M4 and M7 are two gestures, not a vocabulary, until the
@@ -1151,3 +1167,21 @@ fix wearing an idea's clothes. Recorded rather than drilled.
   left oldstyle. Already a documented project rule; this is applying it, not deciding it.
 - **M1 write the Motion rules down** — the prerequisite for everything in §4.2, and it decides
   nothing on its own. Reset Tailwind's `--animate-*` namespace the way `--text-*` was reset in #2417.
+
+## 9. Part G — the international deep-dive's eight ideas
+
+Ruled by the owner on [#3230](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3230)
+(2026-09-28), against `origin/main` and the production dataset. Source:
+`clubs-international-deep-dive.md` Part G. **0 accepted, 5 rejected, 3 already built** — the standing
+check paid again.
+
+| #   | Idea                                                | Ruling                           | Reason                                                                                                                                                       |
+| --- | --------------------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Matchday guide before, report after                 | Rejected                         | Away-game info (parking, canteen, directions) is never available. Home games are covered by the `/hulp` entry "Parkeren & bereikbaarheid".                   |
+| 2   | First-visit FAQ                                     | Already built                    | `/hulp` holds 47 finder entries; cash is on `/club/cashless`. The one gap, dogs, became finder entry `honden` (reglement van inwendige orde, art. 16 5°).    |
+| 3   | Player questionnaire                                | Rejected                         | Players are too hard to reach for the questions, and the player-index privacy ruling stands. Interview Q&A articles (`qaBlock`) cover the editorial version. |
+| 4   | Fee page with a hardship clause                     | Already built · pricing rejected | Prices stay private (competitors; peer clubs do not publish them). The hardship clause is the `/hulp` entry "Lidgeld gespreid betalen".                      |
+| 5   | Memory layer (legacy numbers, hall of fame)         | Rejected                         | Too hard to keep complete; missing someone who deserves it is worse than not having it.                                                                      |
+| 6   | Women and youth as nav peers, values page           | Rejected                         | The club has no women's teams.                                                                                                                               |
+| 7   | Volunteers as a named corps                         | Already built                    | `/club/vrijwilliger` lists the roles. Named volunteer lists are not wanted — keeping the board current is already hard.                                      |
+| 8   | Token design system, brand kit, flat-black sponsors | Already built · rest rejected    | `apps/web/DESIGN.md` is token-driven. Sponsor logos stay in colour on purpose (tests assert `not.toHaveClass("grayscale")`).                                 |
