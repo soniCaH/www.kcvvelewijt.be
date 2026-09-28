@@ -179,8 +179,8 @@ function titleCaseWords(value: string): string {
  * alphabetic word of 3+ letters title-cased. Falls back to `age` when
  * stripping leaves nothing (a blank or prefix-only name).
  *
- * `age` gates the senior branch only — it is never the label itself, and a
- * team is never senior-suffixed on `age` alone: Reserven shares PSD's "A"
+ * Otherwise `age` only gates the senior branch — and a team is never
+ * senior-suffixed on `age` alone: Reserven shares PSD's "A"
  * age bracket with the two first teams but carries no " A"/" B" suffix.
  */
 export function derivePsdTeamLabel(name: string, age: string): string {
