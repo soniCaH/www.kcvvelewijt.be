@@ -69,7 +69,7 @@ const BaseMatchFields = {
   competitionType: S.optional(CompetitionType),
   /** PSD team ID identifying which KCVV team plays (A-team, B-team, U21, etc.) */
   kcvv_team_id: S.optional(S.Finite),
-  /** Human-readable label for the KCVV team (e.g. "A-Ploeg", "U21") */
+  /** Human-readable label for the KCVV team, derived from its own PSD name — age only decides the two senior sides' "A-Ploeg"/"B-Ploeg" suffix (e.g. "A-Ploeg", "U8 Wit", "U21") */
   kcvv_team_label: S.optional(S.String),
   /** Whether the KCVV team is playing at home. Computed by BFF from homeTeamId === teamId. */
   is_home: S.optional(S.Boolean),

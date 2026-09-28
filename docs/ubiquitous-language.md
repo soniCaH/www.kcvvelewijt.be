@@ -213,9 +213,9 @@ The group of players registered to a team for the current season. Represented as
 
 A display label identifying which KCVV team a match belongs to. Shown in match widgets when displaying matches across multiple teams.
 
-| Code                                                 | Dutch         | Notes                                                |
-| ---------------------------------------------------- | ------------- | ---------------------------------------------------- |
-| `kcvv_team_label` (contract) / `kcvvTeamLabel` (web) | Ploeg (label) | Written by the BFF from PSD, e.g. "A-ploeg", "U15 A" |
+| Code                                                 | Dutch         | Notes                                                                                                                                                                                                                                                           |
+| ---------------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `kcvv_team_label` (contract) / `kcvvTeamLabel` (web) | Ploeg (label) | Written by the BFF's `derivePsdTeamLabel` (`apps/api/src/psd/transforms.ts`) from the team's own PSD name — age only decides whether the two senior sides get the "A-Ploeg"/"B-Ploeg" suffix, never the label itself (#3235). E.g. "A-Ploeg", "U8 Wit", "U15 A" |
 
 **Not `Match.squadLabel`:** that contract field was the renamed `round` field, and nothing ever wrote it. It was deleted in #2710. The `/tegenstander` page keeps its own local `squadLabel`, which it fills from the team's display name.
 

@@ -587,6 +587,10 @@ describe("derivePsdTeamLabel (#3235)", () => {
     // " A"/" B" suffix — it must not fall into the A-Ploeg branch (#3235: this
     // was the actual cause of the homepage agenda's stray "A-Ploeg" chip).
     ["Reserven", "A", "Reserven"],
+    // A youth squad whose own name happens to end " A" must not be read as a
+    // senior suffix — that check only applies when `age` is itself "A"
+    // (docs/ubiquitous-language.md's own example).
+    ["KCVVE U15 A", "U15", "U15 A"],
     // PSD names carry stray spaces around the club prefix.
     ["KCVVE  U11 ", "U11", "U11"],
     // Two same-age squads must not collapse to one label.
@@ -597,16 +601,64 @@ describe("derivePsdTeamLabel (#3235)", () => {
     // The team's own name, not its federation age bracket, is the label —
     // this team's PSD age is "U17" but its name says "U16".
     ["KCVVE U16", "U17", "U16"],
+    // Casing: PSD's own capitalisation is inconsistent between siblings
+    // ("U7 WIT" vs "U8 Wit", "U9 groen" vs "U8 Groen") — every alphabetic
+    // word of 3+ letters is normalised to title case.
+    ["KCVVE U7 WIT", "U7", "U7 Wit"],
+    ["KCVVE U9 groen", "U9", "U9 Groen"],
+    // An age-code token stays untouched by the casing rule even though it
+    // starts with a letter — it carries a digit, so it never matches the
+    // letters-only pattern.
+    ["KCVVE U9P", "U9", "U9P"],
+    // Short abbreviations (< 3 letters) are left alone too, so a club name
+    // like "FC Weitse Gans" doesn't come out "Fc Weitse Gans".
+    ["FC WEITSE GANS", "A", "FC Weitse Gans"],
+    // Stripping the "KCVVE" prefix (or trimming a blank name) can leave
+    // nothing — fall back to the PSD age rather than an empty label.
+    ["KCVVE", "U12", "U12"],
+    ["   ", "U9", "U9"],
   ])("derivePsdTeamLabel(%j, %j) -> %j", (name, age, expected) => {
     expect(derivePsdTeamLabel(name, age)).toBe(expected);
   });
 
-  it("does not collapse two same-age teams to the same label", () => {
-    const labels = [
+  // The triage brief's AC: no two teams from the production team list may
+  // share a label. Real names + ages, read-only from Sanity/PSD, 2026-09-28.
+  it("gives every team in the production list its own, distinct label", () => {
+    const productionTeams: [name: string, age: string][] = [
+      ["Eerste Elftallen A", "A"],
+      ["Eerste Elftallen B", "A"],
+      ["Reserven", "A"],
+      ["FC WEITSE GANS", "A"],
+      ["KCVVE  U6", "U6"],
+      ["KCVVE U5", "U5"],
+      ["KCVVE U7", "U7"],
+      ["KCVVE U7 WIT", "U7"],
       ["KCVVE U8 Wit", "U8"],
       ["KCVVE U8 Groen", "U8"],
-    ].map(([name, age]) => derivePsdTeamLabel(name!, age!));
+      ["KCVVE  U9", "U9"],
+      ["KCVVE U9P", "U9"],
+      ["KCVVE U9 groen", "U9"],
+      ["KCVVE U10", "U10"],
+      ["KCVVE U10P", "U10"],
+      ["KCVVE  U11 ", "U11"],
+      ["KCVVE U12", "U12"],
+      ["KCVVE  U13", "U13"],
+      ["KCVVE U14", "U14"],
+      ["KCVVE  U15", "U15"],
+      ["KCVVE U16", "U17"],
+      ["KCVVE U17", "U17"],
+      ["KCVVE U19", "U19"],
+      ["KCVVE U21", "U21"],
+    ];
+    const labels = productionTeams.map(([name, age]) =>
+      derivePsdTeamLabel(name, age),
+    );
+
     expect(new Set(labels).size).toBe(labels.length);
+    // An age-A team with no " A"/" B" suffix is never "A-Ploeg" (Reserven's
+    // own bug), regardless of what other senior-age teams exist alongside it.
+    expect(derivePsdTeamLabel("Reserven", "A")).toBe("Reserven");
+    expect(derivePsdTeamLabel("FC WEITSE GANS", "A")).toBe("FC Weitse Gans");
   });
 });
 
