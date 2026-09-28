@@ -165,6 +165,22 @@ describe("ScrollArrowButton", () => {
       );
       expect(screen.getByLabelText("Scroll right")).not.toHaveClass("bg-cream");
     });
+
+    // The real regression guard is the geometry `play` in
+    // `ScrollRail.stories.tsx` (#3237) — it measures the actual 44 × 44 hit
+    // area with `elementFromPoint` and fails without this class. This one
+    // stays only as a fast, always-on canary against the class name itself
+    // being renamed or dropped — it does not assert the hit area works.
+    it("carries the hit-area utility for its 44 × 44 tap target (#3237)", () => {
+      render(
+        <ScrollArrowButton
+          direction="right"
+          onClick={vi.fn()}
+          register="control"
+        />,
+      );
+      expect(screen.getByLabelText("Scroll right")).toHaveClass("hit-area");
+    });
   });
 
   describe("disabled — spent arrow stays in place", () => {

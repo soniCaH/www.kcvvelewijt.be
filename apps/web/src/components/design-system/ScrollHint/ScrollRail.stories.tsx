@@ -91,6 +91,79 @@ export const Overflows: Story = {
   },
 };
 
+const INTERACTIVE =
+  'a[href],button,input,select,textarea,[role="button"],[role="combobox"],[role="link"],[role="tab"],[role="menuitem"]';
+
+/**
+ * The Tap Target Rule (DESIGN.md, #3237): an icon-only `control`-register
+ * arrow answers to a 44 × 44 hit area, measured with `elementFromPoint` —
+ * `getBoundingClientRect` never changes for the invisible `hit-area`
+ * `::before` this relies on. This is geometry, so it belongs in a `play`
+ * against a fixture that GUARANTEES the condition, never in the E2E layer
+ * against live homepage data (apps/web/CLAUDE.md: "the E2E layer owns
+ * nothing geometric at all" — `UpcomingMatchesClient`'s chip row only
+ * renders once more than one team has an upcoming fixture, so a live-data
+ * version of this check goes red on its own in a thin week). Mirrors the
+ * (deleted) E2E `tap-targets.spec.ts`'s `measureHitArea`: the same 100%
+ * coverage threshold over the same 44 × 44 sample grid, and the same
+ * pointer-events-off confirmation before counting a geometric overlap as
+ * real. `trackEl`'s own interactive descendants (the chips) are exempt —
+ * a rail arrow floats over its own scroll track by design (`ScrollRail`'s
+ * gutter is only ever blank at the true start/end of the scrollable
+ * range), so a chip under it stays reachable beside the arrow or by
+ * scrolling past. Every other neighbour — including the row's OTHER arrow,
+ * a sibling of the track rather than inside it — still counts.
+ */
+function measureHitArea(
+  el: HTMLElement,
+  trackEl: HTMLElement,
+): { coverage: number; overlaps: string[] } {
+  const r = el.getBoundingClientRect();
+  const cx = r.left + r.width / 2;
+  const cy = r.top + r.height / 2;
+  const hits = (x: number, y: number) => {
+    const at = document.elementFromPoint(x, y);
+    return !!at && (at === el || el.contains(at));
+  };
+
+  let covered = 0;
+  let total = 0;
+  for (let x = cx - 20.5; x < cx + 22; x += 3) {
+    for (let y = cy - 20.5; y < cy + 22; y += 3) {
+      total++;
+      if (hits(x, y)) covered++;
+    }
+  }
+
+  const left = cx - 22;
+  const right = cx + 22;
+  const top = cy - 22;
+  const bottom = cy + 22;
+  const overlaps: string[] = [];
+  for (const other of document.querySelectorAll<HTMLElement>(INTERACTIVE)) {
+    if (other === el || el.contains(other) || other.contains(el)) continue;
+    if (trackEl.contains(other)) continue;
+    const q = other.getBoundingClientRect();
+    if (!q.width || !q.height) continue;
+    const ow = Math.min(right, q.right) - Math.max(left, q.left);
+    const oh = Math.min(bottom, q.bottom) - Math.max(top, q.top);
+    if (ow <= 0.5 || oh <= 0.5) continue;
+    const previous = el.style.pointerEvents;
+    el.style.pointerEvents = "none";
+    const under = document.elementFromPoint(
+      Math.max(left, q.left) + ow / 2,
+      Math.max(top, q.top) + oh / 2,
+    );
+    el.style.pointerEvents = previous;
+    if (under && (under === other || other.contains(under))) {
+      overlaps.push(other.tagName.toLowerCase());
+    }
+  }
+
+  // Unrounded: 224 of 225 samples must not round up to a passing 100.
+  return { coverage: (100 * covered) / total, overlaps };
+}
+
 /**
  * Re-homed from `apps/web/test/e2e/scroll-arrows.spec.ts` (#3146, deleted by
  * this ticket) — the rail arrow/overflow invariant, proven once here against
@@ -103,6 +176,14 @@ export const Overflows: Story = {
  * so proving it here proves it for all of them (push it down, #3086 clause
  * 1). `!vr`: assertion-only, no pixel truth to capture — `Overflows` above
  * already owns the baseline.
+ *
+ * Extended for #3237 with the tap-target hit-area proof (see
+ * `measureHitArea` above) at `kcvvMobile` (375px) — the viewport the
+ * acceptance criteria scope this to. The right arrow is measured at rest
+ * (the only state it's enabled in before scrolling); the left arrow once
+ * scrolling to the end enables it. Both states already exist below for the
+ * overflow/disable assertions, so this rides the same two checkpoints
+ * rather than adding a third.
  */
 export const ArrowsMatchOverflow: Story = {
   args: {
@@ -110,16 +191,41 @@ export const ArrowsMatchOverflow: Story = {
     children: manyChips,
   },
   tags: ["!vr"],
+  globals: { viewport: { value: "kcvvMobile" } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    const track = canvas.getByRole("group", { name: "Voorbeeldrij" });
+    const track = canvas.getByRole("group", {
+      name: "Voorbeeldrij",
+    }) as HTMLElement;
 
     // At rest: both arrows mount (the track overflows), left disabled
     // (nothing scrolled left of the start yet), right enabled.
-    const rightArrow = await canvas.findByLabelText("Scroll right");
-    const leftArrow = await canvas.findByLabelText("Scroll left");
+    const rightArrow = (await canvas.findByLabelText(
+      "Scroll right",
+    )) as HTMLElement;
+    const leftArrow = (await canvas.findByLabelText(
+      "Scroll left",
+    )) as HTMLElement;
     await expect(leftArrow).toBeDisabled();
     await expect(rightArrow).toBeEnabled();
+
+    // Guards the `.hit-area { position: relative }` vs `.absolute` cascade
+    // tie (ScrollArrowButton.tsx) — today `.absolute` wins purely by
+    // Tailwind's emit order, not by any rule this test can see otherwise.
+    // If that order ever flipped, the button would fall into normal flow
+    // instead of staying pinned to the rail's edge, and this catches it
+    // directly rather than via a knock-on layout symptom.
+    expect(getComputedStyle(rightArrow).position).toBe("absolute");
+
+    const restMeasurement = measureHitArea(rightArrow, track);
+    expect(
+      restMeasurement.coverage,
+      "44 × 44 square resolves to the right arrow",
+    ).toBe(100);
+    expect(
+      restMeasurement.overlaps,
+      "hit area reaches a control outside the rail's own track",
+    ).toEqual([]);
 
     // Scroll to the end — the spent direction disables IN PLACE (#2489
     // rule 1); it does not unmount. Setting `scrollLeft` fires the native
@@ -129,6 +235,16 @@ export const ArrowsMatchOverflow: Story = {
       await expect(rightArrow).toBeDisabled();
     });
     await expect(leftArrow).toBeEnabled();
+
+    const endMeasurement = measureHitArea(leftArrow, track);
+    expect(
+      endMeasurement.coverage,
+      "44 × 44 square resolves to the left arrow",
+    ).toBe(100);
+    expect(
+      endMeasurement.overlaps,
+      "hit area reaches a control outside the rail's own track",
+    ).toEqual([]);
 
     // Held space follows overflow, not scroll position — both arrows are
     // still present, never unmounted mid-scroll.
