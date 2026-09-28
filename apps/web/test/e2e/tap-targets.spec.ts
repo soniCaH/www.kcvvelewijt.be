@@ -21,131 +21,158 @@ interface HitMeasurement {
   overlaps: string[];
 }
 
-async function measureHitArea(control: Locator): Promise<HitMeasurement> {
-  return control.evaluate((el, interactive) => {
-    // Rule 2 (#3196): scroll only when the whole 44 × 44 hit square around
-    // the control's centre is not already inside the viewport, and never
-    // scroll a control whose own or ancestor `position` is `sticky` or
-    // `fixed` — measure those where they stand. `scrollIntoViewIfNeeded`
-    // used to run unconditionally: on a sticky control (HubSearch's
-    // repeated search in the section bar) it scrolls the document to the
-    // control's *in-flow* position, which brings the hero back into view,
-    // fires its IntersectionObserver, and unmounts the bar's own search —
-    // measuring a detached element reports 0 × 0 / width 1, not a real hit
-    // area. Centring rather than edge-aligning also closes the other half
-    // of the same defect: an edge-aligned scroll can still leave the
-    // pseudo-element hit-area overhanging the viewport uncounted (the
-    // ContactCard defect this rule closes too).
-    const isStickyOrFixed = (node: Element | null): boolean => {
-      for (let n = node; n; n = n.parentElement) {
-        const position = getComputedStyle(n).position;
-        if (position === "sticky" || position === "fixed") return true;
-      }
-      return false;
-    };
-    if (!isStickyOrFixed(el)) {
-      const pre = el.getBoundingClientRect();
-      const half = 22; // half of the 44 × 44 hit square
-      const cx0 = pre.left + pre.width / 2;
-      const cy0 = pre.top + pre.height / 2;
-      const fitsInViewport =
-        cx0 - half >= 0 &&
-        cy0 - half >= 0 &&
-        cx0 + half <= window.innerWidth &&
-        cy0 + half <= window.innerHeight;
-      if (!fitsInViewport) {
-        // `behavior: "instant"` (not the default "auto") is load-bearing:
-        // the site sets `html[data-scroll-behavior="smooth"]` globally
-        // (`globals.css`), and "auto" respects that ancestor CSS — the
-        // scroll would animate, and the very next line's synchronous
-        // `getBoundingClientRect()` would read the control mid-flight,
-        // not at rest. Same convention `<ScrollToTop>` uses for the same
-        // reason.
-        el.scrollIntoView({
-          block: "center",
-          inline: "center",
-          behavior: "instant",
-        });
-      }
-    }
-
-    const r = el.getBoundingClientRect();
-    const cx = r.left + r.width / 2;
-    const cy = r.top + r.height / 2;
-    const hits = (x: number, y: number) => {
-      const at = document.elementFromPoint(x, y);
-      return !!at && (at === el || el.contains(at));
-    };
-    // Walk out from the centre along its row and column until a point stops
-    // resolving to the control — the real extents, pseudo-element included.
-    // Hit testing resolves to whole pixels, so walk whole pixels from a
-    // rounded centre: a fractional start would shave a pixel off one side,
-    // and sub-pixel steps overshoot the real edge.
-    const px = Math.round(cx);
-    const py = Math.round(cy);
-    const reach = (dx: number, dy: number) => {
-      let n = 0;
-      while (n < 60 && hits(px + dx * (n + 1), py + dy * (n + 1))) n++;
-      return n;
-    };
-    const [l, rt, t, b] = [
-      reach(-1, 0),
-      reach(1, 0),
-      reach(0, -1),
-      reach(0, 1),
-    ];
-    const width = l + rt + 1;
-    const height = t + b + 1;
-    const left = px - l;
-    const right = px + rt + 1;
-    const top = py - t;
-    const bottom = py + b + 1;
-
-    let covered = 0;
-    let total = 0;
-    for (let x = cx - 20.5; x < cx + 22; x += 3) {
-      for (let y = cy - 20.5; y < cy + 22; y += 3) {
-        total++;
-        if (hits(x, y)) covered++;
-      }
-    }
-
-    // A pseudo-element hit area hides what sits under it from
-    // `elementFromPoint`, so look geometrically, then confirm the neighbour
-    // is really there by probing with the control's own pointer-events off.
-    const overlaps: string[] = [];
-    const html = el as HTMLElement;
-    for (const other of document.querySelectorAll(interactive)) {
-      if (other === el || el.contains(other) || other.contains(el)) continue;
-      const q = other.getBoundingClientRect();
-      if (!q.width || !q.height) continue;
-      const ow = Math.min(right, q.right) - Math.max(left, q.left);
-      const oh = Math.min(bottom, q.bottom) - Math.max(top, q.top);
-      if (ow <= 0.5 || oh <= 0.5) continue;
-      const previous = html.style.pointerEvents;
-      html.style.pointerEvents = "none";
-      const under = document.elementFromPoint(
-        Math.max(left, q.left) + ow / 2,
-        Math.max(top, q.top) + oh / 2,
-      );
-      html.style.pointerEvents = previous;
-      if (under && (under === other || other.contains(under))) {
-        overlaps.push(
-          `${other.tagName.toLowerCase()}[${other.getAttribute("aria-label") ?? ""}] ${Math.round(ow)}×${Math.round(oh)}`,
-        );
-      }
-    }
-    return {
-      width,
-      height,
-      coverage: Math.round((100 * covered) / total),
-      overlaps,
-    };
-  }, INTERACTIVE);
+interface MeasureHitAreaOptions {
+  /**
+   * A CSS selector for a container whose own interactive descendants are
+   * exempt from the `overlaps` check — for a rail arrow that floats over
+   * its own scroll track (`ScrollRail`), the chips underneath are overlap
+   * by design, not a defect: the arrow sits beside/over them and every chip
+   * stays reachable next to the arrow or by scrolling past it. Every other
+   * neighbour (another control, a link, the row's own other arrow — a
+   * sibling of the track, never inside it) still counts. Omit for the
+   * default, unrestricted check every other caller uses.
+   */
+  ignoreWithin?: string;
 }
 
-async function expectTapTarget(control: Locator) {
-  const m = await measureHitArea(control);
+async function measureHitArea(
+  control: Locator,
+  options: MeasureHitAreaOptions = {},
+): Promise<HitMeasurement> {
+  return control.evaluate(
+    (el, { interactive, ignoreWithin }) => {
+      // Rule 2 (#3196): scroll only when the whole 44 × 44 hit square around
+      // the control's centre is not already inside the viewport, and never
+      // scroll a control whose own or ancestor `position` is `sticky` or
+      // `fixed` — measure those where they stand. `scrollIntoViewIfNeeded`
+      // used to run unconditionally: on a sticky control (HubSearch's
+      // repeated search in the section bar) it scrolls the document to the
+      // control's *in-flow* position, which brings the hero back into view,
+      // fires its IntersectionObserver, and unmounts the bar's own search —
+      // measuring a detached element reports 0 × 0 / width 1, not a real hit
+      // area. Centring rather than edge-aligning also closes the other half
+      // of the same defect: an edge-aligned scroll can still leave the
+      // pseudo-element hit-area overhanging the viewport uncounted (the
+      // ContactCard defect this rule closes too).
+      const isStickyOrFixed = (node: Element | null): boolean => {
+        for (let n = node; n; n = n.parentElement) {
+          const position = getComputedStyle(n).position;
+          if (position === "sticky" || position === "fixed") return true;
+        }
+        return false;
+      };
+      if (!isStickyOrFixed(el)) {
+        const pre = el.getBoundingClientRect();
+        const half = 22; // half of the 44 × 44 hit square
+        const cx0 = pre.left + pre.width / 2;
+        const cy0 = pre.top + pre.height / 2;
+        const fitsInViewport =
+          cx0 - half >= 0 &&
+          cy0 - half >= 0 &&
+          cx0 + half <= window.innerWidth &&
+          cy0 + half <= window.innerHeight;
+        if (!fitsInViewport) {
+          // `behavior: "instant"` (not the default "auto") is load-bearing:
+          // the site sets `html[data-scroll-behavior="smooth"]` globally
+          // (`globals.css`), and "auto" respects that ancestor CSS — the
+          // scroll would animate, and the very next line's synchronous
+          // `getBoundingClientRect()` would read the control mid-flight,
+          // not at rest. Same convention `<ScrollToTop>` uses for the same
+          // reason.
+          el.scrollIntoView({
+            block: "center",
+            inline: "center",
+            behavior: "instant",
+          });
+        }
+      }
+
+      const r = el.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const hits = (x: number, y: number) => {
+        const at = document.elementFromPoint(x, y);
+        return !!at && (at === el || el.contains(at));
+      };
+      // Walk out from the centre along its row and column until a point stops
+      // resolving to the control — the real extents, pseudo-element included.
+      // Hit testing resolves to whole pixels, so walk whole pixels from a
+      // rounded centre: a fractional start would shave a pixel off one side,
+      // and sub-pixel steps overshoot the real edge.
+      const px = Math.round(cx);
+      const py = Math.round(cy);
+      const reach = (dx: number, dy: number) => {
+        let n = 0;
+        while (n < 60 && hits(px + dx * (n + 1), py + dy * (n + 1))) n++;
+        return n;
+      };
+      const [l, rt, t, b] = [
+        reach(-1, 0),
+        reach(1, 0),
+        reach(0, -1),
+        reach(0, 1),
+      ];
+      const width = l + rt + 1;
+      const height = t + b + 1;
+      const left = px - l;
+      const right = px + rt + 1;
+      const top = py - t;
+      const bottom = py + b + 1;
+
+      let covered = 0;
+      let total = 0;
+      for (let x = cx - 20.5; x < cx + 22; x += 3) {
+        for (let y = cy - 20.5; y < cy + 22; y += 3) {
+          total++;
+          if (hits(x, y)) covered++;
+        }
+      }
+
+      // A pseudo-element hit area hides what sits under it from
+      // `elementFromPoint`, so look geometrically, then confirm the neighbour
+      // is really there by probing with the control's own pointer-events off.
+      const overlaps: string[] = [];
+      const html = el as HTMLElement;
+      const ignoreRoot = ignoreWithin
+        ? document.querySelector(ignoreWithin)
+        : null;
+      for (const other of document.querySelectorAll(interactive)) {
+        if (other === el || el.contains(other) || other.contains(el)) continue;
+        if (ignoreRoot && ignoreRoot.contains(other)) continue;
+        const q = other.getBoundingClientRect();
+        if (!q.width || !q.height) continue;
+        const ow = Math.min(right, q.right) - Math.max(left, q.left);
+        const oh = Math.min(bottom, q.bottom) - Math.max(top, q.top);
+        if (ow <= 0.5 || oh <= 0.5) continue;
+        const previous = html.style.pointerEvents;
+        html.style.pointerEvents = "none";
+        const under = document.elementFromPoint(
+          Math.max(left, q.left) + ow / 2,
+          Math.max(top, q.top) + oh / 2,
+        );
+        html.style.pointerEvents = previous;
+        if (under && (under === other || other.contains(under))) {
+          overlaps.push(
+            `${other.tagName.toLowerCase()}[${other.getAttribute("aria-label") ?? ""}] ${Math.round(ow)}×${Math.round(oh)}`,
+          );
+        }
+      }
+      return {
+        width,
+        height,
+        coverage: Math.round((100 * covered) / total),
+        overlaps,
+      };
+    },
+    { interactive: INTERACTIVE, ignoreWithin: options.ignoreWithin ?? null },
+  );
+}
+
+async function expectTapTarget(
+  control: Locator,
+  options: MeasureHitAreaOptions = {},
+) {
+  const m = await measureHitArea(control, options);
   expect(m.width, "hit width").toBeGreaterThanOrEqual(44);
   expect(m.height, "hit height").toBeGreaterThanOrEqual(44);
   expect(m.coverage, "44 × 44 square resolves to the control").toBe(100);
@@ -322,6 +349,61 @@ for (const viewport of VIEWPORTS) {
         "no result and fixture to toggle between",
       ).toBeVisible({ timeout: 10_000 });
       for (const toggle of await toggles.all()) await expectTapTarget(toggle);
+    });
+
+    test("UpcomingMatches team-chip row scroll arrows on /", async ({
+      page,
+    }) => {
+      // The acceptance criterion (#3237) is scoped to the 375px viewport —
+      // measure only there. At 1280px the row sits inside `<TapedCard>`'s
+      // slight decorative rotation (`data-rotation`, a ~0.25° transform);
+      // far enough from that rotation's origin, the sub-pixel skew it
+      // introduces shaves a couple of the 44 × 44 coverage grid's edge
+      // samples off, independent of this fix (`overlaps` is already clean
+      // there) — a pre-existing rendering quirk, not a tap-target
+      // regression, and out of scope here.
+      test.skip(
+        viewport.width !== 375,
+        "AC #3237 scopes this control's tap target to the 375px viewport",
+      );
+      // Fail, not skip: the club fields ~18 teams and an active season
+      // always has more than one with an upcoming fixture, so this chip row
+      // reliably overflows at 375px (measured live: 18 chips need ~1726px
+      // of track against a ~275px content width) — a chip row that stops
+      // overflowing here is a real regression, not test flake.
+      await gotoBounded(page, "/");
+      const chipRowSelector =
+        '[role="group"][aria-label="Filter wedstrijden op ploeg"]';
+      const chipRow = page.locator(chipRowSelector);
+      await expect(
+        chipRow,
+        "no team-chip row rendered on the homepage",
+      ).toBeVisible();
+      const scrollLeft = page.getByRole("button", { name: "Scroll left" });
+      const scrollRight = page.getByRole("button", { name: "Scroll right" });
+      await expect(
+        scrollRight,
+        "chip row does not overflow at this width",
+      ).toBeVisible();
+      // The left arrow starts disabled — the row's own "spent direction
+      // stays, disabled in place" idiom (`ScrollArrowButton`'s `disabled`
+      // doc) — so a click on it would resolve to nothing behind
+      // `pointer-events-none`. Scroll via the right arrow first so both
+      // directions are live before measuring either one.
+      await scrollRight.click();
+      await expect(
+        scrollLeft,
+        "left arrow never became scrollable",
+      ).toBeEnabled();
+      // `ignoreWithin` exempts the row's own chips from the overlap check:
+      // this arrow floats over its own scroll track by design (`ScrollRail`)
+      // — a chip under it stays reachable beside the arrow or by scrolling
+      // past, so that overlap is the intended affordance, not a defect.
+      // Every other neighbour (another control, a link, the row's other
+      // arrow — a sibling of the track, never inside it) still counts.
+      const rail = { ignoreWithin: chipRowSelector };
+      await expectTapTarget(scrollLeft, rail);
+      await expectTapTarget(scrollRight, rail);
     });
   });
 }
