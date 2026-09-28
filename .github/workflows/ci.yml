@@ -225,6 +225,54 @@ jobs:
           NEXT_PUBLIC_SANITY_DATASET: ${{ vars.NEXT_PUBLIC_SANITY_DATASET }}
           SANITY_API_READ_TOKEN: ${{ secrets.SANITY_API_READ_TOKEN }}
 
+  # Separate, non-required job (#3152). #3138 made the `quality-checks` test
+  # step coverage-instrumented on `main` only, because instrumentation costs
+  # ~2.5x (255s vs 98.6s) and nothing gates on it — but a changed-line PR
+  # comment needs a coverage upload from the PR HEAD, which a main-only run
+  # never produces. This job pays that cost on pull requests only, in
+  # parallel with `quality-checks`, and nothing `needs` it, so it never grows
+  # the required gate's wall-clock (ruling: issue #3152, 2026-09-28).
+  coverage:
+    name: Coverage (PR comment)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [changes]
+    if: |
+      github.event_name == 'pull_request' &&
+      needs.changes.outputs.code == 'true' &&
+      github.event.pull_request.draft == false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6.0.10
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run tests with coverage
+        run: npx turbo test --filter=@kcvv/web -- --coverage
+
+      # Same action + inputs as the `main` upload in `quality-checks` above —
+      # keep the two in sync if either changes.
+      - name: Upload coverage
+        uses: codecov/codecov-action@v7.0.0
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: apps/web/coverage
+
   # Split out of `quality-checks` (#3138): the build only takes ~37s, but VR
   # used to wait behind the *entire* quality-checks job (~6.6 min median) to
   # reach it. Depending on `changes` alone, this job runs in parallel with

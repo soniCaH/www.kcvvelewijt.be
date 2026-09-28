@@ -1,0 +1,15 @@
+# Codecov configuration.
+#
+# This repo does not gate merges on coverage (#3100, #3152) — statuses are
+# off, so a coverage delta never blocks a pull request. The only signal is
+# the pull-request comment, which shows the changed-line diff so a reviewer
+# can see what a PR did or didn't cover without leaving GitHub.
+coverage:
+  status:
+    project: off
+    patch: off
+
+comment:
+  layout: "diff, files"
+  behavior: default
+  require_changes: false
