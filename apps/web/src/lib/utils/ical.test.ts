@@ -46,7 +46,6 @@ function makeMatch(overrides: Partial<Match> = {}): Match {
     home_team: { id: 1, name: "KCVV Elewijt", score: undefined },
     away_team: { id: 2, name: "KFC Turnhout", score: undefined },
     status: "scheduled",
-    squadLabel: "A-Ploeg",
     competition: "2e Nationale",
     ...overrides,
   } as Match;
@@ -81,7 +80,7 @@ describe("generateIcal", () => {
     expect(output).toContain("SUMMARY:KCVV Elewijt - KFC Turnhout");
     expect(output).toContain("kcvv-match-12345@kcvvelewijt.be");
     expect(output).toContain("https://www.kcvvelewijt.be/wedstrijd/12345");
-    expect(output).toContain("2e Nationale — A-Ploeg");
+    expect(output).toContain("DESCRIPTION:2e Nationale");
     expect(output).toContain("END:VCALENDAR");
   });
 
@@ -309,6 +308,7 @@ describe("a pitch-reservation placeholder", () => {
     ]);
 
     expect(output).toContain("SUMMARY:Gereserveerd — KCVV Elewijt");
+    expect(output).not.toContain("DESCRIPTION:");
   });
 
   it("is treated as a home fixture for side filtering — it is the club's own booking, and both sides are literally the same club name", () => {

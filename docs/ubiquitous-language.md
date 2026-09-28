@@ -213,11 +213,11 @@ The group of players registered to a team for the current season. Represented as
 
 A display label identifying which KCVV team a match belongs to. Shown in match widgets when displaying matches across multiple teams.
 
-| Code         | Dutch         | Notes                                           |
-| ------------ | ------------- | ----------------------------------------------- |
-| `squadLabel` | Ploeg (label) | Derived from team name, e.g. "A-ploeg", "U15 A" |
+| Code                                                 | Dutch         | Notes                                                |
+| ---------------------------------------------------- | ------------- | ---------------------------------------------------- |
+| `kcvv_team_label` (contract) / `kcvvTeamLabel` (web) | Ploeg (label) | Written by the BFF from PSD, e.g. "A-ploeg", "U15 A" |
 
-**Replaces:** the misnamed `round` field. Currently hardcoded (`teamId 1 → "A-ploeg"`).
+**Not `Match.squadLabel`:** that contract field was the renamed `round` field, and nothing ever wrote it. It was deleted in #2710. The `/tegenstander` page keeps its own local `squadLabel`, which it fills from the team's display name.
 
 **Should resolve via [Team Display Name](#team-display-name)** — it is the same question ("what is this team called?") asked in a match context, and answering it twice is how the naming rules drifted apart in the first place (#2539).
 

@@ -248,7 +248,6 @@ const seniorTeamOnlyMatchFixture = {
   status: "scheduled",
   competition: "3e Nationale",
   competitionType: "league",
-  squadLabel: null,
   kcvv_team_id: 101,
   kcvv_team_label: null,
   is_placeholder: false,
