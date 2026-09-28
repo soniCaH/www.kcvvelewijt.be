@@ -134,7 +134,9 @@ describe("the native update script", () => {
     const { scripts } = JSON.parse(
       readFileSync(join(dirname(SCRIPT), "..", "package.json"), "utf8"),
     ) as { scripts: Record<string, string> };
-    const [gate] = scripts["vr:run:update"].split("; concurrently");
+    const [gate] = scripts["vr:run:update"].split(
+      "; node scripts/prefetch-typekit.mjs",
+    );
     return (CI: string) =>
       spawnSync("sh", ["-c", `${gate}; echo REACHED_CAPTURE`], {
         encoding: "utf8",

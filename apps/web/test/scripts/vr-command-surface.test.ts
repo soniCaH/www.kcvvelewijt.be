@@ -170,7 +170,7 @@ describe("the vr:run:update CI guard", () => {
     readFileSync(join(ROOT, "apps/web/package.json"), "utf8"),
   ).scripts["vr:run:update"] as string;
   // Only the guard runs: the capture after it is swapped for a marker.
-  const guard = `${script.slice(0, script.indexOf("; concurrently"))}; echo REACHED`;
+  const guard = `${script.slice(0, script.indexOf("; node scripts/prefetch-typekit.mjs"))}; echo REACHED`;
   const run = (ci: string) =>
     spawnSync("sh", ["-c", guard], { env: { ...process.env, CI: ci } });
 
@@ -183,5 +183,13 @@ describe("the vr:run:update CI guard", () => {
 
   it("lets CI=true through", () => {
     expect(run("true").stdout.toString()).toContain("REACHED");
+  });
+
+  // Without the prefetch, the deny-by-default route blocks use.typekit.net and
+  // every Freight baseline is re-captured in the fallback face.
+  it("prefetches Typekit before the capture, like vr:run", () => {
+    const prefetch = script.indexOf("node scripts/prefetch-typekit.mjs &&");
+    expect(prefetch).toBeGreaterThan(-1);
+    expect(prefetch).toBeLessThan(script.indexOf("test-storybook"));
   });
 });
