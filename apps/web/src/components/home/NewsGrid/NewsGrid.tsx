@@ -109,12 +109,14 @@ export const NewsGrid = ({
             Uitgelicht (R1.6) now owns the editorial-lead role, so the
             news grid drops internal hierarchy and reads as a flat
             six-card chronological stream. Mobile collapses to one
-            column; ≥ 640px stays at three. */}
-        <ul className="grid list-none grid-cols-1 gap-4 p-0 sm:grid-cols-3 sm:gap-6">
+            column of compact sideways cards (#3239); ≥ 640px stays at
+            three standard cards. */}
+        <ul className="grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-3 sm:gap-6">
           {cards.map((article, idx) => (
             <li key={article.href} className="h-full">
               <NewsCard
                 variant="standard"
+                phoneLayout="compact"
                 title={article.title}
                 href={article.href}
                 imageUrl={article.imageUrl}

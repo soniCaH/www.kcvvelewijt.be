@@ -43,6 +43,20 @@ export interface FeaturedEventBandEvent {
   location: string | null;
 }
 
+/**
+ * The band's kicker, shared by the event and the unavailable state so the two
+ * cannot drift. Ink on a cream label (#3239): ink straight on jersey-deep
+ * measured 3.74:1 and read as small grey type by eye. The wrapper keeps the
+ * label as wide as its text inside either state's flex column.
+ */
+const EVENT_KICKER = (
+  <div>
+    <MonoLabel variant="pill-cream" size="md">
+      AANSTAAND EVENEMENT
+    </MonoLabel>
+  </div>
+);
+
 export interface FeaturedEventBandProps {
   event: FeaturedEventBandEvent | null;
   /** Render reference time. Defaults to now in the club's zone. Tests override
@@ -100,7 +114,7 @@ function FeaturedEventUnavailableNotice() {
     >
       <div className="mx-auto max-w-[var(--container-index)] px-4 md:px-8">
         <div className="mb-6 flex flex-col gap-2">
-          <MonoLabel size="md">AANSTAAND EVENEMENT</MonoLabel>
+          {EVENT_KICKER}
           <EditorialHeading level={2} size="display-md" tone="cream">
             Volgend evenement.
           </EditorialHeading>
@@ -213,10 +227,7 @@ export const FeaturedEventBand = ({
         </TapedFigure>
 
         <div className="flex flex-col justify-between gap-4">
-          {/* Default ink tone — 6.9:1 on jersey-deep, AA pass. Cream tone
-             is reserved for the "when · location" line below where the
-             original inline span already failed AA. */}
-          <MonoLabel size="md">AANSTAAND EVENEMENT</MonoLabel>
+          {EVENT_KICKER}
 
           <EditorialHeading
             level={2}

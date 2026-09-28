@@ -1,0 +1,104 @@
+[
+  {
+    "id": "length",
+    "title": "Laatste nieuws on a phone",
+    "options": [
+      {
+        "key": "today",
+        "name": "Today",
+        "note": "Six full cards, one per row, each ≈350px tall.",
+        "pageH": 10612,
+        "secH": 2229,
+        "file": "length-today.png"
+      },
+      {
+        "key": "A",
+        "name": "A · Compact cards",
+        "note": "Same card, laid out sideways below 640px: a square photo on the left, kicker + title + date on the right. 'Lees verder' is hidden (the whole card is the link).",
+        "pageH": 9206,
+        "secH": 823,
+        "file": "length-A.png"
+      },
+      {
+        "key": "B",
+        "name": "B · Text rows",
+        "note": "No photo below 640px: kicker, title and date in a bordered row. The photos stay on tablet and desktop.",
+        "pageH": 9007,
+        "secH": 624,
+        "file": "length-B.png"
+      }
+    ]
+  },
+  {
+    "id": "stub",
+    "title": "“Volgende” in the Eerste ploegen band",
+    "options": [
+      {
+        "key": "today",
+        "name": "Today",
+        "note": "9px, warm yellow on the green match-day ground.",
+        "pageH": 10612,
+        "secH": 696,
+        "fs": "9px",
+        "ratio": 3.17,
+        "file": "stub-today.png"
+      },
+      {
+        "key": "A",
+        "name": "A · 11px, same yellow",
+        "note": "Two pixels bigger. Colour unchanged.",
+        "pageH": 10668,
+        "secH": 752,
+        "fs": "11px",
+        "ratio": 3.17,
+        "file": "stub-A.png"
+      },
+      {
+        "key": "B",
+        "name": "B · 11px, cream",
+        "note": "Two pixels bigger, and cream like the team names beside it. The yellow accent is gone.",
+        "pageH": 10668,
+        "secH": 752,
+        "fs": "11px",
+        "ratio": 4.69,
+        "file": "stub-B.png"
+      }
+    ]
+  },
+  {
+    "id": "kicker",
+    "title": "“AANSTAAND EVENEMENT” kicker",
+    "options": [
+      {
+        "key": "today",
+        "name": "Today",
+        "note": "13px, black ink on green.",
+        "pageH": 10612,
+        "secH": 515,
+        "fs": "13px",
+        "ratio": 3.74,
+        "file": "kicker-today.png"
+      },
+      {
+        "key": "A",
+        "name": "A · Cream text",
+        "note": "Same size, cream instead of ink.",
+        "pageH": 10612,
+        "secH": 515,
+        "fs": "13px",
+        "ratio": 4.69,
+        "file": "kicker-A.png"
+      },
+      {
+        "key": "B",
+        "name": "B · Ink on a cream label",
+        "note": "Ink stays, on a small cream label box, like a taped tag.",
+        "pageH": 10620,
+        "secH": 523,
+        "fs": "13px",
+        "ratio": 17.54,
+        "file": "kicker-B.png"
+      }
+    ]
+  }
+]
