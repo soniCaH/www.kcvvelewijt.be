@@ -4,6 +4,8 @@ Wayfinder ticket [#3079](https://github.com/soniCaH/www.kcvvelewijt.be/issues/30
 
 > **Update 2026-09-26:** `check-all` no longer exists. Its call sites moved to `pnpm turbo run lint type-check test build --filter=<workspace>` (#3156) and both scripts were deleted (#3157). Mentions of `check-all` below describe the gate as it was when measured.
 
+> **Update 2026-09-28:** `e2e.yml` dropped its `push: branches: [main]` trigger and now runs on pull requests only, gated by its own job-level `changes` filter (#3151) — the "PR (non-draft) and `main` push" and "Preview env on PRs, Production on `main`" cells in §7's `e2e.yml` row describe the trigger as it was when measured. `main-red-alert.yml` correspondingly no longer watches `E2E` (only `ci.yml`), and no longer reads an `e2e-tally` artifact — the §7 row and §10's cost table below describe that mechanism as it was when measured too.
+
 **How to read the numbers.** Local numbers were measured on `main` at `2aac592a` on an Apple M1 Pro (8 cores, 32 GB), Node 24.20.0, pnpm 10.34.5, with the desktop in use: the 1-minute load average was 7.6 before the first run and 12–32 during the Vitest runs. They are _contended_ numbers, which is also what a `/ralph-afk` wave sees. CI numbers come from GitHub Actions (`ubuntu-latest`, 4 vCPU) over the 30 days 2026-08-23 → 2026-09-22: 925 `ci.yml` runs, 793 `e2e.yml` runs, a 40-run job-level sample, and the logs of the latest green run of each workflow. Every number has its command in [§11](#11-commands-that-produced-the-numbers).
 
 ## 1. The suite at a glance

@@ -16,15 +16,19 @@ name: Alert on red main
 
 on:
   workflow_run:
-    workflows: ["CI/CD Pipeline", "E2E"]
+    # `E2E` dropped its `push: branches: [main]` trigger in #3151 — it now
+    # runs on pull requests only, so it never produces a `workflow_run` event
+    # on `main` and has nothing left for this workflow to watch here.
+    workflows: ["CI/CD Pipeline"]
     types: [completed]
     branches: [main]
 
-# Both watched workflows run on the same push to main, so a commit that breaks
-# them both fires two workflow_run events at once. Without this, each job would
-# see no open ci-failure issue and both would create one. A single fixed group
-# serialises them, so the second reads the issue the first just opened and
-# comments instead.
+# Only one workflow is watched today (see `on:` above), so only one
+# workflow_run event fires per push — but a human re-running a failed run's
+# jobs fires a second completed event for the same commit later. A single
+# fixed group still serialises that against a concurrent alert run, so it
+# reads the issue the first run just opened and comments instead of racing a
+# duplicate create.
 #
 # cancel-in-progress stays false on purpose: cancelling would throw away a real
 # failure report, which is the one thing this workflow exists to deliver.
@@ -35,7 +39,7 @@ concurrency:
 permissions:
   contents: read
   issues: write
-  # Read the failed run's jobs, its annotations and its e2e-tally artifact.
+  # Read the failed run's jobs and their annotations.
   actions: read
   checks: read
 
@@ -89,32 +93,20 @@ jobs:
           JOB_LINES=$(jq -r '.[] | "- \(.name) — failed at: \([(.steps // [])[] | select(.conclusion | IN("failure", "timed_out")) | .name] | join(", ") | if . == "" then "(no step)" else . end)"' <<<"$FAILED_JOBS") || JOB_LINES=""
 
           # Test names go in code spans, so a title can never @-mention
-          # anyone or cross-link an issue.
-          #
-          # E2E uploads its own tally on a red run (the github-summary
-          # reporter), which knows failed from flaky — Playwright annotates a
-          # flaky test's failed attempt exactly like a real failure. The
-          # tally is per attempt; an attempt without one falls back to
-          # annotations below. Everything else is read from the failed jobs'
+          # anyone or cross-link an issue. Read from the failed jobs'
           # annotations: Vitest and the VR runner's Jest each title a
           # failed-test annotation with the test's name.
-          if gh run download "$RUN_ID" -n "e2e-tally-$RUN_ATTEMPT" -D "$RUNNER_TEMP/tally" 2>/dev/null; then
-            TALLY="$RUNNER_TEMP/tally/e2e-tally.json"
-            TEST_LINES=$(jq -r 'if (.failed | length) > 0 then .failed[] | "- `\(.location)` — `\(.title)`" else "- none — the suite ended `\(.status)`" end' "$TALLY") || TEST_LINES=""
-            FLAKY=$(jq -r '[.flaky[] | "`\(.location)`"] | "\(length)" + (if length > 0 then " — " + join(", ") else "" end)' "$TALLY") || FLAKY="unreadable tally"
-          else
-            # A job's id is its check run's id. Actions keeps at most 10 error
-            # annotations per step, so a wide failure names only its first.
-            # shellcheck disable=SC2016 # the backticks are literal markdown
-            TEST_LINES=$(jq -r '.[].id' <<<"$FAILED_JOBS" | while read -r JOB_ID; do
-              gh api "repos/$GH_REPO/check-runs/$JOB_ID/annotations?per_page=100" \
-                --jq '.[] | select(.annotation_level == "failure" and (.title // "") != "") | .title' || true
-            done | sort -u | sed -n '1,30s/.*/- `&`/p') || TEST_LINES=""
-            if [ -n "$TEST_LINES" ]; then
-              TEST_LINES="$TEST_LINES
+          #
+          # A job's id is its check run's id. Actions keeps at most 10 error
+          # annotations per step, so a wide failure names only its first.
+          # shellcheck disable=SC2016 # the backticks are literal markdown
+          TEST_LINES=$(jq -r '.[].id' <<<"$FAILED_JOBS" | while read -r JOB_ID; do
+            gh api "repos/$GH_REPO/check-runs/$JOB_ID/annotations?per_page=100" \
+              --jq '.[] | select(.annotation_level == "failure" and (.title // "") != "") | .title' || true
+          done | sort -u | sed -n '1,30s/.*/- `&`/p') || TEST_LINES=""
+          if [ -n "$TEST_LINES" ]; then
+            TEST_LINES="$TEST_LINES
           - _(from annotations — Actions keeps 10 per step, so this list may be partial)_"
-            fi
-            FLAKY="not tallied — only the E2E workflow retries"
           fi
 
           NOTE="\`$WF_NAME\` finished with **$CONCLUSION** on \`main\`.
@@ -127,8 +119,6 @@ jobs:
 
           **Failed tests**
           ${TEST_LINES:-- none named — read the failed step log}
-
-          **Flaky (failed, then passed on retry):** $FLAKY
 
           Flake or regression is a human call: check the [flake ledger](https://github.com/$GH_REPO/blob/main/docs/research/test-suite-flake-ledger.md), and close with the root cause named."
 
