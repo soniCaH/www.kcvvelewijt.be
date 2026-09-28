@@ -284,8 +284,10 @@ To manually invalidate cached data on staging:
 # Clear ALL cached keys on staging
 pnpm --filter @kcvv/api cache:clear:staging
 
-# Clear a single key on staging
-pnpm --filter @kcvv/api cache:clear:staging:key "matches:next"
+# Clear a single key on staging. Match keys carry a version suffix
+# (CACHE_VERSION in src/handlers/matches.ts) — list them first:
+pnpm --filter @kcvv/api exec wrangler kv key list --binding=PSD_CACHE --env staging --remote --prefix "matches:"
+pnpm --filter @kcvv/api cache:clear:staging:key "matches:next:v2"
 pnpm --filter @kcvv/api cache:clear:staging:key "ranking:team:23"
 ```
 

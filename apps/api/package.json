@@ -12,8 +12,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
-    "cache:clear:staging": "wrangler kv key list --binding=PSD_CACHE --env staging | jq -r '.[].name' | xargs -I{} wrangler kv key delete --binding=PSD_CACHE --env staging \"{}\"",
-    "cache:clear:staging:key": "wrangler kv key delete --binding=PSD_CACHE --env staging"
+    "cache:clear:staging": "wrangler kv key list --binding=PSD_CACHE --env staging --remote | jq -r '.[].name' | xargs -I{} wrangler kv key delete --binding=PSD_CACHE --env staging --remote \"{}\"",
+    "cache:clear:staging:key": "wrangler kv key delete --binding=PSD_CACHE --env staging --remote"
   },
   "dependencies": {
     "@effect/platform": "0.97.2",
