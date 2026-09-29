@@ -145,19 +145,12 @@ Headings are set globally in CSS — no per-component overrides needed. Since #2
 
 ## Line Heights
 
-The role token owns leading (#2667): a `leading-*` utility on a
-role-tokened element discards a decision the ramp already made. `@theme`
-resets the whole `--leading-*` namespace to `initial` and re-declares only
-the three real steps below (#2668) — `leading-hero`/`leading-hero-lead` and
-the new `leading-label-wrap`, for a label that wraps (`text-label`'s own lh
-1 is right for a single line, wrong once it breaks). The four `Tailwind
-stock` rows are pinned in `globals.css` at Tailwind's own values so their
-existing call sites keep resolving — drain-only, never a choice for new
-code; each pin is deleted the moment its last use drains. `leading-none` is
-not a token at all — Tailwind builds it as a static value, so the `@theme`
-reset cannot remove it — which is why `kcvv/no-off-ramp-leading`
-(`eslint.config.mjs`, #2666) is the thing that freezes it, alongside the
-four pinned names and any arbitrary `leading-[…]`.
+The role token owns leading — see `apps/web/DESIGN.md` → Typography →
+**The Leading Comes From The Step Rule** for why, and for which rows
+below are legal to reach for in new code. Short version: `leading-hero`,
+`leading-hero-lead` and `leading-label-wrap` are the only legal steps;
+the pinned `Tailwind stock` rows and `leading-none` are drain-only,
+frozen by `kcvv/no-off-ramp-leading` (#2666).
 
 <table>
   <thead><tr><th>Token</th><th>Value</th><th>Usage</th></tr></thead>
@@ -189,8 +182,8 @@ four pinned names and any arbitrary `leading-[…]`.
 ## Special utilities
 
 ```tsx
-<h2 className="font-display font-black leading-tight">Heading text</h2>
-<p className="font-body leading-loose">Body text</p>
+<h2 className="font-display font-black">Heading text</h2>    {/* h1–h6 already carry lh 1.2 (globals.css) */}
+<p className="font-body">Body text</p>                       {/* body already carries lh 1.75 (globals.css) */}
 <span className="font-display-big text-4xl">KCVV</span>      {/* oversized magazine display */}
 <span className="font-mono font-bold text-3xl">2 — 1</span>  {/* scores, times, countdowns */}
 ```

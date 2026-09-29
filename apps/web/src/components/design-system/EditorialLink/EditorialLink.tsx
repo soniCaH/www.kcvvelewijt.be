@@ -22,10 +22,11 @@ const TEXT_TONE: Record<EditorialLinkTone, string> = {
 };
 
 // Hit area, not spacing (#2394). The label's own token (`text-label`, lh 1)
-// is already 11px tall as a thumb target. The padding grows it to ~27px and
-// the equal negative margin pulls the box back, so the consumer does not
-// shift by a pixel. The two halves only work as a pair: `py-2` alone would
-// push `<SectionHeader>`'s heading row out of alignment.
+// is correct as type but only 11px tall — too small as a thumb target. The
+// padding grows it to ~27px and the equal negative margin pulls the box
+// back, so the consumer does not shift by a pixel. The two halves only work
+// as a pair: `py-2` alone would push `<SectionHeader>`'s heading row out of
+// alignment.
 const HIT_AREA = "py-2 -my-2";
 
 /**
