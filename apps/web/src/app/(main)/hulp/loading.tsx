@@ -36,8 +36,8 @@ export default function HulpLoading() {
             the real bar's 52px.
           - **`h-[19.25px]`, not `h-3`.** The chip's height is set by its
             content box, and the real chip's content is an 11px line at
-            `--line-height-loose: 1.75` = 19.25px. A 12px block made this
-            chip 26px against the real 33.25px. */}
+            body's inherited line-height of 1.75 = 19.25px. A 12px block made
+            this chip 26px against the real 33.25px. */}
       <div className="border-ink bg-cream-deep border-b-2" aria-hidden>
         <PageContainer width="index" className="flex items-center gap-3 py-2">
           <div
