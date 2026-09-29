@@ -44,7 +44,7 @@ typography:
     letterSpacing: "-0.025em"
   subtitle:
     fontFamily: "freight-display-pro, Freight Display Fallback, georgia, Times New Roman, serif"
-    fontSize: "clamp(1.5rem, 1rem + 1.5vw, 2rem)"
+    fontSize: "clamp(1.5rem, 1.143rem + 1.43vw, 2rem)"
     fontWeight: 700
     lineHeight: 1.2
     letterSpacing: "-0.025em"
@@ -254,7 +254,7 @@ There are **twelve** steps. Each names its utility class, because the frontmatte
 - **Display** — `text-display-2xl` (900, `clamp(3.5rem, 1.5rem + 8vw, 6rem)`, lh 1, tracking -0.035em): Freight Big Pro. Page-defining hero headings, one per page at most.
 - **Headline** — `text-display-xl` (700, `clamp(2.75rem, 1.5rem + 5vw, 4.5rem)`, lh 1.05, tracking -0.035em): Freight Display Pro. Section-opening editorial headings.
 - **Title** — `text-display-lg` (700, `clamp(2rem, 1.25rem + 3vw, 3rem)`, lh 1.1): the default editorial heading size.
-- **Subtitle** — `text-display-md` (700, `clamp(1.5rem, 1rem + 1.5vw, 2rem)`, lh 1.2): card headings and sub-sections.
+- **Subtitle** — `text-display-md` (700, `clamp(1.5rem, 1.143rem + 1.43vw, 2rem)`, lh 1.2): card headings and sub-sections.
 - **Subtitle Small** — `text-display-sm` (600, `clamp(1.25rem, 1rem + 1vw, 1.5rem)`, lh 1.3): the step below Subtitle. In practice this is the **italic standfirst** voice — a hero's or section's one-line lede, set `font-display` italic under the heading it follows.
 - **Body** — `text-body-md` (400, 1rem, lh 1.6): all prose. Reading column capped at 680px.
 - **Body Large / Small** — `text-body-lg` / `text-body-sm` (400, 1.125rem lh 1.55 / 0.875rem lh 1.55): leads and captions.
@@ -477,7 +477,7 @@ The global top-level bar (`<SiteHeader>`) and the sticky in-page section nav are
 - Default ink; hover and active shift to jersey-deep, colour only, 150ms.
 - The utility action carries a 1px ink border that recolours to jersey-deep on hover.
 - **The nav is flat — no dropdowns.** Every top-level entry is a plain link. Mobile uses a full takeover drawer of the same flat list, not a squeezed menu.
-- **The drawer's own item** (`<NavTakeoverItem>`, the mobile takeover's `ROW`) is not the top-level bar's register — it has no fit constraint (the drawer has no width limit, see the desktop-bar bound above) and sits on the ramp at `text-display-md`, `font-display italic font-bold`. On phones both steps sit at their clamp floors, `display-sm` at 20px and `display-md` at 24px, so the old flat 22px fell exactly halfway between them; a tie on the primary mobile nav goes to the bigger step (#2848, built by #3256). That halfway point holds only at the floors: `display-md` is fluid (`clamp(1.5rem, 1rem + 1.5vw, 2rem)`, 24px → 32px), so from roughly 533px wide up to `lg` the drawer item grows past the old flat 22px — about 27.5px at 768px. That growth is intended: the drawer has no width limit to protect.
+- **The drawer's own item** (`<NavTakeoverItem>`, the mobile takeover's `ROW`) is not the top-level bar's register — it has no fit constraint (the drawer has no width limit, see the desktop-bar bound above) and sits on the ramp at `text-display-md`, `font-display italic font-bold`. On phones both steps sit at their clamp floors, `display-sm` at 20px and `display-md` at 24px, so the old flat 22px fell exactly halfway between them; a tie on the primary mobile nav goes to the bigger step (#2848, built by #3256). That halfway point holds only at the floors: `display-md` is fluid (`clamp(1.5rem, 1.143rem + 1.43vw, 2rem)`, 24px → 32px), so from roughly 400px wide up to `lg` the drawer item grows past the old flat 22px — about 29.3px at 768px. That growth is intended: the drawer has no width limit to protect.
 
 #### In-page section navigation is the light chip, not the top-level bar's bare link
 
