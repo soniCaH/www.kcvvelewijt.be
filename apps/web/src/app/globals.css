@@ -484,7 +484,7 @@
   --text-display-lg: clamp(2rem, 1.25rem + 3vw, 3rem);
   --text-display-lg--line-height: 1.1;
   --text-display-lg--letter-spacing: -0.025em;
-  --text-display-md: clamp(1.5rem, 1rem + 1.5vw, 2rem);
+  --text-display-md: clamp(1.5rem, 1.143rem + 1.43vw, 2rem);
   --text-display-md--line-height: 1.2;
   --text-display-md--letter-spacing: -0.025em;
   --text-display-sm: clamp(1.25rem, 1rem + 1vw, 1.5rem);
