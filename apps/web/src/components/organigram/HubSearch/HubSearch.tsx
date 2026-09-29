@@ -43,7 +43,7 @@ import { useHubMemberPanel } from "@/components/organigram/HubMemberPanel";
 import { useHubSearchQuery } from "./HubSearchQueryProvider";
 import {
   SECTION_NAV_CHIP_SHADOW_CLASS,
-  SECTION_NAV_TRAILING_SLOT_PADDING,
+  SECTION_NAV_TRAILING_SLOT_CLASSES,
 } from "@/components/design-system/section-nav";
 import type { OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
@@ -611,17 +611,15 @@ export function HubSearch({
     <div
       ref={rootRef}
       data-hub-search
-      // `nav` (the sticky-bar slot) is `flex self-stretch`: `self-stretch`
-      // takes the wrapper's height from the bar row it sits in (overriding
-      // that row's `items-center`), and `flex` on the wrapper is what lets
-      // the box below inherit it in turn — see `section-nav.ts`.
-      className={`relative ${isHero ? "" : "flex min-w-0 self-stretch"} ${className}`}
+      // `nav` (the sticky-bar slot) is `self-stretch`: it takes its height
+      // from the bar row it sits in, and the box below fills it with
+      // `h-full` — see `section-nav.ts`. Never `flex` here: it would move
+      // the absolute results popup's static position onto the box.
+      className={`relative ${isHero ? "" : "min-w-0 self-stretch"} ${className}`}
     >
       <div
         className={`border-ink bg-cream flex items-center gap-2 ${boxBorder} ${boxShadow} ${
-          isHero
-            ? "px-3 py-3"
-            : `w-full self-stretch ${SECTION_NAV_TRAILING_SLOT_PADDING}`
+          isHero ? "px-3 py-3" : SECTION_NAV_TRAILING_SLOT_CLASSES
         }`}
       >
         <span className="text-jersey-deep flex-shrink-0">

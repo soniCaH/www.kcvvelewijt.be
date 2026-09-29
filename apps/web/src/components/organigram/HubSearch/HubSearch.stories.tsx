@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { within, userEvent, waitFor } from "storybook/test";
+import { within, userEvent, waitFor, expect } from "storybook/test";
 import { useEffect, type ReactNode } from "react";
 import { HubSearch } from "./HubSearch";
 import { HUB_SEARCH_MEMBERS, HUB_SEARCH_PATHS } from "./hub-search.fixture";
@@ -149,6 +149,29 @@ export const KeywordFallback: Story = {
 export const Nav: Story = {
   args: { variant: "nav", className: "max-w-[260px]" },
   decorators: [(Story) => <div className="bg-cream-deep p-6">{<Story />}</div>],
+};
+
+/**
+ * The `nav` results popup opens **below** the box, not over it. The `nav`
+ * root is stretched to the bar row's height (#3248); if that root ever
+ * becomes a flex container, the absolutely positioned popup's static
+ * position moves to the root's top edge and it covers the text being typed.
+ * `!vr`: geometry-only.
+ */
+export const NavPopupOpensBelowTheBox: Story = {
+  ...Nav,
+  tags: ["!vr"],
+  play: async (context) => {
+    await typePlay("in")(context);
+    const canvas = within(context.canvasElement);
+    const box = canvas.getByLabelText(
+      "Zoek een persoon of hulpvraag",
+    ).parentElement!;
+    const popup = canvas.getByTestId("hub-search-popup");
+    await expect(popup.getBoundingClientRect().top).toBeGreaterThanOrEqual(
+      box.getBoundingClientRect().bottom,
+    );
+  },
 };
 
 /** No-match empty state. */
