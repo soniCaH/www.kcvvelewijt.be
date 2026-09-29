@@ -31,34 +31,25 @@ export const SECTION_NAV_CHIP_SHADOW_CLASS =
 
 /**
  * Padding for the bar's **trailing slot** — today only `<HubSearch
- * variant="nav">` on `/hulp`. Tuned so the slot is never taller than the
- * chip beside it, which is what DESIGN.md § Navigation means by the bar
- * reading as *"one row of one kind of object"*.
+ * variant="nav">` on `/hulp`. Horizontal only: the slot carries no
+ * `py-*` of its own, because its height is no longer tuned to sit under the
+ * chip's — it matches the chip **by construction**. `<HubSearch>`'s `nav`
+ * wrapper and this box both take `self-stretch` (the wrapper against the
+ * bar row it sits in, the box against the wrapper), so the box's height is
+ * always exactly the row's cross size, whatever that is — the same
+ * mechanism that gives every other item on the row its height, not a
+ * second, padding-tuned one (#3248, replacing #2821's hand-worked table).
  *
- * The arithmetic, at `--line-height-loose: 1.75`:
- *
- * | box   | border | padding-y | content              | total     |
- * | ----- | ------ | --------- | -------------------- | --------- |
- * | chip  | 1 + 1  | 6 + 6     | 11px × 1.75 = 19.25  | **33.25** |
- * | slot  | 1 + 1  | 4 + 4     | 13px × 1.75 = 22.75  | **32.75** |
- *
- * The slot keeps 13px text — it is a field you type into, not a label — so
- * it buys the 2px back out of its padding instead. Landing 0.5px *under*
- * the chip is deliberate: the chip stays the row's tallest item, so the
- * bar's height does not change when the slot appears mid-scroll (#2821).
- * Before this, the slot's `py-2` made it 41px and the bar grew 8px on the
- * hand-over — the resize `useSectionNav` then had to publish and
- * `useHashLandingCorrection` had to correct against.
- *
- * If either box's padding, border or type size changes, re-run this table.
- * Nothing asserts it: the unit runner is happy-dom, which performs no
- * layout and cannot measure a rendered box. What catches a change is the
- * VR baseline of `<OrganigramSectionNav>`'s **`RevealedSearch`** story —
- * the only one that renders the slot *inside the bar, beside the chips*,
- * which is where the comparison lives. `Default` cannot: its decorator
- * keeps `#hub-hero` in view, so the slot never mounts. Nor can
- * `features-organigram-hubsearch--nav--*`, which renders the slot alone on
- * a swatch with neither chips nor the consumer's own width classes. And
- * only if a reviewer looks at it.
+ * Nothing asserts the resulting pixel value: the unit runner is happy-dom,
+ * which performs no layout and cannot measure a rendered box. What catches
+ * a regression is the VR baseline of `<OrganigramSectionNav>`'s
+ * **`RevealedSearch`** story — the only one that renders the slot *inside
+ * the bar, beside the chips*, which is where the comparison lives.
+ * `Default` cannot: its decorator keeps `#hub-hero` in view, so the slot
+ * never mounts. Nor can `features-organigram-hubsearch--nav--*`, which
+ * renders the slot alone on a swatch with neither chips nor the consumer's
+ * own width classes. A geometry `play` on the same story
+ * (`SlotHeightMatchesTheChip`) asserts the equality directly, at 375 and
+ * 1280px.
  */
-export const SECTION_NAV_TRAILING_SLOT_PADDING = "px-2.5 py-1";
+export const SECTION_NAV_TRAILING_SLOT_PADDING = "px-2.5";

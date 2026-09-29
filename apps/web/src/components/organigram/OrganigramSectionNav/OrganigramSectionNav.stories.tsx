@@ -100,6 +100,43 @@ export const RevealedSearch: Story = {
 };
 
 /**
+ * #3248: the slot's height matches the chip's **by construction**
+ * (`self-stretch`, see `section-nav.ts`), not by a hand-tuned padding
+ * table. Reuses `RevealedSearch`'s decorator so the slot is mounted from
+ * first paint. Two stories, not one, because the story fixture cannot
+ * change `globals.viewport` mid-`play` — 375 and 1280 are the widths the
+ * #3248 production measurement used. `!vr`: assertion-only, geometry-only.
+ */
+export const SlotHeightMatchesTheChipMobile: Story = {
+  tags: ["!vr"],
+  globals: { viewport: { value: "kcvvMobile" } },
+  decorators: RevealedSearch.decorators,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const nav = canvas.getByRole("navigation", { name: "Secties van de hub" });
+    const chip = within(nav).getByRole("link", { name: "Hulp" });
+    // `findByRole`, not `getByRole`: the slot mounts once the decorator's
+    // `IntersectionObserver` reports `#hub-hero` out of view, which is
+    // async even though it's parked off-screen from first paint.
+    const search = await within(nav).findByRole("combobox", {
+      name: "Zoek een persoon of hulpvraag",
+    });
+
+    const slot = search.parentElement!;
+    // Sub-pixel rounding only — the two must be the same box, not merely close.
+    expect(slot.getBoundingClientRect().height).toBeCloseTo(
+      chip.getBoundingClientRect().height,
+      0,
+    );
+  },
+};
+
+export const SlotHeightMatchesTheChipDesktop: Story = {
+  ...SlotHeightMatchesTheChipMobile,
+  globals: { viewport: { value: "kcvvDesktop" } },
+};
+
+/**
  * Re-homed from `apps/web/test/e2e/section-nav.spec.ts`'s "OrganigramSectionNav
  * on /hulp" case (#3146, deleted by this ticket — the flake ledger's worst
  * row: ~50% first-attempt failure against live hydration timing, see #3077).

@@ -611,11 +611,17 @@ export function HubSearch({
     <div
       ref={rootRef}
       data-hub-search
-      className={`relative ${isHero ? "" : "min-w-0"} ${className}`}
+      // `nav` (the sticky-bar slot) is `flex self-stretch`: `self-stretch`
+      // takes the wrapper's height from the bar row it sits in (overriding
+      // that row's `items-center`), and `flex` on the wrapper is what lets
+      // the box below inherit it in turn — see `section-nav.ts`.
+      className={`relative ${isHero ? "" : "flex min-w-0 self-stretch"} ${className}`}
     >
       <div
         className={`border-ink bg-cream flex items-center gap-2 ${boxBorder} ${boxShadow} ${
-          isHero ? "px-3 py-3" : SECTION_NAV_TRAILING_SLOT_PADDING
+          isHero
+            ? "px-3 py-3"
+            : `w-full self-stretch ${SECTION_NAV_TRAILING_SLOT_PADDING}`
         }`}
       >
         <span className="text-jersey-deep flex-shrink-0">
@@ -649,8 +655,11 @@ export function HubSearch({
           // `<input>` at its intrinsic ~20-character width, so without this
           // the field and its caret render straight through the box's own
           // border at viewports below ~375px instead of the box squeezing.
+          // 16px on touch (`pointer-coarse:`), never a width breakpoint —
+          // an iPad on its side is still touch at ≥1024px. iOS Safari zooms
+          // the page on focus of any field under 16px (#3248).
           className={`text-ink placeholder:text-ink-muted w-full min-w-0 bg-transparent focus:outline-none ${
-            isHero ? "text-[15px]" : "text-[13px]"
+            isHero ? "text-body-md" : "text-body-sm pointer-coarse:text-body-md"
           } ${value ? clearGiveBack : ""}`}
         />
         {value && (

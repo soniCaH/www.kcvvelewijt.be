@@ -46,6 +46,13 @@ const preview: Preview = {
           name: "Organigram Explorer Stage (1024)",
           styles: { width: "1024px", height: "800px" },
         },
+        // `OrganigramSectionNav.stories.tsx`'s `SlotHeightMatchesTheChip*`
+        // play fixtures need the exact 1280px the #3248 production
+        // measurement used — no `MINIMAL_VIEWPORTS` entry reaches it.
+        kcvvDesktop: {
+          name: "KCVV Desktop (1280)",
+          styles: { width: "1280px", height: "800px" },
+        },
       },
     },
     options: {
