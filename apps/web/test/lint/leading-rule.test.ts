@@ -20,6 +20,9 @@ const OFF_RAMP_LEADING = [
   'const d = "leading-(--x)";',
   'const e = "leading-6";',
   "const f = `sm:leading-relaxed`;",
+  // Tailwind's important-modifier prefix — the anchor must include `!`
+  // alongside start-of-string/whitespace/`:`, or this slips past.
+  'const g = "!leading-none";',
 ];
 const ALLOWED = [
   // The only legal leading-* utilities — the named @theme steps (#2667).

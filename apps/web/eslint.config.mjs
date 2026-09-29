@@ -159,25 +159,27 @@ const EDITORIAL_HEADING_MARGIN_PATTERN = "(^|\\s|:)-?(mb|my)-(?!0!?(\\s|$))";
 const OFF_RAMP_FONT_SIZE_PATTERN =
   "text-\\[(?:(?:[0-9]+(?:\\.[0-9]+)?|\\.[0-9]+)(?:px|rem|em|vw|pt|%|ch)\\]|clamp\\(|calc\\(|length:)|text-\\(length:";
 
-// Leading Freeze (DESIGN.md → Typography, #2666). The role token owns
-// leading (#2667): the only legal `leading-*` utilities are the named
-// `@theme` steps `leading-hero`, `leading-hero-lead` and
-// `leading-label-wrap`. `--leading-*: initial` (#2668) already deletes every
-// stock name this rule doesn't need to catch — `leading-loose` — but four
-// things survive that reset and this denylist is the only thing that can
-// still catch them: `leading-none` (a static Tailwind value, never a theme
-// token, so a namespace reset cannot remove it), the four stock names
-// `tight`/`snug`/`normal`/`relaxed` (pinned on purpose in `globals.css`
-// until their last use drains), any arbitrary `leading-[…]`/`leading-(…)`,
-// and a bare-number `leading-<n>` (computed from `--spacing`, not
-// `--leading-*`). Denylist, not allowlist — an allowlist form
-// (`leading-(?!hero|…)`) would also catch prose/test ids that happen to
-// start with `leading-` (`leading-glyph`, `leading-and-trailing`). A new
-// named `@theme` leading step is legal by omission — no rule edit needed.
-// Class-start anchored, same single-line/no-newline requirement as the
-// patterns above.
+// Leading Freeze (DESIGN.md → Typography → The Leading Comes From The Step
+// Rule, #2666) — see there for what's legal and why. This denylist catches
+// everything `--leading-*: initial` (#2668) can't reach: the static
+// `leading-none` (never a theme token, so a namespace reset cannot remove
+// it), the four stock names `tight`/`snug`/`normal`/`relaxed` (pinned on
+// purpose in `globals.css` until their last use drains), any arbitrary
+// `leading-[…]`/`leading-(…)`, and a bare-number `leading-<n>` (computed
+// from `--spacing`, not `--leading-*`). `loose` stays in the list too, even
+// though the reset already drops it (0 uses) — so this rule still holds if
+// it ever ships before #2668's reset lands. Denylist, not allowlist — an
+// allowlist form (`leading-(?!hero|…)`) would also catch prose/test ids
+// that happen to start with `leading-` (`leading-glyph`,
+// `leading-and-trailing`). A new named `@theme` leading step is legal by
+// omission — no rule edit needed. Anchored on `!` alongside start-of-string/
+// whitespace/`:`, so Tailwind's important-modifier prefix (`!leading-none`)
+// doesn't slip past — a `text-*/<n>` modifier form is deliberately NOT
+// added to the anchor: `/` is also colour opacity (`text-ink/50`), and
+// catching it would false-positive on every alpha-adjusted color class.
+// Same single-line/no-newline requirement as the patterns above.
 const OFF_RAMP_LEADING_PATTERN =
-  "(?:^|[\\s:])leading-(?:none|tight|snug|normal|relaxed|loose|[0-9]|\\[|\\()";
+  "(?:^|[\\s:!])leading-(?:none|tight|snug|normal|relaxed|loose|[0-9]|\\[|\\()";
 
 const matchesClassString = (pattern) =>
   `:matches(Literal[value=/${pattern}/], TemplateElement[value.raw=/${pattern}/])`;
