@@ -1,4 +1,4 @@
-import { chromium } from "/Users/kevinvanransbeeck/Sites/KCVV/www.kcvvelewijt.be/apps/web/node_modules/@playwright/test/index.mjs";
+import { chromium } from "playwright";
 const OUT = new URL("./shots/", import.meta.url).pathname;
 const opts = {
   now: "",
