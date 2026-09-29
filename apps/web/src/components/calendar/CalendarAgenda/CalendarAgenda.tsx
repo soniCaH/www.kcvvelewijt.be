@@ -246,7 +246,7 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
               logo={match.homeTeam.logo}
               size={18}
             />
-            <span className="text-ink min-w-0 truncate text-[13px] font-semibold">
+            <span className="text-ink text-body-sm min-w-0 truncate font-semibold">
               {match.homeTeam.name}
             </span>
           </span>
@@ -259,7 +259,7 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
               logo={match.awayTeam.logo}
               size={18}
             />
-            <span className="text-ink min-w-0 truncate text-[13px] font-semibold">
+            <span className="text-ink text-body-sm min-w-0 truncate font-semibold">
               {match.awayTeam.name}
             </span>
           </span>
@@ -314,7 +314,7 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
           )}
           <span
             title={`${match.homeTeam.name} — ${match.awayTeam.name}`}
-            className="text-ink min-w-0 truncate text-[13px] font-semibold"
+            className="text-ink text-body-sm min-w-0 truncate font-semibold"
           >
             {match.homeTeam.name} — {match.awayTeam.name}
           </span>

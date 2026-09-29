@@ -55,7 +55,7 @@ export function FeaturedSponsorCard({ sponsor }: FeaturedSponsorCardProps) {
         </p>
 
         {sponsor.description && (
-          <p className="text-ink mt-1.5 line-clamp-2 text-[13px] leading-normal">
+          <p className="text-ink text-body-sm mt-1.5 line-clamp-2">
             {sponsor.description}
           </p>
         )}
