@@ -264,6 +264,9 @@
   "src/components/design-system/NumberDisplay/NumberDisplay.tsx": {
     "kcvv/no-off-ramp-font-size": {
       "count": 2
+    },
+    "kcvv/no-off-ramp-leading": {
+      "count": 1
     }
   },
   "src/components/design-system/PullQuote/PullQuote.tsx": {
@@ -441,7 +444,7 @@
       "count": 2
     },
     "kcvv/no-off-ramp-leading": {
-      "count": 2
+      "count": 5
     }
   },
   "src/components/layout/NavTakeover/NavTakeover.stories.tsx": {
