@@ -48,14 +48,17 @@ const NAV_LABEL_TRUNCATE = "block max-w-[14ch] truncate";
  *
  * Exempt from the type ramp (DESIGN.md "The Chrome Fits The Bar Rule",
  * #2664): the row must never wrap at `lg` (#2409), so these sizes answer a
- * fit constraint rather than a reading hierarchy. Two of the three steps
- * have no token at all — 11px is `text-label`'s size but neither its
- * tracking nor its weight, and 13px has nothing — so no role token can
- * describe the ramp and none is minted for it. Sanctioned here, in one
- * place, so #2418's lint has a single site to suppress.
+ * fit constraint rather than a reading hierarchy — the exemption covers
+ * sizes only. Tracking is not exempt: #2663 gave every uppercase mono label
+ * role the same 0.08em, and the nav is that role, so it takes `text-label`'s
+ * tracking (`--text-label--letter-spacing`) rather than a hand value. Two of
+ * the three sizes still have no token at all — 11px is `text-label`'s size
+ * but not its weight, and 13px has nothing — so no role token can describe
+ * the size ramp and none is minted for it. Sanctioned here, in one place, so
+ * #2418's lint has a single site to suppress.
  */
 const CHROME_NAV_TYPE =
-  "font-mono text-[11px] font-semibold tracking-[0.04em] whitespace-nowrap uppercase no-underline transition-colors xl:text-[13px] 2xl:text-[14px]";
+  "font-mono text-[11px] font-semibold tracking-[0.08em] whitespace-nowrap uppercase no-underline transition-colors xl:text-[13px] 2xl:text-[14px]";
 
 const Wordmark = () => (
   <Link

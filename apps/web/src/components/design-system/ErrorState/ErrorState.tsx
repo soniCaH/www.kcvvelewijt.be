@@ -72,7 +72,7 @@ export interface ErrorStateProps {
 }
 
 const CODE_LINE_CLASS =
-  "text-ink-muted font-mono text-mono-sm font-semibold tracking-[0.14em] uppercase";
+  "text-ink-muted font-mono text-label font-semibold uppercase";
 
 function lastWord(value: string): string {
   const words = value.trim().split(/\s+/);

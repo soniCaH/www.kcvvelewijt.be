@@ -194,7 +194,7 @@ export const DownloadButton = ({
         <span
           data-testid="file-type-stamp"
           aria-hidden="true"
-          className="inline-flex h-16 w-16 shrink-0 items-center justify-center border-2 font-mono text-[16px] leading-none font-extrabold tracking-[0.04em] uppercase"
+          className="inline-flex h-16 w-16 shrink-0 items-center justify-center border-2 font-mono text-[16px] leading-none font-extrabold tracking-[0.08em] uppercase"
           style={{
             borderColor: fileType.color,
             color: fileType.color,

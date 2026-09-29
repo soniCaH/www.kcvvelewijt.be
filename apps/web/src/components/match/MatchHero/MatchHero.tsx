@@ -314,11 +314,7 @@ function ReservationHero({
             </div>
           </div>
 
-          {time && (
-            <div className="text-ink font-mono text-[14px] tracking-[0.06em]">
-              {time}
-            </div>
-          )}
+          {time && <div className="text-ink font-mono text-[14px]">{time}</div>}
 
           {venue && (
             <div className="text-ink-muted font-mono text-[9.5px] leading-[1.4] tracking-[0.14em] uppercase">
@@ -402,11 +398,7 @@ function FullHero({
             </div>
           </div>
 
-          {time && (
-            <div className="text-ink font-mono text-[14px] tracking-[0.06em]">
-              {time}
-            </div>
-          )}
+          {time && <div className="text-ink font-mono text-[14px]">{time}</div>}
 
           {venue && (
             <div className="text-ink-muted font-mono text-[9.5px] leading-[1.4] tracking-[0.14em] uppercase">

@@ -66,7 +66,7 @@ export default function PrivacyPage() {
           accent="verklaring"
           lead="KCVV Elewijt, gevestigd aan Driesstraat 32, 1982 Elewijt, respecteert je privacy en behandelt je persoonsgegevens vertrouwelijk. Deze privacyverklaring legt uit welke gegevens we verzamelen, waarom we dat doen en welke rechten je hebt."
         >
-          <p className="text-ink-muted text-mono-sm mt-4 font-mono tracking-[0.04em]">
+          <p className="text-ink-muted text-mono-sm mt-4 font-mono">
             Laatst bijgewerkt · {LAST_UPDATED}
           </p>
         </PageHero>

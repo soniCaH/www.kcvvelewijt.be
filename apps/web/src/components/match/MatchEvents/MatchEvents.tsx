@@ -425,7 +425,7 @@ function EventRow({
           column next to it. font-bold, not font-black: IBM Plex Mono
           self-hosts only 400/500/600/700 (app/layout.tsx), so a requested
           900 was already clamping to 700. */}
-      <span className="text-ink font-mono text-[18px] leading-none font-bold tracking-[-0.025em]">
+      <span className="text-ink font-mono text-[18px] leading-none font-bold">
         {formatMinute(event.minute, event.additionalTime)}
       </span>
 
@@ -497,7 +497,7 @@ function SingleSideEventRow({
           two-sided row's minute above (#2579 supersedes #2610's
           lining-nums). First track widened 36px -> 56px (#2579 review) —
           see EventRow's identical note above. */}
-      <span className="text-ink font-mono text-[18px] leading-none font-bold tracking-[-0.025em]">
+      <span className="text-ink font-mono text-[18px] leading-none font-bold">
         {formatMinute(event.minute, event.additionalTime)}
       </span>
       <span className="flex items-center justify-center">

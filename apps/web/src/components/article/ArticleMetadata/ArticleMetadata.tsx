@@ -43,8 +43,7 @@ const DEFAULT_AUTHOR = "KCVV Elewijt";
  * cluster and the `Delen` button so the two never drift (the pattern
  * `SiteHeader`'s `CHROME_NAV_TYPE` uses for its own shared row type).
  */
-const MONO_SMALL_CAPS =
-  "font-mono text-xs tracking-[var(--letter-spacing-caps)] uppercase";
+const MONO_SMALL_CAPS = "font-mono text-label uppercase";
 
 /**
  * Design §7.6 — article metadata bar. Single row with 1px `paper-edge`
