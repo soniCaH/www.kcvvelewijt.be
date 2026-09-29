@@ -227,7 +227,7 @@ function Crest({
     <span
       aria-hidden="true"
       className={cn(
-        "font-display text-mono-sm inline-flex shrink-0 items-center justify-center border leading-none font-black italic",
+        "font-display text-mono-sm inline-flex shrink-0 items-center justify-center border font-black italic",
         size,
         dark
           ? "border-cream/40 bg-cream/10 text-cream"

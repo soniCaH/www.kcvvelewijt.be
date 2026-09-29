@@ -53,8 +53,8 @@ const DOT_CLASS: Record<DividerShade, string> = {
   dark: "bg-cream/60 inline-block h-[3px] w-[3px] rounded-full",
 };
 const GLYPH_CLASS: Record<DividerShade, string> = {
-  light: "text-ink-muted text-label font-mono leading-none",
-  dark: "text-cream text-label font-mono leading-none",
+  light: "text-ink-muted text-label font-mono",
+  dark: "text-cream text-label font-mono",
 };
 
 export function MonoLabelRow({

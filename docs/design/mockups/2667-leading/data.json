@@ -1,0 +1,98 @@
+[
+  {
+    "id": "ticketstub-375",
+    "path": "/evenementen",
+    "w": 375,
+    "text": "26–28 feb · Kantine KCVV Elewijt, Driesstraat 32 - 1982 Elew",
+    "opts": {
+      "1": {
+        "h": 33,
+        "card": 113
+      },
+      "1.2": {
+        "h": 40,
+        "card": 120
+      },
+      "1.3": {
+        "h": 43,
+        "card": 123
+      },
+      "1.375": {
+        "h": 45,
+        "card": 125
+      }
+    }
+  },
+  {
+    "id": "eventhero-375",
+    "path": "/evenementen/ek-darts",
+    "w": 375,
+    "text": "KANTINE KCVV ELEWIJT, DRIESSTRAAT 32 - 1982 ELEWIJT",
+    "opts": {
+      "1": {
+        "h": 22,
+        "card": null
+      },
+      "1.2": {
+        "h": 26,
+        "card": null
+      },
+      "1.3": {
+        "h": 29,
+        "card": null
+      },
+      "1.375": {
+        "h": 30,
+        "card": null
+      }
+    }
+  },
+  {
+    "id": "home-link-375",
+    "path": "/",
+    "w": 375,
+    "text": "ALLE SPONSORS & SYMPATHISANTEN\n→",
+    "opts": {
+      "1": {
+        "h": 27,
+        "card": null
+      },
+      "1.3": {
+        "h": 30,
+        "card": null
+      }
+    }
+  },
+  {
+    "id": "home-pill-375",
+    "path": "/",
+    "w": 375,
+    "text": "Uit",
+    "opts": {
+      "1": {
+        "h": 22,
+        "card": null
+      },
+      "1.3": {
+        "h": 25,
+        "card": null
+      }
+    }
+  },
+  {
+    "id": "matchstrip-1280",
+    "path": "/",
+    "w": 1280,
+    "text": "KCVV",
+    "opts": {
+      "1": {
+        "h": 14,
+        "card": 85
+      },
+      "1.4": {
+        "h": 20,
+        "card": 85
+      }
+    }
+  }
+]

@@ -341,13 +341,6 @@
      only styled base `h1`–`h6`, and six of its ten names disagreed with the
      identically-named `text-*` utility. Deleted in #2417 (decision: #2396). */
 
-  /* Line Heights */
-  --line-height-tight: 1.2;
-  --line-height-snug: 1.25;
-  --line-height-normal: 1.5;
-  --line-height-relaxed: 1.6;
-  --line-height-loose: 1.75;
-
   /* Font Weights */
   --font-weight-normal: 400;
   --font-weight-medium: 500;
@@ -552,7 +545,30 @@
      before this ticket, not a second implementation. Deleted rather than
      left alongside this one; two "hero line-height" tokens at two
      different values is its own bug waiting to be grepped into. */
+  --leading-*: initial;
   --leading-hero: 0.85;
+
+  /* `leading-label-wrap` (#2667): the one gap in "the role token owns
+     leading" — `text-label`'s own lh 1 is right for the one-line labels
+     that are nearly all of them, but collides the lines of a label that
+     wraps (a long venue name, a wrapping title). Picked on the compare
+     page: 1 nearly touches, 1.3 gives room, 1.375 (Tailwind's own
+     `leading-snug`, what both call sites used before) looks the same as
+     1.3. Used by `EventHero` and `TicketStub`. */
+  --leading-label-wrap: 1.3;
+
+  /* Drain only — do not add a new call site. `--leading-*: initial` above
+     resets Tailwind's whole leading scale, so these four stock names would
+     otherwise fall back to whatever they inherit; pinning them here at
+     Tailwind's own values keeps every existing `leading-tight`/`snug`/
+     `normal`/`relaxed` call site resolving to the same pixels it already
+     had. `loose` is not pinned (0 uses). Off-ramp leading moves with its
+     size in #2418's drain (#2667 decision 3) — delete each pin here the
+     moment its last use drains. */
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
 
   /* The stock scale, declared rather than inherited. These ten names ship with
      Tailwind whether or not we choose them, and 154 call sites use them — so
@@ -848,7 +864,7 @@
     color: var(--color-ink);
     font-family: var(--font-family-body);
     font-size: var(--text-base);
-    line-height: var(--line-height-loose);
+    line-height: 1.75; /* was --line-height-loose, deleted (#2668) — nothing else read it */
   }
 
   /* Heading Styles */
@@ -861,7 +877,7 @@
     font-family: var(--font-display);
     font-weight: var(--font-weight-bold);
     color: var(--color-ink);
-    line-height: var(--line-height-tight);
+    line-height: 1.2; /* was --line-height-tight, deleted (#2668) — nothing else read it */
   }
 
   /* Heading sizes — the fluid display steps, so headings scale continuously

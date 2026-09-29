@@ -137,8 +137,7 @@ const EDITORIAL_HEADING_MARGIN_PATTERN = "(^|\\s|:)-?(mb|my)-(?!0!?(\\s|$))";
 // bypasses it while *looking* token-driven — the arbitrary-value form sets
 // font-size alone and silently drops the step's line-height and tracking,
 // which is exactly what DESIGN.md → Typography already tells authors never
-// to write. Font-size literals only — `leading-[…]` belongs to #2666, not
-// this rule.
+// to write. Font-size literals only.
 //
 // Strategy is freeze-and-drain, not big-bang: the literals that already
 // exist are frozen via `eslint-suppressions.json` (`--suppress-rule
@@ -160,16 +159,39 @@ const EDITORIAL_HEADING_MARGIN_PATTERN = "(^|\\s|:)-?(mb|my)-(?!0!?(\\s|$))";
 const OFF_RAMP_FONT_SIZE_PATTERN =
   "text-\\[(?:(?:[0-9]+(?:\\.[0-9]+)?|\\.[0-9]+)(?:px|rem|em|vw|pt|%|ch)\\]|clamp\\(|calc\\(|length:)|text-\\(length:";
 
+// Leading Freeze (DESIGN.md → Typography → The Leading Comes From The Step
+// Rule, #2666) — see there for what's legal and why. This denylist catches
+// everything `--leading-*: initial` (#2668) can't reach: the static
+// `leading-none` (never a theme token, so a namespace reset cannot remove
+// it), the four stock names `tight`/`snug`/`normal`/`relaxed` (pinned on
+// purpose in `globals.css` until their last use drains), any arbitrary
+// `leading-[…]`/`leading-(…)`, and a bare-number `leading-<n>` (computed
+// from `--spacing`, not `--leading-*`). `loose` stays in the list too, even
+// though the reset already drops it (0 uses) — so this rule still holds if
+// it ever ships before #2668's reset lands. Denylist, not allowlist — an
+// allowlist form (`leading-(?!hero|…)`) would also catch prose/test ids
+// that happen to start with `leading-` (`leading-glyph`,
+// `leading-and-trailing`). A new named `@theme` leading step is legal by
+// omission — no rule edit needed. Anchored on `!` alongside start-of-string/
+// whitespace/`:`, so Tailwind's important-modifier prefix (`!leading-none`)
+// doesn't slip past — a `text-*/<n>` modifier form is deliberately NOT
+// added to the anchor: `/` is also colour opacity (`text-ink/50`), and
+// catching it would false-positive on every alpha-adjusted color class.
+// Same single-line/no-newline requirement as the patterns above.
+const OFF_RAMP_LEADING_PATTERN =
+  "(?:^|[\\s:!])leading-(?:none|tight|snug|normal|relaxed|loose|[0-9]|\\[|\\()";
+
 const matchesClassString = (pattern) =>
   `:matches(Literal[value=/${pattern}/], TemplateElement[value.raw=/${pattern}/])`;
 
-// Local plugin alias so the font-size rule above gets its own rule ID while
-// still reusing the battle-tested `no-restricted-syntax` engine — no new
-// dependency, just the core rule registered a second time under a name
+// Local plugin alias so the font-size/leading rules above get their own rule
+// IDs while still reusing the battle-tested `no-restricted-syntax` engine —
+// no new dependency, just the core rule registered twice under names
 // nothing else shares.
 const kcvvPlugin = {
   rules: {
     "no-off-ramp-font-size": builtinRules.get("no-restricted-syntax"),
+    "no-off-ramp-leading": builtinRules.get("no-restricted-syntax"),
   },
 };
 
@@ -318,6 +340,26 @@ const eslintConfig = [
           selector: matchesClassString(OFF_RAMP_FONT_SIZE_PATTERN),
           message:
             "Off-ramp literal font size — the type ramp has a token for every step (apps/web/DESIGN.md → Typography). A text-[…px]/[…rem]/[…em]/[…vw]/[…pt]/[…%]/[…ch], text-[clamp(…)]/[calc(…)], text-[length:…] or text-(length:…) bypasses it and silently drops the step's line-height and tracking. Existing call sites are frozen in eslint-suppressions.json under this rule's own ID; new code must use a text-* token. Replaced one instead of just moving it? Run `pnpm --filter @kcvv/web lint:prune` in the same commit.",
+        },
+      ],
+    },
+  },
+  {
+    // Leading Freeze (DESIGN.md → Typography, #2666) — its own config block,
+    // same plugin, own rule ID. Kept separate from the block above on
+    // purpose: see the comment on `OFF_RAMP_FONT_SIZE_PATTERN` for why this
+    // selector may not share a rule ID (and so a suppression count) with any
+    // other selector.
+    files: ["**/src/**/*.{ts,tsx}"],
+    ignores: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
+    plugins: { kcvv: kcvvPlugin },
+    rules: {
+      "kcvv/no-off-ramp-leading": [
+        "error",
+        {
+          selector: matchesClassString(OFF_RAMP_LEADING_PATTERN),
+          message:
+            "Off-ramp leading — the role token owns leading (apps/web/DESIGN.md → Typography). The only legal leading-* utilities are the named @theme steps leading-hero, leading-hero-lead and leading-label-wrap. Existing call sites are frozen in eslint-suppressions.json under this rule's own ID; new code must not add a leading-* utility. Replaced one instead of just moving it? Run `pnpm --filter @kcvv/web lint:prune` in the same commit.",
         },
       ],
     },
