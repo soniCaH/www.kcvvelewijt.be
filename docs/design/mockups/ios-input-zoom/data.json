@@ -1,0 +1,246 @@
+{
+  "hero": {
+    "375-now": {
+      "font": "15px",
+      "text": "bv. \"mijn kind is geblesseerd\" of een naam…",
+      "w": 235,
+      "h": 26,
+      "textW": 254,
+      "room": 235,
+      "overflow": false,
+      "y": 367.40625,
+      "bottom": 393.65625
+    },
+    "375-A": {
+      "font": "16px",
+      "text": "bv. \"mijn kind is geblesseerd\" of een naam…",
+      "w": 235,
+      "h": 28,
+      "textW": 271,
+      "room": 235,
+      "overflow": false,
+      "y": 367.40625,
+      "bottom": 395.40625
+    },
+    "768-now": {
+      "font": "15px",
+      "text": "bv. \"mijn kind is geblesseerd\" of een naam…",
+      "w": 424,
+      "h": 26,
+      "textW": 254,
+      "room": 424,
+      "overflow": false,
+      "y": 341.984375,
+      "bottom": 368.234375
+    },
+    "768-A": {
+      "font": "16px",
+      "text": "bv. \"mijn kind is geblesseerd\" of een naam…",
+      "w": 424,
+      "h": 28,
+      "textW": 271,
+      "room": 424,
+      "overflow": false,
+      "y": 341.984375,
+      "bottom": 369.984375
+    },
+    "1280-now": {
+      "font": "15px",
+      "text": "bv. \"mijn kind is geblesseerd\" of een naam…",
+      "w": 424,
+      "h": 26,
+      "textW": 254,
+      "room": 424,
+      "overflow": false,
+      "y": 401.5,
+      "bottom": 427.75
+    },
+    "1280-A": {
+      "font": "16px",
+      "text": "bv. \"mijn kind is geblesseerd\" of een naam…",
+      "w": 424,
+      "h": 28,
+      "textW": 271,
+      "room": 424,
+      "overflow": false,
+      "y": 400.625,
+      "bottom": 428.625
+    },
+    "1280-B": {
+      "font": "16px",
+      "text": "bv. \"mijn kind is geblesseerd\" of een naam…",
+      "w": 424,
+      "h": 28,
+      "textW": 271,
+      "room": 424,
+      "overflow": false,
+      "y": 400.625,
+      "bottom": 428.625
+    }
+  },
+  "nav": {
+    "375-now": {
+      "font": "13px",
+      "text": "Zoek…",
+      "w": 131,
+      "h": 23,
+      "textW": 33,
+      "room": 131,
+      "overflow": false,
+      "y": 78.25,
+      "bottom": 101
+    },
+    "375-A": {
+      "font": "16px",
+      "text": "Zoek…",
+      "w": 131,
+      "h": 28,
+      "textW": 40,
+      "room": 131,
+      "overflow": false,
+      "y": 78,
+      "bottom": 106
+    },
+    "768-now": {
+      "font": "13px",
+      "text": "Zoek…",
+      "w": 194,
+      "h": 23,
+      "textW": 33,
+      "room": 194,
+      "overflow": false,
+      "y": 78.25,
+      "bottom": 101
+    },
+    "768-A": {
+      "font": "16px",
+      "text": "Zoek…",
+      "w": 194,
+      "h": 28,
+      "textW": 40,
+      "room": 194,
+      "overflow": false,
+      "y": 78,
+      "bottom": 106
+    },
+    "1280-now": {
+      "font": "13px",
+      "text": "Zoek…",
+      "w": 194,
+      "h": 23,
+      "textW": 33,
+      "room": 194,
+      "overflow": false,
+      "y": 78.25,
+      "bottom": 101
+    },
+    "1280-A": {
+      "font": "14px",
+      "text": "Zoek…",
+      "w": 194,
+      "h": 25,
+      "textW": 35,
+      "room": 194,
+      "overflow": false,
+      "y": 78,
+      "bottom": 102.5
+    },
+    "1280-B": {
+      "font": "16px",
+      "text": "Zoek…",
+      "w": 194,
+      "h": 28,
+      "textW": 40,
+      "room": 194,
+      "overflow": false,
+      "y": 78,
+      "bottom": 106
+    }
+  },
+  "select": {
+    "375-now": {
+      "font": "11px",
+      "text": "+ voeg toe",
+      "w": 110,
+      "h": 31,
+      "textW": 66,
+      "room": 86,
+      "overflow": false,
+      "barH": 701,
+      "y": 545.40625,
+      "bottom": 576.65625
+    },
+    "375-A": {
+      "font": "16px",
+      "text": "+ voeg toe",
+      "w": 140,
+      "h": 34,
+      "textW": 96,
+      "room": 116,
+      "overflow": false,
+      "barH": 703,
+      "y": 545.40625,
+      "bottom": 579.40625
+    },
+    "768-now": {
+      "font": "11px",
+      "text": "+ voeg toe",
+      "w": 110,
+      "h": 31,
+      "textW": 66,
+      "room": 86,
+      "overflow": false,
+      "barH": 376,
+      "y": 757.421875,
+      "bottom": 788.671875
+    },
+    "768-A": {
+      "font": "16px",
+      "text": "+ voeg toe",
+      "w": 140,
+      "h": 34,
+      "textW": 96,
+      "room": 116,
+      "overflow": false,
+      "barH": 379,
+      "y": 757.421875,
+      "bottom": 791.421875
+    },
+    "1280-now": {
+      "font": "11px",
+      "text": "+ voeg toe",
+      "w": 110,
+      "h": 31,
+      "textW": 66,
+      "room": 86,
+      "overflow": false,
+      "barH": 297,
+      "y": 804.125,
+      "bottom": 835.375
+    },
+    "1280-A": {
+      "font": "12px",
+      "text": "+ voeg toe",
+      "w": 116,
+      "h": 31,
+      "textW": 72,
+      "room": 92,
+      "overflow": false,
+      "barH": 297,
+      "y": 804.125,
+      "bottom": 835.375
+    },
+    "1280-B": {
+      "font": "16px",
+      "text": "+ voeg toe",
+      "w": 140,
+      "h": 34,
+      "textW": 96,
+      "room": 116,
+      "overflow": false,
+      "barH": 300,
+      "y": 804.125,
+      "bottom": 838.125
+    }
+  }
+}
