@@ -12,7 +12,7 @@ export interface NavTakeoverItemProps {
 }
 
 const ROW =
-  "border-paper-edge flex w-full items-center justify-between border-b py-4 text-left font-display text-[22px] italic font-bold leading-tight transition-colors";
+  "border-paper-edge flex w-full items-center justify-between border-b py-4 text-left font-display text-display-md italic font-bold transition-colors";
 
 /**
  * One row of the mobile nav takeover. Every row is a leaf link — the nav lost

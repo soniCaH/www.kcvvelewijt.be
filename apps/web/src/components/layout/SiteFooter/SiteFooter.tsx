@@ -33,12 +33,12 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
           />
           <h2
             id="site-footer-wordmark"
-            className="font-display text-[32px] leading-none font-black tracking-[-0.01em] italic md:text-[44px]"
+            className="font-display text-display-lg font-black italic"
           >
             <span className="text-ink">KCVV </span>
             <span className="text-jersey-deep">Elewijt</span>
           </h2>
-          <p className="font-display text-ink mt-4 text-[18px] leading-snug font-bold italic md:text-[21px]">
+          <p className="font-display text-ink text-display-sm mt-4 font-bold italic">
             Er is maar één{" "}
             <em className="text-jersey-deep font-extrabold">plezante</em>{" "}
             compagnie.
