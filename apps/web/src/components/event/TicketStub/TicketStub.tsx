@@ -34,9 +34,9 @@ export interface TicketStubProps {
   location?: string | null;
 }
 
-// `leading-snug` because both consumers (title, meta) wrap on a narrow stub —
-// `text-label`'s own lh 1 is sized for single-line kickers.
-const MONO_LABEL_CLASS = "font-mono text-label leading-snug";
+// `leading-label-wrap` because both consumers (title, meta) wrap on a narrow
+// stub — `text-label`'s own lh 1 is sized for single-line kickers (#2667).
+const MONO_LABEL_CLASS = "font-mono text-label leading-label-wrap";
 
 // Canonical press-down (the paper-stamped interactive idiom): the resting
 // ticket sits on its offset shadow and presses into the page on hover/focus,

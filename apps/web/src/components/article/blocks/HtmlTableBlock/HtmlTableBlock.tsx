@@ -189,7 +189,7 @@ export function HtmlTableBlock({ html, className }: HtmlTableBlockProps) {
           // read differently depending on which table it landed in
           // (review M5).
           "[&>table>caption]:text-label [&>table>caption]:text-ink-muted",
-          "[&>table>caption]:font-medium [&>table>caption]:leading-none",
+          "[&>table>caption]:font-medium",
           "[&>table>caption]:pb-2 [&>table>caption]:text-left [&>table>caption]:uppercase",
         )}
         dangerouslySetInnerHTML={{

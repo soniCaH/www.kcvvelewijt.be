@@ -81,7 +81,7 @@ function CheckboxField({
           onChange={(e) => onChange(e.target.checked)}
           className="accent-jersey-deep mt-0.5 size-4 shrink-0 rounded-none"
         />
-        <span className="text-ink text-body-sm leading-snug">{children}</span>
+        <span className="text-ink text-body-sm">{children}</span>
       </label>
       {error ? <p className="text-alert text-body-sm mt-1">{error}</p> : null}
     </div>

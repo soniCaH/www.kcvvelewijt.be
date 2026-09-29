@@ -232,7 +232,7 @@ const HomeAwayBadge = ({ side }: { side: KcvvSide }) => {
         // in for one. Keeping the border on the filled state too is what stops
         // the two states changing size as a row flips thuis/uit.
         "inline-flex shrink-0 items-center gap-1.5 border px-2 py-1",
-        "text-label font-mono leading-none font-medium",
+        "text-label font-mono font-medium",
         // jersey-deep, never the bright jersey — the redesign's ink-adjacent
         // green is the one that carries cream text safely. `uit` keeps the
         // same green on its edge instead of switching hue: the outline is what

@@ -21,11 +21,11 @@ const TEXT_TONE: Record<EditorialLinkTone, string> = {
   dark: "text-cream",
 };
 
-// Hit area, not spacing (#2394). The label is set at `leading-none` —
-// correct as type, 11px tall as a thumb target. The padding grows it to
-// ~27px and the equal negative margin pulls the box back, so the consumer
-// does not shift by a pixel. The two halves only work as a pair: `py-2`
-// alone would push `<SectionHeader>`'s heading row out of alignment.
+// Hit area, not spacing (#2394). The label's own token (`text-label`, lh 1)
+// is already 11px tall as a thumb target. The padding grows it to ~27px and
+// the equal negative margin pulls the box back, so the consumer does not
+// shift by a pixel. The two halves only work as a pair: `py-2` alone would
+// push `<SectionHeader>`'s heading row out of alignment.
 const HIT_AREA = "py-2 -my-2";
 
 /**
@@ -57,7 +57,7 @@ export const EditorialLink = ({
       data-tone={tone}
       className={cn(
         "group inline-flex items-center gap-2",
-        "text-label font-mono leading-none font-medium uppercase",
+        "text-label font-mono font-medium uppercase",
         HIT_AREA,
         TEXT_TONE[tone],
         className,

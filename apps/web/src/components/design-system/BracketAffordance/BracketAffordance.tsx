@@ -62,10 +62,7 @@ export function BracketAffordance({
     <span
       aria-hidden="true"
       data-glyph={glyph}
-      className={cn(
-        "text-label font-mono leading-none font-medium not-italic",
-        className,
-      )}
+      className={cn("text-label font-mono font-medium not-italic", className)}
     >
       {BRACKET_GLYPH[glyph]}
     </span>

@@ -225,7 +225,7 @@ function PullQuoteAttributionRow({
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <span
           className={cn(
-            "text-label font-mono leading-none font-medium uppercase",
+            "text-label font-mono font-medium uppercase",
             palette.name,
           )}
         >
@@ -245,10 +245,7 @@ function PullQuoteAttributionRow({
             />
             <span
               data-pull-quote-meta-index={i}
-              className={cn(
-                "text-label font-mono leading-none uppercase",
-                palette.metaText,
-              )}
+              className={cn("text-label font-mono uppercase", palette.metaText)}
             >
               {value}
             </span>
@@ -291,7 +288,7 @@ function PullQuoteAttributionRow({
                 <span
                   data-pull-quote-meta-index={i}
                   className={cn(
-                    "text-label font-mono leading-none uppercase",
+                    "text-label font-mono uppercase",
                     palette.metaText,
                   )}
                 >

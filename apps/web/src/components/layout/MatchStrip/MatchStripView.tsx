@@ -227,7 +227,7 @@ function Crest({
     <span
       aria-hidden="true"
       className={cn(
-        "font-display text-mono-sm inline-flex shrink-0 items-center justify-center border leading-none font-black italic",
+        "font-display text-mono-sm inline-flex shrink-0 items-center justify-center border font-black italic",
         size,
         dark
           ? "border-cream/40 bg-cream/10 text-cream"
@@ -790,7 +790,7 @@ function DesktopSlider({
                 // needs a dark counterpart.
                 // `ink/50` computes to 3.63:1 on cream — below AA. `ink-muted` is
                 // the palette's answer for de-emphasised text and clears at ~4.9:1.
-                <span className="font-display text-ink-muted text-mono-md shrink-0 leading-none italic">
+                <span className="font-display text-ink-muted text-mono-md shrink-0 italic">
                   vs.
                 </span>
               )}
@@ -873,7 +873,7 @@ function ReservationDesktopSlide({
     <>
       <div className="flex min-w-0 items-center justify-center gap-3 px-6">
         <Crest team={match.team} big />
-        <span className="font-display text-ink text-mono-md min-w-0 truncate leading-none font-bold italic">
+        <span className="font-display text-ink text-mono-md min-w-0 truncate font-bold italic">
           {match.team.name}
         </span>
       </div>
@@ -899,7 +899,7 @@ function DesktopTeamName({
   return (
     <span
       className={cn(
-        "font-display text-mono-md max-w-[40%] min-w-0 truncate leading-none font-bold italic",
+        "font-display text-mono-md max-w-[40%] min-w-0 truncate font-bold italic",
         dark ? "text-cream" : "text-ink",
       )}
     >
