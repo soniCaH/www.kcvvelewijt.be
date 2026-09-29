@@ -1,0 +1,94 @@
+<title>iPhone Zoom Fields</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;600&display=swap">
+<style>
+:root{--bg:#f4f3ec;--card:#fffffb;--ink:#1c211d;--muted:#5b645d;--line:#d8d8cc;--green:#00753f;--greenbg:#dcefe2;--amber:#8a5a00;--amberbg:#f6ead0;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141815;--card:#1c211d;--ink:#eceee6;--muted:#a3aba4;--line:#343b35;--green:#5fd197;--greenbg:#173726;--amber:#e8b85a;--amberbg:#3a2e14;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141815;--card:#1c211d;--ink:#eceee6;--muted:#a3aba4;--line:#343b35;--green:#5fd197;--greenbg:#173726;--amber:#e8b85a;--amberbg:#3a2e14;color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans",system-ui,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:32px 64px}
+h1,h2{text-wrap:balance;line-height:1.2;margin:0}
+h1{font-size:30px}h2{font-size:22px;margin-top:8px}
+h4{font:600 12px/1 "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px}
+.lead{max-width:68ch;color:var(--muted)}
+code{font:500 .9em "IBM Plex Mono",monospace;background:var(--card);border:1px solid var(--line);padding:0 4px}
+.box{background:var(--card);border:1px solid var(--line);padding:16px 20px;margin-top:20px;max-width:780px}
+.box p{margin:.3em 0}
+table{border-collapse:collapse;width:100%;font-size:15px}
+.tw{overflow-x:auto;margin-top:20px}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px "IBM Plex Mono",monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+section{margin-top:56px;padding-top:24px;border-top:2px solid var(--ink)}
+.sub{color:var(--muted);margin:4px 0 12px}
+.rules{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:0;align-items:baseline}.rules dd{margin:0}
+.facts{margin:12px 0 0;padding-left:20px;max-width:75ch}
+.chip{display:inline-block;font:600 11px/1 "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase;padding:5px 7px;border:1px solid var(--line);color:var(--muted)}
+.chip.pick{background:var(--greenbg);color:var(--green);border-color:var(--green)}
+.chip.alt{background:var(--amberbg);color:var(--amber);border-color:var(--amber)}
+.row{display:grid;gap:16px;align-items:start}
+.w375{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),375px))}
+.w768{grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr))}
+.w1280{grid-template-columns:1fr}
+figure{margin:0;background:var(--card);border:1px solid var(--line)}
+figure.pick{border-color:var(--green);box-shadow:inset 0 0 0 1px var(--green)}
+figcaption{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding:8px 10px;border-bottom:1px solid var(--line)}
+.m{font:500 12px "IBM Plex Mono",monospace;color:var(--muted);font-variant-numeric:tabular-nums}
+img{display:block;width:100%;height:auto}
+</style>
+<div class="wrap">
+<h1>iPhone zoom on small form fields</h1>
+<p class="lead">On an iPhone or iPad, Safari zooms the page in when you tap a field whose text is smaller than 16px. After you type, the page stays zoomed in, so you must pinch it back out. Three fields on the site are smaller than 16px. This page shows each one now and with each fix. Shots come from production (<code>kcvv-nextjs.vercel.app</code>), with the new size put in as CSS, 2026-09-29.</p>
+
+<div class="box">
+<p><span class="chip pick">A · suggested</span> <b>16px on touch screens only.</b> Tailwind's <code>pointer-coarse:</code> variant (Tailwind 4.3, already installed): <code>text-body-sm pointer-coarse:text-body-md</code>. Phones and iPads get 16px, so no zoom. A computer with a mouse keeps the smaller step.</p>
+<p><span class="chip alt">B</span> <b>16px everywhere.</b> One class per field. Desktop changes too.</p>
+<p>I dropped the “16px below 1024px” idea from before. An iPad on its side is 1024px wide or more, so it would still zoom.</p>
+</div>
+
+<div class="tw"><table>
+<thead><tr><th>Field</th><th>Now</th><th>A on touch</th><th>A with mouse</th><th>B</th><th>What B costs on desktop</th></tr></thead>
+<tbody>
+<tr><td><a href="#hero">/hulp main search</a></td><td>15px</td><td>16px</td><td>16px</td><td>16px</td><td>Same as A: nothing more</td></tr>
+<tr><td><a href="#nav">/hulp sticky search</a></td><td>13px</td><td>16px</td><td>14px</td><td>16px</td><td>Sticky bar 5px taller, unless the box stretches (<a href="#bar">see below</a>)</td></tr>
+<tr><td><a href="#select">Calendar “+ voeg toe”</a></td><td>11px</td><td>16px</td><td>12px</td><td>16px</td><td>Dropdown 30px wider, bigger than the chips next to it</td></tr>
+</tbody></table></div>
+
+<p class="lead" style="margin-top:16px">Limit: Chrome cannot copy Safari's zoom, so these shots show the size change, not the zoom itself. Test the zoom once on a real iPhone.</p>
+<section id="bar"><h2>/hulp sticky bar — the search box must match the tabs</h2>
+<p class="sub">Whichever option you pick (A or B), the sticky search goes to 16px on phones. The tabs next to it must stay the same height as the box.</p>
+<p>This rule is already in the code. <code>section-nav.ts</code> says the box is never taller than the tabs, so the bar does not jump when the box slides in (#2821). The two boxes only matched because someone tuned the padding by hand, and no test checks it.</p>
+<ul class="facts">
+<li><b>16px, nothing else:</b> the box gets 4.7px taller than the tabs, and the bar grows 5px. This is what you saw.</li>
+<li><span class="chip pick">suggested</span> <b>Box stretches to the tabs:</b> the field takes the height of the row (<code>self-stretch</code>) and drops its own top and bottom padding. It is 33.3px, the same as the tabs. The bar does not change. The heights match by design, so the next padding change cannot break it.</li>
+<li><b>Tabs grow to the box:</b> it also matches, but the tabs are shared with the team pages (<code>/ploegen/…</code>). Every section bar on the site gets 5px taller.</li>
+<li>I also tried only making the padding smaller. The box then ends 1.7px short of the tabs, and you can see it, so I left it out.</li>
+</ul><h4>Phone · 375px</h4><div class="row w1280"><figure class="opt now"><figcaption><span class="chip now">Now · 13px</span><span class="m">box 32.8 · tab 33.3 · bar 51.3px</span></figcaption><img src="shots/bar-375-now.png" width="375" alt="Now · 13px at 375px" loading="lazy"></figure><figure class="opt alt"><figcaption><span class="chip alt">16px, nothing else</span><span class="m">box 38 · tab 33.3 · bar 56px</span></figcaption><img src="shots/bar-375-plain16.png" width="375" alt="16px, nothing else at 375px" loading="lazy"></figure><figure class="opt pick"><figcaption><span class="chip pick">16px, box stretches to the tabs</span><span class="m">box 33.3 · tab 33.3 · bar 51.3px</span></figcaption><img src="shots/bar-375-stretch.png" width="375" alt="16px, box stretches to the tabs at 375px" loading="lazy"></figure><figure class="opt alt"><figcaption><span class="chip alt">16px, tabs grow to the box</span><span class="m">box 38 · tab 38.3 · bar 56.3px</span></figcaption><img src="shots/bar-375-chips.png" width="375" alt="16px, tabs grow to the box at 375px" loading="lazy"></figure></div><h4>Desktop · 1280px</h4><div class="row w1280"><figure class="opt now"><figcaption><span class="chip now">Now · 13px</span><span class="m">box 32.8 · tab 33.3 · bar 51.3px</span></figcaption><img src="shots/bar-1280-now.png" width="1280" alt="Now · 13px at 1280px" loading="lazy"></figure><figure class="opt alt"><figcaption><span class="chip alt">16px, nothing else</span><span class="m">box 38 · tab 33.3 · bar 56px</span></figcaption><img src="shots/bar-1280-plain16.png" width="1280" alt="16px, nothing else at 1280px" loading="lazy"></figure><figure class="opt pick"><figcaption><span class="chip pick">16px, box stretches to the tabs</span><span class="m">box 33.3 · tab 33.3 · bar 51.3px</span></figcaption><img src="shots/bar-1280-stretch.png" width="1280" alt="16px, box stretches to the tabs at 1280px" loading="lazy"></figure><figure class="opt alt"><figcaption><span class="chip alt">16px, tabs grow to the box</span><span class="m">box 38 · tab 38.3 · bar 56.3px</span></figcaption><img src="shots/bar-1280-chips.png" width="1280" alt="16px, tabs grow to the box at 1280px" loading="lazy"></figure></div></section>
+<section id="hero"><h2>/hulp — the main search box</h2><p class="sub">Today 15px. The front door of the help page.</p>
+<dl class="rules"><dt><span class="chip pick">A</span></dt><dd>16px on touch. With a mouse it is 16px too: 15px is off the scale, and a tie rounds up (ticket 6).</dd><dt><span class="chip alt">B</span></dt><dd>16px.</dd></dl>
+<ul class="facts"><li>The field gets 2px taller (26 → 28px).</li><li>Phone (375px): the hint text was already cut off (it needs 254px, there is 235px). At 16px it needs 271px, so a few more letters are cut.</li><li>768px and wider: the hint text fits in every option.</li></ul><h4>Phone · 375px</h4><div class="row w375"><figure class="opt now"><figcaption><span class="chip now">Now</span><span class="m">15px · field 235×26px</span></figcaption>
+<img src="shots/hero-375-now.png" width="375" alt="Now at 375px wide" loading="lazy"></figure><figure class="opt pick"><figcaption><span class="chip pick">A and B · 16px</span><span class="m">16px · field 235×28px</span></figcaption>
+<img src="shots/hero-375-A.png" width="375" alt="A and B · 16px at 375px wide" loading="lazy"></figure></div><h4>Tablet · 768px</h4><div class="row w768"><figure class="opt now"><figcaption><span class="chip now">Now</span><span class="m">15px · field 424×26px</span></figcaption>
+<img src="shots/hero-768-now.png" width="768" alt="Now at 768px wide" loading="lazy"></figure><figure class="opt pick"><figcaption><span class="chip pick">A and B · 16px</span><span class="m">16px · field 424×28px</span></figcaption>
+<img src="shots/hero-768-A.png" width="768" alt="A and B · 16px at 768px wide" loading="lazy"></figure></div><h4>Desktop · 1280px, mouse</h4><div class="row w1280"><figure class="opt now"><figcaption><span class="chip now">Now</span><span class="m">15px · field 424×26px</span></figcaption>
+<img src="shots/hero-1280-now.png" width="1280" alt="Now at 1280px wide" loading="lazy"></figure><figure class="opt pick"><figcaption><span class="chip pick">A · 16px on touch screens</span><span class="m">16px · field 424×28px</span></figcaption>
+<img src="shots/hero-1280-A.png" width="1280" alt="A · 16px on touch screens at 1280px wide" loading="lazy"></figure><figure class="opt alt"><figcaption><span class="chip alt">B · 16px everywhere</span><span class="m">16px · field 424×28px</span></figcaption>
+<img src="shots/hero-1280-B.png" width="1280" alt="B · 16px everywhere at 1280px wide" loading="lazy"></figure></div></section><section id="nav"><h2>/hulp — the sticky search in the top bar</h2><p class="sub">Today 13px. It shows when you scroll past the main box.</p>
+<dl class="rules"><dt><span class="chip pick">A</span></dt><dd>16px on touch, 14px (<code>text-body-sm</code>, the ticket 6 value) with a mouse.</dd><dt><span class="chip alt">B</span></dt><dd>16px.</dd></dl>
+<ul class="facts"><li>On its own, 16px makes the sticky bar 5px taller (51 → 56px) and the box taller than the tabs. The fix is in the sticky bar section at the top.</li><li>At 14px (A, mouse) the field gets 2px taller.</li><li>“Zoek…” fits in every option. Nothing wraps or overflows.</li></ul><h4>Phone · 375px</h4><div class="row w375"><figure class="opt now"><figcaption><span class="chip now">Now</span><span class="m">13px · field 131×23px</span></figcaption>
+<img src="shots/nav-375-now.png" width="375" alt="Now at 375px wide" loading="lazy"></figure><figure class="opt pick"><figcaption><span class="chip pick">A and B · 16px</span><span class="m">16px · field 131×28px</span></figcaption>
+<img src="shots/nav-375-A.png" width="375" alt="A and B · 16px at 375px wide" loading="lazy"></figure></div><h4>Tablet · 768px</h4><div class="row w768"><figure class="opt now"><figcaption><span class="chip now">Now</span><span class="m">13px · field 194×23px</span></figcaption>
+<img src="shots/nav-768-now.png" width="768" alt="Now at 768px wide" loading="lazy"></figure><figure class="opt pick"><figcaption><span class="chip pick">A and B · 16px</span><span class="m">16px · field 194×28px</span></figcaption>
+<img src="shots/nav-768-A.png" width="768" alt="A and B · 16px at 768px wide" loading="lazy"></figure></div><h4>Desktop · 1280px, mouse</h4><div class="row w1280"><figure class="opt now"><figcaption><span class="chip now">Now</span><span class="m">13px · field 194×23px</span></figcaption>
+<img src="shots/nav-1280-now.png" width="1280" alt="Now at 1280px wide" loading="lazy"></figure><figure class="opt pick"><figcaption><span class="chip pick">A · 16px on touch screens</span><span class="m">14px · field 194×25px</span></figcaption>
+<img src="shots/nav-1280-A.png" width="1280" alt="A · 16px on touch screens at 1280px wide" loading="lazy"></figure><figure class="opt alt"><figcaption><span class="chip alt">B · 16px everywhere</span><span class="m">16px · field 194×28px</span></figcaption>
+<img src="shots/nav-1280-B.png" width="1280" alt="B · 16px everywhere at 1280px wide" loading="lazy"></figure></div></section><section id="select"><h2>/kalender → Abonneer — “+ voeg toe” dropdown</h2><p class="sub">Today 11px. It shows after you remove a team from your feed.</p>
+<dl class="rules"><dt><span class="chip pick">A</span></dt><dd>16px on touch, 12px (<code>text-mono-sm</code>) with a mouse.</dd><dt><span class="chip alt">B</span></dt><dd>16px.</dd></dl>
+<ul class="facts"><li>At 16px the dropdown gets 30px wider (110 → 140px) and 3px taller.</li><li>At 16px it is clearly bigger than the team chips next to it. See the phone shot.</li><li>At 12px (A, mouse) it gets 6px wider. You will hardly see it.</li></ul><h4>Phone · 375px</h4><div class="row w375"><figure class="opt now"><figcaption><span class="chip now">Now</span><span class="m">11px · field 110×31px</span></figcaption>
+<img src="shots/select-375-now.png" width="375" alt="Now at 375px wide" loading="lazy"></figure><figure class="opt pick"><figcaption><span class="chip pick">A and B · 16px</span><span class="m">16px · field 140×34px</span></figcaption>
+<img src="shots/select-375-A.png" width="375" alt="A and B · 16px at 375px wide" loading="lazy"></figure></div><h4>Tablet · 768px</h4><div class="row w768"><figure class="opt now"><figcaption><span class="chip now">Now</span><span class="m">11px · field 110×31px</span></figcaption>
+<img src="shots/select-768-now.png" width="768" alt="Now at 768px wide" loading="lazy"></figure><figure class="opt pick"><figcaption><span class="chip pick">A and B · 16px</span><span class="m">16px · field 140×34px</span></figcaption>
+<img src="shots/select-768-A.png" width="768" alt="A and B · 16px at 768px wide" loading="lazy"></figure></div><h4>Desktop · 1280px, mouse</h4><div class="row w1280"><figure class="opt now"><figcaption><span class="chip now">Now</span><span class="m">11px · field 110×31px</span></figcaption>
+<img src="shots/select-1280-now.png" width="1280" alt="Now at 1280px wide" loading="lazy"></figure><figure class="opt pick"><figcaption><span class="chip pick">A · 16px on touch screens</span><span class="m">12px · field 116×31px</span></figcaption>
+<img src="shots/select-1280-A.png" width="1280" alt="A · 16px on touch screens at 1280px wide" loading="lazy"></figure><figure class="opt alt"><figcaption><span class="chip alt">B · 16px everywhere</span><span class="m">16px · field 140×34px</span></figcaption>
+<img src="shots/select-1280-B.png" width="1280" alt="B · 16px everywhere at 1280px wide" loading="lazy"></figure></div></section>
+</div>
