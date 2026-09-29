@@ -13,19 +13,31 @@
    KCVV Elewijt Design System - Tailwind CSS v4 Configuration
    ======================================================================== */
 
-/* ===== Metric-matched webfont fallbacks (#2174) =====
+/* ===== Metric-matched webfont fallbacks (#2174, measured #2670/#3251) =====
    The Freight families load async via Adobe Typekit, so there's a brief flash
    of fallback before they swap in. These `size-adjust` faces shrink a local
    system font to ≈ the Freight family's apparent size, so the fallback occupies
    the same footprint and the swap doesn't jolt (the "way too big" substitute).
-   size-adjust values are a first pass — fine-tune visually on the dev server.
+   Measured 2026-09-29, Playwright Chromium, one 130-character sentence at
+   100px: sans 400 = 0.879, sans 700 = 0.929, display 90% verified (unchanged).
+   Known ceiling: Android has none of the local() fonts below and falls
+   through to unadjusted Roboto — nothing here reaches it.
    Older browsers without `size-adjust` ignore it and fall through to the stack. */
 @font-face {
   font-family: "Freight Sans Fallback";
+  font-weight: 400;
   src:
     local("Arial"), local("Helvetica Neue"), local("Liberation Sans"),
     local("Segoe UI");
-  size-adjust: 94%;
+  size-adjust: 88%;
+}
+@font-face {
+  font-family: "Freight Sans Fallback";
+  font-weight: 700;
+  src:
+    local("Arial Bold"), local("Arial-BoldMT"), local("Helvetica Neue Bold"),
+    local("Liberation Sans Bold"), local("Segoe UI Bold");
+  size-adjust: 93%;
 }
 @font-face {
   font-family: "Freight Display Fallback";
