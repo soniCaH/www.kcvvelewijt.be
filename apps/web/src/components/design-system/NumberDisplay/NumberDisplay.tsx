@@ -89,7 +89,7 @@ export function NumberDisplay({
   const labelSection = label ? (
     <span
       className={cn(
-        "text-label font-mono leading-none uppercase",
+        "text-label font-mono uppercase",
         // ponytail: full cream, not `text-cream-quiet` — the only cream
         // consumer sits on jersey-deep, where full cream is the one text
         // colour (DESIGN.md → The Whole-Cream Rule, #2551). Ceiling: a

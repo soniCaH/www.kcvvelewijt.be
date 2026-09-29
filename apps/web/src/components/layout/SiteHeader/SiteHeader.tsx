@@ -31,9 +31,12 @@ export interface SiteHeaderProps {
  * `14ch` rather than a character cap on the label itself: it scales with the
  * three mono sizes the row steps through (11 / 13 / 14px), it leaves the full
  * name in the DOM so the link's accessible name stays intact, and it applies
- * only to the desktop row — the mobile drawer has no width constraint. `ch` is
- * exact here because every nav label is mono. `min-w-0` lets the flex item
- * actually shrink; without it `truncate` never engages.
+ * only to the desktop row — the mobile drawer has no width constraint. `ch`
+ * measures a bare glyph advance, not the tracking `CHROME_NAV_TYPE` adds per
+ * character (#2663) — so an exactly-14-character label (the senior team
+ * default `KCVV Elewijt A`/`B`) already clips a touch before the cap; that's
+ * the ellipsis fallback working as intended, not a bug. `min-w-0` lets the
+ * flex item actually shrink; without it `truncate` never engages.
  *
  * Exempt from the reading-measure ban (DESIGN.md "The Reading-Measure
  * Exemption Rule", #2645): a single-line label that truncates, not a
@@ -47,18 +50,12 @@ const NAV_LABEL_TRUNCATE = "block max-w-[14ch] truncate";
  * which sit in the same row and are bound by the same limit.
  *
  * Exempt from the type ramp (DESIGN.md "The Chrome Fits The Bar Rule",
- * #2664): the row must never wrap at `lg` (#2409), so these sizes answer a
- * fit constraint rather than a reading hierarchy — the exemption covers
- * sizes only. Tracking is not exempt: #2663 gave every uppercase mono label
- * role the same 0.08em, and the nav is that role, so it takes `text-label`'s
- * tracking (`--text-label--letter-spacing`) rather than a hand value. Two of
- * the three sizes still have no token at all — 11px is `text-label`'s size
- * but not its weight, and 13px has nothing — so no role token can describe
- * the size ramp and none is minted for it. Sanctioned here, in one place, so
- * #2418's lint has a single site to suppress.
+ * #2664) — sizes only, never tracking, which takes `text-label`'s own
+ * token (#2663). Sanctioned here, in one place, so #2418's lint has a
+ * single site to suppress.
  */
 const CHROME_NAV_TYPE =
-  "font-mono text-[11px] font-semibold tracking-[0.08em] whitespace-nowrap uppercase no-underline transition-colors xl:text-[13px] 2xl:text-[14px]";
+  "font-mono text-[11px] font-semibold tracking-(--text-label--letter-spacing) whitespace-nowrap uppercase no-underline transition-colors xl:text-[13px] 2xl:text-[14px]";
 
 const Wordmark = () => (
   <Link

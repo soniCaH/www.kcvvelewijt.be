@@ -373,9 +373,6 @@
     "kcvv/no-off-ramp-font-size": {
       "count": 2
     },
-    "kcvv/no-off-ramp-leading": {
-      "count": 1
-    },
     "kcvv/no-off-ramp-tracking": {
       "count": 1
     }
@@ -450,14 +447,6 @@
     }
   },
   "src/components/design-system/StampBadge/StampBadge.stories.tsx": {
-    "kcvv/no-off-ramp-font-size": {
-      "count": 1
-    },
-    "kcvv/no-off-ramp-tracking": {
-      "count": 1
-    }
-  },
-  "src/components/design-system/StampBadge/StampBadge.tsx": {
     "kcvv/no-off-ramp-font-size": {
       "count": 1
     },

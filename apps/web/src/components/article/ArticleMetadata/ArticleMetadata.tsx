@@ -39,11 +39,11 @@ const FACEBOOK_SHARER = "https://www.facebook.com/sharer/sharer.php?u=";
 const DEFAULT_AUTHOR = "KCVV Elewijt";
 
 /**
- * The bar's own mono small-caps register — shared verbatim by the facts
- * cluster and the `Delen` button so the two never drift (the pattern
+ * The bar's own uppercase mono label register — shared verbatim by the
+ * facts cluster and the `Delen` button so the two never drift (the pattern
  * `SiteHeader`'s `CHROME_NAV_TYPE` uses for its own shared row type).
  */
-const MONO_SMALL_CAPS = "font-mono text-label uppercase";
+const META_LABEL = "font-mono text-label uppercase";
 
 /**
  * Design §7.6 — article metadata bar. Single row with 1px `paper-edge`
@@ -141,7 +141,7 @@ export const ArticleMetadata = ({
         <ul
           className={cn(
             "text-ink-muted flex flex-wrap items-center gap-x-3 gap-y-1",
-            MONO_SMALL_CAPS,
+            META_LABEL,
           )}
         >
           {facts.map((fact, i) => (
@@ -177,7 +177,7 @@ export const ArticleMetadata = ({
             onClick={handleNativeShare}
             className={cn(
               "text-ink hover:text-jersey-deep -my-3.5 flex items-center gap-2 py-3.5 transition-colors",
-              MONO_SMALL_CAPS,
+              META_LABEL,
             )}
           >
             <ShareNetwork size={16} aria-hidden="true" />

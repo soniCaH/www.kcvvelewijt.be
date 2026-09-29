@@ -181,20 +181,12 @@ const OFF_RAMP_FONT_SIZE_PATTERN =
 const OFF_RAMP_LEADING_PATTERN =
   "(?:^|[\\s:!])leading-(?:none|tight|snug|normal|relaxed|loose|[0-9]|\\[|\\()";
 
-// Tracking Freeze (DESIGN.md → Typography, #2663) — its own config block,
-// same plugin, own rule ID, same freeze-and-drain strategy as the leading
-// rule above: tracking belongs to the type step (each `--text-*` token
-// carries its own `--text-*--letter-spacing`, `--tracking-*: initial` in
-// `globals.css`), and no component sets it by hand. Denylist, not
-// allowlist, for the same reason as `OFF_RAMP_LEADING_PATTERN` — an
-// allowlist form would also catch a prose/test id that happens to start
-// with `tracking-` (e.g. `tracking-id`). Anchored on start-of-string/
-// whitespace/`:` — no `!` here, unlike leading's pattern, because no
-// call site hand-applies an important-modifier `!tracking-*` today; add it
-// if one ever does. Same single-line/no-newline requirement as the
-// patterns above.
+// Tracking Freeze (DESIGN.md → Typography, #2663) — same denylist
+// rationale as `OFF_RAMP_LEADING_PATTERN` above, plus a leading `-`: unlike
+// leading, Tailwind v4's `tracking` utility `supportsNegative`, so
+// `-tracking-[…]`/`-tracking-wide` are real off-ramps too.
 const OFF_RAMP_TRACKING_PATTERN =
-  "(?:^|[\\s:])tracking-(?:tighter|tight|normal|wide|wider|widest|\\[|\\()";
+  "(?:^|[\\s:!])-?tracking-(?:tighter|tight|normal|wide|wider|widest|\\[|\\()";
 
 const matchesClassString = (pattern) =>
   `:matches(Literal[value=/${pattern}/], TemplateElement[value.raw=/${pattern}/])`;
@@ -381,11 +373,9 @@ const eslintConfig = [
     },
   },
   {
-    // Tracking Freeze (DESIGN.md → Typography, #2663) — its own config
-    // block, same plugin, own rule ID. Kept separate from the blocks above
-    // on purpose: see the comment on `OFF_RAMP_FONT_SIZE_PATTERN` for why
-    // this selector may not share a rule ID (and so a suppression count)
-    // with any other selector.
+    // Tracking Freeze (DESIGN.md → Typography, #2663) — own rule ID, own
+    // block, for the same reason as the Leading Freeze block above (see
+    // `OFF_RAMP_FONT_SIZE_PATTERN`'s comment).
     files: ["**/src/**/*.{ts,tsx}"],
     ignores: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
     plugins: { kcvv: kcvvPlugin },

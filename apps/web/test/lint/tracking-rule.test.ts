@@ -18,6 +18,12 @@ const OFF_RAMP_TRACKING = [
   'const b = "tracking-(--x)";',
   'const c = "tracking-wide";',
   "const d = `md:tracking-tight`;",
+  // Tailwind's important-modifier prefix — the anchor must include `!`
+  // alongside start-of-string/whitespace/`:`, or this slips past.
+  'const e = "!tracking-[0.1em]";',
+  // Tailwind v4's `tracking` utility `supportsNegative` — the anchor must
+  // allow a leading `-`, or this off-ramp slips past too.
+  'const f = "-tracking-wide";',
 ];
 const ALLOWED = [
   // Looks like it starts with "tracking-" but isn't a tracking utility at
