@@ -190,8 +190,8 @@ const CHIP_BASE_CLASSES = [
   // `<BrandedTabs>`, not a live consistency claim — see the docblock above).
   "inline-flex flex-shrink-0 items-center gap-2",
   "rounded-none border-2 border-ink",
-  "font-mono font-semibold uppercase tracking-[0.08em]",
-  "px-3 py-2 text-[11px]",
+  "font-mono font-semibold uppercase",
+  "px-3 py-2 text-label",
   "transition-all duration-300",
   "hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-jersey-deep focus-visible:ring-offset-2",
@@ -238,7 +238,7 @@ export function FilterTabs({
         {showCounts && typeof tab.count !== "undefined" && (
           <span
             className={cn(
-              "border-l pl-2 text-[10px] font-semibold",
+              "text-label-sm border-l pl-2 font-semibold",
               isActive
                 ? "border-cream text-cream"
                 : "border-ink-muted text-ink-muted",

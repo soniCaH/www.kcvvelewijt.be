@@ -86,13 +86,16 @@ describe("FilterTabs", () => {
       expect(active).toHaveClass("shadow-paper-sm-soft");
     });
 
-    it("uses mono caps + tracking on every chip", () => {
+    it("uses mono caps on every chip, tracking via the text-label token", () => {
       render(<FilterTabs tabs={mockTabs} activeTab="all" />);
 
       const tab = screen.getByRole("button", { name: "All 10" });
       expect(tab).toHaveClass("font-mono");
       expect(tab).toHaveClass("uppercase");
-      expect(tab.className).toContain("tracking-[0.08em]");
+      // #3255: 13px has no ramp step, so the chip label snaps to `text-label`
+      // (11px), which carries its own 0.08em letter-spacing — no more hand
+      // tracking literal.
+      expect(tab).toHaveClass("text-label");
     });
 
     it("uses sharp corners (rounded-none)", () => {
