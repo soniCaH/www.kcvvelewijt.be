@@ -71,7 +71,7 @@
   },
   "src/components/calendar/CalendarSubscribePanel/CalendarSubscribePanel.tsx": {
     "kcvv/no-off-ramp-font-size": {
-      "count": 6
+      "count": 5
     }
   },
   "src/components/calendar/CalendarWeek/CalendarWeek.tsx": {
@@ -306,7 +306,7 @@
   },
   "src/components/organigram/HubSearch/HubSearch.tsx": {
     "kcvv/no-off-ramp-font-size": {
-      "count": 11
+      "count": 9
     }
   },
   "src/components/organigram/MemberDetailPanel/MemberDetailPanel.tsx": {
