@@ -334,7 +334,9 @@ describe("/ — the agenda's outage signal is its own read (#2505 review finding
     // <FirstTeamsBlock> DOES claim the outage — its `unavailable` still
     // reads the combined signal, correctly, since its own rows come from
     // the failed per-team fan-out.
-    const firstTeams = screen.getByRole("region", { name: "Eerste ploegen" });
+    const firstTeams = screen.getByRole("region", {
+      name: /^Eerste ploegen\s*\.$/,
+    });
     expect(
       within(firstTeams).getByText(/even niet beschikbaar/i),
     ).toBeInTheDocument();

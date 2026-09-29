@@ -240,36 +240,3 @@ export function deriveFirstTeamVM(
     ...(fixture ? { fixture: transformMatchToSchedule(fixture) } : {}),
   };
 }
-
-/** How far ahead a fixture may sit and still be called "this weekend". */
-const WEEKEND_LOOKAHEAD_MS = 7 * 24 * 60 * 60 * 1000;
-
-/**
- * Heading above the "Eerste ploegen" block. "Dit weekend." is a claim about the
- * *day*, so it needs both tests: the soonest fixture must fall inside the coming
- * week (otherwise pre-season, with the next match weeks out, reads oddly) *and*
- * land on a Saturday or Sunday. Gating on the window alone announced a Wednesday
- * cup tie as a weekend fixture (#2392).
- *
- * The weekday is read off UTC, deliberately un-zoned. The BFF encodes the
- * Belgian kickoff wall-clock straight into the Date's UTC fields
- * (`parseDateString`, `apps/api/src/psd/transforms.ts`), so re-zoning to
- * Europe/Brussels would add a phantom offset and roll a ≥22:00 Sunday kickoff
- * into Monday. `/scheurkalender` reads the calendar day the same way.
- */
-export function firstTeamsHeading(
-  teams: readonly FirstTeamVM[],
-  now: Date,
-): string {
-  const soonest = Math.min(
-    ...teams.map((t) => t.fixture?.date.getTime() ?? Number.POSITIVE_INFINITY),
-  );
-  // No fixture ⇒ Infinity ⇒ fails this test, so no separate empty guard.
-  if (soonest - now.getTime() > WEEKEND_LOOKAHEAD_MS)
-    return "Volgende wedstrijd.";
-
-  const weekday = new Date(soonest).getUTCDay(); // 0 = Sunday, 6 = Saturday
-  return weekday === 0 || weekday === 6
-    ? "Dit weekend."
-    : "Volgende wedstrijd.";
-}

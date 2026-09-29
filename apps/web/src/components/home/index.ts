@@ -43,7 +43,6 @@ export type { UpcomingMatchesProps } from "./UpcomingMatches";
 export {
   FirstTeamsBlock,
   deriveFirstTeamVM,
-  firstTeamsHeading,
   selectSeniorTeams,
 } from "./FirstTeamsBlock";
 export type { FirstTeamsBlockProps, FirstTeamVM } from "./FirstTeamsBlock";

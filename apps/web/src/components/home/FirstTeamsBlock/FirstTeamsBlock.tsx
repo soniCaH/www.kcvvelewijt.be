@@ -13,6 +13,7 @@
  * Design lock: docs/design/mockups/eerste-ploegen/eerste-ploegen-locked.md
  * (visual record: docs/design/mockups/eerste-ploegen/04-b3-ia.html).
  */
+import { useId } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { EditorialHeading, StripedSeam } from "@/components/design-system";
@@ -29,13 +30,6 @@ import {
 
 export interface FirstTeamsBlockProps {
   teams: FirstTeamVM[];
-  /**
-   * Section heading. The homepage passes a fixture-aware label (HP-4) derived
-   * by `firstTeamsHeading`, which owns the rule — see its docblock in
-   * `first-teams.ts`. Defaults to "Dit weekend." so stories/tests stay stable;
-   * that default is an unconditional claim, so real callers must pass one.
-   */
-  heading?: string;
   /**
    * A match read failed (BFF/PSD down or quota-exhausted), as opposed to the
    * feed genuinely holding no matches. Read solely on the no-rows path, where
@@ -58,7 +52,7 @@ export interface FirstTeamsBlockProps {
   placeholder?: MatchesSliderPlaceholderVM | null;
   /**
    * Render reference time for the countdown. Defaults to now; the homepage
-   * passes the same `now` it already computed for `firstTeamsHeading` /
+   * passes the same `now` it already computed for
    * `deriveFirstTeamVM` so every date-derived value on the page agrees.
    * Stories and tests override it for a deterministic day count — a default
    * here is harmless (unlike `resolvePlaceholderState`'s own signature,
@@ -285,31 +279,27 @@ function FirstTeamRow({ team }: { team: FirstTeamVM }) {
  */
 export function FirstTeamsBlock({
   teams,
-  heading = "Dit weekend.",
   unavailable = false,
   placeholder = null,
   now = new Date(),
 }: FirstTeamsBlockProps) {
   const rows = teams.filter((t) => t.result || t.fixture);
+  const headingId = useId();
 
   return (
-    <section aria-label="Eerste ploegen" className="bg-jersey-deep-dark">
+    <section aria-labelledby={headingId} className="bg-jersey-deep-dark">
       <StripedSeam colorPair="cream-jersey-deep" height="md" />
       <div className="mx-auto max-w-[var(--container-index)] px-4 py-10 md:px-8 md:py-12">
         <div className="mb-6 flex items-end justify-between gap-4 md:mb-8">
-          <div>
-            <span className="text-warm text-label font-mono font-semibold uppercase">
-              Eerste ploegen
-            </span>
-            <EditorialHeading
-              level={2}
-              size="display-md"
-              tone="cream"
-              className="mt-2"
-            >
-              {heading}
-            </EditorialHeading>
-          </div>
+          <EditorialHeading
+            level={2}
+            size="display-md"
+            tone="cream"
+            emphasis={{ text: ".", tone: "warm" }}
+            id={headingId}
+          >
+            Eerste ploegen.
+          </EditorialHeading>
           <Link
             href="/kalender"
             // `py-2 -my-2` — hit area only, no layout shift (#2394).

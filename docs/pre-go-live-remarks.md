@@ -36,7 +36,7 @@ Excluded: **HULP-2** (organigram — owner-handled).
 - ☐ **HP-1** `[layout]` MatchStrip — inner container isn't full viewport width on a 32" display; should span the full page width.
 - ☐ **HP-2** `[layout]` MatchStrip — right-align the "Competitie" part; left-align date/aftrap.
 - ☐ **HP-3** `[layout]` Featured hero — widen its container to match the "Uitgelicht" grid below it.
-- ☑ **HP-4** `[copy]` "Eerste ploegen" block — "Dit weekend." copy reads weird pre-season when the next match is ~4 weeks out. Needs conditional/smarter wording. _(#2392: `firstTeamsHeading` gates on a ≤7-day window **and** a Saturday/Sunday kickoff; anything else reads "Volgende wedstrijd.")_
+- ☑ **HP-4** `[copy]` "Eerste ploegen" block — "Dit weekend." copy reads weird pre-season when the next match is ~4 weeks out. Needs conditional/smarter wording. _(#2392: `firstTeamsHeading` gates on a ≤7-day window **and** a Saturday/Sunday kickoff; anything else reads "Volgende wedstrijd."; #3236 replaced the whole rule with the constant "Eerste ploegen." on every day, so `firstTeamsHeading` no longer exists.)_
 - ☐ **HP-5** `[design]` "Laatste nieuws" — add a highlight accent (à la EditorialHeading emphasis).
 - ☐ **HP-6** `[design]` "Met dank aan onze sponsors" — same: add a highlight accent.
 - ☐ **HP-7** `[layout]` "ALLE SPONSORS & SYMPATHISANTEN" link — right-align like all other "browse all" links.

@@ -256,11 +256,10 @@ export const ReservationFixture: Story = {
   },
 };
 
-// Both no-row states pass the heading the page actually derives for them:
-// `firstTeamsHeading` sees no fixture, so it never claims "Dit weekend."
+// Both no-row states render the block's own constant heading — it no longer
+// depends on fixture timing (#3236).
 const NO_ROWS_ARGS = {
   teams: [{ label: "A-ploeg", slug: "a-ploeg" }],
-  heading: "Volgende wedstrijd.",
 };
 
 /** #2399 — the read succeeded and the feed is genuinely empty (mid-summer). */

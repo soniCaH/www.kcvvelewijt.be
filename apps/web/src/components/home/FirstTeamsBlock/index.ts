@@ -4,11 +4,7 @@ export {
   HELD_OPEN_FRAME,
 } from "./FirstTeamsBlock";
 export type { FirstTeamsBlockProps } from "./FirstTeamsBlock";
-export {
-  deriveFirstTeamVM,
-  firstTeamsHeading,
-  selectSeniorTeams,
-} from "./first-teams";
+export { deriveFirstTeamVM, selectSeniorTeams } from "./first-teams";
 export type {
   FirstTeamVM,
   FirstTeamInput,
