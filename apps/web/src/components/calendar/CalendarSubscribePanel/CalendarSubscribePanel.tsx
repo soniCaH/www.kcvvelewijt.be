@@ -191,7 +191,9 @@ export function CalendarSubscribePanel({
                   if (e.target.value) addTeam(e.target.value);
                   e.target.value = "";
                 }}
-                className="border-ink bg-cream text-ink border-2 px-2.5 py-1 font-mono text-[11px] font-semibold"
+                // 16px on touch (`pointer-coarse:`) so iOS Safari doesn't
+                // zoom the page on focus (#3248); stays mono with a mouse.
+                className="border-ink bg-cream text-ink text-mono-sm pointer-coarse:text-body-md border-2 px-2.5 py-1 font-mono font-semibold"
                 aria-label="Team toevoegen"
               >
                 <option value="">+ voeg toe</option>
