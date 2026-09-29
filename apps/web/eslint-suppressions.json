@@ -259,11 +259,6 @@
       "count": 1
     }
   },
-  "src/components/layout/NavTakeover/NavTakeoverItem.tsx": {
-    "kcvv/no-off-ramp-font-size": {
-      "count": 1
-    }
-  },
   "src/components/layout/PageHero/PageHero.tsx": {
     "kcvv/no-off-ramp-font-size": {
       "count": 2
@@ -276,7 +271,7 @@
   },
   "src/components/layout/SiteFooter/SiteFooter.tsx": {
     "kcvv/no-off-ramp-font-size": {
-      "count": 6
+      "count": 4
     }
   },
   "src/components/layout/SiteHeader/SiteHeader.tsx": {
