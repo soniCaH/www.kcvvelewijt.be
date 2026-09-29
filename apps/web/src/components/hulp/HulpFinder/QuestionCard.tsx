@@ -115,7 +115,7 @@ export function QuestionCard({
                     >
                       {i + 1}
                     </span>
-                    <span className="text-ink pt-px text-[13px] leading-relaxed">
+                    <span className="text-ink text-body-sm pt-px">
                       {step.description}
                       {safeLink && (
                         <>

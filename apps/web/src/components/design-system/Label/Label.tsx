@@ -5,7 +5,7 @@
  *
  * Bold ink label above a field. Required state appends a `*` in
  * `--color-alert`. Optional state appends a mono-caps "OPTIONEEL" pill
- * (`border border-ink/30 px-1.5 py-0.5 text-[10px] tracking-wide`,
+ * (`border border-ink/30 px-1.5 py-0.5 text-label-sm`,
  * sharp corners). `required` and `optional` are mutually exclusive —
  * `required` wins if both are passed.
  */
@@ -41,7 +41,7 @@ export const Label = forwardRef<HTMLLabelElement, LabelProps>(function Label(
         <span
           className={cn(
             "border-ink/30 text-ink/60 ml-2 inline-block border px-1.5 py-0.5",
-            "align-middle font-mono text-[10px] leading-none tracking-wide uppercase",
+            "text-label-sm align-middle font-mono uppercase",
           )}
           aria-hidden="true"
         >

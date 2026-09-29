@@ -30,7 +30,7 @@ const OVERLAP: Record<"row" | "attribution", string> = {
 };
 
 const COUNTER: Record<"row" | "attribution", string> = {
-  row: "h-8 w-8 text-[13px]",
+  row: "h-8 w-8 text-body-sm",
   attribution: "h-16 w-16 text-[20px]",
 };
 

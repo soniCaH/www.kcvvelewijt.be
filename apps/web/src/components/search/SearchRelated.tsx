@@ -39,7 +39,7 @@ export function SearchRelated({ items }: SearchRelatedProps) {
               <span className="text-jersey-deep font-mono text-[9px] tracking-[0.06em] uppercase">
                 {TYPE_LABEL[item.type]}
               </span>
-              <span className="mt-0.5 block text-[13px] font-semibold">
+              <span className="text-body-sm mt-0.5 block font-semibold">
                 {item.title}
               </span>
               {item.excerpt && (

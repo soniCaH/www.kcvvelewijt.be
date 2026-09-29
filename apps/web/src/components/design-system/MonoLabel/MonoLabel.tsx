@@ -53,9 +53,11 @@ const SIZE_CLASS: Record<MonoLabelSize, string> = {
   // sm consumes the canonical `--text-label` token (11px / 0.08em) so any
   // future tweak to the label size lands here automatically.
   sm: "text-label",
-  // md keeps explicit values — no design token represents 13px/0.06em yet;
-  // promote to a token when a second consumer needs the same size.
-  md: "text-[13px] tracking-[0.06em]",
+  // md used to carry its own 13px/0.06em literal; 13px has no ramp step
+  // (#2396 decision 4), and an audit (#2665) found every other kicker on
+  // the site is already 11px, so md snaps down to the same `text-label`
+  // token as sm — only the pill padding still tells the sizes apart.
+  md: "text-label",
 };
 
 // Pill padding is per-size; plain has no padding at any size.
