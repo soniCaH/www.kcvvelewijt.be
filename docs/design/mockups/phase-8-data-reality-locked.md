@@ -15,16 +15,16 @@ Source of truth: `apps/web/src/types/search.ts`, `SearchInterface.tsx`,
 
 `SearchResult`:
 
-| Field         | Type                                          | Notes                                  |
-| ------------- | --------------------------------------------- | -------------------------------------- |
-| `id`          | string                                        | Sanity/internal id — hash if analytics |
-| `type`        | `"article" \| "player" \| "staff" \| "team"`  | drives icon + label                    |
-| `title`       | string                                        | always present                         |
-| `description` | string?                                       | snippet — articles/teams mostly        |
-| `url`         | string                                        | result link                            |
-| `imageUrl`    | string?                                       | ~most articles + players; teams often none |
-| `tags`        | string[]?                                     | **articles only**                      |
-| `date`        | string?                                       | **articles only**                      |
+| Field         | Type                                         | Notes                                      |
+| ------------- | -------------------------------------------- | ------------------------------------------ |
+| `id`          | string                                       | Sanity/internal id — hash if analytics     |
+| `type`        | `"article" \| "player" \| "staff" \| "team"` | drives icon + label                        |
+| `title`       | string                                       | always present                             |
+| `description` | string?                                      | snippet — articles/teams mostly            |
+| `url`         | string                                       | result link                                |
+| `imageUrl`    | string?                                      | ~most articles + players; teams often none |
+| `tags`        | string[]?                                    | **articles only**                          |
+| `date`        | string?                                      | **articles only**                          |
 
 `SearchResponse`: `{ query, count, results }`. Counts per type computed
 client-side for the filter row (`all / article / player / staff / team`).
@@ -39,7 +39,7 @@ States that must be designed (all real, all in current code):
 
 Type labels (locked, from `SearchResult.tsx`): Nieuws · Speler · Staf · Team.
 Search backend is bge-m3 semantic search (Vectorize) — already shipped #2057,
-**not** in Phase 8 scope. Phase 8 reskins the *presentation* only.
+**not** in Phase 8 scope. Phase 8 reskins the _presentation_ only.
 
 Must-avoid: a full taped-card grid of results reads "seasick" (master-design
 rotation-pool lesson, #1672). Result vocabulary round (8s2) weighs this.
@@ -68,8 +68,9 @@ Must-avoid: magazine chrome / fabricated edition data (memory: no-magazine-chrom
 Source: `apps/web/src/app/not-found.tsx` (404), `apps/web/src/app/error.tsx` (500, `"use client"`).
 
 - **404** — copy "Pagina niet gevonden"; one CTA → home.
-- **500** — copy "Er ging iets mis"; two CTAs → `reset()` + home. `error.tsx`
-  receives `{ error, reset }`; `reset` must stay wired to a real button.
+- **500** — copy "Er ging iets mis"; two CTAs → `retry()` + home. `error.tsx`
+  receives `{ error, retry }`; `retry` must stay wired to a real button (was
+  `reset()`; changed by the #3298 decision).
 - Master-design directive: **football-themed pun + cream-bg + `<JerseyShirt>`
   taped artefact.** `<JerseyShirt>` is a shipped Phase 4.5 primitive.
 - These render OUTSIDE `(main)` route group → no guaranteed SiteHeader/Footer

@@ -100,7 +100,7 @@ legacy tokens with zero remaining consumers on these pages.
   the loser → wire the winner into the routes.
 - **Copy:** 404 **"Buiten de lijnen."** + actions `Naar de homepage` (→ `/`) and
   **`Zoeken`** (→ `/zoeken`); 500 **"Technische panne."** + actions
-  `Probeer opnieuw` (wired to `reset()`) and `Naar de homepage`. Buttons plain;
+  `Probeer opnieuw` (wired to `retry()`, was `reset()` until #3298) and `Naar de homepage`. Buttons plain;
   wink lives in the headline only.
 
 ## 4. Tracer bullet
@@ -173,8 +173,8 @@ meatier search + error work.
       Storybook review** (build TDD-first, do not wire into routes yet).
 - [ ] After owner picks: remove the losing layout branch + its stories; wire the
       winner into `not-found.tsx` (404, copy "Buiten de lijnen." + `/` + `/zoeken`)
-      and `error.tsx` (500, "Technische panne." + `reset()` + `/`). `reset()` stays
-      wired; `error.tsx` stays `"use client"` + self-contained at the root segment.
+      and `error.tsx` (500, "Technische panne." + `retry()` + `/`). `retry()` (was `reset()`, #3298)
+      stays wired; `error.tsx` stays `"use client"` + self-contained at the root segment.
 - [ ] `UI/ErrorState` (or `Features/*`) story for the chosen layout acquires **VR
       baselines**; e2e smoke for the 404 route still green.
 - [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
