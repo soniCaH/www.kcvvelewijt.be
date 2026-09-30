@@ -214,8 +214,12 @@ jobs:
       - name: Lint + type check + test Sanity ops scripts
         run: npx turbo lint type-check test --filter=@kcvv/sanity-ops
 
-      - name: Build Studio
-        run: npx turbo build --filter=@kcvv/studio
+      # Both studios share one Turbo invocation (and cache). Staging builds but
+      # has no typegen gate below on purpose: it consumes the same
+      # `@kcvv/sanity-schemas` and its CLI config declares no typegen target
+      # (#3287).
+      - name: Build Studios
+        run: npx turbo build --filter=@kcvv/studio --filter=@kcvv/studio-staging
 
       # `@kcvv/web#build` already depends on `@kcvv/studio#typegen` in
       # turbo.json, so the Next.js build below silently regenerates these types
