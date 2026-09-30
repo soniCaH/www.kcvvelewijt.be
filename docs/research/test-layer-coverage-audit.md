@@ -127,6 +127,9 @@ git ls-files apps/api | grep -E '\.workerd\.test\.ts$' | wc -l
 git ls-files apps/web | grep -E '\.stories\.[cm]?[jt]sx?$' | wc -l
 git ls-files -z '*.sh' '.husky/*' ':!:.husky/*.*' | tr '\0' '\n' | wc -l     # what lint:sh is given
 git ls-files '*.sh' | wc -l    # 10, plus .husky/commit-msg, pre-commit, pre-merge-commit = 13 shell scripts
+git ls-files '*/package.json' | xargs grep -l '"build":' | wc -l             # 6 workspaces with a build script
+grep -o 'defineQuery(' apps/web/src/lib/repositories/*.ts | wc -l            # 30 queries typegen should read
+grep -c '^// Source: \.\./web/' apps/web/src/lib/sanity/sanity.types.ts      # 30 generated query blocks
 
 # What each runner would run
 pnpm exec vitest list --filesOnly                                   # in each Vitest workspace
