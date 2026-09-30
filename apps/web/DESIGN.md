@@ -29,13 +29,13 @@ typography:
     fontSize: "clamp(3.5rem, 1.5rem + 8vw, 6rem)"
     fontWeight: 900
     lineHeight: 1
-    letterSpacing: "-0.025em"
+    letterSpacing: "-0.035em"
   headline:
     fontFamily: "freight-display-pro, Freight Display Fallback, georgia, Times New Roman, serif"
     fontSize: "clamp(2.75rem, 1.5rem + 5vw, 4.5rem)"
     fontWeight: 700
     lineHeight: 1.05
-    letterSpacing: "-0.025em"
+    letterSpacing: "-0.035em"
   title:
     fontFamily: "freight-display-pro, Freight Display Fallback, georgia, Times New Roman, serif"
     fontSize: "clamp(2rem, 1.25rem + 3vw, 3rem)"
@@ -255,9 +255,9 @@ There are **twelve** steps. Each names its utility class, because the frontmatte
 
 - **Display** — `text-display-2xl` (900, `clamp(3.5rem, 1.5rem + 8vw, 6rem)`, lh 1, tracking -0.035em): Freight Big Pro. Page-defining hero headings, one per page at most.
 - **Headline** — `text-display-xl` (700, `clamp(2.75rem, 1.5rem + 5vw, 4.5rem)`, lh 1.05, tracking -0.035em): Freight Display Pro. Section-opening editorial headings.
-- **Title** — `text-display-lg` (700, `clamp(2rem, 1.25rem + 3vw, 3rem)`, lh 1.1): the default editorial heading size.
-- **Subtitle** — `text-display-md` (700, `clamp(1.5rem, 1.143rem + 1.43vw, 2rem)`, lh 1.2): card headings and sub-sections.
-- **Subtitle Small** — `text-display-sm` (600, `clamp(1.25rem, 1rem + 1vw, 1.5rem)`, lh 1.3): the step below Subtitle. In practice this is the **italic standfirst** voice — a hero's or section's one-line lede, set `font-display` italic under the heading it follows.
+- **Title** — `text-display-lg` (700, `clamp(2rem, 1.25rem + 3vw, 3rem)`, lh 1.1, tracking -0.025em): the default editorial heading size.
+- **Subtitle** — `text-display-md` (700, `clamp(1.5rem, 1.143rem + 1.43vw, 2rem)`, lh 1.2, tracking -0.025em): card headings and sub-sections.
+- **Subtitle Small** — `text-display-sm` (600, `clamp(1.25rem, 1rem + 1vw, 1.5rem)`, lh 1.3, tracking -0.025em): the step below Subtitle. In practice this is the **italic standfirst** voice — a hero's or section's one-line lede, set `font-display` italic under the heading it follows.
 - **Body** — `text-body-md` (400, 1rem, lh 1.6): all prose below `sm`. Reading column capped at 680px. Long-form reading steps up to `text-body-lg` from `sm` (see Body Large below); forms, legal pages and `/hulp` stay `text-body-md`.
 - **Body Large / Small** — `text-body-lg` / `text-body-sm` (400, 1.125rem lh 1.55 / 0.875rem lh 1.55): Sanity-authored bodies and `/club/*` running text step up to Body Large from `sm`, plus leads and captions elsewhere. At the locked 680px `--container-prose` measure (#2436) this runs ~83–92 characters per line, above the usual 45–75 guidance. **Accepted**: it is the biggest legibility gain available without adding a new type-ramp step or reopening the container width, and the larger text serves PRODUCT.md's older-supporter and daylight-phone reading scene. Decided on #3249, built by #3253.
 - **Mono** — `text-mono-md` (500, 0.875rem, lh 1.4): scores, dates, stat values, inline data — a number that **annotates** something else (a fixture-row score, a minute beside a scorer, a squad-card shirt number beside a name, a standings cell, a day stub). A number that **is** the surface's own subject — the match-detail hero score, a `<NumberDisplay>` stat — keeps its display face instead (see **The Subject/Tag Rule** below); mono is the tag register, not every number's register. One named exception: the lineup row's shirt number, ruled to the display register by #2621/#3029 — see the rule below.
