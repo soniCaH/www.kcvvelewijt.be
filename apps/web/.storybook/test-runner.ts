@@ -10,6 +10,7 @@ import {
   type VrViewportName,
   unscopedViewportOverrideMessage,
 } from "../test/vr/viewport-scoping.ts";
+import { animationsNotOnFinalFrame } from "../test/vr/animation-end-frame.ts";
 import { STRUCTURAL_ASSERTIONS } from "../test/vr/structural-assertions.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -226,26 +227,28 @@ input, textarea {
 }
 `;
 
-// Runs in the page context. Names every finite enter animation that holds its
-// start (`from`) frame after the determinism stylesheet landed — the element is
-// then captured as the animation's first frame, not the finished one (#3314:
-// `.spotlight-pop` froze at `opacity: 0`, so all 21 organigram-explorer
-// baselines showed an empty stage). `progress` is the animation's *transformed*
-// progress (direction applied), so 1 is the `to` keyframe; an animation that
-// only fills before/after nothing (`fill: none`/`auto`) leaves no frame to hold.
-function findAnimationsFrozenAtStart() {
+// Runs in the page context, so it is self-contained (imported helpers do not
+// exist there) and returns plain data; `animationsNotOnFinalFrame`
+// (test/vr/animation-end-frame.ts) decides. CSS animations only: the
+// determinism stylesheet cannot reach WAAPI `element.animate()` ones, and
+// Playwright's `animations: "disabled"` finishes those at screenshot time.
+function collectCssAnimations() {
   return document.getAnimations().flatMap((animation) => {
     const effect = animation.effect;
+    if (!(animation instanceof CSSAnimation)) return [];
     if (!(effect instanceof KeyframeEffect)) return [];
     const timing = effect.getComputedTiming();
-    if (timing.iterations === Infinity) return [];
-    if (timing.fill !== "forwards" && timing.fill !== "both") return [];
-    if (timing.progress === 1) return [];
     const target = effect.target;
-    const name =
-      animation instanceof CSSAnimation ? animation.animationName : "(waapi)";
+    const cls = target?.getAttribute("class");
     return [
-      `${name} on <${target?.tagName.toLowerCase()} class="${target?.className}"> (progress ${timing.progress})`,
+      {
+        name: animation.animationName,
+        fill: timing.fill ?? "auto",
+        progress: timing.progress,
+        target:
+          `<${target?.tagName.toLowerCase()}${cls ? ` class="${cls}"` : ""}>` +
+          (effect.pseudoElement ?? ""),
+      },
     ];
   });
 }
@@ -877,14 +880,16 @@ const config: TestRunnerConfig = {
         }
 
         // Fail loudly rather than baseline a half-rendered frame (#3314).
-        const frozen = await page.evaluate(findAnimationsFrozenAtStart);
-        if (frozen.length > 0) {
+        const notFinal = animationsNotOnFinalFrame(
+          await page.evaluate(collectCssAnimations),
+        );
+        if (notFinal.length > 0) {
           throw new Error(
             `[VR] Story "${context.id}" at the ${name} viewport has ` +
-              `${frozen.length} enter animation(s) frozen on their first ` +
-              `frame (Storybook's own \`pauseAnimations\` holds every ` +
+              `${notFinal.length} animation(s) not on their final frame ` +
+              `(known cause: Storybook's \`pauseAnimations\` holds every ` +
               `animation paused with \`animation-direction: reverse\`, which ` +
-              `DETERMINISM_STYLESHEET must not undo): ${frozen.join("; ")}`,
+              `DETERMINISM_STYLESHEET must not undo): ${notFinal.join("; ")}`,
           );
         }
 
