@@ -865,6 +865,11 @@ const config: TestRunnerConfig = {
           // 20, #3136). Proved by
           // `pnpm --filter @kcvv/web run vr:accept:sub-threshold`.
           updatePassedSnapshot: true,
+          // The default diffs in a `spawnSync` child with no timeout. A stuck
+          // child blocks this worker's event loop, so no timer — not even
+          // `--testTimeout` — can end it: the bot hung on one story until the
+          // job was cancelled (#3272). In process, the diff runs in this worker.
+          runInProcess: true,
         });
       }
     } catch (err) {

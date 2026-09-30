@@ -234,11 +234,35 @@ describe("vr-baseline-update.yml", () => {
     expect(jobMinutes).toBeGreaterThan(total);
   });
 
+  // The runner kills only a timed-out step's `docker exec`; the shard's
+  // `http-server` then keeps port 6006 and the next shard cannot start (#3272).
+  it("clears a timed-out shard's leftovers before shards 2 and 3", () => {
+    for (const step of captures.slice(1)) {
+      const kill = step.indexOf("pkill -9 -f");
+      expect(kill).toBeGreaterThan(-1);
+      expect(kill).toBeLessThan(step.indexOf("vr:ci:update"));
+    }
+    // A PR that is not rebased still diffs in a child process (#3272).
+    expect(workflow).toMatch(/VR_LEFTOVERS: "[^"]*jest-image-snapshot/);
+  });
+
   it("commits and pushes once, after the last shard", () => {
     const pushes = workflow.match(/git push origin/g) ?? [];
     expect(pushes).toHaveLength(1);
     expect(workflow.indexOf("git push origin")).toBeGreaterThan(
       workflow.lastIndexOf("vr:ci:update"),
     );
+  });
+});
+
+// Guards `runInProcess` in test-runner.ts; the reason sits next to it (#3272).
+describe("the VR image diff", () => {
+  it("runs in process, never in a spawnSync child", () => {
+    const runner = readFileSync(
+      join(ROOT, "apps/web/.storybook/test-runner.ts"),
+      "utf8",
+    );
+    const call = runner.match(/toMatchImageSnapshot\(\{[\s\S]*?\n\s*\}\);/);
+    expect(call?.[0]).toMatch(/^\s*runInProcess: true,/m);
   });
 });
