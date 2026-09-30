@@ -2,14 +2,13 @@ name: E2E
 
 # Page-level Playwright smoke suite. PRD: docs/prd/page-level-testing-rework.md
 #
-# Path filtering deliberately differs from `visual-regression` in ci.yml:
-#   - Storybook-only paths (apps/web/.storybook/**, apps/web/test/vr/**) are
-#     EXCLUDED — they don't affect a Playwright-against-`next start` run.
-#   - apps/web/test/e2e/** is INCLUDED so PRs that only touch the suite still
-#     run it.
-#   - packages/api-contract/** is INCLUDED beyond the PRD's enumerated paths
-#     because @kcvv/api-contract is a runtime dep of @kcvv/web — schema
-#     changes there can break SSR rendering without touching apps/web/src.
+# Path filtering uses the same broad globs as ci.yml's `web` filter (#3285):
+# apps/web/** and packages/sanity-schemas/**, plus packages/api-contract/**,
+# the root manifests, .nvmrc and this file. A hand-listed set of apps/web
+# subpaths drifted and let PRs that change the build inputs (next.config.ts,
+# vercel.json, the Playwright config's helpers) skip the suite; a glob cannot
+# drift. The price is a run on story- or baseline-only changes too — accepted
+# by the owner over a narrower list.
 #
 # PR-only (#3151): E2E used to also run on every push to `main`, but nothing
 # ever reads that run — the suite has no `main`-only signal like Codecov's
@@ -74,11 +73,9 @@ jobs:
         with:
           filters: |
             web:
-              - "apps/web/src/**"
-              - "apps/web/public/**"
-              - "apps/web/package.json"
-              - "apps/web/test/e2e/**"
+              - "apps/web/**"
               - "packages/api-contract/**"
+              - "packages/sanity-schemas/**"
               - "package.json"
               - "pnpm-lock.yaml"
               - "pnpm-workspace.yaml"

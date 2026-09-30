@@ -50,7 +50,7 @@ The `apps/web` row says 382 because that is the tree at `833cac787`. This PR add
 
 `playwright.config.ts` declares one project (`chromium`), `testDir: "."` and `testMatch: "**/*.spec.ts"`; `forbidOnly` is on in CI. All 6 tracked specs ran. The one skip is a per-viewport guard in the spec, visible in the diff.
 
-The **trigger** is where work is skipped: `e2e.yml`'s `changes` job lists paths, and a job skipped by `if:` reports success on the required `E2E` check. Five of the 346 commits on `main` since 2026-08-15 touched only build inputs the list omits — [#3285](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3285). The filter stays at job level; the ticket proposes widening the list, never moving it to `on:`.
+The **trigger** is where work is skipped: `e2e.yml`'s `changes` job lists paths, and a job skipped by `if:` reports success on the required `E2E` check. Five of the 346 commits on `main` since 2026-08-15 touched only build inputs the list omits — [#3285](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3285). The filter stays at job level; the ticket proposes widening the list, never moving it to `on:`. _Fixed in #3285: the filter is now `apps/web/**` plus `packages/sanity-schemas/**`._
 
 ### 2.3 `test:storybook`
 
