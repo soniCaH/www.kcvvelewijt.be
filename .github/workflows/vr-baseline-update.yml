@@ -84,6 +84,9 @@ jobs:
     # 9 min of setup, so a slow shard 3 still hits its own limit, not this one
     # (default GitHub timeout is 6 h, orders of magnitude too long).
     timeout-minutes: 45
+    env:
+      # What a timed-out shard step leaves behind; shards 2 and 3 kill it.
+      VR_LEFTOVERS: "storybook-static|test-storybook|jest-worker|jest-image-snapshot|ms-playwright"
     permissions:
       contents: read
       pull-requests: write
@@ -170,8 +173,10 @@ jobs:
         run: |
           # A timed-out step only loses its `docker exec`: the shard's server
           # keeps port 6006, and its runner, Jest workers and Chromium keep the
-          # CPU (#3272).
-          pkill -f 'storybook-static|test-storybook|jest-worker|ms-playwright' || true
+          # CPU (#3272). Exit 1 means nothing was left; the loop waits until
+          # the port is free.
+          pkill -9 -f "$VR_LEFTOVERS" || [ $? -eq 1 ]
+          while pgrep -f "$VR_LEFTOVERS" >/dev/null; do sleep 1; done
           pnpm --filter @kcvv/web run vr:ci:update
       - name: Update baselines (3/3)
         if: ${{ !cancelled() }}
@@ -179,7 +184,8 @@ jobs:
         env:
           VR_SHARD: "3/3"
         run: |
-          pkill -f 'storybook-static|test-storybook|jest-worker|ms-playwright' || true
+          pkill -9 -f "$VR_LEFTOVERS" || [ $? -eq 1 ]
+          while pgrep -f "$VR_LEFTOVERS" >/dev/null; do sleep 1; done
           pnpm --filter @kcvv/web run vr:ci:update
 
       - name: Commit and push baselines

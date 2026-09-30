@@ -868,7 +868,7 @@ const config: TestRunnerConfig = {
           // The default diffs in a `spawnSync` child with no timeout. A stuck
           // child blocks this worker's event loop, so no timer — not even
           // `--testTimeout` — can end it: the bot hung on one story until the
-          // job was cancelled (#3272). In process, the diff is plain CPU work.
+          // job was cancelled (#3272). In process, the diff runs in this worker.
           runInProcess: true,
         });
       }

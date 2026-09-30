@@ -238,10 +238,12 @@ describe("vr-baseline-update.yml", () => {
   // `http-server` then keeps port 6006 and the next shard cannot start (#3272).
   it("clears a timed-out shard's leftovers before shards 2 and 3", () => {
     for (const step of captures.slice(1)) {
-      expect(step).toContain(
-        "pkill -f 'storybook-static|test-storybook|jest-worker|ms-playwright' || true",
-      );
+      const kill = step.indexOf("pkill -9 -f");
+      expect(kill).toBeGreaterThan(-1);
+      expect(kill).toBeLessThan(step.indexOf("vr:ci:update"));
     }
+    // A PR that is not rebased still diffs in a child process (#3272).
+    expect(workflow).toMatch(/VR_LEFTOVERS: "[^"]*jest-image-snapshot/);
   });
 
   it("commits and pushes once, after the last shard", () => {
@@ -253,10 +255,7 @@ describe("vr-baseline-update.yml", () => {
   });
 });
 
-// `jest-image-snapshot` diffs in a `spawnSync` child by default, with no
-// timeout. A stuck child blocks the Jest worker's event loop, so no timer —
-// `--testTimeout` included — can end it, and the bot hung on one story until
-// the job was cancelled (#3272).
+// Guards `runInProcess` in test-runner.ts; the reason sits next to it (#3272).
 describe("the VR image diff", () => {
   it("runs in process, never in a spawnSync child", () => {
     const runner = readFileSync(
@@ -264,6 +263,6 @@ describe("the VR image diff", () => {
       "utf8",
     );
     const call = runner.match(/toMatchImageSnapshot\(\{[\s\S]*?\n\s*\}\);/);
-    expect(call?.[0]).toContain("runInProcess: true");
+    expect(call?.[0]).toMatch(/^\s*runInProcess: true,/m);
   });
 });
