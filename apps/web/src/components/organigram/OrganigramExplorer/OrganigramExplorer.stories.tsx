@@ -112,3 +112,65 @@ export const ZoomOverflowsTheStage: Story = {
     await expect(canvas.getByLabelText("Scroll right")).toBeVisible();
   },
 };
+
+/**
+ * #3310 — the stage is a flex item of the `fixed inset-0` dialog, so its
+ * bottom edge must never pass the dialog's. `<ScrollOverlay>`'s outer
+ * wrapper is the flex item (only `className` reaches it), so a stage that
+ * sizes only its track lets the wrapper grow to the content's height: the
+ * track never overflows and the tree runs off the screen, unreachable.
+ */
+function stageBounds(canvasElement: HTMLElement) {
+  const canvas = within(canvasElement);
+  const dialog = canvas.getByRole("dialog").getBoundingClientRect();
+  const track = canvas.getByLabelText("Organigram-verkenner");
+  const stage = (track.parentElement as HTMLElement).getBoundingClientRect();
+  return { canvas, dialog, track, stage };
+}
+
+/** 320x568 — the tree is taller than the stage, so the track scrolls to reach every control. `!vr`. */
+export const StageIsBoundedOnAShortPhone: Story = {
+  tags: ["!vr"],
+  globals: { viewport: { value: "kcvvExplorerPhone" } },
+  play: async ({ canvasElement }) => {
+    const { canvas, dialog, track, stage } = stageBounds(canvasElement);
+    expect(stage.bottom).toBeLessThanOrEqual(dialog.bottom);
+    expect(track.scrollHeight).toBeGreaterThan(track.clientHeight);
+
+    track.scrollTop = track.scrollHeight;
+    const viewportHeight = window.innerHeight;
+    for (const control of canvas.getAllByRole("button")) {
+      const box = control.getBoundingClientRect();
+      // Scrolled to the end, nothing hangs below the screen (the top of the
+      // tree has scrolled up out of the track by then — that is the point).
+      expect(box.bottom).toBeLessThanOrEqual(viewportHeight);
+    }
+  },
+};
+
+/** 375x667 — the stage used to run 23px past the dialog. `!vr`. */
+export const StageIsBoundedOnAPhone: Story = {
+  tags: ["!vr"],
+  globals: { viewport: { value: "kcvvMobile" } },
+  play: async ({ canvasElement }) => {
+    const { dialog, stage } = stageBounds(canvasElement);
+    expect(stage.bottom).toBeLessThanOrEqual(dialog.bottom);
+  },
+};
+
+/** 1440x900 at A++ — the stage still reaches the dialog's bottom, leaving no empty band (the `Opening` fixture's scaled tree fits 810px, so this asserts the bounds, not a vertical scroll — the 320x568 story owns that). `!vr`. */
+export const StageFillsTheDialogAtTheLargestZoom: Story = {
+  tags: ["!vr"],
+  globals: { viewport: { value: "kcvvExplorerDesktop" } },
+  play: async ({ canvasElement }) => {
+    const { canvas, dialog, stage } = stageBounds(canvasElement);
+    expect(stage.bottom).toBeLessThanOrEqual(dialog.bottom);
+
+    await userEvent.click(canvas.getByRole("button", { name: "A++" }));
+    await new Promise((resolve) => setTimeout(resolve, 600));
+
+    const scaled = stageBounds(canvasElement);
+    // Stage reaches the dialog's bottom edge (border-2 = 2px) — no empty band.
+    expect(scaled.dialog.bottom - scaled.stage.bottom).toBeLessThanOrEqual(2);
+  },
+};
