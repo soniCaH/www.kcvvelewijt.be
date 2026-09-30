@@ -100,7 +100,7 @@ In every Vitest workspace, a test body spends at most half its own timeout (2 50
 
 ### Shell Scripts Are Linted
 
-`pnpm lint:sh` runs `shellcheck` at every severity, in the CI `Quality Checks + Build` job, over every tracked `*.sh` file and the extension-less `.husky/` hooks, with one exception: `.husky/branch-guard.sh`, because the pathspec's `':!:.husky/*.*'` exclusion also cancels its `*.sh` match ([#3283](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3283)). Everything it does check was adopted at zero findings, so any finding is a regression. A hook with no shebang (`.husky/commit-msg`) names its shell with a `# shellcheck shell=sh` line.
+`pnpm lint:sh` runs `shellcheck` at every severity, in the CI `Quality Checks + Build` job, over every tracked `*.sh` file and the extension-less `.husky/` hooks, with no exception: the pathspec is the two plain globs `'*.sh'` and `'.husky/*'`, so `.husky/branch-guard.sh` is included ([#3283](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3283) removed a dotted-name exclusion that used to drop it). Everything it checks was adopted at zero findings, so any finding is a regression. A hook with no shebang (`.husky/commit-msg`) names its shell with a `# shellcheck shell=sh` line.
 
 ### Documentation Standards
 
