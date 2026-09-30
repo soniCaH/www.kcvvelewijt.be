@@ -371,13 +371,31 @@ describe("<ArticleBody>", () => {
   });
 
   describe("container", () => {
-    it("renders on a cream surface at --container-prose width", () => {
+    it("renders on a cream surface at --container-prose width, stepping up to text-body-lg from sm (#3253)", () => {
       const content = [paragraph("Body content.")];
       const { container } = render(<ArticleBody content={content} />);
       const outer = container.firstElementChild as HTMLElement;
       expect(outer.className).toContain("bg-cream");
       const inner = outer.firstElementChild as HTMLElement;
       expect(inner.style.maxWidth).toBe("var(--container-prose)");
+      expect(inner.className).toContain("text-body-md");
+      expect(inner.className).toContain("sm:text-body-lg");
+    });
+
+    // #3274 review round 2: the drop-cap paragraph carries no font-size of
+    // its own any more — it inherits the wrapper's `text-body-md
+    // sm:text-body-lg` above, so it steps up with the rest of the body
+    // instead of a second, independently-pinned size that could drift from
+    // the wrapper's.
+    it("lets the drop-cap paragraph inherit the wrapper's size instead of pinning its own", () => {
+      const content = [
+        paragraph("First body paragraph is the drop cap."),
+        paragraph("Second body paragraph follows it."),
+      ];
+      const { container } = render(<ArticleBody content={content} />);
+      const dropCap = container.querySelector('[data-tone="ink"]');
+      expect(dropCap).not.toBeNull();
+      expect(dropCap?.className).not.toMatch(/\btext-body-/);
     });
   });
 

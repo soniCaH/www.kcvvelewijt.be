@@ -110,6 +110,20 @@ describe("<QARow>", () => {
       expect(answer?.className).toContain("pl-11");
     });
 
+    // #3274 review finding B: the answer IS the interview's long-form
+    // prose, so it must step up alongside the article body wrapper, not
+    // stay pinned at 16px (the question heading, QASectionDivider and
+    // QaGroupRapidFire are the things that stay pinned — this is the
+    // answer, not those).
+    it("steps the answer up to sm:text-body-lg alongside the article body", () => {
+      const { container } = render(
+        <QARow question="Q?" respondents={[respondent()]} />,
+      );
+      const answer = container.querySelector('[data-qa-row="answer"]');
+      expect(answer?.className).toContain("text-body-md");
+      expect(answer?.className).toContain("sm:text-body-lg");
+    });
+
     it("renders the monogram avatar at row scale", () => {
       const { container } = render(
         <QARow question="Q?" respondents={[respondent()]} />,

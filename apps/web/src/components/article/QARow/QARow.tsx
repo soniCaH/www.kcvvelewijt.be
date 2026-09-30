@@ -184,7 +184,10 @@ export function QARow({ question, respondents, className }: QARowProps) {
           */}
           <div
             data-qa-row="answer"
-            className={cn("text-body-md", hasSpeaker ? "mt-2 pl-11" : "")}
+            className={cn(
+              "text-body-md sm:text-body-lg",
+              hasSpeaker ? "mt-2 pl-11" : "",
+            )}
           >
             {r.answer}
           </div>
@@ -236,7 +239,10 @@ export function QARow({ question, respondents, className }: QARowProps) {
               )}
               <div
                 data-qa-row="answer"
-                className={cn("text-body-md", hasSpeaker ? "mt-2 pl-11" : "")}
+                className={cn(
+                  "text-body-md sm:text-body-lg",
+                  hasSpeaker ? "mt-2 pl-11" : "",
+                )}
               >
                 {r.answer}
               </div>

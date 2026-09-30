@@ -874,7 +874,7 @@ export function ArticleBody({
       className={cn("bg-cream w-full px-4 py-12 sm:py-16 lg:px-0", className)}
     >
       <div
-        className="mx-auto w-full"
+        className="text-body-md sm:text-body-lg mx-auto w-full"
         style={{ maxWidth: "var(--container-prose)" }}
       >
         {beforeDropCap.length > 0
