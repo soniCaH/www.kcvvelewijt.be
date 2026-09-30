@@ -75,7 +75,7 @@ export function SearchMasthead({
         </div>
 
         {hint && (
-          <p className="text-cream-quiet text-mono-sm mt-3.5 font-mono tracking-[0.03em]">
+          <p className="text-cream-quiet text-mono-sm mt-3.5 font-mono">
             {hint}
           </p>
         )}

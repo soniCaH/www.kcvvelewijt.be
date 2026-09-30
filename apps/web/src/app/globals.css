@@ -346,10 +346,6 @@
   --font-weight-medium: 500;
   --font-weight-bold: 700;
 
-  /* Letter Spacing */
-  --letter-spacing-label: 0.14em; /* uppercase kicker / label */
-  --letter-spacing-caps: 0.08em; /* uppercase links / footer captions */
-
   /* ===== Breakpoints ===== */
 
   --breakpoint-sm: 640px; /* Tailwind sm */
@@ -509,7 +505,23 @@
   --text-label--letter-spacing: 0.08em;
   --text-label-sm: 0.625rem; /* 10px */
   --text-label-sm--line-height: 1;
-  --text-label-sm--letter-spacing: 0.08em;
+  --text-label-sm--letter-spacing: 0.12em;
+
+  /* Tracking is a property of the type step, not an optical scale (#2663) —
+     each `--text-*--letter-spacing` above is the only source of tracking,
+     so this reset (the mirror of `--leading-*: initial` below) makes
+     `tracking-wide` and friends stop resolving on their own. */
+  --tracking-*: initial;
+
+  /* Drain only — do not add a new call site; pins these four stock names at
+     Tailwind's own values so every existing `tracking-tight`/`wide`/`wider`/
+     `widest` site keeps resolving. Off-ramp tracking moves with its site's
+     own step as #2663's drain proceeds — delete each pin here the moment
+     its last use drains. */
+  --tracking-tight: -0.025em;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
 
   /* ===== `leading-hero` (D14/Y1, decision-sheet §8, #2617) =====
 

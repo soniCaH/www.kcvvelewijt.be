@@ -32,7 +32,7 @@ export function QuoteMark({ color = "jersey", hang = false }: QuoteMarkProps) {
     <span
       data-color={color}
       aria-hidden="true"
-      className={`font-body block text-[4.5rem] leading-[0.5] font-black tracking-[-0.05em] select-none ${COLOR_CLASS[color]} ${hang ? "quote-mark-hang" : ""}`}
+      className={`font-body block text-[4.5rem] leading-[0.5] font-black tracking-(--text-display-xl--letter-spacing) select-none ${COLOR_CLASS[color]} ${hang ? "quote-mark-hang" : ""}`}
       style={{ marginBottom: "-0.3em" }}
     >
       &rdquo;

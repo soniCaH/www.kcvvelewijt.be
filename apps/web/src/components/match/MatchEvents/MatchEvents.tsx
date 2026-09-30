@@ -418,14 +418,18 @@ function EventRow({
       {/* Minute — a TAG beside a scorer (#2516 rule 1), not the surface's
           subject, so it moves to mono: alignment and figure shape come from
           the face, not a class (#2579 supersedes #2610's lining-nums).
-          The first track widened 36px -> 56px (#2579 review) — measured on
-          the served kit, IBM Plex Mono at 18px/900 renders a stoppage-time
-          minute ("45+2'") at ~52px, which the old 36px track (sized for the
-          narrower Freight Big glyphs it replaced) clipped into the icon
-          column next to it. font-bold, not font-black: IBM Plex Mono
-          self-hosts only 400/500/600/700 (app/layout.tsx), so a requested
-          900 was already clamping to 700. */}
-      <span className="text-ink font-mono text-[18px] leading-none font-bold tracking-[-0.025em]">
+          The first track widened 36px -> 56px (#2579 review) — the old
+          36px track (sized for the narrower Freight Big glyphs it replaced)
+          clipped a stoppage-time minute ("45+2'") into the icon column next
+          to it. #2663 dropped this span's hand tracking (no mono step at
+          18px carries one); re-measured on the served kit at 18px/700,
+          "45+2'" is now ~54px (still inside 56px), but a two-digit stoppage
+          minute ("90+10'") is ~65px and overflows the track — accepted,
+          not fixed with tracking again; a real double-digit stoppage minute
+          is rare. font-bold, not font-black: IBM Plex Mono self-hosts only
+          400/500/600/700 (app/layout.tsx), so a requested 900 was already
+          clamping to 700. */}
+      <span className="text-ink font-mono text-[18px] leading-none font-bold">
         {formatMinute(event.minute, event.additionalTime)}
       </span>
 
@@ -497,7 +501,7 @@ function SingleSideEventRow({
           two-sided row's minute above (#2579 supersedes #2610's
           lining-nums). First track widened 36px -> 56px (#2579 review) —
           see EventRow's identical note above. */}
-      <span className="text-ink font-mono text-[18px] leading-none font-bold tracking-[-0.025em]">
+      <span className="text-ink font-mono text-[18px] leading-none font-bold">
         {formatMinute(event.minute, event.additionalTime)}
       </span>
       <span className="flex items-center justify-center">

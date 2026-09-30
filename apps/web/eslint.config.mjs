@@ -181,6 +181,13 @@ const OFF_RAMP_FONT_SIZE_PATTERN =
 const OFF_RAMP_LEADING_PATTERN =
   "(?:^|[\\s:!])leading-(?:none|tight|snug|normal|relaxed|loose|[0-9]|\\[|\\()";
 
+// Tracking Freeze (DESIGN.md → Typography, #2663) — same denylist
+// rationale as `OFF_RAMP_LEADING_PATTERN` above, plus a leading `-`: unlike
+// leading, Tailwind v4's `tracking` utility `supportsNegative`, so
+// `-tracking-[…]`/`-tracking-wide` are real off-ramps too.
+const OFF_RAMP_TRACKING_PATTERN =
+  "(?:^|[\\s:!])-?tracking-(?:tighter|tight|normal|wide|wider|widest|\\[|\\()";
+
 const matchesClassString = (pattern) =>
   `:matches(Literal[value=/${pattern}/], TemplateElement[value.raw=/${pattern}/])`;
 
@@ -192,6 +199,7 @@ const kcvvPlugin = {
   rules: {
     "no-off-ramp-font-size": builtinRules.get("no-restricted-syntax"),
     "no-off-ramp-leading": builtinRules.get("no-restricted-syntax"),
+    "no-off-ramp-tracking": builtinRules.get("no-restricted-syntax"),
   },
 };
 
@@ -360,6 +368,24 @@ const eslintConfig = [
           selector: matchesClassString(OFF_RAMP_LEADING_PATTERN),
           message:
             "Off-ramp leading — the role token owns leading (apps/web/DESIGN.md → Typography). The only legal leading-* utilities are the named @theme steps leading-hero, leading-hero-lead and leading-label-wrap. Existing call sites are frozen in eslint-suppressions.json under this rule's own ID; new code must not add a leading-* utility. Replaced one instead of just moving it? Run `pnpm --filter @kcvv/web lint:prune` in the same commit.",
+        },
+      ],
+    },
+  },
+  {
+    // Tracking Freeze (DESIGN.md → Typography, #2663) — own rule ID, own
+    // block, for the same reason as the Leading Freeze block above (see
+    // `OFF_RAMP_FONT_SIZE_PATTERN`'s comment).
+    files: ["**/src/**/*.{ts,tsx}"],
+    ignores: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
+    plugins: { kcvv: kcvvPlugin },
+    rules: {
+      "kcvv/no-off-ramp-tracking": [
+        "error",
+        {
+          selector: matchesClassString(OFF_RAMP_TRACKING_PATTERN),
+          message:
+            "Off-ramp tracking — tracking is a property of the type step (apps/web/DESIGN.md → Typography). Each text-* token already carries its own letter-spacing; no component sets tracking by hand. Existing call sites are frozen in eslint-suppressions.json under this rule's own ID; new code must not add a tracking-* utility. Replaced one instead of just moving it? Run `pnpm --filter @kcvv/web lint:prune` in the same commit.",
         },
       ],
     },

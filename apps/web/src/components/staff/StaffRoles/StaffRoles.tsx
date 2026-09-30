@@ -79,7 +79,7 @@ export function StaffRoles({
                 {pos.title}
               </span>
               {pos.department ? (
-                <span className="text-ink-muted text-mono-sm ml-auto font-mono tracking-[0.06em] uppercase">
+                <span className="text-ink-muted text-label ml-auto font-mono uppercase">
                   {pos.department}
                 </span>
               ) : null}

@@ -158,7 +158,7 @@ export function HeroCompressedEventStrip({
       // can no longer borrow it as a top edge.
       className={cn(
         "border-ink flex items-center gap-2 border-y py-2",
-        "text-mono-sm text-ink font-mono tracking-[0.06em] uppercase",
+        "text-label text-ink font-mono uppercase",
       )}
     >
       <span aria-hidden="true" className="text-jersey-deep">
@@ -426,7 +426,7 @@ export function HeroMatchScoreBar({
             // hosts only 400/500/600/700 (app/layout.tsx), so a requested
             // 900 was already clamping to 700 — font-bold names what
             // actually renders instead of a dead heavier-weight class.
-            "text-ink min-w-[60px] text-center font-mono leading-none font-bold tracking-[-0.01em]",
+            "text-ink min-w-[60px] text-center font-mono leading-none font-bold",
             hasScore ? "text-[24px]" : "text-[16px]",
           )}
         >

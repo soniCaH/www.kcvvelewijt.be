@@ -152,7 +152,7 @@ export function TapedFigure({
         <figcaption className="text-body-sm mt-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
           {caption && <span className="text-ink-muted">{caption}</span>}
           {credit && (
-            <span className="text-mono-sm text-ink-muted ml-auto font-mono tracking-[0.06em] uppercase">
+            <span className="text-label text-ink-muted ml-auto font-mono uppercase">
               {credit}
             </span>
           )}

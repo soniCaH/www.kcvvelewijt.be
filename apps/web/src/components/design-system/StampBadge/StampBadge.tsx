@@ -51,7 +51,7 @@ export function StampBadge({
       className={cn(
         "absolute z-[2] inline-block px-3.5 py-1.5",
         "border-ink shadow-paper-sm border-[1.5px]",
-        "font-mono text-[11px] font-bold tracking-[0.1em] uppercase",
+        "text-label font-mono font-bold uppercase",
         TONE_CLASS[tone],
         POSITION_CLASS[position],
         className,

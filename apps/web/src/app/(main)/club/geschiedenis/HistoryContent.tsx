@@ -540,7 +540,7 @@ function TimelineContent() {
 
       {/* Credits */}
       <div className="mt-16 px-1">
-        <h2 className="text-ink-muted text-mono-sm border-ink/30 mb-4 border-l-2 pl-4 font-mono tracking-[0.08em] uppercase">
+        <h2 className="text-ink-muted text-label border-ink/30 mb-4 border-l-2 pl-4 font-mono uppercase">
           Credits
         </h2>
         <p className="text-body-md text-ink">

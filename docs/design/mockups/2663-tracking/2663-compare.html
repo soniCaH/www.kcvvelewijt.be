@@ -1,0 +1,303 @@
+<title>Label Tracking Picker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  /* PROTOTYPE for #2663 — throwaway. Single-theme on purpose: it shows the site's own cream look. */
+  :root {
+    --cream: #f5f1e6;
+    --cream-soft: #ede8da;
+    --cream-deep: #e1d7bf;
+    --ink: #0a0a0a;
+    --ink-muted: #5f5b52;
+    --jersey: #00a868;
+    --jersey-deep: #008755;
+    --warm: #f0c264;
+    --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+    --serif: "freight-display-pro", Georgia, "Times New Roman", serif;
+    --sans: "freight-sans-pro", -apple-system, system-ui, sans-serif;
+    --w: 500;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--cream-soft);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding-inline: 20px; padding-block: 0 64px; }
+  header.top { background: var(--ink); color: var(--cream); padding-block: 32px 28px; }
+  .kick { font: 600 11px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--warm); margin: 0 0 12px; }
+  h1 { font: 700 clamp(28px, 4vw, 44px)/1.05 var(--serif); letter-spacing: -0.025em; margin: 0 0 12px; text-wrap: balance; }
+  header p { max-width: 68ch; margin: 0; color: #d9d3c4; }
+  h2 { font: 700 26px/1.15 var(--serif); letter-spacing: -0.02em; margin: 48px 0 6px; text-wrap: balance; }
+  .lead { max-width: 70ch; margin: 0 0 18px; color: var(--ink-muted); }
+  .bar {
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+    background: var(--cream); border-bottom: 1px solid var(--cream-deep);
+    display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; padding-block: 10px;
+    font: 500 12px/1.3 var(--mono);
+  }
+  .bar .wrap { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; padding-block: 0; width: 100%; }
+  .seg { display: inline-flex; border: 1.5px solid var(--ink); }
+  .seg button {
+    font: inherit; background: transparent; border: 0; padding: 6px 10px; cursor: pointer; color: var(--ink);
+  }
+  .seg button + button { border-left: 1.5px solid var(--ink); }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--cream); }
+  button:focus-visible { outline: 2px solid var(--jersey-deep); outline-offset: 2px; }
+
+  /* Today wall */
+  .wall { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 16px; }
+  .panel { background: var(--cream); border: 1px solid var(--cream-deep); padding: 16px 18px; }
+  .panel h3 { font: 600 12px/1.2 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 12px; color: var(--jersey-deep); }
+  .row { display: grid; grid-template-columns: 88px 1fr 34px; gap: 10px; align-items: baseline; padding-block: 5px; border-top: 1px dashed var(--cream-deep); }
+  .row .v { font: 400 11px/1 var(--mono); color: var(--ink-muted); font-variant-numeric: tabular-nums; }
+  .row .n { font: 400 11px/1 var(--mono); color: var(--ink-muted); text-align: right; font-variant-numeric: tabular-nums; }
+  .row.tok .v { color: var(--jersey-deep); font-weight: 600; }
+  .sample { font-family: var(--mono); font-weight: var(--w); text-transform: uppercase; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Candidate grid */
+  .step { background: var(--cream); border: 1px solid var(--cream-deep); padding: 18px; margin-bottom: 16px; }
+  .step-head { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: baseline; margin-bottom: 14px; }
+  .step-head strong { font: 700 20px/1.2 var(--serif); }
+  .step-head span { font: 400 12px/1.3 var(--mono); color: var(--ink-muted); }
+  .cands { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .cand {
+    text-align: left; font: inherit; color: inherit; cursor: pointer;
+    background: var(--cream-soft); border: 1.5px solid transparent; padding: 14px; display: grid; gap: 12px; align-content: start;
+  }
+  .cand[aria-pressed="true"] { border-color: var(--ink); background: #fff; }
+  .cand .tag { font: 600 11px/1 var(--mono); display: flex; justify-content: space-between; gap: 8px; }
+  .cand .tag em { font-style: normal; font-weight: 400; color: var(--ink-muted); }
+  .ctx-kick { color: var(--jersey-deep); }
+  .sample.lower { text-transform: none; }
+  .ctx-head { font: 700 22px/1.1 var(--serif); letter-spacing: -0.02em; margin-top: -4px; }
+  .ctx-body { font: 400 15px/1.5 var(--sans); color: var(--ink-muted); margin-top: -6px; }
+  .pill { justify-self: start; background: var(--ink); color: var(--cream); padding: 5px 8px; }
+  .pill.green { background: var(--jersey-deep); }
+  .meta { display: flex; gap: 8px; flex-wrap: wrap; color: var(--ink-muted); }
+
+  /* Before / after */
+  .ba { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; }
+  .ba > div > p { font: 600 11px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 8px; }
+  .card { background: #fff; border: 1.5px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); padding: 18px; display: grid; gap: 12px; }
+  .card .teams { font: 700 24px/1.1 var(--serif); letter-spacing: -0.02em; }
+  .card .score { font: 700 40px/1 var(--mono); letter-spacing: -0.02em; }
+  .card hr { border: 0; border-top: 1px dashed var(--cream-deep); margin: 0; width: 100%; }
+  .card .lines { display: grid; gap: 8px; }
+  .card .lines div { display: flex; justify-content: space-between; gap: 12px; }
+  .legend { font: 400 12px/1.5 var(--mono); color: var(--ink-muted); margin-top: 10px; }
+  .legend b { color: var(--ink); font-weight: 600; }
+  .q5 { display: grid; gap: 12px; }
+  .q5row { background: var(--cream); border: 1px solid var(--cream-deep); padding: 14px 16px; display: grid; gap: 10px; }
+  .q5row h4 { margin: 0; font: 600 12px/1.3 var(--mono); display: flex; flex-wrap: wrap; gap: 4px 12px; }
+  .q5row h4 em { font-style: normal; font-weight: 400; color: var(--ink-muted); }
+  .q5cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+  .q5cell { background: #fff; border: 1px solid var(--cream-deep); padding: 12px; display: grid; gap: 8px; align-content: start; }
+  .q5cell > .opt { font: 600 11px/1 var(--mono); color: var(--ink-muted); }
+  .q5cell.same > .opt::after { content: " · no change"; font-weight: 400; }
+  .ctx { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+  .ctx .t { font: 600 18px/1.2 var(--sans); }
+  .ctx .b { font: 400 15px/1.5 var(--sans); color: var(--ink-muted); }
+  .ctx .num { font: 700 36px/1 var(--serif); }
+  .ctx.col { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .ctx.strip { border-block: 1px solid var(--ink); padding-block: 8px; }
+  .ctx.dark { background: var(--ink); color: var(--cream); padding: 10px; }
+  .note { font: 400 12px/1.5 var(--mono); color: var(--ink-muted); max-width: 90ch; }
+  .picked { font: 600 13px/1.5 var(--mono); background: var(--warm); padding: 10px 14px; display: inline-block; margin-top: 8px; }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <p class="kick">Prototype · #2663 · Decide the tracking system</p>
+    <h1>Pick one letter-spacing per label step</h1>
+    <p>You decided: tracking belongs to the type step, and components never set it by hand. This page helps you pick the value for each step. All text is IBM Plex Mono, uppercase, at the real pixel size. Click a card to pick it. The match card at the bottom updates with your picks.</p>
+  </div>
+</header>
+
+<div class="bar">
+  <div class="wrap">
+    <span>Weight</span>
+    <span class="seg" id="weight">
+      <button type="button" data-w="500" aria-pressed="true">500 · token</button>
+      <button type="button" data-w="600" aria-pressed="false">600 · 45 sites</button>
+      <button type="button" data-w="700" aria-pressed="false">700</button>
+    </span>
+    <span>Zoom</span>
+    <span class="seg" id="zoom">
+      <button type="button" data-z="1" aria-pressed="true">1×</button>
+      <button type="button" data-z="2" aria-pressed="false">2×</button>
+    </span>
+  </div>
+</div>
+
+<main class="wrap" id="root">
+  <h2>1 · What the site does today</h2>
+  <p class="lead">Every value below is live in <code>src/components</code> on 2026-09-29, at that exact size. The number on the right is how many places use it. Green is the value the token already says.</p>
+  <div class="wall" id="wall"></div>
+
+  <h2>2 · Pick a value per step</h2>
+  <p class="lead">Four candidates per step. Each card shows the three jobs a label does: a kicker above a heading, a pill, and a meta row. The black border is your pick.</p>
+  <div id="steps"></div>
+
+  <h2>3 · Before and after, one match card</h2>
+  <p class="lead">Left is a card built with the values real components use today. Right is the same card with your three picks. The heading font here is a Georgia stand-in, because Freight cannot load on this page. The labels are exact.</p>
+  <div class="ba">
+    <div><p>Before · today</p><div class="card" id="before"></div>
+      <div class="legend">kicker <b>10px · 0.16em</b> (MatchStatusBadge) · pill <b>11px · 0.06em</b> (MonoLabel) · date <b>12px · wide = 0.025em</b> · venue <b>11px · 0.04em</b></div></div>
+    <div><p>After · your picks</p><div class="card" id="after"></div>
+      <div class="legend" id="after-legend"></div></div>
+  </div>
+  <p class="picked" id="summary"></p>
+  <h2>4 · Q5: what moving mono-sm to text-label means</h2>
+  <p class="lead">Every real site that uses <code>text-mono-sm</code>, with example text in that component's layout. <b>A</b> keeps 12px and gives the step your mono-sm pick. <b>B</b> moves the uppercase sites to <code>text-label</code> (11px, your label pick, line-height 1 instead of 1.4) and leaves the lowercase sites at 0em.</p>
+  <div class="q5" id="q5"></div>
+
+  <h2>5 · Q8: text that is not a label, now vs the rule</h2>
+  <p class="lead">Every other place that sets its own tracking (scheurkalender is out of scope). <b>Rule</b> is the tracking of the nearest step: display steps carry −0.025em or −0.035em, mono and body steps carry 0em, an uppercase mono label takes <code>text-label</code>'s value. Only the tracking changes here; the size stays. Serif rows use a Georgia stand-in for Freight.</p>
+  <div class="q5" id="q8"></div>
+
+  <p class="note">Tailwind's stock names resolve to: <b>tracking-wide</b> 0.025em · <b>tracking-wider</b> 0.05em · <b>tracking-widest</b> 0.1em · <b>tracking-tight</b> −0.025em. They are counted in section 1 under those values.</p>
+</main>
+
+<script>
+  // Counts: tracking values paired with a size on the same class line, src/components, tests + stories excluded, 2026-09-29.
+  const TODAY = [
+    { title: "10px · text-label-sm", px: 10, token: 0.08, rows: [[0.16,12],[0.025,9,"wide"],[0.18,5],[0.12,3],[0.1,3],[0.05,2],[0.08,2],[0.1,1,"widest"],[0.05,1,"wider"],[0.06,1],[0.14,1]] },
+    { title: "11px · text-label", px: 11, token: 0.08, rows: [[0.06,12],[0.025,10,"wide"],[0.04,10],[0.08,9],[0.1,9],[0.05,2],[0.1,2,"widest"],[0.12,2],[0.14,2],[0.02,1],[0.07,1],[0.13,1],[0.05,1,"wider"],[0.18,1]] },
+    { title: "12px · text-mono-sm / text-xs", px: 12, token: null, rows: [[0.025,8,"wide"],[0.06,3],[0.04,3],[0.14,2],[0.08,2],[0.05,1,"wider"],[0.1,1,"widest"],[0.1,1],[0.03,1],[0.16,1],[0.18,1]] },
+  ];
+  const STEPS = [
+    { key: "label-sm", name: "Label Small", px: 10, today: "0.08em in the token · most-used by hand: 0.16em", cands: [0.08, 0.1, 0.12, 0.16], pick: 0.12 },
+    { key: "label", name: "Label", px: 11, today: "0.08em in the token · most-used by hand: 0.06em", cands: [0.06, 0.08, 0.1, 0.12], pick: 0.08 },
+    { key: "mono-sm", name: "Mono Small", px: 12, today: "no tracking in the token · 6 sites uppercase, 9 lowercase or numbers", cands: [0, 0.04, 0.06, 0.08], pick: 0.06 },
+  ];
+  const TEXT = { k: "Volgende wedstrijd", p: "A-ploeg", m: ["Za 04 okt", "15:00", "Thuis"] };
+  const picks = {};
+  try { Object.assign(picks, JSON.parse(localStorage.getItem("t2663") || "{}")); } catch (e) {}
+  STEPS.forEach(s => { if (!(s.key in picks)) picks[s.key] = s.pick; });
+  let zoom = 1;
+  const em = v => `${v}em`;
+  const fmt = v => (v === null ? "none" : `${v}em`);
+  const lab = (px, v, extra = "") => `<span class="sample ${extra}" style="font-size:${px * zoom}px;letter-spacing:${em(v)}">`;
+
+  function renderWall() {
+    document.getElementById("wall").innerHTML = TODAY.map(p => `
+      <div class="panel"><h3>${p.title} · ${p.rows.length} values</h3>
+        ${p.rows.map(([v, n, name]) => `<div class="row ${v === p.token && !name ? "tok" : ""}">
+          <span class="v">${name ? name + " " : ""}${v}em</span>${lab(p.px, v)}${TEXT.k} · ${TEXT.m[0]}</span><span class="n">×${n}</span></div>`).join("")}
+        ${p.token === null ? `<div class="row tok"><span class="v">token: none</span><span class="sample" style="font-size:${p.px * zoom}px;color:var(--ink-muted)">mono-sm ships no tracking</span><span></span></div>` : ""}
+      </div>`).join("");
+  }
+
+  function renderSteps() {
+    document.getElementById("steps").innerHTML = STEPS.map(s => `
+      <section class="step"><div class="step-head"><strong>${s.name} · ${s.px}px</strong><span>text-${s.key} · today: ${s.today}</span></div>
+        <div class="cands">${s.cands.map(v => `
+          <button type="button" class="cand" data-step="${s.key}" data-v="${v}" aria-pressed="${picks[s.key] === v}">
+            <span class="tag">${v}em <em>${v === 0.08 && s.key !== "mono-sm" ? "token today" : v === s.pick ? "my suggestion" : ""}</em></span>
+            ${lab(s.px, v, "ctx-kick")}${TEXT.k}</span>
+            <span class="ctx-head">KCVV Elewijt wint derby</span>
+            ${lab(s.px, v, "pill")}${TEXT.p}</span>
+            <span class="meta">${TEXT.m.map(t => lab(s.px, v) + t + "</span>").join("<span>·</span>")}</span>
+            ${s.key === "mono-sm" ? `<span class="tag"><em>lowercase + numbers, as MatchStrip and SearchMasthead use it</em></span>
+            ${lab(s.px, v, "lower")}zoek in 1.240 artikels</span>
+            ${lab(s.px, v, "lower")}za 04/10 · 15:00 · 3 – 1</span>` : ""}
+          </button>`).join("")}
+        </div></section>`).join("");
+  }
+
+  function card(k, pill, date, venue) {
+    // k/pill/date/venue = [px, em]
+    return `${lab(k[0], k[1], "ctx-kick")}Uitslag · 3e Nationale VV A</span>
+      <div class="teams">KCVV Elewijt – SK Kampenhout</div>
+      <div class="score">3 – 1</div>
+      ${lab(pill[0], pill[1], "pill green")}Gewonnen</span>
+      <hr />
+      <div class="lines">
+        <div>${lab(date[0], date[1])}Za 04 okt 2026</span>${lab(date[0], date[1])}15:00</span></div>
+        <div>${lab(venue[0], venue[1])}Sportpark Elewijt</span>${lab(venue[0], venue[1])}Veld 1</span></div>
+      </div>`;
+  }
+
+  function renderBA() {
+    document.getElementById("before").innerHTML = card([10, 0.16], [11, 0.06], [12, 0.025], [11, 0.04]);
+    const ls = picks["label-sm"], l = picks.label, m = picks["mono-sm"];
+    document.getElementById("after").innerHTML = card([10, ls], [11, l], [12, m], [11, l]);
+    document.getElementById("after-legend").innerHTML = `kicker <b>10px · ${ls}em</b> · pill <b>11px · ${l}em</b> · date <b>12px · ${m}em</b> · venue <b>11px · ${l}em</b>`;
+    document.getElementById("summary").textContent = `Your picks: label-sm ${ls}em · label ${l}em · mono-sm ${m}em`;
+  }
+
+  // The 15 text-mono-sm sites. up = uppercase label use. today = hand tracking in em (0 = none).
+  // wrap(s) puts the styled span s in that site's real surroundings.
+  const Q5 = [
+    { f: "StaffRoles.tsx:82", up: true, today: 0.06, txt: "Jeugdwerking", wrap: s => `<div class="ctx"><span class="t">Coördinator U13</span>${s}</div>` },
+    { f: "TapedFigure.tsx:155", up: true, today: 0.06, txt: "Foto: Martijn van den Berg", wrap: s => `<div class="ctx"><span class="b">De eerste ploeg in 1978.</span>${s}</div>` },
+    { f: "NumberDisplay.tsx:92", up: true, today: 0.08, txt: "Doelpunten dit seizoen", wrap: s => `<div class="ctx col"><span class="num">47</span>${s}</div>` },
+    { f: "ErrorState.tsx:75", up: true, today: 0.14, w: 600, txt: "Fout 404 · pagina niet gevonden", wrap: s => `<div class="ctx col">${s}<span class="t">Deze pagina bestaat niet (meer).</span></div>` },
+    { f: "EditorialHero/_variant-parts.tsx:161", up: true, today: 0.06, txt: "Interview · 12 sep 2026 · 6 min lezen", wrap: s => `<div class="ctx strip"><span style="color:var(--jersey-deep)">▸</span>${s}</div>` },
+    { f: "HistoryContent.tsx:543 (src/app)", up: true, today: 0.08, txt: "Credits", wrap: s => `<div class="ctx col"><span style="border-left:2px solid #0a0a0a4d;padding-left:14px">${s}</span><span class="b">Met dank aan Martijn van den Berg voor de foto's.</span></div>` },
+    { f: "MatchStripView.tsx (6 sites)", up: false, today: 0, w: 600, txt: "za 04/10 · 15:00 · 3 – 1", wrap: s => `<div class="ctx dark">${s}</div>` },
+    { f: "SearchMasthead.tsx:78", up: false, today: 0.03, txt: "1.240 artikels, wedstrijden en spelers", wrap: s => `<div class="ctx dark">${s}</div>` },
+    { f: "privacy/page.tsx:69 (src/app)", up: false, today: 0.04, txt: "Laatst bijgewerkt op 12 september 2026", wrap: s => `<div class="ctx col"><span class="b">Hoe we met je gegevens omgaan.</span>${s}</div>` },
+    { f: "StaffHero.tsx:171", up: false, today: 0, txt: "Sinds 2019 · Trainer U15", wrap: s => `<div class="ctx">${s}</div>` },
+  ];
+  function q5span(r, px, ls, lh) {
+    return `<span style="font-family:var(--mono);font-weight:${r.w || "var(--w)"};font-size:${px * zoom}px;line-height:${lh};letter-spacing:${ls}em;${r.up ? "text-transform:uppercase;" : ""}color:inherit">${r.txt}</span>`;
+  }
+  function renderQ5() {
+    const a = picks["mono-sm"], l = picks.label;
+    document.getElementById("q5").innerHTML = Q5.map(r => {
+      const cells = [
+        ["Today · 12px · " + fmt(r.today || null).replace("none", "0em"), 12, r.today, 1.4, false],
+        [`A · text-mono-sm · 12px · ${a}em`, 12, a, 1.4, r.today === a],
+        r.up ? [`B · text-label · 11px · ${l}em`, 11, l, 1, false] : ["B · text-mono-sm · 12px · 0em", 12, 0, 1.4, r.today === 0],
+      ];
+      return `<div class="q5row"><h4>${r.f}<em>${r.up ? "uppercase label" : "lowercase / numbers"}</em></h4><div class="q5cols">${cells.map(([o, px, ls, lh, same]) =>
+        `<div class="q5cell ${same ? "same" : ""}"><span class="opt">${o}</span>${r.wrap(q5span(r, px, ls, lh))}</div>`).join("")}</div></div>`;
+    }).join("");
+  }
+
+  // rule: null = use picks.label (uppercase mono label role)
+  const Q8 = [
+    { f: "SiteFooter.tsx:36 · wordmark", fam: "var(--serif)", w: 900, it: true, px: 44, now: -0.01, rule: -0.025, why: "display-lg range (32–48px)", txt: "KCVV Elewijt" },
+    { f: "QuoteMark.tsx:35", fam: "var(--serif)", w: 900, px: 72, now: -0.05, rule: -0.035, why: "display-xl top (72px). One glyph: tracking only moves the space after it", txt: "”" },
+    { f: "MatchEvents.tsx:428/500 · minute", fam: "var(--mono)", w: 700, px: 18, now: -0.025, rule: 0, why: "no mono step at 18px; mono steps carry 0em", txt: "45+2'" },
+    { f: "EditorialHero/_variant-parts.tsx:429 · score", fam: "var(--mono)", w: 700, px: 24, now: -0.01, rule: 0, why: "no mono step at 24px; mono steps carry 0em", txt: "3 – 1" },
+    { f: "MatchHero.tsx:318/406 · time", fam: "var(--mono)", w: 400, px: 14, now: 0.06, rule: 0, why: "text-mono-md (14px) carries 0em", txt: "15:00" },
+    { f: "MonoLabel.tsx:58 · md size", fam: "var(--mono)", w: 500, up: true, px: 13, now: 0.06, rule: null, why: "uppercase label role; the 13px size is ticket 6's question", txt: "Volgende wedstrijd" },
+    { f: "DownloadButton.tsx:197 · file badge", fam: "var(--mono)", w: 700, up: true, px: 16, now: 0.04, rule: null, why: "uppercase label role", txt: "PDF" },
+  ];
+  function renderQ8() {
+    document.getElementById("q8").innerHTML = Q8.map(r => {
+      const rule = r.rule === null ? picks.label : r.rule;
+      const sp = ls => `<span style="font-family:${r.fam};font-weight:${r.w};${r.it ? "font-style:italic;" : ""}font-size:${r.px * zoom}px;line-height:1;letter-spacing:${ls}em;${r.up ? "text-transform:uppercase;" : ""}white-space:nowrap">${r.txt}</span>`;
+      return `<div class="q5row"><h4>${r.f}<em>${r.px}px · ${r.why}</em></h4><div class="q5cols">
+        <div class="q5cell"><span class="opt">Now · ${r.now}em</span>${sp(r.now)}</div>
+        <div class="q5cell"><span class="opt">Rule · ${rule}em</span>${sp(rule)}</div></div></div>`;
+    }).join("");
+  }
+
+  function renderAll() { renderWall(); renderSteps(); renderBA(); renderQ5(); renderQ8(); }
+
+  document.getElementById("steps").addEventListener("click", e => {
+    const b = e.target.closest(".cand"); if (!b) return;
+    picks[b.dataset.step] = Number(b.dataset.v);
+    try { localStorage.setItem("t2663", JSON.stringify(picks)); } catch (err) {}
+    renderSteps(); renderBA(); renderQ5(); renderQ8();
+  });
+  function seg(id, fn) {
+    const el = document.getElementById(id);
+    el.addEventListener("click", e => {
+      const b = e.target.closest("button"); if (!b) return;
+      el.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
+      fn(b); renderAll();
+    });
+  }
+  seg("weight", b => document.documentElement.style.setProperty("--w", b.dataset.w));
+  seg("zoom", b => { zoom = Number(b.dataset.z); });
+  renderAll();
+</script>

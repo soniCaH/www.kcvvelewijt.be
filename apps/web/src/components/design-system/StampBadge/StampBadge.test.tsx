@@ -90,11 +90,11 @@ describe("StampBadge", () => {
     );
   });
 
-  it("typography is mono caps with 0.1em tracking", () => {
+  it("typography is mono caps at the text-label step (11px, 0.08em tracking)", () => {
     const { container } = render(<StampBadge>X</StampBadge>);
     const el = container.firstChild as HTMLElement;
     expect(el.className).toMatch(/font-mono/);
     expect(el.className).toMatch(/uppercase/);
-    expect(el.className).toMatch(/tracking-\[0\.1em\]/);
+    expect(el.className).toMatch(/text-label\b/);
   });
 });
