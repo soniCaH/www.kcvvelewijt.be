@@ -31,7 +31,7 @@ const baseBtn: CSSProperties = {
   fontFamily: "var(--font-mono)",
   fontSize: 12,
   fontWeight: 600,
-  letterSpacing: "0.05em",
+  letterSpacing: "var(--text-label--letter-spacing)",
   textTransform: "uppercase",
   padding: "10px 16px",
   border: "2px solid var(--color-ink)",

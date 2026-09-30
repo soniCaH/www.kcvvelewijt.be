@@ -1566,7 +1566,7 @@ html {
 #cc-main .pm__btn {
   font-family: var(--font-mono);
   font-weight: 600;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--text-label--letter-spacing);
   text-transform: uppercase;
 }
 
