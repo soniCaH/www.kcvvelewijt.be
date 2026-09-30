@@ -379,6 +379,15 @@ describe("<ArticleBody>", () => {
       const inner = outer.firstElementChild as HTMLElement;
       expect(inner.style.maxWidth).toBe("var(--container-prose)");
     });
+
+    it("steps long-form body text up to text-body-lg from sm (#3253)", () => {
+      const content = [paragraph("Body content.")];
+      const { container } = render(<ArticleBody content={content} />);
+      const outer = container.firstElementChild as HTMLElement;
+      const inner = outer.firstElementChild as HTMLElement;
+      expect(inner.className).toContain("text-body-md");
+      expect(inner.className).toContain("sm:text-body-lg");
+    });
   });
 
   describe("EndMark closer", () => {
