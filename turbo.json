@@ -19,25 +19,9 @@
       "dependsOn": ["^build"],
       "outputs": ["coverage/**"],
       // $TURBO_DEFAULT$ (every git-tracked file in the package) rather than a
-      // hand-kept whitelist: the old list read "tests/**" but apps/web keeps 9
-      // test files under "test/" plus a root next.config.test.ts, so 10 files
-      // could change without busting the cache (#3096). A whitelist drifts;
-      // the default does not.
-      //
-      // The one exclusion is apps/web's 3 044 VR baseline PNGs. Nothing in the
-      // Vitest suite reads them — only .storybook/test-runner.ts and
-      // scripts/vr-docker.mjs do — so hashing them just means every baseline
-      // update needlessly busts the unit-test cache.
-      //
-      // $TURBO_ROOT$/.husky/** is hashed because apps/web's hook tests spawn
-      // the real scripts: check-branch.test.ts:38 executes
-      // .husky/branch-guard.sh, and pre-commit.test.ts / wave-check.test.ts do
-      // the same. Without it a .husky edit serves a cached green (#3096).
-      "inputs": [
-        "$TURBO_DEFAULT$",
-        "!test/vr/__snapshots__/**",
-        "$TURBO_ROOT$/.husky/**"
-      ]
+      // hand-kept whitelist, which drifts; the default does not (#3096).
+      // apps/web's own extra inputs live in "@kcvv/web#test" below.
+      "inputs": ["$TURBO_DEFAULT$"]
     },
     "lint": {
       "dependsOn": ["^build"]
@@ -101,6 +85,49 @@
     },
     "@kcvv/sanity-studio#build": {
       "outputs": []
+    },
+    // A root "pkg#task" entry REPLACES the generic task, it does not merge
+    // with it, so dependsOn and outputs are repeated here. The inputs below
+    // are web-only: no other workspace's tests read these files, so keeping
+    // them off the generic `test` stops API/studio test caches from busting on
+    // a root package.json or scripts/* edit (#3284).
+    "@kcvv/web#test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"],
+      // $TURBO_DEFAULT$ (every git-tracked file in the package) rather than a
+      // hand-kept whitelist: the old list read "tests/**" but apps/web keeps 9
+      // test files under "test/" plus a root next.config.test.ts, so 10 files
+      // could change without busting the cache (#3096). A whitelist drifts;
+      // the default does not.
+      //
+      // The one exclusion is apps/web's 3 044 VR baseline PNGs. Nothing in the
+      // Vitest suite reads them — only .storybook/test-runner.ts and
+      // scripts/vr-docker.mjs do — so hashing them just means every baseline
+      // update needlessly busts the unit-test cache.
+      //
+      // $TURBO_ROOT$/.husky/** is hashed because apps/web's hook tests spawn
+      // the real scripts: check-branch.test.ts:38 executes
+      // .husky/branch-guard.sh, and pre-commit.test.ts / wave-check.test.ts do
+      // the same. Without it a .husky edit serves a cached green (#3096).
+      //
+      // The same holds for the other repo-root files those tests spawn or
+      // import (#3284): .claude/hooks/** (check-branch.test.ts spawns
+      // check-branch.sh), the top-level scripts/* (trigger-psd-sync.sh,
+      // wave-check.sh, backfill-staging-search.sh spawned; analytics-taxonomy.mjs
+      // imported by the taxonomy and UpcomingMatches analytics tests) and
+      // apps/api/wrangler.toml (backfill-staging-search.test.ts reads it), and
+      // the root package.json (pre-commit.test.ts reads its lint-staged entry).
+      // The glob is scripts/*, not scripts/**: scripts/sanity-ops/ is its own
+      // workspace and must not bust these tests' cache.
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!test/vr/__snapshots__/**",
+        "$TURBO_ROOT$/.husky/**",
+        "$TURBO_ROOT$/.claude/hooks/**",
+        "$TURBO_ROOT$/scripts/*",
+        "$TURBO_ROOT$/apps/api/wrangler.toml",
+        "$TURBO_ROOT$/package.json"
+      ]
     },
     "@kcvv/api-contract#test": {
       "outputs": []
