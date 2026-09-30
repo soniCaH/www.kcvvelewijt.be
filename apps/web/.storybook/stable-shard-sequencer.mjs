@@ -11,22 +11,26 @@ import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
 import path from "node:path";
 
-// apps/web has no direct Jest dependency; reach Jest's sequencer through the
-// test runner that brings it.
-const Sequencer = createRequire(import.meta.resolve("@storybook/test-runner"))(
-  "@jest/test-sequencer",
-).default;
+// apps/web has no direct Jest dependency. Walk the declared chain
+// test-runner → jest → @jest/core → @jest/test-sequencer, so this loads the
+// same sequencer Jest itself uses and never leans on pnpm's hidden hoist.
+const requireFrom = (from, id) => createRequire(from).resolve(id);
+const jest = requireFrom(import.meta.resolve("@storybook/test-runner"), "jest");
+const core = requireFrom(jest, "@jest/core");
+const Sequencer = createRequire(core)("@jest/test-sequencer").default;
 
 export default class StableShardSequencer extends Sequencer {
   shard(tests, { shardIndex, shardCount }) {
-    const size = Math.ceil(tests.length / shardCount);
+    // Jest's own boundaries, so the split stays as even as Jest's (#3275).
+    const bound = (index) =>
+      this._shardPosition({ shardCount, shardIndex: index, suiteLength: tests.length });
     return tests
       .map((test) => ({
         hash: createHash("sha1").update(path.basename(test.path)).digest("hex"),
         test,
       }))
       .sort((a, b) => (a.hash < b.hash ? -1 : a.hash > b.hash ? 1 : 0))
-      .slice(size * (shardIndex - 1), size * shardIndex)
+      .slice(bound(shardIndex - 1), bound(shardIndex))
       .map(({ test }) => test);
   }
 }
