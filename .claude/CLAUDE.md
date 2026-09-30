@@ -4,7 +4,7 @@
 
 Turborepo monorepo (pnpm). TypeScript strict, Effect, Tailwind v4.
 
-| App/Package         | Path                       | Host               | Test layers                                                                      |
+| App/Package         | Path                       | Host               | Test layers[^files]                                                              |
 | ------------------- | -------------------------- | ------------------ | -------------------------------------------------------------------------------- |
 | Next.js web         | `apps/web/`                | Vercel             | Static, Build, Vitest, Storybook VR[^vr] (owns accessibility, gates[^a11y]), E2E |
 | Sanity Studio       | `apps/studio/`             | sanity.io          | Static, Build[^studio]                                                           |
@@ -14,6 +14,8 @@ Turborepo monorepo (pnpm). TypeScript strict, Effect, Tailwind v4.
 | API contract        | `packages/api-contract/`   | (library)          | Static, Vitest, Build[^api-contract]                                             |
 | BFF (CF Workers)    | `apps/api/`                | Cloudflare Workers | Static, Vitest, Contract (real workerd)[^api]                                    |
 | Sanity ops scripts  | `scripts/sanity-ops/`      | (run by hand)      | Static, Vitest                                                                   |
+
+[^files]: **Every test file is picked up by a runner (#3277).** A runner exits 0 when _some_ files match, so a test in a place no `include` reaches (a `*.test.tsx` under a `*.test.ts` include, a `*.spec.ts` outside `testDir`) passes every gate while running nowhere. `Quality Checks + Build`'s step "Every test file is picked up by a runner" (`apps/web/scripts/test-file-coverage.mjs`, tested in `apps/web/test/scripts/test-file-coverage.test.ts`) asks each runner what it _would_ run (`vitest list --filesOnly` in web, api, api-contract, sanity-studio and sanity-ops, `--config vitest.storybook.config.ts` for the story files, `playwright test --list` for E2E) and fails on any tracked test or story file missing from that list. It lists rather than runs, so it costs seconds, and it adds no required check. The audit behind it, with the per-layer should-run/did-run counts and the five gaps it filed, is `docs/research/test-layer-coverage-audit.md`. `vitest run` with an `include` that matches _nothing_ already exits 1 (measured); this step covers the partial case.
 
 [^vr]: `test-storybook` (`apps/web/package.json`'s `vr:run`) visits every story now, sharded 3 ways by story-file basename (`.storybook/stable-shard-sequencer.mjs`, #3275 — Jest's default hashed the random per-process temp dir, so each shard took a random third and ~61 of 209 files ran nowhere; `VR — Gate` and the baseline bot now fail unless every story was visited, via `apps/web/scripts/vr-coverage.mjs`) — no `--includeTags`/`--excludeTags` filter decides which stories get VISITED any more (#3188, review round 2). `.storybook/test-runner.ts`'s `postVisit` decides per story whether to screenshot: only when the story's combined tags include `vr` and exclude `vr-skip` (184 of 209 story files carry `vr`). Every other story — the 21 `Pages/*` files (carry no `vr` tag, consistent with `apps/web/CLAUDE.md`'s "not VR-tested" note) and any other component whose story was never tagged `vr` — still gets its accessibility check (see the `[^a11y]` note), just no screenshot and no baseline. Runtime geometry (`play`) moved to Storybook's own `play` exports, run by `@storybook/addon-vitest` (`pnpm test:storybook`, `apps/web/vitest.storybook.config.ts`) — [#3146](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3146) is done; `scroll-arrows.spec.ts`/`section-nav.spec.ts` no longer exist.
 
@@ -98,7 +100,7 @@ In every Vitest workspace, a test body spends at most half its own timeout (2 50
 
 ### Shell Scripts Are Linted
 
-`pnpm lint:sh` runs `shellcheck` over every tracked `*.sh` file and the `.husky/` hooks, at every severity, in the CI `Quality Checks + Build` job. It was adopted at zero findings, so any finding is a regression. A hook with no shebang (`.husky/commit-msg`) names its shell with a `# shellcheck shell=sh` line.
+`pnpm lint:sh` runs `shellcheck` over every tracked `*.sh` file except `.husky/branch-guard.sh` (its pathspec `':!:.husky/*.*'` also cancels that file's `*.sh` match — 12 of 13 shell scripts are checked, [#3283](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3283)) and the extension-less `.husky/` hooks, at every severity, in the CI `Quality Checks + Build` job. It was adopted at zero findings, so any finding is a regression. A hook with no shebang (`.husky/commit-msg`) names its shell with a `# shellcheck shell=sh` line.
 
 ### Documentation Standards
 

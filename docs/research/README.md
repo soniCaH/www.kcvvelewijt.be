@@ -128,6 +128,8 @@ session. Read it first; open a document here only when a ruling needs its source
 | [`vr-diff-story-map.md`](./vr-diff-story-map.md)                             | A diff→stories map is possible, and the verdict is still _keep the full run_     |
 | [`agent-layer-suite-command-sweep.md`](./agent-layer-suite-command-sweep.md) | 35 agent-facing suite commands: 7 wrong, 12 bypassing, 1 stale                   |
 
+A later, separate measurement, dated and frozen like the rest: [`test-layer-coverage-audit.md`](./test-layer-coverage-audit.md) (2026-09-30, #3277) — for every layer except VR, what it should have run against what its last green run ran, and five gaps.
+
 **One of these is alive; nine are frozen.** `test-suite-flake-ledger.md` is the **register of the unit
 of work** — a flake class is the unit, never an occurrence — and it is edited as classes open and
 close. The other nine are dated evidence: cite them, do not revise them.
