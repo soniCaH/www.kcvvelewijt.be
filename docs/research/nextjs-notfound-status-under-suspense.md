@@ -3,6 +3,27 @@
 Research for [#2968](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2968). Written 2026-09-15 against
 Next.js **16.3.5** (`apps/web/package.json`), React **19.3.0**, Turbopack, `cacheComponents` **not** enabled.
 
+> [!NOTE]
+> **Dated snapshot, not a living document.** The body below is kept as written on 2026-09-15. Four
+> things have changed since, and the body does not reflect them:
+>
+> - **§4 route table — the tree changed.** [#3037](https://github.com/soniCaH/www.kcvvelewijt.be/pull/3037)
+>   moved the ancestor skeletons into `(index)` route groups, so they no longer wrap the detail routes.
+>   Today, `evenementen/[slug]`, `galerij/[slug]` and `club/[slug]` have only their segment-local
+>   `loading.tsx`. The ploegen routes have `ploegen/[slug]/(detail)/loading.tsx` and
+>   `ploegen/[slug]/wedstrijden/loading.tsx`. `(landing)/jeugd/[slug]` has no `loading.tsx` above it.
+>   Map `apps/web/src/app` again before you rely on the table.
+> - **§4 footnote — line numbers moved.** `notFound()` is now at `(main)/club/[slug]/page.tsx:89` and
+>   `(main)/tegenstander/[clubId]/page.tsx:369, 372`.
+> - **§5 — the first claim is too broad.** Under `cacheComponents`, the page-render options stop working,
+>   because the page cannot set a 404 after the static shell streams. For a dynamic existence check, use
+>   `proxy`. Two §3 options still work, because they run outside the page render: `next.config.js`
+>   `redirects()` and a Route Handler that calls `notFound()`.
+> - **§7 — superseded.** db18737d ([#2911](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2911))
+>   classifies an empty PSD match-detail body as `ResourceNotFoundError`. That closes the open BFF cause of
+>   `/wedstrijd/<unknown>` → 500 for an unknown match id, and #3034 records it. It covers that case only.
+>   It does not explain every possible 500 on that route.
+
 Sources are official Next.js docs (the pages self-report `version: 16.3.5`), the `vercel/next.js` source on
 `canary`, the `vercel/next.js` issue and discussion tracker, and react.dev. No blog posts, no Stack Overflow.
 
