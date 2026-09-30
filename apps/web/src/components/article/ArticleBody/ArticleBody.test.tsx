@@ -371,30 +371,23 @@ describe("<ArticleBody>", () => {
   });
 
   describe("container", () => {
-    it("renders on a cream surface at --container-prose width", () => {
+    it("renders on a cream surface at --container-prose width, stepping up to text-body-lg from sm (#3253)", () => {
       const content = [paragraph("Body content.")];
       const { container } = render(<ArticleBody content={content} />);
       const outer = container.firstElementChild as HTMLElement;
       expect(outer.className).toContain("bg-cream");
       const inner = outer.firstElementChild as HTMLElement;
       expect(inner.style.maxWidth).toBe("var(--container-prose)");
-    });
-
-    it("steps long-form body text up to text-body-lg from sm (#3253)", () => {
-      const content = [paragraph("Body content.")];
-      const { container } = render(<ArticleBody content={content} />);
-      const outer = container.firstElementChild as HTMLElement;
-      const inner = outer.firstElementChild as HTMLElement;
       expect(inner.className).toContain("text-body-md");
       expect(inner.className).toContain("sm:text-body-lg");
     });
 
-    // #3274 review finding A: the drop-cap paragraph sets its own
-    // `text-body-md` (DropCapParagraph's default, shared by other callers)
-    // and does not inherit the wrapper's size — without the `sm:text-body-lg`
-    // passed at the call site, the drop-cap paragraph would stay 16px at
-    // `sm` while the very next paragraph steps up to 18px.
-    it("steps the drop-cap paragraph up to sm:text-body-lg too, so it matches the rest of the body", () => {
+    // #3274 review round 2: the drop-cap paragraph carries no font-size of
+    // its own any more — it inherits the wrapper's `text-body-md
+    // sm:text-body-lg` above, so it steps up with the rest of the body
+    // instead of a second, independently-pinned size that could drift from
+    // the wrapper's.
+    it("lets the drop-cap paragraph inherit the wrapper's size instead of pinning its own", () => {
       const content = [
         paragraph("First body paragraph is the drop cap."),
         paragraph("Second body paragraph follows it."),
@@ -402,8 +395,7 @@ describe("<ArticleBody>", () => {
       const { container } = render(<ArticleBody content={content} />);
       const dropCap = container.querySelector('[data-tone="ink"]');
       expect(dropCap).not.toBeNull();
-      expect(dropCap?.className).toContain("text-body-md");
-      expect(dropCap?.className).toContain("sm:text-body-lg");
+      expect(dropCap?.className).not.toMatch(/\btext-body-/);
     });
   });
 

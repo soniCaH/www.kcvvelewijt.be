@@ -47,7 +47,10 @@ export function DropCapParagraph({
     {
       "data-tone": tone,
       className: cn(
-        "text-body-md",
+        // No own font-size — the paragraph inherits whichever size its
+        // container sets. Its only production caller, ArticleBody.tsx,
+        // already sizes its wrapper (`text-body-md sm:text-body-lg`), so
+        // pinning a size here would fight that instead of following it.
         // initial-letter: <number-of-lines>. Both prefixed (older Safari)
         // and unprefixed declarations via Tailwind arbitrary properties.
         "first-letter:[initial-letter:3]",
