@@ -10,7 +10,7 @@ This is an explicit acceptance-criterion for the error-page implementation issue
 1. Build one shared `<ErrorState>` component (`apps/web/src/components/error/` or
    `design-system/`) that renders both `not-found.tsx` (404) and `error.tsx` (500),
    parameterised by `code`, `pun`, `body`, and `actions` (500 adds a "Probeer
-   opnieuw" button wired to `reset()`).
+   opnieuw" button wired to `retry()`, was `reset()` until #3298).
 2. Ship it with a `layout: "centered" | "scoreboard"` prop and a Storybook story
    per layout × per page (404-centered, 404-scoreboard, 500-centered,
    500-scoreboard).
@@ -35,7 +35,8 @@ both qualify); biggest furniture. The variant the owner most wants to see live.
 - `<JerseyShirt>` is the shipped Phase 4.5 primitive — reuse, don't redraw.
 - Buttons are **plain/clear, not punny** ("Naar de homepage" + "Probeer opnieuw")
   so the action stays obvious — the wink lives in the headline only.
-- 500's "Probeer opnieuw" MUST stay wired to the `reset()` callback from
-  `error.tsx`. `error.tsx` is `"use client"` and renders at the root segment
+- 500's "Probeer opnieuw" MUST stay wired to the `retry()` callback from
+  `error.tsx` (was `reset()`; changed by the #3298 decision). `error.tsx` is
+  `"use client"` and renders at the root segment
   (no guaranteed SiteHeader/Footer) — keep `<ErrorState>` self-contained.
 - Pun copy → locked in 8e2 (layout-independent; the Storybook prototype uses it).

@@ -10,11 +10,11 @@ layout-independent and renders in the Storybook prototype.
   cream / warm on dark). Out of bounds = the page is off the pitch. Owner did not
   object to the recommended line; revisitable at the Storybook review.
 - **Body:** `Deze pagina staat niet (meer) op het veld. Misschien is de link
-  verplaatst of bestaat ze niet meer.`
+verplaatst of bestaat ze niet meer.`
 - **Actions (two):**
   1. `Naar de homepage` (primary, jersey) → `/`
   2. **`Zoeken`** (secondary, ghost) → `/zoeken` — owner add: give a lost visitor
-     a way to *search* instead of only bouncing home. Keep this as the **single**
+     a way to _search_ instead of only bouncing home. Keep this as the **single**
      search affordance in the action row — do not also surface it inline in the
      body (avoids a duplicate search affordance).
 
@@ -25,8 +25,10 @@ layout-independent and renders in the Storybook prototype.
   side; grown-up, pairs with the 404 voice.
 - **Body:** `Er ging iets mis aan onze kant. Probeer het zo dadelijk opnieuw.`
 - **Actions (two):**
-  1. `Probeer opnieuw` (primary) → wired to the `reset()` callback from
-     `error.tsx` (must stay functional).
+  1. `Probeer opnieuw` (primary) → wired to the `retry()` callback from
+     `error.tsx` and `global-error.tsx` (must stay functional). Was `reset()`;
+     changed by the #3298 decision — `reset()` re-renders the payload that
+     already failed, `retry()` re-fetches first.
   2. `Naar de homepage` (ghost) → `/`
 
 ## Notes
@@ -35,5 +37,5 @@ layout-independent and renders in the Storybook prototype.
   an action pair; clean for the component API.
 - Buttons stay plain/clear — the wink is in the headline only (memory: owner
   rejected childish copy; "Geen treffers" register).
-- The `/zoeken` secondary on 404 is the only asymmetry vs 500 (which has reset +
+- The `/zoeken` secondary on 404 is the only asymmetry vs 500 (which has retry +
   home). Both fit a two-button row.
