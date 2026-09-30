@@ -13,8 +13,8 @@
     }
   },
   "scripts": {
-    "type-check": "tsgo --noEmit",
-    "build": "tsgo --build",
+    "type-check": "tsgo --noEmit && tsgo --noEmit -p tsconfig.vitest.json",
+    "build": "tsgo --build && tsgo --noEmit -p tsconfig.vitest.json",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint ."
