@@ -885,7 +885,9 @@ export function ArticleBody({
             )
           : null}
         {hasDropCap && dropCapText.length > 0 ? (
-          <DropCapParagraph tone="ink">{dropCapText}</DropCapParagraph>
+          <DropCapParagraph tone="ink" className="sm:text-body-lg">
+            {dropCapText}
+          </DropCapParagraph>
         ) : null}
         {afterDropCap.length > 0
           ? renderSegments(

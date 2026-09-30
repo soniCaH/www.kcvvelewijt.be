@@ -388,6 +388,23 @@ describe("<ArticleBody>", () => {
       expect(inner.className).toContain("text-body-md");
       expect(inner.className).toContain("sm:text-body-lg");
     });
+
+    // #3274 review finding A: the drop-cap paragraph sets its own
+    // `text-body-md` (DropCapParagraph's default, shared by other callers)
+    // and does not inherit the wrapper's size — without the `sm:text-body-lg`
+    // passed at the call site, the drop-cap paragraph would stay 16px at
+    // `sm` while the very next paragraph steps up to 18px.
+    it("steps the drop-cap paragraph up to sm:text-body-lg too, so it matches the rest of the body", () => {
+      const content = [
+        paragraph("First body paragraph is the drop cap."),
+        paragraph("Second body paragraph follows it."),
+      ];
+      const { container } = render(<ArticleBody content={content} />);
+      const dropCap = container.querySelector('[data-tone="ink"]');
+      expect(dropCap).not.toBeNull();
+      expect(dropCap?.className).toContain("text-body-md");
+      expect(dropCap?.className).toContain("sm:text-body-lg");
+    });
   });
 
   describe("EndMark closer", () => {
