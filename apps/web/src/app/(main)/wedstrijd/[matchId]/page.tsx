@@ -525,12 +525,9 @@ export default async function MatchPage({ params }: MatchPageProps) {
   // squads (review round 1, #2788) — a youth or cup match would otherwise
   // link straight into a hard 404 on a noindex, off-nav page, and a Reserven
   // one (Sanity `age` "A" too) into a 404 or a page showing only A/B (#3289).
-  const isSeniorLeagueFixture = hasOpponentPage(
-    match.competitionType,
-    kcvvTeam,
-  );
+  const hasOpponentLink = hasOpponentPage(match.competitionType, kcvvTeam);
   const opponentClub =
-    isSeniorLeagueFixture &&
+    hasOpponentLink &&
     !match.is_placeholder &&
     match.home_team.id !== match.away_team.id
       ? match.home_team.id === KCVV_CLUB_ID

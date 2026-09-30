@@ -17,6 +17,7 @@ import {
 import type { LineupPlayer } from "@/components/match/MatchLineup";
 import type { MatchLineupPlayer } from "@/lib/effect/schemas/match.schema";
 import { asRowKind } from "@/components/match/test-narrowing";
+import { RESERVEN_PSD_ID } from "@/lib/utils/group-teams";
 import { createMatchDetail } from "./match-detail.fixtures";
 
 describe("transformHomeTeam", () => {
@@ -523,7 +524,7 @@ describe("hasOpponentPage", () => {
   // Shapes per `selectSeniorTeams`: Reserven carries Sanity age "A" too.
   const aPloeg = { psdId: "1", age: "A", slug: "eerste-elftallen-a" };
   const bPloeg = { psdId: "2", age: "A", slug: "eerste-elftallen-b" };
-  const reserven = { psdId: "34", age: "A", slug: "reserven" };
+  const reserven = { psdId: RESERVEN_PSD_ID, age: "A", slug: "reserven" };
   const youth = { psdId: "9", age: "U15", slug: "u15" };
 
   it("admits league fixtures of the A and B squads", () => {
