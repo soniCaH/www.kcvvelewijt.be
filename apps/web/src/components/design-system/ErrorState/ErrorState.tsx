@@ -3,9 +3,10 @@
  *
  * One component renders both the not-found and server-error pages, parameterised
  * by `code` / `codeLine` / `pun` / `body` / `actions`. Self-contained on a cream
- * full-bleed surface (no SiteHeader/Footer of its own — those come from the root
- * layout) so it works at the root segment where `error.tsx` renders outside the
- * `(main)` layout.
+ * full-bleed surface (no SiteHeader/Footer of its own). On the 404 and in
+ * `error.tsx` the root layout supplies them; in `global-error.tsx` there is no
+ * layout at all and the page stands alone. Either way it works at the root
+ * segment, outside the `(main)` layout.
  *
  * Composition: a taped `<JerseyShirt>` carrying the HTTP code as its shirt number,
  * a mono code line, a serif italic pun, body, and a centred action row. This is
@@ -14,7 +15,8 @@
  *
  * Copy + actions are locked in `8e2-copy-locked.md`; buttons stay plain (the wink
  * lives in the headline only). The 500 "Probeer opnieuw" action is wired to the
- * `reset()` callback from `error.tsx` via an `onClick` action.
+ * `retry()` callback from `error.tsx` / `global-error.tsx` via an `onClick`
+ * action (was `reset()` until #3298).
  *
  * Spec: `docs/design/mockups/phase-8-errors/8e1-composition-locked.md` + `8e2`.
  */
@@ -42,7 +44,7 @@ interface ErrorStateActionExtra {
 export type ErrorStateLinkAction = Extract<StateAction, { href: string }> &
   ErrorStateActionExtra;
 
-/** A button action — renders a `<Button>` (e.g. the 500 `reset()`). */
+/** A button action — renders a `<Button>` (e.g. the 500 `retry()`). */
 export type ErrorStateButtonAction = Extract<
   StateAction,
   { onClick: () => void }

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
+import { serverErrorProps } from "@/app/server-error-state";
 import { ErrorState, type ErrorStateProps } from "./ErrorState";
 
 /**
@@ -42,14 +43,5 @@ export const NotFound404: Story = {
 
 export const ServerError500: Story = {
   name: "500 — Technische panne",
-  args: {
-    code: "500",
-    codeLine: "Fout 500 · er ging iets mis",
-    pun: "Technische panne",
-    body: "Er ging iets mis aan onze kant. Probeer het zo dadelijk opnieuw.",
-    actions: [
-      { label: "Probeer opnieuw", onClick: fn(), variant: "primary" },
-      { label: "Naar de homepage", href: "/", variant: "ghost" },
-    ],
-  },
+  args: serverErrorProps(fn()),
 };

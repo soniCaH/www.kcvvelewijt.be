@@ -1,24 +1,23 @@
 "use client";
 
-import Script from "next/script";
-import { IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import { RootDocument } from "./root-document";
 import { ServerErrorState } from "./server-error-state";
-
-// Same face and variable as `layout.tsx`: global-error replaces the root
-// layout, so it inherits neither the stylesheet nor the fonts.
-const ibmPlexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-  variable: "--font-ibm-plex-mono",
-});
 
 /**
  * 500 boundary for a crash in the root layout's own chrome (header, footer,
  * cookie banner …) or in `error.tsx` itself — `error.tsx` does not wrap the
- * layout above it (#3311). Owns its `<html>`/`<body>`, the stylesheet and the
- * fonts, and shows the same locked 500 screen as `error.tsx`.
+ * layout above it (#3311). Owns the document via the shared `<RootDocument>`,
+ * the stylesheet and the fonts, and shows the same locked 500 screen as
+ * `error.tsx`.
+ *
+ * Analytics: on a first-load crash this boundary reports nothing. The GTM
+ * loader + consent-default script (what creates `window.dataLayer`) live in
+ * the root layout, and a stored consent choice is only restored by
+ * `<CookieConsentBanner>`; mounting GTM here without the banner would load
+ * tracking with no way to honour or change consent, so `trackEvent` stays a
+ * no-op until `dataLayer` exists. After a client-side crash `dataLayer`
+ * survives from the layout and `error_view`/`error_action_click` fire as usual.
  *
  * No `metadata` export in a Client Component, so the tab title is a React
  * `<title>` element.
@@ -29,25 +28,11 @@ export default function GlobalError({
   error: Error & { digest?: string };
   retry: () => void;
 }) {
-  const typekitId = process.env.NEXT_PUBLIC_TYPEKIT_ID;
-
   return (
-    <html lang="nl" className={`${ibmPlexMono.variable} overflow-x-clip`}>
-      <head>
-        <title>Technische panne | KCVV Elewijt</title>
-        {/* Freight (Adobe Typekit), same async loader as `layout.tsx`. Without
-            it the metric-matched fallback stacks in globals.css still apply. */}
-        {typekitId && (
-          <Script id="typekit-init" strategy="afterInteractive">
-            {`(function(d){var s=d.createElement("script");s.src="https://use.typekit.net/${typekitId}.js";s.async=true;s.onload=function(){try{Typekit.load({async:true});}catch(e){console.error("Typekit load error:",e);}};d.head.appendChild(s);})(document);`}
-          </Script>
-        )}
-      </head>
-      <body className="flex min-h-screen flex-col overflow-x-clip">
-        <main className="flex flex-1 flex-col">
-          <ServerErrorState retry={retry} />
-        </main>
-      </body>
-    </html>
+    <RootDocument head={<title>Technische panne | KCVV Elewijt</title>}>
+      <main className="flex flex-1 flex-col">
+        <ServerErrorState retry={retry} />
+      </main>
+    </RootDocument>
   );
 }
