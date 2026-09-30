@@ -50,7 +50,7 @@
   button:focus-visible { outline: 2px solid var(--jersey-deep); outline-offset: 2px; }
 
   /* Today wall */
-  .wall { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+  .wall { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 16px; }
   .panel { background: var(--cream); border: 1px solid var(--cream-deep); padding: 16px 18px; }
   .panel h3 { font: 600 12px/1.2 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 12px; color: var(--jersey-deep); }
   .row { display: grid; grid-template-columns: 88px 1fr 34px; gap: 10px; align-items: baseline; padding-block: 5px; border-top: 1px dashed var(--cream-deep); }
@@ -81,7 +81,7 @@
   .meta { display: flex; gap: 8px; flex-wrap: wrap; color: var(--ink-muted); }
 
   /* Before / after */
-  .ba { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  .ba { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; }
   .ba > div > p { font: 600 11px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 8px; }
   .card { background: #fff; border: 1.5px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); padding: 18px; display: grid; gap: 12px; }
   .card .teams { font: 700 24px/1.1 var(--serif); letter-spacing: -0.02em; }
