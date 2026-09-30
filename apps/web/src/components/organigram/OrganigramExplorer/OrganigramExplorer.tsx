@@ -377,11 +377,15 @@ export function OrganigramExplorer({
         })}
       </ScrollRail>
 
-      {/* Stage */}
+      {/* Stage — `className` reaches ScrollOverlay's outer wrapper, the actual
+          flex item of the dialog. Its `min-h-0 flex-1` is what carries the
+          fix: without it the wrapper grows to the tree's height and the
+          track never scrolls (#3310). */}
       <ScrollOverlay
         direction="both"
         remeasureOn={[scaleStep]}
         overflowClassName="overflow-auto"
+        className="flex min-h-0 flex-1 flex-col"
         trackClassName="flex-1 px-4 py-6"
         fadeFromClassName="from-jersey-deep-dark"
         ariaLabel="Organigram-verkenner"

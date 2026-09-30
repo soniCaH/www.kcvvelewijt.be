@@ -46,6 +46,18 @@ const preview: Preview = {
           name: "Organigram Explorer Stage (1024)",
           styles: { width: "1024px", height: "800px" },
         },
+        // The organigram explorer's stage-bounds play fixtures (#3310): the
+        // shortest phone the club supports (320x568, where the stage used
+        // to run 418px past the dialog) and a 1440x900 desktop for the A++
+        // case. `kcvvMobile` (375x667) already covers the middle one.
+        kcvvExplorerPhone: {
+          name: "Organigram Explorer Phone (320x568)",
+          styles: { width: "320px", height: "568px" },
+        },
+        kcvvExplorerDesktop: {
+          name: "Organigram Explorer Desktop (1440x900)",
+          styles: { width: "1440px", height: "900px" },
+        },
         // `OrganigramSectionNav.stories.tsx`'s `SlotHeightMatchesTheChip*`
         // play fixtures need the exact 1280px the #3248 production
         // measurement used — no `MINIMAL_VIEWPORTS` entry reaches it.

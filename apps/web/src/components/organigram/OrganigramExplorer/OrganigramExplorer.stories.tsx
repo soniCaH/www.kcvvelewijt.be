@@ -112,3 +112,82 @@ export const ZoomOverflowsTheStage: Story = {
     await expect(canvas.getByLabelText("Scroll right")).toBeVisible();
   },
 };
+
+/**
+ * #3310 — the stage is a flex item of the `fixed inset-0` dialog, so its
+ * bottom edge must never pass the dialog's. `<ScrollOverlay>`'s outer
+ * wrapper is the flex item (only `className` reaches it), so a stage that
+ * sizes only its track lets the wrapper grow to the content's height: the
+ * track never overflows and the tree runs off the screen, unreachable.
+ */
+function stageBounds(canvasElement: HTMLElement) {
+  const canvas = within(canvasElement);
+  const dialog = canvas.getByRole("dialog").getBoundingClientRect();
+  const track = canvas.getByLabelText("Organigram-verkenner");
+  const stage = (track.parentElement as HTMLElement).getBoundingClientRect();
+  return { canvas, dialog, track, stage };
+}
+
+/** 320x568 — the tree is taller than the stage, so the track scrolls to reach every control (fan expanded). `!vr`. */
+export const StageIsBoundedOnAShortPhone: Story = {
+  tags: ["!vr"],
+  globals: { viewport: { value: "kcvvExplorerPhone" } },
+  play: async ({ canvasElement }) => {
+    const { canvas, dialog, track, stage } = stageBounds(canvasElement);
+    expect(stage.bottom).toBeLessThanOrEqual(dialog.bottom);
+    expect(track.scrollHeight).toBeGreaterThan(track.clientHeight);
+
+    // The root fan is capped (`childrenCap`, 7 of 11) behind a "+N meer" control.
+    await userEvent.click(canvas.getByRole("button", { name: /meer$/ }));
+    track.scrollTop = track.scrollHeight;
+    const clipBottom = track.getBoundingClientRect().bottom;
+    for (const control of canvas.getAllByRole("button")) {
+      // Scrolled to the end, nothing hangs below the track's clip edge (the
+      // top of the tree has scrolled up out of the track — that is the point).
+      expect(control.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+        clipBottom,
+      );
+    }
+  },
+};
+
+/** 375x667 — the stage used to run 23px past the dialog. `!vr`. */
+export const StageIsBoundedOnAPhone: Story = {
+  tags: ["!vr"],
+  globals: { viewport: { value: "kcvvMobile" } },
+  play: async ({ canvasElement }) => {
+    const { dialog, stage } = stageBounds(canvasElement);
+    expect(stage.bottom).toBeLessThanOrEqual(dialog.bottom);
+  },
+};
+
+/**
+ * 1440x900 at A++ — the stage reaches the dialog's bottom (no empty band) and
+ * the scaled tree sits inside the track. Measured 2026-09-30: no fixture
+ * overflows vertically at this size (`Opening`/`DeepWideNode` are ~530px tall
+ * scaled, against an 810px stage), so this asserts the bounds, not a scroll —
+ * the 320x568 story owns the vertical scroll. `!vr`.
+ */
+export const StageFillsTheDialogAtTheLargestZoom: Story = {
+  tags: ["!vr"],
+  globals: { viewport: { value: "kcvvExplorerDesktop" } },
+  play: async ({ canvasElement }) => {
+    const { canvas, dialog, track, stage } = stageBounds(canvasElement);
+    expect(stage.bottom).toBeLessThanOrEqual(dialog.bottom);
+
+    const tree = canvas.getByRole("group", { name: "Organisatiestructuur" });
+    const unscaledWidth = tree.getBoundingClientRect().width;
+    await userEvent.click(canvas.getByRole("button", { name: "A++" }));
+    // The 300ms scale transition must settle before the tree's box is final.
+    await waitFor(() => {
+      expect(tree.getBoundingClientRect().width).toBeGreaterThan(unscaledWidth);
+    });
+
+    const scaled = stageBounds(canvasElement);
+    // Stage reaches the dialog's bottom edge (border-2 = 2px) — no empty band.
+    expect(scaled.dialog.bottom - scaled.stage.bottom).toBeLessThanOrEqual(2);
+    expect(tree.getBoundingClientRect().bottom).toBeLessThanOrEqual(
+      track.getBoundingClientRect().bottom,
+    );
+  },
+};
