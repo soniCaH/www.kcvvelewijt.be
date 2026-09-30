@@ -47,7 +47,7 @@ export function UltrasSection({
           neighbouring paragraph's mb-4 to one 24px gap either side, rather
           than compounding with it or, if the gap utility were simply
           deleted, touching it outright. */}
-      <div className="text-body-md text-ink leading-relaxed [&_strong]:font-semibold [&>:not(p)]:my-6 [&>p]:max-w-[var(--container-prose)]">
+      <div className="text-body-md sm:text-body-lg text-ink [&_strong]:font-semibold [&>:not(p)]:my-6 [&>p]:max-w-[var(--container-prose)]">
         {children}
       </div>
     </section>

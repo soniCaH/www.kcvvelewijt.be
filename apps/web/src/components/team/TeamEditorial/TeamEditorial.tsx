@@ -107,7 +107,7 @@ export function TeamEditorial({
           >
             Het verhaal
           </EditorialHeading>
-          <div className="text-ink font-body mt-4 text-base leading-relaxed">
+          <div className="text-ink font-body text-body-md sm:text-body-lg mt-4">
             <PortableText value={body!} components={pullquoteComponents} />
           </div>
           {pullquoteText !== null ? (
@@ -132,7 +132,7 @@ export function TeamEditorial({
         <EditorialHeading level={3} size="display-sm" emphasis={{ text: "." }}>
           Trainingen
         </EditorialHeading>
-        <p className="text-ink font-body mt-4 text-base leading-relaxed">
+        <p className="text-ink font-body text-body-md sm:text-body-lg mt-4">
           De trainingsuren van {teamLabel} staan nog niet op de site. Je vindt
           ze in{" "}
           <a
@@ -157,7 +157,7 @@ export function TeamEditorial({
           >
             Contact
           </EditorialHeading>
-          <div className="text-ink font-body mt-4 text-base leading-relaxed">
+          <div className="text-ink font-body text-body-md sm:text-body-lg mt-4">
             <PortableText value={contactInfo!} />
           </div>
         </section>

@@ -100,7 +100,7 @@ export function BestuurPage({ header, body, staff = [] }: BestuurPageProps) {
             // column measures the full prose token, not the token minus its
             // own padding.
             <div className="border-jersey-deep border-l-4 pl-6">
-              <div className="text-ink font-body max-w-[var(--container-prose)] text-base leading-relaxed">
+              <div className="text-ink font-body text-body-md sm:text-body-lg max-w-[var(--container-prose)]">
                 <PortableText value={body} components={bodyComponents} />
               </div>
             </div>

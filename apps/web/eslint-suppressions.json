@@ -27,11 +27,6 @@
       "count": 1
     }
   },
-  "src/app/(main)/club/ultras/UltrasSection.tsx": {
-    "kcvv/no-off-ramp-leading": {
-      "count": 1
-    }
-  },
   "src/app/(main)/evenementen/[slug]/EventDetailCtas.tsx": {
     "kcvv/no-off-ramp-font-size": {
       "count": 1
@@ -220,11 +215,6 @@
       "count": 1
     },
     "kcvv/no-off-ramp-tracking": {
-      "count": 1
-    }
-  },
-  "src/components/club/BestuurPage/BestuurPage.tsx": {
-    "kcvv/no-off-ramp-leading": {
       "count": 1
     }
   },
@@ -801,11 +791,6 @@
       "count": 1
     }
   },
-  "src/components/player/BioBlock/BioBlock.tsx": {
-    "kcvv/no-off-ramp-leading": {
-      "count": 1
-    }
-  },
   "src/components/player/PlayerHero/PlayerHero.tsx": {
     "kcvv/no-off-ramp-tracking": {
       "count": 1
@@ -911,11 +896,6 @@
   "src/components/team/StandingsTable/StandingsTable.tsx": {
     "kcvv/no-off-ramp-tracking": {
       "count": 8
-    }
-  },
-  "src/components/team/TeamEditorial/TeamEditorial.tsx": {
-    "kcvv/no-off-ramp-leading": {
-      "count": 3
     }
   },
   "src/components/team/TeamEnrolmentCta/TeamEnrolmentCta.tsx": {
