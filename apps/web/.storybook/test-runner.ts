@@ -1,7 +1,7 @@
 import { type TestRunnerConfig, getStoryContext } from "@storybook/test-runner";
 import type { Page } from "@playwright/test";
 import { toMatchImageSnapshot } from "jest-image-snapshot";
-import { readFileSync } from "node:fs";
+import { appendFileSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { VR_FROZEN_NOW_ISO } from "../test/vr/frozen-clock.ts";
@@ -496,6 +496,11 @@ const config: TestRunnerConfig = {
     process.stderr.write(
       `[VR] start ${context.id} ${new Date().toISOString()}\n`,
     );
+    // CI hands every shard a list to append to, and the gate checks the lists
+    // together cover every story (scripts/vr-coverage.mjs, #3275).
+    if (process.env.VR_VISITED_LOG) {
+      appendFileSync(process.env.VR_VISITED_LOG, `${context.id}\n`);
+    }
     await page.evaluate(() => {
       (globalThis as { __VR_RESET_PRNG__?: () => void }).__VR_RESET_PRNG__?.();
     });

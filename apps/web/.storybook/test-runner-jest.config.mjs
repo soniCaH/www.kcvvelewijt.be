@@ -16,6 +16,8 @@ const config = {
   reporters: process.env.GITHUB_ACTIONS
     ? [...base.reporters, "github-actions"]
     : base.reporters,
+  // `--shard` must split the suite, not take a random third per shard (#3275).
+  testSequencer: "<rootDir>/apps/web/.storybook/stable-shard-sequencer.mjs",
 };
 
 export default config;
