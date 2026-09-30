@@ -108,9 +108,14 @@
       ]
     },
     {
-      "description": "Group React types together (including overrides)",
-      "groupName": "react types",
-      "matchPackageNames": ["@types/react", "@types/react-dom"]
+      "description": "Move React and its types in lockstep across every workspace. The sanity-studios group below used to own these for the studio files only, which split @types/react between the studios and web and broke web's type-check (two @types/react copies behind next/image).",
+      "groupName": "react",
+      "matchPackageNames": [
+        "react",
+        "react-dom",
+        "@types/react",
+        "@types/react-dom"
+      ]
     },
     {
       "description": "Group TypeScript packages",
@@ -150,6 +155,11 @@
       "labels": ["node-version", "major-update"]
     },
     {
+      "description": "Keep engines a range. The repo-wide rangeStrategy pin turned engines.node >=24 into an exact v26 pin, and pnpm then refused to install on the .nvmrc Node.",
+      "matchDepTypes": ["engines"],
+      "rangeStrategy": "auto"
+    },
+    {
       "description": "Sync @types/node with Node.js major version from .nvmrc",
       "matchPackageNames": ["@types/node"],
       "allowedVersions": "24.x",
@@ -165,7 +175,7 @@
       ]
     },
     {
-      "description": "Move sanity, @sanity/* and React in lockstep across the two studios and the two shared Sanity packages. A version split in any of them makes pnpm install a second sanity instance, and two sanity copies in one file break the studios' type-check (#3204). Scoped by file so @sanity/client in api/web/sanity-ops keeps its own groups.",
+      "description": "Move sanity and @sanity/* in lockstep across the two studios and the two shared Sanity packages (React moves repo-wide in the react group above). A version split in any of them makes pnpm install a second sanity instance, and two sanity copies in one file break the studios' type-check (#3204). Scoped by file so @sanity/client in api/web/sanity-ops keeps its own groups.",
       "groupName": "sanity studios",
       "matchFileNames": [
         "apps/studio/package.json",
@@ -173,14 +183,7 @@
         "packages/sanity-schemas/package.json",
         "packages/sanity-studio/package.json"
       ],
-      "matchPackageNames": [
-        "sanity",
-        "/^@sanity//",
-        "react",
-        "react-dom",
-        "@types/react",
-        "@types/react-dom"
-      ]
+      "matchPackageNames": ["sanity", "/^@sanity//"]
     }
   ],
   "vulnerabilityAlerts": {
