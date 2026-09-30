@@ -234,11 +234,36 @@ describe("vr-baseline-update.yml", () => {
     expect(jobMinutes).toBeGreaterThan(total);
   });
 
+  // The runner kills only a timed-out step's `docker exec`; the shard's
+  // `http-server` then keeps port 6006 and the next shard cannot start (#3272).
+  it("clears a timed-out shard's leftovers before shards 2 and 3", () => {
+    for (const step of captures.slice(1)) {
+      expect(step).toContain(
+        "pkill -f 'storybook-static|test-storybook|jest-worker|ms-playwright' || true",
+      );
+    }
+  });
+
   it("commits and pushes once, after the last shard", () => {
     const pushes = workflow.match(/git push origin/g) ?? [];
     expect(pushes).toHaveLength(1);
     expect(workflow.indexOf("git push origin")).toBeGreaterThan(
       workflow.lastIndexOf("vr:ci:update"),
     );
+  });
+});
+
+// `jest-image-snapshot` diffs in a `spawnSync` child by default, with no
+// timeout. A stuck child blocks the Jest worker's event loop, so no timer —
+// `--testTimeout` included — can end it, and the bot hung on one story until
+// the job was cancelled (#3272).
+describe("the VR image diff", () => {
+  it("runs in process, never in a spawnSync child", () => {
+    const runner = readFileSync(
+      join(ROOT, "apps/web/.storybook/test-runner.ts"),
+      "utf8",
+    );
+    const call = runner.match(/toMatchImageSnapshot\(\{[\s\S]*?\n\s*\}\);/);
+    expect(call?.[0]).toContain("runInProcess: true");
   });
 });

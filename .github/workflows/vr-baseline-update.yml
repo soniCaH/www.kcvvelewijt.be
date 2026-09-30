@@ -167,13 +167,20 @@ jobs:
         timeout-minutes: 12
         env:
           VR_SHARD: "2/3"
-        run: pnpm --filter @kcvv/web run vr:ci:update
+        run: |
+          # A timed-out step only loses its `docker exec`: the shard's server
+          # keeps port 6006, and its runner, Jest workers and Chromium keep the
+          # CPU (#3272).
+          pkill -f 'storybook-static|test-storybook|jest-worker|ms-playwright' || true
+          pnpm --filter @kcvv/web run vr:ci:update
       - name: Update baselines (3/3)
         if: ${{ !cancelled() }}
         timeout-minutes: 12
         env:
           VR_SHARD: "3/3"
-        run: pnpm --filter @kcvv/web run vr:ci:update
+        run: |
+          pkill -f 'storybook-static|test-storybook|jest-worker|ms-playwright' || true
+          pnpm --filter @kcvv/web run vr:ci:update
 
       - name: Commit and push baselines
         working-directory: ${{ github.workspace }}
