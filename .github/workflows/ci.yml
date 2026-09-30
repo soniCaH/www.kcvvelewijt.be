@@ -188,7 +188,7 @@ jobs:
       # reaches passes every step above while running nowhere (#3277). Asks
       # each runner which files it would run (`vitest list`, `playwright test
       # --list`) and fails on any tracked test or story file missing from its
-      # list. Lists, does not run: nothing here costs a test run. Lives in
+      # list, or owned by no layer of the script. Lists, does not run: nothing here costs a test run. Lives in
       # this job so it needs no required check of its own.
       - name: Every test file is picked up by a runner
         run: node apps/web/scripts/test-file-coverage.mjs

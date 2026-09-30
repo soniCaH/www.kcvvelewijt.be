@@ -44,6 +44,8 @@ The three places where Vitest's own include can drop a file silently:
 
 Every Vitest row above was also compared file by file, not only by count: the set of paths in the log's `✓` lines equals the set of tracked test files in each workspace (0 tracked-not-ran, 0 ran-not-tracked).
 
+The `apps/web` row says 382 because that is the tree at `833cac787`. This PR adds `apps/web/test/scripts/test-file-coverage.test.ts`, so the script on the merge commit prints `383 tracked, 383 listed` for that layer; the extra file is the self-count's own test.
+
 ### 2.2 E2E
 
 `playwright.config.ts` declares one project (`chromium`), `testDir: "."` and `testMatch: "**/*.spec.ts"`; `forbidOnly` is on in CI. All 6 tracked specs ran. The one skip is a per-viewport guard in the spec, visible in the diff.
@@ -69,10 +71,39 @@ Story level: a fresh `storybook build` at `833cac787` gives 1 357 index entries,
 
 ## 3. What the audit changed
 
-- New CI step **`Every test file is picked up by a runner`** in `Quality Checks + Build` (no new required check): `node apps/web/scripts/test-file-coverage.mjs`. It asks each runner which files it would run and fails on a tracked test or story file missing from the list. It lists; it does not run tests, so it adds seconds, not a test run.
+- New CI step **`Every test file is picked up by a runner`** in `Quality Checks + Build` (no new required check): `node apps/web/scripts/test-file-coverage.mjs`. Every tracked test or story file in the repo must be owned by one of its layers, and each layer asks its runner which files it would run; a file no layer owns, a file its runner does not list, a layer that owns nothing and a runner that lists nothing all fail. It lists; it does not run tests, so it adds seconds, not a test run.
 - Five tickets, all `needs-triage`: [#3283](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3283) (shellcheck), [#3284](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3284) (Turbo hash), [#3285](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3285) (E2E filter), [#3286](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3286) (type-check program), [#3287](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3287) (studio-staging build).
 - `.claude/CLAUDE.md`: test-layer table footnote for the new step; the `lint:sh` paragraph corrected.
 - [`test-suite-inventory.md`](./test-suite-inventory.md) is a dated baseline and stays as written. Its E2E figures (7 specs, 56 tests) differ from the 6 specs and 54 tests measured here because #3190 deleted two specs after 2026-09-22, not because either count is wrong; its Vitest file counts (web 370, api 39, sanity-studio 46, api-contract 5) have grown (382, 42, 56, 6).
+
+### Self-count shown red, then green
+
+Red: three strays added locally and never committed: `packages/sanity-schemas/src/validation/stray.test.ts` (a workspace no layer covers), `apps/web/test/e2e/x.test.ts` (under Playwright's directory, but not a `*.spec.ts`), and `apps/api/src/psd/venue.test.ts` renamed to `venue.test.tsx` (matches neither API include; plain `vitest run` stays green).
+
+```text
+::error::1 tracked test file(s) belong to no layer of scripts/test-file-coverage.mjs: packages/sanity-schemas/src/validation/stray.test.ts
+web unit (Vitest): every tracked file is listed (383 tracked, 383 listed).
+web Storybook play (Vitest addon): every tracked file is listed (209 tracked, 209 listed).
+::error::web E2E (Playwright): 1 tracked file(s) no runner lists: apps/web/test/e2e/x.test.ts
+::error::api (Vitest node + workerd): 1 tracked file(s) no runner lists: apps/api/src/psd/venue.test.tsx
+api-contract (Vitest): every tracked file is listed (6 tracked, 6 listed).
+sanity-studio (Vitest): every tracked file is listed (56 tracked, 56 listed).
+sanity-ops (Vitest): every tracked file is listed (2 tracked, 2 listed).
+exit=1
+```
+
+Green: strays removed, file restored.
+
+```text
+web unit (Vitest): every tracked file is listed (383 tracked, 383 listed).
+web Storybook play (Vitest addon): every tracked file is listed (209 tracked, 209 listed).
+web E2E (Playwright): every tracked file is listed (6 tracked, 6 listed).
+api (Vitest node + workerd): every tracked file is listed (42 tracked, 42 listed).
+api-contract (Vitest): every tracked file is listed (6 tracked, 6 listed).
+sanity-studio (Vitest): every tracked file is listed (56 tracked, 56 listed).
+sanity-ops (Vitest): every tracked file is listed (2 tracked, 2 listed).
+exit=0
+```
 
 ## 4. Commands that produced the numbers
 
