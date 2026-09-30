@@ -202,8 +202,18 @@ function determinismInitScript({
 // Stylesheet injected per story before screenshot. CSS keyframes/transitions
 // would otherwise fire when the viewport resizes between mobile/tablet/desktop
 // captures, leaving the second and third screenshots mid-animation.
+//
+// `animation-direction: normal` is load-bearing (#3314). Storybook's own
+// `pauseAnimations` (it runs whenever the UA matches `StorybookTestRunner`)
+// parks every animation paused at `animation-direction: reverse`, so t=0 is the
+// END frame. A zero duration moves that animation into its "after" phase, where
+// `reverse` flips the finished frame back to the FIRST one — a `both`-fill enter
+// animation (`.spotlight-pop`) then froze on `opacity: 0` and the whole
+// organigram-explorer stage was baselined empty. `normal` + zero duration lands
+// on the end frame, which is what a static screenshot should show.
 const DETERMINISM_STYLESHEET = `
 *, *::before, *::after {
+  animation-direction: normal !important;
   animation-duration: 0s !important;
   animation-delay: 0s !important;
   animation-iteration-count: 1 !important;
@@ -215,6 +225,30 @@ input, textarea {
   caret-color: transparent !important;
 }
 `;
+
+// Runs in the page context. Names every finite enter animation that holds its
+// start (`from`) frame after the determinism stylesheet landed — the element is
+// then captured as the animation's first frame, not the finished one (#3314:
+// `.spotlight-pop` froze at `opacity: 0`, so all 21 organigram-explorer
+// baselines showed an empty stage). `progress` is the animation's *transformed*
+// progress (direction applied), so 1 is the `to` keyframe; an animation that
+// only fills before/after nothing (`fill: none`/`auto`) leaves no frame to hold.
+function findAnimationsFrozenAtStart() {
+  return document.getAnimations().flatMap((animation) => {
+    const effect = animation.effect;
+    if (!(effect instanceof KeyframeEffect)) return [];
+    const timing = effect.getComputedTiming();
+    if (timing.iterations === Infinity) return [];
+    if (timing.fill !== "forwards" && timing.fill !== "both") return [];
+    if (timing.progress === 1) return [];
+    const target = effect.target;
+    const name =
+      animation instanceof CSSAnimation ? animation.animationName : "(waapi)";
+    return [
+      `${name} on <${target?.tagName.toLowerCase()} class="${target?.className}"> (progress ${timing.progress})`,
+    ];
+  });
+}
 
 // Runs in the page context. `document.fonts.ready` alone is NOT a reliable
 // "fonts are applied" signal in this repo: Adobe Typekit injects its
@@ -840,6 +874,18 @@ const config: TestRunnerConfig = {
                 `${assertion.description}`,
             );
           }
+        }
+
+        // Fail loudly rather than baseline a half-rendered frame (#3314).
+        const frozen = await page.evaluate(findAnimationsFrozenAtStart);
+        if (frozen.length > 0) {
+          throw new Error(
+            `[VR] Story "${context.id}" at the ${name} viewport has ` +
+              `${frozen.length} enter animation(s) frozen on their first ` +
+              `frame (Storybook's own \`pauseAnimations\` holds every ` +
+              `animation paused with \`animation-direction: reverse\`, which ` +
+              `DETERMINISM_STYLESHEET must not undo): ${frozen.join("; ")}`,
+          );
         }
 
         // `fullPage: true` would extend horizontally past `vp.width` whenever

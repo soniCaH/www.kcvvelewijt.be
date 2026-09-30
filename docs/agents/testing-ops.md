@@ -692,7 +692,13 @@ the following stubs before any story renders:
 - **CSS animations and transitions** — disabled via a stylesheet injected per
   story before screenshot. Belt-and-braces alongside Playwright's
   `animations: "disabled"` screenshot option, which only stops CSS keyframes
-  but not transition firing on viewport resize.
+  but not transition firing on viewport resize. The stylesheet forces
+  `animation-direction: normal` because Storybook's own `pauseAnimations`
+  parks every animation paused at `reverse`, and a zero duration turns that
+  into the FIRST frame: a `both`-fill enter animation (`.spotlight-pop`)
+  froze at `opacity: 0` and blanked all 21 organigram-explorer baselines
+  (#3314). `postVisit` now fails any story that still holds a finite
+  `forwards`/`both` animation on its first frame.
 - **Font loading** — every viewport awaits `document.fonts.ready` after the
   resize so web fonts are committed before each capture.
 - **Caret blink** — `caret-color: transparent` ensures `<input>` and
