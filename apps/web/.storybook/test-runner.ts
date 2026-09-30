@@ -10,6 +10,7 @@ import {
   type VrViewportName,
   unscopedViewportOverrideMessage,
 } from "../test/vr/viewport-scoping.ts";
+import { animationsNotOnFinalFrame } from "../test/vr/animation-end-frame.ts";
 import { STRUCTURAL_ASSERTIONS } from "../test/vr/structural-assertions.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -202,8 +203,18 @@ function determinismInitScript({
 // Stylesheet injected per story before screenshot. CSS keyframes/transitions
 // would otherwise fire when the viewport resizes between mobile/tablet/desktop
 // captures, leaving the second and third screenshots mid-animation.
+//
+// `animation-direction: normal` is load-bearing (#3314). Storybook's own
+// `pauseAnimations` (it runs whenever the UA matches `StorybookTestRunner`)
+// parks every animation paused at `animation-direction: reverse`, so t=0 is the
+// END frame. A zero duration moves that animation into its "after" phase, where
+// `reverse` flips the finished frame back to the FIRST one — a `both`-fill enter
+// animation (`.spotlight-pop`) then froze on `opacity: 0` and the whole
+// organigram-explorer stage was baselined empty. `normal` + zero duration lands
+// on the end frame, which is what a static screenshot should show.
 const DETERMINISM_STYLESHEET = `
 *, *::before, *::after {
+  animation-direction: normal !important;
   animation-duration: 0s !important;
   animation-delay: 0s !important;
   animation-iteration-count: 1 !important;
@@ -215,6 +226,32 @@ input, textarea {
   caret-color: transparent !important;
 }
 `;
+
+// Runs in the page context, so it is self-contained (imported helpers do not
+// exist there) and returns plain data; `animationsNotOnFinalFrame`
+// (test/vr/animation-end-frame.ts) decides. CSS animations only: the
+// determinism stylesheet cannot reach WAAPI `element.animate()` ones, and
+// Playwright's `animations: "disabled"` finishes those at screenshot time.
+function collectCssAnimations() {
+  return document.getAnimations().flatMap((animation) => {
+    const effect = animation.effect;
+    if (!(animation instanceof CSSAnimation)) return [];
+    if (!(effect instanceof KeyframeEffect)) return [];
+    const timing = effect.getComputedTiming();
+    const target = effect.target;
+    const cls = target?.getAttribute("class");
+    return [
+      {
+        name: animation.animationName,
+        fill: timing.fill ?? "auto",
+        progress: timing.progress,
+        target:
+          `<${target?.tagName.toLowerCase()}${cls ? ` class="${cls}"` : ""}>` +
+          (effect.pseudoElement ?? ""),
+      },
+    ];
+  });
+}
 
 // Runs in the page context. `document.fonts.ready` alone is NOT a reliable
 // "fonts are applied" signal in this repo: Adobe Typekit injects its
@@ -840,6 +877,20 @@ const config: TestRunnerConfig = {
                 `${assertion.description}`,
             );
           }
+        }
+
+        // Fail loudly rather than baseline a half-rendered frame (#3314).
+        const notFinal = animationsNotOnFinalFrame(
+          await page.evaluate(collectCssAnimations),
+        );
+        if (notFinal.length > 0) {
+          throw new Error(
+            `[VR] Story "${context.id}" at the ${name} viewport has ` +
+              `${notFinal.length} animation(s) not on their final frame ` +
+              `(known cause: Storybook's \`pauseAnimations\` holds every ` +
+              `animation paused with \`animation-direction: reverse\`, which ` +
+              `DETERMINISM_STYLESHEET must not undo): ${notFinal.join("; ")}`,
+          );
         }
 
         // `fullPage: true` would extend horizontally past `vp.width` whenever

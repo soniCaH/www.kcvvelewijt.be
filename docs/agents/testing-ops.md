@@ -689,10 +689,17 @@ the following stubs before any story renders:
   `0x1234abcd`). The runner re-seeds before every story (`preVisit` calls
   `__VR_RESET_PRNG__()`) so consumption order is independent of which other
   story rendered first in the same `.stories.tsx` file.
-- **CSS animations and transitions** — disabled via a stylesheet injected per
-  story before screenshot. Belt-and-braces alongside Playwright's
-  `animations: "disabled"` screenshot option, which only stops CSS keyframes
-  but not transition firing on viewport resize.
+- **CSS animations and transitions** — forced to zero duration by a stylesheet
+  injected per story before screenshot; Playwright's `animations: "disabled"`
+  does not replace it (it leaves transitions firing on viewport resize), so the
+  stylesheet's animation rules are required, not optional. It forces
+  `animation-direction: normal` because Storybook's own `pauseAnimations`
+  parks every animation paused at `reverse`, and a zero duration turns that
+  into the FIRST frame: a `both`-fill enter animation (`.spotlight-pop`)
+  froze at `opacity: 0` and blanked all 21 organigram-explorer baselines
+  (#3314). `postVisit` now fails any story where a CSS animation with
+  `forwards`/`both` fill is not on its final frame
+  (`test/vr/animation-end-frame.ts`).
 - **Font loading** — every viewport awaits `document.fonts.ready` after the
   resize so web fonts are committed before each capture.
 - **Caret blink** — `caret-color: transparent` ensures `<input>` and
