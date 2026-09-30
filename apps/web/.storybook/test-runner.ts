@@ -123,9 +123,9 @@ const PRNG_SEED = 0x1234abcd;
 const IMAGE_LOAD_TIMEOUT_MS = 1500;
 // Cap on each animation-frame wait in `postVisit`. A frame normally lands in
 // ~16 ms, but `requestAnimationFrame` never fires while Chromium is not
-// painting, and an uncapped wait there is one of the ways a baseline run hung
-// on its last file with no error at all (#3270). Past the cap we take the
-// screenshot anyway: a missed frame is a diff, a hang is a cancelled job.
+// painting. Past the cap we take the screenshot anyway: a missed frame is a
+// diff, a stuck wait is a story that burns its whole `--testTimeout`. Hardening
+// from #3270 — not that hang's proven cause, which escaped the test timeout.
 const FRAME_WAIT_TIMEOUT_MS = 1000;
 // Cap on the per-viewport `page.waitForLoadState("networkidle")` wait. Storybook
 // keeps a few long-poll connections open for HMR, so networkidle is a soft
@@ -766,8 +766,8 @@ const config: TestRunnerConfig = {
             // tablet tile flake) and is intentionally applied to every image,
             // not just NewsGrid's, so any future story with srcset-driven
             // tiles inherits the same guarantee.
-            // Capped like the load wait above: `decode()` can stay pending
-            // (#3270), and `allSettled` alone waits for every one of them.
+            // Capped like the load wait above: `decode()` can stay pending,
+            // and `allSettled` alone waits for every one of them.
             await Promise.race([
               Promise.allSettled(
                 Array.from(document.images).map((img) =>

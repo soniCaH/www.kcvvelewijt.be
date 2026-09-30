@@ -79,10 +79,11 @@ jobs:
     # test-runner with -u ~1 min for a handful of stories, commit/push <30 s).
     # A full from-empty regen (e.g. #1376 reset) captures the entire vr-tagged
     # set over the 3 shard steps below — comparable cost to the
-    # `visual-regression` verify job — so allow 30 min of headroom; each shard
-    # step has its own tighter limit so a genuine hang fails fast (default
-    # GitHub timeout is 6 h, orders of magnitude too long).
-    timeout-minutes: 30
+    # `visual-regression` verify job. Each shard step has its own 12 min limit
+    # so a genuine hang fails fast; the job limit covers all three plus about
+    # 9 min of setup, so a slow shard 3 still hits its own limit, not this one
+    # (default GitHub timeout is 6 h, orders of magnitude too long).
+    timeout-minutes: 45
     permissions:
       contents: read
       pull-requests: write
@@ -160,11 +161,15 @@ jobs:
           VR_SHARD: "1/3"
         run: pnpm --filter @kcvv/web run vr:ci:update
       - name: Update baselines (2/3)
+        # Run even when an earlier shard failed, so one bot run reports every
+        # failing story. The commit step below still needs all three to pass.
+        if: ${{ !cancelled() }}
         timeout-minutes: 12
         env:
           VR_SHARD: "2/3"
         run: pnpm --filter @kcvv/web run vr:ci:update
       - name: Update baselines (3/3)
+        if: ${{ !cancelled() }}
         timeout-minutes: 12
         env:
           VR_SHARD: "3/3"

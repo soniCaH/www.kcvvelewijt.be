@@ -181,6 +181,13 @@ describe("the vr:run:update CI guard", () => {
     expect(result.stderr.toString()).toContain("vr:update:story");
   });
 
+  // One unsharded `-u` process over all ~209 story files hung on its last
+  // file in four bot runs in a row, a different file each time (#3270). The
+  // verify job, split over 3 shards, never has.
+  it("passes VR_SHARD to test-storybook, like vr:run", () => {
+    expect(script).toContain("${VR_SHARD:+--shard $VR_SHARD}");
+  });
+
   it("lets CI=true through", () => {
     expect(run("true").stdout.toString()).toContain("REACHED");
   });
@@ -191,22 +198,6 @@ describe("the vr:run:update CI guard", () => {
     const prefetch = script.indexOf("node scripts/prefetch-typekit.mjs &&");
     expect(prefetch).toBeGreaterThan(-1);
     expect(prefetch).toBeLessThan(script.indexOf("test-storybook"));
-  });
-});
-
-// One unsharded `-u` process over all ~209 story files hung on its last file
-// in four bot runs in a row, a different file each time (#3270). The verify
-// job, split over 3 shards, never has.
-describe("the vr:run:update shard", () => {
-  const scripts = JSON.parse(
-    readFileSync(join(ROOT, "apps/web/package.json"), "utf8"),
-  ).scripts as Record<string, string>;
-
-  it("passes VR_SHARD to test-storybook, like vr:run", () => {
-    expect(scripts["vr:run"]).toContain("${VR_SHARD:+--shard $VR_SHARD}");
-    expect(scripts["vr:run:update"]).toContain(
-      "${VR_SHARD:+--shard $VR_SHARD}",
-    );
   });
 });
 
@@ -230,9 +221,22 @@ describe("vr-baseline-update.yml", () => {
     }
   });
 
+  it("gives the job room for every shard's own limit to fire first", () => {
+    const stepMinutes = captures.map((step) =>
+      Number(step.match(/timeout-minutes: (\d+)/)?.[1]),
+    );
+    const jobMinutes = Number(
+      workflow
+        .slice(workflow.indexOf("  update-baselines:"))
+        .match(/\n    timeout-minutes: (\d+)/)?.[1],
+    );
+    const total = stepMinutes.reduce((sum, minutes) => sum + minutes, 0);
+    expect(jobMinutes).toBeGreaterThan(total);
+  });
+
   it("commits and pushes once, after the last shard", () => {
-    const commits = workflow.match(/git push origin/g) ?? [];
-    expect(commits).toHaveLength(1);
+    const pushes = workflow.match(/git push origin/g) ?? [];
+    expect(pushes).toHaveLength(1);
     expect(workflow.indexOf("git push origin")).toBeGreaterThan(
       workflow.lastIndexOf("vr:ci:update"),
     );
