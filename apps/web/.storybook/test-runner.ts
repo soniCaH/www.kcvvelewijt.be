@@ -121,6 +121,12 @@ const PRNG_SEED = 0x1234abcd;
 // Cap on the per-viewport image-load wait. A broken image must not hang the
 // runner, but we still need long enough for a real srcset swap to settle.
 const IMAGE_LOAD_TIMEOUT_MS = 1500;
+// Cap on each animation-frame wait in `postVisit`. A frame normally lands in
+// ~16 ms, but `requestAnimationFrame` never fires while Chromium is not
+// painting, and an uncapped wait there is one of the ways a baseline run hung
+// on its last file with no error at all (#3270). Past the cap we take the
+// screenshot anyway: a missed frame is a diff, a hang is a cancelled job.
+const FRAME_WAIT_TIMEOUT_MS = 1000;
 // Cap on the per-viewport `page.waitForLoadState("networkidle")` wait. Storybook
 // keeps a few long-poll connections open for HMR, so networkidle is a soft
 // signal — if it doesn't resolve in time we still fall through to the explicit
@@ -484,6 +490,12 @@ const config: TestRunnerConfig = {
   // this, every story past the first inherits whatever state the previous
   // story left behind.
   async preVisit(page, context) {
+    // Straight to stderr, not `console`: Jest buffers a file's console output
+    // until the file is done, so a story that hangs would never be named.
+    // With this line the live CI log shows the last story that started (#3270).
+    process.stderr.write(
+      `[VR] start ${context.id} ${new Date().toISOString()}\n`,
+    );
     await page.evaluate(() => {
       (globalThis as { __VR_RESET_PRNG__?: () => void }).__VR_RESET_PRNG__?.();
     });
@@ -692,13 +704,18 @@ const config: TestRunnerConfig = {
         // empty even after the eager flip. Scroll to bottom + back to top
         // first so every IO callback fires, then flip the attribute as a
         // belt-and-braces, then wait. Test-runner-only.
-        await page.evaluate(async () => {
+        await page.evaluate(async (frameTimeoutMs: number) => {
+          const nextFrame = () =>
+            Promise.race([
+              new Promise((r) => requestAnimationFrame(() => r(undefined))),
+              new Promise((r) => setTimeout(r, frameTimeoutMs)),
+            ]);
           const fullHeight = document.documentElement.scrollHeight;
           window.scrollTo(0, fullHeight);
-          await new Promise((r) => requestAnimationFrame(() => r(undefined)));
+          await nextFrame();
           window.scrollTo(0, 0);
-          await new Promise((r) => requestAnimationFrame(() => r(undefined)));
-        });
+          await nextFrame();
+        }, FRAME_WAIT_TIMEOUT_MS);
         // After `setViewportSize`, the browser may pick a different `srcset`
         // candidate for every `<img>` and kick off a fresh network request. Wait
         // for the network to settle so the per-image load/decode pair below
@@ -749,13 +766,18 @@ const config: TestRunnerConfig = {
             // tablet tile flake) and is intentionally applied to every image,
             // not just NewsGrid's, so any future story with srcset-driven
             // tiles inherits the same guarantee.
-            await Promise.allSettled(
-              Array.from(document.images).map((img) =>
-                img.decode().catch(() => {
-                  console.warn(`[VR] image failed to decode: ${img.src}`);
-                }),
+            // Capped like the load wait above: `decode()` can stay pending
+            // (#3270), and `allSettled` alone waits for every one of them.
+            await Promise.race([
+              Promise.allSettled(
+                Array.from(document.images).map((img) =>
+                  img.decode().catch(() => {
+                    console.warn(`[VR] image failed to decode: ${img.src}`);
+                  }),
+                ),
               ),
-            );
+              new Promise((resolve) => setTimeout(resolve, loadTimeoutMs)),
+            ]);
           },
           [IMAGE_LOAD_TIMEOUT_MS] as [number],
         );
@@ -763,12 +785,14 @@ const config: TestRunnerConfig = {
         // (e.g. useScrollHint in FilterTabs) and the React re-renders they
         // trigger have been painted before the screenshot is taken.
         await page.evaluate(
-          () =>
+          (frameTimeoutMs: number) =>
             new Promise<void>((resolve) => {
               requestAnimationFrame(() =>
                 requestAnimationFrame(() => resolve()),
               );
+              setTimeout(resolve, frameTimeoutMs);
             }),
+          FRAME_WAIT_TIMEOUT_MS,
         );
 
         // Structural assertions (#2861) scoped to this viewport — real

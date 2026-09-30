@@ -78,9 +78,10 @@ jobs:
     # Steady-state drift update is ~5 min (storybook build ~30 s, install ~1 min,
     # test-runner with -u ~1 min for a handful of stories, commit/push <30 s).
     # A full from-empty regen (e.g. #1376 reset) captures the entire vr-tagged
-    # set in one pass — comparable cost to the `visual-regression` verify job —
-    # so allow 30 min of headroom while still failing fast on a genuine hang
-    # (default GitHub timeout is 6 h, orders of magnitude too long).
+    # set over the 3 shard steps below — comparable cost to the
+    # `visual-regression` verify job — so allow 30 min of headroom; each shard
+    # step has its own tighter limit so a genuine hang fails fast (default
+    # GitHub timeout is 6 h, orders of magnitude too long).
     timeout-minutes: 30
     permissions:
       contents: read
@@ -149,7 +150,24 @@ jobs:
           NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ vars.NEXT_PUBLIC_SANITY_PROJECT_ID }}
           NEXT_PUBLIC_SANITY_DATASET: ${{ vars.NEXT_PUBLIC_SANITY_DATASET }}
 
-      - name: Update baselines
+      - name: Update baselines (1/3)
+        # One unsharded process over every story file hung on its last file in
+        # four runs in a row, a different file each time (#3270). Three smaller
+        # processes, like the verify job, each with its own limit so a hang
+        # fails in minutes. Same job, so there is still one commit and push.
+        timeout-minutes: 12
+        env:
+          VR_SHARD: "1/3"
+        run: pnpm --filter @kcvv/web run vr:ci:update
+      - name: Update baselines (2/3)
+        timeout-minutes: 12
+        env:
+          VR_SHARD: "2/3"
+        run: pnpm --filter @kcvv/web run vr:ci:update
+      - name: Update baselines (3/3)
+        timeout-minutes: 12
+        env:
+          VR_SHARD: "3/3"
         run: pnpm --filter @kcvv/web run vr:ci:update
 
       - name: Commit and push baselines

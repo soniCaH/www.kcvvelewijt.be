@@ -193,3 +193,48 @@ describe("the vr:run:update CI guard", () => {
     expect(prefetch).toBeLessThan(script.indexOf("test-storybook"));
   });
 });
+
+// One unsharded `-u` process over all ~209 story files hung on its last file
+// in four bot runs in a row, a different file each time (#3270). The verify
+// job, split over 3 shards, never has.
+describe("the vr:run:update shard", () => {
+  const scripts = JSON.parse(
+    readFileSync(join(ROOT, "apps/web/package.json"), "utf8"),
+  ).scripts as Record<string, string>;
+
+  it("passes VR_SHARD to test-storybook, like vr:run", () => {
+    expect(scripts["vr:run"]).toContain("${VR_SHARD:+--shard $VR_SHARD}");
+    expect(scripts["vr:run:update"]).toContain(
+      "${VR_SHARD:+--shard $VR_SHARD}",
+    );
+  });
+});
+
+describe("vr-baseline-update.yml", () => {
+  const workflow = readFileSync(
+    join(ROOT, ".github/workflows/vr-baseline-update.yml"),
+    "utf8",
+  );
+  // ponytail: a text split on the step marker, not a YAML parser — apps/web
+  // has no YAML dependency, and every step in this file starts the same way.
+  const captures = workflow
+    .split(/\n\s+- name: /)
+    .filter((step) => step.includes("vr:ci:update"));
+
+  it("runs the update in 3 shards, each with its own time limit", () => {
+    expect(
+      captures.map((step) => step.match(/VR_SHARD: "?(\d\/\d)"?/)?.[1]),
+    ).toEqual(["1/3", "2/3", "3/3"]);
+    for (const step of captures) {
+      expect(step).toMatch(/timeout-minutes: \d+/);
+    }
+  });
+
+  it("commits and pushes once, after the last shard", () => {
+    const commits = workflow.match(/git push origin/g) ?? [];
+    expect(commits).toHaveLength(1);
+    expect(workflow.indexOf("git push origin")).toBeGreaterThan(
+      workflow.lastIndexOf("vr:ci:update"),
+    );
+  });
+});
