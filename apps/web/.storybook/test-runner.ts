@@ -170,15 +170,13 @@ function determinismInitScript({
   prngSeed: number;
 }) {
   const RealDate = Date;
-  function StubDate(
-    this: unknown,
-    ...args: ConstructorParameters<typeof Date>
-  ) {
+  // `unknown[]`, not `ConstructorParameters<typeof Date>`: that resolves to
+  // the last overload (year, monthIndex, ...), so `args.length === 0` — the
+  // live `new Date()` branch — read as dead to the type-checker (TS2367).
+  function StubDate(this: unknown, ...args: unknown[]) {
     if (!(this instanceof StubDate)) return new RealDate(fixedNowMs).toString();
     if (args.length === 0) return new RealDate(fixedNowMs);
-    return new (
-      RealDate as new (...a: ConstructorParameters<typeof Date>) => Date
-    )(...args);
+    return new (RealDate as new (...a: unknown[]) => Date)(...args);
   }
   StubDate.prototype = RealDate.prototype;
   StubDate.now = () => fixedNowMs;
@@ -343,7 +341,10 @@ const config: TestRunnerConfig = {
     // moved. Zero means Storybook stopped calling it and the workaround is
     // dead code. Nothing else would ever tell us: no version is pinned, so
     // Renovate has nothing to surface.
-    if (globalThis.__KCVV_MODULE_REGISTER_CALLS__ === 0) {
+    if (
+      (globalThis as { __KCVV_MODULE_REGISTER_CALLS__?: number })
+        .__KCVV_MODULE_REGISTER_CALLS__ === 0
+    ) {
       throw new Error(
         "@storybook/test-runner no longer calls module.register(). The " +
           "workaround is obsolete: delete apps/web/.storybook/" +
