@@ -173,14 +173,15 @@ Pull requests only (#3151) — the workflow no longer triggers on push to
 `on:` triggers, so a PR outside these paths still reports the `E2E` check
 (skipped, counts as passing) instead of leaving it pending forever.
 
-Path triggers are deliberately **distinct from the VR job's**:
+Path triggers match `ci.yml`'s `web` filter (#3285) — broad globs, so a new
+build input can't fall outside them:
 
-- Included: `apps/web/src/**`, `apps/web/public/**`,
-  `apps/web/package.json`, `apps/web/test/e2e/**`,
-  `packages/api-contract/**`, root `package.json`, `pnpm-lock.yaml`,
+- Included: `apps/web/**`, `packages/api-contract/**`,
+  `packages/sanity-schemas/**`, root `package.json`, `pnpm-lock.yaml`,
   `pnpm-workspace.yaml`, `.nvmrc`, `.github/workflows/e2e.yml`.
-- Excluded: `apps/web/.storybook/**`, `apps/web/test/vr/**` (Storybook-only
-  paths that don't affect a Playwright-against-`next start` run).
+- Nothing inside `apps/web/` is excluded, so a story- or baseline-only change
+  also runs the suite (owner's call: a glob can't drift, about 3 extra runs a
+  week).
 
 Failure uploads `playwright-report/` and `test-results/` (traces,
 screenshots, video) as artifacts with 14-day retention.
