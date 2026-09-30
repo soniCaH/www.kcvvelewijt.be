@@ -184,6 +184,15 @@ jobs:
       - name: Run Storybook play tests
         run: pnpm --filter @kcvv/web run test:storybook
 
+      # A runner exits 0 when SOME files match, so a test file no `include`
+      # reaches passes every step above while running nowhere (#3277). Asks
+      # each runner which files it would run (`vitest list`, `playwright test
+      # --list`) and fails on any tracked test or story file missing from its
+      # list, or owned by no layer of the script. Lists, does not run: nothing here costs a test run. Lives in
+      # this job so it needs no required check of its own.
+      - name: Every test file is picked up by a runner
+        run: node apps/web/scripts/test-file-coverage.mjs
+
       - name: Lint API
         run: npx turbo lint --filter=@kcvv/api --filter=@kcvv/api-contract
 
