@@ -16,6 +16,10 @@ import {
 } from "@/lib/utils/match-display";
 import { assertNever } from "@/lib/utils/assert-never";
 import { extractMatchTime } from "@/lib/utils/match-time";
+import {
+  selectSeniorTeams,
+  type SeniorTeamCandidate,
+} from "@/components/home/FirstTeamsBlock/first-teams";
 
 /**
  * Convert a match's home team into props suitable for the MatchHero component.
@@ -209,4 +213,22 @@ export function formatMatchDescription(match: MatchDetail): string {
   const dateStr = toMatchDisplayZone(match.date).toFormat("cccc d MMMM yyyy");
 
   return `${title} - ${competition} op ${dateStr}`;
+}
+
+/**
+ * Whether a match links to `/tegenstander/[clubId]`: a league fixture played
+ * by a squad `selectSeniorTeams` admits (A, then B). That page reads only
+ * those squads' opponent history, so asking the same selector keeps the two
+ * from drifting — a local `age === "A"` test let Reserven (Sanity `age` "A")
+ * through to a page that 404s or shows only the A/B record (#3289).
+ */
+export function hasOpponentPage(
+  competitionType: MatchDetail["competitionType"],
+  kcvvTeam: SeniorTeamCandidate | undefined,
+): boolean {
+  return (
+    competitionType === "league" &&
+    !!kcvvTeam &&
+    selectSeniorTeams([kcvvTeam]).length > 0
+  );
 }

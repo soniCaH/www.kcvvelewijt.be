@@ -84,6 +84,7 @@ import {
   enrichLineupWithKeeperFlag,
   formatMatchTitle,
   formatMatchDescription,
+  hasOpponentPage,
 } from "./utils";
 
 interface MatchPageProps {
@@ -518,15 +519,15 @@ export default async function MatchPage({ params }: MatchPageProps) {
   // not a Sanity document (opponent clubs have none). No card on a
   // pitch-reservation placeholder (#2606, both sides share KCVV's own club
   // id) — "the opponent" is meaningless there. `/tegenstander/[clubId]`
-  // only ever queries the senior "A" team's opponent history and 404s
-  // (rather than rendering an empty history) when that team has never
-  // played the given club, so the card is additionally gated to a senior
-  // league fixture (review round 1, #2788) — a youth or cup match would
-  // otherwise link straight into a hard 404 on a noindex, off-nav page.
-  const isSeniorLeagueFixture =
-    match.competitionType === "league" && kcvvTeam?.age === "A";
+  // renders one section per flagship squad `selectSeniorTeams` admits (A,
+  // then B) and 404s when none of them has ever played the given club, so
+  // the card is additionally gated to a league fixture of one of those
+  // squads (review round 1, #2788) — a youth or cup match would otherwise
+  // link straight into a hard 404 on a noindex, off-nav page, and a Reserven
+  // one (Sanity `age` "A" too) into a 404 or a page showing only A/B (#3289).
+  const hasOpponentLink = hasOpponentPage(match.competitionType, kcvvTeam);
   const opponentClub =
-    isSeniorLeagueFixture &&
+    hasOpponentLink &&
     !match.is_placeholder &&
     match.home_team.id !== match.away_team.id
       ? match.home_team.id === KCVV_CLUB_ID

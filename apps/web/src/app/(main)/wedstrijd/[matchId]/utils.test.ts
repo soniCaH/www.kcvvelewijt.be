@@ -12,10 +12,12 @@ import {
   formatMatchTitle,
   formatMatchDescription,
   matchDetailToHeroRow,
+  hasOpponentPage,
 } from "./utils";
 import type { LineupPlayer } from "@/components/match/MatchLineup";
 import type { MatchLineupPlayer } from "@/lib/effect/schemas/match.schema";
 import { asRowKind } from "@/components/match/test-narrowing";
+import { RESERVEN_PSD_ID } from "@/lib/utils/group-teams";
 import { createMatchDetail } from "./match-detail.fixtures";
 
 describe("transformHomeTeam", () => {
@@ -515,5 +517,28 @@ describe("enrichLineupWithKeeperFlag", () => {
       enrichLineupWithKeeperFlag(opponentKeeper, "away", "home", undefined)
         .isKeeper,
     ).toBe(true);
+  });
+});
+
+describe("hasOpponentPage", () => {
+  // Shapes per `selectSeniorTeams`: Reserven carries Sanity age "A" too.
+  const aPloeg = { psdId: "1", age: "A", slug: "eerste-elftallen-a" };
+  const bPloeg = { psdId: "2", age: "A", slug: "eerste-elftallen-b" };
+  const reserven = { psdId: RESERVEN_PSD_ID, age: "A", slug: "reserven" };
+  const youth = { psdId: "9", age: "U15", slug: "u15" };
+
+  it("admits league fixtures of the A and B squads", () => {
+    expect(hasOpponentPage("league", aPloeg)).toBe(true);
+    expect(hasOpponentPage("league", bPloeg)).toBe(true);
+  });
+
+  it("refuses Reserven even though its age is the senior code", () => {
+    expect(hasOpponentPage("league", reserven)).toBe(false);
+  });
+
+  it("refuses youth, cup and unknown-team fixtures", () => {
+    expect(hasOpponentPage("league", youth)).toBe(false);
+    expect(hasOpponentPage("cup", aPloeg)).toBe(false);
+    expect(hasOpponentPage("league", undefined)).toBe(false);
   });
 });
