@@ -155,14 +155,14 @@ describe("HubSearch", () => {
     expect(box.className).toContain("shadow-[1px_1px_0_0_var(--color-ink)]");
   });
 
-  it("keeps the hero variant's 2px border and 4px shadow byte-unchanged", () => {
+  it("keeps the hero variant's 2px border and 4px shadow (the shared paper-sm token) unchanged", () => {
     renderSearch();
     const box = screen.getByLabelText(
       "Zoek een persoon of hulpvraag",
     ).parentElement!;
 
     expect(box).toHaveClass("border-2");
-    expect(box.className).toContain("shadow-[4px_4px_0_0_var(--color-ink)]");
+    expect(box.className).toContain("shadow-[var(--shadow-paper-sm)]");
   });
 
   it("interleaves keyword people with semantic answers", async () => {

@@ -28,7 +28,7 @@
  * which each atom owns (Input/Select pad inline, Textarea pads block).
  *
  * Token contract: never inline shadow values. The shadow tokens
- * (`--shadow-paper-sm`, `-sm-hover`, `-sm-soft`, `-sm-soft-hover`,
+ * (`--shadow-paper-sm`, `-sm-hover`, `-sm-soft`,
  * `-sm-alert`, `-sm-alert-hover`) are the single source of truth for the
  * paper-press state machine.
  */
@@ -92,8 +92,8 @@ const fieldChromeError = [
 
   // Disabled — same vocabulary as the idle disabled state. The alert
   // shadow stays since the field is still semantically "in error", just
-  // frozen; opacity-50 softens it visually.
-  "disabled:bg-cream-soft disabled:border-ink/15 disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-x-0 disabled:translate-y-0",
+  // frozen (hover included); opacity-50 softens it visually.
+  "disabled:bg-cream-soft disabled:border-ink/15 disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-x-0 disabled:translate-y-0 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[var(--shadow-paper-sm-alert)]",
 ].join(" ");
 
 /** Selects the chrome string for a given error state. */

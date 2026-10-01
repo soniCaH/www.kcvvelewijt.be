@@ -88,11 +88,19 @@ describe("Input", () => {
       expect(el.className).toContain("focus:border-ink");
     });
 
-    it("keeps the border at full ink when filled — rest is already ink, so no filled rule is needed", () => {
-      render(<Input aria-label="Test" data-testid="input" />);
-      const cls = screen.getByTestId("input").className;
-      expect(cls).not.toContain("border-ink/60");
-      expect(cls).not.toContain("border-ink/40");
+    it("resolves the filled border to full ink, with no other ink weight outside disabled", () => {
+      render(<Input aria-label="Test" defaultValue="x" data-testid="input" />);
+      const tokens = screen.getByTestId("input").className.split(" ");
+      // Unprefixed (rest = filled) border colour is exactly border-ink…
+      expect(tokens.filter((t) => /^border-ink(\/\d+)?$/.test(t))).toEqual([
+        "border-ink",
+      ]);
+      // …and no state variant re-weights it except the disabled skin.
+      expect(
+        tokens.filter(
+          (t) => /:border-ink\/\d+$/.test(t) && !t.startsWith("disabled:"),
+        ),
+      ).toEqual([]);
     });
 
     it("uses dim ink/40 placeholder", () => {
@@ -129,6 +137,18 @@ describe("Input", () => {
       const el = screen.getByTestId("input");
       expect(el).toHaveClass("border-alert");
       expect(el.className).toContain("shadow-[var(--shadow-paper-sm-alert)]");
+    });
+
+    it("freezes a disabled error field on hover — alert shadow stays at 4px", () => {
+      render(
+        <Input aria-label="Test" error="Fout" disabled data-testid="input" />,
+      );
+      const el = screen.getByTestId("input");
+      expect(el).toHaveClass(
+        "disabled:hover:shadow-[var(--shadow-paper-sm-alert)]",
+        "disabled:hover:translate-x-0",
+        "disabled:hover:translate-y-0",
+      );
     });
 
     it("sets aria-invalid + aria-describedby pointing at the AlertBadge", () => {

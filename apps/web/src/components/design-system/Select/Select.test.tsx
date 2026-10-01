@@ -109,16 +109,28 @@ describe("Select", () => {
       expect(el.className).toContain("shadow-[var(--shadow-paper-sm)]");
     });
 
-    it("keeps the border at full ink for placeholder and filled alike", () => {
-      render(
-        <Select aria-label="Test" placeholder="Kies" data-testid="select">
-          <option value="a">A</option>
-        </Select>,
-      );
-      const cls = screen.getByTestId("select").className;
-      expect(cls).not.toContain("border-ink/30");
-      expect(cls).not.toContain("border-ink/60");
-    });
+    it.each([
+      ["placeholder", { placeholder: "Kies" }],
+      ["filled", { placeholder: "Kies", defaultValue: "a" }],
+    ])(
+      "resolves the %s border to full ink, with no other ink weight outside disabled",
+      (_, props) => {
+        render(
+          <Select aria-label="Test" data-testid="select" {...props}>
+            <option value="a">A</option>
+          </Select>,
+        );
+        const tokens = screen.getByTestId("select").className.split(" ");
+        expect(tokens.filter((t) => /^border-ink(\/\d+)?$/.test(t))).toEqual([
+          "border-ink",
+        ]);
+        expect(
+          tokens.filter(
+            (t) => /:border-ink\/\d+$/.test(t) && !t.startsWith("disabled:"),
+          ),
+        ).toEqual([]);
+      },
+    );
 
     it("does not apply rounded corners (sharp)", () => {
       render(<Select aria-label="Test" data-testid="select" />);

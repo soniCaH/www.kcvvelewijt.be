@@ -362,7 +362,12 @@
       {
         "name": "paper-sm",
         "value": "4px 4px 0 0 #0a0a0a",
-        "purpose": "The default hard offset. Buttons, badges, stamps, chrome."
+        "purpose": "The default hard offset. Buttons, badges, stamps, chrome, and the resting shadow of every form field."
+      },
+      {
+        "name": "paper-sm-hover",
+        "value": "3px 3px 0 0 #0a0a0a",
+        "purpose": "The 1px compression a form field makes on hover, beside the 1px nudge of the surface."
       },
       {
         "name": "paper-md",
@@ -377,12 +382,7 @@
       {
         "name": "paper-sm-soft",
         "value": "4px 4px 0 0 #6b6b6b",
-        "purpose": "Same offset in ink-muted, for surfaces on ink or dark-green fields where pure ink loses its silhouette. Also the resting shadow of every form field."
-      },
-      {
-        "name": "paper-sm-soft-hover",
-        "value": "3px 3px 0 0 #6b6b6b",
-        "purpose": "The 1px compression a form field makes on hover."
+        "purpose": "Same offset in ink-muted, for surfaces on ink or dark-green fields where pure ink loses its silhouette, and the frozen resting shadow of a disabled form field."
       },
       {
         "name": "paper-sm-alert",
@@ -468,9 +468,9 @@
       "name": "Text Input",
       "kind": "input",
       "refersTo": "input",
-      "description": "One state of the eight-state field machine. Border weight encodes progress (idle / hover / filled / focus); shadow encodes pressure. Focus is the deepest press in the system.",
+      "description": "One state of the eight-state field machine. The surface is cream with a full-ink border throughout; the shadow encodes pressure (rest / hover / focus). Focus is the deepest press in the system.",
       "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">E-mailadres</span><input class=\"ds-input\" type=\"email\" placeholder=\"jij@voorbeeld.be\" /><span class=\"ds-field-hint\">We gebruiken dit enkel voor je inschrijving.</span></label>",
-      "css": ".ds-field { display: block; max-width: 320px; } .ds-field-label { display: block; margin-bottom: 8px; font-family: var(--font-mono, \"IBM Plex Mono\", monospace); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink, #0a0a0a); } .ds-input { width: 100%; height: 40px; padding: 0 16px; font-family: var(--font-family-body, \"freight-sans-pro\", Arial, sans-serif); font-size: 1rem; color: var(--color-ink, #0a0a0a); background: #ffffff; border: 2px solid rgba(10, 10, 10, 0.3); border-radius: 0; box-shadow: 4px 4px 0 0 var(--color-ink-muted, #6b6b6b); transition: all 150ms ease-out; } .ds-input::placeholder { color: rgba(10, 10, 10, 0.4); } .ds-input:hover { border-color: rgba(10, 10, 10, 0.4); box-shadow: 3px 3px 0 0 var(--color-ink-muted, #6b6b6b); transform: translate(1px, 1px); } .ds-input:focus { outline: none; border-color: var(--color-ink, #0a0a0a); box-shadow: none; transform: translate(2px, 2px); } .ds-field-hint { display: block; margin-top: 8px; font-family: var(--font-family-body, \"freight-sans-pro\", Arial, sans-serif); font-size: 0.875rem; font-style: italic; color: rgba(10, 10, 10, 0.6); }"
+      "css": ".ds-field { display: block; max-width: 320px; } .ds-field-label { display: block; margin-bottom: 8px; font-family: var(--font-mono, \"IBM Plex Mono\", monospace); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink, #0a0a0a); } .ds-input { width: 100%; height: 40px; padding: 0 16px; font-family: var(--font-family-body, \"freight-sans-pro\", Arial, sans-serif); font-size: 1rem; color: var(--color-ink, #0a0a0a); background: var(--color-cream, #f5f1e6); border: 2px solid var(--color-ink, #0a0a0a); border-radius: 0; box-shadow: 4px 4px 0 0 var(--color-ink, #0a0a0a); transition: all 150ms ease-out; } .ds-input::placeholder { color: rgba(10, 10, 10, 0.4); } .ds-input:hover { box-shadow: 3px 3px 0 0 var(--color-ink, #0a0a0a); transform: translate(1px, 1px); } .ds-input:focus { outline: none; border-color: var(--color-ink, #0a0a0a); box-shadow: none; transform: translate(2px, 2px); } .ds-field-hint { display: block; margin-top: 8px; font-family: var(--font-family-body, \"freight-sans-pro\", Arial, sans-serif); font-size: 0.875rem; font-style: italic; color: rgba(10, 10, 10, 0.6); }"
     },
     {
       "name": "Field — Error State",
@@ -478,7 +478,7 @@
       "refersTo": "input",
       "description": "The alert branch of the field machine: border and offset shadow both switch to the dusty-brick pair, and the error survives focus.",
       "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">E-mailadres</span><input class=\"ds-input-error\" type=\"email\" value=\"jij@\" /><span class=\"ds-field-error\">Vul een geldig e-mailadres in.</span></label>",
-      "css": ".ds-input-error { width: 100%; height: 40px; padding: 0 16px; font-family: var(--font-family-body, \"freight-sans-pro\", Arial, sans-serif); font-size: 1rem; color: var(--color-ink, #0a0a0a); background: #ffffff; border: 2px solid var(--color-alert, #b84a3a); border-radius: 0; box-shadow: 4px 4px 0 0 var(--color-alert-soft, #e8d5cf); transition: all 150ms ease-out; } .ds-input-error:hover { box-shadow: 3px 3px 0 0 var(--color-alert-soft, #e8d5cf); transform: translate(1px, 1px); } .ds-input-error:focus { outline: none; border-color: var(--color-alert, #b84a3a); box-shadow: none; transform: translate(2px, 2px); } .ds-field-error { display: inline-block; margin-top: 8px; padding: 4px 8px; background: var(--color-alert-soft, #e8d5cf); border: 2px solid var(--color-alert, #b84a3a); font-family: var(--font-mono, \"IBM Plex Mono\", monospace); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-alert, #b84a3a); }"
+      "css": ".ds-input-error { width: 100%; height: 40px; padding: 0 16px; font-family: var(--font-family-body, \"freight-sans-pro\", Arial, sans-serif); font-size: 1rem; color: var(--color-ink, #0a0a0a); background: var(--color-cream, #f5f1e6); border: 2px solid var(--color-alert, #b84a3a); border-radius: 0; box-shadow: 4px 4px 0 0 var(--color-alert-soft, #e8d5cf); transition: all 150ms ease-out; } .ds-input-error:hover { box-shadow: 3px 3px 0 0 var(--color-alert-soft, #e8d5cf); transform: translate(1px, 1px); } .ds-input-error:focus { outline: none; border-color: var(--color-alert, #b84a3a); box-shadow: none; transform: translate(2px, 2px); } .ds-field-error { display: inline-block; margin-top: 8px; padding: 4px 8px; background: var(--color-alert-soft, #e8d5cf); border: 2px solid var(--color-alert, #b84a3a); font-family: var(--font-mono, \"IBM Plex Mono\", monospace); font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-alert, #b84a3a); }"
     },
     {
       "name": "Mono Label Pill",

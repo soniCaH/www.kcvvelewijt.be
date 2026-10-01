@@ -513,7 +513,7 @@ export function HubSearch({
   // and shadow. `variant="hero"` is byte-unchanged.
   const boxBorder = isHero ? "border-2" : "border";
   const boxShadow = isHero
-    ? "shadow-[4px_4px_0_0_var(--color-ink)]"
+    ? "shadow-[var(--shadow-paper-sm)]"
     : SECTION_NAV_CHIP_SHADOW_CLASS;
   const iconSize = isHero ? 20 : 16;
   // The field's end margin while the clear button shows: it stops the field's
@@ -678,7 +678,7 @@ export function HubSearch({
           // (#3043). One step below it can never do that; it still clears the
           // page's own `z-10`/`z-20` content. The `nav` instance is scoped by
           // the section bar's own `z-30` stacking context either way.
-          className={`border-ink bg-cream absolute z-40 mt-2 max-h-96 ${dropdownWidth} overflow-y-auto border-2 shadow-[4px_4px_0_0_var(--color-ink)]`}
+          className={`border-ink bg-cream absolute z-40 mt-2 max-h-96 ${dropdownWidth} overflow-y-auto border-2 shadow-[var(--shadow-paper-sm)]`}
         >
           {/* `role="listbox"`'s owned children must all be `option`/`group`
               (#3188 — axe `aria-required-children`); the smart-hint banner
