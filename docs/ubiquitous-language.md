@@ -416,7 +416,7 @@ The Studio-authored content that lets an editor fill the homepage "Eerste ploege
 
 ### Held-Open Frame
 
-The held-open shape rule (#2427 tier 2) — an empty slot inside a populated page or band keeps its shape so the absence reads as a known gap, not a render failure — has two renderings: `<EmptyState tier="slot">` on ink/cream grounds, and the dashed `border-cream/40` `HELD_OPEN_FRAME` constant on the homepage's dark bands.
+The held-open shape rule (#2427 tier 2) — an empty slot inside a populated page or band keeps its shape so the absence reads as a known gap, not a render failure — has two renderings: `<EmptyState tier="slot">` on ink/cream grounds, and the dashed `border-cream/40` `HELD_OPEN_FRAME` constant on the homepage's dark bands. It applies to gaps in provider or system data only; an empty editor-authored slot hides instead (#3300, `apps/web/CLAUDE.md` → The Writer Rule).
 
 | Code              | Notes                                                                                                                       |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
