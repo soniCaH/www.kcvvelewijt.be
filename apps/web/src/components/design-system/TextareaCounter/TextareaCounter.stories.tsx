@@ -15,7 +15,7 @@ const meta: Meta<typeof TextareaCounter> = {
   },
   decorators: [
     (Story) => (
-      <div className="border-ink/30 relative h-32 w-80 border-2 bg-white p-3">
+      <div className="border-ink bg-cream relative h-32 w-80 border-2 p-3 shadow-[var(--shadow-paper-sm)]">
         <p className="font-body text-ink/40 text-sm italic">
           Beschrijf hier je vraag…
         </p>

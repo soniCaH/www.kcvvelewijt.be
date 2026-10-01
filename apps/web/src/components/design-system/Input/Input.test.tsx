@@ -59,18 +59,23 @@ describe("Input", () => {
   });
 
   describe("Field chrome — paper-card emphasis", () => {
-    it("renders white surface, 2px ink/30 border, paper-soft shadow at rest", () => {
+    it("renders cream surface, 2px ink border, paper-sm ink shadow at rest", () => {
       render(<Input aria-label="Test" data-testid="input" />);
       const el = screen.getByTestId("input");
-      expect(el).toHaveClass("bg-white", "border-2", "border-ink/30");
-      expect(el.className).toContain("shadow-[var(--shadow-paper-sm-soft)]");
+      expect(el).toHaveClass("bg-cream", "border-2", "border-ink");
+      expect(el).not.toHaveClass("bg-white", "border-ink/30");
+      expect(el.className).toContain("shadow-[var(--shadow-paper-sm)]");
+      // The grey soft shadow belongs to disabled only (variant-prefixed).
+      expect(el.className.split(" ")).not.toContain(
+        "shadow-[var(--shadow-paper-sm-soft)]",
+      );
     });
 
     it("compresses shadow + nudges surface on hover", () => {
       render(<Input aria-label="Test" data-testid="input" />);
       const el = screen.getByTestId("input");
       expect(el.className).toContain(
-        "hover:shadow-[var(--shadow-paper-sm-soft-hover)]",
+        "hover:shadow-[var(--shadow-paper-sm-hover)]",
       );
       expect(el.className).toContain("hover:translate-x-px");
     });
@@ -83,14 +88,11 @@ describe("Input", () => {
       expect(el.className).toContain("focus:border-ink");
     });
 
-    it("anchors filled state via :not(:placeholder-shown):not(:focus) → ink/60", () => {
+    it("keeps the border at full ink when filled — rest is already ink, so no filled rule is needed", () => {
       render(<Input aria-label="Test" data-testid="input" />);
-      // Excludes [data-vr-force-ring=true] (#3137) so this rule can never
-      // compete with the forced-focus VR rule on equal specificity — see
-      // fieldChrome.ts.
-      expect(screen.getByTestId("input").className).toContain(
-        "[&:not(:placeholder-shown):not(:focus):not([data-vr-force-ring=true])]:border-ink/60",
-      );
+      const cls = screen.getByTestId("input").className;
+      expect(cls).not.toContain("border-ink/60");
+      expect(cls).not.toContain("border-ink/40");
     });
 
     it("uses dim ink/40 placeholder", () => {
@@ -230,10 +232,15 @@ describe("Input", () => {
         "disabled:cursor-not-allowed",
         "disabled:translate-x-0",
       );
-      // Resting paper-soft shadow stays — opacity-50 carries it through so
-      // the disabled state remains inside the paper vocabulary.
+      // Disabled keeps its own muted skin: the grey soft shadow, frozen on
+      // hover too, so it never reads as the live ink-shadowed field.
       expect(el.className).not.toContain("disabled:shadow-none");
-      expect(el.className).toContain("shadow-[var(--shadow-paper-sm-soft)]");
+      expect(el.className).toContain(
+        "disabled:shadow-[var(--shadow-paper-sm-soft)]",
+      );
+      expect(el.className).toContain(
+        "disabled:hover:shadow-[var(--shadow-paper-sm-soft)]",
+      );
     });
   });
 
