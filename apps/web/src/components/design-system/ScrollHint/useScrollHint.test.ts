@@ -3,7 +3,10 @@ import { render, screen, act } from "@testing-library/react";
 import { createElement, useEffect } from "react";
 import { FakeResizeObserver } from "@/../tests/helpers/fake-observers.helpers";
 import { useScrollHint, type UseScrollHintReturn } from "./useScrollHint";
-import { stubAnimationFrame } from "@/../tests/helpers/scroll-hint.helpers";
+import {
+  mockLayoutProps,
+  stubAnimationFrame,
+} from "@/../tests/helpers/scroll-hint.helpers";
 
 /**
  * Test helper: renders a div with the hook's scrollRef attached,
@@ -377,6 +380,102 @@ describe("useScrollHint", () => {
 
       expect(hookResult.remainingLeft).toBe(0);
       expect(hookResult.remainingRight).toBe(0);
+    });
+  });
+
+  describe("canScrollDown / remainingBottom — the vertical axis (#3340)", () => {
+    let restoreLayout: (() => void) | undefined;
+    afterEach(() => {
+      restoreLayout?.();
+    });
+
+    function renderVertical(
+      dims: {
+        scrollHeight: number;
+        clientHeight: number;
+        scrollTop: number;
+        offsetHeight?: number;
+      },
+      maxRemainingPx?: number,
+    ) {
+      restoreLayout = mockLayoutProps(dims);
+      let hookResult: UseScrollHintReturn | undefined;
+      function Host() {
+        const hook = useScrollHint({ maxRemainingPx });
+        useEffect(() => {
+          hookResult = hook;
+        });
+        return createElement("div", { ref: hook.scrollRef });
+      }
+      render(createElement(Host));
+      return hookResult!;
+    }
+
+    it("is false and 0 when the track fits vertically", () => {
+      const hook = renderVertical({
+        scrollHeight: 400,
+        clientHeight: 400,
+        scrollTop: 0,
+      });
+      expect(hook.canScrollDown).toBe(false);
+      expect(hook.remainingBottom).toBe(0);
+    });
+
+    it("is true and reports the exact pixels left when the track overflows downward", () => {
+      const hook = renderVertical({
+        scrollHeight: 600,
+        clientHeight: 400,
+        scrollTop: 50,
+      });
+      expect(hook.canScrollDown).toBe(true);
+      expect(hook.remainingBottom).toBe(150);
+    });
+
+    it("uses the 10px dead-zone — 10px left to scroll means canScrollDown=false", () => {
+      const hook = renderVertical({
+        scrollHeight: 410,
+        clientHeight: 400,
+        scrollTop: 0,
+      });
+      expect(hook.canScrollDown).toBe(false);
+    });
+
+    it("is false and 0 at the end of the scroll", () => {
+      const hook = renderVertical({
+        scrollHeight: 600,
+        clientHeight: 400,
+        scrollTop: 200,
+      });
+      expect(hook.canScrollDown).toBe(false);
+      expect(hook.remainingBottom).toBe(0);
+    });
+
+    it("measures the horizontal scrollbar as offsetHeight - clientHeight, 0 when there is none", () => {
+      const hook = renderVertical({
+        scrollHeight: 600,
+        clientHeight: 400,
+        scrollTop: 0,
+        offsetHeight: 415,
+      });
+      expect(hook.scrollbarHeight).toBe(15);
+    });
+
+    it("reports scrollbarHeight 0 when offsetHeight equals clientHeight", () => {
+      const hook = renderVertical({
+        scrollHeight: 600,
+        clientHeight: 400,
+        scrollTop: 0,
+        offsetHeight: 400,
+      });
+      expect(hook.scrollbarHeight).toBe(0);
+    });
+
+    it("caps remainingBottom at maxRemainingPx, like the sides", () => {
+      const hook = renderVertical(
+        { scrollHeight: 1000, clientHeight: 400, scrollTop: 0 },
+        24,
+      );
+      expect(hook.remainingBottom).toBe(24);
     });
   });
 

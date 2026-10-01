@@ -69,6 +69,11 @@ export interface ScrollOverlayProps {
  * actually cut; #2860 moved the cap from a call-site `Math.min` into the
  * hook itself so the capped value stops changing past that point).
  *
+ * A track that can scroll **down** gets a bottom fade — the same gradient and
+ * 24px cap, on the bottom edge only, no arrow (#3340, the #3321 pick). It
+ * follows from the measured overflow rather than a prop: the horizontal-only
+ * consumers have no height constraint, so they never overflow vertically.
+ *
  * `register` is not a prop here for the same reason `<ScrollRail>` doesn't
  * expose it — every arrow this component renders is `"control"`.
  *
@@ -97,6 +102,9 @@ export function ScrollOverlay({
     overflows,
     remainingLeft,
     remainingRight,
+    canScrollDown,
+    remainingBottom,
+    scrollbarHeight,
     scrollLeft,
     scrollRight,
   } = useScrollHint<HTMLElement>({ remeasureOn, maxRemainingPx: MAX_FADE_PX });
@@ -159,6 +167,19 @@ export function ScrollOverlay({
             className={chromeClassName}
           />
         </>
+      )}
+      {canScrollDown && (
+        <div
+          aria-hidden="true"
+          data-scroll-fade="bottom"
+          style={{ height: remainingBottom, bottom: scrollbarHeight }}
+          className={cn(
+            // No `chromeClassName`: consumers pass it for horizontal insets
+            // (StandingsTable's `right-14`) that must not reach this edge.
+            "pointer-events-none absolute inset-x-0 bg-gradient-to-t to-transparent",
+            fadeFromClassName,
+          )}
+        />
       )}
     </div>
   );

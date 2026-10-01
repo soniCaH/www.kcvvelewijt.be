@@ -8,12 +8,13 @@
  * announceFocus copy.
  */
 
-import { describe, it, expect, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { OrganigramExplorer, announceFocus } from "./OrganigramExplorer";
 import { buildSpotlightTree, getSpotlightView } from "./spotlight-tree";
 import { explorerFixture } from "./organigram-explorer.fixture";
+import { mockLayoutProps } from "@/../tests/helpers/scroll-hint.helpers";
 
 function open(props: Partial<Parameters<typeof OrganigramExplorer>[0]> = {}) {
   return render(
@@ -167,6 +168,95 @@ describe("OrganigramExplorer — focus + navigation", () => {
     expect(screen.getByRole("button", { current: true })).toHaveTextContent(
       "Voorzitter",
     );
+  });
+});
+
+describe("OrganigramExplorer — FLIP settle re-measures the stage (#3340)", () => {
+  // happy-dom has no Web Animations API and no layout. Stub `animate` with an
+  // animation whose `finished` the test controls, fake a FLIP distance via
+  // `getBoundingClientRect`, and let `scrollHeight` follow a flag so the
+  // stage "fits" only after the animation settles.
+  const savedAnimate = Object.getOwnPropertyDescriptor(
+    Element.prototype,
+    "animate",
+  );
+  let restoreLayout: (() => void) | undefined;
+
+  afterEach(() => {
+    restoreLayout?.();
+    if (savedAnimate) {
+      Object.defineProperty(Element.prototype, "animate", savedAnimate);
+    } else {
+      Reflect.deleteProperty(Element.prototype, "animate");
+    }
+    vi.restoreAllMocks();
+  });
+
+  async function startFlip() {
+    let fits = false;
+    restoreLayout = mockLayoutProps({
+      scrollHeight: () => (fits ? 400 : 900),
+      clientHeight: 400,
+      scrollTop: 0,
+    });
+    // First read (the activated child, at navigate time) sits 300px below the
+    // second (the new centre) — a FLIP far past the 2px skip threshold.
+    let reads = 0;
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
+      () => {
+        const top = reads++ === 0 ? 300 : 0;
+        return new DOMRect(0, top, 100, 50);
+      },
+    );
+    let settle!: (outcome: "finish" | "cancel") => void;
+    const finished = new Promise<Animation>((resolve, reject) => {
+      settle = (outcome) =>
+        outcome === "finish"
+          ? resolve({} as Animation)
+          : reject(new DOMException("cancelled", "AbortError"));
+    });
+    const animate = vi.fn(() => ({ finished }) as unknown as Animation);
+    Object.defineProperty(Element.prototype, "animate", {
+      configurable: true,
+      value: animate,
+    });
+
+    open({ initialFocusId: "club" });
+    expect(
+      document.querySelector('[data-scroll-fade="bottom"]'),
+    ).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Naar Voorzitter" }),
+    );
+    expect(animate).toHaveBeenCalledTimes(1);
+
+    // The stage now fits, but nothing has told the hook yet.
+    fits = true;
+    await act(async () => {});
+    expect(
+      document.querySelector('[data-scroll-fade="bottom"]'),
+    ).toBeInTheDocument();
+    return settle;
+  }
+
+  it("re-measures when the FLIP animation finishes", async () => {
+    const settle = await startFlip();
+    await act(async () => {
+      settle("finish");
+    });
+    expect(
+      document.querySelector('[data-scroll-fade="bottom"]'),
+    ).not.toBeInTheDocument();
+  });
+
+  it("swallows a cancelled animation without re-measuring", async () => {
+    const settle = await startFlip();
+    await act(async () => {
+      settle("cancel");
+    });
+    expect(
+      document.querySelector('[data-scroll-fade="bottom"]'),
+    ).toBeInTheDocument();
   });
 });
 
