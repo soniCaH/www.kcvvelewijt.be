@@ -109,6 +109,17 @@ describe("Select", () => {
       expect(el.className).toContain("shadow-[var(--shadow-paper-sm)]");
     });
 
+    it("keeps the border at full ink for placeholder and filled alike", () => {
+      render(
+        <Select aria-label="Test" placeholder="Kies" data-testid="select">
+          <option value="a">A</option>
+        </Select>,
+      );
+      const cls = screen.getByTestId("select").className;
+      expect(cls).not.toContain("border-ink/30");
+      expect(cls).not.toContain("border-ink/60");
+    });
+
     it("does not apply rounded corners (sharp)", () => {
       render(<Select aria-label="Test" data-testid="select" />);
       expect(screen.getByTestId("select").className).not.toMatch(/\brounded-/);
