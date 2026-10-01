@@ -10,9 +10,9 @@
  *
  * Cream input surface, 2px ink border, sharp (square) corners — matching the
  * design-system field/button convention (`fieldChrome` "sharp corners",
- * `Button`/`FilterTabs` `rounded-none`) — with a `5px` offset paper shadow.
+ * `Button`/`FilterTabs` `rounded-none`) — with the shared `--shadow-paper-sm` offset (the same 4px ink shadow `<Input>` rests on, #3337).
  * (The 8s1 mockup's 8px radius is not carried over; the shipped system is
  * square-cornered.)
  */
 export const searchFieldShellClasses =
-  "border-ink bg-cream flex w-full max-w-[680px] items-stretch overflow-hidden rounded-none border-2 shadow-[5px_5px_0_0_var(--color-ink)]";
+  "border-ink bg-cream flex w-full max-w-[680px] items-stretch overflow-hidden rounded-none border-2 shadow-[var(--shadow-paper-sm)]";

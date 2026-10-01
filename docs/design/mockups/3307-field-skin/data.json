@@ -1,0 +1,178 @@
+{
+  "word-lid": {
+    "a-1440": {
+      "bg": "rgb(255, 255, 255)",
+      "border": "2px oklab(0.144787 0.00000661612 0.00000289828 / 0.3)",
+      "shadow": "(107, 107, 107) 4px 4px 0px 0px",
+      "font": "freight-sans-pro 16px",
+      "h": 40
+    },
+    "b-1440": {
+      "bg": "rgb(255, 255, 255)",
+      "border": "2px rgba(10, 10, 10, 0.3)",
+      "shadow": "rgb(107, 107, 107) 4px 4px 0px 0px",
+      "font": "freight-sans-pro 16px",
+      "h": 40
+    },
+    "c-1440": {
+      "bg": "rgb(245, 241, 230)",
+      "border": "2px rgb(10, 10, 10)",
+      "shadow": "rgb(10, 10, 10) 4px 4px 0px 0px",
+      "font": "freight-sans-pro 16px",
+      "h": 40
+    },
+    "a-390": {
+      "bg": "rgb(255, 255, 255)",
+      "border": "2px oklab(0.144787 0.00000661612 0.00000289828 / 0.3)",
+      "shadow": "(107, 107, 107) 4px 4px 0px 0px",
+      "font": "freight-sans-pro 16px",
+      "h": 40
+    },
+    "b-390": {
+      "bg": "rgb(255, 255, 255)",
+      "border": "2px rgba(10, 10, 10, 0.3)",
+      "shadow": "rgb(107, 107, 107) 4px 4px 0px 0px",
+      "font": "freight-sans-pro 16px",
+      "h": 40
+    },
+    "c-390": {
+      "bg": "rgb(245, 241, 230)",
+      "border": "2px rgb(10, 10, 10)",
+      "shadow": "rgb(10, 10, 10) 4px 4px 0px 0px",
+      "font": "freight-sans-pro 16px",
+      "h": 40
+    }
+  },
+  "zoeken": {
+    "a-1440": {
+      "bg": "rgb(245, 241, 230)",
+      "border": "2px rgb(10, 10, 10)",
+      "shadow": "(10, 10, 10) 5px 5px 0px 0px",
+      "font": "freight-sans-pro 18px",
+      "h": 64
+    },
+    "b-1440": {
+      "bg": "rgb(255, 255, 255)",
+      "border": "2px rgba(10, 10, 10, 0.3)",
+      "shadow": "rgb(107, 107, 107) 4px 4px 0px 0px",
+      "font": "freight-sans-pro 16px",
+      "h": 61
+    },
+    "c-1440": {
+      "bg": "rgb(245, 241, 230)",
+      "border": "2px rgb(10, 10, 10)",
+      "shadow": "rgb(10, 10, 10) 4px 4px 0px 0px",
+      "font": "freight-sans-pro 18px",
+      "h": 64
+    },
+    "a-390": {
+      "bg": "rgb(245, 241, 230)",
+      "border": "2px rgb(10, 10, 10)",
+      "shadow": "(10, 10, 10) 5px 5px 0px 0px",
+      "font": "freight-sans-pro 18px",
+      "h": 64
+    },
+    "b-390": {
+      "bg": "rgb(255, 255, 255)",
+      "border": "2px rgba(10, 10, 10, 0.3)",
+      "shadow": "rgb(107, 107, 107) 4px 4px 0px 0px",
+      "font": "freight-sans-pro 16px",
+      "h": 61
+    },
+    "c-390": {
+      "bg": "rgb(245, 241, 230)",
+      "border": "2px rgb(10, 10, 10)",
+      "shadow": "rgb(10, 10, 10) 4px 4px 0px 0px",
+      "font": "freight-sans-pro 18px",
+      "h": 64
+    }
+  },
+  "hulp": {
+    "a-1440": {
+      "bg": "rgb(245, 241, 230)",
+      "border": "2px rgb(10, 10, 10)",
+      "shadow": "(10, 10, 10) 4px 4px 0px 0px",
+      "font": "freight-sans-pro 16px",
+      "h": 54
+    },
+    "b-1440": {
+      "bg": "rgb(255, 255, 255)",
+      "border": "2px rgba(10, 10, 10, 0.3)",
+      "shadow": "rgb(107, 107, 107) 4px 4px 0px 0px",
+      "font": "freight-sans-pro 16px",
+      "h": 54
+    },
+    "c-1440": {
+      "bg": "rgb(245, 241, 230)",
+      "border": "2px rgb(10, 10, 10)",
+      "shadow": "rgb(10, 10, 10) 4px 4px 0px 0px",
+      "font": "freight-sans-pro 16px",
+      "h": 54
+    },
+    "a-390": {
+      "bg": "rgb(245, 241, 230)",
+      "border": "2px rgb(10, 10, 10)",
+      "shadow": "(10, 10, 10) 4px 4px 0px 0px",
+      "font": "freight-sans-pro 16px",
+      "h": 54
+    },
+    "b-390": {
+      "bg": "rgb(255, 255, 255)",
+      "border": "2px rgba(10, 10, 10, 0.3)",
+      "shadow": "rgb(107, 107, 107) 4px 4px 0px 0px",
+      "font": "freight-sans-pro 16px",
+      "h": 54
+    },
+    "c-390": {
+      "bg": "rgb(245, 241, 230)",
+      "border": "2px rgb(10, 10, 10)",
+      "shadow": "rgb(10, 10, 10) 4px 4px 0px 0px",
+      "font": "freight-sans-pro 16px",
+      "h": 54
+    }
+  },
+  "kalender": {
+    "a-1440": {
+      "bg": "rgb(245, 241, 230)",
+      "border": "2px rgb(10, 10, 10)",
+      "shadow": "none",
+      "font": "\"IBM Plex Mono\" 12px",
+      "h": 31
+    },
+    "b-1440": {
+      "bg": "rgb(255, 255, 255)",
+      "border": "2px rgba(10, 10, 10, 0.3)",
+      "shadow": "rgb(107, 107, 107) 4px 4px 0px 0px",
+      "font": "freight-sans-pro 16px",
+      "h": 36
+    },
+    "c-1440": {
+      "bg": "rgb(245, 241, 230)",
+      "border": "2px rgb(10, 10, 10)",
+      "shadow": "rgb(10, 10, 10) 4px 4px 0px 0px",
+      "font": "\"IBM Plex Mono\" 12px",
+      "h": 31
+    },
+    "a-390": {
+      "bg": "rgb(245, 241, 230)",
+      "border": "2px rgb(10, 10, 10)",
+      "shadow": "none",
+      "font": "\"IBM Plex Mono\" 12px",
+      "h": 29
+    },
+    "b-390": {
+      "bg": "rgb(255, 255, 255)",
+      "border": "2px rgba(10, 10, 10, 0.3)",
+      "shadow": "rgb(107, 107, 107) 4px 4px 0px 0px",
+      "font": "freight-sans-pro 16px",
+      "h": 36
+    },
+    "c-390": {
+      "bg": "rgb(245, 241, 230)",
+      "border": "2px rgb(10, 10, 10)",
+      "shadow": "rgb(10, 10, 10) 4px 4px 0px 0px",
+      "font": "\"IBM Plex Mono\" 12px",
+      "h": 29
+    }
+  }
+}

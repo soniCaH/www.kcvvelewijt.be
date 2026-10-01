@@ -52,11 +52,12 @@ describe("Textarea", () => {
   });
 
   describe("Field chrome — paper-card emphasis", () => {
-    it("renders 2px border + paper-soft shadow at rest", () => {
+    it("renders cream surface, 2px ink border + paper-sm ink shadow at rest", () => {
       render(<Textarea aria-label="Test" data-testid="ta" />);
       const el = screen.getByTestId("ta");
-      expect(el).toHaveClass("border-2", "bg-white");
-      expect(el.className).toContain("shadow-[var(--shadow-paper-sm-soft)]");
+      expect(el).toHaveClass("border-2", "border-ink", "bg-cream");
+      expect(el).not.toHaveClass("bg-white");
+      expect(el.className).toContain("shadow-[var(--shadow-paper-sm)]");
     });
 
     it("does not apply rounded corners", () => {

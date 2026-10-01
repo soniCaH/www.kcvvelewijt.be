@@ -101,12 +101,36 @@ describe("Select", () => {
   });
 
   describe("Field chrome — paper-card emphasis", () => {
-    it("renders white surface, 2px ink/30 border, paper-soft shadow at rest", () => {
+    it("renders cream surface, 2px ink border, paper-sm ink shadow at rest", () => {
       render(<Select aria-label="Test" data-testid="select" />);
       const el = screen.getByTestId("select");
-      expect(el).toHaveClass("bg-white", "border-2");
-      expect(el.className).toContain("shadow-[var(--shadow-paper-sm-soft)]");
+      expect(el).toHaveClass("bg-cream", "border-2", "border-ink");
+      expect(el).not.toHaveClass("bg-white");
+      expect(el.className).toContain("shadow-[var(--shadow-paper-sm)]");
     });
+
+    it.each([
+      ["placeholder", { placeholder: "Kies" }],
+      ["filled", { placeholder: "Kies", defaultValue: "a" }],
+    ])(
+      "resolves the %s border to full ink, with no other ink weight outside disabled",
+      (_, props) => {
+        render(
+          <Select aria-label="Test" data-testid="select" {...props}>
+            <option value="a">A</option>
+          </Select>,
+        );
+        const tokens = screen.getByTestId("select").className.split(" ");
+        expect(tokens.filter((t) => /^border-ink(\/\d+)?$/.test(t))).toEqual([
+          "border-ink",
+        ]);
+        expect(
+          tokens.filter(
+            (t) => /:border-ink\/\d+$/.test(t) && !t.startsWith("disabled:"),
+          ),
+        ).toEqual([]);
+      },
+    );
 
     it("does not apply rounded corners (sharp)", () => {
       render(<Select aria-label="Test" data-testid="select" />);

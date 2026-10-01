@@ -16,7 +16,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Phase 2.A.4 form atom (Direction C — paper-card emphasis). Implements the eight-state field machine: default / hover / focus / filled / filled+focus / error / error+focus / disabled. Sharp corners, 2px borders with three ink weights, paper-soft resting shadow, ink-press focus.",
+          "Phase 2.A.4 form atom (Direction C — paper-card emphasis). Implements the eight-state field machine: default / hover / focus / filled / filled+focus / error / error+focus / disabled. Sharp corners, cream surface, 2px ink border and a Paper Small ink shadow at rest (compressing on hover), ink-press focus. Error and disabled keep their own skins.",
       },
     },
   },
@@ -54,7 +54,7 @@ export const Filled: Story = {
     docs: {
       description: {
         story:
-          "Filled-anchor state — `:not(:placeholder-shown):not(:focus)` flips the border to `ink/60`, signalling completion without colour.",
+          "Filled state — identical to rest: the border is already full ink, so a typed value changes the text, not the chrome.",
       },
     },
   },

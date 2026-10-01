@@ -1,64 +1,51 @@
 /**
  * Shared field-chrome class strings for the Phase 2.A.4 form-atom state
  * machine — Direction C "paper-card emphasis" (PRD §6.3,
- * `docs/design/mockups/phase-2-a-4-form-atoms/compare.md`).
+ * `docs/design/mockups/phase-2-a-4-form-atoms/compare.md`), re-skinned by
+ * #3337: every typed-value field rests on cream with a full-ink border and
+ * the ink paper shadow (`docs/design/mockups/3307-field-skin/`).
  *
  * Eight-state machine, uniform across `<Input>`, `<Select>`, `<Textarea>`:
  *
  * | State        | Border       | Shadow                            | Transform             |
  * | ------------ | ------------ | --------------------------------- | --------------------- |
- * | Default      | 2px ink/30   | --shadow-paper-sm-soft (4×4)      | —                     |
- * | Hover        | 2px ink/40   | --shadow-paper-sm-soft-hover (3×3)| translate(1px, 1px)   |
+ * | Default      | 2px ink      | --shadow-paper-sm (4×4)           | —                     |
+ * | Hover        | 2px ink      | --shadow-paper-sm-hover (3×3)     | translate(1px, 1px)   |
  * | Focus        | 2px ink      | 0 0 0 0                           | translate(2px, 2px)   |
- * | Filled       | 2px ink/60   | --shadow-paper-sm-soft            | —                     |
+ * | Filled       | 2px ink      | --shadow-paper-sm                 | —                     |
  * | Filled+focus | 2px ink      | 0 0 0 0                           | translate(2px, 2px)   |
  * | Error        | 2px alert    | --shadow-paper-sm-alert (4×4)     | —                     |
  * | Error+focus  | 2px alert    | 0 0 0 0                           | translate(2px, 2px)   |
  * | Disabled     | 2px ink/15   | --shadow-paper-sm-soft (inherits  | —                     |
  * |              |              |  field opacity-50)                |                       |
  *
- * Filled is selected via `:not(:placeholder-shown):not(:focus)` — this
- * makes the filled-anchor automatic without consumers needing to wire a
- * `data-filled` attribute. For `<Select>`, the same selector works
- * because a placeholder option (disabled value="") triggers
- * `:placeholder-shown` semantics in Chromium / Safari; we add a JS
- * fallback class only if needed (not currently required — native
- * placeholder-shown matching is sufficient on the supported browsers).
+ * Rest is already full ink, so the border no longer climbs through the
+ * states: hover and filled read as ink too, and the shadow (compression on
+ * hover, collapse on focus) carries the state alone. Disabled keeps its own
+ * muted skin — the grey soft shadow, not the ink one.
  *
  * The chrome strings below cover every state EXCEPT padding/text-size,
  * which each atom owns (Input/Select pad inline, Textarea pads block).
  *
- * Token contract: never inline shadow values. The four shadow tokens
- * (`--shadow-paper-sm-soft`, `-soft-hover`, `-alert`, `-alert-hover`)
- * are the single source of truth for the paper-press state machine.
+ * Token contract: never inline shadow values. The shadow tokens
+ * (`--shadow-paper-sm`, `-sm-hover`, `-sm-soft`,
+ * `-sm-alert`, `-sm-alert-hover`) are the single source of truth for the
+ * paper-press state machine.
  */
 
 /** Default-state chrome (rest, hover, focus, filled, disabled). */
 const fieldChromeIdle = [
-  // Base — sharp corners, white surface, transitions
-  "font-body w-full border-2 bg-white transition-all duration-150 focus:outline-hidden",
+  // Base — sharp corners, cream surface, transitions
+  "font-body w-full border-2 bg-cream transition-all duration-150 focus:outline-hidden",
   "text-ink placeholder:text-ink/40",
 
-  // Idle border — ink/30
-  "border-ink/30",
+  // Idle border + shadow — full ink; filled (typed, not focused) needs no
+  // rule of its own because rest is already at the end of the old border
+  // progression.
+  "border-ink shadow-[var(--shadow-paper-sm)]",
 
-  // Idle shadow — paper-soft
-  "shadow-[var(--shadow-paper-sm-soft)]",
-
-  // Hover — compress shadow + nudge surface, deepen border
-  "hover:border-ink/40 hover:shadow-[var(--shadow-paper-sm-soft-hover)] hover:translate-x-px hover:translate-y-px",
-
-  // Filled (text typed but not focused) — anchor at ink/60. Excludes
-  // `[data-vr-force-ring=true]` so this rule's border color can never
-  // compete with the forced-focus rule below on a "FilledFocused" VR story
-  // — those set both a value AND the force-ring attribute, and since real
-  // frame focus is exactly what may NOT have landed (the whole reason the
-  // force-ring rule exists), `:not(:focus)` here is genuinely true at the
-  // same time. Two same-specificity rules asserting different border
-  // colors would otherwise depend on Tailwind's utility output order,
-  // which this file does not control — excluding the state here removes
-  // the ambiguity structurally instead of relying on winning a cascade race.
-  "[&:not(:placeholder-shown):not(:focus):not([data-vr-force-ring=true])]:border-ink/60",
+  // Hover — compress shadow + nudge surface
+  "hover:shadow-[var(--shadow-paper-sm-hover)] hover:translate-x-px hover:translate-y-px",
 
   // Focus — full ink border, snap shadow off, press into paper
   "focus:border-ink focus:shadow-none focus:translate-x-0.5 focus:translate-y-0.5",
@@ -77,17 +64,17 @@ const fieldChromeIdle = [
   // frame focus. A real visitor's `focus:` behaviour is untouched.
   "data-[vr-force-ring=true]:border-ink data-[vr-force-ring=true]:shadow-none data-[vr-force-ring=true]:translate-x-0.5 data-[vr-force-ring=true]:translate-y-0.5",
 
-  // Disabled — drop borders to ink/15 + cream surface + opacity-50 inherits
-  // through to the resting paper-soft shadow, so disabled reads as "frozen
-  // at rest" inside the same paper vocabulary as the other states (instead
-  // of `shadow-none`, which lifts the field out of the system entirely).
-  "disabled:bg-cream-soft disabled:border-ink/15 disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-x-0 disabled:translate-y-0 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[var(--shadow-paper-sm-soft)]",
+  // Disabled — its own skin: ink/15 border, cream-soft surface, the grey
+  // soft shadow (so a frozen field never reads as the live ink-shadowed
+  // one), opacity-50. Frozen at rest inside the paper vocabulary instead
+  // of `shadow-none`, which lifts the field out of the system entirely.
+  "disabled:bg-cream-soft disabled:border-ink/15 disabled:shadow-[var(--shadow-paper-sm-soft)] disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-x-0 disabled:translate-y-0 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[var(--shadow-paper-sm-soft)]",
 ].join(" ");
 
 /** Error-state chrome — replaces idle when `error` prop is set. */
 const fieldChromeError = [
-  // Base
-  "font-body w-full border-2 bg-white transition-all duration-150 focus:outline-hidden",
+  // Base — same cream surface as idle; only border + shadow turn alert
+  "font-body w-full border-2 bg-cream transition-all duration-150 focus:outline-hidden",
   "text-ink placeholder:text-ink/40",
 
   // Border + shadow tinted with alert
@@ -105,8 +92,8 @@ const fieldChromeError = [
 
   // Disabled — same vocabulary as the idle disabled state. The alert
   // shadow stays since the field is still semantically "in error", just
-  // frozen; opacity-50 softens it visually.
-  "disabled:bg-cream-soft disabled:border-ink/15 disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-x-0 disabled:translate-y-0",
+  // frozen (hover included); opacity-50 softens it visually.
+  "disabled:bg-cream-soft disabled:border-ink/15 disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-x-0 disabled:translate-y-0 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[var(--shadow-paper-sm-alert)]",
 ].join(" ");
 
 /** Selects the chrome string for a given error state. */

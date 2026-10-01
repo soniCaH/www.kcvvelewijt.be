@@ -360,11 +360,11 @@ Only three weights exist, plus a muted sibling for surfaces where black-on-black
 
 ### Shadow Vocabulary
 
-- **Paper Small** (`box-shadow: 4px 4px 0 0 #0a0a0a`): the default. Buttons, badges, stamps, chrome.
+- **Paper Small** (`box-shadow: 4px 4px 0 0 #0a0a0a`): the default. Buttons, badges, stamps, chrome, and the resting shadow of every form field.
+- **Paper Small Hover** (`box-shadow: 3px 3px 0 0 #0a0a0a`): the 1px compression a form field makes on hover, beside the 1px nudge of the surface.
 - **Paper Medium** (`box-shadow: 6px 6px 0 0 #0a0a0a`): cards at rest — the most common card weight.
 - **Paper Lift** (`box-shadow: 8px 8px 0 0 #0a0a0a`): the hover target of a tilt-mode card, and emphasis cards.
-- **Paper Small Soft** (`box-shadow: 4px 4px 0 0 #6b6b6b`): the same offset in ink-muted, for anything sitting on an ink or dark-green surface where pure ink loses its silhouette. Also the resting shadow of every form field.
-- **Paper Small Soft Hover** (`box-shadow: 3px 3px 0 0 #6b6b6b`): the 1px compression a form field makes on hover.
+- **Paper Small Soft** (`box-shadow: 4px 4px 0 0 #6b6b6b`): the same offset in ink-muted, for anything sitting on an ink or dark-green surface where pure ink loses its silhouette, and the frozen resting shadow of a disabled form field.
 - **Paper Small Alert** / **Alert Hover** (`4px 4px 0 0 #e8d5cf` / `3px 3px 0 0 #e8d5cf`): error-state fields only, so the offset reads as part of the alert moment.
 
 ### Named Rules
@@ -411,7 +411,7 @@ Motion here is **functional, not decorative**. Every duration answers exactly on
 
 **Everything rectangular is sharp.** Border radius is `0` on cards, buttons, inputs, selects, textareas, pills, badges, modals, images and bands. The only curve in the system is a true circle (`rounded-full`) for avatars, timeline bullets, spinner dots and score circles. There is no small-radius softening step, and there is no "just 2px" exception.
 
-Borders vary by weight, and the pattern is a tendency rather than a strict switch. A `2px` ink border is this system's most common weight by far: it is what a shadow-casting **object** uses — a card, a button, a filter chip, and (at reduced opacity, `ink/30` → `ink/40` → `ink/60` → `ink`) the form-field state progression — unless the object is a stamp, badge or small pill, which take `1.5px` instead. `2px` is also, more often than not, a plain divider or a loading-skeleton frame that carries no shadow at all. A quieter `1px` hairline — `border-paper-edge`, the alpha-ink steps `ink/10`–`ink/15`, or full-opacity `border-ink` left at its default weight — appears where a divider sits inside a surface that is already framed, and a second full-weight border would double the frame. Two further weights exist by design, not by drift: `1.5px` on stamps, badges and small pills, and a single `4px` accent rule on a left-hand highlight bar.
+Borders vary by weight, and the pattern is a tendency rather than a strict switch. A `2px` ink border is this system's most common weight by far: it is what a shadow-casting **object** uses — a card, a button, a filter chip, and a form field — unless the object is a stamp, badge or small pill, which take `1.5px` instead. `2px` is also, more often than not, a plain divider or a loading-skeleton frame that carries no shadow at all. A quieter `1px` hairline — `border-paper-edge`, the alpha-ink steps `ink/10`–`ink/15`, or full-opacity `border-ink` left at its default weight — appears where a divider sits inside a surface that is already framed, and a second full-weight border would double the frame. Two further weights exist by design, not by drift: `1.5px` on stamps, badges and small pills, and a single `4px` accent rule on a left-hand highlight bar.
 
 The ornament vocabulary is physical: **tape strips** (small solid rectangles anchored half-over a card edge at ±2°, ±4° or ±6°, an angle that follows the card's identity), **stamps** (rotated ~2°, mono uppercase, bordered and shadowed), **perforations** (a masked half-disc column with a dashed tear guide, on ticket-stub alerts), **striped seams** (45° two-tone SVG bands used as full-bleed section rules), and **highlighter strokes** (a hand-drawn SVG marker that sweeps left-to-right on hover behind inline links and heading accents).
 
@@ -456,12 +456,12 @@ The cost is stated rather than hidden: multiply darkens a photo that fills its f
 
 ### Inputs / Fields
 
-An eight-state machine shared identically by text input, select and textarea — the border weight encodes progress through the state, and the shadow encodes pressure.
+An eight-state machine shared identically by text input, select and textarea — the shadow encodes pressure (rest, compressed on hover, collapsed on focus); the border is full ink throughout, going alert on error and `ink/15` when disabled.
 
-- **Style:** white surface (the one white in the system — a field is a form you write on, not paper you print), sharp corners, `2px` border at `ink/30`, resting muted-ink offset shadow.
-- **Hover:** border to `ink/40`, shadow compresses to `3px 3px`, surface nudges 1px.
-- **Filled** (text present, not focused): border anchors at `ink/60`, resting shadow returns.
-- **Focus:** border goes full ink, shadow snaps to none, surface presses 2px — the deepest press in the system.
+- **Style:** cream surface, sharp corners, `2px` ink border, resting Paper Small ink offset shadow. The same skin on every typed-value field — `<Input>`, `<Select>`, `<Textarea>`, the `/zoeken` shell, the `/hulp` hero box. Not a field, so outside this rule: the `/kalender` "+ voeg toe" team picker (a chip) and `<HubSearch variant="nav">` (section-nav chip weight).
+- **Hover:** shadow compresses to `3px 3px` (Paper Small Hover), surface nudges 1px. The border is already full ink at rest, so it has nothing left to climb.
+- **Filled** (text present, not focused): identical to rest — border `ink`, resting shadow.
+- **Focus:** shadow snaps to none and the surface settles 2px into the page — the deepest press in the system. The border is already full ink at rest, so focus changes nothing there.
 - **Error:** border and shadow both switch to the alert pair; an `AlertBadge` renders below. Error survives focus.
 - **Disabled:** `ink/15` border, cream-soft fill, 50% opacity, all motion frozen — deliberately still inside the paper vocabulary rather than shadowless.
 - **Sizes:** 2rem / 2.5rem / 3rem tall with 0.75 / 1 / 1.25rem inline padding. Hints render in italic `ink/60` beneath.
