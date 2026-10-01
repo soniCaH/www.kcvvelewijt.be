@@ -33,7 +33,9 @@ export const PRESS_DOWN_CLASSES =
  * behaviour of a real link or button: the canonical press-down on hover, and
  * the same press on keyboard focus — un-gated by `motion-safe:`, because the
  * translate is how a keyboard user locates the focused chip. The caller adds
- * the `focus-visible:outline-*` colour. A tone-swapped shadow is a colour
+ * the `focus-visible:outline-*` colour. Under `prefers-reduced-motion` the
+ * transition is off (`motion-reduce:transition-none`): the focus press still
+ * lands, but it snaps instead of sliding. A tone-swapped shadow is a colour
  * utility on top (`shadow-warm`), not a second constant.
  *
  * Compose with plain string concatenation, never `cn()`: tailwind-merge files
@@ -43,4 +45,4 @@ export const PRESS_DOWN_CLASSES =
 export const CHIP_CLASSES =
   "text-label inline-flex w-fit items-center gap-1.5 border-2 px-3 py-2 font-mono font-semibold uppercase shadow-paper-sm";
 
-export const CHIP_LINK_CLASSES = `${CHIP_CLASSES} ${PRESS_DOWN_CLASSES} focus-visible:translate-x-1 focus-visible:translate-y-1 focus-visible:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2`;
+export const CHIP_LINK_CLASSES = `${CHIP_CLASSES} ${PRESS_DOWN_CLASSES} focus-visible:translate-x-1 focus-visible:translate-y-1 focus-visible:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:transition-none`;
