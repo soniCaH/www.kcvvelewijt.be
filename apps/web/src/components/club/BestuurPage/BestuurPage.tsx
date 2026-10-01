@@ -93,7 +93,7 @@ export function BestuurPage({ header, body, staff = [] }: BestuurPageProps) {
           `mt-12` on the members block reproduces the old 48px rhythm as an
           internal gap rather than a second section boundary. */}
       {showDescription || hasMembers ? (
-        <PageContainer as="section" className="py-12 sm:py-16">
+        <PageContainer as="section" className="pt-12 pb-10 sm:pt-16 sm:pb-14">
           {showDescription ? (
             // Shared by /club/bestuur, /club/angels and /club/jeugdbestuur
             // (#2436). The rule + gutter sit outside the clamp so the text

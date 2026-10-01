@@ -205,7 +205,7 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
       <StripedSeam colorPair="ink-cream" height="md" />
 
       {/* Clubgegevens + map */}
-      <PageContainer className="py-12 sm:py-16">
+      <PageContainer className="pt-12 pb-10 sm:pt-16 sm:pb-14">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <TapedCard bg="cream" shadow="sm" padding="lg">
             <EditorialHeading
@@ -288,7 +288,7 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
       <StripedSeam colorPair="ink-cream" height="md" />
 
       {/* Contacteer ons — merged + deduped grid */}
-      <PageContainer className="py-12 sm:py-16">
+      <PageContainer className="py-10 sm:py-14">
         <SectionHeader
           title="Contacteer ons"
           size="display-md"
@@ -327,7 +327,7 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
       <StripedSeam colorPair="ink-cream" height="md" />
 
       {/* Kom naar ons — venue & matchday info */}
-      <PageContainer className="py-12 sm:py-16">
+      <PageContainer className="pt-10 pb-12 sm:pt-14 sm:pb-16">
         <SectionHeader
           title="Kom naar ons"
           size="display-md"

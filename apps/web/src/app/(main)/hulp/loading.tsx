@@ -59,7 +59,7 @@ export default function HulpLoading() {
         </PageContainer>
       </div>
 
-      <PageContainer width="index" className="py-12 sm:py-16">
+      <PageContainer width="index" className="pt-12 pb-10 sm:pt-16 sm:pb-14">
         {/* Hero band — matches OrganigramHero.tsx's 6px offset shadow
             exactly (the `shadow-paper-md` token IS that value). */}
         <div

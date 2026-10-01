@@ -2431,7 +2431,7 @@ describe("rule 15 catches what it claims to (#3023)", () => {
  * `py-16 lg:py-24` · `py-24 sm:py-32` — each internally coherent, none
  * agreeing with any other, and the same 48→64px step firing at `sm:`, `md:`
  * *and* `lg:` depending which route happened to write it. The resolution:
- * every section pads **both** sides with exactly `py-12 sm:py-16` — a
+ * every section pads **both** sides with exactly `py-12 sm:py-16` (#3306 amends this: a side that touches a seam gives back one step, see rule 16's seam half below) — a
  * literal class string at every site, no new utility or primitive (that is
  * the enforcement shape #2601 and #2578 already proved out in this file, and
  * it is deliberately not abstracted).
@@ -2502,7 +2502,7 @@ describe("rule 15 catches what it claims to (#3023)", () => {
  *
  * A **second, tree-wide check** below closes most of the first bullet's gap
  * — it can't tell a *new* section from any other `py-*` use, but it can tell
- * a *retired* one apart from everything else, because the nine retired
+ * a *retired* one apart from everything else, because the eight retired
  * pairs are specific enough that nothing legitimate collides with them
  * (verified empirically: zero false positives across the whole tree at the
  * point this rule was added).
@@ -2549,7 +2549,7 @@ function sectionSpacingOccurrences(source: string): number {
  * `"py-12 text-center sm:py-16"` is the ninth — prettier's sort still lands
  * both tokens on `CtaBand`'s one class-string line, just not touching).
  * Every other entry is a real edit this ticket makes: a value migrated off
- * one of the nine retired pairs, `/kalender`'s two containers merged into
+ * one of the eight retired pairs, `/kalender`'s two containers merged into
  * one, or (`HistoryContent.tsx`) a `py-*` value added where none stood
  * before.
  */
@@ -2564,23 +2564,16 @@ const SECTION_SPACING_SITES: Record<string, number> = {
   "app/(main)/privacy/page.tsx": 1,
   "components/club/SiteContents/SiteContents.tsx": 1,
   "components/design-system/CtaBand/CtaBand.tsx": 1,
-  // Migrated by this ticket.
+  // Migrated by this ticket. (#3335 moved the sites that touch a seam to
+  // `SEAM_SPACING_SITES` below: `hulp`, `ContactPage`, `BestuurPage`, the
+  // `/club` index and `SponsorsPage` no longer carry the plain pair.)
   "app/(main)/kalender/page.tsx": 1, // merged from two containers
-  "app/(main)/hulp/page.tsx": 1,
   "app/(main)/ploegen/[slug]/(detail)/page.tsx": 6,
-  "components/club/ContactPage/ContactPage.tsx": 3,
-  // 1, not 2 — the description and members were two same-colour sections
-  // stacking with no seam once both padded both sides, a rule-3 violation
-  // this ticket's own migration would otherwise introduce (review finding
-  // 1); merged into one section instead.
-  "components/club/BestuurPage/BestuurPage.tsx": 1,
-  "app/(main)/club/(index)/page.tsx": 3,
   "components/match/MatchStandingsSection/MatchStandingsSection.tsx": 1,
   "components/match/MatchEventsSection/MatchEventsSection.tsx": 1,
   "components/match/MatchLineupSection/MatchLineupSection.tsx": 1,
   "components/search/SearchInterface.tsx": 1,
   "components/sponsors/SponsorsBlock/SponsorsBlock.tsx": 1,
-  "components/sponsors/SponsorsPage/SponsorsPage.tsx": 1,
   "components/staff/StaffRoles/StaffRoles.tsx": 1,
   "components/article/ArticleBody/ArticleBody.tsx": 1,
   "components/player/QuotesBlock/QuotesBlock.tsx": 1,
@@ -2599,9 +2592,120 @@ describe("every section pads both sides with the one spacing value (#2571)", () 
 });
 
 /**
+ * Rule 16, seam half (#3306 / #3335) — a section side that touches a
+ * `<StripedSeam>` (or sits above a `<CtaBand>`) gives back one step: `pt-10
+ * sm:pt-14` / `pb-10 sm:pb-14` instead of `pt-12 sm:pt-16` / `pb-12 sm:pb-16`.
+ * A seam directly under a page hero or a sticky section nav is an opening
+ * (#2426) and keeps the plain step on that side. A page that has no seam
+ * keeps `py-12 sm:py-16` and stays in `SECTION_SPACING_SITES` above.
+ *
+ * The four shapes a line can carry, as whole tokens (the same per-line
+ * scan `sectionSpacingOccurrences` uses). A line is classified by the
+ * largest shape it carries in full, so `below` never also counts as
+ * `bottom`:
+ *
+ * - `both`   — seam above and below.
+ * - `below`  — plain top (opening or page edge), seam below.
+ * - `above`  — seam above, plain bottom.
+ * - `bottom` — an override on a component that owns its own padding
+ *   (`<ArticleBody>`), where only the bottom touches a seam.
+ */
+const SEAM_SPACING_SHAPES = {
+  both: ["py-10", "sm:py-14"],
+  below: ["pt-12", "pb-10", "sm:pt-16", "sm:pb-14"],
+  above: ["pt-10", "pb-12", "sm:pt-14", "sm:pb-16"],
+  bottom: ["pb-10", "sm:pb-14"],
+} as const;
+
+type SeamSpacingShape = keyof typeof SEAM_SPACING_SHAPES;
+
+function seamSpacingShapes(source: string): Record<SeamSpacingShape, number> {
+  const counts: Record<SeamSpacingShape, number> = {
+    both: 0,
+    below: 0,
+    above: 0,
+    bottom: 0,
+  };
+  const shapes = Object.entries(SEAM_SPACING_SHAPES) as [
+    SeamSpacingShape,
+    readonly string[],
+  ][];
+  for (const line of source.split("\n")) {
+    const carried = shapes
+      .filter(([, tokens]) =>
+        tokens.every((token) => new RegExp(`\\b${token}\\b`).test(line)),
+      )
+      .sort(([, a], [, b]) => b.length - a.length)[0];
+    if (carried) counts[carried[0]] += 1;
+  }
+  return counts;
+}
+
+/**
+ * Every file whose sections touch a seam, with the exact number of lines of
+ * each shape. Walked against the render on 2026-10-01 (the sibling #3336
+ * owns the team, player, staff, opponent and match pages).
+ */
+const SEAM_SPACING_SITES: Record<
+  string,
+  Partial<Record<SeamSpacingShape, number>>
+> = {
+  // hero → seam → hub (top opening) → seam → mission → seam → contact.
+  "app/(main)/club/(index)/page.tsx": { below: 1, both: 1, above: 1 },
+  // hero → seam → details (top opening) → seam → grid → seam → venue.
+  "components/club/ContactPage/ContactPage.tsx": {
+    below: 1,
+    both: 1,
+    above: 1,
+  },
+  // hero → seam → members (top opening) → <BoardCtaBand>.
+  "components/club/BestuurPage/BestuurPage.tsx": { below: 1 },
+  // sticky nav → hero + finder + directory (top opening) → <CtaBand>.
+  "app/(main)/hulp/page.tsx": { below: 1 },
+  // hero + tiers (top opening) → <SponsorCtaBand>.
+  "components/sponsors/SponsorsPage/SponsorsPage.tsx": { below: 1 },
+  // hero → seam → <ArticleBody> → <CtaBand> (membership page only).
+  "app/(main)/club/[slug]/page.tsx": { bottom: 1 },
+};
+
+describe("a section side that touches a seam gives back one step (#3335)", () => {
+  it.each(Object.entries(SEAM_SPACING_SITES))(
+    "%s — carries exactly the pinned seam shapes",
+    (relPath, expected) => {
+      expect(scannableSources).toContain(relPath);
+      expect(seamSpacingShapes(code.get(relPath)!)).toEqual({
+        both: 0,
+        below: 0,
+        above: 0,
+        bottom: 0,
+        ...expected,
+      });
+    },
+  );
+
+  it("classifies a line by the largest shape it carries in full", () => {
+    expect(
+      seamSpacingShapes('className="pt-12 pb-10 sm:pt-16 sm:pb-14"'),
+    ).toEqual({ both: 0, below: 1, above: 0, bottom: 0 });
+    expect(seamSpacingShapes('className="pb-10 sm:pb-14"')).toEqual({
+      both: 0,
+      below: 0,
+      above: 0,
+      bottom: 1,
+    });
+    expect(seamSpacingShapes('className="py-12 sm:py-16"')).toEqual({
+      both: 0,
+      below: 0,
+      above: 0,
+      bottom: 0,
+    });
+  });
+});
+
+/**
  * Rule 16's second half (review finding 4): the pinned site list above
  * proves the 35 named sites carry the value; this proves nothing ELSE in
- * the tree still carries one of the nine pairs it replaced. Tree-wide by
+ * the tree still carries one of the eight pairs it replaced. Tree-wide by
  * design, not a hand-list — unlike the positive check, a retired pair is
  * specific enough (two exact tokens, `sm:`/`md:`/`lg:` included) that a
  * blind scan doesn't return the false positives a bare `py-*` sweep would
@@ -2617,8 +2721,9 @@ describe("every section pads both sides with the one spacing value (#2571)", () 
  * should flag.
  */
 const RETIRED_SECTION_PADDING_PAIRS: readonly (readonly [string, string])[] = [
+  // `py-10 sm:py-14` left this list in #3335: a section between two seams
+  // pads exactly that now (`SEAM_SPACING_SITES` pins where).
   ["py-8", "sm:py-12"],
-  ["py-10", "sm:py-14"],
   ["py-10", "md:py-14"],
   ["py-12", "md:py-16"],
   ["py-12", "lg:py-16"],
@@ -2643,7 +2748,7 @@ function hasPairOnSameLine(
     .some((line) => baseToken.test(line) && variantToken.test(line));
 }
 
-/** True when `source` carries any of the nine retired pairs at all. */
+/** True when `source` carries any of the eight retired pairs at all. */
 function hasAnyRetiredPair(source: string): boolean {
   return RETIRED_SECTION_PADDING_PAIRS.some(([base, variant]) =>
     hasPairOnSameLine(source, base, variant),
@@ -2697,7 +2802,7 @@ const retiredPairScannableSources = productionSources.filter(
 
 describe("no retired section-padding pair remains, outside the homepage (#2571)", () => {
   it.each(retiredPairScannableSources)(
-    "%s — carries none of the nine retired py-* pairs",
+    "%s — carries none of the eight retired py-* pairs",
     (relPath) => {
       expect(hasAnyRetiredPair(code.get(relPath)!)).toBe(false);
     },
@@ -2729,11 +2834,20 @@ describe("rule 16's retired-pair exemptions are pinned to their exact pair (#257
  */
 describe("rule 16 catches what it claims to (#2571)", () => {
   it("covers 26 files and 35 sites in total", () => {
-    const files = Object.keys(SECTION_SPACING_SITES);
-    const sites = Object.values(SECTION_SPACING_SITES).reduce(
-      (a, b) => a + b,
-      0,
+    // A section site is a plain `py-12 sm:py-16` or a seam shape (#3335); a
+    // `bottom` override sits on top of a component's own plain site, so it
+    // adds neither a file nor a site.
+    const seamSites = Object.entries(SEAM_SPACING_SITES).map(
+      ([relPath, { both = 0, below = 0, above = 0 }]) =>
+        [relPath, both + below + above] as const,
     );
+    const files = [
+      ...Object.keys(SECTION_SPACING_SITES),
+      ...seamSites.filter(([, n]) => n > 0).map(([relPath]) => relPath),
+    ];
+    const sites =
+      Object.values(SECTION_SPACING_SITES).reduce((a, b) => a + b, 0) +
+      seamSites.reduce((a, [, n]) => a + n, 0);
     expect(files).toHaveLength(26);
     expect(sites).toBe(35);
   });
@@ -2794,8 +2908,8 @@ describe("rule 16 catches what it claims to (#2571)", () => {
     expect(sectionSpacingOccurrences(source)).toBe(0);
   });
 
-  it("covers all nine retired pairs, and none of them is the target value", () => {
-    expect(RETIRED_SECTION_PADDING_PAIRS).toHaveLength(9);
+  it("covers all eight retired pairs, and none of them is the target value", () => {
+    expect(RETIRED_SECTION_PADDING_PAIRS).toHaveLength(8);
     expect(RETIRED_SECTION_PADDING_PAIRS).not.toContainEqual([
       SECTION_SPACING_BASE,
       SECTION_SPACING_VARIANT,
@@ -2815,7 +2929,7 @@ describe("rule 16 catches what it claims to (#2571)", () => {
     expect(hasPairOnSameLine(source, "py-10", "md:py-14")).toBe(false);
   });
 
-  it("hasAnyRetiredPair matches any one of the nine, not only the first", () => {
+  it("hasAnyRetiredPair matches any one of the eight, not only the first", () => {
     expect(hasAnyRetiredPair('className="py-16 lg:py-24"')).toBe(true);
     expect(hasAnyRetiredPair('className="py-24 sm:py-32"')).toBe(true);
   });

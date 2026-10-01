@@ -125,7 +125,10 @@ export default async function HulpHubPage() {
           members={members}
           responsibilityPaths={responsibilityPaths}
         />
-        <PageContainer width="index" className="py-12 sm:py-16">
+        {/* Top under the sticky nav + hero keeps the plain step (an opening,
+            #3306); the bottom sits above the `<CtaBand>` seam, so it gives one
+            step back. The in-column seam below keeps its own `my-*` margin. */}
+        <PageContainer width="index" className="pt-12 pb-10 sm:pt-16 sm:pb-14">
           <OrganigramHero
             members={members}
             responsibilityPaths={responsibilityPaths}
