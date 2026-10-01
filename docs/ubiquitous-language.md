@@ -426,6 +426,20 @@ The held-open shape rule (#2427 tier 2) — an empty slot inside a populated pag
 
 **Distinct from `<EmptyState tier="slot">`**, which stays ink-only by decision — it does not grow a matching dark axis for two callers on one homepage ([#3103]). Tier `"surface"` is not affected: it already meets a dark ground through `surface="inverse"`. Reopen only if a dark consumer appears off the homepage.
 
+### Draft
+
+The half-filled membership application a visitor leaves behind on `/club/word-lid` (#3326, decided in #3299). `<MembershipForm>` keeps it in `sessionStorage`, so it is scoped to one tab and gone when that tab closes.
+
+| Code                | Dutch                                    | Notes                                                                                                  |
+| ------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `MembershipDraft`   | (concept, no UI label)                   | `apps/web/src/components/club/MembershipForm/membership-draft.ts` — type plus read/write/clear helpers |
+| restored-draft note | We hebben je ingevulde gegevens bewaard. | One line above the first field, shown only when a draft was restored                                   |
+| clear button        | Wis formulier                            | Empties every field and deletes the draft                                                              |
+
+**Holds** every field the visitor fills in, the three consent checkboxes included. **Never holds** the Turnstile token (single-use, the widget issues a fresh one on mount) or the honeypot (a restored bot hit would stick).
+
+**Lifecycle:** written on every edit, deleted on a successful submit and on _Wis formulier_, kept on a failed submit. A draft beats `defaultRole` / `defaultBirthDate` from the link. Blocked or throwing `sessionStorage` degrades to a form with no draft, never an error.
+
 ### Responsibility
 
 A help/guidance topic that directs users to the right contact person. Displayed at `/hulp`.

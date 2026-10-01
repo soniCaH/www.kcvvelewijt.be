@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useId, useMemo, useState, type ReactNode } from "react";
+import {
+  useId,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import {
   EMAIL_PATTERN,
   MEDICAL_CERT_ROLES,
@@ -17,6 +23,13 @@ import {
   StampBadge,
 } from "@/components/design-system";
 import { trackEvent } from "@/lib/analytics/track-event";
+import {
+  clearDraft,
+  EMPTY_DRAFT,
+  readDraft,
+  writeDraft,
+  type MembershipDraft,
+} from "./membership-draft";
 import { TurnstileWidget } from "./TurnstileWidget";
 
 const ROLE_OPTIONS: { value: MembershipRole; label: string }[] = [
@@ -88,31 +101,87 @@ function CheckboxField({
   );
 }
 
-export function MembershipForm({
+const subscribeNever = () => () => {};
+
+/**
+ * The draft (#3326) is read after hydration, not during the server or the
+ * hydrating render, so the two agree. `useSyncExternalStore` serves the
+ * server snapshot (`false`) while hydrating and the client one right after:
+ * the fields remount once with the draft as their initial state. A plain
+ * client render (Storybook, tests) reads it on the first render.
+ */
+export function MembershipForm(props: MembershipFormProps) {
+  const hydrated = useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false,
+  );
+  return (
+    <MembershipFormFields
+      key={hydrated ? "client" : "server"}
+      {...props}
+      draft={hydrated ? readDraft() : null}
+    />
+  );
+}
+
+function MembershipFormFields({
   defaultRole = "",
   defaultBirthDate = "",
-}: MembershipFormProps) {
+  draft,
+}: MembershipFormProps & { draft: MembershipDraft | null }) {
   const uid = useId();
   const fieldId = (name: string) => `${uid}-${name}`;
 
-  const [role, setRole] = useState<MembershipRole | "">(defaultRole);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [birthDate, setBirthDate] = useState(defaultBirthDate);
-  const [gender, setGender] = useState("");
-  const [municipality, setMunicipality] = useState("");
-  const [email, setEmail] = useState("");
-  const [priorClub, setPriorClub] = useState("");
-  const [parentEmail, setParentEmail] = useState("");
-  const [parentalConsent, setParentalConsent] = useState(false);
-  const [medicalCertAcknowledged, setMedicalCertAcknowledged] = useState(false);
-  const [privacyAccepted, setPrivacyAccepted] = useState(false);
+  // A draft beats `defaultRole` / `defaultBirthDate`: the visitor's own
+  // answer beats the link.
+  const [values, setValues] = useState<MembershipDraft>(
+    () =>
+      draft ?? {
+        ...EMPTY_DRAFT,
+        role: defaultRole,
+        birthDate: defaultBirthDate,
+      },
+  );
+  const [draftRestored, setDraftRestored] = useState(draft !== null);
+  const {
+    role,
+    firstName,
+    lastName,
+    birthDate,
+    gender,
+    municipality,
+    email,
+    priorClub,
+    parentEmail,
+    parentalConsent,
+    medicalCertAcknowledged,
+    privacyAccepted,
+  } = values;
+
+  const setField = <K extends keyof MembershipDraft>(
+    name: K,
+    value: MembershipDraft[K],
+  ) => {
+    const next = { ...values, [name]: value };
+    setValues(next);
+    writeDraft(next);
+  };
+
   const [honeypot, setHoneypot] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
 
   const [state, setState] = useState<SubmitState>("idle");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState("");
+
+  const clearForm = () => {
+    setValues(EMPTY_DRAFT);
+    clearDraft();
+    setDraftRestored(false);
+    setFieldErrors({});
+    setGeneralError("");
+  };
 
   const minor = useMemo(() => isMinor(birthDate), [birthDate]);
   const isPlayer = role !== "" && MEDICAL_CERT_ROLES.includes(role);
@@ -198,6 +267,7 @@ export function MembershipForm({
           is_minor: minor,
           has_prior_club: priorClub.trim() !== "",
         });
+        clearDraft();
         setState("success");
         return;
       }
@@ -255,6 +325,17 @@ export function MembershipForm({
           Laat van je horen.
         </h2>
 
+        {draftRestored ? (
+          <div className="mb-5 flex flex-wrap items-center gap-x-4 gap-y-1">
+            <p className="text-ink-muted text-body-sm">
+              We hebben je ingevulde gegevens bewaard.
+            </p>
+            <Button variant="ghost" size="sm" type="button" onClick={clearForm}>
+              Wis formulier
+            </Button>
+          </div>
+        ) : null}
+
         {/* Honeypot — visually hidden, off-screen; bots fill it, humans don't. */}
         <div
           aria-hidden
@@ -281,7 +362,7 @@ export function MembershipForm({
             value={role}
             placeholder="Maak een keuze…"
             error={fieldErrors.role}
-            onChange={(e) => setRole(e.target.value as MembershipRole)}
+            onChange={(e) => setField("role", e.target.value as MembershipRole)}
           >
             {ROLE_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -300,7 +381,7 @@ export function MembershipForm({
               id={fieldId("firstName")}
               name="firstName"
               value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              onChange={(e) => setField("firstName", e.target.value)}
               error={fieldErrors.firstName}
               autoComplete="given-name"
             />
@@ -313,7 +394,7 @@ export function MembershipForm({
               id={fieldId("lastName")}
               name="lastName"
               value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              onChange={(e) => setField("lastName", e.target.value)}
               error={fieldErrors.lastName}
               autoComplete="family-name"
             />
@@ -327,7 +408,7 @@ export function MembershipForm({
               name="birthDate"
               type="date"
               value={birthDate}
-              onChange={(e) => setBirthDate(e.target.value)}
+              onChange={(e) => setField("birthDate", e.target.value)}
               error={fieldErrors.birthDate}
             />
           </div>
@@ -341,7 +422,7 @@ export function MembershipForm({
               value={gender}
               placeholder="Maak een keuze…"
               error={fieldErrors.gender}
-              onChange={(e) => setGender(e.target.value)}
+              onChange={(e) => setField("gender", e.target.value)}
             >
               <option value="m">Man</option>
               <option value="f">Vrouw</option>
@@ -356,7 +437,7 @@ export function MembershipForm({
               id={fieldId("municipality")}
               name="municipality"
               value={municipality}
-              onChange={(e) => setMunicipality(e.target.value)}
+              onChange={(e) => setField("municipality", e.target.value)}
               error={fieldErrors.municipality}
               autoComplete="address-level2"
             />
@@ -370,7 +451,7 @@ export function MembershipForm({
               name="email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => setField("email", e.target.value)}
               error={fieldErrors.email}
               autoComplete="email"
             />
@@ -383,7 +464,7 @@ export function MembershipForm({
               id={fieldId("priorClub")}
               name="priorClub"
               value={priorClub}
-              onChange={(e) => setPriorClub(e.target.value)}
+              onChange={(e) => setField("priorClub", e.target.value)}
               error={fieldErrors.priorClub}
             />
           </div>
@@ -394,7 +475,9 @@ export function MembershipForm({
             <CheckboxField
               id={fieldId("medical")}
               checked={medicalCertAcknowledged}
-              onChange={setMedicalCertAcknowledged}
+              onChange={(checked) =>
+                setField("medicalCertAcknowledged", checked)
+              }
               error={fieldErrors.medicalCertAcknowledged}
             >
               Ik begrijp dat ik bij de eerste training een medisch attest van
@@ -417,7 +500,7 @@ export function MembershipForm({
                 name="parentEmail"
                 type="email"
                 value={parentEmail}
-                onChange={(e) => setParentEmail(e.target.value)}
+                onChange={(e) => setField("parentEmail", e.target.value)}
                 error={fieldErrors.parentEmail}
                 autoComplete="email"
               />
@@ -425,7 +508,7 @@ export function MembershipForm({
             <CheckboxField
               id={fieldId("parentalConsent")}
               checked={parentalConsent}
-              onChange={setParentalConsent}
+              onChange={(checked) => setField("parentalConsent", checked)}
               error={fieldErrors.parentalConsent}
             >
               Ik ben de ouder/voogd en geef toestemming voor deze inschrijving.
@@ -437,7 +520,7 @@ export function MembershipForm({
           <CheckboxField
             id={fieldId("privacy")}
             checked={privacyAccepted}
-            onChange={setPrivacyAccepted}
+            onChange={(checked) => setField("privacyAccepted", checked)}
             error={fieldErrors.privacyAccepted}
           >
             Ik aanvaard de{" "}
@@ -446,9 +529,8 @@ export function MembershipForm({
                 instrument: it unmounts this form and every useState field
                 (including the Turnstile token) with it. next/link's
                 client-side navigation still unmounts the form on a route
-                change — the field loss is not eliminated, only no longer
-                compounded by a full page reload. Draft persistence across
-                that navigation is a design decision, not this ticket's. */}
+                change — the fields are kept as a per-tab draft (#3326)
+                and restored when the visitor comes back. */}
             <Link href="/privacy" className="prose-link underline">
               privacyverklaring
             </Link>
