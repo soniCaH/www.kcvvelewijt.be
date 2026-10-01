@@ -22,9 +22,11 @@ import { Envelope, Phone, type RedesignIconProps } from "@/lib/icons.redesign";
  *     framed slot — the same coat-garment figure `<PlayerCard garment="coat">`
  *     already renders for this person on the `getCardSubjectArtefact` path
  *     (`<TeamStaff>` on `/ploegen/[slug]` and the three board routes, #2485
- *     rule 5). The organigram's `<OrgPersonCard>`/`<MemberDetailPanel>` avatar
- *     is a deliberate exception — it stays a monogram disc, untouched by this
- *     ticket.
+ *     rule 5). The round family's rule (#3304): cards and heroes draw the
+ *     figure, round avatars (`<RoundAvatar>` — the organigram, the help
+ *     search, the contact card) set a monogram, because at 24-64px the figure
+ *     reads as a blob and initials stay legible. Not an exception to this
+ *     hero's rule — the other half of the same split.
  *   - Kicker → `<MonoLabel variant="plain">` (ink), as on the player hero.
  *   - Name → first upright `font-display-big` black (`display-2xl`), last
  *     italic `font-display` (`display-xl`) + period.

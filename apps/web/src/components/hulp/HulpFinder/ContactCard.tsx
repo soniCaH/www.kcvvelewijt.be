@@ -2,8 +2,8 @@
 
 /**
  * ContactCard — the finder's single contact, in the locked **person vocabulary**
- * (7o6c · 4 / reuses `<OrgPersonCard>`'s round-avatar idiom — jersey-deep
- * monogram · name first-semibold + last-italic · mono function label ·
+ * (7o6c · 4 / reuses `<OrgPersonCard>`'s round avatar — the shared
+ * `<RoundAvatar>` monogram · name first-semibold + last-italic · mono function label ·
  * tappable ✉/☎ (only when present), NOT `<TeamStaff>`'s post-#2575 3:4
  * card, which is a directory of people rather than a chart of positions).
  * A `position` contact also gets a **"Toon in structuur →"** cross-link
@@ -23,10 +23,8 @@ import {
   Phone,
   TreeStructure,
 } from "@/lib/icons.redesign";
-import {
-  monogramInitials,
-  splitDisplayName,
-} from "@/components/organigram/OrgPersonCard";
+import { splitDisplayName } from "@/components/organigram/OrgPersonCard";
+import { RoundAvatar } from "@/components/design-system/RoundAvatar";
 import type { ResolvedContact } from "./resolveContact";
 
 export interface ContactCardProps {
@@ -70,12 +68,7 @@ export function ContactCard({
   return (
     <div>
       <div className="border-ink bg-cream-soft flex items-center gap-3 border-2 p-3 shadow-[2px_2px_0_0_var(--color-ink)]">
-        <span
-          aria-hidden
-          className="border-ink bg-cream text-jersey-deep font-display-big flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full border-2 text-sm font-black"
-        >
-          {monogramInitials(contact.name)}
-        </span>
+        <RoundAvatar size={40} name={contact.name} />
 
         <span className="min-w-0 flex-1 leading-tight">
           {hasName && (

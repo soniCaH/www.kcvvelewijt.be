@@ -3,7 +3,7 @@
  *
  * Covers:
  *  - deriveCardState: 0 → vacant, 1 → single, 2+ → shared
- *  - splitDisplayName / monogramInitials helpers
+ *  - splitDisplayName helper
  *  - single: person name (first-bold + last-italic) + position as mono label + monogram fallback / photo
  *  - shared: position in name slot + "N personen" + dual avatar + "+N" chip at 3+
  *  - vacant: warm state · "deze plek is vrij" · CTA link to the configured href
@@ -17,7 +17,6 @@ import {
   OrgPersonCard,
   deriveCardState,
   splitDisplayName,
-  monogramInitials,
 } from "./OrgPersonCard";
 import type { OrgChartNode } from "@/types/organigram";
 
@@ -68,22 +67,6 @@ describe("splitDisplayName", () => {
       rest: "Vos",
     });
     expect(splitDisplayName("")).toEqual({ lead: "", rest: "" });
-  });
-});
-
-describe("monogramInitials", () => {
-  it("uses first + last token initials, upper-cased", () => {
-    expect(monogramInitials("Luc Boons")).toBe("LB");
-    expect(monogramInitials("Jan De Smet")).toBe("JS");
-  });
-
-  it("uses a single initial for a one-token value", () => {
-    expect(monogramInitials("Penningmeester")).toBe("P");
-  });
-
-  it("falls back to the middot glyph when empty/undefined", () => {
-    expect(monogramInitials(undefined)).toBe("·");
-    expect(monogramInitials("   ")).toBe("·");
   });
 });
 
@@ -184,6 +167,28 @@ describe("OrgPersonCard — shared", () => {
     );
     expect(screen.getByText("3 personen")).toBeInTheDocument();
     expect(screen.getByText("+1")).toBeInTheDocument();
+  });
+
+  it("sets the group on the 40px step, the '+N' circle included", () => {
+    render(
+      <OrgPersonCard
+        node={node({
+          title: "Feestcomité",
+          members: [
+            { id: "p1", name: "Els Claes" },
+            { id: "p2", name: "Nina Bral" },
+            { id: "p3", name: "Bert Aerts" },
+          ],
+        })}
+      />,
+    );
+    const circles = screen
+      .getByTestId("org-person-card-dual-avatar")
+      .querySelectorAll("[data-round-avatar]");
+    expect(circles).toHaveLength(3);
+    for (const circle of circles) {
+      expect(circle.getAttribute("data-size")).toBe("40");
+    }
   });
 });
 
