@@ -46,10 +46,11 @@ export default function UltrasPage() {
         <PageContainer as="article" className="py-12 sm:py-16">
           <UltrasSection kicker="Ons verhaal" heading="Wie zijn we" accent=".">
             <p>
-              De naam KCVV Ultras werd enkele jaren geleden op facebook in het
-              leven geroepen door een bende supporters die elke week trouw op
-              post stonden. Na verloop van tijd werd de pagina echter minder en
-              minder actief, en de term &quot;Ultras&quot; verdween langzaamaan.
+              De naam KCVV Ultras werd al enkele jaren vóór 2018 op facebook in
+              het leven geroepen door een bende supporters die elke week trouw
+              op post stonden. Na verloop van tijd werd de pagina echter minder
+              en minder actief, en de term &quot;Ultras&quot; verdween
+              langzaamaan.
             </p>
             <p>
               Tot het seizoen 2018 - 2019. In de zoektocht naar de
@@ -91,8 +92,9 @@ export default function UltrasPage() {
             </p>
             <p>
               Of het nu aan de steun van de Ultras lag of niet, het seizoen werd
-              bezegeld met een prachtige kampioenstitel, en volgend jaar kunnen
-              de Ultras hun ding doen in 2e provinciale!
+              bezegeld met een prachtige kampioenstitel, en in 2019-2020 deden
+              de Ultras hun ding in 2e provinciale! Vandaag speelt de ploeg in
+              3e Nationale, en de Ultras staan er nog altijd.
             </p>
           </UltrasSection>
 
@@ -113,9 +115,8 @@ export default function UltrasPage() {
               wedstrijden.
             </p>
             <p>
-              Indien de tegenstander zich hiertoe leent, zullen er ook enkele
-              bussen of andere vervoersmiddelen ingelegd worden om samen de
-              verplaatsing te maken.
+              We volgen de ploeg naar bijna elke uitwedstrijd, meestal met de
+              bus.
             </p>
             <p>
               Op het einde van het seizoen 2018-2019 werd ook voor het eerst een
@@ -154,7 +155,7 @@ export default function UltrasPage() {
           <UltrasSection kicker="Doe mee" heading="Lid worden" accent=".">
             <p>
               De makkelijkste manier om op de hoogte te blijven van acties,
-              busritten, evenementen... is via onze vernieuwde facebookpagina:
+              busritten, evenementen... is via onze facebookpagina:
             </p>
             <div>
               <a
