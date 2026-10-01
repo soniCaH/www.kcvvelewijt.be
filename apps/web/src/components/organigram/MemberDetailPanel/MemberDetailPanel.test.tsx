@@ -209,6 +209,9 @@ describe("MemberDetailPanel", () => {
       expect(
         screen.getByRole("link", { name: /Volledig profiel/ }),
       ).toHaveAttribute("href", "/staf/luc-boons");
+      expect(
+        screen.getByRole("link", { name: /Volledig profiel/ }),
+      ).toHaveClass("border-2", "px-3", "py-2", "text-label", "font-semibold");
       unmount();
 
       const noHref: OrgChartNode = {
@@ -420,6 +423,13 @@ describe("MemberDetailPanel", () => {
       expect(
         screen.getByRole("link", { name: /Iets voor jou/ }),
       ).toHaveAttribute("href", "/club/contact");
+      expect(screen.getByRole("link", { name: /Iets voor jou/ })).toHaveClass(
+        "border-2",
+        "px-3",
+        "py-2",
+        "text-label",
+        "font-semibold",
+      );
       expect(
         screen.queryByRole("link", { name: /Mail/ }),
       ).not.toBeInTheDocument();

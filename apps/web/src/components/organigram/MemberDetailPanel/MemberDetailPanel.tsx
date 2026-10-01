@@ -16,6 +16,7 @@ import { revealHash } from "@/lib/utils/same-page-anchor";
 import { findMemberResponsibilities } from "@/lib/responsibility-utils";
 import { splitDisplayName } from "@/components/organigram/OrgPersonCard";
 import { RoundAvatar } from "@/components/design-system/RoundAvatar";
+import { CHIP_CLASSES } from "@/components/design-system/press-down";
 import { ArrowRight, Envelope, Phone, X } from "@/lib/icons.redesign";
 
 /**
@@ -319,10 +320,10 @@ export function MemberDetailPanel({
                 </p>
                 <Link
                   href={vacantCtaHref}
-                  className="border-ink bg-warm text-ink shadow-paper-sm inline-flex items-center gap-2 self-start border-2 px-4 py-2.5 font-mono text-xs font-bold tracking-[0.04em] uppercase transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+                  className={`${CHIP_CLASSES} border-ink bg-warm text-ink self-start`}
                 >
                   Iets voor jou?
-                  <ArrowRight size={13} aria-hidden />
+                  <ArrowRight size={12} aria-hidden />
                 </Link>
               </>
             ) : (
@@ -394,7 +395,7 @@ export function MemberDetailPanel({
                 {activeHolder?.href && (
                   <Link
                     href={activeHolder.href}
-                    className="border-ink bg-cream text-ink shadow-paper-sm inline-flex items-center gap-2 self-start border-2 px-3 py-2 font-mono text-[11px] font-bold tracking-[0.04em] uppercase transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+                    className={`${CHIP_CLASSES} border-ink bg-cream text-ink self-start`}
                   >
                     Volledig profiel
                     <ArrowRight size={12} aria-hidden />

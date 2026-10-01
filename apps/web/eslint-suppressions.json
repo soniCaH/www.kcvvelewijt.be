@@ -700,7 +700,18 @@
   },
   "src/components/organigram/HubSearch/HubSearch.tsx": {
     "kcvv/no-off-ramp-font-size": {
-      "count": 8
+      "count": 7
+    },
+    "kcvv/no-off-ramp-leading": {
+      "count": 2
+    },
+    "kcvv/no-off-ramp-tracking": {
+      "count": 6
+    }
+  },
+  "src/components/organigram/MemberDetailPanel/MemberDetailPanel.tsx": {
+    "kcvv/no-off-ramp-font-size": {
+      "count": 7
     },
     "kcvv/no-off-ramp-leading": {
       "count": 2
@@ -709,26 +720,15 @@
       "count": 7
     }
   },
-  "src/components/organigram/MemberDetailPanel/MemberDetailPanel.tsx": {
-    "kcvv/no-off-ramp-font-size": {
-      "count": 8
-    },
-    "kcvv/no-off-ramp-leading": {
-      "count": 2
-    },
-    "kcvv/no-off-ramp-tracking": {
-      "count": 9
-    }
-  },
   "src/components/organigram/OrgPersonCard/OrgPersonCard.tsx": {
     "kcvv/no-off-ramp-font-size": {
-      "count": 4
+      "count": 2
     },
     "kcvv/no-off-ramp-leading": {
       "count": 2
     },
     "kcvv/no-off-ramp-tracking": {
-      "count": 4
+      "count": 2
     }
   },
   "src/components/organigram/OrganigramExplorer/OrganigramExplorer.tsx": {

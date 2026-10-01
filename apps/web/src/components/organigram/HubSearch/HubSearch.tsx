@@ -39,6 +39,7 @@ import { revealHash } from "@/lib/utils/same-page-anchor";
 import { useSemanticSearch } from "@/hooks/useSemanticSearch";
 import { useHubMemberPanel } from "@/components/organigram/HubMemberPanel";
 import { RoundAvatar } from "@/components/design-system/RoundAvatar";
+import { CHIP_CLASSES } from "@/components/design-system/press-down";
 import { CLUB_ROOT_ID } from "@/components/organigram/OrganigramExplorer/spotlight-tree";
 import { useHubSearchQuery } from "./HubSearchQueryProvider";
 import {
@@ -779,7 +780,7 @@ export function HubSearch({
                       query_length: value.length,
                     })
                   }
-                  className="border-ink bg-warm text-ink shadow-paper-sm mt-3 inline-flex items-center gap-1.5 border-2 px-3 py-1.5 font-mono text-[11px] font-bold tracking-[0.04em] uppercase transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+                  className={`${CHIP_CLASSES} border-ink bg-warm text-ink mt-3`}
                 >
                   Contacteer de club
                   <ArrowRight size={12} aria-hidden />

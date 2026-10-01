@@ -416,6 +416,7 @@ describe("HubSearch", () => {
 
     const escape = screen.getByRole("link", { name: /Contacteer de club/ });
     expect(escape).toHaveAttribute("href", "/club/contact");
+    expect(escape).toHaveClass("border-2", "px-3", "py-2", "text-label");
     fireEvent.click(escape);
     expect(trackEvent).toHaveBeenCalledWith(
       "organigram_search_contact_escape",
