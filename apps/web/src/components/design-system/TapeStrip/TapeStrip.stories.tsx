@@ -13,17 +13,16 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 // Shared cream-soft panel decorator. Applied per-story rather than via
-// meta.decorators so layout-heavy stories (AutoVaryViaGridVariables) and
+// meta.decorators so layout-heavy stories (SlotDrivenInset) and
 // surface-swap stories (WarmOnJerseyDeep) can opt out without the wrapper
 // bleeding through inter-slot gaps or the wrong background colour.
 const panelDecorator = (Story: () => ReactNode) => (
-  // Pin --tape-rotation and --tape-left so client-side navigation between
-  // stories (e.g. from AutoVaryViaGridVariables which sets these inline)
-  // cannot leak a stale value into subsequent story screenshots.
+  // Pin --tape-left so client-side navigation between stories (e.g. from
+  // SlotDrivenInset which sets it inline) cannot leak a stale value into
+  // subsequent story screenshots.
   <div
     style={
       {
-        "--tape-rotation": "var(--rotate-tape-a)",
         "--tape-left": "12%",
       } as CSSProperties
     }
@@ -33,46 +32,74 @@ const panelDecorator = (Story: () => ReactNode) => (
   </div>
 );
 
+// Un-seeded, un-pinned tape is flat — an un-seeded tape has not said what it is.
 export const Playground: Story = {
   args: { color: "jersey", length: "md" },
   decorators: [panelDecorator],
 };
 
-const slotStyle = (left: string, rot: string) =>
-  ({
-    "--tape-left": left,
-    "--tape-rotation": rot,
-  }) as CSSProperties;
-
-export const AutoVaryViaGridVariables: Story = {
-  // The grid pools <TapedCardGrid> uses:
-  //   --tape-rotation: -3deg / -4deg / -5deg / -6deg
-  //   --tape-left:     4%    / 7%    / 10%   / 12%
-  // Standalone tapes default to -5deg / 12%.
+// The tape inset is placement, so it stays slot-driven: <TapedCardGrid> sets
+// --tape-left per slot (4% / 7% / 10% / 12%). The angle is not the slot's.
+export const SlotDrivenInset: Story = {
   render: () => {
-    const slots = [
-      { left: "4%", rot: "-3deg" },
-      { left: "7%", rot: "-4deg" },
-      { left: "10%", rot: "-5deg" },
-      { left: "12%", rot: "-6deg" },
-    ];
+    const lefts = ["4%", "7%", "10%", "12%"];
     return (
       <div className="flex flex-col gap-4">
-        {slots.map(({ left, rot }) => (
+        {lefts.map((left) => (
           <div
-            key={`${left}-${rot}`}
-            style={slotStyle(left, rot)}
+            key={left}
+            style={{ "--tape-left": left } as CSSProperties}
             className="bg-cream-soft border-paper-edge relative h-20 w-64 border"
           >
-            <TapeStrip />
+            <TapeStrip seed={`inset ${left}`} />
             <span className="text-mono-sm absolute bottom-2 left-2 font-mono uppercase">
-              left {left} · rot {rot}
+              left {left}
             </span>
           </div>
         ))}
       </div>
     );
   },
+};
+
+// The bigger tier of the site tilt scale (#3329): six pinned angles
+// -6° / -4° / -2° / +2° / +4° / +6°, plus the explicit flat `none`.
+export const BiggerTier: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      {(["a", "b", "c", "d", "e", "f", "none"] as const).map((rotation) => (
+        <div
+          key={rotation}
+          className="bg-cream-soft border-paper-edge relative h-16 w-64 border"
+        >
+          <TapeStrip rotation={rotation} />
+          <span className="text-mono-sm absolute bottom-2 left-2 font-mono uppercase">
+            {rotation}
+          </span>
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+// A seed derives the angle from the card's identity — same seed, same tape,
+// on every page the card appears on.
+export const SeededFromIdentity: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      {["KCVV 1 wint thuis", "Jeugdkamp 2026", "Nieuwe sponsor"].map((seed) => (
+        <div
+          key={seed}
+          className="bg-cream-soft border-paper-edge relative h-16 w-64 border"
+        >
+          <TapeStrip seed={seed} />
+          <span className="text-mono-sm absolute bottom-2 left-2 font-mono uppercase">
+            {seed}
+          </span>
+        </div>
+      ))}
+    </div>
+  ),
 };
 
 export const InkColor: Story = {
@@ -100,66 +127,60 @@ export const PositionRight: Story = {
 };
 
 // Both strips composed on a single panel — exactly the NewsCard pairing:
-// warm tape at TL + jersey tape at TR. Demonstrates that the two
-// position anchors read independent CSS variables.
+// warm tape at TL + jersey tape at TR, leaning in opposite directions.
+// Demonstrates that the two position anchors read independent CSS variables.
 export const CornerPair: Story = {
   render: () => (
     <div
       style={
         {
-          "--tape-rotation": "var(--rotate-tape-a)",
           "--tape-left": "8%",
           "--tape-right": "8%",
         } as CSSProperties
       }
       className="bg-cream-soft border-paper-edge relative h-40 w-72 border"
     >
-      <TapeStrip color="warm" length="md" position="left" />
-      <TapeStrip color="jersey" length="md" position="right" />
+      <TapeStrip color="warm" length="md" position="left" rotation="b" />
+      <TapeStrip color="jersey" length="md" position="right" rotation="e" />
     </div>
   ),
 };
 
-// Polaroid-scale rotations (#1853). Scoped to the <EventFactInline>
-// composition per eventfact-inline-locked §Round 1 — the steep tilts
-// exist because the polaroid aesthetic needs visibly hand-pinned tape.
+// The two angles the <EventFactInline> polaroid pins (#1853, folded into the
+// bigger tier by #3329): -4° top-left, +4° bottom-right.
 
-// Top-left polaroid-a — the upper-left strip of the EventFactInline
-// polaroid (warm ochre, sm length, -5°). verticalEdge defaults to "top".
-export const TopLeftPolaroidA: Story = {
+// Top-left -4° (`b`) — warm ochre, sm length. verticalEdge defaults to "top".
+export const TopLeftMinusFour: Story = {
   args: {
     color: "warm",
     length: "sm",
     position: "left",
-    rotation: "polaroid-a",
+    rotation: "b",
   },
   decorators: [panelDecorator],
 };
 
-// Bottom-right polaroid-b — the lower-right strip of the EventFactInline
-// polaroid (warm ochre, sm length, +4°, anchored to the bottom edge).
-// Exercises the new verticalEdge="bottom" code path.
-export const BottomRightPolaroidB: Story = {
+// Bottom-right +4° (`e`) — warm ochre, sm length, anchored to the bottom
+// edge. Exercises the verticalEdge="bottom" code path.
+export const BottomRightPlusFour: Story = {
   args: {
     color: "warm",
     length: "sm",
     position: "right",
     verticalEdge: "bottom",
-    rotation: "polaroid-b",
+    rotation: "e",
   },
   decorators: [panelDecorator],
 };
 
 // All four position × verticalEdge corners on a single panel. Mixed
-// rotations exercise both the sub-degree pool (a/d) and the polaroid
-// pool (polaroid-a/polaroid-b) so a single screenshot covers the full
-// matrix of the extended API.
+// rotations span the bigger tier (a/b/d/e) so a single screenshot covers the
+// full matrix of the extended API.
 export const AllFourCornersMixed: Story = {
   render: () => (
     <div
       style={
         {
-          "--tape-rotation": "var(--rotate-tape-a)",
           "--tape-left": "8%",
           "--tape-right": "8%",
         } as CSSProperties
@@ -178,7 +199,7 @@ export const AllFourCornersMixed: Story = {
         length="md"
         position="right"
         verticalEdge="top"
-        rotation="polaroid-a"
+        rotation="b"
       />
       <TapeStrip
         color="ink"
@@ -192,7 +213,7 @@ export const AllFourCornersMixed: Story = {
         length="md"
         position="right"
         verticalEdge="bottom"
-        rotation="polaroid-b"
+        rotation="e"
       />
     </div>
   ),
@@ -210,7 +231,6 @@ export const WarmOnJerseyDeep: Story = {
       <div
         style={
           {
-            "--tape-rotation": "var(--rotate-tape-a)",
             "--tape-left": "12%",
           } as CSSProperties
         }

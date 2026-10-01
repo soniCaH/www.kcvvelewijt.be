@@ -13,7 +13,7 @@ export function RaffleCallout() {
       bg="jersey-deep"
       shadow="soft"
       rotation="b"
-      tape={{ color: "warm", length: "md", position: "left", rotation: "a" }}
+      tape={{ color: "warm", length: "md", position: "left", rotation: "c" }}
       padding="lg"
       dataAttrs={{ "data-testid": "raffle-callout" }}
     >

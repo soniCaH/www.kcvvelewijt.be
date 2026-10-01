@@ -3,21 +3,11 @@ import { cn } from "@/lib/utils/cn";
 import { TapeStrip, type TapeStripProps } from "../TapeStrip/TapeStrip";
 
 export type TapedCardRotation =
-  | "a"
-  | "b"
-  | "c"
-  | "d"
-  | "none"
-  | "auto"
-  | number;
+  "a" | "b" | "c" | "d" | "none" | "auto" | number;
 
 export type TapedCardShadow = "sm" | "md" | "lift" | "soft";
 export type TapedCardBg =
-  | "cream"
-  | "cream-soft"
-  | "ink"
-  | "jersey"
-  | "jersey-deep";
+  "cream" | "cream-soft" | "ink" | "jersey" | "jersey-deep";
 export type TapedCardPadding = "sm" | "md" | "lg" | "none";
 export type TapedCardAs = "div" | "article" | "section" | "li" | "figure";
 
@@ -49,10 +39,10 @@ export interface TapedCardProps {
 }
 
 const ROTATION_CSS: Record<Exclude<TapedCardRotation, number>, string> = {
-  a: "var(--rotate-tape-a)",
-  b: "var(--rotate-tape-b)",
-  c: "var(--rotate-tape-c)",
-  d: "var(--rotate-tape-d)",
+  a: "var(--rotate-lean-a)",
+  b: "var(--rotate-lean-b)",
+  c: "var(--rotate-lean-c)",
+  d: "var(--rotate-lean-d)",
   auto: "var(--taped-card-rotation, 0deg)",
   none: "0deg",
 };

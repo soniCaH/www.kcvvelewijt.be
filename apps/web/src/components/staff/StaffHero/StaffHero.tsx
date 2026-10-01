@@ -13,7 +13,7 @@ import { Envelope, Phone, type RedesignIconProps } from "@/lib/icons.redesign";
  * bare two-column grid as `<PlayerHero>` so the two detail pages read as
  * siblings. The figure is mirrored to the LEFT column (player keeps it right);
  * everything else — container, name rhythm, mono kicker, single jersey
- * `<TapeStrip>` at angle `b`, `padding="none"` newsprint photo — matches.
+ * `<TapeStrip>` (angle seeded by `id`), `padding="none"` newsprint photo — matches.
  *
  * Staff carries different data, so the text column swaps the player's jersey
  * number + ticket-stub for role pills + a contact row:
@@ -95,12 +95,13 @@ export function StaffHero({
       className="grid grid-cols-1 items-start gap-x-10 gap-y-8 sm:grid-cols-[minmax(220px,320px)_1fr]"
     >
       {/* Figure — LEFT column (player mirrors this on the right). Same
-          `padding="none"` newsprint treatment + single jersey tape at angle b. */}
+          `padding="none"` newsprint treatment + single jersey tape, its angle
+          seeded by the staff member's `id`. */}
       <div className="w-full max-w-[320px] justify-self-start">
         <TapedFigure
           aspect="portrait-3-4"
           rotation="b"
-          tape={{ color: "jersey-deep", length: "md" }}
+          tape={{ color: "jersey-deep", length: "md", seed: id }}
           bg="cream-soft"
           tint={hasPhoto ? "newsprint" : "none"}
           padding="none"

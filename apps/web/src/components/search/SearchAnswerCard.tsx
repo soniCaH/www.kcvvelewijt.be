@@ -57,7 +57,7 @@ export function SearchAnswerCard({ answer, sources }: SearchAnswerCardProps) {
       shadow="md"
       bg="cream"
       padding="md"
-      tape={{ color: "warm", length: "md" }}
+      tape={{ color: "warm", length: "md", seed: answer }}
       className="overflow-hidden"
     >
       {/* Decorative ✦ SLIM postmark (variant C circular brick stamp) —

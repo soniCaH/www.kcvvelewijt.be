@@ -125,8 +125,8 @@ export const WithLargeTapesOnCorners: Story = {
     children: [],
   },
   render: () => {
-    // Tapes are tl-only. The grid sets a per-slot --tape-rotation CSS
-    // variable so each tape's angle varies subtly across the row.
+    // Tapes are tl-only and un-seeded, so flat: the grid owns the card's lean
+    // and the tape's inset (--tape-left), never the tape's angle (#3329).
     return (
       <TapedCardGrid columns={3}>
         {Array.from({ length: 6 }).map((_, i) => (

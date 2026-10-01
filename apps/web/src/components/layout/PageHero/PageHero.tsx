@@ -396,7 +396,7 @@ function DarkBand({
                 color: "warm",
                 length: "md",
                 position: "left",
-                rotation: "a",
+                rotation: "c",
               }}
               className="w-full md:w-[24rem]"
             >
@@ -526,7 +526,12 @@ export function PageHero(props: PageHeroProps) {
         as="section"
         bg="cream"
         padding={isCompact ? "md" : "lg"}
-        tape={{ color: "warm", position: "left", length: "lg" }}
+        tape={{
+          color: "warm",
+          position: "left",
+          length: "lg",
+          seed: headline,
+        }}
         dataAttrs={{
           "data-testid": "page-hero",
           "data-register": "band",
@@ -543,7 +548,12 @@ export function PageHero(props: PageHeroProps) {
             {textColumn}
             <TapedFigure
               aspect="landscape-16-9"
-              tape={{ color: "warm", position: "right", length: "md" }}
+              tape={{
+                color: "warm",
+                position: "right",
+                length: "md",
+                seed: `${headline} · foto`,
+              }}
             >
               <Image
                 src={image!}

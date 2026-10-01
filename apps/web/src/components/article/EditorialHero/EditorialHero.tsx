@@ -206,6 +206,8 @@ interface EditorialHeroCoverProps {
   pressOnHover?: boolean;
   /** Forwarded to `next/image` — eager-loads the LCP hero (PERF-1). */
   priority?: boolean;
+  /** Stable identity (the article title) the cover's tape angle derives from. */
+  seed: string;
 }
 
 function EditorialHeroCover({
@@ -214,12 +216,13 @@ function EditorialHeroCover({
   overlay,
   pressOnHover,
   priority,
+  seed,
 }: EditorialHeroCoverProps) {
   return (
     <TapedFigure
       aspect={aspect}
       rotation="b"
-      tape={{ color: "jersey-deep", length: "md" }}
+      tape={{ color: "jersey-deep", length: "md", seed }}
       className={cn(
         "relative max-w-[440px]",
         // Canonical press-down (feedback_canonical_press_down_hover): the
@@ -553,6 +556,7 @@ export function EditorialHero(props: EditorialHeroProps) {
             overlay={coverOverlay}
             pressOnHover={pressOnHover}
             priority={priority}
+            seed={serializeTitle(title)}
           />
         ) : undefined
       }

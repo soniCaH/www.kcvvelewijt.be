@@ -11,6 +11,8 @@ import {
   type TapeStripLength,
   type TapeStripProps,
   type TapeStripRotation,
+  tapeRotationFor,
+  oppositeTapeRotation,
   MonoLabel,
   type MonoLabelTone,
   EditorialHeading,
@@ -83,7 +85,7 @@ export interface NewsCardProps {
   aspectRatio?: NewsCardAspectRatio;
   /**
    * Applies a small slot-deterministic rotation using the shared
-   * `--rotate-tape-{a,b,c,d}` tokens, or — the default — `"auto"`, which reads
+   * `--rotate-lean-{a,b,c,d}` tokens (the slight tier), or — the default — `"auto"`, which reads
    * the `--taped-card-rotation` slot variable a `<TapedCardGrid>` sets and
    * falls back to `0deg` when there is no grid above it (#2569 / decision
    * #2431). `"auto"` is what lets the shared grid own the angle instead of
@@ -147,35 +149,18 @@ const DEFAULT_TAPE_COLORS: readonly [TapeStripColor, TapeStripColor] = [
   "jersey-deep",
 ];
 
-// Four rotation pool entries, in the order applied by `--rotate-tape-*`
-// in `globals.css` (-0.5° / -0.25° / +0.25° / +0.5°).
-const ROTATION_POOL: readonly TapeStripRotation[] = ["a", "b", "c", "d"];
-
-// djb2-light string hash — deterministic, well-distributed across the
-// 4-entry pool. Yields the same index for the same title across renders
-// so a card's tape angle is stable (no hydration mismatch, stable VR
-// baselines) without needing a grid to set `--tape-rotation`.
-function hashIndex(seed: string, modulo: number): number {
-  let h = 5381;
-  for (let i = 0; i < seed.length; i++) {
-    h = ((h << 5) + h + seed.charCodeAt(i)) >>> 0;
-  }
-  return h % modulo;
-}
-
 /**
- * Deterministic per-card tape rotation pair. The two strips on one card
- * lean in opposite directions (offset by 2 in the pool), and the pair
- * itself shifts card-to-card based on a stable seed (the title) so even
- * standalone NewsCards — outside a `<TapedCardGrid>` — read with visual
- * variety. Pure function so render/hydration produce identical output.
+ * Deterministic per-card tape rotation pair, from the site's six-value bigger
+ * tier. The tape follows the card, not the slot: the same title wears the same
+ * tape on every page. The two strips on one card lean in opposite directions
+ * (`oppositeTapeRotation`). Pure function so render/hydration produce
+ * identical output.
  */
 function deriveTapeRotations(
   seed: string,
 ): readonly [TapeStripRotation, TapeStripRotation] {
-  const left = hashIndex(seed, ROTATION_POOL.length);
-  const right = (left + 2) % ROTATION_POOL.length;
-  return [ROTATION_POOL[left]!, ROTATION_POOL[right]!];
+  const left = tapeRotationFor(seed);
+  return [left, oppositeTapeRotation(left)];
 }
 
 // aspect-ratio CSS-class mapping, mirrors `<TapedFigure>`'s Tailwind

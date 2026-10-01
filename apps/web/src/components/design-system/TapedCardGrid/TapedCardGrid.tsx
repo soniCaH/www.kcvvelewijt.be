@@ -40,23 +40,12 @@ const GAP_CLASS: Record<TapedCardGridGap, string> = {
   lg: "gap-10",
 };
 
+// The slot's lean — the site's slight tier (`--rotate-lean-*`, #3329).
 const ROTATION_POOL = [
-  "var(--rotate-tape-a)",
-  "var(--rotate-tape-b)",
-  "var(--rotate-tape-c)",
-  "var(--rotate-tape-d)",
-] as const;
-
-// Per-slot tape rotation — full range -1° to -6° per owner (-7° too much,
-// -1° to -6° gives wider hand-placed feel across a row). 6-wide cycle so
-// each card in a 6-card row gets a unique tape angle.
-const TAPE_ROTATION_POOL = [
-  "-1deg",
-  "-2deg",
-  "-3deg",
-  "-4deg",
-  "-5deg",
-  "-6deg",
+  "var(--rotate-lean-a)",
+  "var(--rotate-lean-b)",
+  "var(--rotate-lean-c)",
+  "var(--rotate-lean-d)",
 ] as const;
 
 // Per-slot tape horizontal inset. Range: a few percent in (4%) up to the
@@ -71,15 +60,17 @@ type StyleWithVars = CSSProperties & Record<`--${string}`, string | number>;
  * hand-rolled `grid-cols-*` ladder beside a card is the drift this primitive
  * exists to remove (#2569 / decision #2431).
  *
- * **The slot contract.** Each child is wrapped in a slot element carrying three
+ * **The slot contract.** Each child is wrapped in a slot element carrying two
  * CSS variables, and a child opts in by reading them:
  *
  * - `--taped-card-rotation` — the card's own angle. `<TapedCard rotation="auto">`
  *   reads it (so `<NewsCard>` does, by default); a card that is not a
  *   `<TapedCard>` reads it directly, as `<EditorialHubCard>` does with
  *   `rotate-[var(--taped-card-rotation,0deg)]`.
- * - `--tape-rotation` / `--tape-left` — the tape strip's angle and inset,
- *   read by `<TapeStrip>` unless the card passes its own pick.
+ * - `--tape-left` — the tape strip's inset (placement, so the slot owns it).
+ *   The tape's *angle* is not the slot's: it follows the card's identity
+ *   (`<TapeStrip seed>`, #3302 / #3329), so the same card wears the same tape
+ *   on every page.
  *
  * Every variable falls back to a flat, centred default, so a card outside a
  * grid renders exactly as it did before.
@@ -124,8 +115,6 @@ export function TapedCardGrid({
       {items.map((child, index) => {
         const slotStyle: StyleWithVars = {
           "--taped-card-rotation": ROTATION_POOL[index % ROTATION_POOL.length]!,
-          "--tape-rotation":
-            TAPE_ROTATION_POOL[index % TAPE_ROTATION_POOL.length]!,
           "--tape-left": TAPE_LEFT_POOL[index % TAPE_LEFT_POOL.length]!,
         };
         return (

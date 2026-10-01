@@ -1,11 +1,7 @@
 import type { CSSProperties } from "react";
 
 export type TapeStripColor =
-  | "jersey"
-  | "jersey-deep"
-  | "ink"
-  | "cream"
-  | "warm";
+  "jersey" | "jersey-deep" | "ink" | "cream" | "warm";
 export type TapeStripLength = "sm" | "md" | "lg";
 
 /**
@@ -29,36 +25,66 @@ export type TapeStripPosition = "left" | "right";
 export type TapeStripVerticalEdge = "top" | "bottom";
 
 /**
- * Optional per-strip rotation pick from the named tape rotation pools.
- * - Omitted (default) — reads `--tape-rotation` from the host's CSS
- *   context (fallback `--rotate-tape-a`). Right for grid slots that
- *   pre-set the var on each card.
- * - `"a" | "b" | "c" | "d"` — pins to the sub-degree pool entry
- *   (range -0.5° to +0.5°, per `feedback_visual_preferences` + Phase 1
- *   §11.5). Used for corner-tape pairings (R10 NewsCard TL+TR) where
- *   the two strips on one card should lean in opposite directions.
- * - `"polaroid-a" | "polaroid-b"` — pins to the polaroid-scale pool
- *   (`-5deg` / `+4deg`). Scoped to the `<EventFactInline>` polaroid
- *   composition only (eventfact-inline-locked.md §Round 1). The
- *   sub-degree pool stays canonical for grid cards; these steeper
- *   angles exist because the polaroid aesthetic needs visibly tilted
- *   tape. Do not use elsewhere — add a new scale-specific token when
- *   a new use case earns it.
+ * The tape strip's angle, drawn from the site's bigger tilt tier
+ * (`globals.css`, #3302 / #3329): `a` -6°, `b` -4°, `c` -2°, `d` +2°,
+ * `e` +4°, `f` +6°. `none` is the explicit flat strip. The tier has no 0
+ * and never goes under 2°, so a tilted strip never reads as flat.
  */
-export type TapeStripRotation =
-  | "a"
-  | "b"
-  | "c"
-  | "d"
-  | "polaroid-a"
-  | "polaroid-b";
+export type TapeStripRotation = "a" | "b" | "c" | "d" | "e" | "f" | "none";
+
+/** The six tilted entries, negative first (`a`-`c`) then positive (`d`-`f`). */
+const TAPE_ROTATION_POOL = ["a", "b", "c", "d", "e", "f"] as const;
+
+// djb2-light string hash — deterministic, so an angle derived from a seed is
+// stable across renders (no hydration mismatch, stable VR baselines).
+// Exported so a card deriving its own lean from its identity reuses it.
+export function seededIndex(seed: string, modulo: number): number {
+  let h = 5381;
+  for (let i = 0; i < seed.length; i++) {
+    h = ((h << 5) + h + seed.charCodeAt(i)) >>> 0;
+  }
+  return h % modulo;
+}
+
+/**
+ * The tape angle a card's identity derives: the same seed gives the same
+ * angle on every page the card appears on.
+ */
+export function tapeRotationFor(
+  seed: string,
+): (typeof TAPE_ROTATION_POOL)[number] {
+  return TAPE_ROTATION_POOL[seededIndex(seed, TAPE_ROTATION_POOL.length)]!;
+}
+
+/**
+ * The strip that leans the other way, mirrored: opposite sign, equal size
+ * (`a`↔`f` ±6°, `b`↔`e` ±4°, `c`↔`d` ±2°).
+ */
+export function oppositeTapeRotation(
+  rotation: (typeof TAPE_ROTATION_POOL)[number],
+): (typeof TAPE_ROTATION_POOL)[number] {
+  return TAPE_ROTATION_POOL[
+    TAPE_ROTATION_POOL.length - 1 - TAPE_ROTATION_POOL.indexOf(rotation)
+  ]!;
+}
 
 export interface TapeStripProps {
   color?: TapeStripColor;
   length?: TapeStripLength;
   position?: TapeStripPosition;
   verticalEdge?: TapeStripVerticalEdge;
+  /**
+   * Pins the angle to a named entry of the bigger tier. Wins over `seed`.
+   * Used where two strips on one card must lean in opposite directions.
+   */
   rotation?: TapeStripRotation;
+  /**
+   * A stable identity string (a title, a name) the angle is derived from —
+   * the tape follows the card, not the grid slot it sits in. With neither
+   * `seed` nor `rotation` the strip is flat (`none`): an un-seeded tape has
+   * not said what it is.
+   */
+  seed?: string;
 }
 
 const LENGTH_CLASS: Record<TapeStripLength, string> = {
@@ -80,8 +106,8 @@ const COLOR_CLASS: Record<TapeStripColor, string> = {
 };
 
 // Two anchor classes. Left reads `--tape-left` (12% fallback); right
-// reads `--tape-right` (12% fallback). Both still share the rotation
-// custom-property pool so consumer slots can vary rotation independently.
+// reads `--tape-right` (12% fallback). The inset is placement, so it stays
+// slot-driven; the angle is the card's identity (`seed` / `rotation`).
 const POSITION_CLASS: Record<TapeStripPosition, string> = {
   left: "left-[var(--tape-left,12%)]",
   right: "right-[var(--tape-right,12%)]",
@@ -100,25 +126,14 @@ const TRANSLATE_Y: Record<TapeStripVerticalEdge, string> = {
   bottom: "50%",
 };
 
-// When no per-strip rotation pick is passed, rotation reads from a CSS
-// custom property so <TapedCardGrid> can auto-vary it per slot — tapes in
-// the same grid row don't perfectly align rotationally. Fallback is the
-// standalone default.
-const tapeTransform = (edge: TapeStripVerticalEdge) =>
-  `translateY(${TRANSLATE_Y[edge]}) rotate(var(--tape-rotation, var(--rotate-tape-a)))`;
-
-// When a per-strip rotation pick is passed explicitly, compose the
-// transform around that pool entry directly (skipping --tape-rotation).
-// Used by R10 NewsCard so TL + TR corner strips lean in opposite
-// directions independent of the grid-supplied var; and by EventFactInline
-// for the polaroid-scale rotations.
 const ROTATION_TOKEN: Record<TapeStripRotation, string> = {
   a: "var(--rotate-tape-a)",
   b: "var(--rotate-tape-b)",
   c: "var(--rotate-tape-c)",
   d: "var(--rotate-tape-d)",
-  "polaroid-a": "var(--rotate-tape-polaroid-a)",
-  "polaroid-b": "var(--rotate-tape-polaroid-b)",
+  e: "var(--rotate-tape-e)",
+  f: "var(--rotate-tape-f)",
+  none: "0deg",
 };
 
 export function TapeStrip({
@@ -127,10 +142,11 @@ export function TapeStrip({
   position = "left",
   verticalEdge = "top",
   rotation,
+  seed,
 }: TapeStripProps) {
-  const transform = rotation
-    ? `translateY(${TRANSLATE_Y[verticalEdge]}) rotate(${ROTATION_TOKEN[rotation]})`
-    : tapeTransform(verticalEdge);
+  const resolved: TapeStripRotation =
+    rotation ?? (seed === undefined ? "none" : tapeRotationFor(seed));
+  const transform = `translateY(${TRANSLATE_Y[verticalEdge]}) rotate(${ROTATION_TOKEN[resolved]})`;
   const style: CSSProperties = { transform };
   if (color === "warm") {
     style.backgroundColor = "var(--tape-warm)";
@@ -143,7 +159,7 @@ export function TapeStrip({
       data-length={length}
       data-position={position}
       data-vertical-edge={verticalEdge}
-      data-rotation={rotation ?? "inherit"}
+      data-rotation={resolved}
       // z-20 + pointer-events-none — tape strips must render above
       // sibling content that uses `position: absolute` (e.g. Next.js
       // `<Image fill>` in flush-edge `<NewsCard>`). The pointer-events

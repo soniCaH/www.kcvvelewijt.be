@@ -1,6 +1,17 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { TapeStrip } from "./TapeStrip";
+import { TapeStrip, oppositeTapeRotation } from "./TapeStrip";
+
+describe("oppositeTapeRotation", () => {
+  it("mirrors to the opposite sign at equal size (a-f -6/+6, b-e -4/+4, c-d -2/+2)", () => {
+    expect(oppositeTapeRotation("a")).toBe("f");
+    expect(oppositeTapeRotation("b")).toBe("e");
+    expect(oppositeTapeRotation("c")).toBe("d");
+    expect(oppositeTapeRotation("d")).toBe("c");
+    expect(oppositeTapeRotation("e")).toBe("b");
+    expect(oppositeTapeRotation("f")).toBe("a");
+  });
+});
 
 describe("TapeStrip", () => {
   it("renders with default jersey colour and lg length", () => {
@@ -35,13 +46,45 @@ describe("TapeStrip", () => {
     expect(el.className).not.toContain("left-[var(--tape-left,12%)]");
   });
 
-  it("rotation reads var(--tape-rotation,-5deg) so grid slots can auto-vary", () => {
+  it("is flat when it has neither a seed nor a rotation — no grid inheritance (#3329)", () => {
     const { container } = render(<TapeStrip />);
     const el = container.firstChild as HTMLElement;
-    expect(el.style.transform).toContain(
-      "var(--tape-rotation, var(--rotate-tape-a))",
-    );
+    expect(el).toHaveAttribute("data-rotation", "none");
+    expect(el.style.transform).toContain("rotate(0deg)");
+    expect(el.style.transform).not.toContain("--tape-rotation");
     expect(el.style.transform).toContain("translateY(-50%)");
+  });
+
+  it("a seed picks a bigger-tier angle, the same one every render", () => {
+    const a = render(<TapeStrip seed="Alpha overwinning" />);
+    const b = render(<TapeStrip seed="Alpha overwinning" />);
+    const elA = a.container.firstChild as HTMLElement;
+    const elB = b.container.firstChild as HTMLElement;
+    expect(elA.getAttribute("data-rotation")).toMatch(/^[a-f]$/);
+    expect(elA.getAttribute("data-rotation")).toBe(
+      elB.getAttribute("data-rotation"),
+    );
+    expect(elA.style.transform).toMatch(/var\(--rotate-tape-[a-f]\)/);
+  });
+
+  it("different seeds spread across the six-value tier", () => {
+    const picks = new Set(
+      ["a", "bb", "ccc", "dddd", "eeeee", "ffffff", "ggggggg", "hhhhhhhh"].map(
+        (seed) =>
+          (
+            render(<TapeStrip seed={seed} />).container
+              .firstChild as HTMLElement
+          ).getAttribute("data-rotation"),
+      ),
+    );
+    expect(picks.size).toBeGreaterThanOrEqual(3);
+  });
+
+  it("an explicit rotation wins over a seed", () => {
+    const { container } = render(<TapeStrip seed="x" rotation="f" />);
+    const el = container.firstChild as HTMLElement;
+    expect(el).toHaveAttribute("data-rotation", "f");
+    expect(el.style.transform).toContain("var(--rotate-tape-f)");
   });
 
   it("color=cream applies --color-tape-cream as inline background-color", () => {
@@ -61,14 +104,10 @@ describe("TapeStrip", () => {
   });
 
   it("rotation prop pins the transform to the named pool entry", () => {
-    // Without the prop, transform falls back to var(--tape-rotation).
-    // With rotation="c", it skips the var and uses --rotate-tape-c
-    // directly — so a per-strip rotation can override grid context.
     const { container } = render(<TapeStrip rotation="c" />);
     const el = container.firstChild as HTMLElement;
     expect(el).toHaveAttribute("data-rotation", "c");
     expect(el.style.transform).toContain("var(--rotate-tape-c)");
-    expect(el.style.transform).not.toContain("var(--tape-rotation");
   });
 
   it("defaults verticalEdge to 'top' and renders top-0 with translateY(-50%)", () => {
@@ -91,31 +130,22 @@ describe("TapeStrip", () => {
     expect(el.style.transform).toContain("translateY(50%)");
   });
 
-  it("rotation='polaroid-a' maps to --rotate-tape-polaroid-a (steep polaroid tilt, scoped to EventFactInline)", () => {
-    const { container } = render(<TapeStrip rotation="polaroid-a" />);
+  it("the polaroid tokens are gone — rotation 'e' maps to the +4deg bigger-tier token", () => {
+    const { container } = render(<TapeStrip rotation="e" />);
     const el = container.firstChild as HTMLElement;
-    expect(el).toHaveAttribute("data-rotation", "polaroid-a");
-    expect(el.style.transform).toContain("var(--rotate-tape-polaroid-a)");
-    expect(el.style.transform).not.toContain("var(--tape-rotation");
-  });
-
-  it("rotation='polaroid-b' maps to --rotate-tape-polaroid-b", () => {
-    const { container } = render(<TapeStrip rotation="polaroid-b" />);
-    const el = container.firstChild as HTMLElement;
-    expect(el).toHaveAttribute("data-rotation", "polaroid-b");
-    expect(el.style.transform).toContain("var(--rotate-tape-polaroid-b)");
+    expect(el).toHaveAttribute("data-rotation", "e");
+    expect(el.style.transform).toContain("var(--rotate-tape-e)");
   });
 
   it("verticalEdge='bottom' composes with an explicit rotation pick (translateY(50%) + token)", () => {
     // Exercises the explicit-rotation branch of the transform builder —
-    // bottom edge must still flip translateY even when rotation token
-    // skips --tape-rotation.
+    // bottom edge must still flip translateY with an explicit rotation.
     const { container } = render(
-      <TapeStrip verticalEdge="bottom" rotation="polaroid-b" />,
+      <TapeStrip verticalEdge="bottom" rotation="e" />,
     );
     const el = container.firstChild as HTMLElement;
     expect(el.style.transform).toContain("translateY(50%)");
-    expect(el.style.transform).toContain("var(--rotate-tape-polaroid-b)");
+    expect(el.style.transform).toContain("var(--rotate-tape-e)");
   });
 
   it("renders above absolutely-positioned siblings (z-20) and is non-interactive", () => {

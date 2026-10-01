@@ -25,6 +25,15 @@ describe("PlayerHero", () => {
     vi.useRealTimers();
   });
 
+  it("seeds its tape from the player's id, so the tape is tilted, not flat (#3329)", () => {
+    const { container } = render(
+      <PlayerHero id="player-test" firstName="Maxim" lastName="Breugelmans" />,
+    );
+    const tape = container.querySelector("[data-rotation][data-color]");
+    expect(tape).not.toBeNull();
+    expect(tape).not.toHaveAttribute("data-rotation", "none");
+  });
+
   describe("Name rhythm (6.d1)", () => {
     it("renders the first name with upright Black display weight", () => {
       render(

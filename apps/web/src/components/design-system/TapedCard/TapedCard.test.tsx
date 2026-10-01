@@ -42,11 +42,11 @@ describe("TapedCard", () => {
     expect(container.querySelector("li")).not.toBeNull();
   });
 
-  it("rotation='a' applies the var(--rotate-tape-a) custom property", () => {
+  it("rotation='a' reads the slight-tier var(--rotate-lean-a) custom property", () => {
     const { container } = render(<TapedCard rotation="a">X</TapedCard>);
     const el = container.firstChild as HTMLElement;
     expect(el.getAttribute("data-rotation")).toBe("a");
-    expect(el.style.transform).toContain("var(--rotate-tape-a)");
+    expect(el.style.transform).toContain("var(--rotate-lean-a)");
   });
 
   it("rotation='auto' uses var(--taped-card-rotation,0deg)", () => {
