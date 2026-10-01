@@ -92,10 +92,6 @@ export function splitDisplayName(value: string): {
 
 // ─── Scale config ────────────────────────────────────────────────────────────
 
-// Single avatar 64, shared group 40 (#3304: groups follow the ramp).
-const AVATAR_PX = 64;
-const NAME_CLASS = "text-base";
-
 // ─── Sub-parts ───────────────────────────────────────────────────────────────
 
 /** First-token-bold + remainder-italic name rhythm. */
@@ -137,8 +133,8 @@ function DualAvatar({ holders }: { holders: OrgChartNode["members"] }) {
 
   return (
     <div
-      aria-hidden="true"
-      // Fixed 64px height keeps the card the same height as a single card.
+      // A group follows the ramp at 40 (#3304); the fixed 64px height keeps
+      // the card as tall as a single-avatar card.
       className="flex h-16 items-center -space-x-2"
       data-testid="org-person-card-dual-avatar"
     >
@@ -208,25 +204,25 @@ export function OrgPersonCard({
       {/* Avatar */}
       {state === "single" && (
         <RoundAvatar
-          size={AVATAR_PX}
+          size={64}
           name={node.members[0]?.name ?? node.title}
           photoUrl={node.members[0]?.imageUrl}
         />
       )}
       {state === "shared" && <DualAvatar holders={node.members} />}
-      {state === "vacant" && <RoundAvatar size={AVATAR_PX} glyph="+" dashed />}
+      {state === "vacant" && <RoundAvatar size={64} glyph="+" dashed />}
 
       {/* Name slot — person (single) or position (shared/vacant) */}
       {state === "single" ? (
         <NameRhythm
           value={node.members[0]?.name ?? node.title}
-          className={cn("mt-2.5", NAME_CLASS)}
+          className="mt-2.5 text-base"
         />
       ) : (
         <NameRhythm
           value={node.title}
           italicLead={state === "vacant"}
-          className={cn("mt-2.5", NAME_CLASS)}
+          className="mt-2.5 text-base"
         />
       )}
 

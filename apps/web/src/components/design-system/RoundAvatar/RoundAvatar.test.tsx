@@ -72,13 +72,30 @@ describe("<RoundAvatar>", () => {
 
     it("rings 24px at 1px and 40/64px at 2px", () => {
       const ring = (size: 24 | 40 | 64) =>
-        root(render(<RoundAvatar size={size} name="Luc" />).container)
-          .className;
-      expect(ring(24)).toMatch(/\bborder\b/);
-      expect(ring(24)).not.toMatch(/\bborder-2\b/);
-      expect(ring(40)).toMatch(/\bborder-2\b/);
-      expect(ring(64)).toMatch(/\bborder-2\b/);
+        root(
+          render(<RoundAvatar size={size} name="Luc" />).container,
+        ).className.split(/\s+/);
+      expect(ring(24)).toContain("border");
+      expect(ring(24)).not.toContain("border-2");
+      expect(ring(40)).toContain("border-2");
+      expect(ring(40)).not.toContain("border");
+      expect(ring(64)).toContain("border-2");
+      expect(ring(64)).not.toContain("border");
     });
+  });
+
+  it("tells a glyph circle from a monogram", () => {
+    const { container } = render(<RoundAvatar size={40} glyph="+2" />);
+    expect(root(container).getAttribute("data-round-avatar")).toBe("glyph");
+  });
+
+  it("shows a plain photo with no newsprint filter or multiply blend", () => {
+    const { container } = render(
+      <RoundAvatar size={40} name="KCVV" photoUrl="/crest.png" plainPhoto />,
+    );
+    const img = container.querySelector("img") as HTMLImageElement;
+    expect(img.style.filter).toBe("");
+    expect(img.className).not.toContain("mix-blend-multiply");
   });
 
   it("is silent to assistive tech — the name sits beside it", () => {

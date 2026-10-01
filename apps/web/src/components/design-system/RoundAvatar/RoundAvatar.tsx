@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils/cn";
 import { initials } from "@/lib/utils/initials";
 
 /**
- * <RoundAvatar> — the one round avatar (#3331, decision #3304).
+ * <RoundAvatar> — the round avatar family (#3331, decision #3304).
  *
  * A person is a circle on a three-step ramp (24 / 40 / 64) with one ring rule
  * (1px ink at 24, 2px ink at 40 and 64) and one no-photo answer: a monogram,
@@ -19,6 +19,9 @@ import { initials } from "@/lib/utils/initials";
  * `glyph` replaces the initials with explicit text for the two circles that
  * are not a person but sit among people: a "+N" count and a "+" vacancy
  * (`dashed`). They take the ring, fill and size of the avatar beside them.
+ *
+ * `<SubjectAvatar>` joins the family in #3332; until then the article avatars
+ * are the one known exception (old fill, 32px row scale).
  *
  * The avatar never speaks: the person's name always sits beside it, so both
  * paths are `aria-hidden` and the photo carries an empty `alt`.
@@ -36,6 +39,11 @@ export interface RoundAvatarProps {
   glyph?: string;
   /** Dashed ring — a vacancy, not a person. */
   dashed?: boolean;
+  /**
+   * Show the photo as-is — no newsprint filter, no multiply blend. For the one
+   * image that is not a portrait: the club crest on the help search's club row.
+   */
+  plainPhoto?: boolean;
   className?: string;
 }
 
@@ -52,6 +60,7 @@ export function RoundAvatar({
   photoUrl,
   glyph,
   dashed = false,
+  plainPhoto = false,
   className,
 }: RoundAvatarProps) {
   const step = STEP[size];
@@ -61,7 +70,9 @@ export function RoundAvatar({
   return (
     <span
       aria-hidden="true"
-      data-round-avatar={hasPhoto ? "photo" : "monogram"}
+      data-round-avatar={
+        hasPhoto ? "photo" : glyph === undefined ? "monogram" : "glyph"
+      }
       data-size={size}
       className={cn(
         "border-ink bg-cream-soft inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full",
@@ -79,8 +90,13 @@ export function RoundAvatar({
           // Metered optimizer, 24-64px thumbnails — same call as <Crest> and
           // the organigram avatars this replaces.
           unoptimized
-          className="h-full w-full object-cover mix-blend-multiply"
-          style={{ filter: "var(--filter-photo-newsprint)" }}
+          className={cn(
+            "h-full w-full object-cover",
+            !plainPhoto && "mix-blend-multiply",
+          )}
+          style={
+            plainPhoto ? undefined : { filter: "var(--filter-photo-newsprint)" }
+          }
         />
       ) : (
         <span

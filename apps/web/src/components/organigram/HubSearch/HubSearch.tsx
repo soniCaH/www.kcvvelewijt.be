@@ -39,6 +39,7 @@ import { revealHash } from "@/lib/utils/same-page-anchor";
 import { useSemanticSearch } from "@/hooks/useSemanticSearch";
 import { useHubMemberPanel } from "@/components/organigram/HubMemberPanel";
 import { RoundAvatar } from "@/components/design-system/RoundAvatar";
+import { CLUB_ROOT_ID } from "@/components/organigram/OrganigramExplorer/spotlight-tree";
 import { useHubSearchQuery } from "./HubSearchQueryProvider";
 import {
   SECTION_NAV_CHIP_SHADOW_CLASS,
@@ -139,7 +140,18 @@ function MemberRow({
       onMouseEnter={onHover}
       className={rowClass(selected)}
     >
-      <RoundAvatar size={40} name={name} photoUrl={person?.imageUrl} />
+      {person ? (
+        <RoundAvatar
+          size={40}
+          name={name}
+          photoUrl={person.imageUrl}
+          // The club row's "photo" is the crest — shown plain, as before.
+          plainPhoto={result.member.id === CLUB_ROOT_ID}
+        />
+      ) : (
+        // No holder: the same dashed "+" the card and the panel draw.
+        <RoundAvatar size={40} glyph="+" dashed />
+      )}
       <span className="min-w-0 flex-1">
         <span
           title={name}

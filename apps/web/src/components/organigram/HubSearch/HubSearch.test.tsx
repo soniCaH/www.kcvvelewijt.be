@@ -113,6 +113,24 @@ describe("HubSearch", () => {
     expect(window.location.hash).toBe("#structuur");
   });
 
+  it("shows the vacancy circle, not a monogram of the title, for a node with no holder", async () => {
+    setSemantic({ results: [], executedQuery: "penning" });
+    render(
+      <HubSearch
+        members={[
+          { id: "pm", title: "Penningmeester", members: [] },
+          ...HUB_SEARCH_MEMBERS,
+        ]}
+        responsibilityPaths={HUB_SEARCH_PATHS}
+      />,
+    );
+    typeQuery("penning");
+    const row = await screen.findByRole("option");
+    const avatar = row.querySelector("[data-round-avatar]");
+    expect(avatar).toHaveTextContent("+");
+    expect(avatar).not.toHaveTextContent("P");
+  });
+
   it("renders the search input", () => {
     renderSearch();
     expect(

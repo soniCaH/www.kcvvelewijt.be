@@ -13,7 +13,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The one round avatar (#3331, decision #3304). Three sizes — 24 / 40 / 64 — one ring rule (1px ink at 24, 2px ink at 40 and 64) and one no-photo answer: a monogram, jersey-deep glyph on cream-soft, never the drawn figure. Letters come from `initials()`: first + last token for a full name, one letter for a first name only. `glyph` swaps the letters for a "+N" count or a "+" vacancy (`dashed`) that sits among avatars and takes their ring, fill and size.',
+          'The round avatar family (#3331, decision #3304; `SubjectAvatar` joins in #3332). Three sizes — 24 / 40 / 64 — one ring rule (1px ink at 24, 2px ink at 40 and 64) and one no-photo answer: a monogram, jersey-deep glyph on cream-soft, never the drawn figure. Letters come from `initials()`: first + last token for a full name, one letter for a first name only. `glyph` swaps the letters for a "+N" count or a "+" vacancy (`dashed`) that sits among avatars and takes their ring, fill and size.',
       },
     },
   },
@@ -30,6 +30,8 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {
+  // Same render as Photo40 — controls only, no second baseline.
+  tags: ["vr-skip"],
   args: { size: 40, name: "Luc Boons", photoUrl: PHOTO },
   argTypes: {
     size: { control: "radio", options: [...ROUND_AVATAR_SIZES] },
@@ -50,7 +52,7 @@ export const Monogram24: Story = { args: { size: 24, name: "Luc Boons" } };
 export const Monogram40: Story = { args: { size: 40, name: "Luc Boons" } };
 export const Monogram64: Story = { args: { size: 64, name: "Luc Boons" } };
 
-// One letter: only a first name is known (article subjects pass `firstName`).
+// One letter: only a first name is known (the case #3332 brings: article subjects pass `firstName` only).
 export const FirstNameOnly: Story = {
   args: { size: 40, name: "Anouk" },
 };
@@ -70,6 +72,8 @@ export const CountAndVacancy: Story = {
 
 // Every size × photo / monogram on one row each.
 export const Matrix: Story = {
+  // The six single-size stories above already baseline every cell.
+  tags: ["vr-skip"],
   args: { size: 40, name: "Luc Boons" },
   render: () => (
     <div className="flex flex-col gap-4">
