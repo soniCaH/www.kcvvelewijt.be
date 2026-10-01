@@ -452,19 +452,6 @@
       "count": 3
     }
   },
-  "src/components/design-system/SubjectAvatar/SubjectAvatar.tsx": {
-    "kcvv/no-off-ramp-font-size": {
-      "count": 3
-    },
-    "kcvv/no-off-ramp-leading": {
-      "count": 1
-    }
-  },
-  "src/components/design-system/SubjectAvatar/SubjectAvatarCluster.tsx": {
-    "kcvv/no-off-ramp-font-size": {
-      "count": 1
-    }
-  },
   "src/components/design-system/TapedCard/TapedCard.stories.tsx": {
     "kcvv/no-off-ramp-font-size": {
       "count": 8

@@ -289,7 +289,7 @@ describe("QaBlock", () => {
     expect(screen.getByText("Wie?")).toBeInTheDocument();
     expect(screen.getByText("Niemand.")).toBeInTheDocument();
     // No avatar, no speaker tag.
-    expect(container.querySelector("[data-subject-avatar]")).toBeNull();
+    expect(container.querySelector("[data-round-avatar]")).toBeNull();
     expect(container.querySelector('[data-qa-row="speaker-tag"]')).toBeNull();
   });
 

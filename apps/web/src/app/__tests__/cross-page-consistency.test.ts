@@ -3075,3 +3075,136 @@ describe("rule 17 catches what it claims to (#2568)", () => {
     expect(TEXT_INK_SOFT.test(snippet)).toBe(false);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Rule 18 (#3332) — a round person avatar renders through <RoundAvatar>
+// ---------------------------------------------------------------------------
+
+/**
+ * The people on the site are one family of circles: one size ramp (24 / 40 /
+ * 64), one ring, one monogram look, one initials helper (#3304, built in #3331).
+ * The family only holds if nobody draws a person's circle by hand — the article
+ * avatars were exactly that until #3332, and the same person looked different on
+ * `/hulp` and in an article.
+ *
+ * What the rule can see is the class list that makes a disc: one string literal
+ * carrying `rounded-full` **and** a disc's content shape — `overflow-hidden` or
+ * `object-cover` (a clipped photo), or `items-center` with `justify-center` (a
+ * centred monogram). A dot, a skeleton and a pill carry `rounded-full` without
+ * either, so they pass. The primitive's own file is the one place that may draw
+ * the disc. A disc that is **not a person** — a club crest, a team's fallback
+ * shield, a stamp — is exempt by name and pinned to its exact count, rule 8's
+ * shape: a file dropped from the scan by name alone could grow a second,
+ * undocumented hand-rolled avatar and no test would see it.
+ *
+ * Sizing is out of reach on purpose: a hand-rolled avatar sizes its box from a
+ * variable (`tokens.box`), so only the content shape is a stable signature.
+ */
+const STRING_LITERAL =
+  /"(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|`(?:\\[\s\S]|[^`\\])*`/g;
+
+const hasToken = (classes: string, token: string): boolean =>
+  classes.split(/\s+/).includes(token);
+
+/** Every string literal in `source` that is the class list of a round disc. */
+function roundDiscLiterals(source: string): string[] {
+  return (source.match(STRING_LITERAL) ?? []).filter(
+    (literal) =>
+      hasToken(literal.slice(1, -1), "rounded-full") &&
+      (hasToken(literal.slice(1, -1), "overflow-hidden") ||
+        hasToken(literal.slice(1, -1), "object-cover") ||
+        (hasToken(literal.slice(1, -1), "items-center") &&
+          hasToken(literal.slice(1, -1), "justify-center"))),
+  );
+}
+
+/** The one file that draws the family's disc. */
+const ROUND_AVATAR_HOME =
+  "components/design-system/RoundAvatar/RoundAvatar.tsx";
+
+/**
+ * Round discs that are not a person, and the one that is a known gap. The count
+ * is how many disc literals the file holds today.
+ */
+const ROUND_DISC_EXEMPT_DECLARATIONS: Record<string, number> = {
+  // A club crest's placeholder disc.
+  "components/design-system/Crest/Crest.tsx": 1,
+  // A team's initial shield when it has no logo — a team, not a person.
+  "components/match/MatchHero/MatchHero.tsx": 1,
+  "components/match/MatchEvents/MatchEvents.tsx": 1,
+  // The rotated "no results" stamp — round, not a person (#3304).
+  "components/search/SearchAnswerCard.tsx": 1,
+  // The transfer hero's club badge (a club) AND the interview hero's credit
+  // chip (`HeroCreditChip`, a person: 28px, off the 24 / 40 / 64 ramp). The
+  // chip is a known gap — #3304 and #3332 name the article subject avatars, not
+  // the hero's — so this entry stays at 2 until the chip moves onto the primitive.
+  "components/article/EditorialHero/_variant-parts.tsx": 2,
+};
+
+const roundDiscSources = productionSources.filter(
+  (relPath) =>
+    relPath !== ROUND_AVATAR_HOME &&
+    !(relPath in ROUND_DISC_EXEMPT_DECLARATIONS),
+);
+
+describe("a round person avatar renders through <RoundAvatar> (#3332)", () => {
+  it.each(roundDiscSources)("%s — no hand-rolled round disc", (relPath) => {
+    expect(roundDiscLiterals(code.get(relPath)!)).toEqual([]);
+  });
+});
+
+describe("rule 18's exemptions are pinned to their exact disc count (#3332)", () => {
+  it.each(Object.entries(ROUND_DISC_EXEMPT_DECLARATIONS))(
+    "%s — holds exactly %i disc literal(s)",
+    (relPath, count) => {
+      expect(roundDiscLiterals(code.get(relPath)!)).toHaveLength(count);
+    },
+  );
+});
+
+describe("rule 18 catches what it claims to (#3332)", () => {
+  it("scans the article avatars, the primitive's own file excepted", () => {
+    expect(roundDiscSources).toContain(
+      "components/design-system/SubjectAvatar/SubjectAvatar.tsx",
+    );
+    expect(roundDiscSources).toContain(
+      "components/design-system/SubjectAvatar/SubjectAvatarCluster.tsx",
+    );
+    expect(roundDiscSources).not.toContain(ROUND_AVATAR_HOME);
+    expect(scannableSources).toContain(ROUND_AVATAR_HOME);
+  });
+
+  it("sees the primitive's own disc, so the rule is not blind to its home", () => {
+    expect(roundDiscLiterals(code.get(ROUND_AVATAR_HOME)!)).toHaveLength(1);
+  });
+
+  it.each([
+    // The pre-#3332 `<SubjectAvatar>` monogram disc — the bisect.
+    [
+      '"bg-jersey-deep inline-flex shrink-0 items-center justify-center rounded-full"',
+    ],
+    // ...its photo disc.
+    ['"border-ink relative shrink-0 overflow-hidden rounded-full border"'],
+    // ...and the cluster's "+N" counter.
+    [
+      '"bg-jersey-deep text-cream ring-cream inline-flex shrink-0 items-center justify-center rounded-full font-mono font-semibold ring-2"',
+    ],
+    ['<Image className="h-10 w-10 rounded-full object-cover" />'],
+    ["`flex items-center justify-center rounded-full ${tone}`"],
+  ])("flags %s", (snippet) => {
+    expect(roundDiscLiterals(snippet)).toHaveLength(1);
+  });
+
+  it.each([
+    // A dot, a skeleton, a pill: round, but not a disc with content.
+    ['"h-2 w-2 rounded-full bg-current"'],
+    ['<Skeleton className="h-16 w-16 shrink-0 rounded-full" />'],
+    ['"inline-flex items-center rounded-full px-3"'],
+    // A disc's content shape without the roundness is a square avatar.
+    ['"inline-flex items-center justify-center overflow-hidden"'],
+    // A class that merely contains the token's letters.
+    ['"rounded-full-ish overflow-hidden"'],
+  ])("leaves %s alone", (snippet) => {
+    expect(roundDiscLiterals(snippet)).toEqual([]);
+  });
+});

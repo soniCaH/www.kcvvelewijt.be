@@ -20,8 +20,8 @@ import { initials } from "@/lib/utils/initials";
  * are not a person but sit among people: a "+N" count and a "+" vacancy
  * (`dashed`). They take the ring, fill and size of the avatar beside them.
  *
- * `<SubjectAvatar>` joins the family in #3332; until then the article avatars
- * are the one known exception (old fill, 32px row scale).
+ * `<SubjectAvatar>` and `<SubjectAvatarCluster>` (the article's people) render
+ * through it (#3332).
  *
  * The avatar never speaks: the person's name always sits beside it, so both
  * paths are `aria-hidden` and the photo carries an empty `alt`.

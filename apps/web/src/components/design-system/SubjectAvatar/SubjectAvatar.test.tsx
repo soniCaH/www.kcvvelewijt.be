@@ -13,8 +13,8 @@ describe("<SubjectAvatar>", () => {
         />,
       );
       const node = container.firstElementChild as HTMLElement;
-      expect(node.getAttribute("data-subject-avatar")).toBe("monogram");
-      expect(node.getAttribute("data-scale")).toBe("row");
+      expect(node.getAttribute("data-round-avatar")).toBe("monogram");
+      expect(node.getAttribute("data-size")).toBe("40");
     });
 
     it("derives the monogram from the first letter of firstName, uppercased", () => {
@@ -24,9 +24,22 @@ describe("<SubjectAvatar>", () => {
       expect(container.textContent).toBe("A");
     });
 
-    it("renders ? when firstName is empty (defensive fallback)", () => {
+    it("sets the family's middot when firstName is empty (defensive fallback)", () => {
       const { container } = render(<SubjectAvatar firstName="" scale="row" />);
-      expect(container.textContent).toBe("?");
+      expect(container.textContent).toBe("·");
+    });
+
+    it("is a 40px round avatar with the 2px ink ring and the family fill", () => {
+      const { container } = render(
+        <SubjectAvatar firstName="Anouk" scale="row" />,
+      );
+      const disc = container.firstElementChild as HTMLElement;
+      expect(disc.className).toContain("h-10");
+      expect(disc.className).toContain("w-10");
+      expect(disc.className).toContain("border-2");
+      expect(disc.className).toContain("border-ink");
+      expect(disc.className).toContain("bg-cream-soft");
+      expect(disc.firstElementChild?.className).toContain("text-jersey-deep");
     });
   });
 
@@ -40,8 +53,8 @@ describe("<SubjectAvatar>", () => {
         />,
       );
       const node = container.firstElementChild as HTMLElement;
-      expect(node.getAttribute("data-subject-avatar")).toBe("photo");
-      expect(node.getAttribute("data-scale")).toBe("attribution");
+      expect(node.getAttribute("data-round-avatar")).toBe("photo");
+      expect(node.getAttribute("data-size")).toBe("64");
       expect(node.querySelector("img")).toBeTruthy();
     });
 
@@ -50,7 +63,7 @@ describe("<SubjectAvatar>", () => {
         <SubjectAvatar firstName="Wim" photoUrl={null} scale="attribution" />,
       );
       expect(
-        container.firstElementChild?.getAttribute("data-subject-avatar"),
+        container.firstElementChild?.getAttribute("data-round-avatar"),
       ).toBe("monogram");
     });
 
@@ -59,7 +72,7 @@ describe("<SubjectAvatar>", () => {
         <SubjectAvatar firstName="Wim" photoUrl="" scale="attribution" />,
       );
       expect(
-        container.firstElementChild?.getAttribute("data-subject-avatar"),
+        container.firstElementChild?.getAttribute("data-round-avatar"),
       ).toBe("monogram");
     });
 
@@ -70,7 +83,7 @@ describe("<SubjectAvatar>", () => {
         <SubjectAvatar firstName="Wim" photoUrl="   " scale="attribution" />,
       );
       expect(
-        container.firstElementChild?.getAttribute("data-subject-avatar"),
+        container.firstElementChild?.getAttribute("data-round-avatar"),
       ).toBe("monogram");
     });
   });
@@ -88,26 +101,20 @@ describe("<SubjectAvatar>", () => {
         />,
       );
       const node = container.firstElementChild as HTMLElement;
-      expect(node.getAttribute("data-subject-avatar")).toBe("monogram");
-      expect(node.getAttribute("data-scale")).toBe("byline");
+      expect(node.getAttribute("data-round-avatar")).toBe("monogram");
+      expect(node.getAttribute("data-size")).toBe("24");
       expect(node.querySelector("img")).toBeNull();
     });
 
-    it("applies the SCALE.byline tokens (h-6 w-6 + text-[12px])", () => {
+    it("is a 24px round avatar with the 1px ink ring", () => {
       const { container } = render(
         <SubjectAvatar firstName="Tom" scale="byline" />,
       );
       const disc = container.firstElementChild as HTMLElement;
-      // Box dimensions — 24px disc.
       expect(disc.className).toContain("h-6");
       expect(disc.className).toContain("w-6");
-      // Inner monogram letter — 12px Freight Display italic black cream.
-      const letter = disc.firstElementChild as HTMLElement;
-      expect(letter.className).toContain("text-[12px]");
-      expect(letter.className).toContain("font-display");
-      expect(letter.className).toContain("italic");
-      expect(letter.className).toContain("font-black");
-      expect(letter.className).toContain("text-cream");
+      expect(disc.className).toContain("border-ink");
+      expect(disc.className).not.toContain("border-2");
     });
 
     it("derives the monogram from the first letter of firstName, uppercased", () => {
@@ -125,6 +132,22 @@ describe("<SubjectAvatar>", () => {
       expect(disc.getAttribute("aria-hidden")).toBe("true");
       expect(disc.getAttribute("aria-label")).toBeNull();
       expect(disc.getAttribute("role")).toBeNull();
+    });
+  });
+
+  describe("initials (the family's one helper)", () => {
+    it("keeps one letter for a first-name-only subject", () => {
+      const { container } = render(
+        <SubjectAvatar firstName="Wim" scale="attribution" />,
+      );
+      expect(container.textContent).toBe("W");
+    });
+
+    it("sets two letters when a full name is passed (the byline author)", () => {
+      const { container } = render(
+        <SubjectAvatar firstName="Tom Janssens" scale="byline" />,
+      );
+      expect(container.textContent).toBe("TJ");
     });
   });
 

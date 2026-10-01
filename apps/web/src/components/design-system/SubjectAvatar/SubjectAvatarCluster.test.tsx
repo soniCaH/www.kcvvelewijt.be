@@ -7,9 +7,7 @@ const members = [{ firstName: "Julien" }, { firstName: "Niels" }];
 describe("<SubjectAvatarCluster>", () => {
   it("renders one monogram disc per member", () => {
     const { container } = render(<SubjectAvatarCluster members={members} />);
-    const discs = container.querySelectorAll(
-      '[data-subject-avatar="monogram"]',
-    );
+    const discs = container.querySelectorAll('[data-round-avatar="monogram"]');
     expect(discs).toHaveLength(2);
     expect(container.textContent).toBe("JN");
   });
@@ -20,7 +18,7 @@ describe("<SubjectAvatarCluster>", () => {
     );
     expect(container.querySelector("img")).toBeNull();
     expect(
-      container.querySelectorAll('[data-subject-avatar="monogram"]'),
+      container.querySelectorAll('[data-round-avatar="monogram"]'),
     ).toHaveLength(2);
   });
 
@@ -30,12 +28,13 @@ describe("<SubjectAvatarCluster>", () => {
       <SubjectAvatarCluster members={four} max={3} />,
     );
     expect(
-      container.querySelectorAll('[data-subject-avatar="monogram"]'),
+      container.querySelectorAll('[data-round-avatar="monogram"]'),
     ).toHaveLength(3);
-    const overflow = container.querySelector(
-      '[data-subject-avatar-cluster="overflow"]',
-    );
+    const overflow = container.querySelector('[data-round-avatar="glyph"]');
     expect(overflow?.textContent).toBe("+1");
+    // Not a person, but it takes the size of the avatar beside it, and the ring.
+    expect(overflow?.getAttribute("data-size")).toBe("40");
+    expect((overflow as HTMLElement).className).toContain("border-2");
     expect(
       container.querySelector("[data-count]")?.getAttribute("data-count"),
     ).toBe("4");
@@ -62,8 +61,7 @@ describe("<SubjectAvatarCluster>", () => {
       <SubjectAvatarCluster members={four} max={3} />,
     );
     expect(
-      container.querySelector('[data-subject-avatar-cluster="overflow"]')
-        ?.textContent,
+      container.querySelector('[data-round-avatar="glyph"]')?.textContent,
     ).toBe("+1");
   });
 });
