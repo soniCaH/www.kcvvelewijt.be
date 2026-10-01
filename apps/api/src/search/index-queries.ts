@@ -323,3 +323,43 @@ export function buildPageMetadata(doc: {
     ),
   };
 }
+
+/**
+ * The one photo-gallery projection, shared by the nightly reindex
+ * (sanity-index-sync) and the per-doc webhook (#3338, decision #3308).
+ *
+ * Embedded text is title + description only — image captions are not
+ * embedded (0 of 99 photos carry one, and matching single images is not the
+ * goal). `pt::text(description)` returns null (not `""`) for an empty
+ * description, which is the common case, so it is coalesced here and the
+ * text is composed in TypeScript like every other branch above.
+ */
+export const GALLERY_INDEX_PROJECTION = `_id,
+  "slug": coalesce(slug.current, ""),
+  "title": coalesce(title, ""),
+  "descriptionText": coalesce(pt::text(description), "")`;
+
+export function buildGalleryIndexText(doc: {
+  title: string;
+  descriptionText: string;
+}): string {
+  return [doc.title, doc.descriptionText].filter(Boolean).join(". ");
+}
+
+/**
+ * The vector metadata for a photo gallery, built once for both index paths.
+ * Mirrors `buildPageMetadata`; `type` is `"gallery"` — what the related
+ * handler maps to the contract's gallery literal.
+ */
+export function buildGalleryMetadata(doc: {
+  slug: string;
+  title: string;
+  descriptionText: string;
+}): Record<string, string> {
+  return {
+    slug: doc.slug,
+    type: "gallery",
+    title: doc.title,
+    excerpt: doc.descriptionText.slice(0, 200),
+  };
+}

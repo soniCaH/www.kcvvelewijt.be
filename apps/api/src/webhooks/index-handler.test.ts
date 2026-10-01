@@ -11,6 +11,7 @@ import { KvCacheLive, makeDurableKv } from "../cache/kv-cache";
 import {
   ARTICLE_INDEX_PROJECTION,
   ARTICLE_PUBLISHED_FILTER,
+  GALLERY_INDEX_PROJECTION,
   PAGE_INDEX_PROJECTION,
   RESPONSIBILITY_ACTIVE_FILTER,
   RESPONSIBILITY_INDEX_PROJECTION,
@@ -722,6 +723,38 @@ describe("handleIndexWebhook", () => {
           type: "page",
           slug: "over-kcvv",
         }),
+      }),
+    ]);
+  });
+
+  it("indexes a photoGallery with gallery metadata, sharing the reindex projection", async () => {
+    mockSanityFetch.mockResolvedValue({
+      _id: "gallery-001",
+      slug: "stage-mierlo",
+      title: "Stage Mierlo",
+      descriptionText: "Foto's van de stage.",
+    });
+
+    const body = JSON.stringify({ _id: "gallery-001", _type: "photoGallery" });
+    const response = await handleIndexWebhook(
+      await makeSignedRequest(body),
+      makeEnv(),
+      defaultLayer,
+    );
+
+    expect(response.status).toBe(200);
+    expect(mockSanityFetch.mock.calls[0]?.[0]).toContain(
+      GALLERY_INDEX_PROJECTION,
+    );
+    expect(upsertSpy).toHaveBeenCalledWith([
+      expect.objectContaining({
+        id: "gallery-001",
+        metadata: {
+          slug: "stage-mierlo",
+          type: "gallery",
+          title: "Stage Mierlo",
+          excerpt: "Foto's van de stage.",
+        },
       }),
     ]);
   });

@@ -15,11 +15,14 @@ import {
 import {
   ARTICLE_INDEX_PROJECTION,
   ARTICLE_PUBLISHED_FILTER,
+  GALLERY_INDEX_PROJECTION,
   PAGE_INDEX_PROJECTION,
   RESPONSIBILITY_ACTIVE_FILTER,
   RESPONSIBILITY_INDEX_PROJECTION,
   buildArticleIndexText,
   buildArticleMetadata,
+  buildGalleryIndexText,
+  buildGalleryMetadata,
   buildPageIndexText,
   buildPageMetadata,
   buildResponsibilityIndexText,
@@ -60,6 +63,13 @@ interface SanityPageDoc {
   fileAttachmentLabels: string[];
 }
 
+interface SanityGalleryDoc {
+  _id: string;
+  slug: string;
+  title: string;
+  descriptionText: string;
+}
+
 // ─── Sanity GROQ queries ─────────────────────────────────────────────────────
 
 const RESPONSIBILITY_QUERY = `*[_type == "responsibility" && ${RESPONSIBILITY_ACTIVE_FILTER}] {
@@ -74,6 +84,10 @@ export const ARTICLE_QUERY = `*[_type == "article" && ${ARTICLE_PUBLISHED_FILTER
 
 const PAGE_QUERY = `*[_type == "page"] {
   ${PAGE_INDEX_PROJECTION}
+}`;
+
+const GALLERY_QUERY = `*[_type == "photoGallery"] {
+  ${GALLERY_INDEX_PROJECTION}
 }`;
 
 // The documents each type's query excludes — negating the SAME exported
@@ -177,6 +191,7 @@ interface SyncOptions {
   fetchResponsibility?: () => Promise<SanityResponsibilityDoc[]>;
   fetchArticles?: () => Promise<SanityArticleDoc[]>;
   fetchPages?: () => Promise<SanityPageDoc[]>;
+  fetchGalleries?: () => Promise<SanityGalleryDoc[]>;
   fetchExcludedResponsibilityIds?: () => Promise<string[]>;
   fetchExcludedArticleIds?: () => Promise<string[]>;
 }
@@ -452,6 +467,41 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
       `[search-sync] Indexed ${pageSuccessCount}/${pageResult.length} pages`,
     );
 
+    // ── Galleries ─────────────────────────────────────────────────────────
+    // No excluded-ids query: like pages, every photoGallery matches (no
+    // publish window or active flag), so the manifest diff alone prunes a
+    // deleted one.
+
+    const galleryResult = yield* fetchPhase(
+      "galleries",
+      options?.fetchGalleries ??
+        (() => sanityClient().fetch<SanityGalleryDoc[]>(GALLERY_QUERY)),
+    );
+
+    yield* Effect.log(
+      `[search-sync] Indexing ${galleryResult.length} galleries`,
+    );
+
+    const galleryVectors = yield* Effect.forEach(
+      galleryResult,
+      (doc) =>
+        embedDoc(
+          doc._id,
+          buildGalleryIndexText(doc),
+          buildGalleryMetadata(doc),
+        ),
+      { concurrency: 3 },
+    );
+
+    const gallerySuccessCount = yield* upsertBatched(
+      galleryVectors,
+      "galleries",
+    );
+
+    yield* Effect.log(
+      `[search-sync] Indexed ${gallerySuccessCount}/${galleryResult.length} galleries`,
+    );
+
     // ── Excluded ids ──────────────────────────────────────────────────────
     // Stateless and authoritative — see the "Reconciliation" block comment
     // above. Routed through fetchPhase too: a truncated/failed read here is
@@ -481,6 +531,7 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
         ...docs.map((d) => d._id),
         ...articleResult.map((d) => d._id),
         ...pageResult.map((d) => d._id),
+        ...galleryResult.map((d) => d._id),
       ];
 
       const manifestRead = yield* Effect.either(readManifest(manifestKv));
@@ -653,8 +704,15 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
     // single degraded document, which stays a WARN/ERROR log, not a job
     // failure.
     const totalAttempted =
-      docs.length + articleResult.length + pageResult.length;
-    const totalLanded = successCount + articleSuccessCount + pageSuccessCount;
+      docs.length +
+      articleResult.length +
+      pageResult.length +
+      galleryResult.length;
+    const totalLanded =
+      successCount +
+      articleSuccessCount +
+      pageSuccessCount +
+      gallerySuccessCount;
     if (totalAttempted > 0 && totalLanded === 0) {
       return yield* Effect.fail(
         new Error(

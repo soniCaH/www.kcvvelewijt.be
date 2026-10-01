@@ -57,6 +57,13 @@ const mockPage = {
   fileAttachmentLabels: [] as string[],
 };
 
+const mockGallery = {
+  _id: "gallery-001",
+  slug: "stage-mierlo",
+  title: "Stage Mierlo",
+  descriptionText: "Foto's van de stage in Mierlo.",
+};
+
 function makeEnvLayer(overrides: Partial<WorkerEnv> = {}) {
   const envLayer = makeTestEnvLayer({
     PSD_API_BASE_URL: "",
@@ -174,6 +181,7 @@ function sweep(
     fetchResponsibility: noopFetch([]),
     fetchArticles: noopFetch([]),
     fetchPages: noopFetch([]),
+    fetchGalleries: noopFetch([]),
     fetchExcludedResponsibilityIds: noopFetch([]),
     fetchExcludedArticleIds: noopFetch([]),
     ...options,
@@ -297,6 +305,59 @@ describe("runSanityIndexSync", () => {
     expect(doc!.metadata["slug"]).toBe("over-kcvv");
     expect(doc!.metadata["type"]).toBe("page");
     expect(doc!.metadata["title"]).toBe("Over KCVV Elewijt");
+  });
+
+  it("indexes galleries from title + description with gallery metadata", async () => {
+    const { upsertCalls, mock } = makeVectorizeCapture();
+    const embedded: string[] = [];
+    const recordingEmbed: EmbeddingServiceInterface = {
+      embed: (text) =>
+        Effect.sync(() => {
+          embedded.push(text);
+          return FAKE_VECTOR;
+        }),
+    };
+
+    await Effect.runPromise(
+      runSanityIndexSync({
+        fetchResponsibility: noopFetch([]),
+        fetchArticles: noopFetch([]),
+        fetchPages: noopFetch([]),
+        fetchGalleries: noopFetch([mockGallery]),
+      }).pipe(
+        Effect.provide(makeEnvLayer()),
+        Effect.provide(Layer.succeed(EmbeddingService, recordingEmbed)),
+        Effect.provide(Layer.succeed(VectorizeService, mock)),
+      ),
+    );
+
+    const doc = upsertCalls.flat().find((v) => v.id === "gallery-001");
+    expect(doc).toBeDefined();
+    expect(doc!.metadata).toEqual({
+      slug: "stage-mierlo",
+      type: "gallery",
+      title: "Stage Mierlo",
+      excerpt: "Foto's van de stage in Mierlo.",
+    });
+    expect(embedded).toEqual(["Stage Mierlo. Foto's van de stage in Mierlo."]);
+  });
+
+  it("continues indexing when gallery fetch fails", async () => {
+    const { upsertCalls, mock } = makeVectorizeCapture();
+
+    await Effect.runPromise(
+      sweep(
+        {
+          fetchPages: noopFetch([mockPage]),
+          fetchGalleries: async () => {
+            throw new Error("Sanity timeout");
+          },
+        },
+        mock,
+      ),
+    );
+
+    expect(upsertCalls.flat().map((v) => v.id)).toEqual(["page-001"]);
   });
 
   it("indexes articles with null body gracefully", async () => {
@@ -424,6 +485,7 @@ describe("runSanityIndexSync", () => {
           },
         ]),
         fetchPages: noopFetch([]),
+        fetchGalleries: noopFetch([]),
       }).pipe(
         Effect.provide(makeEnvLayer()),
         Effect.provide(Layer.succeed(EmbeddingService, flakyEmbed)),
@@ -997,6 +1059,7 @@ describe("runSanityIndexSync", () => {
             fetchResponsibility: noopFetch([mockDoc]),
             fetchArticles: noopFetch([mockArticle]),
             fetchPages: noopFetch([mockPage]),
+            fetchGalleries: noopFetch([mockGallery]),
           },
           mock,
           { SEARCH_INDEX_PRUNE_DRY_RUN: "false", PSD_CACHE: kv },
@@ -1008,8 +1071,55 @@ describe("runSanityIndexSync", () => {
         readManifest(makeDurableKv(kv).forDataset("production")),
       );
       expect(new Set(manifest)).toEqual(
-        new Set(["sanity-abc-123", "article-001", "page-001"]),
+        new Set(["sanity-abc-123", "article-001", "page-001", "gallery-001"]),
       );
+    });
+
+    it("prunes a gallery deleted from Sanity once it leaves the manifest-diff", async () => {
+      const kv = makeKvNamespaceMock();
+      const { mock: mock1 } = makeVectorizeCapture();
+      await Effect.runPromise(
+        sweep({ fetchGalleries: noopFetch([mockGallery]) }, mock1, {
+          SEARCH_INDEX_PRUNE_DRY_RUN: "false",
+          PSD_CACHE: kv,
+        }),
+      );
+
+      const { deleteCalls, mock: mock2 } = makeVectorizeCapture();
+      await Effect.runPromise(
+        sweep({ fetchGalleries: noopFetch([]) }, mock2, {
+          SEARCH_INDEX_PRUNE_DRY_RUN: "false",
+          PSD_CACHE: kv,
+        }),
+      );
+
+      expect(deleteCalls.flat()).toEqual(["gallery-001"]);
+    });
+
+    it("writes no manifest and deletes nothing when the gallery phase fails", async () => {
+      const kv = makeKvNamespaceMock();
+      const { mock: mock1 } = makeVectorizeCapture();
+      await Effect.runPromise(
+        sweep({ fetchGalleries: noopFetch([mockGallery]) }, mock1, {
+          SEARCH_INDEX_PRUNE_DRY_RUN: "false",
+          PSD_CACHE: kv,
+        }),
+      );
+
+      const { deleteCalls, mock: mock2 } = makeVectorizeCapture();
+      await Effect.runPromise(
+        sweep(
+          {
+            fetchGalleries: async () => {
+              throw new Error("Sanity timeout");
+            },
+          },
+          mock2,
+          { SEARCH_INDEX_PRUNE_DRY_RUN: "false", PSD_CACHE: kv },
+        ),
+      );
+
+      expect(deleteCalls).toHaveLength(0);
     });
 
     it("writes no manifest and deletes nothing when the article phase fails — the partial-sweep trap", async () => {
