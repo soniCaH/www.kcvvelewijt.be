@@ -56,6 +56,7 @@ vi.mock("@/lib/repositories/article.repository", async (importOriginal) => {
       findPaginated: () => Effect.die("not used by this suite"),
       findTags: () => Effect.die("not used by this suite"),
       findRelated: () => Effect.die("not used by this suite"),
+      findRelatedByPerson: () => Effect.die("not used by this suite"),
       findByLinkedMatch: () => Effect.die("not used by this suite"),
     }),
   };

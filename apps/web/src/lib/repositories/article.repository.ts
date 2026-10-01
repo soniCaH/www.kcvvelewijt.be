@@ -9,6 +9,7 @@ import type {
   ARTICLE_BY_SLUG_QUERY_RESULT,
   RELATED_ARTICLES_QUERY_RESULT,
   MATCH_ARTICLES_QUERY_RESULT,
+  RELATED_ARTICLES_BY_PERSON_QUERY_RESULT,
 } from "../sanity/sanity.types";
 import { formatArticleDate } from "../utils/dates";
 
@@ -78,10 +79,27 @@ const ARTICLES_PAGINATED_QUERY =
   "coverImageUrl": coverImage.asset->url + "?w=1200&h=675&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5))
 }`);
 
+const RELATED_ARTICLE_PROJECTION = `"id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
+  "coverImageUrl": coverImage.asset->url + "?w=800&h=450&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5))`;
+
 export const RELATED_ARTICLES_QUERY =
   defineQuery(`*[_type == "article" && references($documentId) && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishedAt desc) {
-  "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
-  "coverImageUrl": coverImage.asset->url + "?w=800&h=450&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5))
+  ${RELATED_ARTICLE_PROJECTION}
+}`);
+
+// Player / staff pages (#3339): the reference edge OR the person's full name
+// in the body. GROQ `match` TOKENIZES — "Jan Peeters" matches any body holding
+// both words anywhere, in any order, as prefixes — so it only narrows the
+// candidates; `findRelatedByPerson` confirms the phrase in TypeScript on
+// `bodyText`. `bodyText` is null for linked rows (nothing to confirm), so the
+// flattened text only travels for the handful of match candidates. One OR
+// query yields one row per document: an article both linked and named is
+// already deduplicated.
+const RELATED_ARTICLES_BY_PERSON_QUERY =
+  defineQuery(`*[_type == "article" && (references($documentId) || pt::text(body) match $phrase) && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishedAt desc) {
+  ${RELATED_ARTICLE_PROJECTION},
+  "linked": references($documentId),
+  "bodyText": select(references($documentId) => null, pt::text(body))
 }`);
 
 // Match preview/recap articles linked to a PSD match (#1470 + #1914). Matches
@@ -399,6 +417,24 @@ function widenToArticleVM(
   };
 }
 
+// Lower-case, apostrophes dropped, whitespace collapsed — so "Wim D’hondt",
+// "WIM  D'hondt" and "wim d'hondt" are one name.
+const normalizeName = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/[\u2018\u2019'`]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+/** True when `fullName` appears in `text` as a whole phrase — not as a
+ *  longer word ("Peetersen") and not as scattered tokens. */
+function namesPhrase(text: string, fullName: string): boolean {
+  const phrase = normalizeName(fullName).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`(?<![\\p{L}\\p{N}])${phrase}(?![\\p{L}\\p{N}])`, "u").test(
+    normalizeName(text),
+  );
+}
+
 export function toHomepageArticle(article: ArticleVM): HomepageArticle {
   return {
     href: `/nieuws/${article.slug}`,
@@ -437,6 +473,14 @@ export interface ArticleRepositoryInterface {
   readonly findRelated: (
     documentId: string,
   ) => Effect.Effect<ArticleVM[], SanityReadError>;
+  /** Player / staff pages (#3339): articles that reference the person, then
+   *  articles that name them in full (first + last, as a phrase — never the
+   *  last name alone), each group newest-first, one row per article. A blank
+   *  first or last name degrades to the reference edge alone. */
+  readonly findRelatedByPerson: (
+    documentId: string,
+    person: { firstName: string; lastName: string },
+  ) => Effect.Effect<ArticleVM[], SanityReadError>;
   /** Match preview/recap articles linked to a PSD match by its string id
    *  (#1914). Returns 0–2 rows, newest-first. */
   readonly findByLinkedMatch: (
@@ -448,6 +492,13 @@ export class ArticleRepository extends Context.Tag("ArticleRepository")<
   ArticleRepository,
   ArticleRepositoryInterface
 >() {}
+
+const findRelated = (documentId: string) =>
+  fetchGroq<RELATED_ARTICLES_QUERY_RESULT>(
+    RELATED_ARTICLES_QUERY,
+    { documentId },
+    { revalidate: SANITY_LIST_REVALIDATE, tags: [SANITY_TAGS.articles] },
+  ).pipe(Effect.map((rows) => rows.map(widenToArticleVM)));
 
 export const ArticleRepositoryLive = Layer.succeed(ArticleRepository, {
   findAll: () =>
@@ -478,12 +529,31 @@ export const ArticleRepositoryLive = Layer.succeed(ArticleRepository, {
   findTags: () => fetchGroq<ARTICLE_TAGS_QUERY_RESULT>(ARTICLE_TAGS_QUERY),
   // Tagged for the same reason as `findBySlug` — this one is read by four
   // routes, three of which also had their window shortened by #2563.
-  findRelated: (documentId) =>
-    fetchGroq<RELATED_ARTICLES_QUERY_RESULT>(
-      RELATED_ARTICLES_QUERY,
-      { documentId },
+  findRelated,
+  findRelatedByPerson: (documentId, { firstName, lastName }) => {
+    // Never the last name alone (#3339): without both names there is no
+    // phrase to match, so only the reference edge applies.
+    const fullName = `${firstName.trim()} ${lastName.trim()}`;
+    if (!firstName.trim() || !lastName.trim()) return findRelated(documentId);
+    return fetchGroq<RELATED_ARTICLES_BY_PERSON_QUERY_RESULT>(
+      RELATED_ARTICLES_BY_PERSON_QUERY,
+      { documentId, phrase: fullName },
       { revalidate: SANITY_LIST_REVALIDATE, tags: [SANITY_TAGS.articles] },
-    ).pipe(Effect.map((rows) => rows.map(widenToArticleVM))),
+    ).pipe(
+      Effect.map((rows) => {
+        const kept = rows.filter(
+          (row) => row.linked || namesPhrase(row.bodyText ?? "", fullName),
+        );
+        // Stable sort of a newest-first list: linked group, then named group.
+        return [
+          ...kept.filter((r) => r.linked),
+          ...kept.filter((r) => !r.linked),
+        ]
+          .map(({ linked: _linked, bodyText: _bodyText, ...row }) => row)
+          .map(widenToArticleVM);
+      }),
+    );
+  },
   findByLinkedMatch: (matchId) =>
     // The GROQ filter already constrains `articleType` to the two match
     // variants, but typegen widens it to the full article union. Narrow back

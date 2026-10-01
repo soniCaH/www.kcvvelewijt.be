@@ -31,6 +31,7 @@ vi.mock("@/lib/repositories/article.repository", async (importOriginal) => {
       findPaginated: () => Effect.die(new Error("Sanity is unreachable")),
       findTags: () => Effect.die(new Error("Sanity is unreachable")),
       findRelated: () => Effect.die(new Error("Sanity is unreachable")),
+      findRelatedByPerson: () => Effect.die(new Error("Sanity is unreachable")),
       findByLinkedMatch: () => Effect.die(new Error("Sanity is unreachable")),
     }),
   };

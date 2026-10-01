@@ -183,7 +183,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
     degradeSection(
       Effect.gen(function* () {
         const repo = yield* ArticleRepository;
-        return yield* repo.findRelated(player.id);
+        return yield* repo.findRelatedByPerson(player.id, player);
       }),
       [],
       "[spelers/[slug]] related-articles lookup failed; rendering without the RelatedRow.",

@@ -139,7 +139,7 @@ export default async function StafPage({ params }: StaffPageProps) {
       degradeSection(
         Effect.gen(function* () {
           const repo = yield* ArticleRepository;
-          return yield* repo.findRelated(member.id);
+          return yield* repo.findRelatedByPerson(member.id, member);
         }),
         [],
         "[staf/[slug]] related-articles lookup failed; rendering without the RelatedRow.",
