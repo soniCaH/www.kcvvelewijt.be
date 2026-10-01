@@ -2510,14 +2510,17 @@ describe("rule 15 catches what it claims to (#3023)", () => {
 const SECTION_SPACING_BASE = "py-12";
 const SECTION_SPACING_VARIANT = "sm:py-16";
 
-/** Whole-token match for one class string — bounded by `\b` on both tokens
- *  (`sm:py-16`'s `:` is not a word character, so the leading `\b` still
- *  lands correctly on `s`), so `py-12` never matches inside `py-120` and
- *  `sm:py-16` never matches inside a differently-prefixed variant. */
-const sectionSpacingBaseToken = new RegExp(`\\b${SECTION_SPACING_BASE}\\b`);
-const sectionSpacingVariantToken = new RegExp(
-  `\\b${SECTION_SPACING_VARIANT}\\b`,
-);
+/** Whole-class match for one class string: not preceded or followed by a
+ *  class-name character (word, `:` or `-`). `\b` is not enough — `:` and `-`
+ *  are non-word characters, so `\bpt-12\b` would match inside `sm:pt-12` or
+ *  `md:pb-10`'s tail. This way `py-12` never matches inside `py-120` or a
+ *  variant-prefixed `lg:py-12`, and `sm:py-16` is matched as a whole. */
+function classToken(token: string): RegExp {
+  return new RegExp(`(?<![\\w:-])${token}(?![\\w-])`);
+}
+
+const sectionSpacingBaseToken = classToken(SECTION_SPACING_BASE);
+const sectionSpacingVariantToken = classToken(SECTION_SPACING_VARIANT);
 
 /**
  * One "site" per source line carrying both tokens. Tailwind's own canonical
@@ -2619,6 +2622,14 @@ const SEAM_SPACING_SHAPES = {
 
 type SeamSpacingShape = keyof typeof SEAM_SPACING_SHAPES;
 
+/** Each shape's token regexes, compiled once, largest shape first so a line
+ *  is classified by the most specific shape it carries in full. */
+const SEAM_SPACING_MATCHERS = (
+  Object.entries(SEAM_SPACING_SHAPES) as [SeamSpacingShape, readonly string[]][]
+)
+  .map(([shape, tokens]) => ({ shape, tokens: tokens.map(classToken) }))
+  .sort((a, b) => b.tokens.length - a.tokens.length);
+
 function seamSpacingShapes(source: string): Record<SeamSpacingShape, number> {
   const counts: Record<SeamSpacingShape, number> = {
     both: 0,
@@ -2626,17 +2637,11 @@ function seamSpacingShapes(source: string): Record<SeamSpacingShape, number> {
     above: 0,
     bottom: 0,
   };
-  const shapes = Object.entries(SEAM_SPACING_SHAPES) as [
-    SeamSpacingShape,
-    readonly string[],
-  ][];
   for (const line of source.split("\n")) {
-    const carried = shapes
-      .filter(([, tokens]) =>
-        tokens.every((token) => new RegExp(`\\b${token}\\b`).test(line)),
-      )
-      .sort(([, a], [, b]) => b.length - a.length)[0];
-    if (carried) counts[carried[0]] += 1;
+    const carried = SEAM_SPACING_MATCHERS.find(({ tokens }) =>
+      tokens.every((token) => token.test(line)),
+    );
+    if (carried) counts[carried.shape] += 1;
   }
   return counts;
 }
@@ -2668,20 +2673,84 @@ const SEAM_SPACING_SITES: Record<
   "app/(main)/club/[slug]/page.tsx": { bottom: 1 },
 };
 
+/**
+ * The loading skeletons that mirror those pages (#2432's mirror rule, #3306
+ * rule 5): same container, same seam shapes. Not section sites in their own
+ * right, so they stay out of the site totals below. `/sponsors`' loading
+ * sits under `(landing)/`, which the glob-free list here names directly.
+ */
+const SEAM_SPACING_LOADING_SITES: Record<
+  string,
+  Partial<Record<SeamSpacingShape, number>>
+> = {
+  "app/(main)/club/(index)/loading.tsx": { below: 1 },
+  "app/(main)/club/contact/loading.tsx": { below: 1, both: 1, above: 1 },
+  "app/(main)/hulp/loading.tsx": { below: 1 },
+  "components/club/BestuurPage/BoardPageLoading.tsx": { below: 1 },
+  "app/(landing)/sponsors/loading.tsx": { below: 1 },
+};
+
+const NO_SEAM_SHAPES: Record<SeamSpacingShape, number> = {
+  both: 0,
+  below: 0,
+  above: 0,
+  bottom: 0,
+};
+
+/** True when `source` carries any seam shape at all. */
+const carriesSeamShape = (source: string): boolean =>
+  Object.values(seamSpacingShapes(source)).some((n) => n > 0);
+
 describe("a section side that touches a seam gives back one step (#3335)", () => {
   it.each(Object.entries(SEAM_SPACING_SITES))(
     "%s — carries exactly the pinned seam shapes",
     (relPath, expected) => {
       expect(scannableSources).toContain(relPath);
       expect(seamSpacingShapes(code.get(relPath)!)).toEqual({
-        both: 0,
-        below: 0,
-        above: 0,
-        bottom: 0,
+        ...NO_SEAM_SHAPES,
         ...expected,
       });
     },
   );
+
+  it.each(Object.entries(SEAM_SPACING_LOADING_SITES))(
+    "%s — the loading skeleton carries its page's seam shapes",
+    (relPath, expected) => {
+      expect(scannableSources).toContain(relPath);
+      expect(seamSpacingShapes(code.get(relPath)!)).toEqual({
+        ...NO_SEAM_SHAPES,
+        ...expected,
+      });
+    },
+  );
+
+  // Tree-wide, like the retired-pair scan below: `py-10 sm:py-14` used to be
+  // banned everywhere, so a stray one must not slip in just because it is
+  // legitimate somewhere now. A new seam page adds its own entry by hand.
+  it.each(
+    productionSources.filter(
+      (relPath) =>
+        !(relPath in SEAM_SPACING_SITES) &&
+        !(relPath in SEAM_SPACING_LOADING_SITES),
+    ),
+  )("%s — carries no seam shape it has not pinned", (relPath) => {
+    expect(carriesSeamShape(code.get(relPath)!)).toBe(false);
+  });
+
+  it("catches a seam shape in an unlisted file, and only a whole-class one", () => {
+    expect(carriesSeamShape('className="py-10 sm:py-14"')).toBe(true);
+    expect(carriesSeamShape('className="pt-12 pb-10 sm:pt-16 sm:pb-14"')).toBe(
+      true,
+    );
+    expect(carriesSeamShape('className="pt-10 pb-12 sm:pt-14 sm:pb-16"')).toBe(
+      true,
+    );
+    expect(carriesSeamShape('className="pb-10 sm:pb-14"')).toBe(true);
+    // A variant-prefixed token is a different class, not the base one.
+    expect(carriesSeamShape('className="md:pb-10 sm:pb-14"')).toBe(false);
+    expect(carriesSeamShape('className="lg:py-10 sm:py-14"')).toBe(false);
+    expect(carriesSeamShape('className="py-12 sm:py-16"')).toBe(false);
+  });
 
   it("classifies a line by the largest shape it carries in full", () => {
     expect(
@@ -2703,8 +2772,10 @@ describe("a section side that touches a seam gives back one step (#3335)", () =>
 });
 
 /**
- * Rule 16's second half (review finding 4): the pinned site list above
- * proves the 35 named sites carry the value; this proves nothing ELSE in
+ * Rule 16's second half (review finding 4): the pinned site lists above
+ * prove the named sites carry the value (plain `py-12 sm:py-16` in
+ * `SECTION_SPACING_SITES`, the seam shapes in `SEAM_SPACING_SITES`); this
+ * proves nothing ELSE in
  * the tree still carries one of the eight pairs it replaced. Tree-wide by
  * design, not a hand-list — unlike the positive check, a retired pair is
  * specific enough (two exact tokens, `sm:`/`md:`/`lg:` included) that a
@@ -2741,8 +2812,8 @@ function hasPairOnSameLine(
   base: string,
   variant: string,
 ): boolean {
-  const baseToken = new RegExp(`\\b${base}\\b`);
-  const variantToken = new RegExp(`\\b${variant}\\b`);
+  const baseToken = classToken(base);
+  const variantToken = classToken(variant);
   return source
     .split("\n")
     .some((line) => baseToken.test(line) && variantToken.test(line));
@@ -2833,7 +2904,7 @@ describe("rule 16's retired-pair exemptions are pinned to their exact pair (#257
  * convention every other rule in this file carries.
  */
 describe("rule 16 catches what it claims to (#2571)", () => {
-  it("covers 26 files and 35 sites in total", () => {
+  it("covers 26 files and 35 sites in total (plain and seam, one file counted once)", () => {
     // A section site is a plain `py-12 sm:py-16` or a seam shape (#3335); a
     // `bottom` override sits on top of a component's own plain site, so it
     // adds neither a file nor a site.
@@ -2841,14 +2912,14 @@ describe("rule 16 catches what it claims to (#2571)", () => {
       ([relPath, { both = 0, below = 0, above = 0 }]) =>
         [relPath, both + below + above] as const,
     );
-    const files = [
+    const files = new Set([
       ...Object.keys(SECTION_SPACING_SITES),
       ...seamSites.filter(([, n]) => n > 0).map(([relPath]) => relPath),
-    ];
+    ]);
     const sites =
       Object.values(SECTION_SPACING_SITES).reduce((a, b) => a + b, 0) +
       seamSites.reduce((a, [, n]) => a + n, 0);
-    expect(files).toHaveLength(26);
+    expect(files.size).toBe(26);
     expect(sites).toBe(35);
   });
 
@@ -2896,11 +2967,9 @@ describe("rule 16 catches what it claims to (#2571)", () => {
   });
 
   it("does not match sm:py-16 inside a different variant", () => {
-    expect(sectionSpacingOccurrences('className="py-12 md:sm:py-16"')).toBe(
-      1, // "md:sm:py-16" still contains the literal "sm:py-16" substring —
-      // documented rather than hidden: this compound-variant shape does not
-      // occur anywhere in this tree today.
-    );
+    // "md:sm:py-16" is a different class; the whole-class match (#3335) no
+    // longer finds the literal "sm:py-16" substring inside it.
+    expect(sectionSpacingOccurrences('className="py-12 md:sm:py-16"')).toBe(0);
   });
 
   it("does not count the two tokens when they land on different lines", () => {
