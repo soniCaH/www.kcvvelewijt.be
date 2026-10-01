@@ -121,18 +121,16 @@ export function MembershipForm(props: MembershipFormProps) {
   );
   // Read once, on the first hydrated render: later writes to storage must not
   // flip the key under a visitor who is typing.
-  const [seed, setSeed] = useState<{ draft: MembershipDraft | null } | null>(
-    null,
-  );
-  if (hydrated && seed === null) setSeed({ draft: readDraft() });
-  const draft = seed?.draft ?? null;
+  // `undefined` = not read yet; `null` = read, no draft.
+  const [draft, setDraft] = useState<MembershipDraft | null>();
+  if (hydrated && draft === undefined) setDraft(readDraft());
   // Remount only when there is a draft to start from: a visitor with none
   // keeps the hydrated nodes (focus, typed text, one Turnstile mount).
   return (
     <MembershipFormFields
       key={draft ? "draft" : "base"}
       {...props}
-      draft={draft}
+      draft={draft ?? null}
     />
   );
 }
