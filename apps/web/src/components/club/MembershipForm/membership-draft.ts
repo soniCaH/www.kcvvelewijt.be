@@ -1,4 +1,4 @@
-import type { MembershipRole } from "@kcvv/api-contract";
+import { MembershipRole } from "@kcvv/api-contract";
 
 /**
  * Every visitor-filled field of the membership form — the **draft** (#3326).
@@ -36,6 +36,12 @@ export const EMPTY_DRAFT: MembershipDraft = {
   privacyAccepted: false,
 };
 
+export const GENDER_OPTIONS = [
+  { value: "m", label: "Man" },
+  { value: "f", label: "Vrouw" },
+  { value: "x", label: "X" },
+] as const;
+
 export const DRAFT_STORAGE_KEY = "kcvv:membership-draft";
 
 /** Every reader and writer swallows a throwing accessor (private mode,
@@ -48,21 +54,37 @@ function storage(): Storage | null {
   }
 }
 
-function isDraft(value: unknown): value is MembershipDraft {
-  if (typeof value !== "object" || value === null) return false;
-  return Object.entries(EMPTY_DRAFT).every(
-    ([key, empty]) =>
-      typeof (value as Record<string, unknown>)[key] === typeof empty,
+/** Whether a draft carries no answer at all — nothing worth restoring. */
+export function isEmptyDraft(draft: MembershipDraft): boolean {
+  return (Object.keys(EMPTY_DRAFT) as (keyof MembershipDraft)[]).every(
+    (key) => draft[key] === EMPTY_DRAFT[key],
   );
 }
 
-/** The stored draft, or `null` when there is none, it is malformed, or storage is blocked. */
+function isDraft(value: unknown): value is MembershipDraft {
+  if (typeof value !== "object" || value === null) return false;
+  const draft = value as Record<string, unknown>;
+  const typesMatch = Object.entries(EMPTY_DRAFT).every(
+    ([key, empty]) => typeof draft[key] === typeof empty,
+  );
+  return (
+    typesMatch &&
+    (draft.role === "" ||
+      (MembershipRole.literals as ReadonlyArray<unknown>).includes(
+        draft.role,
+      )) &&
+    (draft.gender === "" ||
+      GENDER_OPTIONS.some((option) => option.value === draft.gender))
+  );
+}
+
+/** The stored draft, or `null` when there is none, it is malformed or empty, or storage is blocked. */
 export function readDraft(): MembershipDraft | null {
   try {
     const raw = storage()?.getItem(DRAFT_STORAGE_KEY);
     if (!raw) return null;
     const parsed: unknown = JSON.parse(raw);
-    return isDraft(parsed) ? parsed : null;
+    return isDraft(parsed) && !isEmptyDraft(parsed) ? parsed : null;
   } catch {
     return null;
   }

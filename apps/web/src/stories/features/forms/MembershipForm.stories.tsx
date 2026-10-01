@@ -92,6 +92,9 @@ export const TransportFailure: Story = {
  * ignored.
  */
 export const RestoredDraft: Story = {
+  // Seeds the shared `sessionStorage`; the docs page would show every other
+  // story's form restored from it.
+  tags: ["!autodocs"],
   args: { defaultRole: "vrijwilliger" },
   beforeEach: () => {
     window.sessionStorage.setItem(

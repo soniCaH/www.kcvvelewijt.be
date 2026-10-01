@@ -3,6 +3,7 @@
 import Link from "next/link";
 import {
   useId,
+  useRef,
   useMemo,
   useState,
   useSyncExternalStore,
@@ -26,6 +27,8 @@ import { trackEvent } from "@/lib/analytics/track-event";
 import {
   clearDraft,
   EMPTY_DRAFT,
+  GENDER_OPTIONS,
+  isEmptyDraft,
   readDraft,
   writeDraft,
   type MembershipDraft,
@@ -107,7 +110,7 @@ const subscribeNever = () => () => {};
  * The draft (#3326) is read after hydration, not during the server or the
  * hydrating render, so the two agree. `useSyncExternalStore` serves the
  * server snapshot (`false`) while hydrating and the client one right after:
- * the fields remount once with the draft as their initial state. A plain
+ * the fields remount once, only when a draft exists, with it as their initial state. A plain
  * client render (Storybook, tests) reads it on the first render.
  */
 export function MembershipForm(props: MembershipFormProps) {
@@ -116,11 +119,20 @@ export function MembershipForm(props: MembershipFormProps) {
     () => true,
     () => false,
   );
+  // Read once, on the first hydrated render: later writes to storage must not
+  // flip the key under a visitor who is typing.
+  const [seed, setSeed] = useState<{ draft: MembershipDraft | null } | null>(
+    null,
+  );
+  if (hydrated && seed === null) setSeed({ draft: readDraft() });
+  const draft = seed?.draft ?? null;
+  // Remount only when there is a draft to start from: a visitor with none
+  // keeps the hydrated nodes (focus, typed text, one Turnstile mount).
   return (
     <MembershipFormFields
-      key={hydrated ? "client" : "server"}
+      key={draft ? "draft" : "base"}
       {...props}
-      draft={hydrated ? readDraft() : null}
+      draft={draft}
     />
   );
 }
@@ -132,6 +144,7 @@ function MembershipFormFields({
 }: MembershipFormProps & { draft: MembershipDraft | null }) {
   const uid = useId();
   const fieldId = (name: string) => `${uid}-${name}`;
+  const roleRef = useRef<HTMLSelectElement>(null);
 
   // A draft beats `defaultRole` / `defaultBirthDate`: the visitor's own
   // answer beats the link.
@@ -163,9 +176,14 @@ function MembershipFormFields({
     name: K,
     value: MembershipDraft[K],
   ) => {
-    const next = { ...values, [name]: value };
-    setValues(next);
-    writeDraft(next);
+    // Functional, so two changes in one batch (browser autofill) both land.
+    setValues((prev) => {
+      if (prev[name] === value) return prev;
+      const next = { ...prev, [name]: value };
+      if (isEmptyDraft(next)) clearDraft();
+      else writeDraft(next);
+      return next;
+    });
   };
 
   const [honeypot, setHoneypot] = useState("");
@@ -181,6 +199,9 @@ function MembershipFormFields({
     setDraftRestored(false);
     setFieldErrors({});
     setGeneralError("");
+    setState("idle");
+    // The button unmounts with the note, so focus would fall to <body>.
+    roleRef.current?.focus();
   };
 
   const minor = useMemo(() => isMinor(birthDate), [birthDate]);
@@ -357,6 +378,7 @@ function MembershipFormFields({
             Ik heb interesse als
           </Label>
           <Select
+            ref={roleRef}
             id={fieldId("role")}
             name="role"
             value={role}
@@ -424,9 +446,11 @@ function MembershipFormFields({
               error={fieldErrors.gender}
               onChange={(e) => setField("gender", e.target.value)}
             >
-              <option value="m">Man</option>
-              <option value="f">Vrouw</option>
-              <option value="x">X</option>
+              {GENDER_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </Select>
           </div>
           <div>

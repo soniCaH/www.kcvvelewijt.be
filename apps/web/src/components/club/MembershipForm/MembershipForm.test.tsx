@@ -325,8 +325,9 @@ describe("MembershipForm", () => {
       container.innerHTML = renderToString(<MembershipForm />);
       expect(container.querySelector("input[name=email]")).toHaveValue("");
 
+      let root!: ReturnType<typeof hydrateRoot>;
       await act(async () => {
-        hydrateRoot(container, <MembershipForm />);
+        root = hydrateRoot(container, <MembershipForm />);
       });
 
       expect(container.querySelector("input[name=email]")).toHaveValue(
@@ -334,7 +335,95 @@ describe("MembershipForm", () => {
       );
       expect(container).toHaveTextContent(RESTORED_NOTE);
       expect(consoleError).not.toHaveBeenCalled();
+      await act(async () => root.unmount());
       container.remove();
+    });
+
+    it("keeps the hydrated nodes when there is no draft", async () => {
+      const container = document.createElement("div");
+      document.body.appendChild(container);
+      container.innerHTML = renderToString(<MembershipForm />);
+      const before = container.querySelector("input[name=email]");
+
+      let root!: ReturnType<typeof hydrateRoot>;
+      await act(async () => {
+        root = hydrateRoot(container, <MembershipForm />);
+      });
+
+      expect(container.querySelector("input[name=email]")).toBe(before);
+      await act(async () => root.unmount());
+      container.remove();
+    });
+
+    it("does not remount the fields when typing writes a draft", () => {
+      render(<MembershipForm />);
+      const input = screen.getByLabelText(/Voornaam/);
+      fireEvent.change(input, { target: { value: "Jan" } });
+      expect(screen.getByLabelText(/Voornaam/)).toBe(input);
+    });
+
+    it("keeps both values when two changes land in one batch", () => {
+      render(<MembershipForm />);
+      act(() => {
+        fireEvent.change(screen.getByLabelText(/Voornaam/), {
+          target: { value: "Jan" },
+        });
+        fireEvent.change(screen.getByLabelText(/Achternaam/), {
+          target: { value: "Peeters" },
+        });
+      });
+      expect(storedDraft()).toMatchObject({
+        firstName: "Jan",
+        lastName: "Peeters",
+      });
+    });
+
+    it("deletes the draft once every field is back to empty", () => {
+      render(<MembershipForm />);
+      const privacy = screen.getByLabelText(/privacyverklaring/i);
+      fireEvent.click(privacy);
+      expect(storedDraft()).not.toBeNull();
+      fireEvent.click(privacy);
+      expect(window.sessionStorage.getItem(DRAFT_STORAGE_KEY)).toBeNull();
+    });
+
+    it("ignores a stored draft that holds no answer", () => {
+      seedDraft({ role: "", firstName: "", lastName: "" });
+      render(<MembershipForm />);
+      expect(screen.queryByText(RESTORED_NOTE)).not.toBeInTheDocument();
+    });
+
+    it.each([
+      ["role", { role: "keeper" }],
+      ["gender", { gender: "z" }],
+    ])("ignores a draft with an unknown %s", (_name, overrides) => {
+      seedDraft(overrides as Partial<typeof EMPTY_DRAFT>);
+      render(<MembershipForm />);
+      expect(screen.queryByText(RESTORED_NOTE)).not.toBeInTheDocument();
+    });
+
+    it("clears a transport-failure notice and focuses the first field on Wis formulier", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(() => Promise.reject(new Error("offline"))),
+      );
+      seedDraft({
+        gender: "m",
+        municipality: "Elewijt",
+        birthDate: "1990-06-15",
+        email: "jan@example.com",
+        privacyAccepted: true,
+      });
+      render(<MembershipForm />);
+      await screen.findByText(RESTORED_NOTE);
+      submit();
+      await screen.findByRole("alert");
+
+      fireEvent.click(screen.getByText("Wis formulier"));
+
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      expect(screen.getByLabelText(/interesse als/i)).toHaveFocus();
     });
 
     it("keeps the link defaults when there is no draft", () => {
