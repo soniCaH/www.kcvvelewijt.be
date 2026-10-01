@@ -7,12 +7,11 @@
  * practical-info hub. The page is static; the form POSTs to `/api/membership`.
  */
 
-import Link from "next/link";
 import { SITE_CONFIG } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
-import { PageContainer } from "@/components/design-system";
+import { EditorialLink, PageContainer } from "@/components/design-system";
 import { PageHero } from "@/components/layout/PageHero";
 import { MembershipForm } from "@/components/club/MembershipForm/MembershipForm";
 
@@ -55,17 +54,17 @@ export default function WordLidPage() {
           lead="Speler, jeugdspeler, vrijwilliger, trainer of scheidsrechter — vul het formulier in en we nemen binnenkort contact met je op. Dit is een aanvraag: sommige ploegen zitten vol, dus een plekje is niet altijd gegarandeerd."
           upLink={{ href: "/club", label: "De club" }}
         >
-          <p className="text-body-md mt-4">
-            <Link href="/club/praktische-informatie" className="prose-link">
-              Praktische info →
-            </Link>
+          <p className="mt-4">
+            <EditorialLink href="/club/praktische-informatie">
+              Praktische info
+            </EditorialLink>
           </p>
           <p className="text-body-md mt-2">
             <a
               href="/downloads/intern-reglement-jeugd-2026.pdf"
               className="prose-link"
             >
-              Intern reglement jeugd (pdf) →
+              Intern reglement jeugd (pdf)
             </a>
           </p>
         </PageHero>

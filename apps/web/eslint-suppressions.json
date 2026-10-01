@@ -733,7 +733,7 @@
   },
   "src/components/organigram/OrganigramExplorer/OrganigramExplorer.tsx": {
     "kcvv/no-off-ramp-font-size": {
-      "count": 13
+      "count": 12
     },
     "kcvv/no-off-ramp-leading": {
       "count": 1
@@ -920,14 +920,6 @@
     },
     "kcvv/no-off-ramp-tracking": {
       "count": 4
-    }
-  },
-  "src/components/team/TeamMatchesSection/TeamMatchesSection.tsx": {
-    "kcvv/no-off-ramp-font-size": {
-      "count": 1
-    },
-    "kcvv/no-off-ramp-tracking": {
-      "count": 1
     }
   },
   "src/components/team/TeamStaff/TeamStaff.tsx": {

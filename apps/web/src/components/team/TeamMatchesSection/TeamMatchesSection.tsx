@@ -1,13 +1,13 @@
 "use client";
 
-// "use client": this section imports a Phosphor icon (ArrowRight), and
-// @phosphor-icons/react is ESM-only (calls React.createContext at module init).
-// A server component importing it breaks Next.js's build-time config collection
-// (same root cause as <TeamAgendaRow>). The section has no server-only logic.
-import Link from "next/link";
+// "use client": the section re-derives next/recent from a clock read on
+// hydration (see `now` below) and renders <TeamAgendaRow>, which imports a
+// Phosphor icon — @phosphor-icons/react is ESM-only (calls
+// React.createContext at module init), so a server component importing it
+// breaks Next.js's build-time config collection.
 import { cn } from "@/lib/utils/cn";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
-import { ArrowRight } from "@/lib/icons.redesign";
+import { EditorialLink } from "@/components/design-system/EditorialLink";
 import { TeamAgendaRow } from "./TeamAgendaRow";
 import { findNextMatch, recentResults } from "./match-visibility";
 import type { ScheduleRow } from "@/components/match/types";
@@ -77,14 +77,12 @@ export function TeamMatchesSection({
         </div>
       ) : null}
 
-      <Link
+      <EditorialLink
         href={calendarHref}
         data-testid="team-matches-calendar-link"
-        className="text-ink hover:text-jersey-deep inline-flex items-center gap-1 font-mono text-[11px] tracking-widest uppercase transition-colors"
       >
         Volledige kalender
-        <ArrowRight size={12} aria-hidden="true" />
-      </Link>
+      </EditorialLink>
     </section>
   );
 }
