@@ -90,8 +90,6 @@ export function splitDisplayName(value: string): {
   return { lead: lead ?? "", rest: others.join(" ") };
 }
 
-// ─── Scale config ────────────────────────────────────────────────────────────
-
 // ─── Sub-parts ───────────────────────────────────────────────────────────────
 
 /** First-token-bold + remainder-italic name rhythm. */
