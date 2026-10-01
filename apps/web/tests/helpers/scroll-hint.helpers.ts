@@ -63,7 +63,9 @@ export function stubAnimationFrame() {
  * getter from every later test in the file; restore the saved descriptor
  * instead (or delete only when there was none).
  */
-export function mockLayoutProps(props: Record<string, number>) {
+export function mockLayoutProps(
+  props: Record<string, number | (() => number)>,
+) {
   const saved = Object.keys(props).map(
     (prop) =>
       [
@@ -72,10 +74,13 @@ export function mockLayoutProps(props: Record<string, number>) {
       ] as const,
   );
   for (const [prop, value] of Object.entries(props)) {
-    Object.defineProperty(HTMLElement.prototype, prop, {
-      configurable: true,
-      value,
-    });
+    Object.defineProperty(
+      HTMLElement.prototype,
+      prop,
+      typeof value === "function"
+        ? { configurable: true, get: value }
+        : { configurable: true, value },
+    );
   }
   return () => {
     for (const [prop, descriptor] of saved) {
