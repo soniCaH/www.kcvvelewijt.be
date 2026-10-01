@@ -31,7 +31,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {
   // Same render as Photo40 — controls only, no second baseline.
-  tags: ["vr-skip"],
+  tags: ["!vr"],
   args: { size: 40, name: "Luc Boons", photoUrl: PHOTO },
   argTypes: {
     size: { control: "radio", options: [...ROUND_AVATAR_SIZES] },
@@ -73,7 +73,7 @@ export const CountAndVacancy: Story = {
 // Every size × photo / monogram on one row each.
 export const Matrix: Story = {
   // The six single-size stories above already baseline every cell.
-  tags: ["vr-skip"],
+  tags: ["!vr"],
   args: { size: 40, name: "Luc Boons" },
   render: () => (
     <div className="flex flex-col gap-4">
