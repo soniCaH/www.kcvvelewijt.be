@@ -49,8 +49,10 @@ export const handleRelated = (request: {
       .map((r) => {
         const meta = r.metadata;
         const rawType = meta["type"];
-        const type: "article" | "page" =
-          rawType === "article" || rawType === "page" ? rawType : "page";
+        const type: "article" | "page" | "gallery" =
+          rawType === "article" || rawType === "page" || rawType === "gallery"
+            ? rawType
+            : "page";
         return {
           id: r.id,
           slug: meta["slug"] ?? "",
