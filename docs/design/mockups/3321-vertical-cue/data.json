@@ -1,0 +1,134 @@
+[
+  {
+    "id": "375-a",
+    "w": 375,
+    "h": 667,
+    "step": "A",
+    "siblings": false,
+    "note": "iPhone SE, default zoom",
+    "option": "none",
+    "remaining": 26,
+    "file": "shots/375-a-none.png"
+  },
+  {
+    "id": "375-a",
+    "w": 375,
+    "h": 667,
+    "step": "A",
+    "siblings": false,
+    "note": "iPhone SE, default zoom",
+    "option": "fade",
+    "remaining": 26,
+    "file": "shots/375-a-fade.png"
+  },
+  {
+    "id": "375-a",
+    "w": 375,
+    "h": 667,
+    "step": "A",
+    "siblings": false,
+    "note": "iPhone SE, default zoom",
+    "option": "arrow",
+    "remaining": 26,
+    "file": "shots/375-a-arrow.png"
+  },
+  {
+    "id": "360-a",
+    "w": 360,
+    "h": 640,
+    "step": "A",
+    "siblings": false,
+    "note": "small Android, default zoom",
+    "option": "none",
+    "remaining": 53,
+    "file": "shots/360-a-none.png"
+  },
+  {
+    "id": "360-a",
+    "w": 360,
+    "h": 640,
+    "step": "A",
+    "siblings": false,
+    "note": "small Android, default zoom",
+    "option": "fade",
+    "remaining": 53,
+    "file": "shots/360-a-fade.png"
+  },
+  {
+    "id": "360-a",
+    "w": 360,
+    "h": 640,
+    "step": "A",
+    "siblings": false,
+    "note": "small Android, default zoom",
+    "option": "arrow",
+    "remaining": 53,
+    "file": "shots/360-a-arrow.png"
+  },
+  {
+    "id": "844-a",
+    "w": 844,
+    "h": 390,
+    "step": "A",
+    "siblings": false,
+    "note": "phone landscape, default zoom",
+    "option": "none",
+    "remaining": 145,
+    "file": "shots/844-a-none.png"
+  },
+  {
+    "id": "844-a",
+    "w": 844,
+    "h": 390,
+    "step": "A",
+    "siblings": false,
+    "note": "phone landscape, default zoom",
+    "option": "fade",
+    "remaining": 145,
+    "file": "shots/844-a-fade.png"
+  },
+  {
+    "id": "844-a",
+    "w": 844,
+    "h": 390,
+    "step": "A",
+    "siblings": false,
+    "note": "phone landscape, default zoom",
+    "option": "arrow",
+    "remaining": 145,
+    "file": "shots/844-a-arrow.png"
+  },
+  {
+    "id": "375-max",
+    "w": 375,
+    "h": 667,
+    "step": "A++",
+    "siblings": true,
+    "note": "iPhone SE, largest zoom, fan expanded",
+    "option": "none",
+    "remaining": 253,
+    "file": "shots/375-max-none.png"
+  },
+  {
+    "id": "375-max",
+    "w": 375,
+    "h": 667,
+    "step": "A++",
+    "siblings": true,
+    "note": "iPhone SE, largest zoom, fan expanded",
+    "option": "fade",
+    "remaining": 253,
+    "file": "shots/375-max-fade.png"
+  },
+  {
+    "id": "375-max",
+    "w": 375,
+    "h": 667,
+    "step": "A++",
+    "siblings": true,
+    "note": "iPhone SE, largest zoom, fan expanded",
+    "option": "arrow",
+    "remaining": 253,
+    "file": "shots/375-max-arrow.png"
+  }
+]
