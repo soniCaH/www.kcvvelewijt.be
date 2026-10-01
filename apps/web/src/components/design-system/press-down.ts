@@ -23,19 +23,24 @@ export const PRESS_DOWN_CLASSES =
 /**
  * The one chip (#3328, decided in #3303): every chip-shaped link on the
  * organigram pages and `<UpLink>` is this size, border and type — `border-2`,
- * `px-3 py-2`, `text-label` (11px), mono semibold uppercase — pressing down via
- * `PRESS_DOWN_CLASSES`. The caller owns the fill and the border/text colour
- * (cream or warm; `border-ink` etc.). A leading `‹` goes up to the structural
- * parent (only `<UpLink>`), a trailing `→` goes onward.
+ * `px-3 py-2`, `text-label` (11px), mono semibold uppercase, ink offset shadow.
+ * The caller owns the fill and the border/text colour (cream or warm,
+ * `border-ink` etc.). A leading `‹` goes up to the structural parent (only
+ * `<UpLink>`), a trailing `→` goes onward.
  *
- * `CHIP_BASE_CLASSES` leaves the shadow out for the one caller that swaps it
- * (`<UpLink tone="cream">`, whose offset shadow is warm); everyone else reads
- * `CHIP_CLASSES`.
+ * `CHIP_CLASSES` is the static shape: for a chip that is not itself pressable
+ * (an inert label inside a clickable card). `CHIP_LINK_CLASSES` adds the
+ * behaviour of a real link or button: the canonical press-down on hover, and
+ * the same press on keyboard focus — un-gated by `motion-safe:`, because the
+ * translate is how a keyboard user locates the focused chip. The caller adds
+ * the `focus-visible:outline-*` colour. A tone-swapped shadow is a colour
+ * utility on top (`shadow-warm`), not a second constant.
  *
  * Compose with plain string concatenation, never `cn()`: tailwind-merge files
  * the custom `text-label` token under text-colour and drops it next to
  * `text-ink` / `text-cream` (#2769).
  */
-export const CHIP_BASE_CLASSES = `text-label inline-flex w-fit items-center gap-1.5 border-2 px-3 py-2 font-mono font-semibold uppercase ${PRESS_DOWN_CLASSES}`;
+export const CHIP_CLASSES =
+  "text-label inline-flex w-fit items-center gap-1.5 border-2 px-3 py-2 font-mono font-semibold uppercase shadow-paper-sm";
 
-export const CHIP_CLASSES = `${CHIP_BASE_CLASSES} shadow-paper-sm`;
+export const CHIP_LINK_CLASSES = `${CHIP_CLASSES} ${PRESS_DOWN_CLASSES} focus-visible:translate-x-1 focus-visible:translate-y-1 focus-visible:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2`;

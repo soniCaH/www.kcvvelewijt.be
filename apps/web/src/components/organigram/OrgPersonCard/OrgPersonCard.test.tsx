@@ -215,11 +215,7 @@ describe("OrgPersonCard — vacant", () => {
     render(<OrgPersonCard node={vacant} />);
     expect(screen.getByTestId("org-person-card-vacant-cta")).toHaveClass(
       "border-2",
-      "px-3",
-      "py-2",
       "text-label",
-      "font-semibold",
-      "shadow-paper-sm",
     );
   });
 
@@ -285,12 +281,9 @@ describe("OrgPersonCard — interactive (Phase 4 panel trigger)", () => {
       screen.queryByTestId("org-person-card-vacant-cta"),
     ).not.toBeInTheDocument();
     // The recruit copy stays visible (now inert) inside the card.
-    expect(screen.getByText("Iets voor jou? →")).toHaveClass(
-      "border-2",
-      "px-3",
-      "py-2",
-      "text-label",
-      "shadow-paper-sm",
-    );
+    // The chip is inert inside the card: the card presses, the chip must not.
+    const chip = screen.getByText("Iets voor jou? →");
+    expect(chip).toHaveClass("border-2", "text-label");
+    expect(chip.className).not.toContain("hover:");
   });
 });

@@ -2,7 +2,11 @@ import Link from "next/link";
 import type { OrgChartNode } from "@/types/organigram";
 import { cn } from "@/lib/utils/cn";
 import { RoundAvatar } from "@/components/design-system/RoundAvatar";
-import { CHIP_CLASSES } from "@/components/design-system/press-down";
+import {
+  CHIP_CLASSES,
+  CHIP_LINK_CLASSES,
+  PRESS_DOWN_CLASSES,
+} from "@/components/design-system/press-down";
 
 /**
  * `<OrgPersonCard>` — the Phase 7 `/hulp` structure card (design lock `7o4`).
@@ -184,7 +188,7 @@ export function OrgPersonCard({
       ? "bg-warm shadow-paper-sm"
       : "bg-cream shadow-[3px_3px_0_0_var(--color-ink)]",
     interactive &&
-      "focus-visible:outline-ink w-full cursor-pointer transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2",
+      `focus-visible:outline-ink w-full cursor-pointer ${PRESS_DOWN_CLASSES} focus-visible:outline-2 focus-visible:outline-offset-2`,
     className,
   );
 
@@ -245,7 +249,7 @@ export function OrgPersonCard({
             <Link
               href={vacantCtaHref}
               data-testid="org-person-card-vacant-cta"
-              className={`${CHIP_CLASSES} border-ink bg-cream text-ink mt-2.5`}
+              className={`${CHIP_LINK_CLASSES} border-ink bg-cream text-ink focus-visible:outline-ink mt-2.5`}
             >
               Iets voor jou? →
             </Link>

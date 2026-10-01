@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import type { OrgChartNode } from "@/types/organigram";
 import { useHubMemberPanel } from "@/components/organigram/HubMemberPanel";
+import { PRESS_DOWN_CLASSES } from "@/components/design-system/press-down";
 import { OrganigramExplorer } from "./OrganigramExplorer";
 import { VolledigOrganigram } from "./VolledigOrganigram";
 
@@ -54,7 +55,7 @@ export function OrganigramOverview({
           type="button"
           onClick={() => setExpanded(true)}
           aria-expanded={false}
-          className="border-ink bg-cream text-jersey-deep shadow-paper-sm focus-visible:outline-ink inline-flex items-center gap-2 border-2 px-4 py-2.5 font-mono text-xs font-bold tracking-wide uppercase transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2"
+          className={`border-ink bg-cream text-jersey-deep shadow-paper-sm focus-visible:outline-ink inline-flex items-center gap-2 border-2 px-4 py-2.5 font-mono text-xs font-bold tracking-wide uppercase ${PRESS_DOWN_CLASSES} focus-visible:outline-2 focus-visible:outline-offset-2`}
         >
           Bekijk het volledige organigram →
         </button>

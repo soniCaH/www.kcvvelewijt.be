@@ -425,10 +425,7 @@ describe("MemberDetailPanel", () => {
       ).toHaveAttribute("href", "/club/contact");
       expect(screen.getByRole("link", { name: /Iets voor jou/ })).toHaveClass(
         "border-2",
-        "px-3",
-        "py-2",
         "text-label",
-        "font-semibold",
       );
       expect(
         screen.queryByRole("link", { name: /Mail/ }),

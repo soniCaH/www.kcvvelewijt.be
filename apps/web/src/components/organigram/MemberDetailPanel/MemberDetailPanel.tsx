@@ -16,7 +16,10 @@ import { revealHash } from "@/lib/utils/same-page-anchor";
 import { findMemberResponsibilities } from "@/lib/responsibility-utils";
 import { splitDisplayName } from "@/components/organigram/OrgPersonCard";
 import { RoundAvatar } from "@/components/design-system/RoundAvatar";
-import { CHIP_CLASSES } from "@/components/design-system/press-down";
+import {
+  CHIP_LINK_CLASSES,
+  PRESS_DOWN_CLASSES,
+} from "@/components/design-system/press-down";
 import { ArrowRight, Envelope, Phone, X } from "@/lib/icons.redesign";
 
 /**
@@ -320,7 +323,7 @@ export function MemberDetailPanel({
                 </p>
                 <Link
                   href={vacantCtaHref}
-                  className={`${CHIP_CLASSES} border-ink bg-warm text-ink self-start`}
+                  className={`${CHIP_LINK_CLASSES} border-ink bg-warm text-ink focus-visible:outline-ink self-start`}
                 >
                   Iets voor jou?
                   <ArrowRight size={12} aria-hidden />
@@ -395,7 +398,7 @@ export function MemberDetailPanel({
                 {activeHolder?.href && (
                   <Link
                     href={activeHolder.href}
-                    className={`${CHIP_CLASSES} border-ink bg-cream text-ink self-start`}
+                    className={`${CHIP_LINK_CLASSES} border-ink bg-cream text-ink focus-visible:outline-ink self-start`}
                   >
                     Volledig profiel
                     <ArrowRight size={12} aria-hidden />
@@ -423,7 +426,7 @@ function ContactAction({
   return (
     <a
       href={href}
-      className="border-ink bg-cream-soft text-ink shadow-paper-sm flex flex-1 items-center justify-center gap-2 border-2 px-3 py-2.5 font-mono text-xs font-semibold tracking-[0.04em] uppercase transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+      className={`border-ink bg-cream-soft text-ink shadow-paper-sm flex flex-1 items-center justify-center gap-2 border-2 px-3 py-2.5 font-mono text-xs font-semibold tracking-[0.04em] uppercase ${PRESS_DOWN_CLASSES}`}
     >
       <Icon size={14} aria-hidden />
       {label}
