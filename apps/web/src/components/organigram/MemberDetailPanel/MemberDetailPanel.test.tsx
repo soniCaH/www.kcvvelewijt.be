@@ -450,6 +450,143 @@ describe("MemberDetailPanel", () => {
     });
   });
 
+  describe("focus trap", () => {
+    // singleNode renders four tabbable controls, in DOM order: close button,
+    // Mail, Bel, Volledig profiel. The panel focuses the close button on open.
+    it("wraps Tab on the last focusable to the first", async () => {
+      const user = userEvent.setup();
+      render(<MemberDetailPanel node={singleNode} open onClose={noop} />);
+      const profile = screen.getByRole("link", { name: /Volledig profiel/ });
+      profile.focus();
+
+      await user.tab();
+
+      expect(screen.getByRole("button", { name: "Sluiten" })).toHaveFocus();
+    });
+
+    it("wraps Shift+Tab on the first focusable to the last", async () => {
+      const user = userEvent.setup();
+      render(<MemberDetailPanel node={singleNode} open onClose={noop} />);
+      const close = screen.getByRole("button", { name: "Sluiten" });
+      expect(close).toHaveFocus();
+
+      await user.tab({ shift: true });
+
+      expect(
+        screen.getByRole("link", { name: /Volledig profiel/ }),
+      ).toHaveFocus();
+    });
+
+    it("leaves Tab alone between the boundaries", async () => {
+      const user = userEvent.setup();
+      render(<MemberDetailPanel node={singleNode} open onClose={noop} />);
+
+      await user.tab();
+
+      expect(screen.getByRole("link", { name: /Mail/ })).toHaveFocus();
+    });
+
+    it("ignores the roving inactive tabs: the active tab is the first boundary", async () => {
+      const user = userEvent.setup();
+      // Shared, restored on holder #2: DOM order is Els (tabIndex -1), Nina
+      // (0), Wout (-1), close, Bel. Nina is the first tabbable, so Shift+Tab
+      // there wraps to Bel, the last control (Nina has a phone, no profile).
+      render(
+        <MemberDetailPanel
+          node={sharedNode}
+          open
+          onClose={noop}
+          initialHolderId="staff-nina"
+        />,
+      );
+      screen.getByRole("tab", { name: /Nina/ }).focus();
+
+      await user.tab({ shift: true });
+
+      expect(screen.getByRole("link", { name: /Bel/ })).toHaveFocus();
+    });
+  });
+
+  describe("holder switcher arrow keys", () => {
+    async function focusTab(
+      user: ReturnType<typeof userEvent.setup>,
+      name: RegExp,
+    ) {
+      await user.click(screen.getByRole("tab", { name }));
+    }
+
+    it("moves to the next holder with ArrowRight and wraps from the last to the first", async () => {
+      const user = userEvent.setup();
+      render(<MemberDetailPanel node={sharedNode} open onClose={noop} />);
+      await focusTab(user, /Els/);
+
+      await user.keyboard("{ArrowRight}");
+      expect(screen.getByRole("tab", { name: /Nina/ })).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+      expect(screen.getByRole("tab", { name: /Nina/ })).toHaveFocus();
+
+      await user.keyboard("{ArrowRight}");
+      expect(screen.getByRole("tab", { name: /Wout/ })).toHaveFocus();
+
+      await user.keyboard("{ArrowRight}");
+      expect(screen.getByRole("tab", { name: /Els/ })).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+      expect(screen.getByRole("tab", { name: /Els/ })).toHaveFocus();
+    });
+
+    it("moves to the previous holder with ArrowLeft and wraps from the first to the last", async () => {
+      const user = userEvent.setup();
+      render(<MemberDetailPanel node={sharedNode} open onClose={noop} />);
+      await focusTab(user, /Els/);
+
+      await user.keyboard("{ArrowLeft}");
+      expect(screen.getByRole("tab", { name: /Wout/ })).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
+      expect(screen.getByRole("tab", { name: /Wout/ })).toHaveFocus();
+
+      await user.keyboard("{ArrowLeft}");
+      expect(screen.getByRole("tab", { name: /Nina/ })).toHaveFocus();
+    });
+
+    it("shows the holder the arrow key landed on", async () => {
+      const user = userEvent.setup();
+      render(<MemberDetailPanel node={sharedNode} open onClose={noop} />);
+      await focusTab(user, /Els/);
+
+      await user.keyboard("{ArrowDown}");
+
+      expect(
+        screen.getByRole("dialog", { name: "Contactgegevens — Nina Bral" }),
+      ).toBeInTheDocument();
+
+      await user.keyboard("{ArrowUp}{ArrowUp}");
+
+      expect(
+        screen.getByRole("dialog", {
+          name: "Contactgegevens — Wout Verlinden",
+        }),
+      ).toBeInTheDocument();
+    });
+
+    it("jumps to the first and last holder with Home and End", async () => {
+      const user = userEvent.setup();
+      render(<MemberDetailPanel node={sharedNode} open onClose={noop} />);
+      await focusTab(user, /Nina/);
+
+      await user.keyboard("{End}");
+      expect(screen.getByRole("tab", { name: /Wout/ })).toHaveFocus();
+
+      await user.keyboard("{Home}");
+      expect(screen.getByRole("tab", { name: /Els/ })).toHaveFocus();
+    });
+  });
+
   describe("onMemberShown", () => {
     it("fires on open with the first holder", () => {
       const onMemberShown = vi.fn();

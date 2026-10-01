@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { Effect, Layer } from "effect";
+import { HttpNotFound, type Match } from "@kcvv/api-contract";
 
 // `fetchRecentMatchIds` resolves the Effect runtime unconditionally, so this
 // keeps ~800 ms of module loading out of the timed test body. See CLAUDE.md
@@ -8,6 +10,28 @@ import "@/lib/effect/runtime";
 import sitemap from "./sitemap";
 
 const mockFetch = vi.fn();
+const { mockGetMatches } = vi.hoisted(() => ({ mockGetMatches: vi.fn() }));
+
+// Only the BFF match fan-out is faked; the sitemap's own window logic and the
+// Effect runtime stay real. Without a team `psdId` the BFF is never called, so
+// the pre-existing tests are unaffected.
+vi.mock("@/lib/effect/services/BffService", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/lib/effect/services/BffService")>();
+  return {
+    ...actual,
+    BffServiceLive: Layer.succeed(actual.BffService, {
+      getMatches: mockGetMatches,
+      getNextMatches: () => Effect.succeed([]),
+      getMatchesWindow: () => Effect.succeed([]),
+      getMatchDetail: () => Effect.die("not used by the sitemap"),
+      getRanking: () => Effect.succeed([]),
+      getRelated: () => Effect.succeed([]),
+      getOpponentHistory: () => Effect.die("not used by the sitemap"),
+      getPlayerStats: () => Effect.die("not used by the sitemap"),
+    }),
+  };
+});
 
 // Mocked at the SDK boundary rather than at `@/lib/sanity/client`, because
 // `sitemap()` reaches the wrapper through six concurrent `await import()`s and
@@ -27,6 +51,7 @@ const SANITY_QUERY_COUNT = 6;
 describe("sitemap.ts", () => {
   beforeEach(() => {
     mockFetch.mockReset();
+    mockGetMatches.mockReset();
   });
 
   // The zero-outbound-request guard: a short count means a query escaped the
@@ -136,5 +161,119 @@ describe("sitemap.ts", () => {
 
     // Should still return static routes
     expect(result).toHaveLength(20);
+  });
+
+  describe("recent matches", () => {
+    const NOW = new Date("2026-06-30T12:00:00.000Z");
+    const DAY_MS = 24 * 60 * 60 * 1000;
+    const daysFromNow = (days: number) =>
+      new Date(NOW.getTime() + days * DAY_MS);
+    const matchUrl = (id: number) =>
+      `https://www.kcvvelewijt.be/wedstrijd/${id}`;
+
+    const makeMatch = (id: number, date: Date) => ({ id, date }) as Match;
+
+    /** Answers the team query with the given psdIds and every other query with []. */
+    function stubTeams(...psdIds: string[]) {
+      mockFetch.mockImplementation(async (query: string) =>
+        query.includes('_type == "team"')
+          ? psdIds.map((psdId) => ({ slug: `team-${psdId}`, psdId }))
+          : [],
+      );
+    }
+
+    async function matchUrls() {
+      const result = await sitemap();
+      return result
+        .map((e) => e.url)
+        .filter((url) => url.includes("/wedstrijd/"));
+    }
+
+    beforeEach(() => {
+      // Only Date is faked: the Effect runtime and promises keep real timers.
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(NOW);
+      vi.spyOn(console, "error").mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+      vi.restoreAllMocks();
+    });
+
+    it("lists matches from the last 90 days up to now, and leaves out future and older ones", async () => {
+      stubTeams("1");
+      mockGetMatches.mockReturnValue(
+        Effect.succeed([
+          makeMatch(1, daysFromNow(1)), // future
+          makeMatch(2, daysFromNow(-1)), // recent
+          makeMatch(3, daysFromNow(-89)), // inside the window
+          makeMatch(4, daysFromNow(-91)), // too old
+        ]),
+      );
+
+      expect(await matchUrls()).toEqual([matchUrl(2), matchUrl(3)]);
+    });
+
+    it("includes a match exactly at the 90-day cutoff and excludes one a millisecond before it", async () => {
+      // NOW is midday, so the local-time `setDate(-90)` in sitemap.ts lands on
+      // the same wall-clock instant this test computes; no DST edge is crossed.
+      const cutoff = new Date(NOW);
+      cutoff.setDate(cutoff.getDate() - 90);
+      stubTeams("1");
+      mockGetMatches.mockReturnValue(
+        Effect.succeed([
+          makeMatch(40, cutoff),
+          makeMatch(41, new Date(cutoff.getTime() - 1)),
+        ]),
+      );
+
+      expect(await matchUrls()).toEqual([matchUrl(40)]);
+    });
+
+    it("lists a match once when two of the club's teams both carry it", async () => {
+      stubTeams("1", "2");
+      mockGetMatches.mockReturnValue(
+        Effect.succeed([makeMatch(7, daysFromNow(-2))]),
+      );
+
+      expect(await matchUrls()).toEqual([matchUrl(7)]);
+    });
+
+    it("resolves a team's HttpNotFound to no entries without logging an error", async () => {
+      stubTeams("1", "2");
+      mockGetMatches.mockImplementation((teamId: number) =>
+        teamId === 1
+          ? Effect.fail(new HttpNotFound({ error: "no such team" }))
+          : Effect.succeed([makeMatch(20, daysFromNow(-3))]),
+      );
+
+      expect(await matchUrls()).toEqual([matchUrl(20)]);
+      expect(console.error).not.toHaveBeenCalled();
+    });
+
+    it("logs any other per-team error and still resolves to the other teams' entries", async () => {
+      stubTeams("1", "2");
+      const failure = new Error("BFF exploded");
+      mockGetMatches.mockImplementation((teamId: number) =>
+        teamId === 1
+          ? Effect.fail(failure)
+          : Effect.succeed([makeMatch(30, daysFromNow(-3))]),
+      );
+
+      expect(await matchUrls()).toEqual([matchUrl(30)]);
+      expect(console.error).toHaveBeenCalledExactlyOnceWith(
+        "[sitemap] Failed to fetch matches for team 1:",
+        failure,
+      );
+    });
+
+    it("resolves to no match entries when every team fails", async () => {
+      stubTeams("1");
+      mockGetMatches.mockReturnValue(Effect.fail(new Error("BFF exploded")));
+
+      expect(await matchUrls()).toEqual([]);
+      expect(console.error).toHaveBeenCalledTimes(1);
+    });
   });
 });

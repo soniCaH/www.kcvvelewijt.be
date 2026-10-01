@@ -256,11 +256,13 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(15_000),
     });
+    // Read the body once: `res.json()` consumes it, so a `res.text()` fallback
+    // after a failed parse would throw "Body is unusable".
+    const text = await res.text();
     let data: unknown;
     try {
-      data = (await res.json()) as unknown;
+      data = JSON.parse(text) as unknown;
     } catch {
-      const text = await res.text();
       data = { error: text || "Unknown error from search service" };
     }
     return NextResponse.json(data, { status: res.status });
