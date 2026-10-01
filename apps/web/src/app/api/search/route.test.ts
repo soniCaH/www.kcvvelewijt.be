@@ -71,11 +71,7 @@ describe("POST /api/search", () => {
         },
       ],
     };
-    vi.mocked(fetch).mockResolvedValueOnce({
-      ok: true,
-      status: 200,
-      json: async () => bffResponse,
-    } as Response);
+    vi.mocked(fetch).mockResolvedValueOnce(Response.json(bffResponse));
 
     const requestBody = { query: "kantine", type: "responsibility", limit: 5 };
     const response = await POST(makePostRequest(requestBody));
@@ -105,19 +101,10 @@ describe("POST /api/search", () => {
     expect(response.status).toBe(500);
   });
 
-  // The stubs below give `json()` a rejection and `text()` a body, which is the
-  // contract the route's fallback is written against. A real `Response` cannot
-  // do both — `json()` consumes the body, so the route's `res.text()` would
-  // throw — see the PR body (#3348).
   it("wraps a non-JSON error body from the search service as { error }, keeping its status", async () => {
-    vi.mocked(fetch).mockResolvedValueOnce({
-      ok: false,
-      status: 502,
-      json: async () => {
-        throw new SyntaxError("Unexpected token <");
-      },
-      text: async () => "Bad gateway",
-    } as unknown as Response);
+    vi.mocked(fetch).mockResolvedValueOnce(
+      new Response("Bad gateway", { status: 502 }),
+    );
 
     const response = await POST(makePostRequest({ query: "test" }));
 
@@ -126,14 +113,7 @@ describe("POST /api/search", () => {
   });
 
   it("falls back to a generic message when the non-JSON error body is empty", async () => {
-    vi.mocked(fetch).mockResolvedValueOnce({
-      ok: false,
-      status: 504,
-      json: async () => {
-        throw new SyntaxError("Unexpected end of JSON input");
-      },
-      text: async () => "",
-    } as unknown as Response);
+    vi.mocked(fetch).mockResolvedValueOnce(new Response("", { status: 504 }));
 
     const response = await POST(makePostRequest({ query: "test" }));
 
@@ -526,212 +506,210 @@ describe("GET /api/search", () => {
       expect(body.error).toBe("Internal server error");
     }, 10_000);
   });
-});
 
-describe("GET /api/search — matching and ranking", () => {
-  interface ArticleRow {
-    id: string;
-    title: string;
-    slug: string;
-    tags: string[];
-    publishedAt?: string;
-    coverImageUrl?: string;
-  }
-  interface PlayerRow {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    psdId?: string | null;
-  }
-  interface TeamRow {
-    _id: string;
-    name: string;
-    displayName?: string | null;
-    slug: string;
-  }
+  describe("Matching and Ranking", () => {
+    interface ArticleRow {
+      id: string;
+      title: string;
+      slug: string;
+      tags: string[];
+      publishedAt?: string;
+      coverImageUrl?: string;
+    }
+    interface PlayerRow {
+      _id: string;
+      firstName: string;
+      lastName: string;
+      psdId?: string | null;
+    }
+    interface TeamRow {
+      _id: string;
+      name: string;
+      displayName?: string | null;
+      slug: string;
+    }
 
-  /**
-   * Routes each repository's GROQ query to its own rows. The repositories and
-   * the route stay real; only the Sanity client (the outer boundary) answers.
-   */
-  function stubSanity(rows: {
-    articles?: ArticleRow[];
-    players?: PlayerRow[];
-    teams?: TeamRow[];
-  }) {
-    mockSanityFetch.mockImplementation(async (query: string) => {
-      if (query === ARTICLES_QUERY) return rows.articles ?? [];
-      if (query === PLAYERS_QUERY) return rows.players ?? [];
-      if (query === TEAMS_QUERY) return rows.teams ?? [];
-      return [];
-    });
-  }
+    /**
+     * Routes each repository's GROQ query to its own rows. The repositories and
+     * the route stay real; only the Sanity client (the outer boundary) answers.
+     */
+    function stubSanity(rows: {
+      articles?: ArticleRow[];
+      players?: PlayerRow[];
+      teams?: TeamRow[];
+    }) {
+      mockSanityFetch.mockImplementation(async (query: string) => {
+        if (query === ARTICLES_QUERY) return rows.articles ?? [];
+        if (query === PLAYERS_QUERY) return rows.players ?? [];
+        if (query === TEAMS_QUERY) return rows.teams ?? [];
+        return [];
+      });
+    }
 
-  async function search(url: string) {
-    const response = await GET(createRequest(url));
-    expect(response.status).toBe(200);
-    return (await response.json()) as {
-      count: number;
-      results: Array<{ type: string; title: string; url: string }>;
-    };
-  }
+    async function search(url: string) {
+      const response = await GET(createRequest(url));
+      expect(response.status).toBe(200);
+      return (await response.json()) as {
+        count: number;
+        results: Array<{ type: string; title: string; url: string }>;
+      };
+    }
 
-  const article = (
-    id: string,
-    title: string,
-    tags: string[] = [],
-  ): ArticleRow => ({ id, title, slug: `slug-${id}`, tags });
+    const article = (
+      id: string,
+      title: string,
+      tags: string[] = [],
+    ): ArticleRow => ({ id, title, slug: `slug-${id}`, tags });
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-    mockSanityFetch.mockResolvedValue([]);
-  });
+    describe("articles", () => {
+      it("matches on title, case-insensitively, and links to /nieuws/<slug>", async () => {
+        stubSanity({
+          articles: [
+            article("1", "Winst tegen Mechelen"),
+            article("2", "Training verplaatst"),
+          ],
+        });
 
-  afterEach(() => {
-    mockSanityFetch.mockReset();
-    mockSanityFetch.mockResolvedValue([]);
-  });
+        const { results } = await search("/api/search?q=MECHELEN&type=article");
 
-  describe("articles", () => {
-    it("matches on title, case-insensitively, and links to /nieuws/<slug>", async () => {
-      stubSanity({
-        articles: [
-          article("1", "Winst tegen Mechelen"),
-          article("2", "Training verplaatst"),
-        ],
+        expect(results).toEqual([
+          expect.objectContaining({
+            type: "article",
+            title: "Winst tegen Mechelen",
+            url: "/nieuws/slug-1",
+          }),
+        ]);
       });
 
-      const { results } = await search("/api/search?q=MECHELEN&type=article");
+      it("matches on a tag even when the title does not match", async () => {
+        stubSanity({
+          articles: [
+            article("1", "Wedstrijdverslag", ["Jeugd", "U15"]),
+            article("2", "Training verplaatst", ["senioren"]),
+          ],
+        });
 
-      expect(results).toEqual([
-        expect.objectContaining({
-          type: "article",
-          title: "Winst tegen Mechelen",
-          url: "/nieuws/slug-1",
-        }),
-      ]);
+        const { results } = await search("/api/search?q=jeugd&type=article");
+
+        expect(results.map((r) => r.title)).toEqual(["Wedstrijdverslag"]);
+      });
     });
 
-    it("matches on a tag even when the title does not match", async () => {
-      stubSanity({
-        articles: [
-          article("1", "Wedstrijdverslag", ["Jeugd", "U15"]),
-          article("2", "Training verplaatst", ["senioren"]),
-        ],
+    describe("players", () => {
+      it("matches on the full name and links by psdId", async () => {
+        stubSanity({
+          players: [
+            { _id: "p1", firstName: "Marc", lastName: "Peeters", psdId: "111" },
+            { _id: "p2", firstName: "Jan", lastName: "Janssens", psdId: "222" },
+          ],
+        });
+
+        // "c pe" only exists across the first/last name boundary.
+        const { results } = await search("/api/search?q=c%20pe&type=player");
+
+        expect(results).toEqual([
+          expect.objectContaining({
+            type: "player",
+            title: "Marc Peeters",
+            url: "/spelers/111",
+          }),
+        ]);
       });
 
-      const { results } = await search("/api/search?q=jeugd&type=article");
+      it("drops players without an href (no psdId) even when the name matches", async () => {
+        stubSanity({
+          players: [
+            { _id: "p1", firstName: "Marc", lastName: "Peeters", psdId: null },
+            {
+              _id: "p2",
+              firstName: "Marcel",
+              lastName: "Dubois",
+              psdId: "333",
+            },
+          ],
+        });
 
-      expect(results.map((r) => r.title)).toEqual(["Wedstrijdverslag"]);
+        const { results } = await search("/api/search?q=marc&type=player");
+
+        expect(results.map((r) => r.title)).toEqual(["Marcel Dubois"]);
+      });
     });
-  });
 
-  describe("players", () => {
-    it("matches on the full name and links by psdId", async () => {
-      stubSanity({
-        players: [
-          { _id: "p1", firstName: "Marc", lastName: "Peeters", psdId: "111" },
-          { _id: "p2", firstName: "Jan", lastName: "Janssens", psdId: "222" },
-        ],
+    describe("teams", () => {
+      const teamRows: TeamRow[] = [
+        {
+          _id: "t1",
+          name: "Eerste Elftallen A",
+          displayName: "A-ploeg",
+          slug: "a-ploeg",
+        },
+        { _id: "t2", name: "KCVVE U16", displayName: "U16", slug: "u16" },
+      ];
+
+      it("matches on displayName and titles the result with it", async () => {
+        stubSanity({ teams: teamRows });
+
+        const { results } = await search("/api/search?q=a-ploeg&type=team");
+
+        expect(results).toEqual([
+          expect.objectContaining({
+            type: "team",
+            title: "A-ploeg",
+            url: "/ploegen/a-ploeg",
+          }),
+        ]);
       });
 
-      // "c pe" only exists across the first/last name boundary.
-      const { results } = await search("/api/search?q=c%20pe&type=player");
+      it("matches on the federation name but still titles the result with displayName", async () => {
+        stubSanity({ teams: teamRows });
 
-      expect(results).toEqual([
-        expect.objectContaining({
-          type: "player",
-          title: "Marc Peeters",
-          url: "/spelers/111",
-        }),
-      ]);
+        const { results } = await search("/api/search?q=elftallen&type=team");
+
+        expect(results).toEqual([
+          expect.objectContaining({
+            title: "A-ploeg",
+            url: "/ploegen/a-ploeg",
+          }),
+        ]);
+      });
     });
 
-    it("drops players without an href (no psdId) even when the name matches", async () => {
-      stubSanity({
-        players: [
-          { _id: "p1", firstName: "Marc", lastName: "Peeters", psdId: null },
-          { _id: "p2", firstName: "Marcel", lastName: "Dubois", psdId: "333" },
-        ],
+    describe("ranking", () => {
+      it("orders exact title, then prefix matches, then the rest, each alphabetically", async () => {
+        // Deliberately scrambled so source order cannot explain the result.
+        stubSanity({
+          articles: [
+            article("1", "Zondag: KCVV wint"),
+            article("2", "KCVV Zege"),
+            article("3", "Alles over KCVV"),
+            article("4", "KCVV"),
+            article("5", "KCVV Beker"),
+          ],
+        });
+
+        const { results } = await search("/api/search?q=kcvv&type=article");
+
+        expect(results.map((r) => r.title)).toEqual([
+          "KCVV", // exact
+          "KCVV Beker", // prefix, alphabetical
+          "KCVV Zege",
+          "Alles over KCVV", // contains, alphabetical
+          "Zondag: KCVV wint",
+        ]);
       });
 
-      const { results } = await search("/api/search?q=marc&type=player");
+      it("ranks across content types by title, not by type", async () => {
+        stubSanity({
+          articles: [article("1", "Over de U16")],
+          teams: [
+            { _id: "t1", name: "KCVVE U16", displayName: "U16", slug: "u16" },
+          ],
+        });
 
-      expect(results.map((r) => r.title)).toEqual(["Marcel Dubois"]);
-    });
-  });
+        const { results } = await search("/api/search?q=u16");
 
-  describe("teams", () => {
-    const teamRows: TeamRow[] = [
-      {
-        _id: "t1",
-        name: "Eerste Elftallen A",
-        displayName: "A-ploeg",
-        slug: "a-ploeg",
-      },
-      { _id: "t2", name: "KCVVE U16", displayName: "U16", slug: "u16" },
-    ];
-
-    it("matches on displayName and titles the result with it", async () => {
-      stubSanity({ teams: teamRows });
-
-      const { results } = await search("/api/search?q=a-ploeg&type=team");
-
-      expect(results).toEqual([
-        expect.objectContaining({
-          type: "team",
-          title: "A-ploeg",
-          url: "/ploegen/a-ploeg",
-        }),
-      ]);
-    });
-
-    it("matches on the federation name but still titles the result with displayName", async () => {
-      stubSanity({ teams: teamRows });
-
-      const { results } = await search("/api/search?q=elftallen&type=team");
-
-      expect(results).toEqual([
-        expect.objectContaining({ title: "A-ploeg", url: "/ploegen/a-ploeg" }),
-      ]);
-    });
-  });
-
-  describe("ranking", () => {
-    it("orders exact title, then prefix matches, then the rest, each alphabetically", async () => {
-      // Deliberately scrambled so source order cannot explain the result.
-      stubSanity({
-        articles: [
-          article("1", "Zondag: KCVV wint"),
-          article("2", "KCVV Zege"),
-          article("3", "Alles over KCVV"),
-          article("4", "KCVV"),
-          article("5", "KCVV Beker"),
-        ],
+        expect(results.map((r) => r.title)).toEqual(["U16", "Over de U16"]);
       });
-
-      const { results } = await search("/api/search?q=kcvv&type=article");
-
-      expect(results.map((r) => r.title)).toEqual([
-        "KCVV", // exact
-        "KCVV Beker", // prefix, alphabetical
-        "KCVV Zege",
-        "Alles over KCVV", // contains, alphabetical
-        "Zondag: KCVV wint",
-      ]);
-    });
-
-    it("ranks across content types by title, not by type", async () => {
-      stubSanity({
-        articles: [article("1", "Over de U16")],
-        teams: [
-          { _id: "t1", name: "KCVVE U16", displayName: "U16", slug: "u16" },
-        ],
-      });
-
-      const { results } = await search("/api/search?q=u16");
-
-      expect(results.map((r) => r.title)).toEqual(["U16", "Over de U16"]);
     });
   });
 });
