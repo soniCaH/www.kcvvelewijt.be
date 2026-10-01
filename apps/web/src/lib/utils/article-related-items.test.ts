@@ -8,15 +8,19 @@ import {
   mapMentionedStaff,
   mapCuratedRelatedContent,
   articleVMsToRelatedRowItems,
+  eventVMsToSiblingItems,
 } from "./article-related-items";
 import type {
   RelatedArticleItem,
   RelatedEventItem,
+  RelatedGalleryItem,
+  RelatedPageItem,
   RelatedPlayerItem,
   RelatedTeamItem,
   RelatedStaffItem,
 } from "@/components/related/types";
 import type { ArticleVM } from "@/lib/repositories/article.repository";
+import type { EventVM } from "@/lib/repositories/event.repository";
 import { formatArticleDate } from "@/lib/utils/dates";
 
 describe("mapEditorialArticles", () => {
@@ -688,5 +692,244 @@ describe("articleVMsToRelatedRowItems", () => {
 
   it("returns an empty array for no related articles (row auto-hides)", () => {
     expect(articleVMsToRelatedRowItems([])).toEqual([]);
+  });
+});
+
+describe("mapRelatedToRelatedRow", () => {
+  const imageUrl = "https://cdn.example.com/card.jpg";
+
+  it("maps a page to a /club/<slug> card badged PAGINA", () => {
+    const page: RelatedPageItem = {
+      type: "page",
+      source: "editorial",
+      id: "page-1",
+      title: "Word lid",
+      slug: "word-lid",
+      imageUrl,
+      excerpt: null,
+    };
+
+    expect(mapRelatedToRelatedRow([page])).toEqual([
+      {
+        title: "Word lid",
+        href: "/club/word-lid",
+        imageUrl,
+        badge: "PAGINA",
+        analyticsId: "page-1",
+        analyticsSource: "editorial",
+        analyticsType: "page",
+        analyticsTargetSlug: "word-lid",
+      },
+    ]);
+  });
+
+  describe("player", () => {
+    const player: RelatedPlayerItem = {
+      type: "player",
+      source: "reference",
+      id: "player-1",
+      firstName: "Marc",
+      lastName: "Peeters",
+      position: "Middenvelder",
+      imageUrl,
+      psdId: "98765",
+    };
+
+    it("links by psdId (the GA4 contract from #1832) and badges by position", () => {
+      expect(mapRelatedToRelatedRow([player])).toEqual([
+        {
+          title: "Marc Peeters",
+          href: "/spelers/98765",
+          imageUrl,
+          artefact: undefined,
+          badge: "MIDDENVELDER",
+          analyticsId: "player-1",
+          analyticsSource: "reference",
+          analyticsType: "player",
+          analyticsTargetSlug: "98765",
+        },
+      ]);
+    });
+
+    it("badges SPELER when the position is unknown", () => {
+      const [item] = mapRelatedToRelatedRow([{ ...player, position: null }]);
+      expect(item?.badge).toBe("SPELER");
+    });
+
+    it("falls back to the person artefact when there is no image", () => {
+      const [item] = mapRelatedToRelatedRow([{ ...player, imageUrl: null }]);
+      expect(item?.imageUrl).toBeUndefined();
+      expect(item?.artefact).toEqual({
+        kind: "person",
+        personType: "player",
+        id: "player-1",
+      });
+    });
+
+    it("keeps a player that has only one of the two names", () => {
+      const [item] = mapRelatedToRelatedRow([
+        { ...player, firstName: null, lastName: "Peeters" },
+      ]);
+      expect(item?.title).toBe("Peeters");
+    });
+
+    it.each([
+      { firstName: null, lastName: null },
+      { firstName: "", lastName: "" },
+    ])(
+      "drops a player with no first and no last name ($firstName / $lastName)",
+      (names) => {
+        expect(mapRelatedToRelatedRow([{ ...player, ...names }])).toEqual([]);
+      },
+    );
+  });
+
+  describe("team", () => {
+    const team: RelatedTeamItem = {
+      type: "team",
+      source: "reference",
+      id: "team-1",
+      name: "U15",
+      slug: "u15",
+      imageUrl,
+      tagline: null,
+    };
+
+    it("maps a team to a /ploegen/<slug> card badged PLOEG", () => {
+      expect(mapRelatedToRelatedRow([team])).toEqual([
+        {
+          title: "U15",
+          href: "/ploegen/u15",
+          imageUrl,
+          artefact: undefined,
+          badge: "PLOEG",
+          analyticsId: "team-1",
+          analyticsSource: "reference",
+          analyticsType: "team",
+          analyticsTargetSlug: "u15",
+        },
+      ]);
+    });
+
+    it("falls back to the team artefact when there is no image", () => {
+      const [item] = mapRelatedToRelatedRow([{ ...team, imageUrl: null }]);
+      expect(item?.imageUrl).toBeUndefined();
+      expect(item?.artefact).toEqual({ kind: "team" });
+    });
+  });
+
+  it("maps an event to a /evenementen/<slug> card badged EVENEMENT with its start date", () => {
+    const event: RelatedEventItem = {
+      type: "event",
+      source: "editorial",
+      id: "event-1",
+      title: "Mosselfestijn",
+      slug: "mosselfestijn",
+      dateStart: "2026-05-15T18:00:00Z",
+      dateEnd: null,
+      imageUrl,
+    };
+
+    expect(mapRelatedToRelatedRow([event])).toEqual([
+      {
+        title: "Mosselfestijn",
+        href: "/evenementen/mosselfestijn",
+        imageUrl,
+        badge: "EVENEMENT",
+        date: formatArticleDate("2026-05-15T18:00:00Z"),
+        analyticsId: "event-1",
+        analyticsSource: "editorial",
+        analyticsType: "event",
+        analyticsTargetSlug: "mosselfestijn",
+      },
+    ]);
+  });
+
+  it("maps a gallery to a /galerij/<slug> card badged BEELDEN, keeping its image", () => {
+    const gallery: RelatedGalleryItem = {
+      type: "gallery",
+      source: "domain",
+      id: "gal-1",
+      title: "Stage Mierlo",
+      slug: "stage-mierlo",
+      imageUrl,
+    };
+
+    expect(mapRelatedToRelatedRow([gallery])).toEqual([
+      {
+        title: "Stage Mierlo",
+        href: "/galerij/stage-mierlo",
+        imageUrl,
+        badge: "BEELDEN",
+        analyticsId: "gal-1",
+        analyticsSource: "domain",
+        analyticsType: "gallery",
+        analyticsTargetSlug: "stage-mierlo",
+      },
+    ]);
+  });
+
+  it("drops staff (no resolvable detail route) and keeps the rest in order", () => {
+    const staff: RelatedStaffItem = {
+      type: "staff",
+      source: "reference",
+      id: "staff-1",
+      firstName: "Jan",
+      lastName: "Janssens",
+      role: "Trainer",
+      imageUrl: null,
+    };
+    const team: RelatedTeamItem = {
+      type: "team",
+      source: "reference",
+      id: "team-1",
+      name: "U15",
+      slug: "u15",
+      imageUrl: null,
+      tagline: null,
+    };
+
+    const items = mapRelatedToRelatedRow([staff, team]);
+
+    expect(items.map((i) => i.href)).toEqual(["/ploegen/u15"]);
+  });
+});
+
+describe("eventVMsToSiblingItems", () => {
+  function makeEvent(overrides: Partial<EventVM> & { id: string }): EventVM {
+    return {
+      title: `Event ${overrides.id}`,
+      slug: `event-${overrides.id}`,
+      dateStart: "2026-05-15T18:00:00Z",
+      dateEnd: null,
+      coverImageUrl: null,
+      ...overrides,
+    } as EventVM;
+  }
+
+  it("maps events to domain-source cards", () => {
+    const items = eventVMsToSiblingItems([
+      makeEvent({ id: "e1", title: "Mosselfestijn", slug: "mosselfestijn" }),
+    ]);
+
+    expect(items).toEqual([
+      expect.objectContaining({
+        title: "Mosselfestijn",
+        href: "/evenementen/mosselfestijn",
+        badge: "EVENEMENT",
+        analyticsSource: "domain",
+        analyticsType: "event",
+        analyticsId: "e1",
+      }),
+    ]);
+  });
+
+  it("drops an event with an empty dateStart (nothing to render)", () => {
+    const items = eventVMsToSiblingItems([
+      makeEvent({ id: "e1", dateStart: "" }),
+      makeEvent({ id: "e2", slug: "kept" }),
+    ]);
+
+    expect(items.map((i) => i.href)).toEqual(["/evenementen/kept"]);
   });
 });
