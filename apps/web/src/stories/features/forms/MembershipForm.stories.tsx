@@ -1,6 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { userEvent, within } from "storybook/test";
 import { MembershipForm } from "@/components/club/MembershipForm/MembershipForm";
+import {
+  DRAFT_STORAGE_KEY,
+  EMPTY_DRAFT,
+} from "@/components/club/MembershipForm/membership-draft";
 
 /**
  * Membership-intake form for `/club/word-lid`, built from the locked Phase 2.A.4
@@ -9,12 +13,20 @@ import { MembershipForm } from "@/components/club/MembershipForm/MembershipForm"
  *
  * `defaultRole` / `defaultBirthDate` exist only to render the conditional
  * branches statically for docs + visual regression — the live form starts empty.
+ *
+ * Every story starts from an empty `sessionStorage` and leaves it empty: the
+ * form keeps a per-tab draft (#3326), so one story's typing must not restore
+ * into the next.
  */
 const meta: Meta<typeof MembershipForm> = {
   title: "Features/Forms/MembershipForm",
   component: MembershipForm,
   tags: ["autodocs", "vr"],
   parameters: { layout: "centered" },
+  beforeEach: () => {
+    window.sessionStorage.removeItem(DRAFT_STORAGE_KEY);
+    return () => window.sessionStorage.removeItem(DRAFT_STORAGE_KEY);
+  },
   decorators: [
     (Story) => (
       <div className="bg-cream w-[760px] max-w-full p-12">
@@ -70,5 +82,39 @@ export const TransportFailure: Story = {
     await userEvent.click(canvas.getByLabelText(/privacyverklaring/i));
     await userEvent.click(canvas.getByText(/Verstuur aanvraag/));
     await canvas.findByRole("alert");
+  },
+};
+
+/**
+ * A visitor comes back to a half-filled application (#3326) — the draft is
+ * restored, one line above the first field says so, and **Wis formulier**
+ * empties it. The draft beats `defaultRole`, so the volunteer role below is
+ * ignored.
+ */
+export const RestoredDraft: Story = {
+  // Seeds the shared `sessionStorage`; the docs page would show every other
+  // story's form restored from it.
+  tags: ["!autodocs"],
+  args: { defaultRole: "vrijwilliger" },
+  beforeEach: () => {
+    window.sessionStorage.setItem(
+      DRAFT_STORAGE_KEY,
+      JSON.stringify({
+        ...EMPTY_DRAFT,
+        role: "speler",
+        firstName: "Jan",
+        lastName: "Peeters",
+        birthDate: "1990-06-15",
+        gender: "m",
+        municipality: "Elewijt",
+        email: "jan@example.com",
+        medicalCertAcknowledged: true,
+      }),
+    );
+  },
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText(
+      "We hebben je ingevulde gegevens bewaard.",
+    );
   },
 };

@@ -1,6 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from "@testing-library/react";
+import { renderToString } from "react-dom/server";
+import { hydrateRoot } from "react-dom/client";
 import { MembershipForm } from "./MembershipForm";
+import { DRAFT_STORAGE_KEY, EMPTY_DRAFT } from "./membership-draft";
 
 function fillRequiredFields() {
   fireEvent.change(screen.getByLabelText(/Voornaam/), {
@@ -27,6 +36,7 @@ function fillRequiredFields() {
 describe("MembershipForm", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    window.sessionStorage.clear();
   });
   afterEach(() => {
     vi.unstubAllGlobals();
@@ -211,6 +221,369 @@ describe("MembershipForm", () => {
         .getAllByRole("alert")
         .find((el) => el.textContent?.includes("Verzenden mislukt"));
       expect(staleNotice).toBeUndefined();
+    });
+  });
+
+  describe("draft (#3326)", () => {
+    const RESTORED_NOTE = "We hebben je ingevulde gegevens bewaard.";
+    const storedDraft = () =>
+      JSON.parse(window.sessionStorage.getItem(DRAFT_STORAGE_KEY) ?? "null");
+    const seedDraft = (overrides: Partial<typeof EMPTY_DRAFT> = {}) =>
+      window.sessionStorage.setItem(
+        DRAFT_STORAGE_KEY,
+        JSON.stringify({
+          ...EMPTY_DRAFT,
+          role: "vrijwilliger",
+          firstName: "Jan",
+          lastName: "Peeters",
+          ...overrides,
+        }),
+      );
+    const submit = () =>
+      fireEvent.submit(screen.getByText(/Verstuur aanvraag/).closest("form")!);
+
+    it("shows no note on a fresh visit", () => {
+      render(<MembershipForm />);
+      expect(screen.queryByText(RESTORED_NOTE)).not.toBeInTheDocument();
+      expect(screen.queryByText("Wis formulier")).not.toBeInTheDocument();
+    });
+
+    it("restores every field, the consent checkboxes included, with the note", async () => {
+      const minorYear = new Date().getFullYear() - 10;
+      seedDraft({
+        role: "jeugdspeler",
+        birthDate: `${minorYear}-05-01`,
+        gender: "f",
+        municipality: "Elewijt",
+        email: "jan@example.com",
+        priorClub: "FC Zemst",
+        parentEmail: "ouder@example.com",
+        parentalConsent: true,
+        medicalCertAcknowledged: true,
+        privacyAccepted: true,
+      });
+      render(<MembershipForm />);
+
+      expect(await screen.findByText(RESTORED_NOTE)).toBeInTheDocument();
+      expect(screen.getByLabelText(/interesse als/i)).toHaveValue(
+        "jeugdspeler",
+      );
+      expect(screen.getByLabelText(/Voornaam/)).toHaveValue("Jan");
+      expect(screen.getByLabelText(/Achternaam/)).toHaveValue("Peeters");
+      expect(screen.getByLabelText(/Geboortedatum/)).toHaveValue(
+        `${minorYear}-05-01`,
+      );
+      expect(screen.getByLabelText(/Geslacht/)).toHaveValue("f");
+      expect(screen.getByLabelText(/Gemeente/)).toHaveValue("Elewijt");
+      expect(screen.getByLabelText(/^E-mail(?! ouder)/)).toHaveValue(
+        "jan@example.com",
+      );
+      expect(screen.getByLabelText(/Vorige club/)).toHaveValue("FC Zemst");
+      expect(screen.getByLabelText(/E-mail ouder\/voogd/i)).toHaveValue(
+        "ouder@example.com",
+      );
+      expect(screen.getByLabelText(/geef toestemming/i)).toBeChecked();
+      expect(screen.getByLabelText(/medisch attest/i)).toBeChecked();
+      expect(screen.getByLabelText(/privacyverklaring/i)).toBeChecked();
+    });
+
+    it("keeps the draft as the visitor types", () => {
+      render(<MembershipForm />);
+      fireEvent.change(screen.getByLabelText(/Voornaam/), {
+        target: { value: "Jan" },
+      });
+      fireEvent.click(screen.getByLabelText(/privacyverklaring/i));
+      expect(storedDraft()).toMatchObject({
+        firstName: "Jan",
+        privacyAccepted: true,
+      });
+    });
+
+    it("stores every visitor field typed through the UI", () => {
+      render(<MembershipForm />);
+      const minorYear = new Date().getFullYear() - 10;
+      fireEvent.change(screen.getByLabelText(/interesse als/i), {
+        target: { value: "jeugdspeler" },
+      });
+      fireEvent.change(screen.getByLabelText(/Voornaam/), {
+        target: { value: "Jan" },
+      });
+      fireEvent.change(screen.getByLabelText(/Achternaam/), {
+        target: { value: "Peeters" },
+      });
+      fireEvent.change(screen.getByLabelText(/Geboortedatum/), {
+        target: { value: `${minorYear}-05-01` },
+      });
+      fireEvent.change(screen.getByLabelText(/Geslacht/), {
+        target: { value: "f" },
+      });
+      fireEvent.change(screen.getByLabelText(/Gemeente/), {
+        target: { value: "Elewijt" },
+      });
+      fireEvent.change(screen.getByLabelText(/^E-mail(?! ouder)/), {
+        target: { value: "jan@example.com" },
+      });
+      fireEvent.change(screen.getByLabelText(/Vorige club/), {
+        target: { value: "FC Zemst" },
+      });
+      fireEvent.change(screen.getByLabelText(/E-mail ouder\/voogd/i), {
+        target: { value: "ouder@example.com" },
+      });
+      fireEvent.click(screen.getByLabelText(/geef toestemming/i));
+      fireEvent.click(screen.getByLabelText(/medisch attest/i));
+      fireEvent.click(screen.getByLabelText(/privacyverklaring/i));
+
+      expect(storedDraft()).toEqual({
+        role: "jeugdspeler",
+        firstName: "Jan",
+        lastName: "Peeters",
+        birthDate: `${minorYear}-05-01`,
+        gender: "f",
+        municipality: "Elewijt",
+        email: "jan@example.com",
+        priorClub: "FC Zemst",
+        parentEmail: "ouder@example.com",
+        parentalConsent: true,
+        medicalCertAcknowledged: true,
+        privacyAccepted: true,
+      });
+    });
+
+    it("does not write storage when a change leaves the value as it was", () => {
+      render(<MembershipForm />);
+      const role = screen.getByLabelText(/interesse als/i);
+      fireEvent.change(role, { target: { value: "trainer" } });
+      const setItem = vi.spyOn(window.sessionStorage, "setItem");
+      fireEvent.change(role, { target: { value: "trainer" } });
+      expect(setItem).not.toHaveBeenCalled();
+    });
+
+    it("writes nothing until the visitor edits a field", () => {
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      expect(window.sessionStorage.getItem(DRAFT_STORAGE_KEY)).toBeNull();
+    });
+
+    it("lets a draft beat defaultRole and defaultBirthDate", async () => {
+      seedDraft({ role: "trainer", birthDate: "1985-03-02" });
+      render(
+        <MembershipForm defaultRole="speler" defaultBirthDate="2014-05-01" />,
+      );
+      await screen.findByText(RESTORED_NOTE);
+      expect(screen.getByLabelText(/interesse als/i)).toHaveValue("trainer");
+      expect(screen.getByLabelText(/Geboortedatum/)).toHaveValue("1985-03-02");
+    });
+
+    it("restores the draft after hydrating server HTML, without a hydration mismatch", async () => {
+      seedDraft({ email: "jan@example.com" });
+      const consoleError = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+      const container = document.createElement("div");
+      document.body.appendChild(container);
+      // The server has no draft: it renders the empty form.
+      container.innerHTML = renderToString(<MembershipForm />);
+      expect(container.querySelector("input[name=email]")).toHaveValue("");
+
+      let root!: ReturnType<typeof hydrateRoot>;
+      await act(async () => {
+        root = hydrateRoot(container, <MembershipForm />);
+      });
+
+      expect(container.querySelector("input[name=email]")).toHaveValue(
+        "jan@example.com",
+      );
+      expect(container).toHaveTextContent(RESTORED_NOTE);
+      expect(consoleError).not.toHaveBeenCalled();
+      await act(async () => root.unmount());
+      container.remove();
+    });
+
+    it("keeps the hydrated nodes when there is no draft", async () => {
+      const container = document.createElement("div");
+      document.body.appendChild(container);
+      container.innerHTML = renderToString(<MembershipForm />);
+      const before = container.querySelector("input[name=email]");
+
+      let root!: ReturnType<typeof hydrateRoot>;
+      await act(async () => {
+        root = hydrateRoot(container, <MembershipForm />);
+      });
+
+      expect(container.querySelector("input[name=email]")).toBe(before);
+      await act(async () => root.unmount());
+      container.remove();
+    });
+
+    it("does not remount the fields when typing writes a draft", () => {
+      render(<MembershipForm />);
+      const input = screen.getByLabelText(/Voornaam/);
+      fireEvent.change(input, { target: { value: "Jan" } });
+      expect(screen.getByLabelText(/Voornaam/)).toBe(input);
+    });
+
+    it("keeps both values when two changes land in one batch", () => {
+      render(<MembershipForm />);
+      act(() => {
+        fireEvent.change(screen.getByLabelText(/Voornaam/), {
+          target: { value: "Jan" },
+        });
+        fireEvent.change(screen.getByLabelText(/Achternaam/), {
+          target: { value: "Peeters" },
+        });
+      });
+      expect(storedDraft()).toMatchObject({
+        firstName: "Jan",
+        lastName: "Peeters",
+      });
+    });
+
+    it("deletes the draft once every field is back to empty", () => {
+      render(<MembershipForm />);
+      const privacy = screen.getByLabelText(/privacyverklaring/i);
+      fireEvent.click(privacy);
+      expect(storedDraft()).not.toBeNull();
+      fireEvent.click(privacy);
+      expect(window.sessionStorage.getItem(DRAFT_STORAGE_KEY)).toBeNull();
+    });
+
+    it("ignores a stored draft that holds no answer", () => {
+      seedDraft({ role: "", firstName: "", lastName: "" });
+      render(<MembershipForm />);
+      expect(screen.queryByText(RESTORED_NOTE)).not.toBeInTheDocument();
+    });
+
+    it.each([
+      ["role", { role: "keeper" }],
+      ["gender", { gender: "z" }],
+    ])("ignores a draft with an unknown %s", (_name, overrides) => {
+      seedDraft(overrides as Partial<typeof EMPTY_DRAFT>);
+      render(<MembershipForm />);
+      expect(screen.queryByText(RESTORED_NOTE)).not.toBeInTheDocument();
+    });
+
+    it("clears a transport-failure notice and focuses the first field on Wis formulier", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(() => Promise.reject(new Error("offline"))),
+      );
+      seedDraft({
+        gender: "m",
+        municipality: "Elewijt",
+        birthDate: "1990-06-15",
+        email: "jan@example.com",
+        privacyAccepted: true,
+      });
+      render(<MembershipForm />);
+      await screen.findByText(RESTORED_NOTE);
+      submit();
+      await screen.findByRole("alert");
+
+      fireEvent.click(screen.getByText("Wis formulier"));
+
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      expect(screen.getByLabelText(/interesse als/i)).toHaveFocus();
+    });
+
+    it("keeps the link defaults when there is no draft", () => {
+      render(<MembershipForm defaultRole="speler" />);
+      expect(screen.getByLabelText(/interesse als/i)).toHaveValue("speler");
+    });
+
+    it("empties every field and deletes the draft on Wis formulier", async () => {
+      seedDraft({ privacyAccepted: true, email: "jan@example.com" });
+      render(<MembershipForm />);
+      fireEvent.click(await screen.findByText("Wis formulier"));
+
+      expect(screen.queryByText(RESTORED_NOTE)).not.toBeInTheDocument();
+      expect(screen.getByLabelText(/interesse als/i)).toHaveValue("");
+      expect(screen.getByLabelText(/Voornaam/)).toHaveValue("");
+      expect(screen.getByLabelText(/^E-mail/)).toHaveValue("");
+      expect(screen.getByLabelText(/privacyverklaring/i)).not.toBeChecked();
+      expect(window.sessionStorage.getItem(DRAFT_STORAGE_KEY)).toBeNull();
+    });
+
+    it("never stores the Turnstile token or the honeypot", () => {
+      render(<MembershipForm />);
+      fireEvent.change(document.querySelector("input[name=company]")!, {
+        target: { value: "bot" },
+      });
+      fireEvent.change(screen.getByLabelText(/Voornaam/), {
+        target: { value: "Jan" },
+      });
+      const keys = Object.keys(storedDraft());
+      expect(keys).not.toContain("company");
+      expect(keys).not.toContain("honeypot");
+      expect(keys).not.toContain("turnstileToken");
+      expect(window.sessionStorage.getItem(DRAFT_STORAGE_KEY)).not.toMatch(
+        /bot/,
+      );
+    });
+
+    it("deletes the draft after a successful submit", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(() =>
+          Promise.resolve({
+            ok: true,
+            status: 200,
+            json: () => Promise.resolve({ ok: true }),
+          }),
+        ),
+      );
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      expect(storedDraft()).not.toBeNull();
+      submit();
+
+      await screen.findByText(/Bedankt voor je interesse/i);
+      expect(window.sessionStorage.getItem(DRAFT_STORAGE_KEY)).toBeNull();
+    });
+
+    it("keeps the draft after a failed submit", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(() => Promise.reject(new Error("offline"))),
+      );
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      submit();
+
+      await screen.findByRole("alert");
+      expect(storedDraft()).toMatchObject({ firstName: "Jan" });
+    });
+
+    it("ignores a malformed draft", () => {
+      window.sessionStorage.setItem(DRAFT_STORAGE_KEY, '{"firstName":3}');
+      render(<MembershipForm />);
+      expect(screen.queryByText(RESTORED_NOTE)).not.toBeInTheDocument();
+      window.sessionStorage.setItem(DRAFT_STORAGE_KEY, "not json");
+      render(<MembershipForm />);
+      expect(screen.queryByText(RESTORED_NOTE)).not.toBeInTheDocument();
+    });
+
+    it("degrades to a plain form when sessionStorage throws", () => {
+      vi.spyOn(window, "sessionStorage", "get").mockImplementation(() => {
+        throw new DOMException("denied", "SecurityError");
+      });
+      render(<MembershipForm />);
+      fireEvent.change(screen.getByLabelText(/Voornaam/), {
+        target: { value: "Jan" },
+      });
+      expect(screen.getByLabelText(/Voornaam/)).toHaveValue("Jan");
+      expect(screen.queryByText(RESTORED_NOTE)).not.toBeInTheDocument();
+    });
+
+    it("degrades when setItem throws (quota)", () => {
+      vi.spyOn(window.sessionStorage, "setItem").mockImplementation(() => {
+        throw new DOMException("full", "QuotaExceededError");
+      });
+      render(<MembershipForm />);
+      fireEvent.change(screen.getByLabelText(/Voornaam/), {
+        target: { value: "Jan" },
+      });
+      expect(screen.getByLabelText(/Voornaam/)).toHaveValue("Jan");
     });
   });
 });
