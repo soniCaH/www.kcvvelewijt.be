@@ -57,10 +57,9 @@
  * has no writer and never will, and live production measured 352 player
  * documents, 278 non-archived, zero with `jerseyNumber` set (2026-09-20)
  * — the empty branch is not a temporary gap, it is the only case today.
- * A reserved slot there would be exactly the `team.season` failure this
- * repo's Writer Rule exists to prevent: a permanent empty box on the
- * large majority of profiles. So the number renders when present and
- * nothing renders when it isn't — no dashed box, no placeholder copy.
+ * So the number renders when present and nothing renders when it isn't —
+ * no dashed box, no placeholder copy. This is the general rule for any
+ * editor-authored slot (`apps/web/CLAUDE.md` → The Writer Rule, #3300).
  * `/wedstrijd/[matchId]` is unaffected either way — that route reports
  * whatever the match sheet says, a different fact (#2532 rule 3).
  */
