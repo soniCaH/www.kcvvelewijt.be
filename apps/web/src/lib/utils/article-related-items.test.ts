@@ -900,11 +900,15 @@ describe("eventVMsToSiblingItems", () => {
     return {
       title: `Event ${overrides.id}`,
       slug: `event-${overrides.id}`,
+      eventType: null,
       dateStart: "2026-05-15T18:00:00Z",
       dateEnd: null,
+      location: null,
+      featuredOnHome: false,
+      href: `/evenementen/event-${overrides.id}`,
       coverImageUrl: null,
       ...overrides,
-    } as EventVM;
+    };
   }
 
   it("maps events to domain-source cards", () => {

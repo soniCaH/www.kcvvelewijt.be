@@ -215,6 +215,22 @@ describe("sitemap.ts", () => {
       expect(await matchUrls()).toEqual([matchUrl(2), matchUrl(3)]);
     });
 
+    it("includes a match exactly at the 90-day cutoff and excludes one a millisecond before it", async () => {
+      // NOW is midday, so the local-time `setDate(-90)` in sitemap.ts lands on
+      // the same wall-clock instant this test computes; no DST edge is crossed.
+      const cutoff = new Date(NOW);
+      cutoff.setDate(cutoff.getDate() - 90);
+      stubTeams("1");
+      mockGetMatches.mockReturnValue(
+        Effect.succeed([
+          makeMatch(40, cutoff),
+          makeMatch(41, new Date(cutoff.getTime() - 1)),
+        ]),
+      );
+
+      expect(await matchUrls()).toEqual([matchUrl(40)]);
+    });
+
     it("lists a match once when two of the club's teams both carry it", async () => {
       stubTeams("1", "2");
       mockGetMatches.mockReturnValue(

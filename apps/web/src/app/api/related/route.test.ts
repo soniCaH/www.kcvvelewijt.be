@@ -81,6 +81,7 @@ describe("GET /api/related", () => {
 
     const response = await GET(makeRequest("?id=abc"));
 
+    expect(response.status).toBe(200);
     expect(await response.json()).toEqual([]);
     expect(response.headers.get("Cache-Control")).toBeNull();
   });

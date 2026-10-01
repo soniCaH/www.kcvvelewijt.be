@@ -9,12 +9,22 @@
  * the component module is imported.
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterAll,
+  afterEach,
+} from "vitest";
 import { render } from "@testing-library/react";
 import type { Window as HappyDomWindow } from "happy-dom";
 
-vi.hoisted(() => {
+const previousSiteKey = vi.hoisted(() => {
+  const previous = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY = "test-site-key";
+  return previous;
 });
 
 import { TurnstileWidget } from "./TurnstileWidget";
@@ -41,6 +51,16 @@ function scriptTags() {
 }
 
 describe("TurnstileWidget", () => {
+  afterAll(() => {
+    // `SITE_KEY` was already read at import, so restoring only keeps the
+    // variable from leaking to anything else in this worker.
+    if (previousSiteKey === undefined) {
+      delete process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+    } else {
+      process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY = previousSiteKey;
+    }
+  });
+
   beforeEach(() => {
     delete window.turnstile;
   });
@@ -119,8 +139,8 @@ describe("TurnstileWidget", () => {
     const previous = settings.handleDisabledFileLoadingAsSuccess;
 
     beforeEach(() => {
-      // happy-dom has script file loading switched off (vitest.config.ts) and
-      // reports every injected <script src> as a console error. Treating that
+      // happy-dom's default is to not load script files, and it reports every
+      // injected <script src> as a console error. Treating that
       // as a silent success keeps the log clean; the tests never need the real
       // Cloudflare script, they fake `window.turnstile` themselves.
       settings.handleDisabledFileLoadingAsSuccess = true;
