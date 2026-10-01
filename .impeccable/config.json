@@ -8,6 +8,13 @@
         "value": "fraunces",
         "createdAt": "2026-08-13T10:34:02.147Z",
         "reason": "Google stand-in for freight-display-pro in mockup files"
+      },
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": ["docs/design/mockups/3307-field-skin/3307-compare.html"],
+        "createdAt": "2026-10-01T06:13:23.184Z",
+        "reason": "Claude: #a8a596 is the dark-theme muted token, only applied on the #16170f dark ground; the hook paired it with a white body it never sits on"
       }
     ]
   }
