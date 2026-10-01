@@ -49,27 +49,33 @@ export const handleSearch = (
       ? { type: TYPE_FILTER[request.type] ?? request.type }
       : undefined;
 
+    // Over-fetch, then slice: the index holds types this response does not
+    // admit (galleries, #3338), and `isResultType` drops them AFTER topK, so
+    // asking for exactly `limit` would let them eat the limit. 20 is
+    // Vectorize's topK ceiling with `returnMetadata: "all"`.
     const matches = yield* vectorize.query(vector, {
-      topK: request.limit,
+      topK: Math.min(request.limit * 2, 20),
       returnMetadata: "all",
       ...(filter ? { filter } : {}),
     });
 
-    const results = matches.flatMap((m) => {
-      const type = m.metadata?.["type"];
-      if (m.score < MIN_SCORE || !isResultType(type)) return [];
+    const results = matches
+      .flatMap((m) => {
+        const type = m.metadata?.["type"];
+        if (m.score < MIN_SCORE || !isResultType(type)) return [];
 
-      return [
-        {
-          id: m.id,
-          slug: m.metadata?.["slug"] ?? "",
-          type,
-          score: m.score,
-          title: m.metadata?.["title"] ?? "",
-          excerpt: m.metadata?.["excerpt"] ?? "",
-        },
-      ];
-    });
+        return [
+          {
+            id: m.id,
+            slug: m.metadata?.["slug"] ?? "",
+            type,
+            score: m.score,
+            title: m.metadata?.["title"] ?? "",
+            excerpt: m.metadata?.["excerpt"] ?? "",
+          },
+        ];
+      })
+      .slice(0, request.limit);
 
     const topScore = results[0]?.score ?? 0;
     let answer: string | undefined;

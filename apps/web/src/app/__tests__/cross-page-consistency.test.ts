@@ -577,7 +577,7 @@ const layoutChain = (relPath: string): string[] => {
 const reachesTheBff = (relPath: string): boolean =>
   [relPath, ...layoutChain(relPath)].some((f) => BFF_SIGNAL.test(code.get(f)!));
 
-/** BFF-fed route files that declare a window — 9 today, never 0. */
+/** BFF-fed route files that declare a window — 10 today, never 0. */
 const bffFedRouteFiles = productionSources.filter(
   (relPath) =>
     /(^|\/)page\.tsx$/.test(relPath) &&
@@ -610,6 +610,7 @@ describe("rule 5 checks the routes it claims to (#2563)", () => {
     ["app/(main)/ploegen/[slug]/(detail)/page.tsx"],
     ["app/(main)/spelers/[slug]/page.tsx"],
     ["app/(main)/wedstrijd/[matchId]/page.tsx"],
+    ["app/(main)/galerij/[slug]/page.tsx"],
   ])("covers %s", (relPath) => {
     expect(bffFedRouteFiles).toContain(relPath);
   });

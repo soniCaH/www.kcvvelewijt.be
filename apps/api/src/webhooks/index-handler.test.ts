@@ -11,6 +11,7 @@ import { KvCacheLive, makeDurableKv } from "../cache/kv-cache";
 import {
   ARTICLE_INDEX_PROJECTION,
   ARTICLE_PUBLISHED_FILTER,
+  GALLERY_INDEXABLE_FILTER,
   GALLERY_INDEX_PROJECTION,
   PAGE_INDEX_PROJECTION,
   RESPONSIBILITY_ACTIVE_FILTER,
@@ -733,6 +734,7 @@ describe("handleIndexWebhook", () => {
       slug: "stage-mierlo",
       title: "Stage Mierlo",
       descriptionText: "Foto's van de stage.",
+      imageUrl: "https://cdn.example.com/gallery.jpg",
     });
 
     const body = JSON.stringify({ _id: "gallery-001", _type: "photoGallery" });
@@ -746,6 +748,10 @@ describe("handleIndexWebhook", () => {
     expect(mockSanityFetch.mock.calls[0]?.[0]).toContain(
       GALLERY_INDEX_PROJECTION,
     );
+    // A slugless gallery projects null and takes the `!doc` delete branch.
+    expect(mockSanityFetch.mock.calls[0]?.[0]).toContain(
+      GALLERY_INDEXABLE_FILTER,
+    );
     expect(upsertSpy).toHaveBeenCalledWith([
       expect.objectContaining({
         id: "gallery-001",
@@ -754,6 +760,7 @@ describe("handleIndexWebhook", () => {
           type: "gallery",
           title: "Stage Mierlo",
           excerpt: "Foto's van de stage.",
+          imageUrl: "https://cdn.example.com/gallery.jpg",
         },
       }),
     ]);

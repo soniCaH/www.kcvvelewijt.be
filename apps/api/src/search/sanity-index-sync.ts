@@ -15,6 +15,7 @@ import {
 import {
   ARTICLE_INDEX_PROJECTION,
   ARTICLE_PUBLISHED_FILTER,
+  GALLERY_INDEXABLE_FILTER,
   GALLERY_INDEX_PROJECTION,
   PAGE_INDEX_PROJECTION,
   RESPONSIBILITY_ACTIVE_FILTER,
@@ -68,6 +69,7 @@ interface SanityGalleryDoc {
   slug: string;
   title: string;
   descriptionText: string;
+  imageUrl: string | null;
 }
 
 // ─── Sanity GROQ queries ─────────────────────────────────────────────────────
@@ -86,7 +88,8 @@ const PAGE_QUERY = `*[_type == "page"] {
   ${PAGE_INDEX_PROJECTION}
 }`;
 
-const GALLERY_QUERY = `*[_type == "photoGallery"] {
+// Exported for the test that pins the slug filter.
+export const GALLERY_QUERY = `*[_type == "photoGallery" && ${GALLERY_INDEXABLE_FILTER}] {
   ${GALLERY_INDEX_PROJECTION}
 }`;
 
@@ -468,9 +471,9 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
     );
 
     // ── Galleries ─────────────────────────────────────────────────────────
-    // No excluded-ids query: like pages, every photoGallery matches (no
-    // publish window or active flag), so the manifest diff alone prunes a
-    // deleted one.
+    // No excluded-ids query: the only exclusion is a missing slug, and a
+    // gallery that loses its slug (or is deleted) drops out of `currentIds`,
+    // so the manifest diff alone prunes it.
 
     const galleryResult = yield* fetchPhase(
       "galleries",

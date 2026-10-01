@@ -9,6 +9,7 @@ import { EmbeddingService, EmbeddingServiceLive } from "../search/embedding";
 import {
   ARTICLE_INDEX_PROJECTION,
   ARTICLE_PUBLISHED_FILTER,
+  GALLERY_INDEXABLE_FILTER,
   GALLERY_INDEX_PROJECTION,
   PAGE_INDEX_PROJECTION,
   RESPONSIBILITY_ACTIVE_FILTER,
@@ -107,6 +108,7 @@ const GalleryDoc = S.Struct({
   title: S.String,
   descriptionText: S.String,
   slug: S.String,
+  imageUrl: S.optional(S.NullOr(S.String)),
 });
 
 interface TypeDescriptor {
@@ -149,7 +151,7 @@ const typeDescriptors: Record<AllowedType, TypeDescriptor> = {
     },
   },
   photoGallery: {
-    query: `*[_id == $id][0]{ ${GALLERY_INDEX_PROJECTION} }`,
+    query: `*[_id == $id && ${GALLERY_INDEXABLE_FILTER}][0]{ ${GALLERY_INDEX_PROJECTION} }`,
     buildIndex: (doc) => {
       const r = S.decodeUnknownSync(GalleryDoc)(doc);
       return {

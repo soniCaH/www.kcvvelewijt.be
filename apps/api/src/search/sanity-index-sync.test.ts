@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { Effect, Exit, Layer, Logger } from "effect";
-import { runSanityIndexSync } from "./sanity-index-sync";
+import { GALLERY_QUERY, runSanityIndexSync } from "./sanity-index-sync";
+import { GALLERY_INDEXABLE_FILTER } from "./index-queries";
 import {
   EmbeddingError,
   EmbeddingService,
@@ -62,6 +63,7 @@ const mockGallery = {
   slug: "stage-mierlo",
   title: "Stage Mierlo",
   descriptionText: "Foto's van de stage in Mierlo.",
+  imageUrl: null as string | null,
 };
 
 function makeEnvLayer(overrides: Partial<WorkerEnv> = {}) {
@@ -340,6 +342,47 @@ describe("runSanityIndexSync", () => {
       excerpt: "Foto's van de stage in Mierlo.",
     });
     expect(embedded).toEqual(["Stage Mierlo. Foto's van de stage in Mierlo."]);
+  });
+
+  it("stores the gallery's cover image url in metadata when it has one", async () => {
+    const { upsertCalls, mock } = makeVectorizeCapture();
+    const imageUrl = "https://cdn.example.com/gallery.jpg?w=800&h=450";
+
+    await Effect.runPromise(
+      sweep(
+        { fetchGalleries: noopFetch([{ ...mockGallery, imageUrl }]) },
+        mock,
+      ),
+    );
+
+    const doc = upsertCalls.flat().find((v) => v.id === "gallery-001");
+    expect(doc!.metadata["imageUrl"]).toBe(imageUrl);
+  });
+
+  it("queries only galleries that have a slug", () => {
+    expect(GALLERY_QUERY).toContain(GALLERY_INDEXABLE_FILTER);
+  });
+
+  it("prunes a gallery that loses its slug (drops out of the sweep's result)", async () => {
+    const kv = makeKvNamespaceMock();
+    const { mock: mock1 } = makeVectorizeCapture();
+    await Effect.runPromise(
+      sweep({ fetchGalleries: noopFetch([mockGallery]) }, mock1, {
+        SEARCH_INDEX_PRUNE_DRY_RUN: "false",
+        PSD_CACHE: kv,
+      }),
+    );
+
+    // The slug-filtered query no longer returns it.
+    const { deleteCalls, mock: mock2 } = makeVectorizeCapture();
+    await Effect.runPromise(
+      sweep({ fetchGalleries: noopFetch([]) }, mock2, {
+        SEARCH_INDEX_PRUNE_DRY_RUN: "false",
+        PSD_CACHE: kv,
+      }),
+    );
+
+    expect(deleteCalls.flat()).toEqual(["gallery-001"]);
   });
 
   it("continues indexing when gallery fetch fails", async () => {
