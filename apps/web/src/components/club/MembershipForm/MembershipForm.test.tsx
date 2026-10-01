@@ -299,6 +299,65 @@ describe("MembershipForm", () => {
       });
     });
 
+    it("stores every visitor field typed through the UI", () => {
+      render(<MembershipForm />);
+      const minorYear = new Date().getFullYear() - 10;
+      fireEvent.change(screen.getByLabelText(/interesse als/i), {
+        target: { value: "jeugdspeler" },
+      });
+      fireEvent.change(screen.getByLabelText(/Voornaam/), {
+        target: { value: "Jan" },
+      });
+      fireEvent.change(screen.getByLabelText(/Achternaam/), {
+        target: { value: "Peeters" },
+      });
+      fireEvent.change(screen.getByLabelText(/Geboortedatum/), {
+        target: { value: `${minorYear}-05-01` },
+      });
+      fireEvent.change(screen.getByLabelText(/Geslacht/), {
+        target: { value: "f" },
+      });
+      fireEvent.change(screen.getByLabelText(/Gemeente/), {
+        target: { value: "Elewijt" },
+      });
+      fireEvent.change(screen.getByLabelText(/^E-mail(?! ouder)/), {
+        target: { value: "jan@example.com" },
+      });
+      fireEvent.change(screen.getByLabelText(/Vorige club/), {
+        target: { value: "FC Zemst" },
+      });
+      fireEvent.change(screen.getByLabelText(/E-mail ouder\/voogd/i), {
+        target: { value: "ouder@example.com" },
+      });
+      fireEvent.click(screen.getByLabelText(/geef toestemming/i));
+      fireEvent.click(screen.getByLabelText(/medisch attest/i));
+      fireEvent.click(screen.getByLabelText(/privacyverklaring/i));
+
+      expect(storedDraft()).toEqual({
+        role: "jeugdspeler",
+        firstName: "Jan",
+        lastName: "Peeters",
+        birthDate: `${minorYear}-05-01`,
+        gender: "f",
+        municipality: "Elewijt",
+        email: "jan@example.com",
+        priorClub: "FC Zemst",
+        parentEmail: "ouder@example.com",
+        parentalConsent: true,
+        medicalCertAcknowledged: true,
+        privacyAccepted: true,
+      });
+    });
+
+    it("does not write storage when a change leaves the value as it was", () => {
+      render(<MembershipForm />);
+      const role = screen.getByLabelText(/interesse als/i);
+      fireEvent.change(role, { target: { value: "trainer" } });
+      const setItem = vi.spyOn(window.sessionStorage, "setItem");
+      fireEvent.change(role, { target: { value: "trainer" } });
+      expect(setItem).not.toHaveBeenCalled();
+    });
+
     it("writes nothing until the visitor edits a field", () => {
       render(<MembershipForm defaultRole="vrijwilliger" />);
       expect(window.sessionStorage.getItem(DRAFT_STORAGE_KEY)).toBeNull();
@@ -517,7 +576,7 @@ describe("MembershipForm", () => {
     });
 
     it("degrades when setItem throws (quota)", () => {
-      vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      vi.spyOn(window.sessionStorage, "setItem").mockImplementation(() => {
         throw new DOMException("full", "QuotaExceededError");
       });
       render(<MembershipForm />);
