@@ -19,6 +19,50 @@ describe("<RoundAvatar>", () => {
       expect(container.textContent).toBe("");
     });
 
+    describe("fetch weight (a 64px disc must not download a 600px photo)", () => {
+      const sanity = (query: string) =>
+        `https://cdn.sanity.io/images/p/d/abc-600x800.jpg?${query}`;
+      const srcOf = (size: 24 | 40 | 64, photoUrl: string) =>
+        render(<RoundAvatar size={size} photoUrl={photoUrl} />)
+          .container.querySelector("img")
+          ?.getAttribute("src");
+
+      it.each([
+        [24, 48],
+        [40, 80],
+        [64, 128],
+      ] as const)(
+        "caps a Sanity w= at twice the %ipx step (%i)",
+        (size, cap) => {
+          const src = srcOf(size, sanity("w=600&q=80&fm=webp&fit=max"));
+          const params = new URL(src!).searchParams;
+          expect(params.get("w")).toBe(String(cap));
+          expect(params.get("q")).toBe("80");
+          expect(params.get("fm")).toBe("webp");
+          expect(params.get("fit")).toBe("max");
+        },
+      );
+
+      it("never raises a w= that is already smaller", () => {
+        const src = srcOf(64, sanity("w=100&fit=max"));
+        expect(new URL(src!).searchParams.get("w")).toBe("100");
+      });
+
+      it("adds a w= to a Sanity URL that has none", () => {
+        const src = srcOf(
+          40,
+          "https://cdn.sanity.io/images/p/d/abc-600x800.jpg",
+        );
+        expect(new URL(src!).searchParams.get("w")).toBe("80");
+      });
+
+      it("leaves a non-Sanity URL alone", () => {
+        expect(srcOf(40, "https://picsum.photos/seed/x/600/800?w=600")).toBe(
+          "https://picsum.photos/seed/x/600/800?w=600",
+        );
+      });
+    });
+
     it.each([null, undefined, "", "   "])(
       "falls back to the monogram when photoUrl is %j",
       (photoUrl) => {

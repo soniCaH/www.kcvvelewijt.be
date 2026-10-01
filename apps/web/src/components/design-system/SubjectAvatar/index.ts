@@ -1,5 +1,6 @@
 export {
   SubjectAvatar,
+  SUBJECT_AVATAR_SIZE,
   type SubjectAvatarProps,
   type SubjectAvatarScale,
 } from "./SubjectAvatar";

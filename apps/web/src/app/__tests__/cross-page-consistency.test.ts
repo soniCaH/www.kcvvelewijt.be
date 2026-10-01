@@ -42,8 +42,16 @@ const sourceFiles = globSync(["**/*.ts", "**/*.tsx"], { cwd: srcDir }).sort();
  * delimiter. Literals are then re-emitted **verbatim**, because a rule may need
  * to read one: the zone below *is* a string.
  */
-const COMMENT_OR_STRING =
-  /"(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|`(?:\\[\s\S]|[^`\\])*`|\/\/[^\n]*|\/\*[\s\S]*?\*\//g;
+// A single quote opens a literal only after a non-word character: after a
+// letter it is an apostrophe in JSX text ("foto's", "zo'n"), and treating it as a
+// quote would swallow every className up to the next one.
+const STRING_LITERAL =
+  /"(?:\\[\s\S]|[^"\\])*"|(?<!\w)'(?:\\[\s\S]|[^'\\])*'|`(?:\\[\s\S]|[^`\\])*`/;
+
+const COMMENT_OR_STRING = new RegExp(
+  `${STRING_LITERAL.source}|\\/\\/[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/`,
+  "g",
+);
 
 /**
  * This file is the one no rule can read. It states every banned pattern twice —
@@ -3087,45 +3095,89 @@ describe("rule 17 catches what it claims to (#2568)", () => {
  * avatars were exactly that until #3332, and the same person looked different on
  * `/hulp` and in an article.
  *
- * What the rule can see is the class list that makes a disc: one string literal
- * carrying `rounded-full` **and** a disc's content shape — `overflow-hidden` or
- * `object-cover` (a clipped photo), or `items-center` with `justify-center` (a
- * centred monogram). A dot, a skeleton and a pill carry `rounded-full` without
- * either, so they pass. The primitive's own file is the one place that may draw
- * the disc. A disc that is **not a person** — a club crest, a team's fallback
- * shield, a stamp — is exempt by name and pinned to its exact count, rule 8's
- * shape: a file dropped from the scan by name alone could grow a second,
- * undocumented hand-rolled avatar and no test would see it.
+ * What the rule can see is the class list that makes a disc: `rounded-full`
+ * **and** a disc's content shape — `overflow-hidden` or `object-cover` (a
+ * clipped photo), or `items-center` with `justify-center` (a centred monogram).
+ * A dot, a skeleton and a pill carry `rounded-full` without either, so they
+ * pass. The class list is one unit: every string literal inside one `className`
+ * attribute or `cn(...)` call is joined before it is tested, so a disc cannot
+ * dodge the rule by splitting its classes across arguments or hiding one behind
+ * `cond && "overflow-hidden"`. A literal outside any such expression (a class
+ * constant) is a unit on its own. The primitive's own file is the one place that
+ * may draw the disc. A disc that is **not a person** — a club crest, a team's
+ * fallback shield, a stamp — is exempt by name and pinned to its exact count,
+ * rule 8's shape: a file dropped from the scan by name alone could grow a
+ * second, undocumented hand-rolled avatar and no test would see it.
  *
  * Sizing is out of reach on purpose: a hand-rolled avatar sizes its box from a
  * variable (`tokens.box`), so only the content shape is a stable signature.
  */
-const STRING_LITERAL =
-  /"(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|`(?:\\[\s\S]|[^`\\])*`/g;
+const STRING_LITERAL_G = new RegExp(STRING_LITERAL.source, "g");
+const CLASS_EXPRESSION_START = /\bclassName=|\bcn\(/g;
 
-const hasToken = (classes: string, token: string): boolean =>
-  classes.split(/\s+/).includes(token);
+/** The `{...}` / `(...)` / `"..."` expression opening at `open`, string-aware. */
+function expressionAt(source: string, open: number): string {
+  if (!/[{(]/.test(source[open] ?? "")) {
+    STRING_LITERAL_G.lastIndex = open;
+    const literal = STRING_LITERAL_G.exec(source);
+    return literal?.index === open ? literal[0] : "";
+  }
+  let depth = 0;
+  let i = open;
+  while (i < source.length) {
+    STRING_LITERAL_G.lastIndex = i;
+    const literal = STRING_LITERAL_G.exec(source);
+    const next = literal?.index ?? source.length;
+    for (; i < next; i++) {
+      if (/[{(]/.test(source[i]!)) depth++;
+      else if (/[})]/.test(source[i]!) && --depth === 0) {
+        return source.slice(open, i + 1);
+      }
+    }
+    i = next + (literal?.[0].length ?? 0);
+  }
+  return source.slice(open);
+}
 
-/** Every string literal in `source` that is the class list of a round disc. */
-function roundDiscLiterals(source: string): string[] {
-  return (source.match(STRING_LITERAL) ?? []).filter(
-    (literal) =>
-      hasToken(literal.slice(1, -1), "rounded-full") &&
-      (hasToken(literal.slice(1, -1), "overflow-hidden") ||
-        hasToken(literal.slice(1, -1), "object-cover") ||
-        (hasToken(literal.slice(1, -1), "items-center") &&
-          hasToken(literal.slice(1, -1), "justify-center"))),
-  );
+/** The class lists in `source`: one joined unit per outermost className / cn(). */
+function classUnits(source: string): string[][] {
+  const units: string[][] = [];
+  const spans: [number, number][] = [];
+  for (const m of source.matchAll(CLASS_EXPRESSION_START)) {
+    if (spans.some(([from, to]) => m.index >= from && m.index < to)) continue;
+    const open = m.index + m[0].length - (m[0].endsWith("(") ? 1 : 0);
+    const expression = expressionAt(source, open);
+    spans.push([m.index, open + expression.length]);
+    units.push(expression.match(STRING_LITERAL_G) ?? []);
+  }
+  for (const m of source.matchAll(STRING_LITERAL_G)) {
+    if (!spans.some(([from, to]) => m.index >= from && m.index < to)) {
+      units.push([m[0]]);
+    }
+  }
+  return units;
+}
+
+/** Every class list in `source` that is a round disc. */
+function roundDiscs(source: string): string[][] {
+  return classUnits(source).filter((literals) => {
+    const tokens = new Set(
+      literals.flatMap((literal) => literal.slice(1, -1).split(/\s+/)),
+    );
+    return (
+      tokens.has("rounded-full") &&
+      (tokens.has("overflow-hidden") ||
+        tokens.has("object-cover") ||
+        (tokens.has("items-center") && tokens.has("justify-center")))
+    );
+  });
 }
 
 /** The one file that draws the family's disc. */
 const ROUND_AVATAR_HOME =
   "components/design-system/RoundAvatar/RoundAvatar.tsx";
 
-/**
- * Round discs that are not a person, and the one that is a known gap. The count
- * is how many disc literals the file holds today.
- */
+/** Round discs that are not a person. The count is how many the file holds today. */
 const ROUND_DISC_EXEMPT_DECLARATIONS: Record<string, number> = {
   // A club crest's placeholder disc.
   "components/design-system/Crest/Crest.tsx": 1,
@@ -3134,11 +3186,9 @@ const ROUND_DISC_EXEMPT_DECLARATIONS: Record<string, number> = {
   "components/match/MatchEvents/MatchEvents.tsx": 1,
   // The rotated "no results" stamp — round, not a person (#3304).
   "components/search/SearchAnswerCard.tsx": 1,
-  // The transfer hero's club badge (a club) AND the interview hero's credit
-  // chip (`HeroCreditChip`, a person: 28px, off the 24 / 40 / 64 ramp). The
-  // chip is a known gap — #3304 and #3332 name the article subject avatars, not
-  // the hero's — so this entry stays at 2 until the chip moves onto the primitive.
-  "components/article/EditorialHero/_variant-parts.tsx": 2,
+  // The transfer hero's club badge — a club (the interview credit chip is a
+  // person and renders through the primitive).
+  "components/article/EditorialHero/_variant-parts.tsx": 1,
 };
 
 const roundDiscSources = productionSources.filter(
@@ -3149,50 +3199,69 @@ const roundDiscSources = productionSources.filter(
 
 describe("a round person avatar renders through <RoundAvatar> (#3332)", () => {
   it.each(roundDiscSources)("%s — no hand-rolled round disc", (relPath) => {
-    expect(roundDiscLiterals(code.get(relPath)!)).toEqual([]);
+    expect(roundDiscs(code.get(relPath)!)).toEqual([]);
   });
 });
 
 describe("rule 18's exemptions are pinned to their exact disc count (#3332)", () => {
   it.each(Object.entries(ROUND_DISC_EXEMPT_DECLARATIONS))(
-    "%s — holds exactly %i disc literal(s)",
+    "%s — holds exactly %i disc(s)",
     (relPath, count) => {
-      expect(roundDiscLiterals(code.get(relPath)!)).toHaveLength(count);
+      expect(roundDiscs(code.get(relPath)!)).toHaveLength(count);
     },
   );
 });
 
 describe("rule 18 catches what it claims to (#3332)", () => {
-  it("scans the article avatars, the primitive's own file excepted", () => {
-    expect(roundDiscSources).toContain(
+  it("scans the article avatars and the hero credit chip, the primitive's own file excepted", () => {
+    for (const file of [
       "components/design-system/SubjectAvatar/SubjectAvatar.tsx",
-    );
-    expect(roundDiscSources).toContain(
       "components/design-system/SubjectAvatar/SubjectAvatarCluster.tsx",
-    );
+    ]) {
+      expect(roundDiscSources).toContain(file);
+    }
     expect(roundDiscSources).not.toContain(ROUND_AVATAR_HOME);
     expect(scannableSources).toContain(ROUND_AVATAR_HOME);
   });
 
   it("sees the primitive's own disc, so the rule is not blind to its home", () => {
-    expect(roundDiscLiterals(code.get(ROUND_AVATAR_HOME)!)).toHaveLength(1);
+    expect(roundDiscs(code.get(ROUND_AVATAR_HOME)!)).toHaveLength(1);
   });
 
   it.each([
     // The pre-#3332 `<SubjectAvatar>` monogram disc — the bisect.
     [
-      '"bg-jersey-deep inline-flex shrink-0 items-center justify-center rounded-full"',
+      '<div className={cn("bg-jersey-deep inline-flex shrink-0 items-center justify-center rounded-full", tokens.box, className)} />',
     ],
     // ...its photo disc.
-    ['"border-ink relative shrink-0 overflow-hidden rounded-full border"'],
+    [
+      '<div className={cn("border-ink relative shrink-0 overflow-hidden rounded-full border", tokens.box)} />',
+    ],
     // ...and the cluster's "+N" counter.
     [
-      '"bg-jersey-deep text-cream ring-cream inline-flex shrink-0 items-center justify-center rounded-full font-mono font-semibold ring-2"',
+      '<span className={cn("bg-jersey-deep text-cream ring-cream inline-flex shrink-0 items-center justify-center rounded-full font-mono ring-2", COUNTER[scale])}>+1</span>',
     ],
     ['<Image className="h-10 w-10 rounded-full object-cover" />'],
-    ["`flex items-center justify-center rounded-full ${tone}`"],
+    ["const DISC = `flex items-center justify-center rounded-full ${tone}`;"],
+    // Classes split across cn() arguments.
+    [
+      '<span className={cn("inline-flex rounded-full", "items-center", "justify-center", box)} />',
+    ],
+    // A content-shape class behind a condition.
+    [
+      '<span className={cn("relative rounded-full", hasPhoto && "overflow-hidden", box)} />',
+    ],
+    // A cn() call outside a className attribute.
+    ['const disc = cn("rounded-full", "overflow-hidden", box);'],
+    // A class constant between two JSX-text apostrophes ("foto's" ... "zo'n"):
+    // an apostrophe after a letter is not a quote, so it swallows nothing.
+    [
+      `<p>Een foto's lang</p>
+       const DISC = "inline-flex items-center justify-center rounded-full";
+       <p>Dat is zo'n goede foto</p>`,
+    ],
   ])("flags %s", (snippet) => {
-    expect(roundDiscLiterals(snippet)).toHaveLength(1);
+    expect(roundDiscs(snippet)).toHaveLength(1);
   });
 
   it.each([
@@ -3204,7 +3273,15 @@ describe("rule 18 catches what it claims to (#3332)", () => {
     ['"inline-flex items-center justify-center overflow-hidden"'],
     // A class that merely contains the token's letters.
     ['"rounded-full-ish overflow-hidden"'],
+    // Two unrelated class lists in one file are two units, not one.
+    ['<><i className="rounded-full" /><b className="overflow-hidden" /></>'],
   ])("leaves %s alone", (snippet) => {
-    expect(roundDiscLiterals(snippet)).toEqual([]);
+    expect(roundDiscs(snippet)).toEqual([]);
+  });
+
+  it("counts a className holding a cn() call once, not twice", () => {
+    expect(
+      roundDiscs('<i className={cn("rounded-full", "overflow-hidden")} />'),
+    ).toHaveLength(1);
   });
 });

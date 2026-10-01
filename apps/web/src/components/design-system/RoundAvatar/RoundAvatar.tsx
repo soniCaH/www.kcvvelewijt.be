@@ -54,6 +54,23 @@ const STEP: Record<RoundAvatarSize, { box: string; glyph: string }> = {
   64: { box: "h-16 w-16 border-2", glyph: "text-2xl" },
 };
 
+const SANITY_CDN = "https://cdn.sanity.io/";
+
+/**
+ * The photo is `unoptimized` (see below), so the browser fetches exactly the URL
+ * it is given — and the queries project avatars at `w=400` / `w=600`, ten times
+ * the pixels a 24-64px disc shows. Ask Sanity's CDN for twice the step (retina)
+ * instead: the cap lives here so every caller benefits. A smaller `w=` is kept,
+ * and a URL that is not Sanity's is none of this component's business.
+ */
+function thumbnailSrc(src: string, size: RoundAvatarSize): string {
+  if (!src.startsWith(SANITY_CDN)) return src;
+  const url = new URL(src);
+  const w = Number(url.searchParams.get("w")) || Infinity;
+  url.searchParams.set("w", String(Math.min(w, size * 2)));
+  return url.toString();
+}
+
 export function RoundAvatar({
   size,
   name,
@@ -83,7 +100,7 @@ export function RoundAvatar({
     >
       {hasPhoto ? (
         <Image
-          src={src}
+          src={thumbnailSrc(src, size)}
           alt=""
           width={size}
           height={size}

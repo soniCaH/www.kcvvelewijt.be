@@ -37,8 +37,9 @@ import { cn } from "@/lib/utils/cn";
  */
 export interface QARowRespondent {
   /**
-   * First name — drives the monogram avatar (first letter, uppercased)
-   * per the 5.d2 lock. For custom subjects pass `customName`; for
+   * First name — drives the monogram avatar (one letter, uppercased: the
+   * first token only, so a compound first name stays one) per the 5.d2 lock,
+   * set by the round avatar family's `initials()` (#3304). For custom subjects pass `customName`; for
    * player/staff subjects pass `firstName`. Omit (`undefined`) to render
    * the row without a speaker header — used for `standard` pairs in
    * multi-subject articles whose editors didn't tag `respondentKey`

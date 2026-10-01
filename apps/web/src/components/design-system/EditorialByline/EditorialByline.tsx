@@ -7,9 +7,10 @@
  *
  * Phase 5 (5.d-col lock, #1796): when a real `author` is supplied, the
  * row gains an inline-prefix `<SubjectAvatar scale="byline">` monogram
- * chip — a 24px disc with the first letter of the author, jersey-deep
- * background, cream initial in italic Freight Display 900. The chip
- * does NOT render on the "redactie" fallback (no monogram for a
+ * chip — a 24px round avatar (ring 1px ink, jersey-deep glyph on
+ * cream-soft, #3332) with the author's initials: first + last token of the
+ * full name the byline carries ("Tom Janssens" -> "TJ"), the round avatar
+ * family's rule (#3304). The chip does NOT render on the "redactie" fallback (no monogram for a
  * generic editorial signature).
  *
  * Spec: PRD redesign-phase-3 §5.B.1 + Phase 5 announcement-locked.md.

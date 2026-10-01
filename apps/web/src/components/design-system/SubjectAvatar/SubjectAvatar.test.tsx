@@ -143,6 +143,17 @@ describe("<SubjectAvatar>", () => {
       expect(container.textContent).toBe("W");
     });
 
+    it("keeps one letter for a compound first name", () => {
+      const { container } = render(
+        <SubjectAvatar firstName="Mohamed Amine" scale="row" />,
+      );
+      expect(container.textContent).toBe("M");
+      const attribution = render(
+        <SubjectAvatar firstName=" jan willem " scale="attribution" />,
+      );
+      expect(attribution.container.textContent).toBe("J");
+    });
+
     it("sets two letters when a full name is passed (the byline author)", () => {
       const { container } = render(
         <SubjectAvatar firstName="Tom Janssens" scale="byline" />,

@@ -1,5 +1,9 @@
-import { RoundAvatar, type RoundAvatarSize } from "../RoundAvatar";
-import { type SubjectAvatarScale } from "./SubjectAvatar";
+import { RoundAvatar } from "../RoundAvatar";
+import {
+  SubjectAvatar,
+  SUBJECT_AVATAR_SIZE,
+  type SubjectAvatarScale,
+} from "./SubjectAvatar";
 import { cn } from "@/lib/utils/cn";
 
 /**
@@ -27,11 +31,6 @@ export interface SubjectAvatarClusterProps {
   className?: string;
 }
 
-const SIZE: Record<"row" | "attribution", RoundAvatarSize> = {
-  row: 40,
-  attribution: 64,
-};
-
 const OVERLAP: Record<"row" | "attribution", string> = {
   row: "-ml-3",
   attribution: "-ml-5",
@@ -58,16 +57,16 @@ export function SubjectAvatarCluster({
     >
       <span aria-hidden="true" className="contents">
         {visible.map((m, i) => (
-          <RoundAvatar
+          <SubjectAvatar
             key={`${m.firstName}-${i}`}
-            size={SIZE[scale]}
-            name={m.firstName}
+            firstName={m.firstName}
+            scale={scale}
             className={cn(i > 0 && OVERLAP[scale])}
           />
         ))}
         {overflow > 0 && (
           <RoundAvatar
-            size={SIZE[scale]}
+            size={SUBJECT_AVATAR_SIZE[scale]}
             glyph={`+${overflow}`}
             className={OVERLAP[scale]}
           />

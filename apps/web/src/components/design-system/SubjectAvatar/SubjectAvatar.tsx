@@ -15,8 +15,9 @@ import { RoundAvatar, type RoundAvatarSize } from "../RoundAvatar";
  * - `attribution` (64) — `<PullQuote>` attribution. The photo when `photoUrl`
  *   resolves, the monogram otherwise.
  *
- * Letters come from the family's `initials()`: one letter for the first name an
- * article subject carries, two when a full name is passed (the byline author).
+ * Letters come from the family's `initials()` (#3304): one letter for the first
+ * name an article subject carries — compound first names included — and two for
+ * the full author name the byline passes ("Tom Janssens" -> "TJ").
  */
 export type SubjectAvatarScale = "byline" | "row" | "attribution";
 
@@ -28,8 +29,9 @@ export type SubjectAvatarScale = "byline" | "row" | "attribution";
 export interface SubjectAvatarProps {
   /**
    * The name the monogram is derived from. Player and staff subjects pass
-   * `firstName`, custom subjects the first token of `customName` — one letter.
-   * The byline passes the author's full name — two.
+   * `firstName`, custom subjects the first token of `customName`: one letter,
+   * whatever the first name's length (only its first token is used). The byline
+   * passes the author's full name: two.
    */
   firstName: string;
   /** Photo source, used at `attribution` scale only; the other scales ignore it. */
@@ -38,11 +40,21 @@ export interface SubjectAvatarProps {
   className?: string;
 }
 
-const SIZE: Record<SubjectAvatarScale, RoundAvatarSize> = {
-  byline: 24,
-  row: 40,
-  attribution: 64,
-};
+export const SUBJECT_AVATAR_SIZE: Record<SubjectAvatarScale, RoundAvatarSize> =
+  {
+    byline: 24,
+    row: 40,
+    attribution: 64,
+  };
+
+/**
+ * An article subject is known by a first name, and a compound one ("Jan
+ * Willem", "Mohamed Amine") is still ONE first name: one letter. Only the byline
+ * carries a full author name, and that one gets the helper's two.
+ */
+function monogramName(name: string, scale: SubjectAvatarScale): string {
+  return scale === "byline" ? name : (name.trim().split(/\s+/)[0] ?? "");
+}
 
 export function SubjectAvatar({
   firstName,
@@ -52,8 +64,8 @@ export function SubjectAvatar({
 }: SubjectAvatarProps) {
   return (
     <RoundAvatar
-      size={SIZE[scale]}
-      name={firstName}
+      size={SUBJECT_AVATAR_SIZE[scale]}
+      name={monogramName(firstName, scale)}
       photoUrl={scale === "attribution" ? photoUrl : null}
       className={className}
     />

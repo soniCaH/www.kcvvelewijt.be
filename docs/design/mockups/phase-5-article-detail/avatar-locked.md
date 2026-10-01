@@ -71,14 +71,20 @@ Both renders share:
 
 - Circular geometry (border-radius: 50%).
 - The Phase 4.5 R9 photo treatment when the photo path is active
-  (newsprint filter + paper grain + 1px ink border).
+  (newsprint filter; **since #3332** a 2px ink ring at 64px and no
+  paper-grain overlay — the round family's photo, `<RoundAvatar>`).
 - ~~Cream-on-jersey-deep monogram surface with full-opacity cream text~~
   — **superseded (#3332):** jersey-deep glyph on cream-soft, ink ring.
 
 ### Monogram derivation rule (locked)
 
-- **First initial of `firstName` only.** Single uppercase letter,
-  italic Freight Display 900.
+- **First initial of `firstName` only.** Single uppercase letter, upright
+  `font-display-big` black (**amended #3332:** was italic Freight Display 900).
+  A compound first name ("Jan Willem") is still one first name: one letter.
+  The one place a full name is known is the `<EditorialByline>` author chip,
+  which sets two letters ("Tom Janssens" → "TJ") — the round avatar family's
+  initials rule (decision #3304: first + last token for a full name, one letter
+  for a first name only).
 - **Collision tolerance:** initial collisions WITHIN a single article
   are accepted (An ↔ Anouk → both "A"). Mitigations like two-letter
   initials, per-role hue shift, or last-initial were considered and

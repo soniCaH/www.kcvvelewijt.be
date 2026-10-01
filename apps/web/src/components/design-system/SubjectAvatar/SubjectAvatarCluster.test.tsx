@@ -40,6 +40,15 @@ describe("<SubjectAvatarCluster>", () => {
     ).toBe("4");
   });
 
+  it("keeps one letter per member, compound first names included", () => {
+    const { container } = render(
+      <SubjectAvatarCluster
+        members={[{ firstName: "Jan Willem" }, { firstName: "Niels" }]}
+      />,
+    );
+    expect(container.textContent).toBe("JN");
+  });
+
   it("renders nothing for an empty member list", () => {
     const { container } = render(<SubjectAvatarCluster members={[]} />);
     expect(container.firstChild).toBeNull();
