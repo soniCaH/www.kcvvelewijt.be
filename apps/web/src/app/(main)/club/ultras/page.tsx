@@ -93,7 +93,8 @@ export default function UltrasPage() {
             <p>
               Of het nu aan de steun van de Ultras lag of niet, het seizoen werd
               bezegeld met een prachtige kampioenstitel, en in 2019-2020 deden
-              de Ultras hun ding in 2e provinciale!
+              de Ultras hun ding in 2e provinciale! Vandaag speelt de ploeg in
+              3e Nationale, en de Ultras staan er nog altijd.
             </p>
           </UltrasSection>
 
@@ -114,9 +115,8 @@ export default function UltrasPage() {
               wedstrijden.
             </p>
             <p>
-              Indien de tegenstander zich hiertoe leent, zullen er ook enkele
-              bussen of andere vervoersmiddelen ingelegd worden om samen de
-              verplaatsing te maken.
+              We volgen de ploeg naar bijna elke uitwedstrijd, meestal met de
+              bus.
             </p>
             <p>
               Op het einde van het seizoen 2018-2019 werd ook voor het eerst een
