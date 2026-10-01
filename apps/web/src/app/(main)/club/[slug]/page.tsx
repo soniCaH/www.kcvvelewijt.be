@@ -1,6 +1,7 @@
 import { cache } from "react";
 import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/lib/constants";
+import { cn } from "@/lib/utils/cn";
 import { notFound } from "next/navigation";
 import { Effect } from "effect";
 import type { PortableTextBlock } from "@portabletext/react";
@@ -120,7 +121,16 @@ export default async function DynamicClubPage({ params }: Props) {
           edge-to-edge shell + prose container + top/bottom padding, so it
           renders bare here (no max-w wrapper would box the cream into a band). */}
       {body.length > 0 ? (
-        <ArticleBody className="article-body" content={body} />
+        <ArticleBody
+          className={cn(
+            "article-body",
+            // The membership page's body sits above a `<CtaBand>` seam, so
+            // its bottom side gives back a step (#3306). Its top is under
+            // the hero seam, an opening, and keeps `<ArticleBody>`'s own air.
+            slug === MEMBERSHIP_INFO_SLUG && "pb-10 sm:pb-14",
+          )}
+          content={body}
+        />
       ) : null}
 
       {slug === MEMBERSHIP_INFO_SLUG ? (

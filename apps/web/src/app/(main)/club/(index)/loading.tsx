@@ -48,7 +48,7 @@ export default function ClubLoading() {
           rotation,0deg)]` on arrival. Without both the grid AND that class
           on each skeleton card, all 12 sit flat and visibly snap to
           −1°…−6° when the real hub swaps in. */}
-      <PageContainer width="index" className="py-12">
+      <PageContainer width="index" className="pt-12 pb-10 sm:pt-16 sm:pb-14">
         <Skeleton className="mb-8 h-10 w-72 max-w-full" />
         <div data-testid="club-hub-skeleton">
           <TapedCardGrid columns={3} gap="sm">

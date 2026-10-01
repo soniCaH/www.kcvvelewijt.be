@@ -56,14 +56,14 @@ export default function ClubPage() {
       <StripedSeam colorPair="ink-cream" height="md" />
 
       {/* Editorial nav hub. */}
-      <PageContainer width="index" className="py-12 sm:py-16">
+      <PageContainer width="index" className="pt-12 pb-10 sm:pt-16 sm:pb-14">
         <ClubEditorialHub />
       </PageContainer>
 
       <StripedSeam colorPair="ink-cream" height="md" />
 
       {/* Mission. */}
-      <PageContainer width="index" className="py-12 sm:py-16">
+      <PageContainer width="index" className="py-10 sm:py-14">
         <PullQuote
           placement="section"
           attribution={{ name: "Sportpark Elewijt" }}
@@ -76,7 +76,7 @@ export default function ClubPage() {
       <StripedSeam colorPair="ink-cream" height="md" />
 
       {/* Contact CTA band. */}
-      <PageContainer width="index" className="py-12 sm:py-16">
+      <PageContainer width="index" className="pt-10 pb-12 sm:pt-14 sm:pb-16">
         <TapedCard bg="cream" padding="lg">
           <div className="flex flex-wrap items-center justify-between gap-6">
             <div>

@@ -53,7 +53,7 @@ export function BoardPageLoading({ label }: { label: string }) {
           (PlayerCard.tsx's own `aspect-[3/4]`), not a round avatar. Card
           chrome beyond the track and the aspect ratio is deliberately not
           mirrored here (#2575 is still applying review fixes to it). */}
-      <PageContainer as="section" className="py-12 sm:py-16">
+      <PageContainer as="section" className="pt-12 pb-10 sm:pt-16 sm:pb-14">
         <div className="border-paper-edge mb-3 border-b pb-1.5">
           <Skeleton className="h-3 w-24" />
         </div>

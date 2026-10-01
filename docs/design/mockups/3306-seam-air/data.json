@@ -1,0 +1,390 @@
+{
+  "/ploegen/eerste-elftallen-a": {
+    "a-1440": {
+      "rows": [
+        {
+          "kind": "seam",
+          "above": "opening",
+          "below": "Klassement",
+          "gap": 91
+        },
+        {
+          "kind": "seam",
+          "above": "Klassement",
+          "below": "Wedstrijden",
+          "gap": 154
+        },
+        {
+          "kind": "seam",
+          "above": "Wedstrijden",
+          "below": "Spelers",
+          "gap": 148
+        },
+        {
+          "kind": "seam",
+          "above": "Spelers",
+          "below": "Staf",
+          "gap": 145
+        },
+        {
+          "kind": "seam",
+          "above": "Staf",
+          "below": "Trainingen & contact",
+          "gap": 147
+        },
+        {
+          "kind": "bare",
+          "above": "Trainingen & contact",
+          "below": "Met dank aan onze sponsors",
+          "gap": 126
+        }
+      ],
+      "height": 6774
+    },
+    "b-1440": {
+      "rows": [
+        {
+          "kind": "seam",
+          "above": "opening",
+          "below": "Klassement",
+          "gap": 91
+        },
+        {
+          "kind": "seam",
+          "above": "Klassement",
+          "below": "Wedstrijden",
+          "gap": 138
+        },
+        {
+          "kind": "seam",
+          "above": "Wedstrijden",
+          "below": "Spelers",
+          "gap": 132
+        },
+        {
+          "kind": "seam",
+          "above": "Spelers",
+          "below": "Staf",
+          "gap": 129
+        },
+        {
+          "kind": "seam",
+          "above": "Staf",
+          "below": "Trainingen & contact",
+          "gap": 131
+        },
+        {
+          "kind": "bare",
+          "above": "Trainingen & contact",
+          "below": "Met dank aan onze sponsors",
+          "gap": 126
+        }
+      ],
+      "height": 6710
+    },
+    "c-1440": {
+      "rows": [
+        {
+          "kind": "seam",
+          "above": "opening",
+          "below": "Klassement",
+          "gap": 91
+        },
+        {
+          "kind": "seam",
+          "above": "Klassement",
+          "below": "Wedstrijden",
+          "gap": 90
+        },
+        {
+          "kind": "seam",
+          "above": "Wedstrijden",
+          "below": "Spelers",
+          "gap": 84
+        },
+        {
+          "kind": "seam",
+          "above": "Spelers",
+          "below": "Staf",
+          "gap": 81
+        },
+        {
+          "kind": "seam",
+          "above": "Staf",
+          "below": "Trainingen & contact",
+          "gap": 83
+        },
+        {
+          "kind": "bare",
+          "above": "Trainingen & contact",
+          "below": "Met dank aan onze sponsors",
+          "gap": 126
+        }
+      ],
+      "height": 6518
+    },
+    "a-390": {
+      "rows": [
+        {
+          "kind": "seam",
+          "above": "opening",
+          "below": "Klassement",
+          "gap": 67
+        },
+        {
+          "kind": "seam",
+          "above": "Klassement",
+          "below": "Wedstrijden",
+          "gap": 122
+        },
+        {
+          "kind": "seam",
+          "above": "Wedstrijden",
+          "below": "Spelers",
+          "gap": 116
+        },
+        {
+          "kind": "seam",
+          "above": "Spelers",
+          "below": "Staf",
+          "gap": 113
+        },
+        {
+          "kind": "seam",
+          "above": "Staf",
+          "below": "Trainingen & contact",
+          "gap": 115
+        },
+        {
+          "kind": "bare",
+          "above": "Trainingen & contact",
+          "below": "Met dank aan onze sponsors",
+          "gap": 96
+        }
+      ],
+      "height": 10589
+    },
+    "b-390": {
+      "rows": [
+        {
+          "kind": "seam",
+          "above": "opening",
+          "below": "Klassement",
+          "gap": 67
+        },
+        {
+          "kind": "seam",
+          "above": "Klassement",
+          "below": "Wedstrijden",
+          "gap": 106
+        },
+        {
+          "kind": "seam",
+          "above": "Wedstrijden",
+          "below": "Spelers",
+          "gap": 100
+        },
+        {
+          "kind": "seam",
+          "above": "Spelers",
+          "below": "Staf",
+          "gap": 97
+        },
+        {
+          "kind": "seam",
+          "above": "Staf",
+          "below": "Trainingen & contact",
+          "gap": 99
+        },
+        {
+          "kind": "bare",
+          "above": "Trainingen & contact",
+          "below": "Met dank aan onze sponsors",
+          "gap": 96
+        }
+      ],
+      "height": 10525
+    },
+    "c-390": {
+      "rows": [
+        {
+          "kind": "seam",
+          "above": "opening",
+          "below": "Klassement",
+          "gap": 67
+        },
+        {
+          "kind": "seam",
+          "above": "Klassement",
+          "below": "Wedstrijden",
+          "gap": 74
+        },
+        {
+          "kind": "seam",
+          "above": "Wedstrijden",
+          "below": "Spelers",
+          "gap": 68
+        },
+        {
+          "kind": "seam",
+          "above": "Spelers",
+          "below": "Staf",
+          "gap": 65
+        },
+        {
+          "kind": "seam",
+          "above": "Staf",
+          "below": "Trainingen & contact",
+          "gap": 67
+        },
+        {
+          "kind": "bare",
+          "above": "Trainingen & contact",
+          "below": "Met dank aan onze sponsors",
+          "gap": 96
+        }
+      ],
+      "height": 10397
+    }
+  },
+  "/club": {
+    "a-1440": {
+      "rows": [
+        {
+          "kind": "seam",
+          "above": "opening",
+          "below": "Dit is KCVV",
+          "gap": 125
+        },
+        {
+          "kind": "seam",
+          "above": "Dit is KCVV",
+          "below": "opening",
+          "gap": 144
+        },
+        {
+          "kind": "seam",
+          "above": "opening",
+          "below": "Vragen over de club?",
+          "gap": 146
+        }
+      ],
+      "height": 3261
+    },
+    "b-1440": {
+      "rows": [
+        {
+          "kind": "seam",
+          "above": "opening",
+          "below": "Dit is KCVV",
+          "gap": 125
+        },
+        {
+          "kind": "seam",
+          "above": "Dit is KCVV",
+          "below": "opening",
+          "gap": 128
+        },
+        {
+          "kind": "seam",
+          "above": "opening",
+          "below": "Vragen over de club?",
+          "gap": 130
+        }
+      ],
+      "height": 3229
+    },
+    "c-1440": {
+      "rows": [
+        {
+          "kind": "seam",
+          "above": "opening",
+          "below": "Dit is KCVV",
+          "gap": 77
+        },
+        {
+          "kind": "seam",
+          "above": "Dit is KCVV",
+          "below": "opening",
+          "gap": 80
+        },
+        {
+          "kind": "seam",
+          "above": "opening",
+          "below": "Vragen over de club?",
+          "gap": 82
+        }
+      ],
+      "height": 3085
+    },
+    "a-390": {
+      "rows": [
+        {
+          "kind": "seam",
+          "above": "opening",
+          "below": "Dit is KCVV",
+          "gap": 111
+        },
+        {
+          "kind": "seam",
+          "above": "Dit is KCVV",
+          "below": "opening",
+          "gap": 112
+        },
+        {
+          "kind": "seam",
+          "above": "opening",
+          "below": "Vragen over de club?",
+          "gap": 114
+        }
+      ],
+      "height": 5953
+    },
+    "b-390": {
+      "rows": [
+        {
+          "kind": "seam",
+          "above": "opening",
+          "below": "Dit is KCVV",
+          "gap": 95
+        },
+        {
+          "kind": "seam",
+          "above": "Dit is KCVV",
+          "below": "opening",
+          "gap": 96
+        },
+        {
+          "kind": "seam",
+          "above": "opening",
+          "below": "Vragen over de club?",
+          "gap": 98
+        }
+      ],
+      "height": 5905
+    },
+    "c-390": {
+      "rows": [
+        {
+          "kind": "seam",
+          "above": "opening",
+          "below": "Dit is KCVV",
+          "gap": 63
+        },
+        {
+          "kind": "seam",
+          "above": "Dit is KCVV",
+          "below": "opening",
+          "gap": 64
+        },
+        {
+          "kind": "seam",
+          "above": "opening",
+          "below": "Vragen over de club?",
+          "gap": 66
+        }
+      ],
+      "height": 5809
+    }
+  }
+}

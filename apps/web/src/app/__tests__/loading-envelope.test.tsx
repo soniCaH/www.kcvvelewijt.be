@@ -179,9 +179,11 @@ describe("loading.tsx envelope drift guard", () => {
       Loading: SponsorsLoading,
       // Phase 7 (#2033): cream editorial header + SponsorTile grid skeleton,
       // mirroring the rebuilt /sponsors page (no SectionStack envelope). Outer
-      // container is a `<PageContainer width="index">` (page's index width).
+      // container is a `<PageContainer width="index">` (page's index width),
+      // with the page's own air: plain top, seam-step bottom above the
+      // closing `<SponsorCtaBand>` (#3335).
       expectedRootClass:
-        "mx-auto w-full px-4 md:px-8 max-w-[var(--container-index)] py-12 sm:py-16",
+        "mx-auto w-full px-4 md:px-8 max-w-[var(--container-index)] pt-12 pb-10 sm:pt-16 sm:pb-14",
       announcement: "Sponsors laden…",
     },
     {

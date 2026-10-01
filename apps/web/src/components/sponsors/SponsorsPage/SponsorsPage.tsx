@@ -32,7 +32,9 @@ export function SponsorsPage({ sponsors }: SponsorsPageProps) {
 
   return (
     <SponsorsAnalytics>
-      <PageContainer width="index" className="py-12 sm:py-16">
+      {/* Plain top (the hero opens the page); the bottom sits above the
+          `<SponsorCtaBand>` seam, so it gives one step back (#3306). */}
+      <PageContainer width="index" className="pt-12 pb-10 sm:pt-16 sm:pb-14">
         <SponsorHero featured={featured} />
 
         {hasSponsors ? (
