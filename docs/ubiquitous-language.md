@@ -392,6 +392,10 @@ A generic static content page.
 | ------------------------ | ------ | --------------------------------- |
 | `page` (Sanity document) | Pagina | Title + slug + portable text body |
 
+**Route:** `/club/[slug]`, under the standard `<PageHero>`.
+
+**Page or hand-written route:** a `/club/*` page is a Sanity `page` by default. It stays a hand-written route only when it **needs code** (live data, a form, an interactive tool) **or opens with its own top banner**. A body piece the `page` schema has no block for is not a reason to stay hand-written; add the block instead (#3309).
+
 ### Banner
 
 A promotional image shown on the homepage in designated slots (A, B, C).
