@@ -276,7 +276,7 @@ export function PlayerHero({
         <TapedFigure
           aspect="portrait-3-4"
           rotation="b"
-          tape={{ color: "jersey-deep", length: "md" }}
+          tape={{ color: "jersey-deep", length: "md", seed: id }}
           bg="cream-soft"
           tint={hasPhoto ? "newsprint" : "none"}
           padding="none"

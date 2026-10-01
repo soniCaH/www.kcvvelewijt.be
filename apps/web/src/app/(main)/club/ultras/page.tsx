@@ -139,7 +139,7 @@ export default function UltrasPage() {
                 color: "warm",
                 length: "lg",
                 position: "right",
-                rotation: "d",
+                rotation: "c",
               }}
             >
               <Image

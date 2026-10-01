@@ -1,6 +1,17 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { TapeStrip } from "./TapeStrip";
+import { TapeStrip, oppositeTapeRotation } from "./TapeStrip";
+
+describe("oppositeTapeRotation", () => {
+  it("mirrors to the opposite sign at equal size (a-f -6/+6, b-e -4/+4, c-d -2/+2)", () => {
+    expect(oppositeTapeRotation("a")).toBe("f");
+    expect(oppositeTapeRotation("b")).toBe("e");
+    expect(oppositeTapeRotation("c")).toBe("d");
+    expect(oppositeTapeRotation("d")).toBe("c");
+    expect(oppositeTapeRotation("e")).toBe("b");
+    expect(oppositeTapeRotation("f")).toBe("a");
+  });
+});
 
 describe("TapeStrip", () => {
   it("renders with default jersey colour and lg length", () => {

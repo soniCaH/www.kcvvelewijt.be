@@ -111,7 +111,7 @@ export function TeamHero({
         <TapedFigure
           aspect="landscape-3-2"
           rotation="b"
-          tape={{ color: "warm", length: "md" }}
+          tape={{ color: "warm", length: "md", seed: displayName }}
           bg="cream-soft"
           tint={hasPhoto ? "newsprint" : "none"}
           padding="none"

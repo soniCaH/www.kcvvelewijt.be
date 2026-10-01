@@ -445,6 +445,16 @@ describe("NewsCard", () => {
       // one card must lean in opposite directions.
       const isNegative = (r: string | null | undefined) => "abc".includes(r!);
       expect(isNegative(lr)).not.toBe(isNegative(rr));
+      // Mirrored, so the two strips are equally steep: a-f, b-e, c-d.
+      const mirror: Record<string, string> = {
+        a: "f",
+        b: "e",
+        c: "d",
+        d: "c",
+        e: "b",
+        f: "a",
+      };
+      expect(rr).toBe(mirror[lr!]);
     });
 
     it("derivation is deterministic — same title yields the same rotation pair", () => {

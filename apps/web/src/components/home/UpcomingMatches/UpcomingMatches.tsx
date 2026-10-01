@@ -49,7 +49,7 @@ export const UpcomingMatches = ({
           bg="cream"
           shadow="md"
           padding="lg"
-          tape={[{ color: "warm" }]}
+          tape={[{ color: "warm", seed: "Komende wedstrijden" }]}
         >
           <div className="mb-6 flex flex-col gap-2">
             <MonoLabel size="md">AGENDA</MonoLabel>

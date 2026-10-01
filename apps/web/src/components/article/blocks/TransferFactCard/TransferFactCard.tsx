@@ -1,7 +1,11 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import { TOP_HEADING_LEVEL } from "@/components/article/ArticleBody";
-import { TapedCard, type TapeStripProps } from "@/components/design-system";
+import {
+  TapedCard,
+  seededIndex,
+  type TapeStripProps,
+} from "@/components/design-system";
 import {
   resolveTransfer,
   type TransferDirection,
@@ -30,20 +34,12 @@ import { cn } from "@/lib/utils/cn";
  * `<ArticleBody>` so the card itself stays agnostic to layout context.
  */
 
+// The card's lean, from the slight tier, picked with the shared seeded hash.
 const ROTATION_POOL = ["a", "b", "c", "d"] as const;
 type CardRotation = (typeof ROTATION_POOL)[number];
 
-// djb2-light deterministic hash — same shape as the NewsCard helper.
-function hashIndex(seed: string, modulo: number): number {
-  let h = 5381;
-  for (let i = 0; i < seed.length; i += 1) {
-    h = ((h << 5) + h + seed.charCodeAt(i)) >>> 0;
-  }
-  return h % modulo;
-}
-
 function deriveRotation(seed: string): CardRotation {
-  return ROTATION_POOL[hashIndex(seed, ROTATION_POOL.length)]!;
+  return ROTATION_POOL[seededIndex(seed, ROTATION_POOL.length)]!;
 }
 
 const DIRECTION_CHIP: Record<
@@ -115,9 +111,9 @@ export function TransferFactCard({ fact, className }: TransferFactCardProps) {
   const resolved = resolveTransfer(fact);
   const direction = resolved.direction;
   const chip = DIRECTION_CHIP[direction];
-  const rotation = deriveRotation(
-    fact.playerName ?? fact._key ?? `${direction}-${fact.age ?? ""}`,
-  );
+  // The card's identity: its lean and its tape angle both derive from it.
+  const seed = fact.playerName ?? fact._key ?? `${direction}-${fact.age ?? ""}`;
+  const rotation = deriveRotation(seed);
   const tapeColor = TAPE_COLOR[direction];
 
   const playerName = fact.playerName?.trim() ?? "";
@@ -131,7 +127,7 @@ export function TransferFactCard({ fact, className }: TransferFactCardProps) {
     <TapedCard
       bg="cream"
       rotation={rotation}
-      tape={[{ color: tapeColor, length: "md" }]}
+      tape={[{ color: tapeColor, length: "md", seed }]}
       padding="md"
       className={cn(className)}
     >

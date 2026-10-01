@@ -2,6 +2,7 @@ export {
   TapeStrip,
   tapeRotationFor,
   oppositeTapeRotation,
+  seededIndex,
   type TapeStripProps,
   type TapeStripColor,
   type TapeStripLength,

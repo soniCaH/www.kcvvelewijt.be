@@ -35,9 +35,10 @@ export type TapeStripRotation = "a" | "b" | "c" | "d" | "e" | "f" | "none";
 /** The six tilted entries, negative first (`a`-`c`) then positive (`d`-`f`). */
 const TAPE_ROTATION_POOL = ["a", "b", "c", "d", "e", "f"] as const;
 
-// djb2-light string hash — deterministic, so a card's tape angle is stable
-// across renders (no hydration mismatch, stable VR baselines).
-function hashIndex(seed: string, modulo: number): number {
+// djb2-light string hash — deterministic, so an angle derived from a seed is
+// stable across renders (no hydration mismatch, stable VR baselines).
+// Exported so a card deriving its own lean from its identity reuses it.
+export function seededIndex(seed: string, modulo: number): number {
   let h = 5381;
   for (let i = 0; i < seed.length; i++) {
     h = ((h << 5) + h + seed.charCodeAt(i)) >>> 0;
@@ -52,19 +53,18 @@ function hashIndex(seed: string, modulo: number): number {
 export function tapeRotationFor(
   seed: string,
 ): (typeof TAPE_ROTATION_POOL)[number] {
-  return TAPE_ROTATION_POOL[hashIndex(seed, TAPE_ROTATION_POOL.length)]!;
+  return TAPE_ROTATION_POOL[seededIndex(seed, TAPE_ROTATION_POOL.length)]!;
 }
 
 /**
- * The strip that leans the other way: three entries along the pool, so a
- * negative entry always meets a positive one (`a`↔`d`, `b`↔`e`, `c`↔`f`).
+ * The strip that leans the other way, mirrored: opposite sign, equal size
+ * (`a`↔`f` ±6°, `b`↔`e` ±4°, `c`↔`d` ±2°).
  */
 export function oppositeTapeRotation(
   rotation: (typeof TAPE_ROTATION_POOL)[number],
 ): (typeof TAPE_ROTATION_POOL)[number] {
-  const half = TAPE_ROTATION_POOL.length / 2;
   return TAPE_ROTATION_POOL[
-    (TAPE_ROTATION_POOL.indexOf(rotation) + half) % TAPE_ROTATION_POOL.length
+    TAPE_ROTATION_POOL.length - 1 - TAPE_ROTATION_POOL.indexOf(rotation)
   ]!;
 }
 
