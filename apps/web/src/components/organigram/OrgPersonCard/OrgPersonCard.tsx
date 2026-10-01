@@ -139,7 +139,7 @@ function DualAvatar({ holders }: { holders: OrgChartNode["members"] }) {
     <div
       aria-hidden="true"
       // Fixed 64px height keeps the card the same height as a single card.
-      className="flex h-16 items-center -space-x-5"
+      className="flex h-16 items-center -space-x-2"
       data-testid="org-person-card-dual-avatar"
     >
       <RoundAvatar

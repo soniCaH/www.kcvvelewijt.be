@@ -85,7 +85,12 @@ export function RoundAvatar({
       ) : (
         <span
           className={cn(
-            "text-jersey-deep font-display-big font-black",
+            "text-jersey-deep",
+            // Letters are the display face; a "+N" / "+" is a sign, and the
+            // display face draws its plus too small to read at 40px.
+            glyph === undefined
+              ? "font-display-big font-black"
+              : "font-mono font-semibold",
             step.glyph,
           )}
         >
