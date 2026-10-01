@@ -178,6 +178,103 @@ describe("ScrollOverlay", () => {
     expect(fade.style.width).toBe("15px");
   });
 
+  describe("bottom fade — the vertical cue (#3340)", () => {
+    function mockVerticalDimensions(
+      scrollHeight: number,
+      clientHeight: number,
+    ) {
+      Object.defineProperty(HTMLElement.prototype, "scrollHeight", {
+        configurable: true,
+        value: scrollHeight,
+      });
+      Object.defineProperty(HTMLElement.prototype, "clientHeight", {
+        configurable: true,
+        value: clientHeight,
+      });
+    }
+
+    afterEach(() => {
+      Reflect.deleteProperty(HTMLElement.prototype, "scrollHeight");
+      Reflect.deleteProperty(HTMLElement.prototype, "clientHeight");
+    });
+
+    it("renders no bottom fade when the track does not overflow vertically", () => {
+      mockScrollDimensions(900, 400);
+      mockVerticalDimensions(400, 400);
+      const { container } = render(
+        <ScrollOverlay>
+          <span>Item</span>
+        </ScrollOverlay>,
+      );
+      expect(
+        container.querySelector('[data-scroll-fade="bottom"]'),
+      ).not.toBeInTheDocument();
+    });
+
+    it("renders a bottom fade capped at 24px, in the given from-colour, with no arrow", () => {
+      mockScrollDimensions(400, 400);
+      mockVerticalDimensions(900, 400);
+      const { container } = render(
+        <ScrollOverlay fadeFromClassName="from-jersey-deep-dark">
+          <span>Item</span>
+        </ScrollOverlay>,
+      );
+      const fade = container.querySelector(
+        '[data-scroll-fade="bottom"]',
+      ) as HTMLElement;
+      expect(fade.style.height).toBe("24px");
+      expect(fade).toHaveClass(
+        "from-jersey-deep-dark",
+        "bottom-0",
+        "inset-x-0",
+      );
+      expect(fade).toHaveClass("bg-gradient-to-t");
+      expect(screen.queryByLabelText("Scroll down")).not.toBeInTheDocument();
+    });
+
+    it("shrinks the bottom fade and removes it at the end of the scroll", () => {
+      mockScrollDimensions(400, 400);
+      mockVerticalDimensions(900, 400);
+      const { container } = render(
+        <ScrollOverlay>
+          <span>Item</span>
+        </ScrollOverlay>,
+      );
+      const track = container.querySelector('[tabindex="0"]') as HTMLElement;
+      const { flush } = stubAnimationFrame();
+
+      // 500px total overflow; scrolled to 485 leaves 15px.
+      Object.defineProperty(track, "scrollTop", {
+        value: 485,
+        configurable: true,
+      });
+      act(() => {
+        track.dispatchEvent(new Event("scroll"));
+      });
+      act(() => {
+        flush();
+      });
+      const fade = container.querySelector(
+        '[data-scroll-fade="bottom"]',
+      ) as HTMLElement;
+      expect(fade.style.height).toBe("15px");
+
+      Object.defineProperty(track, "scrollTop", {
+        value: 500,
+        configurable: true,
+      });
+      act(() => {
+        track.dispatchEvent(new Event("scroll"));
+      });
+      act(() => {
+        flush();
+      });
+      expect(
+        container.querySelector('[data-scroll-fade="bottom"]'),
+      ).not.toBeInTheDocument();
+    });
+  });
+
   it("applies overflowsClassName whenever the track overflows at all, even once scrolled to the end", () => {
     mockScrollDimensions(400, 400);
     const { container: fitContainer, unmount } = render(

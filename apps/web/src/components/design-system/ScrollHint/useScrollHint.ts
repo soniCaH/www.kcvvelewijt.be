@@ -62,6 +62,18 @@ export interface UseScrollHintReturn<T extends HTMLElement = HTMLElement> {
    * raw pixel count, by default).
    */
   remainingRight: number;
+  /**
+   * Whether the track can still scroll down — more than the dead zone left
+   * below the fold. Vertical is read-only: no `scrollDown` — the only
+   * consumer (the organigram explorer's stage) scrolls by touch and wheel,
+   * and a down arrow was considered and not picked (#3321).
+   */
+  canScrollDown: boolean;
+  /**
+   * Pixels still scrollable downward — 0 at the end of the track, capped at
+   * `maxRemainingPx` like `remainingLeft` / `remainingRight`.
+   */
+  remainingBottom: number;
   scrollLeft: () => void;
   scrollRight: () => void;
 }
@@ -80,6 +92,8 @@ export function useScrollHint<T extends HTMLElement = HTMLElement>(
   const [overflows, setOverflows] = useState(false);
   const [remainingLeft, setRemainingLeft] = useState(0);
   const [remainingRight, setRemainingRight] = useState(0);
+  const [canScrollDown, setCanScrollDown] = useState(false);
+  const [remainingBottom, setRemainingBottom] = useState(0);
 
   // The track's own horizontal padding, cached across scroll events.
   // Scrolling cannot change an element's own padding, so re-reading
@@ -152,6 +166,11 @@ export function useScrollHint<T extends HTMLElement = HTMLElement>(
 
     setRemainingLeft(Math.min(maxRemainingPx, rLeft));
     setRemainingRight(Math.min(maxRemainingPx, rRight));
+
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    const rBottom = Math.max(0, scrollHeight - clientHeight - scrollTop);
+    setCanScrollDown(rBottom > DEAD_ZONE);
+    setRemainingBottom(Math.min(maxRemainingPx, rBottom));
   }, [maxRemainingPx]);
 
   // Full re-check for every non-scroll trigger: refresh the cached padding
@@ -278,6 +297,8 @@ export function useScrollHint<T extends HTMLElement = HTMLElement>(
     overflows,
     remainingLeft,
     remainingRight,
+    canScrollDown,
+    remainingBottom,
     scrollLeft: scrollLeftFn,
     scrollRight: scrollRightFn,
   };

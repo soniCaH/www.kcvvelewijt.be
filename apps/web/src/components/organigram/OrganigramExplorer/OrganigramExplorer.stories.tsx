@@ -151,6 +151,30 @@ export const StageIsBoundedOnAShortPhone: Story = {
   },
 };
 
+/**
+ * #3340 — 320x568 guarantees vertical overflow (the story above asserts it),
+ * so the stage shows the bottom fade at rest, up to 24px tall, and it is gone
+ * once scrolled to the end. The scroll is set directly with a `scroll` event,
+ * never a smooth scroll (a hidden tab renders no animation frames). `!vr`.
+ */
+export const BottomFadeFollowsTheVerticalScroll: Story = {
+  tags: ["!vr"],
+  globals: { viewport: { value: "kcvvExplorerPhone" } },
+  play: async ({ canvasElement }) => {
+    const { track } = stageBounds(canvasElement);
+    const fade = () =>
+      canvasElement.querySelector<HTMLElement>('[data-scroll-fade="bottom"]');
+
+    expect(track.scrollHeight - track.clientHeight).toBeGreaterThan(24);
+    await waitFor(() => expect(fade()).toBeInTheDocument());
+    expect(fade()?.style.height).toBe("24px");
+
+    track.scrollTop = track.scrollHeight;
+    track.dispatchEvent(new Event("scroll"));
+    await waitFor(() => expect(fade()).not.toBeInTheDocument());
+  },
+};
+
 /** 375x667 — the stage used to run 23px past the dialog. `!vr`. */
 export const StageIsBoundedOnAPhone: Story = {
   tags: ["!vr"],

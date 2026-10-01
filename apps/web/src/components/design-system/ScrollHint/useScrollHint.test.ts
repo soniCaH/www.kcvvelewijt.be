@@ -380,6 +380,83 @@ describe("useScrollHint", () => {
     });
   });
 
+  describe("canScrollDown / remainingBottom — the vertical axis (#3340)", () => {
+    afterEach(() => {
+      for (const prop of ["scrollHeight", "clientHeight", "scrollTop"]) {
+        Reflect.deleteProperty(HTMLElement.prototype, prop);
+      }
+    });
+
+    function renderVertical(
+      dims: { scrollHeight: number; clientHeight: number; scrollTop: number },
+      maxRemainingPx?: number,
+    ) {
+      for (const [prop, value] of Object.entries(dims)) {
+        Object.defineProperty(HTMLElement.prototype, prop, {
+          configurable: true,
+          value,
+        });
+      }
+      let hookResult: UseScrollHintReturn | undefined;
+      function Host() {
+        const hook = useScrollHint({ maxRemainingPx });
+        useEffect(() => {
+          hookResult = hook;
+        });
+        return createElement("div", { ref: hook.scrollRef });
+      }
+      render(createElement(Host));
+      return hookResult!;
+    }
+
+    it("is false and 0 when the track fits vertically", () => {
+      const hook = renderVertical({
+        scrollHeight: 400,
+        clientHeight: 400,
+        scrollTop: 0,
+      });
+      expect(hook.canScrollDown).toBe(false);
+      expect(hook.remainingBottom).toBe(0);
+    });
+
+    it("is true and reports the exact pixels left when the track overflows downward", () => {
+      const hook = renderVertical({
+        scrollHeight: 600,
+        clientHeight: 400,
+        scrollTop: 50,
+      });
+      expect(hook.canScrollDown).toBe(true);
+      expect(hook.remainingBottom).toBe(150);
+    });
+
+    it("uses the 10px dead-zone — 10px left to scroll means canScrollDown=false", () => {
+      const hook = renderVertical({
+        scrollHeight: 410,
+        clientHeight: 400,
+        scrollTop: 0,
+      });
+      expect(hook.canScrollDown).toBe(false);
+    });
+
+    it("is false and 0 at the end of the scroll", () => {
+      const hook = renderVertical({
+        scrollHeight: 600,
+        clientHeight: 400,
+        scrollTop: 200,
+      });
+      expect(hook.canScrollDown).toBe(false);
+      expect(hook.remainingBottom).toBe(0);
+    });
+
+    it("caps remainingBottom at maxRemainingPx, like the sides", () => {
+      const hook = renderVertical(
+        { scrollHeight: 1000, clientHeight: 400, scrollTop: 0 },
+        24,
+      );
+      expect(hook.remainingBottom).toBe(24);
+    });
+  });
+
   describe("#2448 — re-measures when content changes without a container resize", () => {
     it("re-checks overflow when a child element's own box resizes", () => {
       // The track's own clientWidth/scrollWidth are read live off the
