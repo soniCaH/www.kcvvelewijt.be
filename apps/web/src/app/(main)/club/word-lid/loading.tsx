@@ -14,8 +14,11 @@
  * #2570).
  */
 
-import Link from "next/link";
-import { PageContainer, LoadingAnnouncement } from "@/components/design-system";
+import {
+  EditorialLink,
+  PageContainer,
+  LoadingAnnouncement,
+} from "@/components/design-system";
 import { PageHero } from "@/components/layout/PageHero";
 import { MembershipForm } from "@/components/club/MembershipForm/MembershipForm";
 
@@ -33,10 +36,10 @@ export default function WordLidLoading() {
           lead="Speler, jeugdspeler, vrijwilliger, trainer of scheidsrechter — vul het formulier in en we nemen binnenkort contact met je op. Dit is een aanvraag: sommige ploegen zitten vol, dus een plekje is niet altijd gegarandeerd."
           upLink={{ href: "/club", label: "De club" }}
         >
-          <p className="text-body-md mt-4">
-            <Link href="/club/praktische-informatie" className="prose-link">
-              Praktische info →
-            </Link>
+          <p className="mt-4">
+            <EditorialLink href="/club/praktische-informatie">
+              Praktische info
+            </EditorialLink>
           </p>
         </PageHero>
 

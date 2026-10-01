@@ -23,6 +23,7 @@ import {
   Envelope,
   X,
 } from "@/lib/icons.redesign";
+import { EditorialLink } from "@/components/design-system/EditorialLink";
 import { ScrollRail } from "@/components/design-system/ScrollHint/ScrollRail";
 import { ScrollOverlay } from "@/components/design-system/ScrollHint/ScrollOverlay";
 import { SpotlightNodeCard } from "./SpotlightNodeCard";
@@ -478,12 +479,9 @@ export function OrganigramExplorer({
                 ) : (
                   <>
                     {profileHref && (
-                      <Link
-                        href={profileHref}
-                        className="text-warm hover:text-cream flex items-center gap-1 font-mono text-[11px] uppercase"
-                      >
-                        Volledig profiel <ArrowRight size={11} aria-hidden />
-                      </Link>
+                      <EditorialLink href={profileHref} tone="dark">
+                        Volledig profiel
+                      </EditorialLink>
                     )}
                     {focusState === "shared" && (
                       <ul
