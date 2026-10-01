@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   mapEditorialArticles,
   mapBffRelatedItems,
+  mapRelatedToRelatedRow,
   mapMentionedPlayers,
   mapMentionedTeams,
   mapMentionedStaff,
@@ -114,6 +115,39 @@ describe("mapBffRelatedItems", () => {
       type: "article",
       imageUrl: "https://cdn.example.com/cover.jpg",
     });
+  });
+
+  it("maps a BFF gallery to a gallery item that links to /galerij/<slug>", () => {
+    const items = mapBffRelatedItems([
+      {
+        id: "gal-1",
+        slug: "stage-mierlo",
+        type: "gallery" as const,
+        score: 0.6,
+        title: "Stage Mierlo",
+        excerpt: "Foto's van de stage.",
+        imageUrl: null,
+      },
+    ]);
+
+    expect(items).toEqual([
+      {
+        type: "gallery",
+        source: "ai",
+        id: "gal-1",
+        title: "Stage Mierlo",
+        slug: "stage-mierlo",
+        imageUrl: null,
+      },
+    ]);
+    expect(mapRelatedToRelatedRow(items)).toEqual([
+      expect.objectContaining({
+        href: "/galerij/stage-mierlo",
+        badge: "BEELDEN",
+        analyticsSource: "ai",
+        analyticsType: "gallery",
+      }),
+    ]);
   });
 
   it("handles empty input", () => {

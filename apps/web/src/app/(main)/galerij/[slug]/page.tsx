@@ -4,13 +4,15 @@
  * Renders the gallery's thumbnail grid + `yet-another-react-lightbox` viewer
  * (`<GalleryLightbox>`), with an optional intro paragraph. `gallery_open`
  * fires client-side on mount via `<GalleryOpenTracker>`; the lightbox fires
- * `gallery_image_view` per navigation. Long (24h) ISR — galleries change rarely.
+ * `gallery_image_view` per navigation. 15 min ISR: the semantic tier reads
+ * the BFF, so a degraded render may not outlive 900s (#2563 rule 5 in
+ * `cross-page-consistency.test.ts`).
  *
  * Ends on `<RelatedRow>` (#2443/#2581) — this was the one true dead end on
  * the site before this decision (every other detail page had *some* onward
  * affordance). Domain tier: the event this gallery documents, when there is
- * one (`linkedEvent`, a real Sanity reference). Auto-hides at zero, which is
- * common here — most galleries have no linked event.
+ * one (`linkedEvent`, a real Sanity reference). Semantic tier: the BFF's
+ * vector-nearest articles/pages/galleries (#3338). Auto-hides at zero.
  */
 
 import type { Metadata } from "next";
@@ -31,13 +33,21 @@ import { GalleryLightbox } from "@/components/gallery/GalleryLightbox/GalleryLig
 import { GalleryOpenTracker } from "@/components/gallery/GalleryOpenTracker/GalleryOpenTracker";
 import { RelatedRow } from "@/components/related/RelatedRow";
 import { mergeRelatedRow } from "@/components/related/mergeRelatedRow";
-import type { RelatedRowItem } from "@/components/related/types";
+import type {
+  RelatedContentItem,
+  RelatedRowItem,
+} from "@/components/related/types";
+import { BffService } from "@/lib/effect/services/BffService";
+import {
+  mapBffRelatedItems,
+  mapRelatedToRelatedRow,
+} from "@/lib/utils/article-related-items";
 
 interface GalleryPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export const revalidate = 86400;
+export const revalidate = 900;
 
 /** First gallery image at 1200×630 for the social share card. */
 function ogImageUrl(url: string | null | undefined): string | null {
@@ -182,11 +192,25 @@ export default async function GalleryDetailPage({ params }: GalleryPageProps) {
       ]
     : [];
 
+  // Semantic tier (#3338): vector-nearest articles, pages and other galleries
+  // by title + description. Broad catch on purpose, same as `/nieuws/[slug]`:
+  // related content is polish, so any BFF failure renders the gallery without
+  // it rather than failing the page.
+  const semanticItems = await runPromise(
+    Effect.gen(function* () {
+      const bff = yield* BffService;
+      return yield* bff.getRelated(gallery.id);
+    }).pipe(
+      Effect.map(mapBffRelatedItems),
+      Effect.catchAll(() => Effect.succeed<RelatedContentItem[]>([])),
+    ),
+  );
+
   const relatedRowItems = mergeRelatedRow({
     domain: domainItems,
     curated: [],
     reference: [],
-    semantic: [],
+    semantic: mapRelatedToRelatedRow(semanticItems),
     siblings: [],
   });
 

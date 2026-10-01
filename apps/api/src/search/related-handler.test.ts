@@ -151,6 +151,46 @@ describe("handleRelated", () => {
     expect(result[0]!.id).toBe("doc-article");
   });
 
+  it("maps a gallery vector to the gallery type instead of falling back to page", async () => {
+    const matches: VectorizeMatch[] = [
+      { id: "doc-abc", score: 1.0, metadata: {} },
+      {
+        id: "gallery-1",
+        score: 0.8,
+        metadata: {
+          slug: "stage-mierlo",
+          type: "gallery",
+          title: "Stage Mierlo",
+          excerpt: "Foto's van de stage.",
+        },
+      },
+    ];
+
+    const result = await Effect.runPromise(
+      handleRelated({ id: "doc-abc", limit: 3 }).pipe(
+        Effect.provide(
+          Layer.succeed(
+            VectorizeService,
+            makeVectorizeMock({
+              matches,
+              stored: [
+                { id: "doc-abc", values: FAKE_VECTOR, metadata: {} },
+                ...matches.slice(1).map(storeFromMatch),
+              ],
+            }),
+          ),
+        ),
+      ),
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      id: "gallery-1",
+      type: "gallery",
+      slug: "stage-mierlo",
+    });
+  });
+
   it("filters responsibilities using stored metadata even when query match metadata lacks the type field", async () => {
     // Defensive: if the metadata index on `type` ever disappears, the query
     // binding stops returning that field. The handler must still filter

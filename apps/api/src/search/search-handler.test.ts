@@ -234,6 +234,29 @@ describe("handleSearch", () => {
     }
   });
 
+  it("does not let gallery matches eat the limit", async () => {
+    const gallery = (id: string, score: number): VectorizeMatch => ({
+      id,
+      score,
+      metadata: { slug: id, type: "gallery", title: id, excerpt: "" },
+    });
+    // The top 2 are galleries, which the response does not admit; a limit of
+    // 2 must still return the 2 admitted hits behind them.
+    const result = await Effect.runPromise(
+      provideAllServices(handleSearch({ query: "stage", limit: 2 }), {
+        matches: [
+          gallery("g1", 0.9),
+          gallery("g2", 0.8),
+          makeHit("a", 0.7),
+          makeHit("b", 0.6),
+          makeHit("c", 0.5),
+        ],
+      }),
+    );
+
+    expect(result.results.map((r) => r.id)).toEqual(["a", "b"]);
+  });
+
   it("passes type filter to Vectorize query", async () => {
     let capturedFilter: Record<string, string> | undefined;
     const capturingVectorize: VectorizeServiceInterface = {

@@ -31,4 +31,18 @@ describe("RelatedItem", () => {
     );
     expect(result.type).toBe("article");
   });
+
+  it("accepts gallery type", async () => {
+    const result = await Effect.runPromise(
+      S.decodeUnknown(RelatedItem)({
+        id: "doc-gal",
+        slug: "stage-mierlo",
+        type: "gallery",
+        score: 0.6,
+        title: "Stage Mierlo",
+        excerpt: "Foto's van de stage.",
+      }),
+    );
+    expect(result.type).toBe("gallery");
+  });
 });

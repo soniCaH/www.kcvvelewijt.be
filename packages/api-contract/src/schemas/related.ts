@@ -6,13 +6,13 @@ export class RelatedItem extends S.Class<RelatedItem>("RelatedItem")({
   /** URL-friendly slug */
   slug: S.String,
   /** Content type */
-  type: S.Literal("article", "page"),
+  type: S.Literal("article", "page", "gallery"),
   /** Cosine similarity score (0–1) */
   score: S.Finite,
   /** Display title */
   title: S.String,
   /** Short excerpt for display */
   excerpt: S.String,
-  /** Cover image URL — null for pages and articles without a cover image */
+  /** Cover image URL — null for pages, galleries and articles without a cover image */
   imageUrl: S.optionalWith(S.NullOr(S.String), { default: () => null }),
 }) {}

@@ -323,3 +323,64 @@ export function buildPageMetadata(doc: {
     ),
   };
 }
+
+/**
+ * Which galleries are indexable. A gallery with no slug has no `/galerij/…`
+ * page, so a vector for it would render a related card linking `/galerij/`.
+ * Both index paths negate/compose it the same way: the webhook folds it into
+ * its query (a slugless gallery projects null and takes the `!doc` delete
+ * branch), the sweep into `GALLERY_QUERY` (a gallery that loses its slug
+ * drops out of `currentIds`, so the manifest diff prunes it).
+ */
+export const GALLERY_INDEXABLE_FILTER = `defined(slug.current)`;
+
+/**
+ * The gallery's first image is its cover (the web repository's `coverUrl`).
+ * Baked to the same hotspot-aware 16:9 crop as `ARTICLE_COVER_IMAGE_PROJECTION`
+ * so a semantic gallery card shows the photo its domain-tier twin shows.
+ * Null when the gallery has no images.
+ */
+const GALLERY_COVER_IMAGE_PROJECTION = `"imageUrl": images[0].asset->url + "?w=800&h=450&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(images[0].hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(images[0].hotspot.y, 0.5))`;
+
+/**
+ * The one photo-gallery projection, shared by the nightly reindex
+ * (sanity-index-sync) and the per-doc webhook (#3338, decision #3308).
+ *
+ * Embedded text is title + description only — image captions are not
+ * embedded (0 of 99 photos carry one, and matching single images is not the
+ * goal). `pt::text(description)` returns null (not `""`) for an empty
+ * description, which is the common case, so it is coalesced here and the
+ * text is composed in TypeScript like every other branch above.
+ */
+export const GALLERY_INDEX_PROJECTION = `_id,
+  "slug": coalesce(slug.current, ""),
+  "title": coalesce(title, ""),
+  "descriptionText": coalesce(pt::text(description), ""),
+  ${GALLERY_COVER_IMAGE_PROJECTION}`;
+
+export function buildGalleryIndexText(doc: {
+  title: string;
+  descriptionText: string;
+}): string {
+  return [doc.title, doc.descriptionText].filter(Boolean).join(". ");
+}
+
+/**
+ * The vector metadata for a photo gallery, built once for both index paths.
+ * Mirrors `buildPageMetadata`; `type` is `"gallery"` — what the related
+ * handler maps to the contract's gallery literal.
+ */
+export function buildGalleryMetadata(doc: {
+  slug: string;
+  title: string;
+  descriptionText: string;
+  imageUrl?: string | null;
+}): Record<string, string> {
+  return {
+    slug: doc.slug,
+    type: "gallery",
+    title: doc.title,
+    excerpt: doc.descriptionText.slice(0, 200),
+    ...(doc.imageUrl ? { imageUrl: doc.imageUrl } : {}),
+  };
+}

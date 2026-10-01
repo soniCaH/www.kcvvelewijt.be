@@ -49,6 +49,16 @@ export function mapBffRelatedItems(
   items: readonly RelatedItem[],
 ): RelatedContentItem[] {
   return items.map((item) => {
+    if (item.type === "gallery") {
+      return {
+        type: "gallery" as const,
+        source: "ai" as const,
+        id: item.id,
+        title: item.title,
+        slug: item.slug,
+        imageUrl: item.imageUrl ?? null,
+      } satisfies RelatedGalleryItem;
+    }
     if (item.type === "page") {
       return {
         type: "page" as const,

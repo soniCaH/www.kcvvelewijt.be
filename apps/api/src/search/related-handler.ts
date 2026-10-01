@@ -1,5 +1,6 @@
 import { Effect } from "effect";
-import type { RelatedItem } from "@kcvv/api-contract";
+import { Schema as S } from "effect";
+import { RelatedItem } from "@kcvv/api-contract";
 import { VectorizeService } from "./vectorize";
 
 /**
@@ -49,8 +50,9 @@ export const handleRelated = (request: {
       .map((r) => {
         const meta = r.metadata;
         const rawType = meta["type"];
-        const type: "article" | "page" =
-          rawType === "article" || rawType === "page" ? rawType : "page";
+        // Narrowed by the contract itself, so a type added there needs no
+        // edit here. Anything else (a retired type) falls back to "page".
+        const type = S.is(RelatedItem.fields.type)(rawType) ? rawType : "page";
         return {
           id: r.id,
           slug: meta["slug"] ?? "",

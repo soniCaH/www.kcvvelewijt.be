@@ -9,11 +9,15 @@ import { EmbeddingService, EmbeddingServiceLive } from "../search/embedding";
 import {
   ARTICLE_INDEX_PROJECTION,
   ARTICLE_PUBLISHED_FILTER,
+  GALLERY_INDEXABLE_FILTER,
+  GALLERY_INDEX_PROJECTION,
   PAGE_INDEX_PROJECTION,
   RESPONSIBILITY_ACTIVE_FILTER,
   RESPONSIBILITY_INDEX_PROJECTION,
   buildArticleIndexText,
   buildArticleMetadata,
+  buildGalleryIndexText,
+  buildGalleryMetadata,
   buildPageIndexText,
   buildPageMetadata,
   buildResponsibilityIndexText,
@@ -53,7 +57,12 @@ class WebhookServiceError {
 
 // ─── Pure helpers ──────────────────────────────────────────────────────────
 
-const ALLOWED_TYPES = ["responsibility", "article", "page"] as const;
+const ALLOWED_TYPES = [
+  "responsibility",
+  "article",
+  "page",
+  "photoGallery",
+] as const;
 const ALLOWED_OPS = ["create", "update", "delete"] as const;
 
 type AllowedType = (typeof ALLOWED_TYPES)[number];
@@ -95,6 +104,13 @@ const PageDoc = S.Struct({
   slug: S.String,
 });
 
+const GalleryDoc = S.Struct({
+  title: S.String,
+  descriptionText: S.String,
+  slug: S.String,
+  imageUrl: S.optional(S.NullOr(S.String)),
+});
+
 interface TypeDescriptor {
   readonly query: string;
   readonly buildIndex: (doc: Record<string, unknown>) => {
@@ -131,6 +147,16 @@ const typeDescriptors: Record<AllowedType, TypeDescriptor> = {
       return {
         indexText: buildPageIndexText(r),
         metadata: buildPageMetadata(r),
+      };
+    },
+  },
+  photoGallery: {
+    query: `*[_id == $id && ${GALLERY_INDEXABLE_FILTER}][0]{ ${GALLERY_INDEX_PROJECTION} }`,
+    buildIndex: (doc) => {
+      const r = S.decodeUnknownSync(GalleryDoc)(doc);
+      return {
+        indexText: buildGalleryIndexText(r),
+        metadata: buildGalleryMetadata(r),
       };
     },
   },
