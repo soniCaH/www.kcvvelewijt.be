@@ -360,11 +360,12 @@ Only three weights exist, plus a muted sibling for surfaces where black-on-black
 
 ### Shadow Vocabulary
 
-- **Paper Small** (`box-shadow: 4px 4px 0 0 #0a0a0a`): the default. Buttons, badges, stamps, chrome.
+- **Paper Small** (`box-shadow: 4px 4px 0 0 #0a0a0a`): the default. Buttons, badges, stamps, chrome, and the resting shadow of every form field.
+- **Paper Small Hover** (`box-shadow: 3px 3px 0 0 #0a0a0a`): the 1px compression a form field makes on hover, beside the 1px nudge of the surface.
 - **Paper Medium** (`box-shadow: 6px 6px 0 0 #0a0a0a`): cards at rest — the most common card weight.
 - **Paper Lift** (`box-shadow: 8px 8px 0 0 #0a0a0a`): the hover target of a tilt-mode card, and emphasis cards.
-- **Paper Small Soft** (`box-shadow: 4px 4px 0 0 #6b6b6b`): the same offset in ink-muted, for anything sitting on an ink or dark-green surface where pure ink loses its silhouette. Also the resting shadow of every form field.
-- **Paper Small Soft Hover** (`box-shadow: 3px 3px 0 0 #6b6b6b`): the 1px compression a form field makes on hover.
+- **Paper Small Soft** (`box-shadow: 4px 4px 0 0 #6b6b6b`): the same offset in ink-muted, for anything sitting on an ink or dark-green surface where pure ink loses its silhouette.
+- **Paper Small Soft Hover** (`box-shadow: 3px 3px 0 0 #6b6b6b`): the same 1px compression for soft chrome on hover (scroll and slider arrows).
 - **Paper Small Alert** / **Alert Hover** (`4px 4px 0 0 #e8d5cf` / `3px 3px 0 0 #e8d5cf`): error-state fields only, so the offset reads as part of the alert moment.
 
 ### Named Rules
@@ -375,7 +376,7 @@ Only three weights exist, plus a muted sibling for surfaces where black-on-black
 
 **The Press-Down Overflow Rule.** A press-down consumer that is full-bleed or flush to a container edge (its translating box spans the full page width, so the container's own gutters live _inside_ it and can't absorb the shift) can push the page into a horizontal scrollbar on hover — a translated box still counts toward `scrollWidth` even though nothing looks different at rest. The fix is a **page-level** guard rather than a per-consumer one: `apps/web/src/app/layout.tsx` carries `overflow-x-clip` on **both** `<html>` and `<body>` — both are required, dropping either one reopens the bug (verified live; Chromium's overflow-propagation between body and the viewport means a clip on only one of the two does not actually stop the page from scrolling). It must stay `clip`, never `hidden`: `hidden` creates a scroll container that the sticky `<SiteHeader>` positions against, which breaks it. A new full-bleed press-down consumer does **not** need its own local `overflow-x-clip` — the page-level guard already covers it by construction, since `<html>`+`<body>` is the outermost box and a clip nested inside it cannot catch anything they miss. **But retiring an existing local clip is a visual change, not a no-op cleanup, and it is not judged on `scrollWidth`.** Under `clip` that number stays inflated whether or not anything is actually reachable (see `layout.tsx`'s guard comment; `test/e2e/homepage.spec.ts` therefore scrolls for real and asserts `window.scrollX`). Judge it on the rendered pixels instead, and review the baselines that move. `TeamHero.tsx` carried a clip from #1950, retired in #2920 — and it was **not** dead weight: it was slicing its own `<TapedFigure>`'s offset shadow. All nine TeamHero baselines moved; the rightmost drawn pixel went 7px further right and still stops 9px inside the canvas at every viewport, so nothing reaches the edge to scroll to. **Note which overflow is in play.** This rule's guard is about _hover_ overflow — a press-down consumer translating +4px, present only while pointed at. #1950's clip answered a different class: a `rotation`-tilted `<TapedCard>` whose offset shadow overflows **at rest**, with no press-down anywhere in the component (`<TapedFigure>` passes no `interactive`, so `TapedCard` applies no press classes). The page-level guard covers both, but only the static case shows up in a screenshot. [#2912](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2912).
 
-**The Complete Vocabulary Rule.** The seven tokens above are the entire shadow system — there is nothing else to reach for. The pre-redesign blurred family (`--shadow-sm`, `--shadow-DEFAULT`, `--shadow-md`, `--shadow-lg`, `--shadow-card-hover`, `--shadow-input`, `--shadow-input-focus`, `--shadow-soft`) and the orphaned asymmetric pair (`--shadow-photo-tape`, `--shadow-photo-tape-lift`) were removed from `globals.css`; all ten had zero consumers. Adding a blurred token back is a change to the design language, not a convenience.
+**The Complete Vocabulary Rule.** The eight tokens above are the entire shadow system — there is nothing else to reach for. The pre-redesign blurred family (`--shadow-sm`, `--shadow-DEFAULT`, `--shadow-md`, `--shadow-lg`, `--shadow-card-hover`, `--shadow-input`, `--shadow-input-focus`, `--shadow-soft`) and the orphaned asymmetric pair (`--shadow-photo-tape`, `--shadow-photo-tape-lift`) were removed from `globals.css`; all ten had zero consumers. Adding a blurred token back is a change to the design language, not a convenience.
 
 ## Motion
 
@@ -411,7 +412,7 @@ Motion here is **functional, not decorative**. Every duration answers exactly on
 
 **Everything rectangular is sharp.** Border radius is `0` on cards, buttons, inputs, selects, textareas, pills, badges, modals, images and bands. The only curve in the system is a true circle (`rounded-full`) for avatars, timeline bullets, spinner dots and score circles. There is no small-radius softening step, and there is no "just 2px" exception.
 
-Borders vary by weight, and the pattern is a tendency rather than a strict switch. A `2px` ink border is this system's most common weight by far: it is what a shadow-casting **object** uses — a card, a button, a filter chip, and (at reduced opacity, `ink/30` → `ink/40` → `ink/60` → `ink`) the form-field state progression — unless the object is a stamp, badge or small pill, which take `1.5px` instead. `2px` is also, more often than not, a plain divider or a loading-skeleton frame that carries no shadow at all. A quieter `1px` hairline — `border-paper-edge`, the alpha-ink steps `ink/10`–`ink/15`, or full-opacity `border-ink` left at its default weight — appears where a divider sits inside a surface that is already framed, and a second full-weight border would double the frame. Two further weights exist by design, not by drift: `1.5px` on stamps, badges and small pills, and a single `4px` accent rule on a left-hand highlight bar.
+Borders vary by weight, and the pattern is a tendency rather than a strict switch. A `2px` ink border is this system's most common weight by far: it is what a shadow-casting **object** uses — a card, a button, a filter chip, and a form field — unless the object is a stamp, badge or small pill, which take `1.5px` instead. `2px` is also, more often than not, a plain divider or a loading-skeleton frame that carries no shadow at all. A quieter `1px` hairline — `border-paper-edge`, the alpha-ink steps `ink/10`–`ink/15`, or full-opacity `border-ink` left at its default weight — appears where a divider sits inside a surface that is already framed, and a second full-weight border would double the frame. Two further weights exist by design, not by drift: `1.5px` on stamps, badges and small pills, and a single `4px` accent rule on a left-hand highlight bar.
 
 The ornament vocabulary is physical: **tape strips** (small solid rectangles anchored half-over a card edge at ±2°, ±4° or ±6°, an angle that follows the card's identity), **stamps** (rotated ~2°, mono uppercase, bordered and shadowed), **perforations** (a masked half-disc column with a dashed tear guide, on ticket-stub alerts), **striped seams** (45° two-tone SVG bands used as full-bleed section rules), and **highlighter strokes** (a hand-drawn SVG marker that sweeps left-to-right on hover behind inline links and heading accents).
 
@@ -456,11 +457,11 @@ The cost is stated rather than hidden: multiply darkens a photo that fills its f
 
 ### Inputs / Fields
 
-An eight-state machine shared identically by text input, select and textarea — the border weight encodes progress through the state, and the shadow encodes pressure.
+An eight-state machine shared identically by text input, select and textarea — the shadow encodes pressure (rest, compressed on hover, collapsed on focus); the border is full ink throughout, going alert on error and `ink/15` when disabled.
 
-- **Style:** white surface (the one white in the system — a field is a form you write on, not paper you print), sharp corners, `2px` border at `ink/30`, resting muted-ink offset shadow.
-- **Hover:** border to `ink/40`, shadow compresses to `3px 3px`, surface nudges 1px.
-- **Filled** (text present, not focused): border anchors at `ink/60`, resting shadow returns.
+- **Style:** cream surface, sharp corners, `2px` ink border, resting Paper Small ink offset shadow. The same skin on every typed-value field — `<Input>`, `<Select>`, `<Textarea>`, the `/zoeken` shell, the `/hulp` hero box. Not a field, so outside this rule: the `/kalender` "+ voeg toe" team picker (a chip) and `<HubSearch variant="nav">` (section-nav chip weight).
+- **Hover:** shadow compresses to `3px 3px` (Paper Small Hover), surface nudges 1px. The border is already full ink at rest, so it has nothing left to climb.
+- **Filled** (text present, not focused): identical to rest — border `ink`, resting shadow.
 - **Focus:** border goes full ink, shadow snaps to none, surface presses 2px — the deepest press in the system.
 - **Error:** border and shadow both switch to the alert pair; an `AlertBadge` renders below. Error survives focus.
 - **Disabled:** `ink/15` border, cream-soft fill, 50% opacity, all motion frozen — deliberately still inside the paper vocabulary rather than shadowless.
@@ -581,7 +582,7 @@ Where a notice is warranted, two more splits apply. **The tier follows the scope
 
 - **Do** set every rectangle's border radius to `0` and reserve curves for true circles.
 - **Do** give a shadow-casting surface a `2px` ink border, or `1.5px` on a stamp, badge or chip — never a `1px` hairline underneath a shadow, except the in-page section-nav chip, which is deliberately `1px`/`1px` (chrome, not content). A shadowless divider may still be `2px` ink; the implication runs one way only.
-- **Do** use hard offset shadows with `0` blur, in exactly the seven documented tokens.
+- **Do** use hard offset shadows with `0` blur, in exactly the eight documented tokens.
 - **Do** press interactive surfaces into their shadow on hover (`translate(4px, 4px)` + `shadow-none`), gating only the translate behind `motion-safe:` — except the in-page section-nav chip, which never presses at all.
 - **Do** pick the right green: `jersey` decorative only, `jersey-deep` for anything carrying text (headings, CTAs, inline prose links), `jersey-bright` for green text on ink.
 - **Do** reach for an existing primitive — taped card, ticket stub, mono label, editorial heading, tape strip, stamp badge, striped seam — before writing new markup.

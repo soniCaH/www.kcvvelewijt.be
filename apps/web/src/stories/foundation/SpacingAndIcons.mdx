@@ -264,7 +264,8 @@ The redesign uses hard-edged offset shadows ("paper shadows") for cards on the
 cream surface — they read like risograph print rather than soft web glows. There
 is no soft alternative for chrome that should sit subtly above content: use the
 ink-muted `--shadow-paper-sm-soft` sibling, which keeps the hard offset but
-softens its colour.
+softens its colour. Form fields rest on `--shadow-paper-sm` and compress to
+`--shadow-paper-sm-hover` on hover.
 
 <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', alignItems: 'flex-start', marginBottom: '24px', padding: '32px 24px', background: 'var(--color-cream)', borderRadius: '8px', border: '1px solid var(--color-paper-edge)' }}>
   <div style={{ textAlign: 'center' }}>
@@ -281,6 +282,11 @@ softens its colour.
     <div style={{ width: '120px', height: '120px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-ink)', boxShadow: 'var(--shadow-paper-lift)' }} />
     <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '12px' }}>--shadow-paper-lift</div>
     <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2' }}>8px offset (hover lift)</div>
+  </div>
+  <div style={{ textAlign: 'center' }}>
+    <div style={{ width: '120px', height: '120px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-ink)', boxShadow: 'var(--shadow-paper-sm-hover)' }} />
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '12px' }}>--shadow-paper-sm-hover</div>
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2' }}>3px offset (form-field hover)</div>
   </div>
 </div>
 
