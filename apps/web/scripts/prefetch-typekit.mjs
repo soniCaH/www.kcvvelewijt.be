@@ -21,8 +21,9 @@
 // `build-storybook` / `vr:build-storybook` — those only produce
 // `storybook-static`, which must never carry Adobe's files.
 //
-// Each network call is bounded (`FETCH_TIMEOUT_MS`) and falls back to
-// whatever this cache already holds from a previous run if the fetch fails;
+// Each network call is tried `FETCH_ATTEMPTS` times, each attempt bounded by
+// `FETCH_TIMEOUT_MS`, and falls back to whatever this cache already holds
+// from a previous run if every attempt fails;
 // with no prior cache to fall back to, it fails loudly instead of silently
 // producing an empty/partial cache the test-runner would then have to
 // explain away as "denied" requests.
@@ -33,7 +34,7 @@
 // that fails PARTWAY through leave `typekit.css` (already overwritten)
 // referencing faces the manifest/disk never actually got, a corrupted state
 // worse than just keeping the previous run's cache untouched.
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { mkdir, rename, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -46,6 +47,12 @@ const MANIFEST_PATH = join(CACHE_DIR, "manifest.json");
 
 const KIT_CSS_URL = "https://use.typekit.net/cvo5raz.css";
 const FETCH_TIMEOUT_MS = 10_000;
+// A fresh CI runner has no previous cache, so the fallback below never fires
+// there — one slow Typekit response used to fail a whole VR shard (#3316).
+// Worst case per URL: 3 × 10 s + 2 × ≤4 s ≈ 38 s. The CSS and the fonts are
+// fetched one after the other, so ≈ 76 s for the whole script.
+export const FETCH_ATTEMPTS = 3;
+const RETRY_PAUSE_MS = 2_000;
 
 function loadExistingManifest() {
   try {
@@ -56,20 +63,41 @@ function loadExistingManifest() {
 }
 
 /**
- * Fetch `url`, falling back to a previously-cached copy (if the manifest
- * already has one and its file is still on disk) when the fetch fails.
+ * Fetch `url` up to `FETCH_ATTEMPTS` times, each attempt bounded by
+ * `FETCH_TIMEOUT_MS`. A timeout, a network error and a non-2xx response all
+ * count as a failed attempt; the last attempt's error is thrown.
+ */
+export async function fetchFresh(url, asBuffer) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      const res = await fetch(url, {
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      });
+      if (!res.ok) throw new Error(`responded ${res.status}`);
+      return asBuffer ? Buffer.from(await res.arrayBuffer()) : await res.text();
+    } catch (err) {
+      if (attempt === FETCH_ATTEMPTS) throw err;
+      console.warn(
+        `[prefetch-typekit] ${url} attempt ${attempt}/${FETCH_ATTEMPTS} failed (${err.message}); retrying`,
+      );
+      // Jitter, so the 19 parallel font fetches don't retry in lockstep.
+      const pause = RETRY_PAUSE_MS * (1 + Math.random());
+      await new Promise((resolve) => setTimeout(resolve, pause));
+    }
+  }
+}
+
+/**
+ * Fetch `url` (with retries), falling back to a previously-cached copy (if
+ * the manifest already has one and its file is still on disk) when every
+ * attempt fails.
  * Throws when the fetch fails AND there is no prior cache — a silent empty
  * cache would just surface later as a confusing "denied" request in the VR
  * run instead of a clear failure here.
  */
 async function fetchWithFallback(url, { existingManifest, asBuffer }) {
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) });
-    if (!res.ok) throw new Error(`responded ${res.status}`);
-    return {
-      body: asBuffer ? Buffer.from(await res.arrayBuffer()) : await res.text(),
-      fromCache: false,
-    };
+    return { body: await fetchFresh(url, asBuffer), fromCache: false };
   } catch (err) {
     const cached = existingManifest[url];
     const cachedPath = cached && join(CACHE_DIR, cached.file);
@@ -78,7 +106,9 @@ async function fetchWithFallback(url, { existingManifest, asBuffer }) {
         `[prefetch-typekit] ${url} fetch failed (${err.message}); using the cached copy from a previous run`,
       );
       return {
-        body: asBuffer ? readFileSync(cachedPath) : readFileSync(cachedPath, "utf8"),
+        body: asBuffer
+          ? readFileSync(cachedPath)
+          : readFileSync(cachedPath, "utf8"),
         fromCache: true,
       };
     }
@@ -101,8 +131,9 @@ async function fetchWithFallback(url, { existingManifest, asBuffer }) {
 function extractWoff2Urls(css) {
   const urls = [];
   for (const block of css.matchAll(/@font-face\s*\{[^}]*\}/g)) {
-    const match =
-      /url\((["']?)([^"')]+)\1\)\s*format\((["']?)woff2\3\)/.exec(block[0]);
+    const match = /url\((["']?)([^"')]+)\1\)\s*format\((["']?)woff2\3\)/.exec(
+      block[0],
+    );
     if (match) urls.push(match[2]);
   }
   return urls;
@@ -151,7 +182,10 @@ async function main() {
     }),
   );
 
-  await writeFile(join(STAGING_DIR, "manifest.json"), JSON.stringify(manifest, null, 2));
+  await writeFile(
+    join(STAGING_DIR, "manifest.json"),
+    JSON.stringify(manifest, null, 2),
+  );
 
   // Publish: only reached once every fetch above has succeeded (a thrown
   // error anywhere above skips straight to main().catch() below, leaving
@@ -166,7 +200,11 @@ async function main() {
   );
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+// realpath: Node resolves symlinks in `import.meta.url` but not in argv[1],
+// and a skipped `main()` here exits 0 with no cache written.
+if (realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}
