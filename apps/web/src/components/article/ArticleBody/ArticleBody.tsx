@@ -555,14 +555,14 @@ function renderArticleImage(value: ArticleImageValue): ReactNode {
         // `--tape-left` / `--tape-right` custom properties — center
         // isn't directly supported, so we use the canonical `left`
         // anchor (matches the design-system default for figure-scale
-        // tape) and the `a` rotation token (~−2°).
+        // tape) and the `c` rotation token (−2°).
         tape={
           showTape
             ? {
                 color: "warm",
                 length: "sm",
                 position: "left",
-                rotation: "a",
+                rotation: "c",
               }
             : undefined
         }

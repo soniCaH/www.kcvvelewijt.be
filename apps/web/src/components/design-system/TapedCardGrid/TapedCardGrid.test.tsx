@@ -75,20 +75,35 @@ describe("TapedCardGrid", () => {
       "--taped-card-rotation",
     );
     expect((slots[0] as HTMLElement).style.cssText).toContain(
-      "var(--rotate-tape-a)",
+      "var(--rotate-lean-a)",
     );
     expect((slots[1] as HTMLElement).style.cssText).toContain(
-      "var(--rotate-tape-b)",
+      "var(--rotate-lean-b)",
     );
     expect((slots[2] as HTMLElement).style.cssText).toContain(
-      "var(--rotate-tape-c)",
+      "var(--rotate-lean-c)",
     );
     expect((slots[3] as HTMLElement).style.cssText).toContain(
-      "var(--rotate-tape-d)",
+      "var(--rotate-lean-d)",
     );
     expect((slots[4] as HTMLElement).style.cssText).toContain(
-      "var(--rotate-tape-a)",
+      "var(--rotate-lean-a)",
     );
+  });
+
+  it("sets no tape-rotation custom property — tape angle follows the card, not the slot (#3329)", () => {
+    const { container } = render(
+      <TapedCardGrid>
+        <span>x</span>
+        <span>y</span>
+      </TapedCardGrid>,
+    );
+    for (const slot of container.querySelectorAll("[data-slot]")) {
+      expect((slot as HTMLElement).style.cssText).not.toContain(
+        "--tape-rotation",
+      );
+      expect((slot as HTMLElement).style.cssText).toContain("--tape-left");
+    }
   });
 
   it("renders emptyState when children is empty and prop is provided", () => {

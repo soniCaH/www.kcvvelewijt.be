@@ -110,11 +110,12 @@ function buildMetaParts(value: EventFactValue): string[] {
  * eventFact references (eventfact-inline-locked.md, drill 5.d-evt-inline).
  *
  * Composition: `<TapedCard>` cream-white frame + two ochre tape strips
- * at top-left @ -5° (`rotation="polaroid-a"`) and bottom-right @ +4°
- * (`verticalEdge="bottom"` + `rotation="polaroid-b"`) per
+ * at top-left @ -4° (`rotation="b"`) and bottom-right @ +4°
+ * (`verticalEdge="bottom"` + `rotation="e"`) per
  * eventfact-inline-locked.md §Round 1. The `<TapeStrip>` primitive was
- * extended in #1853 to support bottom-edge anchor + polaroid-scale
- * rotations specifically for this composition.
+ * extended in #1853 to support a bottom-edge anchor for this composition; the
+ * angles come from the site's bigger tilt tier (#3329 folded the old
+ * -5° / +4° polaroid tokens into it).
  *
  * Past-event treatment mirrors `<EventDetailBlock>`: muted `Afgelopen`
  * pill in place of the competitionTag, CTA suppressed entirely.
@@ -148,22 +149,21 @@ export function EventFactInline({
       <TapedCard
         bg="cream"
         // Two ochre tape strips per eventfact-inline-locked §Round 1:
-        // top-left @ -5° (polaroid-a) + bottom-right @ +4° (polaroid-b).
-        // Both pool tokens scoped to this composition only — see
-        // `TapeStripRotation` JSDoc for the discipline rationale.
+        // top-left @ -4° (`b`) + bottom-right @ +4° (`e`), both from the
+        // bigger tier of the site tilt scale.
         tape={[
           {
             color: "warm",
             length: "sm",
             position: "left",
-            rotation: "polaroid-a",
+            rotation: "b",
           },
           {
             color: "warm",
             length: "sm",
             position: "right",
             verticalEdge: "bottom",
-            rotation: "polaroid-b",
+            rotation: "e",
           },
         ]}
         padding="lg"

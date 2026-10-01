@@ -166,7 +166,7 @@ export function TimelineImage({
         bg="cream"
         tint="newsprint"
         rotation={rotation}
-        tape={{ color: "warm", length: "sm", position: "left", rotation: "a" }}
+        tape={{ color: "warm", length: "sm", position: "left", rotation: "c" }}
       >
         {children}
       </TapedFigure>

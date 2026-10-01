@@ -197,28 +197,64 @@ matching `--container-*` var) — but still only one of these three values:
   <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2' }}>chrome · 1440px (max-w-[1440px]) — header / footer only, NOT page content</div>
 </div>
 
-### Rotation pool
+### Tilt scale
 
-Four small angles compose the taped-card aesthetic. Pick one per card to keep
-the layout from feeling regimented; never apply uniform rotation across a
-grid. The pool is intentionally narrow so the page never tips into chaos.
+One site scale, two tiers. **Lean says where a card sits; tape says what the
+card is.** Neither tier contains 0, so a tilted thing never reads as flat by
+accident; flat is a separate, explicit `none` in the components.
+
+**Slight tier — a card's lean.** It follows the grid slot (`<TapedCardGrid>`
+sets `--taped-card-rotation` per slot; `<TapedCard rotation="a" … "d">` reads
+this tier).
 
 <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '24px', padding: '32px 16px', background: 'var(--color-cream)', borderRadius: '8px', border: '1px solid var(--color-paper-edge)' }}>
   <div style={{ textAlign: 'center' }}>
-    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-tape-a))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>-0.5°</div>
+    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-lean-a))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>-1°</div>
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '8px' }}>--rotate-lean-a</div>
+  </div>
+  <div style={{ textAlign: 'center' }}>
+    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-lean-b))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>-0.5°</div>
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '8px' }}>--rotate-lean-b</div>
+  </div>
+  <div style={{ textAlign: 'center' }}>
+    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-lean-c))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>0.5°</div>
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '8px' }}>--rotate-lean-c</div>
+  </div>
+  <div style={{ textAlign: 'center' }}>
+    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-lean-d))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>1°</div>
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '8px' }}>--rotate-lean-d</div>
+  </div>
+</div>
+
+**Bigger tier — a tape strip's angle.** It follows the card's identity
+(`<TapeStrip seed>`, as `<NewsCard>` seeds it with its title) so the same card
+wears the same tape on every page. A strip with neither `seed` nor `rotation`
+is flat.
+
+<div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '24px', padding: '32px 16px', background: 'var(--color-cream)', borderRadius: '8px', border: '1px solid var(--color-paper-edge)' }}>
+  <div style={{ textAlign: 'center' }}>
+    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-tape-a))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>-6°</div>
     <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '8px' }}>--rotate-tape-a</div>
   </div>
   <div style={{ textAlign: 'center' }}>
-    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-tape-b))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>-0.25°</div>
+    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-tape-b))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>-4°</div>
     <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '8px' }}>--rotate-tape-b</div>
   </div>
   <div style={{ textAlign: 'center' }}>
-    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-tape-c))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>0.25°</div>
+    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-tape-c))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>-2°</div>
     <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '8px' }}>--rotate-tape-c</div>
   </div>
   <div style={{ textAlign: 'center' }}>
-    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-tape-d))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>0.5°</div>
+    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-tape-d))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>2°</div>
     <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '8px' }}>--rotate-tape-d</div>
+  </div>
+  <div style={{ textAlign: 'center' }}>
+    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-tape-e))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>4°</div>
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '8px' }}>--rotate-tape-e</div>
+  </div>
+  <div style={{ textAlign: 'center' }}>
+    <div style={{ width: '80px', height: '80px', background: 'var(--color-cream-soft)', border: '1px solid var(--color-paper-edge)', boxShadow: 'var(--shadow-paper-sm)', transform: 'rotate(var(--rotate-tape-f))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'monospace', fontSize: '11px', color: 'var(--color-ink)' }}>6°</div>
+    <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#9a9da2', marginTop: '8px' }}>--rotate-tape-f</div>
   </div>
 </div>
 

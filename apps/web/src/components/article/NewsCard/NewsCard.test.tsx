@@ -439,11 +439,12 @@ describe("NewsCard", () => {
       const rr = right?.getAttribute("data-rotation");
       // Each strip pins to a named pool entry (not "inherit") so
       // standalone usage outside a TapedCardGrid still varies.
-      expect(lr).toMatch(/^[abcd]$/);
-      expect(rr).toMatch(/^[abcd]$/);
-      // The two strips on one card should never share a rotation —
-      // the derivation offsets by 2 in the 4-entry pool.
-      expect(lr).not.toBe(rr);
+      expect(lr).toMatch(/^[a-f]$/);
+      expect(rr).toMatch(/^[a-f]$/);
+      // Bigger tier is a..c negative, d..f positive: the two strips on
+      // one card must lean in opposite directions.
+      const isNegative = (r: string | null | undefined) => "abc".includes(r!);
+      expect(isNegative(lr)).not.toBe(isNegative(rr));
     });
 
     it("derivation is deterministic — same title yields the same rotation pair", () => {
@@ -456,6 +457,21 @@ describe("NewsCard", () => {
         .querySelector('[data-position="left"]')
         ?.getAttribute("data-rotation");
       expect(aLeft).toBe(bLeft);
+    });
+
+    it("opposite signs hold for every title", () => {
+      for (const title of ["a", "bb", "ccc", "dddd", "eeeee", "ffffff", "g7"]) {
+        const { container } = render(
+          <NewsCard title={title} href="/x" tapeCount={2} />,
+        );
+        const lr = container
+          .querySelector('[data-position="left"]')
+          ?.getAttribute("data-rotation");
+        const rr = container
+          .querySelector('[data-position="right"]')
+          ?.getAttribute("data-rotation");
+        expect("abc".includes(lr!)).not.toBe("abc".includes(rr!));
+      }
     });
 
     it("different titles distribute across the rotation pool", () => {

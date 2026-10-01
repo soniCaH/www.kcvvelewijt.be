@@ -160,7 +160,7 @@ export function YouthDirectory({
                       color: "warm",
                       length: "sm",
                       position: index % 2 === 0 ? "left" : "right",
-                      rotation: "a",
+                      rotation: "c",
                     }}
                     bg="cream"
                     padding="sm"

@@ -238,7 +238,7 @@ export type {
 } from "./StripedSeam";
 
 // TapeStrip
-export { TapeStrip } from "./TapeStrip";
+export { TapeStrip, tapeRotationFor, oppositeTapeRotation } from "./TapeStrip";
 export type {
   TapeStripProps,
   TapeStripColor,

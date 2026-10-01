@@ -396,7 +396,7 @@ function DarkBand({
                 color: "warm",
                 length: "md",
                 position: "left",
-                rotation: "a",
+                rotation: "c",
               }}
               className="w-full md:w-[24rem]"
             >

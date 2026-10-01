@@ -104,7 +104,7 @@ export function EventHero({
           <TapedFigure
             aspect="landscape-16-9"
             rotation={-1}
-            tape={{ color: "warm", length: "md", rotation: "b" }}
+            tape={{ color: "warm", length: "md", rotation: "d" }}
           >
             {cover}
           </TapedFigure>
