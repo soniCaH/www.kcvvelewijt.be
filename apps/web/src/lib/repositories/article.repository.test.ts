@@ -1074,4 +1074,117 @@ describe("ArticleRepository", () => {
       expect(articles[0].id).toBe("article-1");
     });
   });
+
+  describe("findRelatedByPerson", () => {
+    const person = { firstName: "Jan", lastName: "Peeters" };
+
+    // The person query's projection: the related-card fields plus `linked`
+    // (the reference edge) and `bodyText` (null for linked rows — GROQ skips
+    // flattening what it does not need to confirm).
+    function makePersonRow(
+      id: string,
+      overrides: { linked?: boolean; bodyText?: string | null } = {},
+    ) {
+      return {
+        id,
+        title: `Article ${id}`,
+        slug: `article-${id}`,
+        publishedAt: "2026-03-20T10:00:00Z",
+        featured: false,
+        tags: [],
+        coverImageUrl: null,
+        linked: overrides.linked ?? false,
+        bodyText: overrides.bodyText ?? null,
+      };
+    }
+
+    function run(p = person) {
+      return runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findRelatedByPerson("player-1", p);
+        }),
+      );
+    }
+
+    it("lists linked articles first, then name-matched ones, each keeping the query's newest-first order", async () => {
+      mockFetch.mockResolvedValueOnce([
+        makePersonRow("named-new", { bodyText: "Jan Peeters scoort." }),
+        makePersonRow("linked-new", { linked: true }),
+        makePersonRow("named-old", { bodyText: "Coach over Jan Peeters." }),
+        makePersonRow("linked-old", { linked: true }),
+      ]);
+
+      const articles = await run();
+
+      expect(articles.map((a) => a.id)).toEqual([
+        "linked-new",
+        "linked-old",
+        "named-new",
+        "named-old",
+      ]);
+    });
+
+    it("returns an article that is both linked and name-matched once", async () => {
+      // One OR-query yields one row per document, so dedupe is structural —
+      // pin it so a future two-query rewrite cannot regress it.
+      mockFetch.mockResolvedValueOnce([
+        makePersonRow("both", { linked: true, bodyText: "Jan Peeters" }),
+      ]);
+
+      const articles = await run();
+
+      expect(articles.map((a) => a.id)).toEqual(["both"]);
+    });
+
+    it("drops a candidate that only shares tokens with the full name", async () => {
+      // GROQ `match` tokenizes: every body below contains the words but not
+      // the phrase "Jan Peeters".
+      mockFetch.mockResolvedValueOnce([
+        makePersonRow("last-name-only", {
+          bodyText: "Piet Peeters en Jan Dewit spelen samen.",
+        }),
+        makePersonRow("reversed", { bodyText: "Peeters Jan blijft thuis." }),
+        makePersonRow("longer-word", { bodyText: "Jan Peetersen kwam langs." }),
+        makePersonRow("real", { bodyText: "Trainer Jan Peeters tekent bij." }),
+      ]);
+
+      const articles = await run();
+
+      expect(articles.map((a) => a.id)).toEqual(["real"]);
+    });
+
+    it("confirms the phrase across case, whitespace and apostrophe style", async () => {
+      mockFetch.mockResolvedValueOnce([
+        makePersonRow("curly", { bodyText: "Wim D’hondt vertrekt." }),
+        makePersonRow("spaced", { bodyText: "WIM  D'HONDT\nblijft." }),
+      ]);
+
+      const articles = await run({ firstName: "Wim", lastName: "D'hondt" });
+
+      expect(articles.map((a) => a.id)).toEqual(["curly", "spaced"]);
+    });
+
+    it("sends the full name as the match phrase", async () => {
+      mockFetch.mockResolvedValueOnce([]);
+
+      await run();
+
+      expect(mockFetch.mock.calls.at(-1)?.[1]).toEqual({
+        documentId: "player-1",
+        phrase: "Jan Peeters",
+      });
+    });
+
+    it("never matches on the last name alone: a missing first name falls back to the reference edge", async () => {
+      mockFetch.mockResolvedValueOnce([makeArticleListRow({ id: "linked" })]);
+
+      const articles = await run({ firstName: " ", lastName: "Peeters" });
+
+      expect(articles.map((a) => a.id)).toEqual(["linked"]);
+      expect(mockFetch.mock.calls.at(-1)?.[1]).toEqual({
+        documentId: "player-1",
+      });
+    });
+  });
 });

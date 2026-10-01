@@ -248,10 +248,11 @@ function mapCuratedEntry(
  * Adapt `ArticleVM[]` — the `ArticleRepository.findRelated()` output rendered
  * on the player / staff / team detail pages — to `<RelatedRow>` cards.
  *
- * Builds `reference`-source article items (the query behind `findRelated`,
- * `RELATED_ARTICLES_QUERY`, matches on `references($documentId)` — an
- * explicit in-body mention, the same relation `mapMentionedPlayers` etc.
- * represent for the article page) and delegates to `mapRelatedToRelatedRow`,
+ * Builds `reference`-source article items (the queries behind `findRelated`
+ * and, on player / staff pages, `findRelatedByPerson` match on
+ * `references($documentId)` — an explicit in-body mention, the same relation
+ * `mapMentionedPlayers` etc. represent for the article page — and, for a
+ * person, an article naming them in full, #3339) and delegates to `mapRelatedToRelatedRow`,
  * so the cards are shaped identically to every other route AND the
  * `related_content_*` analytics keep firing with `source: "reference"` /
  * `target_type: "article"` — preserving the contract of the retired
