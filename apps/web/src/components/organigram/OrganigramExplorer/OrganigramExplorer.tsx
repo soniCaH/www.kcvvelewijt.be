@@ -149,6 +149,8 @@ export function OrganigramExplorer({
   const [fanExpanded, setFanExpanded] = useState(false);
   const [siblingsOpen, setSiblingsOpen] = useState(false);
   const [scaleStep, setScaleStep] = useState(0);
+  // Bumped when the centre node's FLIP animation settles, to re-measure the stage.
+  const [flipSettled, setFlipSettled] = useState(0);
   // Phones cap the zoom at A+ (1.15): scale(1.3) pushes the centre card under
   // sibling carets at ~360px, and CSS transforms don't expand the scroll area
   // so overflow can't rescue it (MOB-4).
@@ -220,7 +222,7 @@ export function OrganigramExplorer({
     if (Math.abs(dx) < 2 && Math.abs(dy) < 2) return;
     const scale = Math.max(0.4, Math.min(1, flip.rect.width / to.width));
 
-    center.animate(
+    const animation = center.animate(
       [
         { transform: `translate(${dx}px, ${dy}px) scale(${scale})` },
         { transform: "none" },
@@ -231,6 +233,15 @@ export function OrganigramExplorer({
         // keyword stands in for var(--ease-out) here.
         easing: "ease-out",
       },
+    );
+    // The animated translate counts toward the track's `scrollHeight` while
+    // it runs, and a transform fires neither a ResizeObserver entry nor a
+    // `transitionend` — so a measurement taken mid-flight could latch the
+    // bottom fade on. Re-measure once the animation settles (a cancelled one
+    // rejects `finished`; nothing to re-measure then).
+    animation.finished.then(
+      () => setFlipSettled((n) => n + 1),
+      () => {},
     );
   }, [open, focusId]);
 
@@ -384,7 +395,7 @@ export function OrganigramExplorer({
           track never scrolls (#3310). */}
       <ScrollOverlay
         direction="both"
-        remeasureOn={[scaleStep]}
+        remeasureOn={[scaleStep, flipSettled]}
         overflowClassName="overflow-auto"
         className="flex min-h-0 flex-1 flex-col"
         trackClassName="flex-1 px-4 py-6"

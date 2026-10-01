@@ -26,7 +26,7 @@ export interface UseScrollHintOptions<T extends HTMLElement = HTMLElement> {
    */
   remeasureOn?: React.DependencyList;
   /**
-   * Caps `remainingLeft` / `remainingRight` at this many pixels. A consumer
+   * Caps `remainingLeft` / `remainingRight` / `remainingBottom` at this many pixels. A consumer
    * that renders a fade whose width is `min(fadeWidth, remaining)` should
    * pass its fade width here instead of clamping at the call site (#2860):
    * once the real remaining distance exceeds the cap, the capped value —
@@ -74,6 +74,12 @@ export interface UseScrollHintReturn<T extends HTMLElement = HTMLElement> {
    * `maxRemainingPx` like `remainingLeft` / `remainingRight`.
    */
   remainingBottom: number;
+  /**
+   * Height of the track's horizontal scrollbar (`offsetHeight - clientHeight`)
+   * — 0 for overlay scrollbars. A bottom fade offsets itself by this much so
+   * it never paints over an always-visible scrollbar.
+   */
+  scrollbarHeight: number;
   scrollLeft: () => void;
   scrollRight: () => void;
 }
@@ -94,6 +100,7 @@ export function useScrollHint<T extends HTMLElement = HTMLElement>(
   const [remainingRight, setRemainingRight] = useState(0);
   const [canScrollDown, setCanScrollDown] = useState(false);
   const [remainingBottom, setRemainingBottom] = useState(0);
+  const [scrollbarHeight, setScrollbarHeight] = useState(0);
 
   // The track's own horizontal padding, cached across scroll events.
   // Scrolling cannot change an element's own padding, so re-reading
@@ -171,6 +178,7 @@ export function useScrollHint<T extends HTMLElement = HTMLElement>(
     const rBottom = Math.max(0, scrollHeight - clientHeight - scrollTop);
     setCanScrollDown(rBottom > DEAD_ZONE);
     setRemainingBottom(Math.min(maxRemainingPx, rBottom));
+    setScrollbarHeight(Math.max(0, el.offsetHeight - clientHeight));
   }, [maxRemainingPx]);
 
   // Full re-check for every non-scroll trigger: refresh the cached padding
@@ -299,6 +307,7 @@ export function useScrollHint<T extends HTMLElement = HTMLElement>(
     remainingRight,
     canScrollDown,
     remainingBottom,
+    scrollbarHeight,
     scrollLeft: scrollLeftFn,
     scrollRight: scrollRightFn,
   };

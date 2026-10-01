@@ -53,3 +53,37 @@ export function stubAnimationFrame() {
     },
   };
 }
+
+/**
+ * Overrides numeric layout getters (`scrollHeight`, `clientHeight`,
+ * `offsetHeight`, `scrollTop`, ...) on `HTMLElement.prototype` — happy-dom
+ * does no layout, so these read 0 — and returns a function that puts back
+ * exactly what was there. Some of them (`clientHeight`) are native getters
+ * OWNED by the prototype, so deleting them in cleanup would strip the real
+ * getter from every later test in the file; restore the saved descriptor
+ * instead (or delete only when there was none).
+ */
+export function mockLayoutProps(props: Record<string, number>) {
+  const saved = Object.keys(props).map(
+    (prop) =>
+      [
+        prop,
+        Object.getOwnPropertyDescriptor(HTMLElement.prototype, prop),
+      ] as const,
+  );
+  for (const [prop, value] of Object.entries(props)) {
+    Object.defineProperty(HTMLElement.prototype, prop, {
+      configurable: true,
+      value,
+    });
+  }
+  return () => {
+    for (const [prop, descriptor] of saved) {
+      if (descriptor) {
+        Object.defineProperty(HTMLElement.prototype, prop, descriptor);
+      } else {
+        Reflect.deleteProperty(HTMLElement.prototype, prop);
+      }
+    }
+  };
+}

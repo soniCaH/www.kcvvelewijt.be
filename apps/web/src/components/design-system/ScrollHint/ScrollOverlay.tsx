@@ -104,6 +104,7 @@ export function ScrollOverlay({
     remainingRight,
     canScrollDown,
     remainingBottom,
+    scrollbarHeight,
     scrollLeft,
     scrollRight,
   } = useScrollHint<HTMLElement>({ remeasureOn, maxRemainingPx: MAX_FADE_PX });
@@ -171,11 +172,12 @@ export function ScrollOverlay({
         <div
           aria-hidden="true"
           data-scroll-fade="bottom"
-          style={{ height: remainingBottom }}
+          style={{ height: remainingBottom, bottom: scrollbarHeight }}
           className={cn(
-            "pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t to-transparent",
+            // No `chromeClassName`: consumers pass it for horizontal insets
+            // (StandingsTable's `right-14`) that must not reach this edge.
+            "pointer-events-none absolute inset-x-0 bg-gradient-to-t to-transparent",
             fadeFromClassName,
-            chromeClassName,
           )}
         />
       )}

@@ -9,7 +9,10 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ScrollOverlay } from "./ScrollOverlay";
-import { stubAnimationFrame } from "@/../tests/helpers/scroll-hint.helpers";
+import {
+  mockLayoutProps,
+  stubAnimationFrame,
+} from "@/../tests/helpers/scroll-hint.helpers";
 
 function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
   Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
@@ -179,23 +182,49 @@ describe("ScrollOverlay", () => {
   });
 
   describe("bottom fade — the vertical cue (#3340)", () => {
+    let restoreLayout: (() => void) | undefined;
     function mockVerticalDimensions(
       scrollHeight: number,
       clientHeight: number,
+      offsetHeight = clientHeight,
     ) {
-      Object.defineProperty(HTMLElement.prototype, "scrollHeight", {
-        configurable: true,
-        value: scrollHeight,
-      });
-      Object.defineProperty(HTMLElement.prototype, "clientHeight", {
-        configurable: true,
-        value: clientHeight,
+      restoreLayout = mockLayoutProps({
+        scrollHeight,
+        clientHeight,
+        offsetHeight,
       });
     }
 
     afterEach(() => {
-      Reflect.deleteProperty(HTMLElement.prototype, "scrollHeight");
-      Reflect.deleteProperty(HTMLElement.prototype, "clientHeight");
+      restoreLayout?.();
+    });
+
+    it("sits above the track's horizontal scrollbar instead of painting over it", () => {
+      mockScrollDimensions(400, 400);
+      mockVerticalDimensions(900, 400, 415);
+      const { container } = render(
+        <ScrollOverlay>
+          <span>Item</span>
+        </ScrollOverlay>,
+      );
+      const fade = container.querySelector(
+        '[data-scroll-fade="bottom"]',
+      ) as HTMLElement;
+      expect(fade.style.bottom).toBe("15px");
+    });
+
+    it("does not apply chromeClassName to the bottom fade — consumers use it for horizontal insets", () => {
+      mockScrollDimensions(400, 400);
+      mockVerticalDimensions(900, 400);
+      const { container } = render(
+        <ScrollOverlay chromeClassName="right-14">
+          <span>Item</span>
+        </ScrollOverlay>,
+      );
+      const fade = container.querySelector(
+        '[data-scroll-fade="bottom"]',
+      ) as HTMLElement;
+      expect(fade).not.toHaveClass("right-14");
     });
 
     it("renders no bottom fade when the track does not overflow vertically", () => {
@@ -223,11 +252,7 @@ describe("ScrollOverlay", () => {
         '[data-scroll-fade="bottom"]',
       ) as HTMLElement;
       expect(fade.style.height).toBe("24px");
-      expect(fade).toHaveClass(
-        "from-jersey-deep-dark",
-        "bottom-0",
-        "inset-x-0",
-      );
+      expect(fade).toHaveClass("from-jersey-deep-dark", "inset-x-0");
       expect(fade).toHaveClass("bg-gradient-to-t");
       expect(screen.queryByLabelText("Scroll down")).not.toBeInTheDocument();
     });

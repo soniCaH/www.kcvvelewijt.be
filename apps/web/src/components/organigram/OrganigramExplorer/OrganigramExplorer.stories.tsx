@@ -155,7 +155,8 @@ export const StageIsBoundedOnAShortPhone: Story = {
  * #3340 — 320x568 guarantees vertical overflow (the story above asserts it),
  * so the stage shows the bottom fade at rest, up to 24px tall, and it is gone
  * once scrolled to the end. The scroll is set directly with a `scroll` event,
- * never a smooth scroll (a hidden tab renders no animation frames). `!vr`.
+ * never a smooth scroll (its animation is blank in a hidden tab); the hook's
+ * own rAF-coalesced measurement is awaited through `waitFor`. `!vr`.
  */
 export const BottomFadeFollowsTheVerticalScroll: Story = {
   tags: ["!vr"],
