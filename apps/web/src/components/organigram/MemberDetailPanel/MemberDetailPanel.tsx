@@ -8,17 +8,14 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type RefObject,
 } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import type { OrgChartMember, OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
 import { cn } from "@/lib/utils/cn";
 import { revealHash } from "@/lib/utils/same-page-anchor";
 import { findMemberResponsibilities } from "@/lib/responsibility-utils";
-import {
-  monogramInitials,
-  splitDisplayName,
-} from "@/components/organigram/OrgPersonCard";
+import { splitDisplayName } from "@/components/organigram/OrgPersonCard";
+import { RoundAvatar } from "@/components/design-system/RoundAvatar";
 import { ArrowRight, Envelope, Phone, X } from "@/lib/icons.redesign";
 
 /**
@@ -278,10 +275,12 @@ export function MemberDetailPanel({
             </p>
 
             <div className="mt-2.5 flex items-center gap-3">
-              <HeaderAvatar
-                isVacant={isVacant}
+              <RoundAvatar
+                size={64}
                 name={activeName}
-                imageUrl={activeHolder?.imageUrl}
+                photoUrl={activeHolder?.imageUrl}
+                glyph={isVacant ? "+" : undefined}
+                dashed={isVacant}
               />
               {/* A vacant node's title / an active holder's name is
                   free-text/unbounded — per DESIGN.md's Hyphenation Rule it
@@ -410,55 +409,6 @@ export function MemberDetailPanel({
   );
 }
 
-const AVATAR_RING =
-  "border-ink bg-cream-soft flex h-[54px] w-[54px] flex-none items-center justify-center overflow-hidden rounded-full border-2";
-
-function HeaderAvatar({
-  isVacant,
-  name,
-  imageUrl,
-}: {
-  isVacant: boolean;
-  name: string;
-  imageUrl?: string;
-}) {
-  if (isVacant) {
-    return (
-      <div className={cn(AVATAR_RING, "border-dashed")}>
-        <span
-          aria-hidden="true"
-          className="text-jersey-deep font-display-big text-xl font-black italic"
-        >
-          +
-        </span>
-      </div>
-    );
-  }
-  const src = imageUrl?.trim() ?? "";
-  return (
-    <div className={AVATAR_RING}>
-      {src !== "" ? (
-        <Image
-          src={src}
-          alt=""
-          width={54}
-          height={54}
-          unoptimized
-          className="h-full w-full object-cover mix-blend-multiply"
-          style={{ filter: "var(--filter-photo-newsprint)" }}
-        />
-      ) : (
-        <span
-          aria-hidden="true"
-          className="text-jersey-deep font-display-big text-xl font-black"
-        >
-          {monogramInitials(name)}
-        </span>
-      )}
-    </div>
-  );
-}
-
 function ContactAction({
   kind,
   href,
@@ -550,17 +500,7 @@ function HolderSwitcher({
                   : "bg-cream text-ink hover:translate-x-px hover:translate-y-px",
               )}
             >
-              <span
-                aria-hidden="true"
-                className={cn(
-                  "border-ink font-display-big flex h-[22px] w-[22px] items-center justify-center rounded-full border-[1.5px] text-[11px] font-black",
-                  active
-                    ? "bg-cream text-jersey-deep"
-                    : "bg-cream-soft text-jersey-deep",
-                )}
-              >
-                {monogramInitials(holder.name)}
-              </span>
+              <RoundAvatar size={24} name={holder.name} />
               {first}
             </button>
           );

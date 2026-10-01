@@ -50,8 +50,8 @@ export const WithPhoto: Story = {
  * No photo → `<JerseyIllustration variant="hero" garment="coat">` in the
  * same framed slot (#2485 rule 5 / #2789) — the identical coat figure
  * `<PlayerCard garment="coat">` already renders for this person on the
- * `getCardSubjectArtefact` path. The organigram's monogram-disc avatar
- * (`<OrgPersonCard>`) is a separate, deliberate exception.
+ * `getCardSubjectArtefact` path. Round avatars (`<RoundAvatar>`)
+ * set a monogram instead — the round family's rule (#3304).
  */
 export const IllustrationFallback: Story = {
   args: {

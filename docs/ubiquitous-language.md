@@ -333,6 +333,17 @@ Organisational grouping for staff members.
 
 The hierarchical org chart of staff members. Built from `parentMember` references. Visualised at `/club/organigram`.
 
+### Monogram
+
+What a round avatar shows when a person has no photo: their initials, set in a jersey-deep glyph on a cream-soft disc (#3331, decided in #3304). Never the drawn figure — at 24-64px a `<JerseyIllustration>` reads as a blob, initials stay legible. Cards and heroes draw the figure; round avatars set a monogram. That split is the round family's rule, not an exception to a hero's.
+
+| Code                                                      | Notes                                                                                                                                                                            |
+| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `<RoundAvatar>` (`components/design-system/RoundAvatar/`) | The round avatar family: sizes 24 / 40 / 64, ring 1px ink at 24 and 2px ink at 40/64. `SubjectAvatar` joins in #3332; until then the article avatars are the one known exception |
+| `initials()` (`apps/web/src/lib/utils/initials.ts`)       | First + last token for a full name, one letter when only a first name is known                                                                                                   |
+
+A "+N" count circle or a "+" vacancy circle that sits among avatars is not a person but takes the ring, fill and size of its neighbour (`glyph` on `<RoundAvatar>`).
+
 ---
 
 ## Content

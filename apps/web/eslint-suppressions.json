@@ -700,7 +700,7 @@
   },
   "src/components/organigram/HubSearch/HubSearch.tsx": {
     "kcvv/no-off-ramp-font-size": {
-      "count": 9
+      "count": 8
     },
     "kcvv/no-off-ramp-leading": {
       "count": 2
@@ -711,7 +711,7 @@
   },
   "src/components/organigram/MemberDetailPanel/MemberDetailPanel.tsx": {
     "kcvv/no-off-ramp-font-size": {
-      "count": 9
+      "count": 8
     },
     "kcvv/no-off-ramp-leading": {
       "count": 2
@@ -722,7 +722,7 @@
   },
   "src/components/organigram/OrgPersonCard/OrgPersonCard.tsx": {
     "kcvv/no-off-ramp-font-size": {
-      "count": 5
+      "count": 4
     },
     "kcvv/no-off-ramp-leading": {
       "count": 2

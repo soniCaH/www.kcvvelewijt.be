@@ -1,14 +1,14 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { OrgChartNode } from "@/types/organigram";
 import { cn } from "@/lib/utils/cn";
+import { RoundAvatar } from "@/components/design-system/RoundAvatar";
 
 /**
  * `<OrgPersonCard>` — the Phase 7 `/hulp` structure card (design lock `7o4`).
  *
- * Round newsprint photo OR jersey-deep monogram · first-semibold +
+ * Round newsprint photo OR monogram (`<RoundAvatar>`, #3331) · first-semibold +
  * last-italic name · mono function label — the avatar idiom `<TeamStaff>`
- * carried pre-#2575, kept here deliberately: `/hulp` is a chart of
+ * carried pre-#2575, now the shared round family: `/hulp` is a chart of
  * **positions**, not a directory of people (#2477 rule 7), so it never
  * moved onto the shared 3:4 `<PlayerCard>`. Parameterised by
  * **occupancy state**:
@@ -90,44 +90,6 @@ export function splitDisplayName(value: string): {
   return { lead: lead ?? "", rest: others.join(" ") };
 }
 
-/**
- * Monogram initials (max 2 chars) from a name/title: first + last token initial.
- * Returns "·" when there is no usable text, mirroring 6.C's fallback glyph.
- */
-export function monogramInitials(value: string | undefined): string {
-  const parts = (value ?? "").trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "·";
-  const first = parts[0]?.charAt(0) ?? "";
-  const last = parts.length > 1 ? (parts.at(-1)?.charAt(0) ?? "") : "";
-  return `${first}${last}`.toLocaleUpperCase("nl-BE") || "·";
-}
-
-// ─── Scale config ────────────────────────────────────────────────────────────
-
-interface ScaleConfig {
-  avatarPx: number;
-  avatarClass: string;
-  monoClass: string;
-  dualWrapClass: string;
-  dualCirclePx: number;
-  dualCircleClass: string;
-  dualMonoClass: string;
-  plusNClass: string;
-  nameClass: string;
-}
-
-const CARD_CONFIG: ScaleConfig = {
-  avatarPx: 64,
-  avatarClass: "h-16 w-16",
-  monoClass: "text-2xl",
-  dualWrapClass: "h-16 w-[78px]",
-  dualCirclePx: 52,
-  dualCircleClass: "h-[52px] w-[52px]",
-  dualMonoClass: "text-lg",
-  plusNClass: "h-[30px] w-[30px] text-[11px]",
-  nameClass: "text-base",
-};
-
 // ─── Sub-parts ───────────────────────────────────────────────────────────────
 
 /** First-token-bold + remainder-italic name rhythm. */
@@ -162,109 +124,33 @@ function NameRhythm({
   );
 }
 
-const AVATAR_RING =
-  "border-ink bg-cream-soft flex items-center justify-center overflow-hidden rounded-full border-2";
-
-const MONO_GLYPH = "text-jersey-deep font-display-big font-black";
-
-/** Single round avatar: newsprint photo, or jersey-deep monogram fallback. */
-function SingleAvatar({
-  name,
-  imageUrl,
-  cfg,
-}: {
-  name: string;
-  imageUrl?: string;
-  cfg: ScaleConfig;
-}) {
-  const src = imageUrl?.trim() ?? "";
-  const hasPhoto = src !== "";
-  return (
-    <div className={cn(AVATAR_RING, cfg.avatarClass)}>
-      {hasPhoto ? (
-        <Image
-          src={src}
-          alt=""
-          width={cfg.avatarPx}
-          height={cfg.avatarPx}
-          unoptimized
-          className="h-full w-full object-cover mix-blend-multiply"
-          style={{ filter: "var(--filter-photo-newsprint)" }}
-        />
-      ) : (
-        <span aria-hidden="true" className={cn(MONO_GLYPH, cfg.monoClass)}>
-          {monogramInitials(name)}
-        </span>
-      )}
-    </div>
-  );
-}
-
-/** Overlapping dual-avatar cue for shared roles (static — no hover/tooltip). */
-function DualAvatar({
-  holders,
-  cfg,
-}: {
-  holders: OrgChartNode["members"];
-  cfg: ScaleConfig;
-}) {
+/** Overlapping cue for shared roles (static — no hover/tooltip). */
+function DualAvatar({ holders }: { holders: OrgChartNode["members"] }) {
   const [a, b] = holders;
   const extra = holders.length - 2;
 
-  const circle = (
-    member: OrgChartNode["members"][number] | undefined,
-    pos: "left" | "right",
-  ) => {
-    const src = member?.imageUrl?.trim() ?? "";
-    const hasPhoto = src !== "";
-    return (
-      <span
-        className={cn(
-          AVATAR_RING,
-          cfg.dualCircleClass,
-          "absolute top-[6px]",
-          pos === "left" ? "left-0 z-20" : "right-0 z-10",
-        )}
-      >
-        {hasPhoto ? (
-          <Image
-            src={src}
-            alt=""
-            width={cfg.dualCirclePx}
-            height={cfg.dualCirclePx}
-            unoptimized
-            className="h-full w-full object-cover mix-blend-multiply"
-            style={{ filter: "var(--filter-photo-newsprint)" }}
-          />
-        ) : (
-          <span
-            aria-hidden="true"
-            className={cn(MONO_GLYPH, cfg.dualMonoClass)}
-          >
-            {monogramInitials(member?.name)}
-          </span>
-        )}
-      </span>
-    );
-  };
-
   return (
     <div
-      aria-hidden="true"
-      className={cn("relative", cfg.dualWrapClass)}
+      // A group follows the ramp at 40 (#3304); the fixed 64px height keeps
+      // the card as tall as a single-avatar card.
+      className="flex h-16 items-center -space-x-2"
       data-testid="org-person-card-dual-avatar"
     >
-      {circle(a, "left")}
-      {circle(b, "right")}
+      <RoundAvatar
+        size={40}
+        name={a?.name}
+        photoUrl={a?.imageUrl}
+        className="relative z-30"
+      />
+      <RoundAvatar
+        size={40}
+        name={b?.name}
+        photoUrl={b?.imageUrl}
+        className="relative z-20"
+      />
+      {/* Not a person, but it takes the ring, fill and size of its neighbour. */}
       {extra > 0 && (
-        <span
-          className={cn(
-            "border-ink bg-jersey-deep text-cream absolute top-[6px] -right-[6px] z-30 flex items-center justify-center rounded-full border-2 font-mono font-semibold",
-            cfg.plusNClass,
-          )}
-        >
-          +{extra}
-        </span>
+        <RoundAvatar size={40} glyph={`+${extra}`} className="relative z-10" />
       )}
     </div>
   );
@@ -288,7 +174,6 @@ export function OrgPersonCard({
   className,
 }: OrgPersonCardProps) {
   const state = deriveCardState(node.members.length);
-  const cfg = CARD_CONFIG;
 
   const baseCard =
     "border-ink relative flex flex-col items-center border-2 p-3 text-center";
@@ -316,44 +201,26 @@ export function OrgPersonCard({
 
       {/* Avatar */}
       {state === "single" && (
-        <SingleAvatar
+        <RoundAvatar
+          size={64}
           name={node.members[0]?.name ?? node.title}
-          imageUrl={node.members[0]?.imageUrl}
-          cfg={cfg}
+          photoUrl={node.members[0]?.imageUrl}
         />
       )}
-      {state === "shared" && <DualAvatar holders={node.members} cfg={cfg} />}
-      {state === "vacant" && (
-        <div
-          className={cn(
-            AVATAR_RING,
-            cfg.avatarClass,
-            "border-dashed bg-white/45",
-          )}
-        >
-          <span
-            aria-hidden="true"
-            className={cn(
-              "text-jersey-deep font-display-big font-black italic",
-              cfg.monoClass,
-            )}
-          >
-            +
-          </span>
-        </div>
-      )}
+      {state === "shared" && <DualAvatar holders={node.members} />}
+      {state === "vacant" && <RoundAvatar size={64} glyph="+" dashed />}
 
       {/* Name slot — person (single) or position (shared/vacant) */}
       {state === "single" ? (
         <NameRhythm
           value={node.members[0]?.name ?? node.title}
-          className={cn("mt-2.5", cfg.nameClass)}
+          className="mt-2.5 text-base"
         />
       ) : (
         <NameRhythm
           value={node.title}
           italicLead={state === "vacant"}
-          className={cn("mt-2.5", cfg.nameClass)}
+          className="mt-2.5 text-base"
         />
       )}
 

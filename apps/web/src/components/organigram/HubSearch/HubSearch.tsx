@@ -25,14 +25,12 @@
  */
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
   MagnifyingGlass,
   Question,
   Sparkle,
-  User,
   X,
 } from "@/lib/icons.redesign";
 import { trackEvent } from "@/lib/analytics/track-event";
@@ -40,6 +38,8 @@ import { getCategoryInfo } from "@/lib/responsibility-utils";
 import { revealHash } from "@/lib/utils/same-page-anchor";
 import { useSemanticSearch } from "@/hooks/useSemanticSearch";
 import { useHubMemberPanel } from "@/components/organigram/HubMemberPanel";
+import { RoundAvatar } from "@/components/design-system/RoundAvatar";
+import { CLUB_ROOT_ID } from "@/components/organigram/OrganigramExplorer/spotlight-tree";
 import { useHubSearchQuery } from "./HubSearchQueryProvider";
 import {
   SECTION_NAV_CHIP_SHADOW_CLASS,
@@ -80,15 +80,6 @@ export interface HubSearchProps {
   maxResults?: number;
   /** Extra classes on the root (e.g. `max-w-[480px]`). */
   className?: string;
-}
-
-function initials(name: string): string {
-  return name
-    .trim()
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("");
 }
 
 /** A light contact label for the answer-forward card (no resolveContact dep). */
@@ -149,23 +140,18 @@ function MemberRow({
       onMouseEnter={onHover}
       className={rowClass(selected)}
     >
-      <span className="border-ink bg-cream-soft text-jersey-deep flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full border-2">
-        {person?.imageUrl ? (
-          <Image
-            src={person.imageUrl}
-            alt=""
-            width={40}
-            height={40}
-            className="h-full w-full object-cover"
-          />
-        ) : name ? (
-          <span className="font-display text-sm font-black">
-            {initials(name)}
-          </span>
-        ) : (
-          <User size={18} aria-hidden />
-        )}
-      </span>
+      {person ? (
+        <RoundAvatar
+          size={40}
+          name={name}
+          photoUrl={person.imageUrl}
+          // The club row's "photo" is the crest — shown plain, as before.
+          plainPhoto={result.member.id === CLUB_ROOT_ID}
+        />
+      ) : (
+        // No holder: the same dashed "+" the card and the panel draw.
+        <RoundAvatar size={40} glyph="+" dashed />
+      )}
       <span className="min-w-0 flex-1">
         <span
           title={name}
@@ -572,9 +558,7 @@ export function HubSearch({
       <span className="mt-2 flex items-center justify-between gap-2">
         {forwardContactInfo ? (
           <span className="flex min-w-0 items-center gap-2">
-            <span className="border-ink bg-cream-soft text-jersey-deep font-display flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-[1.5px] text-[11px] font-black">
-              {initials(forwardContactInfo.name)}
-            </span>
+            <RoundAvatar size={24} name={forwardContactInfo.name} />
             <span
               title={`${forwardContactInfo.name}${
                 forwardContactInfo.sub ? ` · ${forwardContactInfo.sub}` : ""
@@ -727,7 +711,7 @@ export function HubSearch({
               </div>
               <div aria-hidden className="px-3 py-2.5">
                 <div className="flex items-center gap-3">
-                  <div className="bg-cream-soft h-9 w-9 flex-shrink-0 rounded-full motion-safe:animate-pulse" />
+                  <div className="bg-cream-soft h-10 w-10 flex-shrink-0 rounded-full motion-safe:animate-pulse" />
                   <div className="flex-1 space-y-1.5">
                     <div className="bg-cream-soft h-2.5 w-1/3 motion-safe:animate-pulse" />
                     <div className="bg-cream-soft h-2.5 w-3/4 motion-safe:animate-pulse" />
