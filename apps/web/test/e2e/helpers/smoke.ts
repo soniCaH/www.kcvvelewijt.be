@@ -23,10 +23,6 @@ export interface SmokeOptions {
 const DEFAULT_IGNORE_CONSOLE_ERRORS: Array<string | RegExp> = [
   // Next/Image priority hints — informational, not a regression signal.
   /priority/i,
-  // Adobe Typekit init race between two afterInteractive scripts; pre-existing
-  // quirk in apps/web/src/app/layout.tsx. Fix would require lifting Typekit
-  // into a client component to use `onLoad`.
-  /Typekit load error/,
   // Chromium logs "Failed to load resource: status of <code>" for every
   // sub-resource that 4xx/5xx. THIS FILTER INTENTIONALLY MAKES THE SMOKE
   // LAYER TOLERANT OF ASSET-GAP NOISE — visible-image breakage is covered
