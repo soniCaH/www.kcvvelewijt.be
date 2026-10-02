@@ -10,6 +10,7 @@ import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/thumbnails.css";
 import "yet-another-react-lightbox/plugins/captions.css";
 
+import { Spinner } from "@/components/design-system";
 import { trackEvent } from "@/lib/analytics/track-event";
 
 export interface GalleryLightboxImage {
@@ -33,6 +34,22 @@ export interface GalleryLightboxProps {
 
 // Thumbnails in the (widest) first row — rendered eagerly via `priority`.
 const FIRST_ROW = 4;
+
+// Every lightbox motion is Arrival — a photo entering the screen — on The
+// Curve (DESIGN.md → Motion). The literal is `--ease-out`'s value (a test pins
+// them together): the library also feeds `easing.fade` to `Element.animate()`
+// (pull-to-close release), which rejects `var()`. Under
+// `prefers-reduced-motion: reduce` the library itself skips the slide
+// animations and zeroes the fade, so nothing is gated here. One exception no
+// prop reaches: the Zoom plugin hardcodes `ease-in-out` for a fresh zoom.
+const ARRIVAL_MS = 500;
+const THE_CURVE = "cubic-bezier(0, 0, 0.58, 1)";
+const LIGHTBOX_ANIMATION = {
+  fade: ARRIVAL_MS,
+  swipe: ARRIVAL_MS,
+  navigation: ARRIVAL_MS,
+  easing: { fade: THE_CURVE, swipe: THE_CURVE, navigation: THE_CURVE },
+};
 
 const sized = (url: string, w: number) => `${url}?w=${w}&q=80&fm=webp&fit=max`;
 
@@ -119,6 +136,22 @@ export const GalleryLightbox = ({
         close={() => setIndex(-1)}
         slides={slides}
         plugins={[Thumbnails, Zoom, Captions]}
+        animation={LIGHTBOX_ANIMATION}
+        render={{
+          // A visitor-requested photo is loading: the site's waiting device.
+          // `yarl__slide_loading` is the library's own class for its default
+          // icon: it brings the delayed fade-in (no flash on a fast load) and
+          // the reduced-motion opt-out; `aria-hidden` keeps the carousel's
+          // live region as quiet as it was with the library icon.
+          iconLoading: () => (
+            <div className="yarl__slide_loading" aria-hidden="true">
+              <Spinner
+                variant="compact"
+                className="[--spinner-dot:var(--color-cream)]"
+              />
+            </div>
+          ),
+        }}
         on={{
           view: ({ index: i }) =>
             trackEvent("gallery_image_view", {
