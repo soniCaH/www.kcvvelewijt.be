@@ -104,9 +104,11 @@ interface EditorialHeroSharedProps {
   coverImage?: EditorialHeroCoverImage;
   /**
    * Mark the cover image as the LCP element (eager-load + high fetch
-   * priority, no lazy-loading). Set ONLY by the homepage hero call site
-   * — below-fold consumers (detail page, featured rows) leave it off so
-   * they keep lazy-loading. PERF-1 (#2235).
+   * priority, no lazy-loading). Rule: set `priority` when the hero is the
+   * page's first paint. Two call sites do: the homepage hero
+   * (`to-editorial-hero-props.ts`) and the article detail hero
+   * (`renderArticleHero`). Featured rows and every other non-first-paint
+   * consumer leave it off so they keep lazy-loading. PERF-1 (#2235), #2524.
    */
   priority?: boolean;
   /**
