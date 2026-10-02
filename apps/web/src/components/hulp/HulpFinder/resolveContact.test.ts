@@ -56,6 +56,15 @@ describe("resolveContact", () => {
     expect(resolved.organigramHref).toBe("/hulp?member=node-vz#structuur");
   });
 
+  it("carries the first member's photo through", () => {
+    const resolved = resolveContact({
+      contactType: "position",
+      position: "Voorzitter",
+      members: [{ id: "m1", name: "Jan Willems", imageUrl: "/jan.webp" }],
+    });
+    expect(resolved.imageUrl).toBe("/jan.webp");
+  });
+
   it("encodes the nodeId in the deep-link", () => {
     const resolved = resolveContact({
       contactType: "position",

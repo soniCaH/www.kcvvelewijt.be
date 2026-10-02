@@ -50,6 +50,8 @@ function makeContact(
       {
         id: "staffMember-1",
         name: "Jan Janssens",
+        photoUrl: null,
+        psdImageUrl: null,
         email: "jan@kcvv.be",
         phone: "+32 123 456 789",
       },
@@ -85,6 +87,8 @@ function makePathRow(overrides: Partial<PathRow> = {}): PathRow {
             {
               id: "staffMember-2",
               name: "Piet Pieters",
+              photoUrl: null,
+              psdImageUrl: null,
               email: "piet@kcvv.be",
               phone: null,
             },
@@ -163,6 +167,43 @@ describe("ResponsibilityRepository", () => {
         ],
         relatedPaths: ["transfer-aanvragen", "verzekering"],
       });
+    });
+
+    it("carries a member's photo as imageUrl, editorial photo over PSD image, and none when absent", async () => {
+      const member = (
+        id: string,
+        photoUrl: string | null,
+        psdImageUrl: string | null,
+      ) => ({
+        id,
+        name: id,
+        photoUrl,
+        psdImageUrl,
+        email: null,
+        phone: null,
+      });
+      mockFetch.mockResolvedValueOnce([
+        makePathRow({
+          primaryContact: makeContact({
+            members: [
+              member("both", "https://cdn/photo.webp", "https://cdn/psd.webp"),
+              member("psd-only", null, "https://cdn/psd.webp"),
+              member("none", null, null),
+            ],
+          }),
+          steps: [],
+        }),
+      ]);
+
+      const [path] = await runFindAll();
+      const members =
+        path.primaryContact.contactType === "position"
+          ? path.primaryContact.members
+          : undefined;
+
+      expect(members?.[0].imageUrl).toBe("https://cdn/photo.webp");
+      expect(members?.[1].imageUrl).toBe("https://cdn/psd.webp");
+      expect(members?.[2]).not.toHaveProperty("imageUrl");
     });
 
     it("maps manual contact with inline fields", async () => {

@@ -34,6 +34,20 @@ export const PositionWithStructuurLink: Story = {
   },
 };
 
+/** Position contact whose member has a photo — the avatar shows it, not a monogram. */
+export const PositionWithPhoto: Story = {
+  args: {
+    contact: {
+      name: "Karel Vermeulen",
+      role: "Voorzitter",
+      imageUrl: "/player-fixtures/player-schulz.jpg",
+      email: "voorzitter@kcvvelewijt.be",
+      nodeId: "node-vz",
+      organigramHref: "/hulp?member=node-vz#structuur",
+    },
+  },
+};
+
 /** Manual contact — name == role, e-mail only (no phone, no cross-link). */
 export const ManualEmailOnly: Story = {
   args: {

@@ -16,6 +16,8 @@ export type UserRole =
 export interface ContactMember {
   id: string;
   name: string;
+  /** Profile photo URL — the organigram's source (editorial `photo`, else PSD image). */
+  imageUrl?: string;
   email?: string;
   phone?: string;
 }

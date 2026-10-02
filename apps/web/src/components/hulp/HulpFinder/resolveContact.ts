@@ -22,6 +22,8 @@ export interface ResolvedContact {
   name: string;
   /** Role label (e.g. "Voorzitter", "Trainer van jouw ploeg"). */
   role: string;
+  /** The member's photo — unset → the card draws a monogram. */
+  imageUrl?: string;
   email?: string;
   phone?: string;
   /**
@@ -60,6 +62,7 @@ export function resolveContact(contact: Contact): ResolvedContact {
       return {
         name: member?.name ?? role,
         role,
+        imageUrl: member?.imageUrl,
         email: member?.email,
         phone: member?.phone,
         ...(contact.nodeId

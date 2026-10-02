@@ -24,6 +24,8 @@ const RESPONSIBILITY_PATHS_QUERY =
     "members": organigramNode->members[]->{
       "id": _id,
       "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),
+      "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",
+      "psdImageUrl": psdImage.asset->url + "?w=200&q=80&fm=webp&fit=max",
       email, phone
     },
     "nodeId": organigramNode->_id,
@@ -43,6 +45,8 @@ const RESPONSIBILITY_PATHS_QUERY =
       "members": organigramNode->members[]->{
         "id": _id,
         "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),
+        "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",
+        "psdImageUrl": psdImage.asset->url + "?w=200&q=80&fm=webp&fit=max",
         email, phone
       },
       "nodeId": organigramNode->_id,
@@ -81,12 +85,18 @@ function toContact(c: ContactRow): Contact {
           ? {
               members: c.members
                 .filter((m): m is NonNullable<typeof m> => m != null)
-                .map((m) => ({
-                  id: m.id ?? "",
-                  name: (m.name ?? "").replace(/\s+/g, " ").trim(),
-                  ...(m.email ? { email: m.email } : {}),
-                  ...(m.phone ? { phone: m.phone } : {}),
-                })),
+                .map((m) => {
+                  // Editorial `photo` wins over the sync-owned `psdImage` —
+                  // the same ?? chain the organigram (staff.repository.ts) uses.
+                  const imageUrl = m.photoUrl ?? m.psdImageUrl;
+                  return {
+                    id: m.id ?? "",
+                    name: (m.name ?? "").replace(/\s+/g, " ").trim(),
+                    ...(imageUrl ? { imageUrl } : {}),
+                    ...(m.email ? { email: m.email } : {}),
+                    ...(m.phone ? { phone: m.phone } : {}),
+                  };
+                }),
             }
           : {}),
         ...(c.nodeId ? { nodeId: c.nodeId } : {}),
