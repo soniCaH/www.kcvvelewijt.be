@@ -152,10 +152,13 @@ jobs:
         run: npx turbo lint --filter=@kcvv/web
 
       # Pinned to the version `lint:sh` was adopted on, so a runner-image
-      # bump cannot turn this red with no repo change.
+      # bump cannot turn this red with no repo change. The download retries
+      # on any error (a one-off TLS fault turned main red in #3377) and lands
+      # in a file first, so a retried transfer never feeds tar a torn stream.
       - name: Lint shell scripts
         run: |
-          curl -fsSL https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.x86_64.tar.xz | tar -xJ -C "$RUNNER_TEMP"
+          curl -fsSL --retry 3 --retry-all-errors -o "$RUNNER_TEMP/shellcheck.tar.xz" https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.x86_64.tar.xz
+          tar -xJf "$RUNNER_TEMP/shellcheck.tar.xz" -C "$RUNNER_TEMP"
           PATH="$RUNNER_TEMP/shellcheck-v0.11.0:$PATH" pnpm run lint:sh
 
       - name: Unused dependencies (knip)
