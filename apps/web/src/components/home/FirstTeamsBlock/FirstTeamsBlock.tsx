@@ -147,7 +147,7 @@ function Mededeling({ text, href }: MededelingVM) {
       {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
     >
       {text}
-      <LinkPendingDots />
+      <LinkPendingDots tone="light" />
     </Link>
   );
 }
@@ -308,7 +308,7 @@ export function FirstTeamsBlock({
             className="text-warm hover:text-cream -my-2 shrink-0 py-2 font-mono text-xs font-semibold tracking-wide uppercase transition-colors"
           >
             Volledige kalender <span aria-hidden="true">→</span>
-            <LinkPendingDots />
+            <LinkPendingDots tone="light" />
           </Link>
         </div>
         {rows.length > 0 ? (

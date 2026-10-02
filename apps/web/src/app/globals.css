@@ -190,27 +190,6 @@
   }
 }
 
-/* A wait that earns its signal: hidden for 150 ms (the Chrome speed), then
-   shown at once. A `step-end` run of exactly 150 ms rather than a delay — one
-   number, no new duration — held on its last frame by `forwards`. Lives on
-   the wrapper, never on the dot spans, which already spend `animation-delay`
-   on their stagger. Used by `LinkPendingDots` (#3386). Not gated on
-   `prefers-reduced-motion`: the one-frame show is the signal, not motion —
-   the reduced-motion rule above only stops the loop. */
-@keyframes kcvv-pending-reveal {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.kcvv-pending-reveal {
-  opacity: 0;
-  animation: kcvv-pending-reveal 150ms step-end forwards;
-}
-
 /* ===== Alert ticket-stub perforation (Phase 2.A.5) =====
 
    The "tear" effect on the left notch column of <Alert> (Direction B —

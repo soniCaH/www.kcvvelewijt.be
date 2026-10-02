@@ -160,7 +160,7 @@ export function TeamFlagship({
           </>
         )}
       </TapedCard>
-      <LinkPendingDots placement="corner" />
+      <LinkPendingDots tone={isA ? "light" : "default"} placement="corner" />
     </Link>
   );
 }

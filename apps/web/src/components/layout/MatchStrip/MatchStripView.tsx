@@ -561,7 +561,11 @@ function LedgerLinkRow({
       <span aria-hidden="true" className={cn("shrink-0 font-mono", muted)}>
         →
       </span>
-      <LinkPendingDots placement="corner" className="top-1 right-1" />
+      <LinkPendingDots
+        tone={matchDay ? "light" : "default"}
+        placement="corner"
+        className="top-1 right-1"
+      />
     </Link>
   );
 }
@@ -842,7 +846,10 @@ function DesktopSlider({
           >
             Wedstrijddetails
             <span aria-hidden="true">→</span>
-            <LinkPendingDots />
+            <LinkPendingDots
+              spaced={false}
+              tone={matchDay ? "default" : "light"}
+            />
           </Link>
         )}
       </div>

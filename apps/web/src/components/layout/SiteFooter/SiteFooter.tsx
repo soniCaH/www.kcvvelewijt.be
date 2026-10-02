@@ -102,7 +102,7 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
               className="text-cream-quiet hover:text-cream inline-flex h-6 items-center font-mono text-[9.5px] font-medium tracking-[0.06em] uppercase transition-colors md:text-[10.5px]"
             >
               Privacy
-              <LinkPendingDots />
+              <LinkPendingDots tone="light" />
             </Link>
             <CookiePreferencesButton />
             <ul className="m-0 flex list-none gap-2 p-0">

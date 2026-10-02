@@ -113,7 +113,10 @@ export function UpLink({ href, label, tone = "ink", className }: UpLinkProps) {
     >
       <CaretLeft aria-hidden size={12} />
       {label}
-      <LinkPendingDots />
+      <LinkPendingDots
+        spaced={false}
+        tone={tone === "cream" ? "light" : "default"}
+      />
     </Link>
   );
 }

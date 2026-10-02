@@ -95,7 +95,7 @@ export function LeaderDotRow({
       )}
     >
       {contents}
-      <LinkPendingDots />
+      <LinkPendingDots spaced={false} />
     </Link>
   );
 }

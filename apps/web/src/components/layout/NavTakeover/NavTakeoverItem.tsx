@@ -40,7 +40,7 @@ export function NavTakeoverItem({
       )}
     >
       <span>{label}</span>
-      <LinkPendingDots />
+      <LinkPendingDots spaced={false} />
     </Link>
   );
 }

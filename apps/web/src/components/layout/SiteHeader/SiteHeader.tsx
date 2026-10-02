@@ -205,16 +205,18 @@ export function SiteHeader({ seniorTeams, className }: SiteHeaderProps) {
                       // the 390px walk.
                       "relative -my-2 py-2",
                       CHROME_NAV_TYPE,
-                      NAV_LABEL_TRUNCATE,
                       isActive(item.href)
                         ? "text-jersey-deep"
                         : "text-ink hover:text-jersey-deep",
                     )}
                   >
-                    {item.label}
+                    {/* On an inner span, not the link: `truncate` is `overflow:
+                        hidden`, which would clip the dots drawn below the
+                        link's box. */}
+                    <span className={NAV_LABEL_TRUNCATE}>{item.label}</span>
                     <LinkPendingDots
                       placement="corner"
-                      className="top-1/2 right-0 -translate-y-1/2"
+                      className="top-full left-1/2 -translate-x-1/2"
                     />
                   </Link>
                 </li>
@@ -291,7 +293,7 @@ export function SiteHeader({ seniorTeams, className }: SiteHeaderProps) {
             })}
           >
             Word lid
-            <LinkPendingDots />
+            <LinkPendingDots spaced={false} tone="light" />
           </Link>
         </div>
       </NavTakeover>

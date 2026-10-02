@@ -196,7 +196,7 @@ export function EditorialHubCard({
           </span>
         </span>
       </div>
-      <LinkPendingDots placement="corner" />
+      <LinkPendingDots tone={isNav ? "light" : "default"} placement="corner" />
     </Wrapper>
   );
 }

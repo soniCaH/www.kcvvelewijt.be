@@ -182,7 +182,7 @@ export const UpcomingMatchesClient = ({
             className="hover-underline-thicken text-ink hover:text-jersey-deep -my-2 inline-flex items-center gap-1 py-2 font-mono text-sm font-bold tracking-wide uppercase underline-offset-4"
           >
             Volledige kalender ↗
-            <LinkPendingDots />
+            <LinkPendingDots spaced={false} />
           </Link>
         </div>
       )}

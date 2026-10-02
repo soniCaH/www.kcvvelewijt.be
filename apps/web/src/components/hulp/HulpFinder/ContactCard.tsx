@@ -130,7 +130,7 @@ export function ContactCard({
           {isStructuur && <TreeStructure size={12} aria-hidden />}
           {isStructuur ? "Toon in structuur" : "Vind je ploeg"}
           <ArrowRight size={12} aria-hidden />
-          <LinkPendingDots />
+          <LinkPendingDots spaced={false} />
         </Link>
       )}
     </div>

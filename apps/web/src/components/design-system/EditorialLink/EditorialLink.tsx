@@ -75,7 +75,10 @@ export const EditorialLink = ({
           →
         </span>
       )}
-      <LinkPendingDots />
+      <LinkPendingDots
+        spaced={false}
+        tone={tone === "dark" ? "light" : "default"}
+      />
     </Link>
   );
 };

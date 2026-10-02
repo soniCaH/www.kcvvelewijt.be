@@ -44,7 +44,10 @@ export const LinkButton = forwardRef<HTMLAnchorElement, LinkButtonProps>(
             →
           </span>
         )}
-        <LinkPendingDots />
+        <LinkPendingDots
+          spaced={false}
+          tone={variant === "primary" ? "light" : "default"}
+        />
       </Link>
     );
   },

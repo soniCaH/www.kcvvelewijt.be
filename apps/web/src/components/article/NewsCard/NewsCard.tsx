@@ -435,7 +435,10 @@ export const NewsCard = ({
           // on the card itself, where that colour was chosen for, on any page.
           className="focus-ring-inset absolute inset-0 z-10"
         >
-          <LinkPendingDots placement="corner" />
+          <LinkPendingDots
+            tone={isDark ? "light" : "default"}
+            placement="corner"
+          />
         </Link>
       )}
     </TapedCard>

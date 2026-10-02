@@ -257,7 +257,7 @@ export function OrgPersonCard({
               className={`${CHIP_LINK_CLASSES} border-ink bg-cream text-ink mt-2.5`}
             >
               Iets voor jou? →
-              <LinkPendingDots />
+              <LinkPendingDots spaced={false} />
             </Link>
           )}
         </>

@@ -98,6 +98,14 @@ export type { HorizontalSliderProps } from "./HorizontalSlider";
 export { DownloadButton } from "./DownloadButton";
 export type { DownloadButtonProps } from "./DownloadButton";
 
+// LinkPendingDots
+export { LinkPendingDots } from "./LinkPendingDots";
+export type {
+  LinkPendingDotsProps,
+  LinkPendingDotsPlacement,
+  LinkPendingDotsTone,
+} from "./LinkPendingDots";
+
 // LinkButton
 export { LinkButton } from "./LinkButton";
 export type { LinkButtonProps } from "./LinkButton";

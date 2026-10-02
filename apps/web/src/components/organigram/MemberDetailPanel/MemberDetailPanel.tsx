@@ -328,7 +328,7 @@ export function MemberDetailPanel({
                 >
                   Iets voor jou?
                   <ArrowRight size={12} aria-hidden />
-                  <LinkPendingDots />
+                  <LinkPendingDots spaced={false} />
                 </Link>
               </>
             ) : (
@@ -404,7 +404,7 @@ export function MemberDetailPanel({
                   >
                     Volledig profiel
                     <ArrowRight size={12} aria-hidden />
-                    <LinkPendingDots />
+                    <LinkPendingDots spaced={false} />
                   </Link>
                 )}
               </>

@@ -502,7 +502,7 @@ export function OrganigramExplorer({
                               >
                                 {member.name?.trim() || "—"}{" "}
                                 <ArrowRight size={10} aria-hidden />
-                                <LinkPendingDots />
+                                <LinkPendingDots spaced={false} tone="light" />
                               </Link>
                             ) : (
                               <span className="text-cream-quiet font-mono text-[11px]">

@@ -799,7 +799,10 @@ export function TeamAgendaRow({
           })()}
         </div>
       </article>
-      <LinkPendingDots placement="corner" />
+      <LinkPendingDots
+        tone={featured ? "light" : "default"}
+        placement="corner"
+      />
     </Link>
   );
 }

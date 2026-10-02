@@ -794,7 +794,7 @@ export function HubSearch({
                 >
                   Contacteer de club
                   <ArrowRight size={12} aria-hidden />
-                  <LinkPendingDots />
+                  <LinkPendingDots spaced={false} />
                 </Link>
               </div>
             </>
