@@ -3,9 +3,16 @@ import { describe, expect, it } from "vitest";
 import { EditorialByline } from "./EditorialByline";
 
 describe("EditorialByline", () => {
-  it("falls back to 'Door redactie' when author is omitted", () => {
-    render(<EditorialByline />);
-    expect(screen.getByText("Door redactie")).toBeInTheDocument();
+  it("renders nothing when author is omitted — no invented 'redactie' fallback (#2531)", () => {
+    const { container } = render(<EditorialByline />);
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("renders nothing when author is empty or whitespace-only", () => {
+    const { container: a } = render(<EditorialByline author="" />);
+    expect(a).toBeEmptyDOMElement();
+    const { container: b } = render(<EditorialByline author="   " />);
+    expect(b).toBeEmptyDOMElement();
   });
 
   it("renders the supplied author name with a 'Door' prefix", () => {
@@ -14,7 +21,7 @@ describe("EditorialByline", () => {
   });
 
   it("prefixes the byline with a decorative ★ glyph", () => {
-    const { container } = render(<EditorialByline />);
+    const { container } = render(<EditorialByline author="Tom Janssens" />);
     const star = container.querySelector('[aria-hidden="true"]');
     expect(star?.textContent).toBe("★");
   });
@@ -28,22 +35,6 @@ describe("EditorialByline", () => {
       expect(chip).not.toBeNull();
       // Full name known: first + last initial (the family initials helper).
       expect(chip?.textContent).toBe("TJ");
-    });
-
-    it("does NOT render the monogram on the 'redactie' fallback", () => {
-      const { container } = render(<EditorialByline />);
-      expect(
-        container.querySelector('[data-round-avatar="monogram"]'),
-      ).toBeNull();
-    });
-
-    it("does NOT render the monogram when author is an empty/whitespace string", () => {
-      const { container: a } = render(<EditorialByline author="" />);
-      expect(a.querySelector('[data-round-avatar="monogram"]')).toBeNull();
-      const { container: b } = render(<EditorialByline author="   " />);
-      expect(b.querySelector('[data-round-avatar="monogram"]')).toBeNull();
-      // Byline still reads "Door redactie" in both cases (fallback).
-      expect(screen.getAllByText("Door redactie")).toHaveLength(2);
     });
 
     it("trims surrounding whitespace before deriving the monogram + display name", () => {
