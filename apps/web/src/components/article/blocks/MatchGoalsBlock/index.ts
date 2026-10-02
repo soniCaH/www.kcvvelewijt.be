@@ -1,2 +1,2 @@
-export { MatchGoalsBlock } from "./MatchGoalsBlock";
+export { MatchGoalsBlock, hasGoalEvents } from "./MatchGoalsBlock";
 export type { MatchGoalsBlockProps } from "./MatchGoalsBlock";

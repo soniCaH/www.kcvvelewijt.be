@@ -2866,14 +2866,6 @@ function hasAnyRetiredPair(source: string): boolean {
  *   `py-14 sm:py-20` (#2426/#2442), the shared opening every route composes
  *   rather than reimplements.
  * - `ErrorState.tsx` — excluded outright by #2433, untouched by #2479.
- * - `nieuws/[slug]/loading.tsx` — mirrors `<RelatedRow>`'s own footprint,
- *   and `<RelatedRow>` itself carries a *different*, asymmetric shape
- *   (`pt-8 pb-16 lg:pt-10 lg:pb-24`, ART-1, #2237) that predates and is
- *   untouched by #2479 — this skeleton's `py-16 lg:py-24` already drifted
- *   from the component it mirrors before this ticket existed. Fixing a
- *   loading skeleton against a page/component #2571 doesn't touch is
- *   #2432's call, not this ticket's; named here rather than silently
- *   passed.
  */
 const RETIRED_PAIR_EXEMPTIONS: Record<string, readonly [string, string]> = {
   "app/(main)/club/ultras/UltrasHero.tsx": ["py-24", "sm:py-32"],
@@ -2882,7 +2874,6 @@ const RETIRED_PAIR_EXEMPTIONS: Record<string, readonly [string, string]> = {
   "components/layout/PageHero/PageHero.tsx": ["py-14", "sm:py-20"],
   "components/layout/PageHero/PageHeroSkeleton.tsx": ["py-14", "sm:py-20"],
   "components/design-system/ErrorState/ErrorState.tsx": ["py-16", "md:py-20"],
-  "app/(main)/nieuws/[slug]/loading.tsx": ["py-16", "lg:py-24"],
 };
 
 /** The homepage — excluded outright, not matched-and-exempted (#2402/#2479

@@ -4,7 +4,13 @@
  * server-only Effect runtime / repositories.
  */
 import type { MatchDetail } from "@kcvv/api-contract";
+import type { PortableTextBlock } from "@portabletext/react";
 import type { HeroMatchData } from "@/components/article/EditorialHero";
+import {
+  hasRenderableBody,
+  qaBlocksToTailSection,
+  type QaBlocksToTailSectionResult,
+} from "@/components/article/ArticleBody";
 import { KCVV_CLUB_ID } from "@/lib/constants";
 import { formatMatchWidgetDate } from "@/lib/utils/dates";
 import { matchRowKind } from "@/lib/utils/match-display";
@@ -71,5 +77,39 @@ export function toHeroMatchData(match: MatchDetail): HeroMatchData | null {
     status: match.status,
     competition: match.competition,
     matchDate: formatMatchWidgetDate(match.date),
+  };
+}
+
+/**
+ * What the article page renders for `article.body`, derived once from one
+ * source so the shell, the tail section and the credits' top gap can't drift
+ * (#2531). Tail blocks are hoisted out of the in-flow stream; the first
+ * `eventFact` of an event article (`hoistedEventKey`) is dropped from it
+ * because the page draws it in the contained event panel (#2237).
+ *
+ * - `rendersArticleBody`: `<ArticleBody>` has something to draw — otherwise it
+ *   would be an empty cream box with padding and no closing `<EndMark>`.
+ * - `endGapOwnedAbove`: an `<EndMark>` (inside the body) or the tail section
+ *   (`pb-8`) sits directly above whatever follows and owns the 32px gap. When
+ *   false, the next block has to carry the gap itself.
+ */
+export function splitArticleBody(
+  body: PortableTextBlock[] | null,
+  hoistedEventKey: string | undefined,
+) {
+  const { inFlow, tailBlocks }: QaBlocksToTailSectionResult = body
+    ? qaBlocksToTailSection(body)
+    : { inFlow: [], tailBlocks: [] };
+  const bodyInFlow = hoistedEventKey
+    ? inFlow.filter((b) => b._key !== hoistedEventKey)
+    : inFlow;
+  const rendersArticleBody = hasRenderableBody(bodyInFlow);
+  const hasTail = tailBlocks.length > 0;
+  return {
+    bodyInFlow,
+    tailBlocks,
+    rendersArticleBody,
+    hasTail,
+    endGapOwnedAbove: rendersArticleBody || hasTail,
   };
 }

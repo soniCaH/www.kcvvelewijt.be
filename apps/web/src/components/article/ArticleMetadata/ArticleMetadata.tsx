@@ -5,13 +5,6 @@ import { cn } from "@/lib/utils/cn";
 import { useArticleAnalytics } from "@/hooks/useArticleAnalytics";
 
 export interface ArticleMetadataProps {
-  /**
-   * Article author name (e.g. "Redactie KCVV"). Defaults to the club
-   * banner `"KCVV Elewijt"` — every article template renders this implicit
-   * club author until an editor-authored byline field lands. Pass
-   * explicitly to override (e.g. ghost-written articles).
-   */
-  author?: string;
   /** Publication date formatted for display (e.g. "19.04.2026"). */
   date?: string;
   /** Reading time, e.g. "4 min lezen". Optional — omitted when empty. */
@@ -19,7 +12,7 @@ export interface ArticleMetadataProps {
   /** Share configuration — URL to share. When provided, the Delen button renders. */
   shareConfig?: {
     url: string;
-    /** Title used by `navigator.share()`. Falls back to `author` when absent. */
+    /** Title used by `navigator.share()` — the article's own title. */
     title?: string;
   };
   /**
@@ -36,8 +29,6 @@ export interface ArticleMetadataProps {
 
 const FACEBOOK_SHARER = "https://www.facebook.com/sharer/sharer.php?u=";
 
-const DEFAULT_AUTHOR = "KCVV Elewijt";
-
 /**
  * The bar's own uppercase mono label register — shared verbatim by the
  * facts cluster and the `Delen` button so the two never drift (the pattern
@@ -47,8 +38,9 @@ const META_LABEL = "font-mono text-label uppercase";
 
 /**
  * Design §7.6 — article metadata bar. Single row with 1px `paper-edge`
- * rules above and below. Left cluster: date · author · reading time, mono
- * small-caps. Right cluster: one labelled "Delen" button (ShareNetwork icon
+ * rules above and below. Left cluster: date · reading time, mono
+ * small-caps — no author slot (#2531): a name appears only where an editor
+ * wrote one, in the hero byline and the credits. Right cluster: one labelled "Delen" button (ShareNetwork icon
  * + visible text, same mono small-caps register as the facts cluster) that
  * triggers the Web Share API, or the Facebook sharer fallback where Web
  * Share is unavailable. No breadcrumb — that role belongs to the `<UpLink>`
@@ -63,7 +55,6 @@ const META_LABEL = "font-mono text-label uppercase";
  * URL-share target.
  */
 export const ArticleMetadata = ({
-  author = DEFAULT_AUTHOR,
   date,
   readingTime,
   shareConfig,
@@ -72,7 +63,7 @@ export const ArticleMetadata = ({
   className,
 }: ArticleMetadataProps) => {
   const { trackArticleShare } = useArticleAnalytics();
-  const facts = [date, author, readingTime].filter(
+  const facts = [date, readingTime].filter(
     (x): x is string => typeof x === "string" && x.length > 0,
   );
 
@@ -93,7 +84,7 @@ export const ArticleMetadata = ({
       trackShare("native");
       navigator
         .share({
-          title: shareConfig.title ?? author,
+          title: shareConfig.title,
           url: shareConfig.url,
         })
         .catch(() => {

@@ -9,11 +9,11 @@ vi.mock("@/lib/analytics/track-event", () => ({
 }));
 
 const defaultProps = {
-  author: "Redactie KCVV",
   date: "19.04.2026",
   readingTime: "4 min lezen",
   shareConfig: {
     url: "https://kcvvelewijt.be/nieuws/test",
+    title: "Belangrijke overwinning",
   },
   articleId: "article-doc-1",
   articleType: "announcement",
@@ -24,25 +24,26 @@ describe("ArticleMetadata", () => {
     trackEventMock.mockReset();
   });
 
-  it("renders the facts row in design order (date, author, reading time)", () => {
+  it("renders the facts row in design order (date, reading time) with no author slot (#2531)", () => {
     render(<ArticleMetadata {...defaultProps} />);
-    const navText = (
-      screen.getByRole("navigation", { name: "Artikelinfo" }).textContent ?? ""
-    ).replace(/\s+/g, " ");
-    expect(navText.indexOf("19.04.2026")).toBeGreaterThanOrEqual(0);
-    expect(navText.indexOf("Redactie KCVV")).toBeGreaterThan(
-      navText.indexOf("19.04.2026"),
-    );
-    expect(navText.indexOf("4 min lezen")).toBeGreaterThan(
-      navText.indexOf("Redactie KCVV"),
-    );
+    const items = screen
+      .getAllByRole("listitem")
+      .map((li) => (li.textContent ?? "").replace(/[\s·]+/g, " ").trim());
+    expect(items).toEqual(["19.04.2026", "4 min lezen"]);
   });
 
-  it("omits missing facts — shows only author when date and readingTime are empty", () => {
-    render(<ArticleMetadata author="Redactie KCVV" />);
+  it("omits missing facts — shows only the date when readingTime is empty", () => {
+    render(<ArticleMetadata date="19.04.2026" />);
     const nav = screen.getByRole("navigation", { name: "Artikelinfo" });
-    expect(nav).toHaveTextContent("Redactie KCVV");
+    expect(nav).toHaveTextContent("19.04.2026");
     expect(nav.textContent ?? "").not.toContain("·");
+  });
+
+  it("invents no author when none exists — the bar never shows the club name (#2531)", () => {
+    render(<ArticleMetadata date="19.04.2026" readingTime="6 min lezen" />);
+    const nav = screen.getByRole("navigation", { name: "Artikelinfo" });
+    expect(nav).not.toHaveTextContent("KCVV Elewijt");
+    expect(nav).not.toHaveTextContent(/redactie/i);
   });
 
   it("renders one labelled Delen button when shareConfig is set — no separate Facebook control (#2529)", () => {
@@ -59,7 +60,7 @@ describe("ArticleMetadata", () => {
   });
 
   it("does not render the share button without shareConfig", () => {
-    render(<ArticleMetadata author="Redactie KCVV" date="19.04.2026" />);
+    render(<ArticleMetadata date="19.04.2026" />);
     expect(screen.queryByRole("button", { name: "Delen" })).toBeNull();
   });
 
@@ -81,22 +82,6 @@ describe("ArticleMetadata", () => {
       <ArticleMetadata {...defaultProps} className="custom-metadata" />,
     );
     expect(container.querySelector("nav")).toHaveClass("custom-metadata");
-  });
-
-  it("falls back to the club default author when none is supplied", () => {
-    // The four article templates all render the same implicit club author
-    // until an editor-authored byline field lands. Defaulting inside
-    // ArticleMetadata removes per-template `const AUTHOR = "KCVV Elewijt"`
-    // duplication. See #1361 cross-template polish.
-    render(
-      <ArticleMetadata
-        date="19.04.2026"
-        readingTime="6 min lezen"
-        shareConfig={{ url: "https://kcvvelewijt.be/nieuws/test" }}
-      />,
-    );
-    const nav = screen.getByRole("navigation", { name: "Artikelinfo" });
-    expect(nav).toHaveTextContent("KCVV Elewijt");
   });
 
   it("gives the Delen button a 44px tap target that spills only into space the bar itself owns (#2529 — Tap Target Rule, review finding on #3071)", () => {
@@ -125,9 +110,7 @@ describe("ArticleMetadata", () => {
   });
 
   it("keeps the bar's original py-3/gap-y-2 when there is no Delen button to contain an overhang for (review finding on #3071)", () => {
-    const { container } = render(
-      <ArticleMetadata author="Redactie KCVV" date="19.04.2026" />,
-    );
+    const { container } = render(<ArticleMetadata date="19.04.2026" />);
     const nav = container.querySelector("nav");
     const row = nav?.firstElementChild;
     expect(nav).toHaveClass("py-3");
@@ -156,7 +139,7 @@ describe("ArticleMetadata", () => {
 
         expect(mockShare).toHaveBeenCalledTimes(1);
         expect(mockShare).toHaveBeenCalledWith({
-          title: defaultProps.author,
+          title: defaultProps.shareConfig.title,
           url: defaultProps.shareConfig.url,
         });
         expect(trackEventMock).toHaveBeenCalledTimes(1);
@@ -214,7 +197,6 @@ describe("ArticleMetadata", () => {
         const user = userEvent.setup();
         render(
           <ArticleMetadata
-            author="Redactie KCVV"
             shareConfig={{ url: "https://kcvvelewijt.be/nieuws/test" }}
           />,
         );

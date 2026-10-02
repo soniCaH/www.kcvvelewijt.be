@@ -139,7 +139,7 @@ export const ARTICLE_BY_SLUG_QUERY =
   // via BffService.getMatchDetail to feed the hero score bar + Doelpunten.
   linkedMatch,
   // 5.B.int (#1795) — author + photographer drive <EditorialByline>'s
-  // "Door {author}" line (fallback "Door redactie") and the
+  // "Door {author}" line (empty = no byline, #2531) and the
   // <ArticleCredits> Door / Beeld rows. Both fields are optional on
   // the schema; coalesce to empty string so downstream consumers can
   // trim-and-check without nullable guards.

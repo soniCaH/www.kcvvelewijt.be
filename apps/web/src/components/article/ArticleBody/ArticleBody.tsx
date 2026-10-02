@@ -132,6 +132,14 @@ export interface ArticleBodyProps {
    * renders, just with the neutral default label.
    */
   articleType?: string | null;
+  /**
+   * The page lets `<EndMark>`'s own `mb-8` be the one gap below the body
+   * (#2531): when true and the closer renders, the shell drops its bottom
+   * padding. With no closer (nothing renderable) the padding stays, so the
+   * next block is never flush against the body. Default false keeps
+   * `py-12 sm:py-16` for every other consumer.
+   */
+  endMarkOwnsTrailingGap?: boolean;
   className?: string;
 }
 
@@ -255,6 +263,15 @@ function blockHasRenderableOutput(block: PortableTextBlock): boolean {
   // qaBlock / eventFact / videoBlock / unknown types are assumed to
   // render — they own their own empty-state checks.
   return true;
+}
+
+/**
+ * Does any block of `content` render something? `<ArticleBody>` closes with
+ * `<EndMark>` exactly when this holds, and the article page skips the body
+ * shell when it does not (#2531) — both go through this one predicate.
+ */
+export function hasRenderableBody(content: PortableTextBlock[]): boolean {
+  return content.some(blockHasRenderableOutput);
 }
 
 /**
@@ -849,6 +866,7 @@ export function ArticleBody({
   subjects = null,
   articleSlug,
   articleType,
+  endMarkOwnsTrailingGap = false,
   className,
 }: ArticleBodyProps) {
   const dropCapIdx = content.findIndex(isNormalParagraph);
@@ -868,12 +886,18 @@ export function ArticleBody({
   // render, inside BlockquoteGroup) — it depends only on `components`,
   // which is itself already built once per render.
   const blockquoteGroupComponents = buildBlockquoteGroupComponents(components);
-  const hasRenderableBody = content.some(blockHasRenderableOutput);
+  const closesWithEndMark = hasRenderableBody(content);
 
   return (
     <div
       data-article-body="true"
-      className={cn("bg-cream w-full px-4 py-12 sm:py-16 lg:px-0", className)}
+      className={cn(
+        "bg-cream w-full px-4 lg:px-0",
+        endMarkOwnsTrailingGap && closesWithEndMark
+          ? "pt-12 sm:pt-16"
+          : "py-12 sm:py-16",
+        className,
+      )}
     >
       <div
         className="text-body-md sm:text-body-lg mx-auto w-full"
@@ -896,7 +920,7 @@ export function ArticleBody({
               blockquoteGroupComponents,
             )
           : null}
-        {hasRenderableBody ? (
+        {closesWithEndMark ? (
           <EndMark label={endMarkLabelFor(articleType)} />
         ) : null}
       </div>

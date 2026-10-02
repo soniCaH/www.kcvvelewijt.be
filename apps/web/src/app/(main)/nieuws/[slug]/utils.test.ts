@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { MatchDetail } from "@kcvv/api-contract";
 import type { HeroMatchData } from "@/components/article/EditorialHero";
-import { parsePsdMatchId, toHeroMatchData } from "./utils";
+import type { PortableTextBlock } from "@portabletext/react";
+import { parsePsdMatchId, splitArticleBody, toHeroMatchData } from "./utils";
 
 /** `toHeroMatchData` returns `null` for a reservation (#2802) — every test
  *  below feeds it a genuine two-sided match, so narrow the nullable return
@@ -206,5 +207,71 @@ describe("parsePsdMatchId", () => {
     ["undefined", undefined],
   ])("returns null for %s, so getMatchDetail is never called", (_, input) => {
     expect(parsePsdMatchId(input)).toBeNull();
+  });
+});
+
+describe("splitArticleBody (#2531)", () => {
+  const para = (text: string, key = `p-${text}`): PortableTextBlock => ({
+    _type: "block",
+    _key: key,
+    style: "normal",
+    children: [{ _type: "span", _key: `s-${key}`, text, marks: [] }],
+    markDefs: [],
+  });
+  const tailQa = (key: string): PortableTextBlock =>
+    ({
+      _type: "qaBlock",
+      _key: key,
+      groupAtTail: true,
+      pairs: [],
+    }) as unknown as PortableTextBlock;
+  const transferFact = (key: string): PortableTextBlock =>
+    ({
+      _type: "transferFact",
+      _key: key,
+      playerName: "Bocar Sarr",
+    }) as unknown as PortableTextBlock;
+
+  it("a null or empty body renders neither shell nor tail, so the credits carry the gap", () => {
+    for (const body of [null, []]) {
+      const r = splitArticleBody(body, undefined);
+      expect(r.rendersArticleBody).toBe(false);
+      expect(r.hasTail).toBe(false);
+      expect(r.endGapOwnedAbove).toBe(false);
+    }
+  });
+
+  it("a body with renderable prose renders the shell, and EndMark owns the gap", () => {
+    const r = splitArticleBody([para("Tekst.")], undefined);
+    expect(r.rendersArticleBody).toBe(true);
+    expect(r.endGapOwnedAbove).toBe(true);
+  });
+
+  it("a body that is only the hoisted eventFact skips the shell and leaves the gap to the credits", () => {
+    const r = splitArticleBody([transferFact("ev-1")], "ev-1");
+    expect(r.bodyInFlow).toEqual([]);
+    expect(r.rendersArticleBody).toBe(false);
+    expect(r.endGapOwnedAbove).toBe(false);
+  });
+
+  it("only empty paragraphs after the hoist also skip the shell", () => {
+    const r = splitArticleBody([para(""), transferFact("ev-1")], "ev-1");
+    expect(r.rendersArticleBody).toBe(false);
+    expect(r.endGapOwnedAbove).toBe(false);
+  });
+
+  it("a body that is only tail Q&A skips the shell but the tail section still owns the gap", () => {
+    const r = splitArticleBody([tailQa("qa-1")], undefined);
+    expect(r.rendersArticleBody).toBe(false);
+    expect(r.hasTail).toBe(true);
+    expect(r.tailBlocks).toHaveLength(1);
+    expect(r.endGapOwnedAbove).toBe(true);
+  });
+
+  it("keeps in-flow prose and tail Q&A apart", () => {
+    const r = splitArticleBody([para("Tekst."), tailQa("qa-1")], undefined);
+    expect(r.rendersArticleBody).toBe(true);
+    expect(r.hasTail).toBe(true);
+    expect(r.bodyInFlow).toHaveLength(1);
   });
 });

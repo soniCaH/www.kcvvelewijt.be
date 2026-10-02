@@ -98,7 +98,7 @@ interface EditorialHeroSharedProps {
   title: string | PortableTextBlock[];
   /** Editor-supplied lead, or a body-derived fallback truncated via `truncateLead`. */
   lead?: string;
-  /** Author display name (e.g. "Tom Janssens"). Falls back to "redactie". */
+  /** Author display name (e.g. "Tom Janssens"). Empty = no byline (#2531). */
   author?: string;
   /** Cover image artefact rendered in the right column (40fr). */
   coverImage?: EditorialHeroCoverImage;
@@ -112,12 +112,15 @@ interface EditorialHeroSharedProps {
    */
   priority?: boolean;
   /**
-   * Optional pre-formatted Dutch date string appended to the kicker
-   * (e.g. `"15 mei 2026"`). Per variant the kicker reads:
+   * Optional pre-formatted Dutch publish date (e.g. `"15 mei 2026"`).
+   * Homepage placement only — it has no metadata bar, so the date goes in the
+   * kicker (and is the event strip's fallback). The detail page does not pass
+   * it: `<ArticleMetadata>` is the date's one home there (#2531), and the
+   * component ignores it on `placement="detail"`. Homepage kicker per variant:
    * - announcement → `Aankondiging · ${category} · ${date}`
    * - interview    → `Interview` (+ optional jersey/position) `· ${date}`
    * - event        → `Event | ${ageGroup||competitionTag} · ${date}`
-   * - transfer     → `Transfer | <dirChip> · ${date}`
+   * - transfer     → `Transfer · ${date}`
    */
   date?: string;
 }
@@ -399,8 +402,9 @@ function renderMatchEditorial(
 ) {
   // Kicker mirrors the match-page status vocabulary (<MatchHero>): preview →
   // VOORBESCHOUWING, recap → MATCHVERSLAG. When the cover score bar is present
-  // it carries the competition + match date (so `date` is passed undefined);
-  // when the match 404s the bar is gone, so the kicker keeps the article date.
+  // it carries the competition + match date (so `date` is passed undefined).
+  // `date` is only ever set on the homepage placement (#2531): on detail the
+  // metadata bar owns the publish date, even when the match 404s.
   const label = variant === "matchPreview" ? "Voorbeschouwing" : "Matchverslag";
   const items = buildPlainKickerItems(label, [], date);
   return (
@@ -420,6 +424,10 @@ function renderMatchEditorial(
 export function EditorialHero(props: EditorialHeroProps) {
   const { title, lead, author, coverImage, placement, slug, date, priority } =
     props;
+  // The publish date reaches the kicker on the homepage only (#2531): the
+  // detail page's metadata bar owns it there, and `date` stays untouched for
+  // the homepage event strip below.
+  const kickerDate = placement === "homepage" ? date : undefined;
 
   // Variant-specific editorial slot, cover aspect, cover overlay, and
   // below-hero strip. All branches share the placement + link wrapper
@@ -441,7 +449,7 @@ export function EditorialHero(props: EditorialHeroProps) {
       lead,
       author,
       props.category,
-      date,
+      kickerDate,
     );
   } else if (props.variant === "interview") {
     editorial = renderInterviewEditorial(
@@ -449,10 +457,16 @@ export function EditorialHero(props: EditorialHeroProps) {
       lead,
       author,
       props.subjects,
-      date,
+      kickerDate,
     );
   } else if (props.variant === "event") {
-    editorial = renderEventEditorial(title, lead, author, props.feature, date);
+    editorial = renderEventEditorial(
+      title,
+      lead,
+      author,
+      props.feature,
+      kickerDate,
+    );
     // Day-block overlay — derived from feature.date when present.
     if (props.feature?.date) {
       const dayBlock = deriveEventDayBlock(props.feature.date);
@@ -514,21 +528,21 @@ export function EditorialHero(props: EditorialHeroProps) {
       lead,
       author,
       props.feature,
-      date,
+      kickerDate,
     );
   } else {
     // matchPreview | matchRecap — score-forward hero. The two-tier score bar
     // sits in the cover's lower third (5.d-mat-refine D@P3) and carries the
-    // competition + match date, so the kicker stays a clean type label and
-    // only falls back to the article date when the bar is absent (404).
+    // competition + match date, so the kicker stays a clean type label; the
+    // article date never reaches it on the detail page, even when the bar is
+    // absent (404) — the metadata bar carries it (#2531).
     const match = props.match;
-    const kickerDate = match ? undefined : date;
     editorial = renderMatchEditorial(
       title,
       lead,
       author,
       props.variant,
-      kickerDate,
+      match ? undefined : kickerDate,
     );
     if (match) {
       coverFirstOnMobile = true;

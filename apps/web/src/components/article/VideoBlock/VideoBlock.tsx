@@ -10,6 +10,7 @@ import {
 } from "react";
 import { cn } from "@/lib/utils/cn";
 import { useVideoAnalytics } from "@/hooks/useVideoAnalytics";
+import { PRESS_DOWN_CLASSES } from "@/components/design-system/press-down";
 import { TapedFigure } from "@/components/design-system/TapedFigure";
 import type { TapeStripProps } from "@/components/design-system/TapeStrip/TapeStrip";
 import { parseEmbedUrl, type VideoProvider } from "./parseEmbedUrl";
@@ -327,8 +328,7 @@ function UploadFigureContent({
             "border-ink bg-jersey-deep border px-4",
             "text-cream font-mono text-[11px] tracking-[0.14em] uppercase",
             "shadow-paper-sm",
-            "transition-all duration-300",
-            "hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
+            PRESS_DOWN_CLASSES,
           )}
         >
           <PlayTriangleIcon className="h-3.5 w-3.5" />

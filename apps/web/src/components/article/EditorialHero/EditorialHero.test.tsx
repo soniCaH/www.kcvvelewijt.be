@@ -1,3 +1,4 @@
+import type { ComponentProps } from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { EditorialHero } from "./EditorialHero";
@@ -30,10 +31,13 @@ describe("EditorialHero — shell + placement", () => {
     expect(document.querySelector("p.italic")).toBeNull();
   });
 
-  it("falls back to 'Door redactie' when no author is supplied", () => {
+  it("renders no byline when no author is supplied (#2531 — a name only where an editor wrote one)", () => {
     const { author: _author, ...withoutAuthor } = SHARED;
-    render(<EditorialHero variant="announcement" {...withoutAuthor} />);
-    expect(screen.getByText("Door redactie")).toBeInTheDocument();
+    const { container } = render(
+      <EditorialHero variant="announcement" {...withoutAuthor} />,
+    );
+    expect(screen.queryByText(/^Door /)).not.toBeInTheDocument();
+    expect(container.querySelector("[data-editorial-byline]")).toBeNull();
   });
 
   it("renders the supplied author with a 'Door' prefix", () => {
@@ -178,14 +182,74 @@ describe("EditorialHero — announcement variant", () => {
     );
     expect(screen.getByText("Aankondiging")).toBeInTheDocument();
     expect(screen.getByText("Clubnieuws")).toBeInTheDocument();
-    expect(screen.getByText("6 mei 2026")).toBeInTheDocument();
+    // The detail placement carries no date: <ArticleMetadata> owns it (#2531).
+    expect(screen.queryByText("6 mei 2026")).not.toBeInTheDocument();
   });
 
   it("omits the category segment when empty (graceful)", () => {
     render(<EditorialHero variant="announcement" {...SHARED} />);
     expect(screen.getByText("Aankondiging")).toBeInTheDocument();
-    expect(screen.getByText("6 mei 2026")).toBeInTheDocument();
   });
+});
+
+// ─── Publish date (#2531) ───────────────────────────────────────────────────
+
+describe("EditorialHero — publish date in the kicker (#2531)", () => {
+  // The it.each tables below mix variants, so the discriminated union can't
+  // be inferred per row; one cast at the table boundary.
+  const asHeroProps = (props: object) =>
+    props as ComponentProps<typeof EditorialHero>;
+
+  const FEATURE = {
+    event: { ageGroup: "U13", title: "Tornooi" },
+    transfer: { direction: "incoming" as const, playerName: "Bocar Sarr" },
+  };
+
+  it.each([
+    ["announcement", {}],
+    ["interview", { subjects: [] }],
+    ["event", { feature: FEATURE.event }],
+    ["transfer", { feature: FEATURE.transfer }],
+    ["matchPreview", {}],
+    ["matchRecap", { match: null }],
+  ] as const)(
+    "%s: the detail placement does not render the publish date",
+    (variant, extra) => {
+      render(
+        <EditorialHero
+          {...asHeroProps({
+            variant,
+            placement: "detail",
+            ...SHARED,
+            ...extra,
+          })}
+        />,
+      );
+      expect(screen.queryByText("6 mei 2026")).not.toBeInTheDocument();
+    },
+  );
+
+  it.each([
+    ["announcement", {}],
+    ["interview", { subjects: [] }],
+    ["transfer", { feature: FEATURE.transfer }],
+  ] as const)(
+    "%s: the homepage placement keeps the date in its kicker (no metadata bar there)",
+    (variant, extra) => {
+      render(
+        <EditorialHero
+          {...asHeroProps({
+            variant,
+            placement: "homepage",
+            slug: "zomer-2026",
+            ...SHARED,
+            ...extra,
+          })}
+        />,
+      );
+      expect(screen.getByText("6 mei 2026")).toBeInTheDocument();
+    },
+  );
 });
 
 // ─── Interview variant ─────────────────────────────────────────────────────
@@ -281,7 +345,7 @@ describe("EditorialHero — interview variant", () => {
 // ─── Event variant ─────────────────────────────────────────────────────────
 
 describe("EditorialHero — event variant", () => {
-  it("renders the kicker `Event · ${ageGroup||competitionTag}` + date", () => {
+  it("renders the kicker `Event · ${ageGroup||competitionTag}`", () => {
     render(
       <EditorialHero
         variant="event"
@@ -291,9 +355,6 @@ describe("EditorialHero — event variant", () => {
     );
     expect(screen.getByText("Event")).toBeInTheDocument();
     expect(screen.getByText("U13")).toBeInTheDocument();
-    // Date is intentionally rendered twice — kicker AND the
-    // compressed event strip below the hero — so use getAllByText.
-    expect(screen.getAllByText("6 mei 2026").length).toBeGreaterThan(0);
   });
 
   it("renders the day-block overlay on the cover when feature.date is parseable", () => {
@@ -544,9 +605,9 @@ describe("EditorialHero — match variant", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("uses the article date in the kicker when no match data is supplied", () => {
+  it("does not fall back to the article date in the kicker when no match data is supplied (#2531)", () => {
     render(<EditorialHero variant="matchPreview" {...SHARED} />);
     expect(screen.getByText("Voorbeschouwing")).toBeInTheDocument();
-    expect(screen.getByText("6 mei 2026")).toBeInTheDocument();
+    expect(screen.queryByText("6 mei 2026")).not.toBeInTheDocument();
   });
 });

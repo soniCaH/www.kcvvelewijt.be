@@ -150,7 +150,7 @@ export const article = defineType({
       type: "string",
       group: "inhoud",
       description:
-        "Naam van de schrijver. Wordt getoond in de byline boven het artikel en in het ArticleCredits-blok onderaan. Optioneel — bij interviews en lange stukken aanbevolen.",
+        "Naam van de schrijver. Wordt getoond in de byline boven het artikel en in het ArticleCredits-blok onderaan. Leeg = geen byline: er komt dan nergens een naam te staan (geen 'redactie', geen clubnaam). Optioneel — bij interviews en lange stukken aanbevolen.",
     }),
     defineField({
       name: "photographer",

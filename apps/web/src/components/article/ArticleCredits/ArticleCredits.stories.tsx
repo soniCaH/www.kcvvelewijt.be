@@ -11,7 +11,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Net-new Phase 5 closing credits block (5.d-int Round 2 lock). Centered framed block with 1px ink rules top + bottom, prose width. Four optional rows in fixed order: `Door · Met · Beeld · Gepubliceerd`. Each row drops when its source field is blank.",
+          "Net-new Phase 5 closing credits block (5.d-int Round 2 lock). Centered framed block with 1px ink rules top + bottom, prose width. Three optional rows in fixed order: `Door · Met · Beeld` (the publish date lives in the metadata bar only, #2531). Each row drops when its source field is blank.",
       },
     },
   },
@@ -42,25 +42,21 @@ const TWO_SUBJECTS: IndexedSubject[] = [
 
 const ONE_SUBJECT: IndexedSubject[] = TWO_SUBJECTS.slice(0, 1);
 
-const ISO_DATE = "2026-05-17T12:00:00Z";
-
-// Fully populated — all four rows render.
+// Fully populated — all three rows render.
 export const AllFields: Story = {
   args: {
     author: "Tom De Smet",
     photographer: "An Verheyden",
     subjects: TWO_SUBJECTS,
-    publishedAt: ISO_DATE,
   },
 };
 
-// Interview minimum — Met + Gepubliceerd only. Drops Door + Beeld
+// Interview minimum — Met only. Drops Door + Beeld
 // because the editor didn't fill them; the credits block still renders
 // because subjects[] is required on interviews.
 export const InterviewMinimum: Story = {
   args: {
     subjects: ONE_SUBJECT,
-    publishedAt: ISO_DATE,
   },
 };
 
@@ -70,7 +66,6 @@ export const NoPhotographer: Story = {
   args: {
     author: "Tom De Smet",
     subjects: ONE_SUBJECT,
-    publishedAt: ISO_DATE,
   },
 };
 
@@ -80,7 +75,6 @@ export const NoAuthor: Story = {
   args: {
     photographer: "An Verheyden",
     subjects: ONE_SUBJECT,
-    publishedAt: ISO_DATE,
   },
 };
 
@@ -90,7 +84,6 @@ export const DuoSubjects: Story = {
     author: "Tom De Smet",
     photographer: "An Verheyden",
     subjects: TWO_SUBJECTS,
-    publishedAt: ISO_DATE,
   },
 };
 
