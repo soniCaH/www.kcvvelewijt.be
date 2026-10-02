@@ -61,9 +61,10 @@ export interface YouthDirectoryProps {
   className?: string;
 }
 
-// Subtle ±1° scrapbook tilt, cycled by index (design lock 7j5). Kept small so a
-// full division reads as character, not noise.
-const CARD_ROTATIONS = [-1.1, 0.7, -0.5];
+// The card's lean is the site's slight tier (`--rotate-lean-*`, #3302 / #3329),
+// cycled by index and alternating in sign so neighbours do not twin (design lock
+// 7j5, numbers amended by #3302). Its tape is the team's own: see `tape.seed`.
+const CARD_ROTATIONS = ["a", "c", "b", "d"] as const;
 
 /**
  * Team directory (`/jeugd` + `/ploegen`). Grouped Reserven / Bovenbouw /
@@ -160,7 +161,7 @@ export function YouthDirectory({
                       color: "warm",
                       length: "sm",
                       position: index % 2 === 0 ? "left" : "right",
-                      rotation: "c",
+                      seed: team._id,
                     }}
                     bg="cream"
                     padding="sm"
