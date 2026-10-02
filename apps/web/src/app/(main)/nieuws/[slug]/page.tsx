@@ -654,7 +654,10 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                             Q&amp;A.
                           </EditorialHeading>
                         </header>
-                        <div className="flex flex-col gap-12">
+                        {/* `<QaBlock>` ships its own `my-12`; the last block's
+                            bottom margin would stack on this section's `pb-8`
+                            above the credits, so it is cancelled (#2531). */}
+                        <div className="flex flex-col gap-12 [&>:last-child]:mb-0">
                           {tailBlocks.map((block) => (
                             <QaBlock
                               key={block._key}
