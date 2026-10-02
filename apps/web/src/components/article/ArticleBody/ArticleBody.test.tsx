@@ -127,13 +127,15 @@ describe("<ArticleBody>", () => {
     it("preserves heading blocks that precede the first paragraph", () => {
       const content = [heading("Heading first"), paragraph("Then the body.")];
       const { container } = render(<ArticleBody content={content} />);
-      // Heading renders via <QASectionDivider> (a separator landmark); the
-      // DropCap paragraph follows it in DOM order.
+      // Heading renders via <QASectionDivider> (a real <h2>); the DropCap
+      // paragraph follows it in DOM order.
       const dropcap = container.querySelector('[data-tone="ink"]');
-      const separator = container.querySelector('div[role="separator"]');
+      const sectionHeading = screen.getByRole("heading", {
+        level: 2,
+        name: "Heading first",
+      });
       expect(dropcap).toBeTruthy();
-      expect(separator).toBeTruthy();
-      const cmp = separator!.compareDocumentPosition(dropcap!);
+      const cmp = sectionHeading.compareDocumentPosition(dropcap!);
       // Node.DOCUMENT_POSITION_FOLLOWING = 4
       expect(cmp & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     });
@@ -296,7 +298,7 @@ describe("<ArticleBody>", () => {
 
   describe("h2 block serializer", () => {
     // h2 body headings delegate to <QASectionDivider> per the 5.d3 lock —
-    // tests assert the delegation produces the divider's separator + title
+    // tests assert the delegation produces the divider's heading + title
     // structure rather than the inline-h2 geometry from the earlier draft.
     it("renders the section-break treatment via <QASectionDivider>", () => {
       const content = [
@@ -305,12 +307,12 @@ describe("<ArticleBody>", () => {
         paragraph("Body continues."),
       ];
       render(<ArticleBody content={content} />);
-      const separator = screen.getByRole("separator", {
+      const sectionHeading = screen.getByRole("heading", {
+        level: 2,
         name: "Het seizoen.",
       });
-      expect(separator).toBeTruthy();
-      // A plain <div>, not <aside> (#3188) — see QASectionDivider.tsx.
-      expect(separator.tagName.toLowerCase()).toBe("div");
+      expect(sectionHeading.tagName.toLowerCase()).toBe("h2");
+      expect(screen.queryByRole("separator")).toBeNull();
     });
 
     it("renders the h2 text inside the divider's title slot", () => {

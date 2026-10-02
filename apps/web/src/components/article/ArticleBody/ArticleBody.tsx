@@ -60,7 +60,7 @@ import { cn } from "@/lib/utils/cn";
  *   - First normal paragraph wraps in <DropCapParagraph tone="ink">.
  *   - `accent` mark renders italic + jersey-deep (5.A.1).
  *   - `h2` block delegates to <QASectionDivider> for the section-break
- *     treatment (5.d3 lock).
+ *     treatment (5.d3 lock); its title is a real `<h2>` (#2523).
  *   - `blockquote` style block renders <PullQuote> as the full taped card
  *     — the only quote object on the site (#2566, decision #2515).
  *   - `pullQuote` block renders <PullQuote> with a <SubjectAvatar
@@ -89,8 +89,10 @@ import { cn } from "@/lib/utils/cn";
 /**
  * The shallowest real heading level an article body ever produces (#3188 —
  * review round 2 finding 5). PT `h2` renders via `<QASectionDivider>` as a
- * non-heading, so PT `h3` — the ladder's own top rung — is the first real
- * heading, landing directly under the page's `<h1>`. Any inline widget that
+ * literal `<h2>` (#2523), and PT `h3` — the ladder's own top rung — renders
+ * as a sibling of it at this same level, landing directly under the page's
+ * `<h1>`. `QASectionDivider` restates the `<h2>` literal (design-system/ may
+ * not import from article/), so change both together. Any inline widget that
  * can appear ANYWHERE in the flow (not tied to the PT subheading ladder —
  * `<QARow>`'s question, `<TransferFactCard>`'s name, `<EventFactInline>`'s
  * title) takes this SAME level rather than a hardcoded `<h2>` literal, so
@@ -636,11 +638,11 @@ const ARTICLE_BLOCK_STYLE_HANDLERS = {
   // h1 is not selectable in the schema: the article title is the only <h1>.
   //
   // Rendered ONE REAL LEVEL SHALLOWER than the PT style name (#3188 — axe
-  // `heading-order`): `h2` above is already a non-heading
-  // `<div role="separator">` (`<QASectionDivider>`), so a PT `h3` is the
-  // FIRST real heading an article body can produce, and it must land
-  // directly under the page's own `<h1>` (the article title) with nothing
-  // in between — hence `h3` renders `TOP_HEADING_LEVEL` (`<h2>`, see the
+  // `heading-order`): `h2` above renders a real `<h2>` (`<QASectionDivider>`,
+  // #2523), so PT `h3` is a sibling of that star heading, not a child of
+  // it, and the first heading an article body produces must land directly
+  // under the page's own `<h1>` (the article title) with nothing in
+  // between — hence `h3` renders `TOP_HEADING_LEVEL` (`<h2>`, see the
   // exported constant above), `h4` renders `<h3>`, and so on down to `h6`
   // rendering `<h5>`. Each keeps its OWN existing className (the visual
   // scale is keyed to the PT style name, not the HTML level), so nothing

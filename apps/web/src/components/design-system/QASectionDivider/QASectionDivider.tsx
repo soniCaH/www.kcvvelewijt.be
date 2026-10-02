@@ -6,14 +6,17 @@ import type { PortableTextBlock } from "@portabletext/react";
  * Two variants:
  *
  *   - `variant="title"` (default) — major section break with title + rules +
- *     `✦` glyphs (Phase 3-b lock). Composition:
+ *     `✦` glyphs (Phase 3-b lock). The title is a real `<h2>` (#2523): a
+ *     heading already marks a section start, so the wrapper is a plain
+ *     `<div>` with no `role`/`aria-label`, and the heading's own text is its
+ *     accessible name. Composition:
  *
  *     [1px ink rule]  ✦  {italic display title}  ✦  [1px ink rule]
  *                            AKTE 02 · DE OVERSTAP   (optional kicker)
  *
  *   - `variant="dotted"` (5.A.2 / 5.B.int) — thin dotted rule used as a
  *     between-row separator inside `<QASection>`. No title, no glyph, no
- *     kicker; just a centered ink-muted dotted line. Renders the same
+ *     kicker; just a centered ink-muted dotted line. Renders a
  *     `<div role="separator">` shell (a plain `<div>`, not `<aside>` — see
  *     #3188: `separator` is not an allowed role for `<aside>`'s implicit
  *     landmark role) so AT picks it up as a structural break, with an
@@ -33,8 +36,10 @@ import type { PortableTextBlock } from "@portabletext/react";
  *   - ✦ glyphs render as separate flex children, NEVER pseudo-elements on the
  *     title (same architectural reason as <EndMark>).
  *   - The glyph silhouette is reserved for this primitive; <EndMark> uses ★.
- *   - aria-label on the wrapper is a plain string, NOT the raw blocks (AT
- *     would otherwise read structural noise instead of the title).
+ *   - Why the title is not a `role="separator"`: `separator` has presentational
+ *     children, so an `<h2>` inside it drops out of the accessibility tree,
+ *     and `role="separator"` on the `<h2>` itself replaces the heading role
+ *     (and is not allowed on `<h2>` — axe `aria-allowed-role`).
  */
 
 interface TitleSpan {
@@ -61,16 +66,6 @@ export interface QASectionDividerProps {
    * second row entirely. Ignored on `variant="dotted"`.
    */
   kicker?: string;
-}
-
-function flattenTitle(blocks: PortableTextBlock[]): string {
-  const block = blocks[0];
-  const children = (block as { children?: TitleSpan[] } | undefined)?.children;
-  if (!Array.isArray(children)) return "";
-  return children
-    .map((c) => c.text ?? "")
-    .join("")
-    .trim();
 }
 
 export function QASectionDivider({
@@ -109,13 +104,10 @@ export function QASectionDivider({
 
   const block = title[0] as { children?: TitleSpan[] } | undefined;
   const spans = Array.isArray(block?.children) ? block.children : [];
-  const plain = flattenTitle(title);
 
   return (
-    // See the dotted variant above for why this is a `<div>`, not `<aside>`.
+    // A plain `<div>` with no role: the `<h2>` below names the section (#2523).
     <div
-      role="separator"
-      aria-label={plain}
       data-divider-variant="title"
       className="mx-auto my-10 w-full max-w-[580px]"
     >
@@ -132,7 +124,11 @@ export function QASectionDivider({
         >
           ✦
         </span>
-        <span
+        {/* A literal `<h2>`, one level above PT `h3` / `TOP_HEADING_LEVEL`
+            (`@/components/article/ArticleBody`) — design-system/ never imports
+            from article/, so the level is restated here, not shared. If that
+            constant changes, change this tag with it. */}
+        <h2
           data-divider="title"
           // Wraps rather than runs off (#2526): display type is never cut
           // (#2549 rule 2). A long h2 such as "Doorstroming + jong talent
@@ -160,7 +156,7 @@ export function QASectionDivider({
             }
             return <span key={span._key ?? i}>{text}</span>;
           })}
-        </span>
+        </h2>
         <span
           data-divider="glyph"
           aria-hidden="true"
