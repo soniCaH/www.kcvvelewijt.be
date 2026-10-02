@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { cn } from "@/lib/utils/cn";
 import { formatMatchWidgetDate } from "@/lib/utils/dates";
 import { FilterTabs, type FilterTab } from "@/components/design-system";
@@ -181,6 +182,7 @@ export const UpcomingMatchesClient = ({
             className="hover-underline-thicken text-ink hover:text-jersey-deep -my-2 inline-flex items-center gap-1 py-2 font-mono text-sm font-bold tracking-wide uppercase underline-offset-4"
           >
             Volledige kalender ↗
+            <LinkPendingDots />
           </Link>
         </div>
       )}
@@ -400,6 +402,7 @@ const MatchRow = ({ match, kcvvTeamId }: MatchRowProps) => {
       <span className="col-start-2 row-start-1 sm:col-auto sm:row-auto">
         {kcvvSide && <HomeAwayBadge side={kcvvSide} />}
       </span>
+      <LinkPendingDots placement="corner" className="top-1 right-1" />
     </Link>
   );
 };

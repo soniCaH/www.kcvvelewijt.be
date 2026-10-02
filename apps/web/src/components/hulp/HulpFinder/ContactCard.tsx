@@ -15,6 +15,7 @@
  */
 
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import type { MouseEvent } from "react";
 import {
   ArrowRight,
@@ -129,6 +130,7 @@ export function ContactCard({
           {isStructuur && <TreeStructure size={12} aria-hidden />}
           {isStructuur ? "Toon in structuur" : "Vind je ploeg"}
           <ArrowRight size={12} aria-hidden />
+          <LinkPendingDots />
         </Link>
       )}
     </div>

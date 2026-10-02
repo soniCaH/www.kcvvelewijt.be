@@ -34,6 +34,7 @@ import {
   type MouseEvent,
 } from "react";
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { ArrowRight } from "@/lib/icons.redesign";
 import {
   EmptyState,
@@ -352,6 +353,7 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
             className="text-jersey-deep font-semibold underline"
           >
             Contacteer de club →
+            <LinkPendingDots />
           </Link>
         </EmptyState>
       );

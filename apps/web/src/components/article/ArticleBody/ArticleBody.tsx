@@ -5,6 +5,7 @@ import type {
 } from "@portabletext/react";
 import Image from "next/image";
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { FacebookLogo, InstagramLogo, X } from "@/lib/icons.redesign";
 import type { ReactNode } from "react";
 import { DropCapParagraph } from "@/components/design-system/DropCapParagraph";
@@ -847,6 +848,7 @@ export function buildComponents({
         return (
           <Link href={href} data-article-link="internal" className="prose-link">
             {children}
+            <LinkPendingDots />
           </Link>
         );
       },

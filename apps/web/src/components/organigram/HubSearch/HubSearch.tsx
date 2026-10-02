@@ -26,6 +26,7 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import {
   ArrowRight,
   MagnifyingGlass,
@@ -793,6 +794,7 @@ export function HubSearch({
                 >
                   Contacteer de club
                   <ArrowRight size={12} aria-hidden />
+                  <LinkPendingDots />
                 </Link>
               </div>
             </>

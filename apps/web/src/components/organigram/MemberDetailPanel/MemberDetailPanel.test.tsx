@@ -26,6 +26,7 @@ import type { ResponsibilityPath } from "@/types/responsibility";
 // chip does NOT — Next ≥ 16.2 appends hash fragments instead of replacing them
 // (vercel/next.js#93126), so hash-only navigation must stay a plain <a> (#2312).
 vi.mock("next/link", () => ({
+  useLinkStatus: () => ({ pending: false }),
   default: ({ children, ...rest }: ComponentProps<"a">) => (
     <a data-next-link="" {...rest}>
       {children}

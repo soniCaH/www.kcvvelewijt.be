@@ -21,6 +21,7 @@
  */
 import Image from "next/image";
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import type { PortableTextBlock } from "@portabletext/react";
 import {
   EditorialByline,
@@ -603,7 +604,7 @@ export function EditorialHero(props: EditorialHeroProps) {
         // `apps/web/test/e2e/homepage.spec.ts`'s #2912 test anchors on this
         // rather than guessing DOM position or link count.
         data-testid="homepage-hero-link"
-        className={cn("group block", PRESS_DOWN_CLASSES)}
+        className={cn("group relative block", PRESS_DOWN_CLASSES)}
         aria-label={serializeTitle(title)}
       >
         {body}
@@ -622,6 +623,7 @@ export function EditorialHero(props: EditorialHeroProps) {
             ★ Lees verder →
           </span>
         </PageContainer>
+        <LinkPendingDots placement="corner" />
       </Link>
     );
   }

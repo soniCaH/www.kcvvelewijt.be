@@ -48,6 +48,7 @@
  */
 import { Fragment } from "react";
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { Crest, PRESS_DOWN_CLASSES } from "@/components/design-system";
 import { cn } from "@/lib/utils/cn";
 import { toMatchDisplayZone } from "@/lib/utils/dates";
@@ -689,7 +690,7 @@ export function TeamAgendaRow({
       href={`/wedstrijd/${match.id}`}
       aria-label={matchLabel}
       onClick={onNavigate}
-      className="block no-underline"
+      className="relative block no-underline"
     >
       <article
         data-testid="team-agenda-row"
@@ -798,6 +799,7 @@ export function TeamAgendaRow({
           })()}
         </div>
       </article>
+      <LinkPendingDots placement="corner" />
     </Link>
   );
 }

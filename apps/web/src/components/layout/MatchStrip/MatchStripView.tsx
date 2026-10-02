@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
@@ -512,7 +513,7 @@ function LedgerLinkRow({
       href={`/wedstrijd/${match.id}`}
       aria-label={label}
       className={cn(
-        "flex min-w-0 items-center gap-2.5 px-4 py-2.5 no-underline",
+        "relative flex min-w-0 items-center gap-2.5 px-4 py-2.5 no-underline",
         // The inset ring takes its colour from the ground (globals.css):
         // warm on the match-day jersey-deep-dark strip, jersey-deep on cream.
         "focus-ring-inset",
@@ -560,6 +561,7 @@ function LedgerLinkRow({
       <span aria-hidden="true" className={cn("shrink-0 font-mono", muted)}>
         →
       </span>
+      <LinkPendingDots placement="corner" className="top-1 right-1" />
     </Link>
   );
 }
@@ -840,6 +842,7 @@ function DesktopSlider({
           >
             Wedstrijddetails
             <span aria-hidden="true">→</span>
+            <LinkPendingDots />
           </Link>
         )}
       </div>

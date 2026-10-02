@@ -8,6 +8,7 @@ vi.mock("next/font/google", () => ({
 }));
 
 vi.mock("next/link", () => ({
+  useLinkStatus: () => ({ pending: false }),
   default: ({
     href,
     children,

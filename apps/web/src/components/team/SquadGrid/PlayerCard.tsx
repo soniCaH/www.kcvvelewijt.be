@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { cn } from "@/lib/utils/cn";
 import { TapedCard } from "@/components/design-system/TapedCard";
 import {
@@ -183,9 +184,10 @@ export function PlayerCard({
             ? `${firstName} ${lastName} — ${position}`
             : `${firstName} ${lastName}`
         }
-        className="block h-full"
+        className="relative block h-full"
       >
         {card}
+        <LinkPendingDots placement="corner" />
       </Link>
     );
   }

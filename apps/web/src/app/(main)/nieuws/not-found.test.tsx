@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import NotFound, { metadata } from "./not-found";
 
 vi.mock("next/link", () => ({
+  useLinkStatus: () => ({ pending: false }),
   default: ({
     href,
     children,

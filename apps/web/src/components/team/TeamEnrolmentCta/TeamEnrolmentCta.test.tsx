@@ -23,6 +23,7 @@ vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 vi.mock("next/link", async () => {
   const { forwardRef } = await import("react");
   return {
+    useLinkStatus: () => ({ pending: false }),
     default: forwardRef<HTMLAnchorElement, ComponentProps<"a">>(
       function MockNextLink({ children, ...props }, ref) {
         return (

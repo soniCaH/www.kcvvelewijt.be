@@ -17,6 +17,7 @@ import {
 // Mock Next.js modules
 // Note: Kept in each file due to Vitest hoisting requirements
 vi.mock("next/link", () => ({
+  useLinkStatus: () => ({ pending: false }),
   default: ({
     children,
     href,

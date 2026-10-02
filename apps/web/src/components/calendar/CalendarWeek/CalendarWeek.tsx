@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { cn } from "@/lib/utils/cn";
 import { clubToday, toDisplayZone } from "@/lib/utils/dates";
 import { PRESS_DOWN_CLASSES } from "@/components/design-system/press-down";
@@ -156,11 +157,12 @@ function WeekMatchCard({ match }: { match: CalendarMatch }) {
       data-match
       onClick={() => trackKalenderItemClick("match")}
       className={cn(
-        "border-ink bg-cream shadow-paper-sm block border-2 p-1.5",
+        "border-ink bg-cream shadow-paper-sm relative block border-2 p-1.5",
         PRESS_DOWN_CLASSES,
       )}
     >
       {body}
+      <LinkPendingDots placement="corner" className="top-0.5 right-0.5" />
     </Link>
   );
 }
@@ -217,7 +219,7 @@ export function CalendarWeek({
                     href={event.href}
                     onClick={() => trackKalenderItemClick(event.source)}
                     className={cn(
-                      "border-ink bg-cream shadow-paper-sm block border-2 p-1.5",
+                      "border-ink bg-cream shadow-paper-sm relative block border-2 p-1.5",
                       PRESS_DOWN_CLASSES,
                     )}
                   >
@@ -238,6 +240,10 @@ export function CalendarWeek({
                         {time}
                       </span>
                     )}
+                    <LinkPendingDots
+                      placement="corner"
+                      className="top-0.5 right-0.5"
+                    />
                   </Link>
                 );
               })}

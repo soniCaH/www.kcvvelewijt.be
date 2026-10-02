@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import ErrorPage from "./error";
 
 vi.mock("next/link", () => ({
+  useLinkStatus: () => ({ pending: false }),
   default: ({
     href,
     children,

@@ -9,6 +9,7 @@
  */
 
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import Image from "next/image";
 import { SearchResult as SearchResultType } from "./SearchInterface";
 import { MonoLabel, StampBadge } from "@/components/design-system";
@@ -133,6 +134,10 @@ export const SearchResult = ({ result, onClick }: SearchResultProps) => {
           </div>
         )}
       </div>
+      <LinkPendingDots
+        placement="corner"
+        className="top-auto right-2 bottom-2"
+      />
     </Link>
   );
 };

@@ -24,6 +24,7 @@ import type {
 
 // Render Link as a plain anchor that forwards onClick (no router in tests).
 vi.mock("next/link", () => ({
+  useLinkStatus: () => ({ pending: false }),
   default: ({
     children,
     href,

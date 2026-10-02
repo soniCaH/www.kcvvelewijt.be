@@ -60,6 +60,7 @@ vi.mock("next/navigation", () => ({
 // Mock child components' dependencies
 // Note: Kept in file due to Vitest hoisting requirements
 vi.mock("next/link", () => ({
+  useLinkStatus: () => ({ pending: false }),
   default: ({ children, href }: { children: ReactNode; href: string }) => (
     <a href={href}>{children}</a>
   ),

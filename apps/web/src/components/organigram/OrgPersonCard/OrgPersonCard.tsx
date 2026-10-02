@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import type { OrgChartNode } from "@/types/organigram";
 import { cn } from "@/lib/utils/cn";
 import { RoundAvatar } from "@/components/design-system/RoundAvatar";
@@ -256,6 +257,7 @@ export function OrgPersonCard({
               className={`${CHIP_LINK_CLASSES} border-ink bg-cream text-ink mt-2.5`}
             >
               Iets voor jou? →
+              <LinkPendingDots />
             </Link>
           )}
         </>

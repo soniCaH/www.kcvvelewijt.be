@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { FacebookLogo, InstagramLogo } from "@/lib/icons.redesign";
 import { EXTERNAL_LINKS } from "@/lib/constants";
 import { cn } from "@/lib/utils/cn";
@@ -70,6 +71,7 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
                       className="text-ink hover:text-jersey-deep hover:decoration-jersey-deep -my-1 inline-block py-1 text-[14px] leading-snug font-medium underline decoration-transparent underline-offset-2 transition-colors duration-150"
                     >
                       {link.label}
+                      <LinkPendingDots />
                     </Link>
                   </li>
                 ))}
@@ -100,6 +102,7 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
               className="text-cream-quiet hover:text-cream inline-flex h-6 items-center font-mono text-[9.5px] font-medium tracking-[0.06em] uppercase transition-colors md:text-[10.5px]"
             >
               Privacy
+              <LinkPendingDots />
             </Link>
             <CookiePreferencesButton />
             <ul className="m-0 flex list-none gap-2 p-0">

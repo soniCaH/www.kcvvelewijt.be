@@ -2,6 +2,7 @@
 
 import { useMemo, type CSSProperties } from "react";
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import {
   EditorialHeading,
   DashedDivider,
@@ -204,7 +205,7 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
       data-testid="agenda-match-row"
       onClick={() => trackKalenderItemClick("match")}
       className={cn(
-        "border-paper-edge block border-b border-dashed no-underline transition-colors last:border-b-0",
+        "border-paper-edge relative block border-b border-dashed no-underline transition-colors last:border-b-0",
         "hover:bg-cream-soft/50 focus-visible:bg-cream-soft/50",
         LIST_ROW_FOCUS_CLASSES,
       )}
@@ -340,6 +341,7 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
         </span>
         <MatchVenueTag isHome={isHome} />
       </div>
+      <LinkPendingDots placement="corner" className="top-1 right-1" />
     </Link>
   );
 }
@@ -357,7 +359,7 @@ function AgendaEventRow({ event }: { event: CalendarEvent }) {
       data-testid="agenda-event-row"
       onClick={() => trackKalenderItemClick(event.source)}
       className={cn(
-        "border-paper-edge bg-jersey-deep/6 grid grid-cols-[52px_1fr_auto] items-center gap-3 border-b border-dashed px-2 py-2 no-underline transition-colors last:border-b-0",
+        "border-paper-edge bg-jersey-deep/6 relative grid grid-cols-[52px_1fr_auto] items-center gap-3 border-b border-dashed px-2 py-2 no-underline transition-colors last:border-b-0",
         "hover:bg-jersey-deep/12 focus-visible:bg-jersey-deep/12",
         LIST_ROW_FOCUS_CLASSES,
       )}
@@ -370,6 +372,7 @@ function AgendaEventRow({ event }: { event: CalendarEvent }) {
         {event.title}
       </span>
       <EventTypeTag eventType={event.eventType} />
+      <LinkPendingDots placement="corner" className="top-1 right-1" />
     </Link>
   );
 }

@@ -2,6 +2,7 @@
 
 import { forwardRef, type ReactNode } from "react";
 import Link, { type LinkProps } from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import {
   getButtonClasses,
   type ButtonStyleProps,
@@ -43,6 +44,7 @@ export const LinkButton = forwardRef<HTMLAnchorElement, LinkButtonProps>(
             →
           </span>
         )}
+        <LinkPendingDots />
       </Link>
     );
   },

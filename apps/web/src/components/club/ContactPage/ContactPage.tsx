@@ -24,6 +24,7 @@
  */
 
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import {
   ArrowRight,
   Car,
@@ -133,7 +134,7 @@ const ICON_TITLE = "text-ink text-[1.05rem] font-bold";
 const INLINE_LINK = "prose-link text-sm";
 const CARD_BODY = "text-ink text-[0.95rem] leading-relaxed";
 const CROSS_LINK =
-  "group border-ink bg-cream-soft hover:bg-cream-deep flex items-center justify-between gap-3 border p-3 transition-colors";
+  "group border-ink bg-cream-soft hover:bg-cream-deep relative flex items-center justify-between gap-3 border p-3 transition-colors";
 
 /** A boxed cross-link row in the Clubgegevens card (hulpvinder, organigram). */
 function CrossLink({
@@ -156,6 +157,7 @@ function CrossLink({
         className="text-jersey-deep shrink-0 transition-transform group-hover:translate-x-0.5"
         aria-hidden
       />
+      <LinkPendingDots placement="corner" />
     </Link>
   );
 }
