@@ -121,32 +121,6 @@ describe("OrganigramExplorer — focus + navigation", () => {
     );
   });
 
-  it("shows the keyboard focus ring only after a keyboard nav, not on open", async () => {
-    open({ initialFocusId: "voorzitter" });
-    // On open: no keyboard-nav ring.
-    expect(screen.getByRole("button", { current: true })).toHaveAttribute(
-      "data-keyboard-nav",
-      "false",
-    );
-    screen.getByRole("button", { current: true }).focus();
-    await userEvent.keyboard("{ArrowDown}");
-    expect(screen.getByRole("button", { current: true })).toHaveAttribute(
-      "data-keyboard-nav",
-      "true",
-    );
-  });
-
-  it("keeps the ring off when navigating by mouse click", async () => {
-    open({ initialFocusId: "voorzitter" });
-    await userEvent.click(
-      screen.getByRole("button", { name: "Naar Jeugdvoorzitter" }),
-    );
-    expect(screen.getByRole("button", { current: true })).toHaveAttribute(
-      "data-keyboard-nav",
-      "false",
-    );
-  });
-
   it("ascends via the parent control", async () => {
     open({ initialFocusId: "tvjo" });
     await userEvent.click(

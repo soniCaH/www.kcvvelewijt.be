@@ -260,8 +260,15 @@ export function CalendarMonth({
               className={cn(
                 "border-paper-edge flex min-h-[108px] flex-col items-stretch border-r border-b border-dashed p-1.5 text-left transition-colors last:border-r-0",
                 "[&:nth-child(7n)]:border-r-0",
+                // List Row Fill Rule's inset ring: the cells are gap-free
+                // inside the grid's `border-2`, so an outset ring would paint
+                // over the neighbours and the border. Selection is the inset
+                // jersey-deep box-shadow (not an outline, which focus would
+                // have to override); focus on the selected cell is an inset
+                // INK ring over it, so focus and selection read differently.
+                "focus-visible:outline-offset-[-2px]",
                 isSelected
-                  ? "bg-jersey-deep/12 outline-jersey-deep outline-2 -outline-offset-2"
+                  ? "bg-jersey-deep/12 focus-visible:outline-ink shadow-[inset_0_0_0_2px_var(--color-jersey-deep)]"
                   : "hover:bg-cream-soft/60",
               )}
             >

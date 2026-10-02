@@ -427,7 +427,12 @@ export const NewsCard = ({
           data-rotation={rotation}
           data-aspect={aspectRatio}
           data-bg={bg}
-          className="absolute inset-0 z-10"
+          // The link covers the whole card, so an outset ring would be drawn
+          // on the PAGE ground around it — not the card's — and `TapedCard`
+          // hands this link the card's ring colour (warm on an ink /
+          // jersey-deep card: ~1.3:1 on a cream page). Inset, the ring lands
+          // on the card itself, where that colour was chosen for, on any page.
+          className="absolute inset-0 z-10 focus-visible:outline-offset-[-2px]"
         />
       )}
     </TapedCard>

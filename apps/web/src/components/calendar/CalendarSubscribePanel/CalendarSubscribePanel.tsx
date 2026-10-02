@@ -256,6 +256,10 @@ export function CalendarSubscribePanel({
                   aria-pressed={side === tab.value}
                   className={cn(
                     "not-last:border-ink px-3 py-1.5 font-mono text-[11px] tracking-wide uppercase transition-colors not-last:border-r-2",
+                    // Gap-free segments inside the group's `border-2`: the
+                    // inset ring (List Row Fill Rule) keeps it off the
+                    // neighbours and the border.
+                    "focus-visible:outline-offset-[-2px]",
                     side === tab.value
                       ? "bg-ink text-cream"
                       : "text-ink hover:bg-cream-soft",

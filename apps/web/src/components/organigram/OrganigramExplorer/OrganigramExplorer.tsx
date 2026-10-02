@@ -155,10 +155,6 @@ export function OrganigramExplorer({
   // sibling carets at ~360px, and CSS transforms don't expand the scroll area
   // so overflow can't rescue it (MOB-4).
   const [isPhone, setIsPhone] = useState(false);
-  // The centre's focus ring shows only once the user navigates by keyboard
-  // (arrows/Tab) — never on open or mouse use, where it reads as a heavy,
-  // unwanted selection outline. The centre stays focusable throughout (a11y).
-  const [keyboardNav, setKeyboardNav] = useState(false);
 
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -173,9 +169,8 @@ export function OrganigramExplorer({
     : getSpotlightView(tree, CLUB_ROOT_ID);
   const fan = splitFan(view.children, childrenCap, fanExpanded);
 
-  const navigate = (targetId: string | null, viaKeyboard = false) => {
+  const navigate = (targetId: string | null) => {
     if (!targetId || targetId === focusId) return;
-    setKeyboardNav(viaKeyboard);
     // Capture the activated node's current on-screen rect (when it's rendered as
     // a child / parent / jump-list card) so the new centre can travel from it.
     const fromEl = dialogRef.current?.querySelector<HTMLElement>(
@@ -195,7 +190,6 @@ export function OrganigramExplorer({
       setFocusId(landingId);
       setFanExpanded(false);
       setSiblingsOpen(false);
-      setKeyboardNav(false);
     }
     prevOpenRef.current = open;
   }, [open, landingId]);
@@ -269,7 +263,6 @@ export function OrganigramExplorer({
       return;
     }
     if (e.key !== "Tab" || !dialogRef.current) return;
-    setKeyboardNav(true); // Tab is a keyboard interaction — show focus rings.
     const focusables = Array.from(
       dialogRef.current.querySelectorAll<HTMLElement>(
         'a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])',
@@ -293,7 +286,7 @@ export function OrganigramExplorer({
   const onCenterKeyDown = (e: ReactKeyboardEvent<HTMLButtonElement>) => {
     if (!NAV_KEYS.has(e.key)) return;
     e.preventDefault();
-    navigate(targetForKey(tree, focusId, e.key as SpotlightNavKey), true);
+    navigate(targetForKey(tree, focusId, e.key as SpotlightNavKey));
   };
 
   if (!open) return null;
@@ -452,8 +445,11 @@ export function OrganigramExplorer({
                   tabIndex={0}
                   aria-current="true"
                   aria-label={announceFocus(view)}
-                  data-keyboard-nav={keyboardNav}
                   onKeyDown={onCenterKeyDown}
+                  // No ring gating of our own: the centre is focused by script on
+                  // open and after each re-centre, and the browser's
+                  // `:focus-visible` heuristic decides whether that shows the
+                  // global ring (it does after a keyboard open or key press).
                   className="cursor-default"
                 >
                   <SpotlightNodeCard

@@ -266,6 +266,18 @@ describe("EmptyState — tier: surface (Tier 1)", () => {
     );
     expect(container.firstElementChild).not.toHaveClass("shadow-paper-sm");
   });
+
+  it.each(["paper", "inverse"] as const)(
+    "surface=%s is a cream-soft card, so it pins the focus ring to jersey-deep even inside a focus-on-dark band",
+    (surface) => {
+      const { container } = render(
+        <EmptyState tier="surface" heading="Niets" surface={surface}>
+          Body.
+        </EmptyState>,
+      );
+      expect(container.firstElementChild).toHaveClass("focus-on-light");
+    },
+  );
 });
 
 describe("EmptyState — tier: slot (Tier 2)", () => {

@@ -72,16 +72,24 @@ describe("TapedCard", () => {
   });
 
   it.each(["ink", "jersey-deep"] as const)(
-    "bg=%s turns the global focus ring warm for what it holds; a light card does not",
+    "bg=%s turns the global focus ring warm for what it holds",
     (bg) => {
-      const dark = render(<TapedCard bg={bg}>X</TapedCard>);
-      expect((dark.container.firstChild as HTMLElement).className).toContain(
-        "focus-on-dark",
-      );
-      const light = render(<TapedCard bg="cream">X</TapedCard>);
-      expect(
-        (light.container.firstChild as HTMLElement).className,
-      ).not.toContain("focus-on-dark");
+      const { container } = render(<TapedCard bg={bg}>X</TapedCard>);
+      const className = (container.firstChild as HTMLElement).className;
+      expect(className).toContain("focus-on-dark");
+      expect(className).not.toContain("focus-on-light");
+    },
+  );
+
+  // The ground a ring is drawn on decides its colour: a cream card dropped
+  // into a dark band (`/evenementen`, the dark `PageHero`) must state its own.
+  it.each(["cream", "cream-soft"] as const)(
+    "bg=%s pins the focus ring to jersey-deep, whatever band it sits in",
+    (bg) => {
+      const { container } = render(<TapedCard bg={bg}>X</TapedCard>);
+      const className = (container.firstChild as HTMLElement).className;
+      expect(className).toContain("focus-on-light");
+      expect(className).not.toContain("focus-on-dark");
     },
   );
 

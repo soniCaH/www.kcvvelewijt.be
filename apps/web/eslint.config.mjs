@@ -192,16 +192,28 @@ const OFF_RAMP_TRACKING_PATTERN =
 // whole site draws a single ring from `globals.css` (`:focus-visible`, 2px at
 // a 2px offset, colour from `--focus-ring`). Every `@layer base` rule loses to
 // a utility, so any of these on a component either recolours the ring or hides
-// it: a `focus-visible:`/`focus:` outline or ring utility, `outline-hidden`,
-// or a bare `outline-none`. `focus:outline-none` stays legal on purpose — it is
-// how a `tabIndex={-1}` scroll target (a section the page moves focus to)
-// opts out of a section-sized box; nothing a visitor can tab to is one.
-// A dark ground says `focus-on-dark` instead of re-colouring a ring. The one
-// sanctioned inset ring is the List Row Fill Rule's, granted per file in the
-// config block below, not per class string. Same single-line/no-newline
-// requirement as the patterns above.
-const FOCUS_RING_PATTERN =
-  "(?:^|[\\s:!])(?:focus-visible:-?(?:outline|ring)-|focus:-?(?:ring-|outline-(?!none(?![\\w-])))|outline-hidden(?![\\w-]))|(?:^|[\\s!])outline-none(?![\\w-])";
+// it:
+//   1. an outline/ring utility under a focus-state variant — `focus-visible:`,
+//      `focus-within:`, `group-`/`peer-` `focus`, `focus-visible`,
+//      `focus-within` — or under `has-[…]:` (any condition);
+//   2. a `focus:` ring, or a `focus:` outline other than `none`;
+//   3. `outline-hidden`, `outline-0`, and `outline-none` under ANY prefix
+//      (`md:`, `hover:`, `group-focus:` …) or none — except plain `focus:`.
+// `focus:outline-none` (also under a responsive prefix) stays legal on
+// purpose: it is how a `tabIndex={-1}` scroll target (a section the page
+// moves focus to) opts out of a section-sized box; nothing a visitor can tab
+// to is one. A dark ground says `focus-on-dark` instead of re-colouring a
+// ring. The sanctioned inset rings (List Row Fill Rule and the surfaces that
+// share its reason: gap-free grids/tab groups, scrolling popups, full-card
+// overlay links) are granted per file in the config block below, not per
+// class string. Same single-line/no-newline requirement as the patterns above.
+const FOCUS_RING_PATTERN = [
+  "(?<![\\w-])(?:(?:group-|peer-)?focus-(?:visible|within)|(?:group|peer)-focus):-?(?:outline|ring)-",
+  "(?<![\\w-])focus:-?(?:ring-|outline-(?!none(?![\\w-])))",
+  "(?<![\\w-])has-\\[[^\\]]*\\]:-?(?:outline|ring)-",
+  "(?<!(?<![\\w-])focus:)(?<![\\w-])outline-none(?![\\w-])",
+  "(?<![\\w-])outline-(?:hidden|0)(?![\\w-])",
+].join("|");
 
 const matchesClassString = (pattern) =>
   `:matches(Literal[value=/${pattern}/], TemplateElement[value.raw=/${pattern}/])`;
@@ -407,15 +419,29 @@ const eslintConfig = [
     },
   },
   {
-    // One Focus Ring Rule (#3368) — own rule ID, own block: the List Row Fill
-    // Rule's inset ring lives in exactly these two files and nowhere else, so
-    // the exemption is a file list here, never an `eslint-disable` there.
+    // One Focus Ring Rule (#3368) — own rule ID, own block. The inset ring
+    // (`outline-offset-[-2px]`, DESIGN.md → The List Row Fill Rule) lives in
+    // exactly these files and nowhere else, so the exemption is a file list
+    // here, never an `eslint-disable` there. Each one is a surface where an
+    // outset ring would be clipped or painted over a neighbour, or would land
+    // on the wrong ground:
+    //   - flush list rows: CalendarAgenda, MatchStripView, SearchRelated,
+    //     HubSearch (result rows in a scrolling popup);
+    //   - gap-free cells/segments inside a `border-2`: CalendarMonth (day
+    //     cells), CalendarSubscribePanel (segmented tabs);
+    //   - a link covering a whole dark card, whose outset ring would be drawn
+    //     on the page ground: NewsCard.
     files: ["**/src/**/*.{ts,tsx}"],
     ignores: [
       "**/*.test.{ts,tsx}",
       "**/*.spec.{ts,tsx}",
       "**/src/components/calendar/CalendarAgenda/CalendarAgenda.tsx",
       "**/src/components/layout/MatchStrip/MatchStripView.tsx",
+      "**/src/components/search/SearchRelated.tsx",
+      "**/src/components/organigram/HubSearch/HubSearch.tsx",
+      "**/src/components/calendar/CalendarMonth/CalendarMonth.tsx",
+      "**/src/components/calendar/CalendarSubscribePanel/CalendarSubscribePanel.tsx",
+      "**/src/components/article/NewsCard/NewsCard.tsx",
     ],
     plugins: { kcvv: kcvvPlugin },
     rules: {
@@ -424,7 +450,7 @@ const eslintConfig = [
         {
           selector: matchesClassString(FOCUS_RING_PATTERN),
           message:
-            "A per-component focus ring or a hidden outline — the site draws ONE global focus ring from globals.css (apps/web/DESIGN.md → Buttons). A focus-visible:/focus: outline or ring utility, outline-hidden or a bare outline-none recolours or hides it. A dark ground adds `focus-on-dark` instead; a text-input shell adds `focus-ring-within`.",
+            "A per-component focus ring or a hidden outline — the site draws ONE global focus ring from globals.css (apps/web/DESIGN.md → Buttons). A focus-visible:/focus-within:/group-focus*:/has-[…]: outline or ring utility, a focus: ring, outline-hidden, outline-0 or outline-none (other than plain focus:outline-none) recolours or hides it. A dark ground adds `focus-on-dark` instead, a light card `focus-on-light`; a text-input shell adds `focus-ring-within`.",
         },
       ],
     },

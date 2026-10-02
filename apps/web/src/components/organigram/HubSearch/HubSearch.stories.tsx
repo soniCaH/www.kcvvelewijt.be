@@ -56,7 +56,7 @@ function SemanticStub({
 }
 
 const heroBand = (node: ReactNode) => (
-  <div className="bg-jersey-deep-dark p-10">{node}</div>
+  <div className="bg-jersey-deep-dark focus-on-dark p-10">{node}</div>
 );
 
 const meta = {

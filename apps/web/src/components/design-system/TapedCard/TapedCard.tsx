@@ -63,10 +63,13 @@ const SHADOW_CLASS: Record<TapedCardShadow, string> = {
 };
 
 const BG_CLASS: Record<TapedCardBg, string> = {
-  cream: "bg-cream text-ink",
-  "cream-soft": "bg-cream-soft text-ink",
-  // `focus-on-dark`: a dark card turns the global focus ring warm for
-  // whatever it holds (a jersey-deep ring disappears on jersey-deep).
+  // The ground a ring is DRAWN ON decides its colour (#2530), so the card
+  // primitive states it for what it holds, whatever band it is dropped into:
+  // `focus-on-light` stops a dark page's `focus-on-dark` reaching a cream
+  // card (warm on cream is 1.48:1); `focus-on-dark` turns the ring warm on a
+  // dark card (a jersey-deep ring disappears on jersey-deep).
+  cream: "bg-cream text-ink focus-on-light",
+  "cream-soft": "bg-cream-soft text-ink focus-on-light",
   ink: "bg-ink text-cream focus-on-dark",
   jersey: "bg-jersey text-ink",
   "jersey-deep": "bg-jersey-deep text-cream focus-on-dark",
