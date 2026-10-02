@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import {
+  useEffect,
   useId,
   useRef,
   useMemo,
@@ -24,6 +25,7 @@ import {
   StampBadge,
 } from "@/components/design-system";
 import { trackEvent } from "@/lib/analytics/track-event";
+import { scrollIntoViewMotionSafe } from "@/lib/utils/scroll-into-view";
 import {
   clearDraft,
   EMPTY_DRAFT,
@@ -143,6 +145,7 @@ function MembershipFormFields({
   const uid = useId();
   const fieldId = (name: string) => `${uid}-${name}`;
   const roleRef = useRef<HTMLSelectElement>(null);
+  const confirmationRef = useRef<HTMLHeadingElement>(null);
 
   // A draft beats `defaultRole` / `defaultBirthDate`: the visitor's own
   // answer beats the link.
@@ -190,6 +193,17 @@ function MembershipFormFields({
   const [state, setState] = useState<SubmitState>("idle");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState("");
+
+  // The submit button unmounts with the form, so focus would fall to <body>
+  // and the confirmation can sit above the viewport on a long form (#3384).
+  useEffect(() => {
+    if (state !== "success") return;
+    const heading = confirmationRef.current;
+    if (!heading) return;
+    // `preventScroll`: the scroll below is the one that honours reduced motion.
+    heading.focus({ preventScroll: true });
+    scrollIntoViewMotionSafe(heading, { block: "start" });
+  }, [state]);
 
   const clearForm = () => {
     setValues(EMPTY_DRAFT);
@@ -318,7 +332,11 @@ function MembershipFormFields({
         <StampBadge tone="jersey" rotation={-2} position="top-right">
           ✓ ONTVANGEN
         </StampBadge>
-        <h2 className="font-display mb-3 text-[32px] leading-[1.05] font-black">
+        <h2
+          ref={confirmationRef}
+          tabIndex={-1}
+          className="font-display mb-3 text-[32px] leading-[1.05] font-black focus:outline-none"
+        >
           Bedankt voor je interesse!
         </h2>
         <p className="text-ink text-body-md">
@@ -562,6 +580,15 @@ function MembershipFormFields({
 
         <TurnstileWidget onToken={setTurnstileToken} />
 
+        {/* The wait is announced from here: a button's children are
+            presentational, so the spinner inside it is never spoken. Always
+            mounted, empty when idle, so the change is what gets announced.
+            `aria-live`, not `role="status"`: the `/club/word-lid` loading
+            skeleton renders this form and may hold exactly one status. */}
+        <span aria-live="polite" className="sr-only">
+          {state === "submitting" ? "Versturen…" : ""}
+        </span>
+
         {generalError ? (
           <p
             role="alert"
@@ -592,13 +619,14 @@ function MembershipFormFields({
 
         <div className="border-paper-edge mt-7 flex items-center justify-between border-t border-dashed pt-4">
           <span className="text-ink-muted font-mono text-[11px] tracking-[0.08em] uppercase">
-            {state === "submitting" ? "Versturen…" : "Word lid van KCVV"}
+            Word lid van KCVV
           </span>
           <Button
             variant="secondary"
             withArrow
             type="submit"
-            disabled={state === "submitting"}
+            loading={state === "submitting"}
+            loadingLabel="Versturen…"
           >
             Verstuur aanvraag
           </Button>

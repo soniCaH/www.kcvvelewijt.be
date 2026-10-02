@@ -39,6 +39,15 @@ const meta = {
       control: "boolean",
       description: "Disable the button",
     },
+    loading: {
+      control: "boolean",
+      description:
+        "A request is in flight: compact spinner over the hidden label, button disabled",
+    },
+    loadingLabel: {
+      control: "text",
+      description: "Accessible name while loading",
+    },
   },
 } satisfies Meta<typeof Button>;
 
@@ -152,6 +161,21 @@ export const Disabled: Story = {
   args: {
     children: "Disabled Button",
     disabled: true,
+  },
+};
+
+/**
+ * A request the visitor made is in flight (Waiting-Device Rule): the compact
+ * dots replace the label, the button is disabled, and its width does not
+ * change — compare with `WithArrowVariants`.
+ */
+export const Loading: Story = {
+  args: {
+    children: "Verstuur aanvraag",
+    variant: "secondary",
+    withArrow: true,
+    loading: true,
+    loadingLabel: "Versturen…",
   },
 };
 

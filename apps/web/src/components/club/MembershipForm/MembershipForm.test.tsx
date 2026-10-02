@@ -109,6 +109,87 @@ describe("MembershipForm", () => {
     );
   });
 
+  describe("submitting and success (#3384)", () => {
+    const submitForm = () =>
+      fireEvent.submit(screen.getByText(/Verstuur aanvraag/).closest("form")!);
+    const stubSuccessFetch = () =>
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(() =>
+          Promise.resolve({
+            ok: true,
+            status: 200,
+            json: () => Promise.resolve({ ok: true }),
+          }),
+        ),
+      );
+
+    it("moves focus to the confirmation heading and scrolls to it after a successful submit", async () => {
+      stubSuccessFetch();
+      const scrollIntoView = vi.spyOn(HTMLElement.prototype, "scrollIntoView");
+
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      submitForm();
+
+      const heading = await screen.findByRole("heading", {
+        name: "Bedankt voor je interesse!",
+      });
+      await waitFor(() => expect(document.activeElement).toBe(heading));
+      expect(heading).toHaveAttribute("tabindex", "-1");
+      expect(scrollIntoView).toHaveBeenCalledWith(
+        expect.objectContaining({ block: "start" }),
+      );
+    });
+
+    it("shows the compact spinner in a disabled, sending-named button while the request is pending", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(() => new Promise(() => {})),
+      );
+
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      submitForm();
+
+      const button = await screen.findByRole("button", { name: "Versturen…" });
+      expect(button).toBeDisabled();
+      expect(button).toHaveAttribute("type", "submit");
+      expect(button.querySelector(".kcvv-spinner-pulse")).not.toBeNull();
+    });
+
+    it("announces the wait from a live region outside the button, empty when idle", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(() => new Promise(() => {})),
+      );
+
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      const liveRegion = () =>
+        document.querySelector<HTMLElement>('form [aria-live="polite"]')!;
+      expect(liveRegion()).toBeEmptyDOMElement();
+
+      fillRequiredFields();
+      submitForm();
+
+      await waitFor(() => expect(liveRegion()).toHaveTextContent("Versturen…"));
+    });
+
+    it("keeps the footer caption as it was while sending", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(() => new Promise(() => {})),
+      );
+
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      submitForm();
+
+      await screen.findByRole("button", { name: "Versturen…" });
+      expect(screen.getByText("Word lid van KCVV")).toBeInTheDocument();
+    });
+  });
+
   describe("transport failure (#2580)", () => {
     it("shows the locked notice and logs the caught error to the console only", async () => {
       const consoleError = vi

@@ -3,11 +3,57 @@
  */
 
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Button } from "./Button";
 
 describe("Button", () => {
+  describe("Loading", () => {
+    it("is not loading by default: no spinner, no wrapper, enabled", () => {
+      render(<Button withArrow>Send</Button>);
+      const button = screen.getByRole("button", { name: /send/i });
+      expect(button).toBeEnabled();
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+      expect(button.querySelector(".invisible")).toBeNull();
+    });
+
+    it("shows the compact spinner, disables the button and names it by loadingLabel", () => {
+      render(
+        <Button loading loadingLabel="Versturen…">
+          Send
+        </Button>,
+      );
+      const button = screen.getByRole("button", { name: "Versturen…" });
+      expect(button).toBeDisabled();
+      expect(within(button).getByRole("status")).toBeInTheDocument();
+      expect(button.querySelector(".kcvv-spinner-pulse")).not.toBeNull();
+    });
+
+    it("keeps the label and arrow in flow, hidden, so the width does not jump", () => {
+      render(
+        <Button loading withArrow>
+          Send
+        </Button>,
+      );
+      const button = screen.getByRole("button");
+      const label = within(button).getByText("Send");
+      expect(label).toHaveClass("invisible");
+      expect(label).toHaveAttribute("aria-hidden", "true");
+      expect(within(button).getByText("→")).toHaveClass("invisible");
+    });
+
+    it("does not fire onClick while loading", async () => {
+      const onClick = vi.fn();
+      render(
+        <Button loading onClick={onClick}>
+          Send
+        </Button>,
+      );
+      await userEvent.click(screen.getByRole("button"));
+      expect(onClick).not.toHaveBeenCalled();
+    });
+  });
+
   describe("Rendering", () => {
     it("should render with children", () => {
       render(<Button>Click me</Button>);

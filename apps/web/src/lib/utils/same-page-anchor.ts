@@ -1,4 +1,5 @@
 import type { MouseEvent } from "react";
+import { scrollIntoViewMotionSafe } from "./scroll-into-view";
 
 /**
  * Bypasses Next's App Router for in-page-anchor nav links that target the page
@@ -60,7 +61,7 @@ export function handleSamePageAnchorClick(
       window.history.pushState(window.history.state, "", target.hash);
     }
   }
-  el.scrollIntoView({ behavior: "smooth" });
+  scrollIntoViewMotionSafe(el);
   el.focus({ preventScroll: true });
 }
 
