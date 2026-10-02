@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CaretLeft } from "@/lib/icons.redesign";
-import { PRESS_DOWN_CLASSES } from "../press-down";
+import { CHIP_LINK_CLASSES } from "../press-down";
 import { trackEvent } from "@/lib/analytics/track-event";
 
 export type UpLinkTone = "ink" | "cream";
@@ -58,17 +58,10 @@ export const UP_LINK_TOP_AIR: Record<UpLinkTone, string> = {
 };
 
 const TONE_CLASS: Record<UpLinkTone, string> = {
-  ink: `${UP_LINK_TOP_AIR.ink} border-ink bg-cream text-ink shadow-paper-sm focus-visible:outline-jersey-deep`,
+  ink: `${UP_LINK_TOP_AIR.ink} border-ink bg-cream text-ink focus-visible:outline-jersey-deep`,
   cream:
-    "border-cream bg-transparent text-cream shadow-[4px_4px_0_0_var(--color-warm)] focus-visible:outline-warm",
+    "border-cream bg-transparent text-cream shadow-warm focus-visible:outline-warm",
 };
-
-// Keyboard focus gets the same pressed-into-the-shadow state as hover, but
-// ungated by `motion-safe:` — parity with <EditorialHubCard>: the translate
-// is how a keyboard user locates the focused chip, so reduced-motion must
-// not remove it (only the mouse-hover version is optional motion).
-const FOCUS_VISIBLE_CLASSES =
-  "focus-visible:translate-x-1 focus-visible:translate-y-1 focus-visible:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2";
 
 /**
  * `<UpLink>` — the one up-link every detail route renders to its structural
@@ -116,7 +109,7 @@ export function UpLink({ href, label, tone = "ink", className }: UpLinkProps) {
           destination: href,
         });
       }}
-      className={`text-label inline-flex w-fit items-center gap-1.5 border-2 px-3 py-2 font-mono font-semibold uppercase ${TONE_CLASS[tone]} ${PRESS_DOWN_CLASSES} ${FOCUS_VISIBLE_CLASSES}${className ? ` ${className}` : ""}`}
+      className={`${CHIP_LINK_CLASSES} ${TONE_CLASS[tone]}${className ? ` ${className}` : ""}`}
     >
       <CaretLeft aria-hidden size={12} />
       {label}

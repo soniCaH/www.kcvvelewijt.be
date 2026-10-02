@@ -211,6 +211,14 @@ describe("OrgPersonCard — vacant", () => {
     expect(cta).toHaveAttribute("href", "/club/contact");
   });
 
+  it("wears the one chip (#3328)", () => {
+    render(<OrgPersonCard node={vacant} />);
+    expect(screen.getByTestId("org-person-card-vacant-cta")).toHaveClass(
+      "border-2",
+      "text-label",
+    );
+  });
+
   it("honours a custom vacantCtaHref", () => {
     render(<OrgPersonCard node={vacant} vacantCtaHref="/hulp#hulp" />);
     expect(screen.getByTestId("org-person-card-vacant-cta")).toHaveAttribute(
@@ -273,6 +281,9 @@ describe("OrgPersonCard — interactive (Phase 4 panel trigger)", () => {
       screen.queryByTestId("org-person-card-vacant-cta"),
     ).not.toBeInTheDocument();
     // The recruit copy stays visible (now inert) inside the card.
-    expect(screen.getByText("Iets voor jou? →")).toBeInTheDocument();
+    // The chip is inert inside the card: the card presses, the chip must not.
+    const chip = screen.getByText("Iets voor jou? →");
+    expect(chip).toHaveClass("border-2", "text-label");
+    expect(chip.className).not.toContain("hover:");
   });
 });

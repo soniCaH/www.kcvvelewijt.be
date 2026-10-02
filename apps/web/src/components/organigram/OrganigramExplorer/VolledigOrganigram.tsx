@@ -181,7 +181,7 @@ export function VolledigOrganigram({
               type="button"
               onClick={(e) => onOpenExplorer(e.currentTarget)}
               aria-haspopup="dialog"
-              className="border-ink bg-jersey-deep text-cream shadow-paper-sm focus-visible:outline-ink flex items-center gap-2 border-2 px-4 py-2.5 font-mono text-xs font-bold tracking-wide uppercase transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2"
+              className={`border-ink bg-jersey-deep text-cream shadow-paper-sm focus-visible:outline-ink flex items-center gap-2 border-2 px-4 py-2.5 font-mono text-xs font-bold tracking-wide uppercase ${PRESS_DOWN_CLASSES} focus-visible:outline-2 focus-visible:outline-offset-2`}
             >
               <ArrowsOut size={16} aria-hidden />
               Blader door het organigram ⤢
@@ -190,7 +190,7 @@ export function VolledigOrganigram({
           <button
             type="button"
             onClick={handleDownload}
-            className="border-ink bg-cream-soft text-ink shadow-paper-sm focus-visible:outline-ink flex items-center gap-2 border-2 px-4 py-2.5 font-mono text-xs font-bold tracking-wide uppercase transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2"
+            className={`border-ink bg-cream-soft text-ink shadow-paper-sm focus-visible:outline-ink flex items-center gap-2 border-2 px-4 py-2.5 font-mono text-xs font-bold tracking-wide uppercase ${PRESS_DOWN_CLASSES} focus-visible:outline-2 focus-visible:outline-offset-2`}
           >
             <DownloadSimple size={16} aria-hidden />
             Download als PDF
