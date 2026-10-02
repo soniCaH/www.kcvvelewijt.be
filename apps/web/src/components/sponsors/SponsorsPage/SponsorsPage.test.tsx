@@ -55,6 +55,17 @@ describe("SponsorsPage", () => {
     expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
   });
 
+  it("never skips a heading level: the Hoofdsponsors run label (h3) sits under an h2 (#3334, axe heading-order)", () => {
+    render(<SponsorsPage sponsors={sponsors} />);
+    const levels = screen
+      .getAllByRole("heading")
+      .map((h) => Number(h.tagName.slice(1)));
+    expect(levels[0]).toBe(1);
+    levels.slice(1).forEach((level, i) => {
+      expect(level - levels[i]!).toBeLessThanOrEqual(1);
+    });
+  });
+
   it("renders the sponsors kicker", () => {
     render(<SponsorsPage sponsors={sponsors} />);
     expect(screen.getByText("Sponsors & sympathisanten")).toBeInTheDocument();

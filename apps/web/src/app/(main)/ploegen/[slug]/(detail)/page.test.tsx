@@ -35,7 +35,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { Effect, Layer } from "effect";
 import { HttpNotFound } from "@kcvv/api-contract";
 import type { Match } from "@kcvv/api-contract";
@@ -334,15 +334,16 @@ describe("/ploegen/[slug] heading sweep — every gated section gets a real <h2>
     ]);
 
     // #3334: the staff run has no sibling, so no run-label h3 repeats "Staf."
-    // under the display heading — the region keeps its accessible name.
+    // under the display heading, and the run adds no second "Staf" region
+    // inside `section#staf` (which already carries the aria-label).
     expect(headings.filter((h) => h.level === 3 && h.text === "Staf")).toEqual(
       [],
     );
-    expect(
-      within(document.getElementById("staf")!).getByRole("region", {
-        name: "Staf",
-      }),
-    ).toBeInTheDocument();
+    expect(screen.getAllByRole("region", { name: "Staf" })).toHaveLength(1);
+    expect(document.getElementById("staf")).toHaveAttribute(
+      "aria-label",
+      "Staf",
+    );
 
     // The competitive block is genuinely closed — no #klassement/#wedstrijden
     // section, real fixtures/ranking notwithstanding.

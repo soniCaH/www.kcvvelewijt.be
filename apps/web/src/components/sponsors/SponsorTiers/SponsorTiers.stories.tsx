@@ -66,7 +66,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "The `/sponsors` body (7.d3): a labelled Hoofdsponsors group (MonoLabel kicker + paper-edge rule + large taped tiles) over one unlabelled merged wall of `sponsor` + `sympathisant` + untiered sponsors. Empty branches collapse: 0 hoofd → wall only; 0 wall → hoofd only.",
+          'The `/sponsors` body (7.d3): a Hoofdsponsors group (large taped tiles) over one unlabelled merged wall of `sponsor` + `sympathisant` + untiered sponsors. The group carries a `<RunLabel>` (h3 + paper-edge hairline) only when the wall sits next to it; with no wall the label is not rendered and the region keeps `aria-label="Hoofdsponsors"`. Empty branches collapse: 0 hoofd → wall only; 0 wall → hoofd only.',
       },
     },
   },
@@ -82,12 +82,12 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Both tiers: labelled hoofd grid + unlabelled wall. */
+/** Both tiers: hoofd grid under its run label + unlabelled wall. */
 export const Both: Story = {
   args: { sponsors: [...hoofd, ...wall] },
 };
 
-/** No wall — only hoofdsponsors render. */
+/** No wall — only hoofdsponsors render, with no run label (nothing to separate from). */
 export const HoofdOnly: Story = {
   args: { sponsors: hoofd },
 };
