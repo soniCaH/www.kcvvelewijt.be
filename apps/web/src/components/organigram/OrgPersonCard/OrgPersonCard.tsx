@@ -5,7 +5,9 @@ import { RoundAvatar } from "@/components/design-system/RoundAvatar";
 import {
   CHIP_CLASSES,
   CHIP_LINK_CLASSES,
-  PRESS_DOWN_CLASSES,
+  PRESS_DOWN_HOVER,
+  PRESS_DOWN_TRANSITION,
+  PRESS_DOWN_TRANSITION_FADE,
 } from "@/components/design-system/press-down";
 
 /**
@@ -187,7 +189,10 @@ export function OrgPersonCard({
     state === "vacant"
       ? "bg-warm shadow-paper-sm"
       : "bg-cream shadow-[3px_3px_0_0_var(--color-ink)]",
-    interactive && `w-full cursor-pointer ${PRESS_DOWN_CLASSES}`,
+    interactive &&
+      `w-full cursor-pointer ${
+        state === "vacant" ? PRESS_DOWN_TRANSITION_FADE : PRESS_DOWN_TRANSITION
+      } ${PRESS_DOWN_HOVER}`,
     className,
   );
 

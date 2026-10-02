@@ -14,9 +14,9 @@
  * `bg-ink text-cream` with the soft `--shadow-paper-sm-soft` — unconditionally,
  * regardless of `surface` (see below). Hover collapses the shadow fully
  * (`hover:shadow-none`) and translates by 4 px on both axes
- * (`hover:translate-x-1 hover:translate-y-1`) over `transition-all
- * duration-300` — the canonical press-down hover shared with `<Button>`,
- * `<ScrollArrowButton>`, and the slider arrows. Counts render inline after
+ * (`hover:translate-x-1 hover:translate-y-1`) over an explicit
+ * `transition-[…]` property list at `duration-300` — the canonical press-down
+ * hover shared with `<Button>`, `<ScrollArrowButton>`, and the slider arrows. Counts render inline after
  * a 1 px hairline pipe — no pill, no badge.
  *
  * **Stale-reference correction (#2444 resolution).** This docblock and
@@ -192,7 +192,7 @@ const CHIP_BASE_CLASSES = [
   "rounded-none border-2 border-ink",
   "font-mono font-semibold uppercase",
   "px-3 py-2 text-label",
-  "transition-all duration-300",
+  "transition-[translate,box-shadow,background-color,color,border-color] duration-300",
   "hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
 ] as const;
 

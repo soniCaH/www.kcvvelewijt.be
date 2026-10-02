@@ -23,6 +23,7 @@ import {
   Envelope,
   X,
 } from "@/lib/icons.redesign";
+import { PRESS_DOWN_CLASSES } from "@/components/design-system/press-down";
 import { EditorialLink } from "@/components/design-system/EditorialLink";
 import { ScrollRail } from "@/components/design-system/ScrollHint/ScrollRail";
 import { ScrollOverlay } from "@/components/design-system/ScrollHint/ScrollOverlay";
@@ -561,7 +562,7 @@ export function OrganigramExplorer({
                       data-node-id={child.id}
                       onClick={() => navigate(child.id)}
                       aria-label={`Naar ${child.title}`}
-                      className="transition-all duration-300 hover:shadow-none motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1"
+                      className={PRESS_DOWN_CLASSES}
                     >
                       <SpotlightNodeCard node={child} variant="node" />
                     </button>

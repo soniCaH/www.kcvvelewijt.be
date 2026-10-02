@@ -127,7 +127,8 @@ export function StructureDirectory({
                 interactive={interactive}
                 // Dim vacant positions (7o9 · 3) — de-emphasised but reachable;
                 // brighten on hover/focus so recruitment stays a click away.
-                // (The interactive card's own `transition-all` eases the opacity.)
+                // (The card eases the opacity itself: `<OrgPersonCard>` swaps in
+                // `PRESS_DOWN_TRANSITION_FADE` when it is vacant and interactive.)
                 className={
                   node.members.length === 0
                     ? "opacity-65 focus-within:opacity-100 hover:opacity-100"

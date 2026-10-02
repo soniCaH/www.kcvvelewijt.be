@@ -13,6 +13,7 @@ import Image from "next/image";
 import { SearchResult as SearchResultType } from "./SearchInterface";
 import { MonoLabel, StampBadge } from "@/components/design-system";
 import { toDisplayZone } from "@/lib/utils/dates";
+import { PRESS_DOWN_TRANSITION } from "@/components/design-system/press-down";
 
 export interface SearchResultProps {
   /**
@@ -48,7 +49,7 @@ export const SearchResult = ({ result, onClick }: SearchResultProps) => {
     <Link
       href={result.url}
       onClick={onClick}
-      className="group border-ink bg-cream-soft text-ink shadow-paper-sm relative flex gap-3.5 border-2 p-4 transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+      className={`group border-ink bg-cream-soft text-ink shadow-paper-sm relative flex gap-3.5 border-2 p-4 ${PRESS_DOWN_TRANSITION} hover:translate-x-1 hover:translate-y-1 hover:shadow-none`}
     >
       {/* Rubber-stamp type badge, pressed into the top-right corner. */}
       <StampBadge tone="jersey" position="top-right" rotation={-5}>

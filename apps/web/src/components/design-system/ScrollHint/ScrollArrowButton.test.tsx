@@ -275,7 +275,7 @@ describe("ScrollArrowButton", () => {
         />,
       );
       expect(screen.getByLabelText("Scroll left")).toHaveClass(
-        "transition-all",
+        "transition-[translate,box-shadow,opacity]",
         "duration-300",
       );
     });

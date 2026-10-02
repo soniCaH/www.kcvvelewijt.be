@@ -3,6 +3,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 import { formatSponsorAlt } from "../formatSponsorAlt";
 import type { Sponsor } from "../Sponsors";
+import { PRESS_DOWN_TRANSITION } from "@/components/design-system/press-down";
 
 export interface FeaturedSponsorCardProps {
   sponsor: Sponsor;
@@ -86,7 +87,8 @@ export function FeaturedSponsorCard({ sponsor }: FeaturedSponsorCardProps) {
         data-sponsor-featured="true"
         className={cn(
           frameClass,
-          "transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
+          PRESS_DOWN_TRANSITION,
+          "hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
         )}
       >
         {content}

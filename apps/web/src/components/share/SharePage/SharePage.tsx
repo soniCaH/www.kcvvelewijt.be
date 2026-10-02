@@ -652,7 +652,7 @@ export function SharePage({ matches, players }: SharePageProps) {
               type="button"
               onClick={() => handleAspectChange(opt.value)}
               aria-pressed={aspect === opt.value}
-              className={`flex-1 rounded-none border-2 px-4 py-3 font-mono text-sm font-semibold tracking-wide uppercase transition-all duration-300 ${
+              className={`flex-1 rounded-none border-2 px-4 py-3 font-mono text-sm font-semibold tracking-wide uppercase transition-colors duration-300 ${
                 aspect === opt.value
                   ? "border-ink bg-jersey-deep text-cream"
                   : "border-ink/30 text-ink hover:border-ink bg-cream"
@@ -676,7 +676,7 @@ export function SharePage({ matches, players }: SharePageProps) {
               type="button"
               onClick={() => handleTemplateChange(t.id)}
               aria-pressed={selectedTemplateId === t.id}
-              className={`flex min-h-[72px] flex-col items-center gap-1 rounded-none border-2 p-3 font-mono text-sm font-semibold transition-all duration-300 ${
+              className={`flex min-h-[72px] flex-col items-center gap-1 rounded-none border-2 p-3 font-mono text-sm font-semibold transition-colors duration-300 ${
                 selectedTemplateId === t.id
                   ? "border-ink bg-jersey-deep/10 text-jersey-deep"
                   : "border-ink/30 text-ink hover:border-ink bg-cream"

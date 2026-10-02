@@ -5,6 +5,7 @@ import { ExternalMark } from "@/components/design-system/ExternalMark";
 import { trackEvent } from "@/lib/analytics/track-event";
 import { buildEventIcs } from "@/lib/utils/event-ics";
 import { buildEventUid } from "@/lib/utils/event-uid";
+import { PRESS_DOWN_TRANSITION } from "@/components/design-system/press-down";
 
 export interface EventDetailCtasProps {
   /** Slug of the event — non-PII, sent as `event_slug`; also the `.ics` filename. */
@@ -36,7 +37,8 @@ export interface EventDetailCtasProps {
 const CTA_BASE = cn(
   "inline-flex items-center gap-2 border-2 border-ink px-[18px] py-3",
   "font-mono text-[12px] font-bold tracking-[0.06em] uppercase no-underline",
-  "shadow-paper-sm transition-all duration-300",
+  "shadow-paper-sm",
+  PRESS_DOWN_TRANSITION,
   "hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
   "motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0",
   "cursor-pointer",

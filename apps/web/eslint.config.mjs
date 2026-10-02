@@ -84,6 +84,17 @@ const OFF_SCALE_DURATION_PATTERN =
 const ARBITRARY_MOTION_VALUE_PATTERN = "(?:duration|ease|animate)-\\[";
 const UNGUARDED_LOOP_PATTERN =
   "(?<!motion-safe:)(?<!motion-reduce:)animate-(?!none\\b)";
+// `transition-all` (#2493): the shorthand transitions every property, so a
+// `filter` or `background` change nobody meant to animate eases along with
+// the press-down's `transform`/`box-shadow`. Name the properties instead.
+const TRANSITION_ALL_PATTERN = "(?<![\\w-])transition-all(?![\\w-])";
+// The sibling mistake (#2493): Tailwind v4's `translate-x-*`/`translate-y-*`
+// set the standalone CSS `translate` property, not `transform`, so a
+// `transition-[transform,…]` list on the same class string leaves the move
+// snapping while only the shadow eases. One class string only — a list built
+// from `PRESS_DOWN_TRANSITION` is a separate literal and is right by construction.
+const TRANSITION_TRANSFORM_FOR_TRANSLATE_PATTERN =
+  "^(?=.*(?<!\\w)translate-[xy]-)(?=.*transition-\\[[^\\]]*\\btransform\\b)(?!.*transition-\\[[^\\]]*\\btranslate\\b)";
 
 // Token-Only Colour Rule (DESIGN.md → Colors → Named Rules, #2433). This
 // system has one paper, one ink, one green and a small set of named status
@@ -336,6 +347,18 @@ const eslintConfig = [
           selector: matchesClassString(UNGUARDED_LOOP_PATTERN),
           message:
             "Unguarded loop — an animate- utility needs a motion-safe: (or motion-reduce: to remove it) guard so prefers-reduced-motion can stop it (apps/web/DESIGN.md → Motion, the Reduced-Motion Rule).",
+        },
+        {
+          selector: matchesClassString(TRANSITION_ALL_PATTERN),
+          message:
+            "transition-all — list the properties that actually change (transition-[translate,box-shadow] for the press-down, transition-colors for colour-only toggles) so nothing else, filter included, eases along (apps/web/DESIGN.md → Motion, #2493).",
+        },
+        {
+          selector: matchesClassString(
+            TRANSITION_TRANSFORM_FOR_TRANSLATE_PATTERN,
+          ),
+          message:
+            "This class string moves with translate-x-*/translate-y-* but its transition list names `transform` — in Tailwind v4 those utilities set the `translate` property, so the move would snap. Name `translate` (PRESS_DOWN_TRANSITION in components/design-system/press-down.ts), or `transform` only for a CSS-variable transform (apps/web/DESIGN.md → Motion, the Named Properties Rule, #2493).",
         },
         {
           selector: matchesClassString(RAW_PALETTE_CLASS_PATTERN),

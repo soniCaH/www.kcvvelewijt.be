@@ -3,6 +3,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 import { formatSponsorAlt } from "../formatSponsorAlt";
 import type { Sponsor } from "../Sponsors";
+import { PRESS_DOWN_TRANSITION } from "@/components/design-system/press-down";
 
 export interface SponsorTileProps {
   sponsor: Sponsor;
@@ -76,8 +77,10 @@ export const SponsorTile = ({
         // shadow collapses flush as the cell shifts into it on hover AND on
         // keyboard focus, so pointer and keyboard users get the same feedback.
         framed &&
-          sponsor.url &&
-          "transition-all duration-300 group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-none group-focus-visible:translate-x-1 group-focus-visible:translate-y-1 group-focus-visible:shadow-none",
+          sponsor.url && [
+            PRESS_DOWN_TRANSITION,
+            "group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-none group-focus-visible:translate-x-1 group-focus-visible:translate-y-1 group-focus-visible:shadow-none",
+          ],
       )}
     >
       {inner}

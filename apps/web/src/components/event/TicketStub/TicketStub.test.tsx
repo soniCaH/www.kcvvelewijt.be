@@ -146,8 +146,13 @@ describe("TicketStub", () => {
     render(<TicketStub {...baseProps} />);
 
     const card = screen.getByTestId("ticket-stub-card");
-    expect(card.className).toContain("hover:shadow-none");
-    expect(card.className).toContain("motion-safe:hover:translate-x-1");
-    expect(card.className).toContain("motion-safe:group-hover:translate-x-1");
+    // toHaveClass matches whole tokens, so a missing separator (e.g.
+    // "duration-300hover:shadow-none") fails here instead of passing as a substring.
+    expect(card).toHaveClass(
+      "duration-300",
+      "hover:shadow-none",
+      "motion-safe:hover:translate-x-1",
+      "motion-safe:group-hover:translate-x-1",
+    );
   });
 });
