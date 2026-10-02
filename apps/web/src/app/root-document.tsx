@@ -58,27 +58,35 @@ export function RootDocument({
             not its JS embed (#3387): the JS loader downloads EVERY face in the
             kit (19 files) to fire its active/inactive events, whereas the CSS
             declares the same `@font-face` rules and the browser fetches only the
-            faces the page actually renders. Still non-blocking: an
-            `afterInteractive` script appends the <link> after hydration, so
-            Adobe being slow/down never delays first render — text keeps the
-            metric-matched fallback stacks (`Freight Sans/Display Fallback` in
-            globals.css) until the faces arrive. The font files live on
-            use.typekit.net and the kit CSS @imports a stylesheet from
-            p.typekit.net; the injected <link> is `crossorigin` (both hosts send
-            `access-control-allow-origin: *`) so the CSS, its @import and the
-            fonts all ride the one anonymous connection warmed here. Mono (IBM
-            Plex Mono) is self-hosted via next/font. */}
+            faces the page actually renders.
+
+            Not render-blocking: the stylesheet is attached by an
+            `afterInteractive` script, after hydration. The server-rendered
+            `preload` starts the CSS fetch during HTML parse (so it is not
+            serialised behind hydration) and does not block render either; the
+            injected <link> is `crossorigin="anonymous"` to match it — a
+            mismatched mode would make the browser fetch the CSS twice. The
+            preload also opens the anonymous connection to use.typekit.net that
+            the font files (same host, CORS) reuse, so a separate `preconnect`
+            would add nothing. p.typekit.net only serves the kit's tracking
+            `@import`, which is fetched no-cors: no preconnect can be reused.
+
+            Fallback behaviour: freight-display/big ship `font-display: swap`, so
+            they show the metric-matched fallback stacks (`Freight Display
+            Fallback` in globals.css) until the faces arrive. freight-sans-pro
+            (body) ships `font-display: auto` in the kit — the browser may hide
+            body text for a short block period on a slow line until the owner
+            flips that kit setting to `swap` (Adobe dashboard, tracked as a
+            `ready-for-human` issue). The old JS embed served the same
+            @font-face rules, so this is not a regression. Mono (IBM Plex Mono)
+            is self-hosted via next/font. */}
         {typekitId && (
           <>
             <link
-              rel="preconnect"
-              href="https://use.typekit.net"
+              rel="preload"
+              as="style"
               crossOrigin="anonymous"
-            />
-            <link
-              rel="preconnect"
-              href="https://p.typekit.net"
-              crossOrigin="anonymous"
+              href={`https://use.typekit.net/${typekitId}.css`}
             />
             <Script id="typekit-init" strategy="afterInteractive">
               {`(function(d){var l=d.createElement("link");l.rel="stylesheet";l.crossOrigin="anonymous";l.href="https://use.typekit.net/${typekitId}.css";d.head.appendChild(l);})(document);`}

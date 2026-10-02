@@ -43,19 +43,29 @@ function render() {
 }
 
 /**
+ * Parses the markup into an inert `<template>` fragment — a parsed document
+ * would make happy-dom fetch the preload/stylesheet links over the network.
+ */
+function parse(markup: string) {
+  const template = document.createElement("template");
+  template.innerHTML = markup;
+  return template.content;
+}
+
+/**
  * Runs the inline `typekit-init` script against a stub document and returns
  * what it appended to `<head>` — the real happy-dom document would try to
  * fetch the stylesheet over the network.
  */
 function runLoader(markup: string) {
-  const match = /<script[^>]*>([\s\S]*?)<\/script>/.exec(markup);
-  expect(match, "typekit-init script is rendered").not.toBeNull();
+  const script = parse(markup).querySelector("#typekit-init");
+  expect(script, "typekit-init script is rendered").not.toBeNull();
   const appended: Record<string, string>[] = [];
   const fakeDocument = {
     createElement: (tag: string) => ({ tag }),
     head: { appendChild: (el: Record<string, string>) => appended.push(el) },
   };
-  new Function("document", match![1])(fakeDocument);
+  new Function("document", script!.textContent ?? "")(fakeDocument);
   return appended;
 }
 
@@ -81,19 +91,35 @@ describe("RootDocument — Typekit loader", () => {
     ]);
   });
 
-  it("loads after interactive and preconnects to both Typekit hosts", () => {
+  it("preloads the CSS during parse and loads the stylesheet after interactive", () => {
+    vi.stubEnv("NEXT_PUBLIC_TYPEKIT_ID", KIT);
+    const doc = parse(render());
+
+    const preload = doc.querySelector('link[rel="preload"]');
+    expect(preload?.getAttribute("as")).toBe("style");
+    expect(preload?.getAttribute("href")).toBe(
+      `https://use.typekit.net/${KIT}.css`,
+    );
+    expect(preload?.getAttribute("crossorigin")).toBe("anonymous");
+
+    expect(
+      doc.querySelector("#typekit-init")?.getAttribute("data-strategy"),
+    ).toBe("afterInteractive");
+    // Never a render-blocking stylesheet in the server markup, and no
+    // preconnect: the preload already warms the one host the fonts share.
+    expect(doc.querySelector('link[rel="stylesheet"]')).toBeNull();
+    expect(doc.querySelector('link[rel="preconnect"]')).toBeNull();
+  });
+
+  it("injects a stylesheet whose crossOrigin matches the preload", () => {
     vi.stubEnv("NEXT_PUBLIC_TYPEKIT_ID", KIT);
     const markup = render();
+    const preload = parse(markup).querySelector('link[rel="preload"]');
 
-    expect(markup).toContain('data-strategy="afterInteractive"');
-    expect(markup).toMatch(
-      /<link rel="preconnect" href="https:\/\/use\.typekit\.net" crossorigin="anonymous"\/>/i,
-    );
-    expect(markup).toMatch(
-      /<link rel="preconnect" href="https:\/\/p\.typekit\.net" crossorigin="anonymous"\/>/i,
-    );
-    // Never a render-blocking stylesheet in the server markup.
-    expect(markup).not.toMatch(/<link[^>]*rel="stylesheet"/);
+    expect(runLoader(markup)[0]).toMatchObject({
+      href: preload?.getAttribute("href"),
+      crossOrigin: preload?.getAttribute("crossorigin"),
+    });
   });
 
   it("renders no loader and no preconnect when no kit id is configured", () => {
