@@ -13,7 +13,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The round avatar family (#3331, decision #3304; `SubjectAvatar` joins in #3332). Three sizes — 24 / 40 / 64 — one ring rule (1px ink at 24, 2px ink at 40 and 64) and one no-photo answer: a monogram, jersey-deep glyph on cream-soft, never the drawn figure. Letters come from `initials()`: first + last token for a full name, one letter for a first name only. `glyph` swaps the letters for a "+N" count or a "+" vacancy (`dashed`) that sits among avatars and takes their ring, fill and size.',
+          'The round avatar family (#3331, decision #3304, #3332: `SubjectAvatar` joins). Three sizes — 24 / 40 / 64 — one ring rule (1px ink at 24, 2px ink at 40 and 64) and one no-photo answer: a monogram, jersey-deep glyph on cream-soft, never the drawn figure. Letters come from `initials()`: first + last token for a full name, one letter for a first name only. `glyph` swaps the letters for a "+N" count or a "+" vacancy (`dashed`) that sits among avatars and takes their ring, fill and size.',
       },
     },
   },

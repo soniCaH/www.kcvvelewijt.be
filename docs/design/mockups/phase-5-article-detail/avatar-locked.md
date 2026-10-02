@@ -7,11 +7,22 @@
 
 ---
 
+> **Amended 2026-10-01 (#3332, decided in #3304) — monogram fill only.** The
+> monogram is now a **jersey-deep glyph on a cream-soft disc with an ink ring**
+> (1px at 24, 2px at 40 and 64), the round avatar family's one look
+> (`<RoundAvatar>`): a dark disc mimics a photo on a page of photos, a light one
+> reads as "no photo". This overturns the cream-on-jersey-deep surface below.
+> **Everything else stands** — scale-conditional render paths, the photo
+> fallback, and the one-letter derivation for first-name-only subjects. Only the
+> pixel sizes follow the family's 24 / 40 / 64 ramp now (`row` 32 → 40), and
+> the photo path is the primitive's (newsprint filter, 2px ink ring at 64, no
+> paper-grain overlay).
+
 ## Decision
 
 **Option D — scale-conditional.** Subject avatars render as:
 
-- **Q&A row scale (~32px)** → **initial monogram** (Option B vocabulary)
+- **Q&A row scale (~32px; 40px since #3332)** → **initial monogram** (Option B vocabulary)
 - **Pull-quote attribution scale (~64px)** → **circular photo crop**
   (Option A vocabulary), falling back to a 64px monogram when the
   subject has no photo
@@ -48,7 +59,7 @@ implementation choice, but the data model is the same:
 ```typescript
 type SubjectAvatarProps = {
   subject: Subject; // resolved at the page-level Server Component
-  scale: "row" | "attribution"; // "row" ≈ 32px, "attribution" ≈ 64px
+  scale: "row" | "attribution"; // "row" ≈ 32px (40px since #3332), "attribution" ≈ 64px
 };
 ```
 
@@ -60,14 +71,20 @@ Both renders share:
 
 - Circular geometry (border-radius: 50%).
 - The Phase 4.5 R9 photo treatment when the photo path is active
-  (newsprint filter + paper grain + 1px ink border).
-- Cream-on-jersey-deep monogram surface with full-opacity cream text
-  per `feedback_monolabel_cream_full_opacity`.
+  (newsprint filter; **since #3332** a 2px ink ring at 64px and no
+  paper-grain overlay — the round family's photo, `<RoundAvatar>`).
+- ~~Cream-on-jersey-deep monogram surface with full-opacity cream text~~
+  — **superseded (#3332):** jersey-deep glyph on cream-soft, ink ring.
 
 ### Monogram derivation rule (locked)
 
-- **First initial of `firstName` only.** Single uppercase letter,
-  italic Freight Display 900.
+- **First initial of `firstName` only.** Single uppercase letter, upright
+  `font-display-big` black (**amended #3332:** was italic Freight Display 900).
+  A compound first name ("Jan Willem") is still one first name: one letter.
+  The one place a full name is known is the `<EditorialByline>` author chip,
+  which sets two letters ("Tom Janssens" → "TJ") — the round avatar family's
+  initials rule (decision #3304: first + last token for a full name, one letter
+  for a first name only).
 - **Collision tolerance:** initial collisions WITHIN a single article
   are accepted (An ↔ Anouk → both "A"). Mitigations like two-letter
   initials, per-role hue shift, or last-initial were considered and

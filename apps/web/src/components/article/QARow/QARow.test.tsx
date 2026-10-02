@@ -104,10 +104,10 @@ describe("<QARow>", () => {
         question.compareDocumentPosition(headerEl) &
           Node.DOCUMENT_POSITION_FOLLOWING,
       ).toBeTruthy();
-      expect(question.parentElement?.className).not.toContain("pl-11");
+      expect(question.parentElement?.className).not.toContain("pl-13");
       // The answer is indented under the speaker name instead.
       const answer = container.querySelector('[data-qa-row="answer"]');
-      expect(answer?.className).toContain("pl-11");
+      expect(answer?.className).toContain("pl-13");
     });
 
     // #3274 review finding B: the answer IS the interview's long-form
@@ -130,7 +130,7 @@ describe("<QARow>", () => {
       );
       expect(
         container.querySelector(
-          '[data-subject-avatar="monogram"][data-scale="row"]',
+          '[data-round-avatar="monogram"][data-size="40"]',
         ),
       ).not.toBeNull();
     });
@@ -147,14 +147,14 @@ describe("<QARow>", () => {
       const row = container.firstElementChild as HTMLElement;
       expect(row.getAttribute("data-qa-row-has-speaker")).toBe("false");
       expect(container.querySelector("header")).toBeNull();
-      expect(container.querySelector("[data-subject-avatar]")).toBeNull();
+      expect(container.querySelector("[data-round-avatar]")).toBeNull();
       expect(container.querySelector('[data-qa-row="speaker-tag"]')).toBeNull();
-      // Question + answer still render; the body block has no pl-11
+      // Question + answer still render; the body block has no pl-13
       // indent since there's no avatar to align under.
       const question = container.querySelector('[data-qa-row="question"]');
       expect(question?.textContent).toBe("Wie?");
       const body = question?.parentElement;
-      expect(body?.className).not.toContain("pl-11");
+      expect(body?.className).not.toContain("pl-13");
     });
   });
 
@@ -265,7 +265,7 @@ describe("<QARow>", () => {
         container.querySelector('[data-subject-avatar-cluster="true"]'),
       ).not.toBeNull();
       expect(
-        container.querySelectorAll('[data-subject-avatar="monogram"]'),
+        container.querySelectorAll('[data-round-avatar="monogram"]'),
       ).toHaveLength(2);
     });
 
@@ -286,7 +286,7 @@ describe("<QARow>", () => {
       expect(row.getAttribute("data-qa-row-mode")).toBe("single");
       expect(
         container.querySelector('[data-qa-row="answer"]')?.className,
-      ).toContain("pl-11");
+      ).toContain("pl-13");
     });
 
     it("falls back to a single avatar when cluster has fewer than 2 members", () => {
@@ -300,7 +300,7 @@ describe("<QARow>", () => {
         container.querySelector('[data-subject-avatar-cluster="true"]'),
       ).toBeNull();
       expect(
-        container.querySelector('[data-subject-avatar="monogram"]'),
+        container.querySelector('[data-round-avatar="monogram"]'),
       ).not.toBeNull();
     });
   });

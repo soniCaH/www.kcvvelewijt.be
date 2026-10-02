@@ -11,7 +11,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Phase 5 net-new primitive per the 5.d2 lock. Two render paths picked by `scale`: `row` (~32px) always renders an initial monogram; `attribution` (~64px) renders a circular photo crop with Phase 4.5 R9 newsprint treatment, falling back to a 64px monogram when no photo exists. Monogram derivation: first letter of `firstName`, uppercased, italic Freight Display 900 on a jersey-deep disc.",
+          "The article's person avatar — a scale over the round avatar family (`UI/RoundAvatar`, #3332). `byline` (24px) and `row` (40px) always render an initial monogram; `attribution` (64px) renders a circular newsprint photo, falling back to a 64px monogram when no photo exists. The ring (1px ink at 24, 2px at 40 and 64) and the monogram fill (jersey-deep glyph on cream-soft) are the family's; one letter for a first-name-only subject, two for a full name.",
       },
     },
   },
@@ -37,9 +37,9 @@ export const BylineMonogram: Story = {
   },
 };
 
-// 32px monogram — the only render path at row scale, even when a photo
-// URL is supplied (per 5.d2 lock: photos at 32px are too small to
-// identify a face).
+// 40px monogram — the only render path at row scale, even when a photo
+// URL is supplied (per 5.d2 lock: a photo this small is too small to
+// identify a face). Was 32px before the round family's ramp (#3332).
 export const RowMonogram: Story = {
   args: {
     firstName: "Wim",
@@ -47,7 +47,7 @@ export const RowMonogram: Story = {
   },
 };
 
-// 64px photo with R9 newsprint treatment + 1px ink border. The photo
+// 64px photo with R9 newsprint treatment + 2px ink ring. The photo
 // uses a stable Picsum seed so VR baselines don't churn.
 export const AttributionPhoto: Story = {
   args: {
@@ -65,8 +65,8 @@ export const AttributionMonogramFallback: Story = {
   },
 };
 
-// Side-by-side comparison of the two scales for the same subject. Shows
-// the cross-scale "same speaker, two looks" tradeoff acknowledged by the
+// Side-by-side comparison of the scales for the same subject. Shows the
+// cross-scale "same speaker, two looks" tradeoff acknowledged by the
 // 5.d2 lock — recognisability beats consistency.
 export const ScaleComparison: Story = {
   args: { firstName: "Wim", scale: "attribution" },
@@ -75,7 +75,7 @@ export const ScaleComparison: Story = {
       <div className="flex flex-col items-center gap-2">
         <SubjectAvatar firstName="Wim" scale="row" />
         <span className="font-mono text-[10px] tracking-[0.18em] uppercase">
-          row · 32px
+          row · 40px
         </span>
       </div>
       <div className="flex flex-col items-center gap-2">

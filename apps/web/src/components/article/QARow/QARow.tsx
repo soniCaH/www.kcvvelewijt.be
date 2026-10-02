@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils/cn";
  *   Wat was het moment dat alles draaide?    ← question (italic display-sm)
  *
  *   [●L] LARS · AANVALLER                    ← respondent 1 header
- *        Halfweg de eerste helft …          ← respondent 1 answer (pl-11)
+ *        Halfweg de eerste helft …          ← respondent 1 answer (pl-13)
  *
  *   [●N] NIELS · MIDDENVELDER                ← respondent 2 header (only if N>1)
  *        Voor mij was het de stage.          ← respondent 2 answer
@@ -37,8 +37,9 @@ import { cn } from "@/lib/utils/cn";
  */
 export interface QARowRespondent {
   /**
-   * First name — drives the monogram avatar (first letter, uppercased)
-   * per the 5.d2 lock. For custom subjects pass `customName`; for
+   * First name — drives the monogram avatar (one letter, uppercased: the
+   * first token only, so a compound first name stays one) per the 5.d2 lock,
+   * set by the round avatar family's `initials()` (#3304). For custom subjects pass `customName`; for
    * player/staff subjects pass `firstName`. Omit (`undefined`) to render
    * the row without a speaker header — used for `standard` pairs in
    * multi-subject articles whose editors didn't tag `respondentKey`
@@ -117,10 +118,10 @@ function SpeakerHeader({
       <p
         data-qa-row="speaker-tag"
         // `m-0` overrides the global `p { margin-bottom: 1rem }` rule in
-        // globals.css so the `<p>`'s outer box equals its 32px content
+        // globals.css so the `<p>`'s outer box equals its 40px content
         // box. Without this the parent flex `items-center` centres a
-        // 48px box, pushing the text to the top of the visible area.
-        className="text-ink-muted text-label m-0 flex h-8 items-center font-mono uppercase"
+        // 56px box, pushing the text to the top of the visible area.
+        className="text-ink-muted text-label m-0 flex h-10 items-center font-mono uppercase"
       >
         <span className="text-ink">{tagName}</span>
         {role ? (
@@ -178,7 +179,7 @@ export function QARow({ question, respondents, className }: QARowProps) {
             />
           )}
           {/*
-            Answer indent: 32px avatar + 12px header gap = `pl-11`, so the
+            Answer indent: 40px avatar + 12px header gap = `pl-13`, so the
             answer sits flush under the speaker name. Dropped when there's
             no speaker header — the row reads as a plain Q&A in that case.
           */}
@@ -186,7 +187,7 @@ export function QARow({ question, respondents, className }: QARowProps) {
             data-qa-row="answer"
             className={cn(
               "text-body-md sm:text-body-lg",
-              hasSpeaker ? "mt-2 pl-11" : "",
+              hasSpeaker ? "mt-2 pl-13" : "",
             )}
           >
             {r.answer}
@@ -241,7 +242,7 @@ export function QARow({ question, respondents, className }: QARowProps) {
                 data-qa-row="answer"
                 className={cn(
                   "text-body-md sm:text-body-lg",
-                  hasSpeaker ? "mt-2 pl-11" : "",
+                  hasSpeaker ? "mt-2 pl-13" : "",
                 )}
               >
                 {r.answer}

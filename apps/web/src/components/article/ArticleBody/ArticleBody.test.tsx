@@ -542,7 +542,7 @@ describe("<ArticleBody>", () => {
         container.querySelector('[data-pull-quote-tone="cream"]'),
       ).not.toBeNull();
       expect(
-        container.querySelector('[data-subject-avatar="photo"]'),
+        container.querySelector('[data-round-avatar="photo"]'),
       ).not.toBeNull();
       const displayName = container.querySelector(
         '[data-pull-quote-name="display"]',
@@ -566,7 +566,7 @@ describe("<ArticleBody>", () => {
       ];
       const { container } = render(<ArticleBody content={content} />);
       expect(
-        container.querySelector('[data-subject-avatar="monogram"]'),
+        container.querySelector('[data-round-avatar="monogram"]'),
       ).not.toBeNull();
     });
 
@@ -580,7 +580,7 @@ describe("<ArticleBody>", () => {
       ];
       const { container } = render(<ArticleBody content={content} />);
       // No avatar slot.
-      expect(container.querySelector("[data-subject-avatar]")).toBeNull();
+      expect(container.querySelector("[data-round-avatar]")).toBeNull();
       // No display-name span (that only renders in the avatar layout).
       expect(
         container.querySelector('[data-pull-quote-name="display"]'),

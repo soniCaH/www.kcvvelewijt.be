@@ -63,7 +63,7 @@ export const QaGroupRapidFire = ({
         <span aria-hidden="true" className="bg-ink h-px flex-1" />
       </header>
 
-      {/* Speaker strip — 32px monogram + mono caps tag. */}
+      {/* Speaker strip — 40px monogram + mono caps tag. */}
       {respondent ? (
         <div
           data-rapidfire="speaker"
@@ -72,7 +72,7 @@ export const QaGroupRapidFire = ({
           <SubjectAvatar firstName={respondent.firstName} scale="row" />
           <p
             data-rapidfire="speaker-tag"
-            className="text-ink-muted text-label m-0 flex h-8 items-center font-mono uppercase"
+            className="text-ink-muted text-label m-0 flex h-10 items-center font-mono uppercase"
           >
             <span className="text-ink">
               {(respondent.fullName ?? respondent.firstName).trim()}

@@ -5,7 +5,7 @@
  * rather than ballooning the design-system surface.
  *
  * Pieces:
- * - `<HeroCreditChip>` — 16 px subject thumbnail + name pill for the
+ * - `<HeroCreditChip>` — 24 px round avatar (`<RoundAvatar>`) + name for the
  *   Interview credit row below the H1.
  * - `<HeroDayBlockOverlay>` — mono day stamp pinned to the lower-left
  *   of the Event cover photo (signature visual hook from R1.5b).
@@ -26,6 +26,7 @@ import Image from "next/image";
 import type { MatchStatus } from "@kcvv/api-contract";
 import { cn } from "@/lib/utils/cn";
 import { Crest } from "@/components/design-system";
+import { RoundAvatar } from "@/components/design-system/RoundAvatar";
 import { MatchStatusBadge } from "@/components/match/MatchStatusBadge";
 import type { ResolvedSubject } from "@/components/article/SubjectAttribution";
 import type {
@@ -40,42 +41,22 @@ export interface HeroCreditChipProps {
 }
 
 /**
- * One credit chip per interviewee. 16 px square thumbnail (psdImage /
- * transparentImage when available, coloured initial-block fallback
- * otherwise) + the subject's display name. Reads as a byline-ish row
+ * One credit chip per interviewee. 24 px round avatar (psdImage /
+ * transparentImage when available, monogram otherwise) + the subject's
+ * display name. Reads as a byline-ish row
  * rather than a feature list.
  */
 export function HeroCreditChip({ subject }: HeroCreditChipProps) {
-  const initial = subject.name.trim().charAt(0).toUpperCase() || "?";
-  // PR-review iteration (#1749): the original pill-with-border framing
-  // produced visible radius mismatches between the avatar circle and
-  // the pill cap. Dropping the chrome entirely sidesteps the problem
-  // — `[avatar] Name` reads as a byline-ish row that doesn't compete
-  // with the H1 above.
+  // The avatar is the round family's 24px step (`<RoundAvatar>`, #3332): photo
+  // when the subject has one, monogram otherwise. The chip drops its own chrome
+  // on purpose (#1749): `[avatar] Name` reads as a byline-ish row that doesn't
+  // compete with the H1 above.
   return (
     <span
       className="inline-flex items-center gap-2"
       data-testid="hero-credit-chip"
     >
-      <span
-        aria-hidden="true"
-        className={cn(
-          "relative inline-flex h-7 w-7 flex-shrink-0 items-center justify-center overflow-hidden rounded-full",
-          "bg-jersey-deep text-cream text-xs font-semibold",
-        )}
-      >
-        {subject.photoUrl ? (
-          <Image
-            src={subject.photoUrl}
-            alt=""
-            fill
-            sizes="28px"
-            className="object-cover"
-          />
-        ) : (
-          initial
-        )}
-      </span>
+      <RoundAvatar size={24} name={subject.name} photoUrl={subject.photoUrl} />
       <span className="text-ink text-body-md font-display italic">
         {subject.name}
       </span>

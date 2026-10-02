@@ -166,9 +166,7 @@ describe("QaGroupRapidFire (Phase 5 rewrite)", () => {
       />,
     );
     expect(
-      container.querySelector(
-        '[data-subject-avatar="monogram"][data-scale="row"]',
-      ),
+      container.querySelector('[data-round-avatar="monogram"][data-size="40"]'),
     ).not.toBeNull();
   });
 

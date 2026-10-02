@@ -197,6 +197,7 @@ describe("EditorialHero — interview variant", () => {
       lastName: string;
       jerseyNumber: number;
       position: string;
+      psdImageUrl: string;
     }> = {},
   ) => ({
     kind: "player" as const,
@@ -224,6 +225,35 @@ describe("EditorialHero — interview variant", () => {
     expect(chips).toHaveLength(2);
     expect(chips[0]).toHaveTextContent("Jens De Smet");
     expect(chips[1]).toHaveTextContent("Lars Peeters");
+  });
+
+  it("draws each credit chip's avatar through the 24px round avatar family (#3332)", () => {
+    const { container } = render(
+      <EditorialHero
+        variant="interview"
+        {...SHARED}
+        subjects={[
+          player(),
+          player({
+            firstName: "Lars",
+            lastName: "Peeters",
+            jerseyNumber: 7,
+            psdImageUrl: "https://example.com/lars.jpg",
+          }),
+        ]}
+      />,
+    );
+    const avatars = container.querySelectorAll(
+      '[data-testid="hero-credit-chip"] [data-round-avatar]',
+    );
+    expect(avatars).toHaveLength(2);
+    expect([...avatars].map((a) => a.getAttribute("data-size"))).toEqual([
+      "24",
+      "24",
+    ]);
+    expect(avatars[0]?.getAttribute("data-round-avatar")).toBe("monogram");
+    expect(avatars[0]?.textContent).toBe("JS");
+    expect(avatars[1]?.getAttribute("data-round-avatar")).toBe("photo");
   });
 
   it("populates kicker meta `#${jersey} · POSITION` only when N=1 player", () => {

@@ -1,15 +1,22 @@
-import { SubjectAvatar, type SubjectAvatarScale } from "./SubjectAvatar";
+import { RoundAvatar } from "../RoundAvatar";
+import {
+  SubjectAvatar,
+  SUBJECT_AVATAR_SIZE,
+  type SubjectAvatarScale,
+} from "./SubjectAvatar";
 import { cn } from "@/lib/utils/cn";
 
 /**
  * <SubjectAvatarCluster> — overlapping monogram discs for a "unaniem"
- * (all-subjects) answer. Always monogram, even at `attribution` scale: the
+ * (all-subjects) answer, on the round avatar family (#3332): same ramp, ring and
+ * fill as `<SubjectAvatar>`. Always monogram, even at `attribution` scale: the
  * cluster is a compact identity marker for a shared answer, not a portrait,
  * so the photo path would only muddy an overlapping stack.
  *
- * Discs overlap left-to-right, each with a cream ring to stay legible
- * against its neighbour. Duo/trio interviews are the real cases; 4+ subjects
- * collapse the tail into a "+N" counter disc so the row can't blow out.
+ * Discs overlap left-to-right; the ink ring keeps each legible against its
+ * neighbour. Duo/trio interviews are the real cases; 4+ subjects collapse the
+ * tail into a "+N" count disc that takes the ring, fill and size of the avatars
+ * beside it, so the row can't blow out.
  */
 export interface SubjectAvatarClusterMember {
   firstName: string;
@@ -17,7 +24,7 @@ export interface SubjectAvatarClusterMember {
 
 export interface SubjectAvatarClusterProps {
   members: SubjectAvatarClusterMember[];
-  /** Row (32px, QARow) or attribution (64px, PullQuote). Both monogram. */
+  /** Row (40px, QARow) or attribution (64px, PullQuote). Both monogram. */
   scale?: Extract<SubjectAvatarScale, "row" | "attribution">;
   /** Max discs before the remainder collapses into a "+N" counter. */
   max?: number;
@@ -27,11 +34,6 @@ export interface SubjectAvatarClusterProps {
 const OVERLAP: Record<"row" | "attribution", string> = {
   row: "-ml-3",
   attribution: "-ml-5",
-};
-
-const COUNTER: Record<"row" | "attribution", string> = {
-  row: "h-8 w-8 text-body-sm",
-  attribution: "h-16 w-16 text-[20px]",
 };
 
 export function SubjectAvatarCluster({
@@ -59,20 +61,15 @@ export function SubjectAvatarCluster({
             key={`${m.firstName}-${i}`}
             firstName={m.firstName}
             scale={scale}
-            className={cn("ring-cream ring-2", i > 0 && OVERLAP[scale])}
+            className={cn(i > 0 && OVERLAP[scale])}
           />
         ))}
         {overflow > 0 && (
-          <span
-            data-subject-avatar-cluster="overflow"
-            className={cn(
-              "bg-jersey-deep text-cream ring-cream inline-flex shrink-0 items-center justify-center rounded-full font-mono font-semibold ring-2",
-              COUNTER[scale],
-              OVERLAP[scale],
-            )}
-          >
-            +{overflow}
-          </span>
+          <RoundAvatar
+            size={SUBJECT_AVATAR_SIZE[scale]}
+            glyph={`+${overflow}`}
+            className={OVERLAP[scale]}
+          />
         )}
       </span>
     </div>
