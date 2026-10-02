@@ -316,7 +316,7 @@ const ReservationMatchRow = ({
           {match.time ? ` · ${match.time}` : ""}
         </span>
 
-        <span className="text-ink col-span-2 row-start-2 font-sans text-base leading-tight sm:col-auto sm:row-auto">
+        <span className="text-ink font-body col-span-2 row-start-2 text-base leading-tight sm:col-auto sm:row-auto">
           <span className="font-bold">{match.team.name}</span>
           {caption && (
             <span className="text-ink-muted mt-0.5 block text-xs font-medium">
@@ -376,7 +376,7 @@ const MatchRow = ({ match, kcvvTeamId }: MatchRowProps) => {
         {when}
       </span>
 
-      <span className="text-ink col-span-2 row-start-2 font-sans text-base leading-tight sm:col-auto sm:row-auto">
+      <span className="text-ink font-body col-span-2 row-start-2 text-base leading-tight sm:col-auto sm:row-auto">
         <span className={cn(homeIsKcvv && "font-bold")}>
           {match.homeTeam.name}
         </span>

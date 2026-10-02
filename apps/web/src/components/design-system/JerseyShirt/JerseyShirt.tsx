@@ -99,7 +99,7 @@ export function JerseyShirt({ letterOverlay, className }: JerseyShirtProps) {
       {letterOverlay !== undefined && letterOverlay !== "" ? (
         <span
           aria-hidden="true"
-          className="text-cream pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-serif leading-none font-black"
+          className="text-cream pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 leading-none font-black"
           style={{
             fontFamily: "var(--font-display)",
             textShadow: LETTER_TEXT_SHADOW,
