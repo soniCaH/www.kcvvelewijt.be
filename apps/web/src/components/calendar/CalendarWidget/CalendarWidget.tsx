@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 import { clubToday, toDisplayZone } from "@/lib/utils/dates";
 import { trackEvent } from "@/lib/analytics/track-event";
-import { useRouterFilterParam } from "@/hooks/useRouterFilterParam";
-import { narrowParam } from "@/hooks/filterParam";
+import { useHistoryFilterParam } from "@/hooks/useHistoryFilterParam";
 import {
   EmptyState,
   FilterTabs,
@@ -56,7 +54,7 @@ const KALENDER_FILTER_TABS: FilterTab[] = [
 ];
 
 /** Every valid `?type=` value, in render order — the single source of truth
- *  `useRouterFilterParam` narrows the URL param against (an unknown value falls
+ *  `useHistoryFilterParam` narrows the URL param against (an unknown value falls
  *  back to "all"). Derived from `KALENDER_FILTER_TABS` itself (#2564 review
  *  item 10) so a new chip can't be added to the row and forgotten here —
  *  the failure mode that shipped a chip whose own deep link silently fell
@@ -91,13 +89,12 @@ const VIEW_TABS: { value: ViewMode; label: string; mobileHidden?: boolean }[] =
     { value: "agenda", label: "Agenda" },
   ];
 
-/** `?view=` narrows to "week"/"agenda" only — "month" is both the fallback
- *  and the sentinel every other value (including an absent param) collapses
- *  to, via the same `narrowParam` (#2779) `useRouterFilterParam` uses for
- *  `?type=` below (#2783 review finding 9) — `?view=` itself stays off that
- *  hook: its default depends on runtime viewport state (`isPhone`), not a
- *  static fallback, and it always writes rather than deleting on default. */
-const VIEW_VALUES: readonly ViewMode[] = ["week", "agenda"];
+/** Every explicit `?view=` value. `useHistoryFilterParam` narrows the URL
+ *  against it; an absent or unknown param reads back as `"default"` — a
+ *  sentinel, never written — because the real default depends on the viewport
+ *  (`isPhone`), not a static fallback. A tap always writes an explicit value,
+ *  so `?view=month` can still beat the phone agenda default. */
+const VIEW_VALUES: readonly ViewMode[] = ["month", "week", "agenda"];
 
 /**
  * `true` once mounted on a sub-`md` (phone) viewport. Starts `false` so the
@@ -118,19 +115,17 @@ function useIsPhoneViewport(): boolean {
 }
 
 export function CalendarWidget({ feed, teams, today }: CalendarWidgetProps) {
-  const searchParams = useSearchParams();
-  const router = useRouter();
   // No explicit `?view=` → branch the default on the md breakpoint: agenda on
   // phones, month on tablet/desktop. An explicit choice (incl. tapping a tab,
   // which sets `?view=`) always wins.
-  const rawView = searchParams.get("view");
+  const [rawView, setRawView] = useHistoryFilterParam<ViewMode | "default">(
+    "view",
+    VIEW_VALUES,
+    { fallback: "default", route: "/kalender" },
+  );
   const isPhone = useIsPhoneViewport();
   const requestedView: ViewMode =
-    rawView != null
-      ? narrowParam(rawView, VIEW_VALUES, "month")
-      : isPhone
-        ? "agenda"
-        : "month";
+    rawView !== "default" ? rawView : isPhone ? "agenda" : "month";
   // The week grid is forced 7-col (~41px cells) and `?view=week` pins it on any
   // viewport — coerce it to the agenda list on phones (MOB-6). The month tab is
   // hidden on phones too, but an explicit `?view=month` still wins (it can only
@@ -139,10 +134,10 @@ export function CalendarWidget({ feed, teams, today }: CalendarWidgetProps) {
     isPhone && requestedView === "week" ? "agenda" : requestedView;
 
   // By-type filter (Phase 6.D Phase 2, #1992). An unknown `?type=` falls to
-  // "all" — `useRouterFilterParam` (#2779) owns the narrow-or-fallback, the
+  // "all" — `useHistoryFilterParam` (#2779, history-backed per #3382) owns the narrow-or-fallback, the
   // delete-on-default write, and the dedup guard the old hand-rolled
   // `isKalenderFilterValue` + `setType` body used to.
-  const [activeTypeFilter, setActiveTypeFilter] = useRouterFilterParam(
+  const [activeTypeFilter, setActiveTypeFilter] = useHistoryFilterParam(
     "type",
     KALENDER_FILTER_VALUES,
     { fallback: "all", route: "/kalender" },
@@ -173,9 +168,7 @@ export function CalendarWidget({ feed, teams, today }: CalendarWidgetProps) {
     // Dedup guard (repo analytics policy): re-selecting the active view is a
     // no-op, so neither the URL push nor `kalender_view_toggle` fires twice.
     if (newView === view) return;
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("view", newView);
-    router.push(`/kalender?${params.toString()}`, { scroll: false });
+    setRawView(newView);
     trackEvent("kalender_view_toggle", { view: newView });
   }
 
@@ -206,7 +199,7 @@ export function CalendarWidget({ feed, teams, today }: CalendarWidgetProps) {
   function setType(value: KalenderFilterValue) {
     // Dedup guard: re-pressing the active chip is a no-op, so neither the URL
     // push nor the `kalender_filter` analytics event fires twice (repo
-    // policy) — `useRouterFilterParam`'s own internal dedup guard covers the URL
+    // policy) — `useHistoryFilterParam`'s own internal dedup guard covers the URL
     // write, but the analytics call is this component's own side effect, so
     // it needs its own guard too.
     if (value === activeTypeFilter) return;

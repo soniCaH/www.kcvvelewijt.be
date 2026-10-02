@@ -24,8 +24,11 @@ export interface UseRouterFilterParamOptions<T extends string> {
  * needs no local state, no mount effect, no `popstate` listener. Only
  * correct on a route that already accepts calling `useSearchParams()` for
  * this facet: wrapped in its own local `<Suspense>`, or
- * `force-dynamic` (`/kalender`, where it resolves during the per-request
- * server render with no bailout and no `<Suspense>` needed at all). A
+ * `force-dynamic` (where it resolves during the per-request server render with
+ * no bailout and no `<Suspense>` needed at all). Every tap is a router
+ * navigation, so on `force-dynamic` it costs a server round-trip (`/kalender`
+ * measured 272–759 ms, #3382) — prefer `useHistoryFilterParam` whenever the
+ * data is already a client prop. A
  * static/ISR route that must stay prerendered needs `useHistoryFilterParam`
  * instead — merely calling `useSearchParams()`, whether or not the result is
  * used, opts the whole subtree into client-side rendering.
@@ -43,8 +46,7 @@ export interface UseRouterFilterParamOptions<T extends string> {
  * long as that panel stayed open. The live URL has the opposite gap:
  * it cannot see a `router.push` this hook itself already issued but that
  * hasn't landed yet, so merging from it risks reverting an in-flight write
- * to a sibling param on the SAME route (e.g. `/kalender`'s `?view=` versus
- * `?type=`, both driven by `CalendarWidget`) — a narrow, same-widget race,
+ * to a sibling param on the SAME route (two facets driven by one widget) — a narrow, same-widget race,
  * and exactly what this write already did on `main` before #2779. Losing
  * `?member=` deterministically for the panel's entire open duration is
  * strictly worse than that race, so this hook accepts the race and keeps

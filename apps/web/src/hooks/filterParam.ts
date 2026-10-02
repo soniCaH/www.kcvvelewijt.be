@@ -25,8 +25,8 @@
  *  any value `values` doesn't recognise — the `isX(value): value is X` type
  *  guard every filter-URL call site in this codebase used to hand-roll once
  *  each. Exported so a caller with its own narrow-or-fallback shape for a
- *  facet this hook doesn't own (e.g. `CalendarWidget`'s `?view=`) can reuse
- *  it instead of reinventing it (#2783 review finding 9). */
+ *  facet these hooks don't own can reuse it instead of reinventing it
+ *  (#2783 review finding 9). */
 export function narrowParam<T extends string>(
   raw: string | null,
   values: readonly T[],

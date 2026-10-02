@@ -122,14 +122,29 @@ const feedWithPlayedMatch = buildCalendarFeed(
   events,
 );
 
+/**
+ * Seeds the REAL browser URL for a story. `CalendarWidget` reads `?view=` /
+ * `?type=` from `window.location` on mount (#3382, history-backed so a chip
+ * tap makes no server round-trip), which Storybook's `nextjs.navigation` mock
+ * — a Next-router shim — has no effect on. The returned cleanup restores the
+ * URL on teardown (after the screenshot): Storybook does not hard-navigate
+ * between stories, so a leaked `?view=` would seed the next story's mount.
+ */
+function seedUrl(search: string): StoryObj["beforeEach"] {
+  return () => {
+    const original =
+      window.location.pathname + window.location.search + window.location.hash;
+    window.history.replaceState(window.history.state, "", `/kalender${search}`);
+    return () =>
+      window.history.replaceState(window.history.state, "", original);
+  };
+}
+
 const meta = {
   title: "Features/Calendar/CalendarWidget",
   component: CalendarWidget,
   parameters: {
     layout: "padded",
-    nextjs: {
-      navigation: { pathname: "/kalender", query: {} },
-    },
   },
   tags: ["autodocs", "vr"],
   args: {
@@ -147,27 +162,15 @@ type Story = StoryObj<typeof meta>;
 // ── Stories ────────────────────────────────────────────────────────────────
 
 export const MonthView: Story = {
-  parameters: {
-    nextjs: {
-      navigation: { pathname: "/kalender", query: { view: "month" } },
-    },
-  },
+  beforeEach: seedUrl("?view=month"),
 };
 
 export const WeekView: Story = {
-  parameters: {
-    nextjs: {
-      navigation: { pathname: "/kalender", query: { view: "week" } },
-    },
-  },
+  beforeEach: seedUrl("?view=week"),
 };
 
 export const AgendaView: Story = {
-  parameters: {
-    nextjs: {
-      navigation: { pathname: "/kalender", query: { view: "agenda" } },
-    },
-  },
+  beforeEach: seedUrl("?view=agenda"),
 };
 
 /**
@@ -181,43 +184,21 @@ export const AgendaView: Story = {
  */
 export const WeekViewWithPlayedMatch: Story = {
   args: { feed: feedWithPlayedMatch },
-  parameters: {
-    nextjs: {
-      navigation: { pathname: "/kalender", query: { view: "week" } },
-    },
-  },
+  beforeEach: seedUrl("?view=week"),
 };
 
 /** By-type filter applied — only `Wedstrijden` (matches) survive the filter. */
 export const FilteredToWedstrijden: Story = {
-  parameters: {
-    nextjs: {
-      navigation: {
-        pathname: "/kalender",
-        query: { view: "month", type: "Wedstrijden" },
-      },
-    },
-  },
+  beforeEach: seedUrl("?view=month&type=Wedstrijden"),
 };
 
 /** Filtered-to-zero — a category with no upcoming items shows the reset state. */
 export const FilteredToZero: Story = {
-  parameters: {
-    nextjs: {
-      navigation: {
-        pathname: "/kalender",
-        query: { view: "month", type: "Supportersactiviteit" },
-      },
-    },
-  },
+  beforeEach: seedUrl("?view=month&type=Supportersactiviteit"),
 };
 
 export const SubscribePanelOpen: Story = {
-  parameters: {
-    nextjs: {
-      navigation: { pathname: "/kalender", query: { view: "month" } },
-    },
-  },
+  beforeEach: seedUrl("?view=month"),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole("button", { name: /Abonneer/i }));
@@ -233,11 +214,7 @@ export const SubscribePanelOpen: Story = {
  */
 export const AgendaViewWithReservation: Story = {
   args: { feed: feedWithReservation },
-  parameters: {
-    nextjs: {
-      navigation: { pathname: "/kalender", query: { view: "agenda" } },
-    },
-  },
+  beforeEach: seedUrl("?view=agenda"),
 };
 
 export const RouteSkeleton: Story = {
