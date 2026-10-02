@@ -20,7 +20,7 @@ export interface ErrorAnalyticsProps {
  * Both events carry `error_code` (`"404"` | `"500"`) and `path` (the URL the
  * visitor hit, read once at mount — for a 404 the missing URL, for a 500 the
  * URL that errored). The action marker `data-error-action` (set by
- * `<ErrorState>` on each action button/link → `"home"` | `"search"` | `"retry"`)
+ * `<ErrorState>` on each action button/link → `"home"` | `"search"` | `"retry"` | `"news"`)
  * supplies the `action` param.
  */
 export function ErrorAnalytics({ code, children }: ErrorAnalyticsProps) {
