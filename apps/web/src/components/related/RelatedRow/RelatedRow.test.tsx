@@ -60,14 +60,14 @@ describe("<RelatedRow>", () => {
   });
 
   describe("the tilt scale (#3330)", () => {
-    it("cycles the slight tier and then flat, wrapping after five cards", () => {
+    it("cycles the slight tier in alternating signs and then flat, wrapping after five cards", () => {
       const { container } = render(
         <RelatedRow items={[1, 2, 3, 4, 5, 6].map((i) => item(i))} />,
       );
       const leans = [
         ...container.querySelectorAll('[data-slot="related-row-card"] article'),
       ].map((card) => card.getAttribute("data-rotation"));
-      expect(leans).toEqual(["a", "b", "c", "d", "none", "a"]);
+      expect(leans).toEqual(["a", "c", "b", "d", "none", "a"]);
     });
   });
 

@@ -130,10 +130,10 @@ function bgForArticleType(type: RelatedRowItem["articleType"]): NewsCardBg {
 }
 
 // Slot-deterministic lean cycle so adjacent cards don't twin: the site's slight
-// tier (#3302 / #3329) plus an explicit flat card. The cycle wraps for >5 items
-// — by the time the 6th card paints, the first is well off-screen so a repeat
-// reads as fresh tilt rather than a twin.
-const ROTATION_CYCLE = ["a", "b", "c", "d", "none"] as const;
+// tier (#3302 / #3329) in sign-alternating order, plus an explicit flat card.
+// The cycle wraps for >5 items — by the time the 6th card paints, the first is
+// well off-screen so a repeat reads as fresh tilt rather than a twin.
+const ROTATION_CYCLE = ["a", "c", "b", "d", "none"] as const;
 
 function deriveImpressionSource(
   items: RelatedRowItem[],

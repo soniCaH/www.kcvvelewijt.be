@@ -3299,8 +3299,10 @@ describe("rule 18 catches what it claims to (#3332)", () => {
  * one looked local and harmless. The rule keeps a fourth out.
  *
  * What it reads is the declaration of a pool, in code: an identifier naming a
- * rotation or a tilt, declared `const`/`let`/`var` and assigned a list (or a record) whose first entry is a
- * degree, bare (`-1.1`) or quoted (`"-6deg"`); and a tilt custom property
+ * rotation, tilt, lean, angle or skew, declared `const`/`let`/`var` and assigned
+ * a list (or a record) whose first entry is a degree, bare (`-1.1`, `+1`) or
+ * quoted (`"-6deg"`), or a Tailwind rotate class (`"-rotate-1"`); and a tilt
+ * custom property
  * (`--rotate-lean-*`, `--rotate-tape-*`, `--tape-rotation`,
  * `--taped-card-rotation`) given a literal degree. A list of token *names*
  * (`["a", "b"]`) or of token *reads* (`"var(--rotate-lean-a)"`) is the scale
@@ -3312,10 +3314,40 @@ describe("rule 18 catches what it claims to (#3332)", () => {
  * site is not a pool, and a stamp's or a jersey's own angle is not a tape or a
  * lean. They are the next drift to look at, not this rule's.
  */
-const TILT_POOL =
-  /\b(?:const|let|var)\s+\w*(?:rotat|tilt)\w*\s*(?::[^=;]+)?=\s*[[{]\s*(?:["']?\w+["']?\s*:\s*)?["'`]?-?\d/i;
+// An identifier that names a tilt. `lean` needs care — "clean" holds it — so a
+// lowercase `lean` only counts at the start of a word (`leanPool`), `Lean` / `LEAN`
+// anywhere (`cardLean`, `LEAN_POOL`).
+const TILT_NAME =
+  "\\w*(?:[Rr]otat|ROTAT|[Tt]ilt|TILT|[Aa]ngle|ANGLE|[Ss]kew|SKEW|(?<![a-z])lean|Lean|LEAN)\\w*";
+// A degree, bare (`-1.1`, `+1`, `.5`) or quoted with a unit (`"-6deg"`).
+const BARE_DEGREE = "[+-]?\\.?\\d";
+const QUOTED_DEGREE = "[\"'`][+-]?\\.?\\d[\\d.]*(?:deg|turn)";
+// A Tailwind rotate class (`-rotate-1`, `md:rotate-[0.7deg]`) as a list entry.
+const ROTATE_CLASS = "[\"'`](?:[\\w-]+:)*-?rotate-";
+const TILT_POOL = new RegExp(
+  `\\b(?:const|let|var)\\s+${TILT_NAME}\\s*(?::[^=;]+)?=\\s*(?:` +
+    // A list: its first entry is a degree or a rotate class.
+    `\\[\\s*(?:${BARE_DEGREE}|${QUOTED_DEGREE}|${ROTATE_CLASS})` +
+    // A record: a quoted degree or rotate class under any key, or a bare
+    // number under a token-name key (`a`, `md`) — `{ zIndex: 2 }` is no pool.
+    `|\\{\\s*(?:["']?\\w+["']?\\s*:\\s*)?(?:${QUOTED_DEGREE}|${ROTATE_CLASS})` +
+    `|\\{\\s*["']?\\w{1,2}["']?\\s*:\\s*${BARE_DEGREE}` +
+    `)`,
+);
 const TILT_TOKEN_LITERAL =
   /(?<![\w-])--(?:rotate-(?:lean|tape)-[\w-]+|tape-rotation|taped-card-rotation)["'`]?\s*:\s*["'`]?-?\d/;
+
+/**
+ * Every `--rotate-<tier>-*` declaration in a stylesheet, with its value. The name
+ * pattern takes hyphens (`--rotate-tape-polaroid-a`), so a token the scale does
+ * not name cannot hide from the pin below.
+ */
+const tiltTokens = (css: string, tier: "lean" | "tape") =>
+  [
+    ...css.matchAll(
+      new RegExp(`^\\s*(--rotate-${tier}-[\\w-]+):\\s*(\\S+?);`, "gm"),
+    ),
+  ].map((m) => [m[1], m[2]]);
 
 /** True when `source` declares a tilt pool or a tilt token of its own. */
 const declaresTilt = (source: string): boolean =>
@@ -3332,15 +3364,8 @@ describe("no component declares its own tilt pool (#3330)", () => {
 
 describe("the tilt scale lives in globals.css, and only there (#3330)", () => {
   const globals = readFileSync(resolve(srcDir, "app/globals.css"), "utf8");
-  const declared = (prefix: string) =>
-    [
-      ...globals.matchAll(
-        new RegExp(`^\\s*(--rotate-${prefix}-\\w+):\\s*(\\S+?);`, "gm"),
-      ),
-    ].map((m) => [m[1], m[2]]);
-
   it("holds the slight tier, for a card's lean", () => {
-    expect(declared("lean")).toEqual([
+    expect(tiltTokens(globals, "lean")).toEqual([
       ["--rotate-lean-a", "-1deg"],
       ["--rotate-lean-b", "-0.5deg"],
       ["--rotate-lean-c", "0.5deg"],
@@ -3349,7 +3374,7 @@ describe("the tilt scale lives in globals.css, and only there (#3330)", () => {
   });
 
   it("holds the bigger tier, for a tape strip", () => {
-    expect(declared("tape")).toEqual([
+    expect(tiltTokens(globals, "tape")).toEqual([
       ["--rotate-tape-a", "-6deg"],
       ["--rotate-tape-b", "-4deg"],
       ["--rotate-tape-c", "-2deg"],
@@ -3374,11 +3399,31 @@ describe("rule 19 catches what it claims to (#3330)", () => {
     }
   });
 
+  it("sees a hyphenated token the scale does not name", () => {
+    expect(
+      tiltTokens(
+        "  --rotate-tape-polaroid-a: -5deg;\n  --rotate-tape-a: -6deg;",
+        "tape",
+      ),
+    ).toEqual([
+      ["--rotate-tape-polaroid-a", "-5deg"],
+      ["--rotate-tape-a", "-6deg"],
+    ]);
+  });
+
   it.each([
     // The youth directory's pool, before #3330 — the bisect.
     ["const CARD_ROTATIONS = [-1.1, 0.7, -0.5];"],
     // The grid's tape pool, before #3329: degrees as quoted strings, over lines.
     ['const TAPE_ROTATION_POOL = [\n  "-1deg",\n  "-2deg",\n];'],
+    // A pool named for the lean, the angle or the skew, not only rotation or tilt.
+    ["const LEAN_POOL = [-1, 1];"],
+    ["const cardLean = [0.5, -0.5];"],
+    ["const cardAngles = [.5, -.5];"],
+    ["const skews = [+1, 2];"],
+    // A pool of Tailwind rotate classes.
+    ['const ROTATION_CLASSES = ["-rotate-1", "rotate-[0.7deg]"];'],
+    ['const tilts = ["md:rotate-2", "-rotate-1"];'],
     // A typed declaration, and a positive first entry.
     ["const TILTS: number[] = [0.5, 1];"],
     ["export const rotationPool: readonly number[] = [2, -2] as const;"],
@@ -3405,6 +3450,11 @@ describe("rule 19 catches what it claims to (#3330)", () => {
     [
       'const ROTATION_POOL = [\n  "var(--rotate-lean-a)",\n  "var(--rotate-lean-b)",\n] as const;',
     ],
+    // A record that is not a pool of degrees.
+    ["const tiltStyle = { zIndex: 2 };"],
+    ['const angleLabel = { label: "Hoek", count: 3 };'],
+    // "clean" holds "lean", and is not a tilt.
+    ["const cleanItems = [1, 2, 3];"],
     // A custom property given a read, not a literal.
     ['{ "--taped-card-rotation": ROTATION_POOL[index] }'],
     ['style={{ transform: "rotate(var(--taped-card-rotation, 0deg))" }}'],
