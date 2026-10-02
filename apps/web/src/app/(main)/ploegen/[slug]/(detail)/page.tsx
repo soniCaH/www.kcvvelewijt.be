@@ -509,6 +509,10 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
   const analyticsParams = { team_slug: slug };
 
+  // One gate for the youth CTA and for `#info`'s bottom spacing: a seam
+  // follows `#info` exactly when the CTA does.
+  const hasEnrolmentCta = team.teamType === "youth";
+
   // #2443 rule 4 originally put the team's own fixture-list route
   // (`/ploegen/[slug]/wedstrijden`) in the domain tier here. Dropped (review
   // round 1, #2788): it has no Sanity document behind it, so the card was a
@@ -581,10 +585,21 @@ export default async function TeamPage({ params }: TeamPageProps) {
           block open for `#wedstrijden` but replaces the klassement slot with
           a failure notice instead — no `<h2>`, no `id`, matching the status
           line's own nav/render-invariant exception. */}
+      {/* Seam air (#3306 / #3336): every section here has a seam above, and
+          every one but the last has one below, so a side that touches a seam
+          pads `pt-10 sm:pt-14` / `pb-10 sm:pb-14` instead of `py-12 sm:py-16`.
+          The first section sits under `<TeamSectionNav>`'s opening seam and
+          keeps its plain top; the last (`#info`, or the youth CTA) sits above
+          `<SponsorsSection>`, a bare colour change, and keeps its plain
+          bottom. The two `py-10` status/notice containers fall under the same
+          rule: they were the first section's own `py-10` (40px at every
+          width, no `sm:` step) and are now `pt-12 pb-10 sm:pt-16 sm:pb-14` —
+          the top grows to the plain opening air (48px, then 64px from
+          640px), the bottom steps 40px to 56px. */}
       {!inCompetition ? (
         <>
           <StripedSeam colorPair="ink-cream" height="md" />
-          <PageContainer className="py-10">
+          <PageContainer className="pt-12 pb-10 sm:pt-16 sm:pb-14">
             <CompetitiveStatusLine
               variant={
                 competitiveState.kind === "fixtures-unavailable"
@@ -598,7 +613,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
         <>
           <StripedSeam colorPair="ink-cream" height="md" />
           {rankingUnavailable ? (
-            <PageContainer className="py-10">
+            <PageContainer className="pt-12 pb-10 sm:pt-16 sm:pb-14">
               <EmptyState
                 tier="slot"
                 reason="unavailable"
@@ -622,7 +637,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
                 // the one `inCompetition` state where it wouldn't be), but TS
                 // narrows the variable, not a property read off the record.
                 ariaLabel={sectionLabels.klassement!}
-                className="py-12 focus:outline-none sm:py-16"
+                className="pt-12 pb-10 focus:outline-none sm:pt-16 sm:pb-14"
               >
                 <SectionHeader
                   title={sectionLabels.klassement!}
@@ -649,7 +664,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
                   id="wedstrijden"
                   tabIndex={-1}
                   ariaLabel={sectionLabels.wedstrijden}
-                  className="py-12 focus:outline-none sm:py-16"
+                  className="py-10 focus:outline-none sm:py-14"
                 >
                   <SectionHeader
                     title={sectionLabels.wedstrijden}
@@ -677,7 +692,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
               id="spelers"
               tabIndex={-1}
               ariaLabel={sectionLabels.spelers}
-              className="py-12 focus:outline-none sm:py-16"
+              className="py-10 focus:outline-none sm:py-14"
             >
               <SectionHeader title={sectionLabels.spelers} size="display-md" />
               <SquadGrid players={team.players} />
@@ -694,7 +709,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
             id="staf"
             tabIndex={-1}
             ariaLabel={sectionLabels.staf}
-            className="py-12 focus:outline-none sm:py-16"
+            className="py-10 focus:outline-none sm:py-14"
           >
             <SectionHeader title={sectionLabels.staf} size="display-md" />
             {/* `unlabelledNotice` (#2638): ProSoccerData is PSD's
@@ -725,7 +740,11 @@ export default async function TeamPage({ params }: TeamPageProps) {
         id="info"
         tabIndex={-1}
         ariaLabel={sectionLabels.info}
-        className="py-12 focus:outline-none sm:py-16"
+        className={
+          hasEnrolmentCta
+            ? "py-10 focus:outline-none sm:py-14"
+            : "pt-10 pb-12 focus:outline-none sm:pt-14 sm:pb-16"
+        }
       >
         <SectionHeader title={sectionLabels.info} size="display-md" />
         <TeamEditorial
@@ -752,14 +771,17 @@ export default async function TeamPage({ params }: TeamPageProps) {
           click-only analytics today (view→click uncomputable) become
           falsifiable once there is post-go-live traffic. No GTM change — the
           live `team_` trigger regex already matches this event. */}
-      {team.teamType === "youth" ? (
+      {hasEnrolmentCta ? (
         <>
           <StripedSeam colorPair="ink-cream" height="md" />
           <TrackInView
             eventName="team_enrolment_cta_in_view"
             params={analyticsParams}
           >
-            <PageContainer as="section" className="py-12 sm:py-16">
+            <PageContainer
+              as="section"
+              className="pt-10 pb-12 sm:pt-14 sm:pb-16"
+            >
               <TeamEnrolmentCta
                 teamType={team.teamType}
                 teamSlug={slug}
