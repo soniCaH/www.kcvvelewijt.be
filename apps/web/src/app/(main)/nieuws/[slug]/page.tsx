@@ -135,6 +135,8 @@ function renderArticleHero({
   // broken image.
   const landscape = article.coverImageUrl?.trim() || undefined;
   const landscapeCover = landscape ? { url: landscape } : undefined;
+  // Every variant below sets `priority`: on a detail page the hero cover is
+  // the page's first paint (the LCP element), so it must not lazy-load (#2524).
 
   switch (article.articleType) {
     case "interview":
@@ -148,6 +150,7 @@ function renderArticleHero({
           date={publishedDate}
           subjects={article.subjects ?? null}
           coverImage={landscapeCover}
+          priority
         />
       );
     case "transfer":
@@ -161,6 +164,7 @@ function renderArticleHero({
           date={publishedDate}
           feature={firstTransferFact ?? null}
           coverImage={landscapeCover}
+          priority
         />
       );
     case "event":
@@ -174,6 +178,7 @@ function renderArticleHero({
           date={publishedDate}
           feature={firstEventFact ?? null}
           coverImage={landscapeCover}
+          priority
         />
       );
     case "matchPreview":
@@ -190,6 +195,7 @@ function renderArticleHero({
           author={author}
           date={publishedDate}
           coverImage={landscapeCover}
+          priority
           match={heroMatch}
         />
       );
@@ -206,6 +212,7 @@ function renderArticleHero({
           date={publishedDate}
           category={primaryCategory}
           coverImage={landscapeCover}
+          priority
         />
       );
   }

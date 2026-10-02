@@ -48,7 +48,8 @@ export function toEditorialHeroProps(article: ArticleVM): EditorialHeroProps {
       ? formatArticleDate(article.publishedAt)
       : undefined,
     // PERF-1 (#2235): the homepage hero cover is the LCP element — eager-load
-    // it. Only this call site sets `priority`; below-fold rows stay lazy.
+    // it. The article detail hero (`renderArticleHero`) sets `priority` too;
+    // featured and below-fold rows stay lazy.
     priority: true,
   };
 
