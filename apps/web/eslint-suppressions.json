@@ -861,14 +861,6 @@
       "count": 2
     }
   },
-  "src/components/team/SquadGrid/PersonCardRun.tsx": {
-    "kcvv/no-off-ramp-font-size": {
-      "count": 1
-    },
-    "kcvv/no-off-ramp-tracking": {
-      "count": 1
-    }
-  },
   "src/components/team/SquadGrid/PlayerCard.tsx": {
     "kcvv/no-off-ramp-font-size": {
       "count": 2

@@ -699,8 +699,16 @@ export default async function TeamPage({ params }: TeamPageProps) {
             <SectionHeader title={sectionLabels.staf} size="display-md" />
             {/* `unlabelledNotice` (#2638): ProSoccerData is PSD's
                 dashboard, so the routing line only makes sense on a team
-                page — `<BestuurPage>` leaves it at the default `false`. */}
-            <TeamStaff staff={staff} heading="Staf" unlabelledNotice />
+                page — `<BestuurPage>` leaves it at the default `false`.
+                `hideHeading` (#3334): the run has no sibling and the
+                `<SectionHeader>` above already says "Staf." — the run label
+                would repeat it (#3305 rule 3). */}
+            <TeamStaff
+              staff={staff}
+              heading="Staf"
+              unlabelledNotice
+              hideHeading
+            />
           </PageContainer>
         </>
       ) : null}

@@ -26,6 +26,21 @@ export interface PersonCardRunProps {
 }
 
 /**
+ * `<RunLabel>` — the one run-label treatment (#3305 rule 2): an `<h3>` under
+ * the section's `<h2>`, mono, uppercase, `text-ink-muted`, the `text-label`
+ * step (its own tracking, #2663) and a `border-paper-edge` hairline below.
+ * Exported so a card run outside this module (`<SponsorTiers>`'
+ * Hoofdsponsors) renders the same heading instead of a lookalike (#3334).
+ */
+export function RunLabel({ children }: { children: ReactNode }) {
+  return (
+    <h3 className="text-ink-muted border-paper-edge text-label mb-3 border-b pb-1.5 font-mono uppercase">
+      {children}
+    </h3>
+  );
+}
+
+/**
  * `<PersonCardRun>` — one labelled run of person cards: a mono-caps
  * heading (also the run's `aria-label`) over `<SquadGrid>`'s canonical
  * `auto-fill` grid track.
@@ -45,11 +60,7 @@ export function PersonCardRun({
 }: PersonCardRunProps) {
   return (
     <section aria-label={label}>
-      {hideHeading ? null : (
-        <h3 className="text-ink-muted border-paper-edge mb-3 border-b pb-1.5 font-mono text-[11px] tracking-[0.1em] uppercase">
-          {label}
-        </h3>
-      )}
+      {hideHeading ? null : <RunLabel>{label}</RunLabel>}
       <div
         data-testid={dataTestId}
         className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-4"

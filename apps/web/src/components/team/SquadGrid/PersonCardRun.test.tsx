@@ -25,6 +25,17 @@ describe("PersonCardRun", () => {
     );
   });
 
+  it("sets the run label in the text-label step, not an arbitrary size and tracking (#3334)", () => {
+    render(
+      <PersonCardRun label="Doelmannen">
+        <div>card</div>
+      </PersonCardRun>,
+    );
+    const heading = screen.getByRole("heading", { level: 3 });
+    expect(heading).toHaveClass("text-label");
+    expect(heading.className).not.toMatch(/text-\[|tracking-\[/);
+  });
+
   it("names the region after the label", () => {
     render(
       <PersonCardRun label="Doelmannen">
