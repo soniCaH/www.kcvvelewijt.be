@@ -333,6 +333,18 @@ describe("/ploegen/[slug] heading sweep — every gated section gets a real <h2>
       "Sluit je aan bij de jeugd van Elewijt.",
     ]);
 
+    // #3334: the staff run has no sibling, so no run-label h3 repeats "Staf."
+    // under the display heading, and the run adds no second "Staf" region
+    // inside `section#staf` (which already carries the aria-label).
+    expect(headings.filter((h) => h.level === 3 && h.text === "Staf")).toEqual(
+      [],
+    );
+    expect(screen.getAllByRole("region", { name: "Staf" })).toHaveLength(1);
+    expect(document.getElementById("staf")).toHaveAttribute(
+      "aria-label",
+      "Staf",
+    );
+
     // The competitive block is genuinely closed — no #klassement/#wedstrijden
     // section, real fixtures/ranking notwithstanding.
     expect(document.getElementById("klassement")).toBeNull();

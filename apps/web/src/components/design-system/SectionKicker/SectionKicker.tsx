@@ -12,9 +12,10 @@ export interface SectionKickerProps {
 /**
  * <SectionKicker> — a mono section label followed by a trailing paper-edge
  * hairline rule (`KICKER ─────`). The redesign's standard section header for
- * landing-page sub-sections (filosofie/visie, the jeugd nav hub, sponsor
- * tiers). Extracted from the byte-identical inline pattern that lived in
- * `<JeugdVisie>` and `<SponsorTiers>`.
+ * landing-page sub-sections (filosofie/visie, the jeugd nav hub). Extracted
+ * from the byte-identical inline pattern that lived in `<JeugdVisie>` and
+ * `<SponsorTiers>` — which has since moved to the run-label heading
+ * (`<RunLabel>`, #3334): a card-run label is not a section kicker.
  */
 export function SectionKicker({ children, className }: SectionKickerProps) {
   return (

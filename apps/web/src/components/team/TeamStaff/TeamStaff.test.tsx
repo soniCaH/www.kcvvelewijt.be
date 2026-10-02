@@ -99,12 +99,10 @@ describe("TeamStaff", () => {
     ).toBeInTheDocument();
   });
 
-  it("suppresses the visible run heading but keeps the accessible name when hideHeading is set (#2572 review — a <SectionHeader> above this component would otherwise repeat `heading` verbatim)", () => {
+  it("suppresses the visible run heading and the run's own region name when hideHeading is set (#3334; #2572 review — a <SectionHeader> above this component would otherwise repeat `heading` verbatim)", () => {
     render(<TeamStaff staff={STAFF} heading="De leden" hideHeading />);
     expect(screen.queryByRole("heading", { level: 3 })).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("region", { name: "De leden" }),
-    ).toBeInTheDocument();
+    expect(screen.queryByRole("region")).not.toBeInTheDocument();
   });
 
   it("renders one shared <PlayerCard> per staff member", () => {

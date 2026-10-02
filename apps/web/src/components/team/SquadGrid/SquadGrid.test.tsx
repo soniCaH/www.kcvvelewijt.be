@@ -100,8 +100,8 @@ describe("SquadGrid", () => {
   it("renders no heading when the single group is the catch-all (#2638)", () => {
     // No player's position is known — every player lands in the one
     // trailing "Spelers" catch-all, exactly the U9 shape the gate exists
-    // for. The region itself still carries the label as its accessible
-    // name; only the visible <h3> heading disappears.
+    // for. The host section names the squad (#3334), so the run carries
+    // neither the visible <h3> nor a second region of the same name.
     render(
       <SquadGrid
         players={[
@@ -111,7 +111,7 @@ describe("SquadGrid", () => {
       />,
     );
     expect(screen.queryByRole("heading", { level: 3 })).toBeNull();
-    expect(screen.getByRole("region", { name: "Spelers" })).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Spelers" })).toBeNull();
   });
 
   it("keeps the heading when the single group is a real position bucket, not the catch-all (#2638)", () => {
@@ -256,7 +256,8 @@ describe("SquadGrid", () => {
           ]}
         />,
       );
-      const region = screen.getByRole("region", { name: "Spelers" });
+      // Single catch-all group: no heading, no region of its own (#3334).
+      const region = screen.getByTestId("squad-grid");
       const cards = Array.from(
         region.querySelectorAll('[data-testid="player-card"]'),
       );

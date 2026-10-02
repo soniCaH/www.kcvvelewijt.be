@@ -41,13 +41,14 @@ export interface TeamStaffProps {
    */
   unlabelledNotice?: boolean;
   /**
-   * Forwarded to `<PersonCardRun>`'s own `hideHeading` (#2638) — suppress the
-   * visible mono-caps run heading while `heading` still carries the
-   * section's `aria-label`. Default `false` (unchanged for `/ploegen/[slug]`,
-   * which has no other visible label for the run). `<BestuurPage>` sets this
-   * once it adopts `<SectionHeader>` for "De leden" directly above this
-   * component (#2572) — without it, the page would print "De leden" twice:
-   * once as the display heading, once as `<PersonCardRun>`'s own run label.
+   * Forwarded to `<PersonCardRun>`'s own `hideHeading` (#2638, #3334) —
+   * suppress the visible mono-caps run heading and the run's own
+   * `aria-label`, because a display heading / named section already names
+   * the run directly around it. Both callers set it: `/ploegen/[slug]`
+   * (`#staf` is a named section under a "Staf." `<SectionHeader>`, #3334) and
+   * `<BestuurPage>` ("De leden" `<SectionHeader>`, #2572) — without it the
+   * page would print the word twice. Default `false` (a run with a sibling
+   * keeps its label).
    */
   hideHeading?: boolean;
 }

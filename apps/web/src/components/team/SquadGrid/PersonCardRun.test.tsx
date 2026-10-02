@@ -25,6 +25,17 @@ describe("PersonCardRun", () => {
     );
   });
 
+  it("sets the run label in the text-label step, not an arbitrary size and tracking (#3334)", () => {
+    render(
+      <PersonCardRun label="Doelmannen">
+        <div>card</div>
+      </PersonCardRun>,
+    );
+    const heading = screen.getByRole("heading", { level: 3 });
+    expect(heading).toHaveClass("text-label");
+    expect(heading.className).not.toMatch(/text-\[|tracking-\[/);
+  });
+
   it("names the region after the label", () => {
     render(
       <PersonCardRun label="Doelmannen">
@@ -65,13 +76,14 @@ describe("PersonCardRun", () => {
     ).toContain("grid-cols-[repeat(auto-fill,minmax(140px,1fr))]");
   });
 
-  it("suppresses the visible heading but keeps the region's accessible name when hideHeading is set (#2638)", () => {
+  it("suppresses the visible heading and the run's own region name when hideHeading is set, so the host's named section is not listed twice (#2638, #3334)", () => {
     render(
       <PersonCardRun label="Spelers" hideHeading>
         <div>card</div>
       </PersonCardRun>,
     );
     expect(screen.queryByRole("heading", { level: 3 })).toBeNull();
-    expect(screen.getByRole("region", { name: "Spelers" })).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Spelers" })).toBeNull();
+    expect(screen.queryByRole("region")).toBeNull();
   });
 });

@@ -1,5 +1,5 @@
-import { SectionKicker } from "@/components/design-system/SectionKicker";
 import { TapedCardGrid } from "@/components/design-system/TapedCardGrid";
+import { RunLabel } from "@/components/team/SquadGrid/PersonCardRun";
 import { HoofdSponsorTile } from "../HoofdSponsorTile";
 import { SponsorTile, SPONSOR_TILE_GRID_CLASS } from "../SponsorTile";
 import { sortByTierThenName } from "../sortByTierThenName";
@@ -13,8 +13,10 @@ export interface SponsorTiersProps {
 /**
  * <SponsorTiers> — the `/sponsors` body (7.d3). Two visual classes, not three:
  *
- * 1. **Hoofdsponsors** — the only labelled group: a MonoLabel kicker + paper-edge
- *    rule over a `<TapedCardGrid>` of large `<HoofdSponsorTile>`s.
+ * 1. **Hoofdsponsors** — the only labelled group: a `<RunLabel>` over a
+ *    `<TapedCardGrid>` of large `<HoofdSponsorTile>`s. The label only separates
+ *    the run from the wall next to it, so with an empty wall it is not rendered
+ *    (the region keeps its `aria-label`; #3305 rule 1, #3334).
  * 2. **The wall** — `sponsor` + `sympathisant` (and untiered) merged into one
  *    *unlabelled* dense `<SponsorTile>` grid, ordered `sponsor` → `sympathisant`
  *    → `name` (nl). No header, no tier label, no blurb.
@@ -32,7 +34,7 @@ export function SponsorTiers({ sponsors }: SponsorTiersProps) {
     <div className="flex flex-col gap-10 sm:gap-12">
       {hoofd.length > 0 && (
         <section aria-label="Hoofdsponsors">
-          <SectionKicker className="mb-4">Hoofdsponsors</SectionKicker>
+          {wall.length > 0 && <RunLabel>Hoofdsponsors</RunLabel>}
           <TapedCardGrid columns={3} gap="md" as="ul">
             {hoofd.map((sponsor) => (
               <HoofdSponsorTile key={sponsor.id} sponsor={sponsor} />

@@ -47,6 +47,17 @@ describe("SponsorTiers", () => {
     expect(screen.queryByText("Sympathisanten")).not.toBeInTheDocument();
   });
 
+  it("renders the Hoofdsponsors label as the shared run-label h3 when a wall sits next to it (#3334)", () => {
+    render(<SponsorTiers sponsors={mixed} />);
+    const label = screen.getByRole("heading", {
+      level: 3,
+      name: "Hoofdsponsors",
+    });
+    expect(label).toHaveClass("text-label");
+    const region = screen.getByRole("region", { name: "Hoofdsponsors" });
+    expect(within(region).getByRole("heading", { level: 3 })).toBe(label);
+  });
+
   it("puts hoofdsponsors in the labelled region and the rest in the unlabelled wall", () => {
     render(<SponsorTiers sponsors={mixed} />);
     const region = screen.getByRole("region", { name: "Hoofdsponsors" });
@@ -88,6 +99,8 @@ describe("SponsorTiers", () => {
     ];
     render(<SponsorTiers sponsors={hoofdOnly} />);
     const region = screen.getByRole("region", { name: "Hoofdsponsors" });
+    // No sibling run → no label, but the region keeps its accessible name (#3334).
+    expect(screen.queryByRole("heading")).not.toBeInTheDocument();
     // Every list item lives inside the hoofd region — there is no wall list.
     expect(screen.getAllByRole("listitem")).toHaveLength(2);
     expect(within(region).getAllByRole("listitem")).toHaveLength(2);

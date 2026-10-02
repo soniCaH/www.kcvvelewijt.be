@@ -42,6 +42,10 @@ export function SponsorsPage({ sponsors }: SponsorsPageProps) {
             <div className="mb-10 sm:mb-12">
               <StripedSeam colorPair="ink-cream" height="md" />
             </div>
+            {/* The Hoofdsponsors run label is an <h3>; without this h2 the
+                outline jumps h1 → h3 (axe `heading-order`). sr-only because
+                the page opener already names the section visually (#3334). */}
+            <h2 className="sr-only">Onze sponsors</h2>
             <SponsorTiers sponsors={sponsors} />
           </>
         ) : (
