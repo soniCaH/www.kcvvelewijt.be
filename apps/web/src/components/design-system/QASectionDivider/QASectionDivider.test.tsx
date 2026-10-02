@@ -66,14 +66,20 @@ describe("QASectionDivider", () => {
     rules.forEach((r) => expect(r).toHaveAttribute("aria-hidden", "true"));
   });
 
-  it("uses a <div role=separator> with aria-label set to the plain title text", () => {
+  it("renders the title as an <h2> named by its own text, with no separator role", () => {
     const { container } = render(<QASectionDivider title={titleWithAccent} />);
     const root = container.firstChild as HTMLElement;
-    // A plain <div>, not <aside> (#3188) — `separator` isn't an allowed
-    // role for `<aside>`'s implicit landmark role (axe `aria-allowed-role`).
+    // A plain <div> wrapper: `separator` has presentational children, so it
+    // would hide the heading from the accessibility tree (#2523).
     expect(root.tagName).toBe("DIV");
-    expect(root).toHaveAttribute("role", "separator");
-    expect(root).toHaveAttribute("aria-label", "De jaren tussen de lijnen.");
+    expect(root).not.toHaveAttribute("role");
+    expect(root).not.toHaveAttribute("aria-label");
+    const heading = screen.getByRole("heading", {
+      level: 2,
+      name: "De jaren tussen de lijnen.",
+    });
+    expect(heading).toHaveAttribute("data-divider", "title");
+    expect(screen.queryByRole("separator")).toBeNull();
   });
 
   it("omits the kicker row when no kicker is supplied", () => {
