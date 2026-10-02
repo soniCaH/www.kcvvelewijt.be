@@ -72,6 +72,19 @@ describe("DownloadButton", () => {
     expect(stamp.textContent).toContain("XLSX");
   });
 
+  it("card variant: unknown file type falls back to ink, never grey (#2531)", () => {
+    render(
+      <DownloadButton
+        href="https://example.com/file.xyz"
+        label="Test"
+        mimeType="application/x-unknown"
+      />,
+    );
+    const stamp = screen.getByTestId("file-type-stamp");
+    expect(stamp).toHaveStyle({ color: "var(--color-ink)" });
+    expect(stamp.textContent).toContain("FILE");
+  });
+
   it("card variant: renders description below the label", () => {
     render(
       <DownloadButton

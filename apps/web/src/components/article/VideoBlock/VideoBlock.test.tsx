@@ -118,6 +118,18 @@ describe("VideoBlock — upload path (Phase 5 #1849)", () => {
   });
 });
 
+describe("VideoBlock — press-down hover (#2531)", () => {
+  it("gates the pill translate behind motion-safe, leaves the shadow collapse ungated", () => {
+    render(<VideoBlock value={withAsset()} />);
+    const classes = screen.getByTestId("video-block-play-pill").classList;
+    expect(classes).toContain("motion-safe:hover:translate-x-1");
+    expect(classes).toContain("motion-safe:hover:translate-y-1");
+    expect(classes).toContain("hover:shadow-none");
+    expect(classes).not.toContain("hover:translate-x-1");
+    expect(classes).not.toContain("hover:translate-y-1");
+  });
+});
+
 describe("VideoBlock — upload aspect fit (#2279)", () => {
   // The clipping box is the TapedFigure photo div: `overflow-hidden` +
   // a fixed `aspectRatio` when the aspect is not "auto". Its `data-aspect`

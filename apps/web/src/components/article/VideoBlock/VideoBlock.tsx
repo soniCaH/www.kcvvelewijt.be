@@ -328,7 +328,7 @@ function UploadFigureContent({
             "text-cream font-mono text-[11px] tracking-[0.14em] uppercase",
             "shadow-paper-sm",
             "transition-all duration-300",
-            "hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
+            "hover:shadow-none motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1",
           )}
         >
           <PlayTriangleIcon className="h-3.5 w-3.5" />

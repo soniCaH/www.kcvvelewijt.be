@@ -24,6 +24,10 @@ export interface DownloadButtonProps {
  * Semantic file-type metadata. The `color` palette and `stampLabel`
  * vocabulary stay editor-deterministic — only the visual presentation
  * changes in the Phase 5 redesign.
+ *
+ * The seven hex colours are a sanctioned exception to the Token-Only Colour
+ * Rule (DESIGN.md → "The File-Type Stamp Exception"): scoped to this stamp,
+ * never reused. The unknown-type fallback is ink, never grey.
  */
 interface FileTypeInfo {
   /** Stamp + extension-pill background colour (file-type accent). */
@@ -46,7 +50,7 @@ const FILE_TYPES: Record<string, FileTypeInfo> = {
   audio: { color: "#7c3aed", stampLabel: "MP3", subtitle: "Audio" },
   video: { color: "#0f766e", stampLabel: "MP4", subtitle: "Video" },
   zip: { color: "#d97706", stampLabel: "ZIP", subtitle: "Archief" },
-  other: { color: "#6b7280", stampLabel: "FILE", subtitle: "Bijlage" },
+  other: { color: "var(--color-ink)", stampLabel: "FILE", subtitle: "Bijlage" },
 };
 
 const MIME_MAP: Record<string, string> = {
