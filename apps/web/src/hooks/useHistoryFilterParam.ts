@@ -68,9 +68,10 @@ export function useHistoryFilterParam<T extends string>(
   // Deep-link restore on first mount: a one-time read of the URL (an
   // external system). Only writes when the URL actually implies a
   // facet different from the seeded one — re-seeding the same value this state
-  // already holds (`fallback`, or `initial`) would be a no-op React bails on anyway, but the guard also keeps
-  // this hook's own claim true: a visitor who did NOT arrive on a deep link
-  // costs nothing beyond the initial render (#2783 review finding 8).
+  // already holds (`fallback`, or `initial`) would be a no-op React bails on
+  // anyway, but the guard also keeps this hook's own claim true: a visitor
+  // who did NOT arrive on a deep link costs nothing beyond the initial
+  // render (#2783 review finding 8).
   useEffect(() => {
     const fromUrl = narrowParam(readParam(name), values, fallback);
     if (fromUrl !== value) {
