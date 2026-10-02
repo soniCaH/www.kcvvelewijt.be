@@ -1,4 +1,8 @@
 import type { Metadata, Viewport } from "next";
+import {
+  TravelPageBoundary,
+  TravelSwitcher,
+} from "@/components/match/MatchTravelPrototype";
 import Script from "next/script";
 import "./globals.css";
 import { RootDocument } from "./root-document";
@@ -115,7 +119,8 @@ export default async function RootLayout({
       {/* flex-1 column so a short page's footer sticks to the viewport
             bottom (ZOEK-1 / TEGEN-1) instead of floating up or leaving a gap. */}
       <main id="main-content" tabIndex={-1} className="flex flex-1 flex-col">
-        {children}
+        <TravelPageBoundary>{children}</TravelPageBoundary>
+        <TravelSwitcher />
       </main>
       <SiteFooter />
       <CookieConsentBanner />

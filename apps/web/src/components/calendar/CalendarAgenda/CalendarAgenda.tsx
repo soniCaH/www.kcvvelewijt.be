@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  TravelSource,
+  markTravelSource,
+} from "@/components/match/MatchTravelPrototype";
 import { useMemo, type CSSProperties } from "react";
 import Link from "next/link";
 import {
@@ -198,18 +202,22 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
     .join(", ");
 
   return (
-    <Link
-      href={`/wedstrijd/${match.id}`}
-      aria-label={rowLabel}
-      data-testid="agenda-match-row"
-      onClick={() => trackKalenderItemClick("match")}
-      className={cn(
-        "border-paper-edge block border-b border-dashed no-underline transition-colors last:border-b-0",
-        "hover:bg-cream-soft/50 focus-visible:bg-cream-soft/50",
-        LIST_ROW_FOCUS_CLASSES,
-      )}
-    >
-      {/*
+    <TravelSource matchId={match.id} part="card">
+      <Link
+        href={`/wedstrijd/${match.id}`}
+        aria-label={rowLabel}
+        data-testid="agenda-match-row"
+        onClick={() => {
+          markTravelSource(match.id);
+          trackKalenderItemClick("match");
+        }}
+        className={cn(
+          "border-paper-edge block border-b border-dashed no-underline transition-colors last:border-b-0",
+          "hover:bg-cream-soft/50 focus-visible:bg-cream-soft/50",
+          LIST_ROW_FOCUS_CLASSES,
+        )}
+      >
+        {/*
         Below sm (#2599, owner decision 2026-09-21): stacked, home over away.
         Rule 1 — a 56px left margin (not 52px) so "U8 Groen"/"Reserven" fit
         one line. Rule 2 — both clubs stacked, home on top (`match.homeTeam`
@@ -220,127 +228,138 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
         already says home/away, the same rule `<TeamAgendaRow>`'s desktop
         scoreboard follows (detail-ia-locked.md §3, "no venue indicator").
       */}
-      <div
-        data-layout="mobile"
-        className="grid grid-cols-[56px_1fr_auto] items-center gap-3 px-2 py-2 sm:hidden"
-      >
-        <div className="flex flex-col gap-0.5">
-          <span className="text-ink-muted font-mono text-[11px] leading-none">
-            {when}
-          </span>
-          {match.team && (
-            <span className="text-ink-muted font-mono text-[10px] leading-none font-semibold tracking-wide">
-              {match.team}
+        <div
+          data-layout="mobile"
+          className="grid grid-cols-[56px_1fr_auto] items-center gap-3 px-2 py-2 sm:hidden"
+        >
+          <div className="flex flex-col gap-0.5">
+            {isPlayed && hasScore ? (
+              <span className="text-ink-muted font-mono text-[11px] leading-none">
+                {when}
+              </span>
+            ) : (
+              <TravelSource matchId={match.id} part="score">
+                <span className="text-ink-muted font-mono text-[11px] leading-none">
+                  {when}
+                </span>
+              </TravelSource>
+            )}
+            {match.team && (
+              <span className="text-ink-muted font-mono text-[10px] leading-none font-semibold tracking-wide">
+                {match.team}
+              </span>
+            )}
+          </div>
+          <div className="flex min-w-0 flex-col gap-1">
+            <span
+              className="flex min-w-0 items-center gap-1.5"
+              title={match.homeTeam.name}
+            >
+              <Crest
+                name={match.homeTeam.name}
+                logo={match.homeTeam.logo}
+                size={18}
+              />
+              <span className="text-ink text-body-sm min-w-0 truncate font-semibold">
+                {match.homeTeam.name}
+              </span>
             </span>
+            <span
+              className="flex min-w-0 items-center gap-1.5"
+              title={match.awayTeam.name}
+            >
+              <Crest
+                name={match.awayTeam.name}
+                logo={match.awayTeam.logo}
+                size={18}
+              />
+              <span className="text-ink text-body-sm min-w-0 truncate font-semibold">
+                {match.awayTeam.name}
+              </span>
+            </span>
+          </div>
+          {isPlayed && hasScore ? (
+            <TravelSource matchId={match.id} part="score">
+              <div
+                data-outcome={outcome ?? undefined}
+                className={cn(
+                  "text-ink flex flex-col items-center justify-center gap-0.5 px-2 py-1 font-mono text-[16px] leading-tight font-bold",
+                  // A real `background-color`, not `box-shadow`: a shadow-based
+                  // fill would silently beat any later `shadow-*`/`ring-*` on
+                  // this box and sits outside DESIGN.md's shadow vocabulary.
+                  // Read via a CSS custom property (`--score-tint`, the
+                  // `TapedCardGrid`/`TapeStrip` `--tape-left` pattern) rather
+                  // than passed straight to `backgroundColor`: the test
+                  // environment (happy-dom, `vitest.config.ts`) validates a
+                  // `background-color` value and silently drops
+                  // `color-mix(...)`, but a custom property's value is never
+                  // parsed, so it survives.
+                  boxTint && "bg-[var(--score-tint)]",
+                )}
+                style={
+                  boxTint
+                    ? ({ "--score-tint": boxTint } as CSSProperties)
+                    : undefined
+                }
+              >
+                <span>{match.homeScore}</span>
+                <span>{match.awayScore}</span>
+              </div>
+            </TravelSource>
+          ) : (
+            <span />
           )}
         </div>
-        <div className="flex min-w-0 flex-col gap-1">
-          <span
-            className="flex min-w-0 items-center gap-1.5"
-            title={match.homeTeam.name}
-          >
+
+        {/* sm+ (#2599): today's one-line row, unchanged. */}
+        <div
+          data-layout="desktop"
+          className="hidden grid-cols-[52px_1fr_auto] items-center gap-3 px-2 py-2 sm:grid"
+        >
+          <span className="text-ink-muted font-mono text-[11px]">{when}</span>
+          <span className="flex min-w-0 items-center gap-2">
             <Crest
               name={match.homeTeam.name}
               logo={match.homeTeam.logo}
               size={18}
             />
-            <span className="text-ink text-body-sm min-w-0 truncate font-semibold">
-              {match.homeTeam.name}
-            </span>
-          </span>
-          <span
-            className="flex min-w-0 items-center gap-1.5"
-            title={match.awayTeam.name}
-          >
-            <Crest
-              name={match.awayTeam.name}
-              logo={match.awayTeam.logo}
-              size={18}
-            />
-            <span className="text-ink text-body-sm min-w-0 truncate font-semibold">
-              {match.awayTeam.name}
-            </span>
-          </span>
-        </div>
-        {isPlayed && hasScore ? (
-          <div
-            data-outcome={outcome ?? undefined}
-            className={cn(
-              "text-ink flex flex-col items-center justify-center gap-0.5 px-2 py-1 font-mono text-[16px] leading-tight font-bold",
-              // A real `background-color`, not `box-shadow`: a shadow-based
-              // fill would silently beat any later `shadow-*`/`ring-*` on
-              // this box and sits outside DESIGN.md's shadow vocabulary.
-              // Read via a CSS custom property (`--score-tint`, the
-              // `TapedCardGrid`/`TapeStrip` `--tape-left` pattern) rather
-              // than passed straight to `backgroundColor`: the test
-              // environment (happy-dom, `vitest.config.ts`) validates a
-              // `background-color` value and silently drops
-              // `color-mix(...)`, but a custom property's value is never
-              // parsed, so it survives.
-              boxTint && "bg-[var(--score-tint)]",
+            {match.team && (
+              <span className="text-ink-muted shrink-0 font-mono text-[10px] font-semibold tracking-wide">
+                {match.team}
+              </span>
             )}
-            style={
-              boxTint
-                ? ({ "--score-tint": boxTint } as CSSProperties)
-                : undefined
-            }
-          >
-            <span>{match.homeScore}</span>
-            <span>{match.awayScore}</span>
-          </div>
-        ) : (
-          <span />
-        )}
-      </div>
-
-      {/* sm+ (#2599): today's one-line row, unchanged. */}
-      <div
-        data-layout="desktop"
-        className="hidden grid-cols-[52px_1fr_auto] items-center gap-3 px-2 py-2 sm:grid"
-      >
-        <span className="text-ink-muted font-mono text-[11px]">{when}</span>
-        <span className="flex min-w-0 items-center gap-2">
-          <Crest
-            name={match.homeTeam.name}
-            logo={match.homeTeam.logo}
-            size={18}
-          />
-          {match.team && (
-            <span className="text-ink-muted shrink-0 font-mono text-[10px] font-semibold tracking-wide">
-              {match.team}
-            </span>
-          )}
-          <span
-            title={`${match.homeTeam.name} — ${match.awayTeam.name}`}
-            className="text-ink text-body-sm min-w-0 truncate font-semibold"
-          >
-            {match.homeTeam.name} — {match.awayTeam.name}
-          </span>
-          {isPlayed && hasScore && (
             <span
-              // A score beside the fixture row is a TAG (#2516 rule 1) — mono,
-              // which aligns by construction (#2579 supersedes #2610's
-              // lining-nums). font-bold, not font-black (#2579 review): IBM
-              // Plex Mono loads only up to 700, so 900 was already clamping.
-              className="text-ink shrink-0 font-mono text-[15px] font-bold"
-              style={
-                underline
-                  ? { boxShadow: underline, padding: "0 4px" }
-                  : undefined
-              }
+              title={`${match.homeTeam.name} — ${match.awayTeam.name}`}
+              className="text-ink text-body-sm min-w-0 truncate font-semibold"
             >
-              {match.homeScore} – {match.awayScore}
+              {match.homeTeam.name} — {match.awayTeam.name}
             </span>
-          )}
-          {match.competition && (
-            <span className="text-ink-muted hidden shrink-0 font-mono text-[10px] tracking-wide uppercase sm:inline">
-              {match.competition}
-            </span>
-          )}
-        </span>
-        <MatchVenueTag isHome={isHome} />
-      </div>
-    </Link>
+            {isPlayed && hasScore && (
+              <span
+                // A score beside the fixture row is a TAG (#2516 rule 1) — mono,
+                // which aligns by construction (#2579 supersedes #2610's
+                // lining-nums). font-bold, not font-black (#2579 review): IBM
+                // Plex Mono loads only up to 700, so 900 was already clamping.
+                className="text-ink shrink-0 font-mono text-[15px] font-bold"
+                style={
+                  underline
+                    ? { boxShadow: underline, padding: "0 4px" }
+                    : undefined
+                }
+              >
+                {match.homeScore} – {match.awayScore}
+              </span>
+            )}
+            {match.competition && (
+              <span className="text-ink-muted hidden shrink-0 font-mono text-[10px] tracking-wide uppercase sm:inline">
+                {match.competition}
+              </span>
+            )}
+          </span>
+          <MatchVenueTag isHome={isHome} />
+        </div>
+      </Link>
+    </TravelSource>
   );
 }
 

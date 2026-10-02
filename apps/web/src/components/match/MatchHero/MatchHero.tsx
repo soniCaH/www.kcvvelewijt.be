@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { TravelDest } from "@/components/match/MatchTravelPrototype";
 import { toMatchDisplayZone } from "@/lib/utils/dates";
 import { deriveSeason } from "@/lib/utils/season";
 import { TapedCard } from "@/components/design-system/TapedCard";
@@ -378,72 +379,91 @@ function FullHero({
   const metaParts = buildCompetitionMeta(competition, kcvvTeamLabel, date);
 
   return (
-    <TapedCard
-      as="section"
-      bg="cream"
-      shadow="md"
-      padding="none"
-      rotation="none"
-      className={cn("relative overflow-visible", className)}
-    >
-      <div className="grid grid-cols-1 md:grid-cols-[110px_1fr]">
-        {/* ── Stub (left zone) ─────────────────────────────────────── */}
-        <div className="bg-cream-soft text-ink flex flex-col gap-3 border-b-2 border-dashed border-[var(--color-ink)] p-5 md:border-r-2 md:border-b-0">
-          <div className="flex flex-row items-baseline gap-x-2 leading-none md:flex-col md:items-start md:gap-x-0">
-            <div className="font-display-big text-ink text-[20px] leading-none font-black md:text-[24px]">
-              {stubDate.weekday} {stubDate.day}
+    <TravelDest part="card">
+      <TapedCard
+        as="section"
+        bg="cream"
+        shadow="md"
+        padding="none"
+        rotation="none"
+        className={cn("relative overflow-visible", className)}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-[110px_1fr]">
+          {/* ── Stub (left zone) ─────────────────────────────────────── */}
+          <div className="bg-cream-soft text-ink flex flex-col gap-3 border-b-2 border-dashed border-[var(--color-ink)] p-5 md:border-r-2 md:border-b-0">
+            <div className="flex flex-row items-baseline gap-x-2 leading-none md:flex-col md:items-start md:gap-x-0">
+              <div className="font-display-big text-ink text-[20px] leading-none font-black md:text-[24px]">
+                {stubDate.weekday} {stubDate.day}
+              </div>
+              <div className="font-display-big text-ink text-[20px] leading-none font-black md:mt-1 md:text-[24px]">
+                {stubDate.month}
+              </div>
             </div>
-            <div className="font-display-big text-ink text-[20px] leading-none font-black md:mt-1 md:text-[24px]">
-              {stubDate.month}
-            </div>
+
+            {time &&
+              (status === "scheduled" ? (
+                <TravelDest part="score">
+                  <div className="text-ink font-mono text-[14px]">{time}</div>
+                </TravelDest>
+              ) : (
+                <div className="text-ink font-mono text-[14px]">{time}</div>
+              ))}
+
+            {venue && (
+              <div className="text-ink-muted font-mono text-[9.5px] leading-[1.4] tracking-[0.14em] uppercase">
+                {venue}
+              </div>
+            )}
           </div>
 
-          {time && <div className="text-ink font-mono text-[14px]">{time}</div>}
-
-          {venue && (
-            <div className="text-ink-muted font-mono text-[9.5px] leading-[1.4] tracking-[0.14em] uppercase">
-              {venue}
+          {/* ── Body (right zone) ────────────────────────────────────── */}
+          <div className="flex flex-col gap-5 p-5 md:gap-6 md:p-6">
+            <div className="text-ink font-mono text-[10px] tracking-[0.18em] uppercase">
+              <span aria-hidden="true">{"∗ "}</span>
+              {kicker}
             </div>
-          )}
-        </div>
 
-        {/* ── Body (right zone) ────────────────────────────────────── */}
-        <div className="flex flex-col gap-5 p-5 md:gap-6 md:p-6">
-          <div className="text-ink font-mono text-[10px] tracking-[0.18em] uppercase">
-            <span aria-hidden="true">{"∗ "}</span>
-            {kicker}
-          </div>
-
-          {/* The scoreline IS the page's headline, so it owns the <h1> —
+            {/* The scoreline IS the page's headline, so it owns the <h1> —
               following `<PlayerHero>`'s pattern of wrapping an already-visible
               identity rather than shipping an `sr-only` duplicate beside it
               (#2426 rule 3). The accessible name assembles from the three
               slots: "KCVV Elewijt vs KFC Turnhout" before kickoff,
               "KCVV Elewijt 3 — 1 KFC Turnhout" after it. */}
-          {/* `font-normal` because the base `h1` rule is bold and the slots
+            {/* `font-normal` because the base `h1` rule is bold and the slots
               inside set their own weight — without it the two club names, which
               carry no explicit weight, would thicken on this one route. */}
-          <h1 className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 font-normal md:gap-6">
-            <TeamSlot team={homeTeam} align="start" />
-            <div className="flex items-center justify-center">
-              <ScoreRegion
-                status={status}
-                homeScore={homeTeam.score}
-                awayScore={awayTeam.score}
-              />
-            </div>
-            <TeamSlot team={awayTeam} align="end" />
-          </h1>
+            <h1 className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 font-normal md:gap-6">
+              <TeamSlot team={homeTeam} align="start" />
+              <div className="flex items-center justify-center">
+                {status === "scheduled" ? (
+                  <ScoreRegion
+                    status={status}
+                    homeScore={homeTeam.score}
+                    awayScore={awayTeam.score}
+                  />
+                ) : (
+                  <TravelDest part="score">
+                    <ScoreRegion
+                      status={status}
+                      homeScore={homeTeam.score}
+                      awayScore={awayTeam.score}
+                    />
+                  </TravelDest>
+                )}
+              </div>
+              <TeamSlot team={awayTeam} align="end" />
+            </h1>
 
-          <MetaLine parts={metaParts} />
+            <MetaLine parts={metaParts} />
+          </div>
         </div>
-      </div>
 
-      {/* ── Corner stamp ─────────────────────────────────────────── */}
-      <div className="pointer-events-none absolute -top-3 right-4 z-10 rotate-[2deg]">
-        <MatchStatusBadge status={status} />
-      </div>
-    </TapedCard>
+        {/* ── Corner stamp ─────────────────────────────────────────── */}
+        <div className="pointer-events-none absolute -top-3 right-4 z-10 rotate-[2deg]">
+          <MatchStatusBadge status={status} />
+        </div>
+      </TapedCard>
+    </TravelDest>
   );
 }
 

@@ -46,6 +46,10 @@
  *
  * Design lock: docs/design/mockups/phase-6-team/detail-ia-locked.md §3
  */
+import {
+  TravelSource,
+  markTravelSource,
+} from "@/components/match/MatchTravelPrototype";
 import { Fragment } from "react";
 import Link from "next/link";
 import { Crest, PRESS_DOWN_CLASSES } from "@/components/design-system";
@@ -685,22 +689,26 @@ export function TeamAgendaRow({
   const mobileCaption = buildCaption(mobileKindWord);
 
   return (
-    <Link
-      href={`/wedstrijd/${match.id}`}
-      aria-label={matchLabel}
-      onClick={onNavigate}
-      className="block no-underline"
-    >
-      <article
-        data-testid="team-agenda-row"
-        data-featured={featured}
-        className={cardBase}
+    <TravelSource matchId={match.id} part="card">
+      <Link
+        href={`/wedstrijd/${match.id}`}
+        aria-label={matchLabel}
+        onClick={() => {
+          markTravelSource(match.id);
+          onNavigate?.();
+        }}
+        className="block no-underline"
       >
-        {/* Date stub */}
-        {dateStub}
+        <article
+          data-testid="team-agenda-row"
+          data-featured={featured}
+          className={cardBase}
+        >
+          {/* Date stub */}
+          {dateStub}
 
-        {/* Desktop layout (sm+): symmetric scoreboard */}
-        {/*
+          {/* Desktop layout (sm+): symmetric scoreboard */}
+          {/*
           The caption sits on its own full-width line rather than inside the
           centre column. A flex column is as wide as its widest child, and that
           column is `shrink-0` — so a caption wider than the scoreline used to
@@ -709,95 +717,104 @@ export function TeamAgendaRow({
           ("BEKER VAN BRABANT" → "SK Noss…" / "KCVV Ele…"). Being visually below
           the score never mattered; they shared a box.
         */}
-        <div
-          data-layout="desktop"
-          className="hidden w-full flex-col justify-center px-3 py-2 sm:flex"
-        >
-          <div className="flex w-full items-center gap-2">
-            {/* Home side */}
-            <div
-              className="flex min-w-0 flex-1 items-center gap-2"
-              title={match.homeTeam.name}
-            >
-              <Crest name={match.homeTeam.name} logo={match.homeTeam.logo} />
-              <TeamName
-                team={match.homeTeam}
-                featured={featured}
-                bold={isHome === true}
-              />
-            </div>
-
-            {/* Score / time */}
-            <span
-              className={scoreSlotClass("px-2", "text-[18px]")}
-              style={outlineShadow ? { boxShadow: outlineShadow } : undefined}
-            >
-              {scoreOrTime}
-            </span>
-
-            {/* Away side */}
-            <div
-              className="flex min-w-0 flex-1 flex-row-reverse items-center gap-2"
-              title={match.awayTeam.name}
-            >
-              <Crest name={match.awayTeam.name} logo={match.awayTeam.logo} />
-              <TeamName
-                team={match.awayTeam}
-                featured={featured}
-                bold={isHome === false}
-                align="right"
-              />
-            </div>
-          </div>
-
-          {desktopCaption ? (
-            <span className={captionClass("mt-0.5 text-center")}>
-              {desktopCaption}
-            </span>
-          ) : null}
-        </div>
-
-        {/* Mobile layout: KCVV-centric column */}
-        <div
-          data-layout="mobile"
-          className="flex w-full items-center gap-2 px-3 py-2 sm:hidden"
-        >
-          {/* Opponent crest + name + competition */}
-          {(() => {
-            const opponent = isHome ? match.awayTeam : match.homeTeam;
-            const VenueIcon = isHome ? House : Bus;
-            return (
-              <>
-                <Crest name={opponent.name} logo={opponent.logo} />
-                <div className="min-w-0 flex-1" title={opponent.name}>
-                  <TeamName team={opponent} featured={featured} bold />
-                  {mobileCaption ? (
-                    <span className={captionClass()}>{mobileCaption}</span>
-                  ) : null}
-                </div>
-                <VenueIcon
-                  size={14}
-                  aria-label={
-                    isHome ? HOME_AWAY_A11Y_NAME.home : HOME_AWAY_A11Y_NAME.away
-                  }
-                  className={cn(
-                    "shrink-0",
-                    featured ? "text-cream" : "text-ink-muted",
-                  )}
+          <div
+            data-layout="desktop"
+            className="hidden w-full flex-col justify-center px-3 py-2 sm:flex"
+          >
+            <div className="flex w-full items-center gap-2">
+              {/* Home side */}
+              <div
+                className="flex min-w-0 flex-1 items-center gap-2"
+                title={match.homeTeam.name}
+              >
+                <Crest name={match.homeTeam.name} logo={match.homeTeam.logo} />
+                <TeamName
+                  team={match.homeTeam}
+                  featured={featured}
+                  bold={isHome === true}
                 />
+              </div>
+
+              {/* Score / time */}
+              <TravelSource matchId={match.id} part="score">
                 <span
-                  className={scoreSlotClass("px-1.5", "text-[16px]")}
+                  className={scoreSlotClass("px-2", "text-[18px]")}
                   style={
                     outlineShadow ? { boxShadow: outlineShadow } : undefined
                   }
                 >
                   {scoreOrTime}
                 </span>
-              </>
-            );
-          })()}
-        </div>
-      </article>
-    </Link>
+              </TravelSource>
+
+              {/* Away side */}
+              <div
+                className="flex min-w-0 flex-1 flex-row-reverse items-center gap-2"
+                title={match.awayTeam.name}
+              >
+                <Crest name={match.awayTeam.name} logo={match.awayTeam.logo} />
+                <TeamName
+                  team={match.awayTeam}
+                  featured={featured}
+                  bold={isHome === false}
+                  align="right"
+                />
+              </div>
+            </div>
+
+            {desktopCaption ? (
+              <span className={captionClass("mt-0.5 text-center")}>
+                {desktopCaption}
+              </span>
+            ) : null}
+          </div>
+
+          {/* Mobile layout: KCVV-centric column */}
+          <div
+            data-layout="mobile"
+            className="flex w-full items-center gap-2 px-3 py-2 sm:hidden"
+          >
+            {/* Opponent crest + name + competition */}
+            {(() => {
+              const opponent = isHome ? match.awayTeam : match.homeTeam;
+              const VenueIcon = isHome ? House : Bus;
+              return (
+                <>
+                  <Crest name={opponent.name} logo={opponent.logo} />
+                  <div className="min-w-0 flex-1" title={opponent.name}>
+                    <TeamName team={opponent} featured={featured} bold />
+                    {mobileCaption ? (
+                      <span className={captionClass()}>{mobileCaption}</span>
+                    ) : null}
+                  </div>
+                  <VenueIcon
+                    size={14}
+                    aria-label={
+                      isHome
+                        ? HOME_AWAY_A11Y_NAME.home
+                        : HOME_AWAY_A11Y_NAME.away
+                    }
+                    className={cn(
+                      "shrink-0",
+                      featured ? "text-cream" : "text-ink-muted",
+                    )}
+                  />
+                  <TravelSource matchId={match.id} part="score">
+                    <span
+                      className={scoreSlotClass("px-1.5", "text-[16px]")}
+                      style={
+                        outlineShadow ? { boxShadow: outlineShadow } : undefined
+                      }
+                    >
+                      {scoreOrTime}
+                    </span>
+                  </TravelSource>
+                </>
+              );
+            })()}
+          </div>
+        </article>
+      </Link>
+    </TravelSource>
   );
 }

@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  TravelSource,
+  markTravelSource,
+} from "@/components/match/MatchTravelPrototype";
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -508,59 +512,64 @@ function LedgerLinkRow({
       : `${leadWordA11y} wedstrijd ${dateLabel}${match.time ? ` om ${match.time}` : ""}: KCVV Elewijt tegen ${opponent.name}`;
 
   return (
-    <Link
-      href={`/wedstrijd/${match.id}`}
-      aria-label={label}
-      className={cn(
-        "flex min-w-0 items-center gap-2.5 px-4 py-2.5 no-underline",
-        // The inset ring takes its colour from the ground (globals.css):
-        // warm on the match-day jersey-deep-dark strip, jersey-deep on cream.
-        "focus-ring-inset",
-        matchDay ? "hover:bg-cream/10" : "hover:bg-cream-soft",
-        !last && "border-b",
-        !last && hairline,
-      )}
-    >
-      <StripDate
-        date={match.date}
-        kind={kind}
-        today={today}
-        dark={matchDay}
-        outcomeWord={outcomeWordVisual}
-      />
-      <Crest team={opponent} dark={matchDay} />
-      <span
+    <TravelSource matchId={match.id} part="card">
+      <Link
+        href={`/wedstrijd/${match.id}`}
+        aria-label={label}
+        onClick={() => markTravelSource(match.id)}
         className={cn(
-          "font-display min-w-0 flex-1 truncate leading-none font-bold italic",
-          text,
+          "flex min-w-0 items-center gap-2.5 px-4 py-2.5 no-underline",
+          // The inset ring takes its colour from the ground (globals.css):
+          // warm on the match-day jersey-deep-dark strip, jersey-deep on cream.
+          "focus-ring-inset",
+          matchDay ? "hover:bg-cream/10" : "hover:bg-cream-soft",
+          !last && "border-b",
+          !last && hairline,
         )}
       >
-        {opponent.name}
-      </span>
-      <VenueGlyph home={home} dark={matchDay} />
-      <span className="shrink-0">
-        {kind === "result" ? (
-          <Score
-            match={match}
-            className="text-mono-md"
-            dark={matchDay}
-            awaitingResult={awaitingResult}
-          />
-        ) : match.time ? (
-          <span
-            className={cn(
-              "text-mono-sm font-mono font-semibold whitespace-nowrap",
-              text,
-            )}
-          >
-            {match.time}
+        <StripDate
+          date={match.date}
+          kind={kind}
+          today={today}
+          dark={matchDay}
+          outcomeWord={outcomeWordVisual}
+        />
+        <Crest team={opponent} dark={matchDay} />
+        <span
+          className={cn(
+            "font-display min-w-0 flex-1 truncate leading-none font-bold italic",
+            text,
+          )}
+        >
+          {opponent.name}
+        </span>
+        <VenueGlyph home={home} dark={matchDay} />
+        <TravelSource matchId={match.id} part="score">
+          <span className="shrink-0">
+            {kind === "result" ? (
+              <Score
+                match={match}
+                className="text-mono-md"
+                dark={matchDay}
+                awaitingResult={awaitingResult}
+              />
+            ) : match.time ? (
+              <span
+                className={cn(
+                  "text-mono-sm font-mono font-semibold whitespace-nowrap",
+                  text,
+                )}
+              >
+                {match.time}
+              </span>
+            ) : null}
           </span>
-        ) : null}
-      </span>
-      <span aria-hidden="true" className={cn("shrink-0 font-mono", muted)}>
-        →
-      </span>
-    </Link>
+        </TravelSource>
+        <span aria-hidden="true" className={cn("shrink-0 font-mono", muted)}>
+          →
+        </span>
+      </Link>
+    </TravelSource>
   );
 }
 
