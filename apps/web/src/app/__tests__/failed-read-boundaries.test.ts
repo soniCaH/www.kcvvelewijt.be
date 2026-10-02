@@ -165,7 +165,9 @@ describe("a failed subject takes the page down (#2563)", () => {
   });
 
   it("/kalender — the team list is the subject, so the page throws", async () => {
-    await expect(CalendarPage()).rejects.toThrow();
+    await expect(
+      CalendarPage({ searchParams: Promise.resolve({}) }),
+    ).rejects.toThrow();
   });
 });
 

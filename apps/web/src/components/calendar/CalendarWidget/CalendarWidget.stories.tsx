@@ -123,20 +123,29 @@ const feedWithPlayedMatch = buildCalendarFeed(
 );
 
 /**
- * Seeds the REAL browser URL for a story. `CalendarWidget` reads `?view=` /
- * `?type=` from `window.location` on mount (#3382, history-backed so a chip
- * tap makes no server round-trip), which Storybook's `nextjs.navigation` mock
- * — a Next-router shim — has no effect on. The returned cleanup restores the
- * URL on teardown (after the screenshot): Storybook does not hard-navigate
- * between stories, so a leaked `?view=` would seed the next story's mount.
+ * Seeds the REAL browser query string for a story. `CalendarWidget` reads
+ * `?view=` / `?type=` from `window.location` on mount (#3382, history-backed so
+ * a chip tap makes no server round-trip), which Storybook's `nextjs.navigation`
+ * mock — a Next-router shim — has no effect on. Only `search` is rewritten: the
+ * iframe's own pathname belongs to Storybook's URL store. The returned cleanup
+ * restores the URL on teardown (after the screenshot): Storybook does not
+ * hard-navigate between stories, so a leaked `?view=` would seed the next
+ * story's mount.
  */
 function seedUrl(search: string): StoryObj["beforeEach"] {
   return () => {
-    const original =
-      window.location.pathname + window.location.search + window.location.hash;
-    window.history.replaceState(window.history.state, "", `/kalender${search}`);
+    const { pathname, hash, search: original } = window.location;
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${pathname}${search}${hash}`,
+    );
     return () =>
-      window.history.replaceState(window.history.state, "", original);
+      window.history.replaceState(
+        window.history.state,
+        "",
+        `${pathname}${original}${hash}`,
+      );
   };
 }
 

@@ -78,6 +78,14 @@ export interface CalendarWidgetProps {
    * "today" highlight still follows the real clock).
    */
   today?: string;
+  /**
+   * The request's `?type=` / `?view=`, read by the `force-dynamic` page and
+   * passed through untrusted — the history hooks narrow them. They only make
+   * the first (server) render match the deep link; the URL stays the source of
+   * truth after mount.
+   */
+  initialType?: string;
+  initialView?: string;
 }
 
 type ViewMode = "month" | "week" | "agenda";
@@ -114,14 +122,20 @@ function useIsPhoneViewport(): boolean {
   return isPhone;
 }
 
-export function CalendarWidget({ feed, teams, today }: CalendarWidgetProps) {
+export function CalendarWidget({
+  feed,
+  teams,
+  today,
+  initialType,
+  initialView,
+}: CalendarWidgetProps) {
   // No explicit `?view=` → branch the default on the md breakpoint: agenda on
   // phones, month on tablet/desktop. An explicit choice (incl. tapping a tab,
   // which sets `?view=`) always wins.
   const [rawView, setRawView] = useHistoryFilterParam<ViewMode | "default">(
     "view",
     VIEW_VALUES,
-    { fallback: "default", route: "/kalender" },
+    { fallback: "default", route: "/kalender", initial: initialView },
   );
   const isPhone = useIsPhoneViewport();
   const requestedView: ViewMode =
@@ -134,13 +148,15 @@ export function CalendarWidget({ feed, teams, today }: CalendarWidgetProps) {
     isPhone && requestedView === "week" ? "agenda" : requestedView;
 
   // By-type filter (Phase 6.D Phase 2, #1992). An unknown `?type=` falls to
-  // "all" — `useHistoryFilterParam` (#2779, history-backed per #3382) owns the narrow-or-fallback, the
+  // "all" — `useHistoryFilterParam` (#2779) owns the narrow-or-fallback, the
   // delete-on-default write, and the dedup guard the old hand-rolled
-  // `isKalenderFilterValue` + `setType` body used to.
+  // `isKalenderFilterValue` + `setType` body used to. It writes through
+  // `history.pushState`, not the router: a router write re-rendered this
+  // `force-dynamic` page on every tap (#3382).
   const [activeTypeFilter, setActiveTypeFilter] = useHistoryFilterParam(
     "type",
     KALENDER_FILTER_VALUES,
-    { fallback: "all", route: "/kalender" },
+    { fallback: "all", route: "/kalender", initial: initialType },
   );
 
   // One shared period anchor for all three views (6.D lock — switching Maand /
@@ -199,7 +215,7 @@ export function CalendarWidget({ feed, teams, today }: CalendarWidgetProps) {
   function setType(value: KalenderFilterValue) {
     // Dedup guard: re-pressing the active chip is a no-op, so neither the URL
     // push nor the `kalender_filter` analytics event fires twice (repo
-    // policy) — `useHistoryFilterParam`'s own internal dedup guard covers the URL
+    // policy) — `useHistoryFilterParam`'s own dedup guard covers the URL
     // write, but the analytics call is this component's own side effect, so
     // it needs its own guard too.
     if (value === activeTypeFilter) return;

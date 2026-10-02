@@ -8,6 +8,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { renderToString } from "react-dom/server";
 import { CalendarWidget } from "./CalendarWidget";
 import type {
   CalendarMatchFixture,
@@ -371,6 +372,51 @@ describe("CalendarWidget", () => {
         "aria-pressed",
         "true",
       );
+    });
+  });
+
+  describe("server-seeded first render (#3382)", () => {
+    // `renderToString` runs no effects, so this is exactly the HTML the
+    // `force-dynamic` page ships — a deep link must not paint month / "all".
+    it("renders the deep-linked chip and view before any effect runs", () => {
+      const html = renderToString(
+        <CalendarWidget
+          {...defaultProps}
+          initialView="agenda"
+          initialType="Wedstrijden"
+        />,
+      );
+      expect(html).toContain('data-testid="calendar-agenda"');
+      expect(html).not.toContain('data-testid="month-grid"');
+      expect(html).toMatch(/aria-pressed="true"[^>]*><span>Wedstrijden</);
+    });
+
+    it("narrows an untrusted initial value and keeps the month default", () => {
+      const html = renderToString(
+        <CalendarWidget
+          {...defaultProps}
+          initialView="<script>"
+          initialType="nope"
+        />,
+      );
+      expect(html).toContain('data-testid="month-grid"');
+      expect(html).toMatch(/aria-pressed="true"[^>]*><span>Alles</);
+    });
+
+    it("lets the phone default apply when the URL carries no view", () => {
+      const original = window.matchMedia;
+      window.matchMedia = vi.fn().mockReturnValue({
+        matches: true,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      } as unknown as MediaQueryList);
+      try {
+        setUrl("?type=Wedstrijden");
+        render(<CalendarWidget {...defaultProps} initialType="Wedstrijden" />);
+        expect(screen.getByTestId("calendar-agenda")).toBeInTheDocument();
+      } finally {
+        window.matchMedia = original;
+      }
     });
   });
 

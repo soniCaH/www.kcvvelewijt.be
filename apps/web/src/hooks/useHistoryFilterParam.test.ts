@@ -21,6 +21,44 @@ describe("useHistoryFilterParam", () => {
     expect(result.current[0]).toBe("a");
   });
 
+  it("seeds the first render from `initial`, narrowed against the allowed values", () => {
+    const seen: Facet[] = [];
+    const { result } = renderHook(() => {
+      const pair = useHistoryFilterParam("type", VALUES, {
+        fallback: "a",
+        route: "/evenementen",
+        initial: "c",
+      });
+      seen.push(pair[0]);
+      return pair;
+    });
+    // The very first render already carries `initial`; the URL (no `?type=`)
+    // then wins on mount.
+    expect(seen[0]).toBe("c");
+    expect(result.current[0]).toBe("a");
+
+    const { result: bad } = renderHook(() =>
+      useHistoryFilterParam("type", VALUES, {
+        fallback: "a",
+        route: "/evenementen",
+        initial: "zzz",
+      }),
+    );
+    expect(bad.current[0]).toBe("a");
+  });
+
+  it("keeps `initial` when the URL agrees with it", () => {
+    window.history.replaceState({}, "", "/evenementen?type=b");
+    const { result } = renderHook(() =>
+      useHistoryFilterParam("type", VALUES, {
+        fallback: "a",
+        route: "/evenementen",
+        initial: "b",
+      }),
+    );
+    expect(result.current[0]).toBe("b");
+  });
+
   it("reads a deep-linked value after mount", () => {
     window.history.replaceState({}, "", "/evenementen?type=b");
     const { result } = renderHook(() =>

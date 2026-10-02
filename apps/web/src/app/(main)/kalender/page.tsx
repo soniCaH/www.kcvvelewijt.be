@@ -159,7 +159,16 @@ async function fetchCalendarData(): Promise<CalendarData> {
   );
 }
 
-export default async function CalendarPage() {
+export default async function CalendarPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ type?: string | string[]; view?: string | string[] }>;
+}) {
+  // Reading the query costs nothing here (`force-dynamic`). It only seeds the
+  // widget's first render so a deep link is not painted as month/"all" and then
+  // flipped after hydration; the widget narrows both, and the URL stays the
+  // source of truth after mount.
+  const { type, view } = await searchParams;
   const data = await fetchCalendarData();
   const itemListEntries = buildKalenderItemListEntries(
     data.feed,
@@ -190,7 +199,12 @@ export default async function CalendarPage() {
             value so the gap below the card reads the same as every other
             hero-to-content transition on the site. */}
         <div className="mt-10">
-          <CalendarWidget feed={data.feed} teams={data.teams} />
+          <CalendarWidget
+            feed={data.feed}
+            teams={data.teams}
+            initialType={typeof type === "string" ? type : undefined}
+            initialView={typeof view === "string" ? view : undefined}
+          />
         </div>
       </PageContainer>
     </div>
