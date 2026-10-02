@@ -12,8 +12,9 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import type { YouthDivisionGroup } from "@/lib/utils/group-teams";
+import { tapeRotationFor } from "@/components/design-system/TapeStrip";
 import { YouthDirectory } from "./YouthDirectory";
 import { reservenTeam, youthTeam as team } from "./youth-directory.fixtures";
 
@@ -203,6 +204,52 @@ describe("YouthDirectory", () => {
         "alert",
         "warning",
       ]);
+    });
+  });
+
+  describe("the tilt scale (#3330)", () => {
+    const cardsOf = (teams: ReturnType<typeof team>[]) => {
+      renderDirectory([{ label: "Onderbouw", range: "U6–U11", teams }]);
+      return screen.getAllByTestId("youth-team-card");
+    };
+    const lean = (card: HTMLElement) =>
+      card.querySelector("[data-rotation]")?.getAttribute("data-rotation");
+    const tape = (card: HTMLElement) =>
+      card
+        .querySelector("[data-length][data-position]")
+        ?.getAttribute("data-rotation");
+
+    it("leans every card by a named slight-tier entry, never a free-form degree", () => {
+      const cards = cardsOf(
+        ["U6", "U7", "U8", "U9", "U10"].map((a) => team(a)),
+      );
+      for (const card of cards) {
+        expect(["a", "b", "c", "d"]).toContain(lean(card));
+      }
+    });
+
+    it("cycles the lean in five steps, so no column of a 2-, 3- or 4-column grid shares one lean", () => {
+      const cards = cardsOf(
+        ["U6", "U7", "U8", "U9", "U10", "U11"].map((a) => team(a)),
+      );
+      expect(cards.map(lean)).toEqual(["a", "c", "b", "d", "b", "a"]);
+    });
+
+    it("derives every card's tape angle from the team's display name, the key TeamHero seeds from", () => {
+      const teams = ["U6", "U7", "U8", "U9", "U10", "U11"].map((a) => team(a));
+      const cards = cardsOf(teams);
+      // Six teams, so a wrong seed (an id, an index, a constant) cannot match
+      // every one of them by luck.
+      expect(cards.map(tape)).toEqual(
+        teams.map((t) => tapeRotationFor(t.displayName)),
+      );
+    });
+
+    it("gives a team the same tape in whichever slot it lands", () => {
+      const alone = tape(cardsOf([team("U9")])[0]!);
+      cleanup();
+      const later = tape(cardsOf([team("U6"), team("U7"), team("U9")])[2]!);
+      expect(later).toBe(alone);
     });
   });
 });

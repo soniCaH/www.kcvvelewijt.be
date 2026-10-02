@@ -3285,3 +3285,186 @@ describe("rule 18 catches what it claims to (#3332)", () => {
     ).toHaveLength(1);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Rule 19 (#3330) — the tilt scale has one home: `globals.css`
+// ---------------------------------------------------------------------------
+
+/**
+ * A card leans and a tape strip tilts from one site scale (#3302, built in
+ * #3329, DESIGN.md → The Tilt Scale Rule): the slight tier `--rotate-lean-a..d`
+ * for a card, the bigger tier `--rotate-tape-a..f` for a tape strip. Three
+ * components kept a pool of their own anyway — `[-1.1, 0.7, -0.5]` in the youth
+ * directory, a cycle in the related row, a pair of polaroid tokens — and each
+ * one looked local and harmless. The rule keeps a fourth out.
+ *
+ * What it reads is the declaration of a pool, in code: an identifier naming a
+ * rotation, tilt, lean, angle or skew, declared `const`/`let`/`var` and assigned
+ * a list (or a record) whose first entry is a degree, bare (`-1.1`, `+1`) or
+ * quoted (`"-6deg"`), or a Tailwind rotate class (`"-rotate-1"`); and a tilt
+ * custom property
+ * (`--rotate-lean-*`, `--rotate-tape-*`, `--tape-rotation`,
+ * `--taped-card-rotation`) given a literal degree. A list of token *names*
+ * (`["a", "b"]`) or of token *reads* (`"var(--rotate-lean-a)"`) is the scale
+ * being used, not redeclared, so it passes — that is `<TapedCardGrid>`'s slot
+ * pool and `<NewsGrid>`'s. The token file is a stylesheet, so a scan of `.ts` /
+ * `.tsx` source never sees it; a second test pins what it declares instead.
+ *
+ * Not in reach on purpose: a one-off `rotation={2}` or `rotate-[4deg]` at a call
+ * site is not a pool, and a stamp's or a jersey's own angle is not a tape or a
+ * lean. They are the next drift to look at, not this rule's.
+ */
+// An identifier that names a tilt. `lean` needs care — "clean" holds it — so a
+// lowercase `lean` only counts at the start of a word (`leanPool`), `Lean` / `LEAN`
+// anywhere (`cardLean`, `LEAN_POOL`).
+const TILT_NAME =
+  "\\w*(?:[Rr]otat|ROTAT|[Tt]ilt|TILT|[Aa]ngle|ANGLE|[Ss]kew|SKEW|(?<![a-z])lean|Lean|LEAN)\\w*";
+// A degree, bare (`-1.1`, `+1`, `.5`) or quoted with a unit (`"-6deg"`).
+const BARE_DEGREE = "[+-]?\\.?\\d";
+const QUOTED_DEGREE = "[\"'`][+-]?\\.?\\d[\\d.]*(?:deg|turn)";
+// A Tailwind rotate class (`-rotate-1`, `md:rotate-[0.7deg]`) as a list entry.
+const ROTATE_CLASS = "[\"'`](?:[\\w-]+:)*-?rotate-";
+const TILT_POOL = new RegExp(
+  `\\b(?:const|let|var)\\s+${TILT_NAME}\\s*(?::[^=;]+)?=\\s*(?:` +
+    // A list: its first entry is a degree or a rotate class.
+    `\\[\\s*(?:${BARE_DEGREE}|${QUOTED_DEGREE}|${ROTATE_CLASS})` +
+    // A record: a quoted degree or rotate class under any key, or a bare
+    // number under a token-name key (`a`, `md`) — `{ zIndex: 2 }` is no pool.
+    `|\\{\\s*(?:["']?\\w+["']?\\s*:\\s*)?(?:${QUOTED_DEGREE}|${ROTATE_CLASS})` +
+    `|\\{\\s*["']?\\w{1,2}["']?\\s*:\\s*${BARE_DEGREE}` +
+    `)`,
+);
+const TILT_TOKEN_LITERAL =
+  /(?<![\w-])--(?:rotate-(?:lean|tape)-[\w-]+|tape-rotation|taped-card-rotation)["'`]?\s*:\s*["'`]?-?\d/;
+
+/**
+ * Every `--rotate-<tier>-*` declaration in a stylesheet, with its value. The name
+ * pattern takes hyphens (`--rotate-tape-polaroid-a`), so a token the scale does
+ * not name cannot hide from the pin below.
+ */
+const tiltTokens = (css: string, tier: "lean" | "tape") =>
+  [
+    ...css.matchAll(
+      new RegExp(`^\\s*(--rotate-${tier}-[\\w-]+):\\s*(\\S+?);`, "gm"),
+    ),
+  ].map((m) => [m[1], m[2]]);
+
+/** True when `source` declares a tilt pool or a tilt token of its own. */
+const declaresTilt = (source: string): boolean =>
+  TILT_POOL.test(source) || TILT_TOKEN_LITERAL.test(source);
+
+describe("no component declares its own tilt pool (#3330)", () => {
+  it.each(productionSources)(
+    "%s — reads the scale, declares none",
+    (relPath) => {
+      expect(declaresTilt(code.get(relPath)!)).toBe(false);
+    },
+  );
+});
+
+describe("the tilt scale lives in globals.css, and only there (#3330)", () => {
+  const globals = readFileSync(resolve(srcDir, "app/globals.css"), "utf8");
+  it("holds the slight tier, for a card's lean", () => {
+    expect(tiltTokens(globals, "lean")).toEqual([
+      ["--rotate-lean-a", "-1deg"],
+      ["--rotate-lean-b", "-0.5deg"],
+      ["--rotate-lean-c", "0.5deg"],
+      ["--rotate-lean-d", "1deg"],
+    ]);
+  });
+
+  it("holds the bigger tier, for a tape strip", () => {
+    expect(tiltTokens(globals, "tape")).toEqual([
+      ["--rotate-tape-a", "-6deg"],
+      ["--rotate-tape-b", "-4deg"],
+      ["--rotate-tape-c", "-2deg"],
+      ["--rotate-tape-d", "2deg"],
+      ["--rotate-tape-e", "4deg"],
+      ["--rotate-tape-f", "6deg"],
+    ]);
+  });
+});
+
+describe("rule 19 catches what it claims to (#3330)", () => {
+  it("scans the three components this ticket moved, and the primitives that read the scale", () => {
+    for (const file of [
+      "components/team/YouthDirectory/YouthDirectory.tsx",
+      "components/related/RelatedRow/RelatedRow.tsx",
+      "components/article/blocks/EventFactInline/EventFactInline.tsx",
+      "components/design-system/TapeStrip/TapeStrip.tsx",
+      "components/design-system/TapedCard/TapedCard.tsx",
+      "components/design-system/TapedCardGrid/TapedCardGrid.tsx",
+    ]) {
+      expect(productionSources).toContain(file);
+    }
+  });
+
+  it("sees a hyphenated token the scale does not name", () => {
+    expect(
+      tiltTokens(
+        "  --rotate-tape-polaroid-a: -5deg;\n  --rotate-tape-a: -6deg;",
+        "tape",
+      ),
+    ).toEqual([
+      ["--rotate-tape-polaroid-a", "-5deg"],
+      ["--rotate-tape-a", "-6deg"],
+    ]);
+  });
+
+  it.each([
+    // The youth directory's pool, before #3330 — the bisect.
+    ["const CARD_ROTATIONS = [-1.1, 0.7, -0.5];"],
+    // The grid's tape pool, before #3329: degrees as quoted strings, over lines.
+    ['const TAPE_ROTATION_POOL = [\n  "-1deg",\n  "-2deg",\n];'],
+    // A pool named for the lean, the angle or the skew, not only rotation or tilt.
+    ["const LEAN_POOL = [-1, 1];"],
+    ["const cardLean = [0.5, -0.5];"],
+    ["const cardAngles = [.5, -.5];"],
+    ["const skews = [+1, 2];"],
+    // A pool of Tailwind rotate classes.
+    ['const ROTATION_CLASSES = ["-rotate-1", "rotate-[0.7deg]"];'],
+    ['const tilts = ["md:rotate-2", "-rotate-1"];'],
+    // A typed declaration, and a positive first entry.
+    ["const TILTS: number[] = [0.5, 1];"],
+    ["export const rotationPool: readonly number[] = [2, -2] as const;"],
+    // A record keyed by token name, valued in degrees.
+    ["const ROTATION_DEG = { a: -1, b: 1 };"],
+    ['const ROTATION_DEG: Record<Pick, string> = { "a": "-1deg" };'],
+    // A tilt token redeclared in a style object, or a template.
+    ['style={{ "--rotate-tape-a": "-3deg" }}'],
+    ["const css = `--rotate-lean-b: -0.5deg;`;"],
+    // The polaroid tokens, before #3329.
+    ["const css = `--rotate-tape-polaroid-a: -5deg;`;"],
+    // The grid's retired tape variable, given a degree.
+    ['const slot = { "--tape-rotation": "-4deg" };'],
+    ['const slot = { "--taped-card-rotation": 1 };'],
+  ])("flags %s", (snippet) => {
+    expect(declaresTilt(snippet)).toBe(true);
+  });
+
+  it.each([
+    // A pool of token names is the scale being used.
+    ['const ROTATION_CYCLE = ["a", "b", "c", "d", "none"] as const;'],
+    ['const SLOT_ROTATIONS: NewsCardRotation[] = ["a", "b", "a"];'],
+    // A pool of token reads is the scale being read.
+    [
+      'const ROTATION_POOL = [\n  "var(--rotate-lean-a)",\n  "var(--rotate-lean-b)",\n] as const;',
+    ],
+    // A record that is not a pool of degrees.
+    ["const tiltStyle = { zIndex: 2 };"],
+    ['const angleLabel = { label: "Hoek", count: 3 };'],
+    // "clean" holds "lean", and is not a tilt.
+    ["const cleanItems = [1, 2, 3];"],
+    // A custom property given a read, not a literal.
+    ['{ "--taped-card-rotation": ROTATION_POOL[index] }'],
+    ['style={{ transform: "rotate(var(--taped-card-rotation, 0deg))" }}'],
+    // A list that is not about a tilt, even when it starts with a number.
+    ["const TAPE_LEFT_POOL = [4, 7, 10, 12];"],
+    ["const widths = [1, 2, 3];"],
+    // A default parameter and a plain field are not pools.
+    ["function f({ rotation = 2 }) {}"],
+    ["const rotation = span(random, -0.9, 0.9);"],
+  ])("leaves %s alone", (snippet) => {
+    expect(declaresTilt(snippet)).toBe(false);
+  });
+});

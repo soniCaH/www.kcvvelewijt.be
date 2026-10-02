@@ -61,9 +61,14 @@ export interface YouthDirectoryProps {
   className?: string;
 }
 
-// Subtle ±1° scrapbook tilt, cycled by index (design lock 7j5). Kept small so a
-// full division reads as character, not noise.
-const CARD_ROTATIONS = [-1.1, 0.7, -0.5];
+// The card's lean is the site's slight tier (`--rotate-lean-*`, #3302 / #3329),
+// cycled by index (design lock 7j5, numbers amended by #3302). Five steps, not
+// four: the grid runs 2, 3 or 4 columns, and a cycle that divides the column
+// count stacks one lean down a whole column. Five divides none of them, so the
+// lean (and, through the same slot, the tape's side) drifts from row to row.
+// Neighbours alternate in sign, except where the cycle wraps. The tape's angle
+// is the team's own: see `tape.seed`.
+const CARD_ROTATIONS = ["a", "c", "b", "d", "b"] as const;
 
 /**
  * Team directory (`/jeugd` + `/ploegen`). Grouped Reserven / Bovenbouw /
@@ -146,6 +151,7 @@ export function YouthDirectory({
               // The team's own age, not the group it renders inside — see
               // `toneFor`'s doc comment for why that distinction matters.
               const cardTone = toneFor(team.age);
+              const slot = index % CARD_ROTATIONS.length;
               return (
                 <Link
                   key={team._id}
@@ -155,12 +161,14 @@ export function YouthDirectory({
                   className="block"
                 >
                   <TapedCard
-                    rotation={CARD_ROTATIONS[index % CARD_ROTATIONS.length]}
+                    rotation={CARD_ROTATIONS[slot]}
                     tape={{
                       color: "warm",
                       length: "sm",
-                      position: index % 2 === 0 ? "left" : "right",
-                      rotation: "c",
+                      position: slot % 2 === 0 ? "left" : "right",
+                      // The same key `<TeamHero>` seeds from, so a team wears
+                      // one tape on `/jeugd` and on its own page.
+                      seed: team.displayName,
                     }}
                     bg="cream"
                     padding="sm"
