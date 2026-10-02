@@ -81,7 +81,7 @@ describe("DownloadButton", () => {
       />,
     );
     const stamp = screen.getByTestId("file-type-stamp");
-    expect(stamp).toHaveStyle({ color: "var(--color-ink)" });
+    expect(stamp.style.color).toBe("var(--color-ink)");
     expect(stamp.textContent).toContain("FILE");
   });
 
