@@ -96,10 +96,13 @@ export default function MatchDetailLoading() {
 
       <StripedSeam colorPair="ink-cream" height="md" />
 
-      {/* MatchLineupSection — kicker + heading + 2 columns of 11 lineup rows. */}
+      {/* MatchLineupSection — kicker + heading + 2 columns of 11 lineup rows.
+          Seam air (#3306 / #3336), mirroring the page: the first section
+          keeps its top under the hero's opening seam, and gives its bottom
+          back to the seam below; the next two have a seam on both sides. */}
       <PageContainer
         as="section"
-        className="bg-cream py-12 sm:py-16"
+        className="bg-cream pt-12 pb-10 sm:pt-16 sm:pb-14"
         aria-hidden="true"
       >
         <SectionHeadingSkeleton />
@@ -127,7 +130,7 @@ export default function MatchDetailLoading() {
       {/* MatchEventsSection — kicker + heading + timeline rows. */}
       <PageContainer
         as="section"
-        className="bg-cream py-12 sm:py-16"
+        className="bg-cream py-10 sm:py-14"
         aria-hidden="true"
       >
         <SectionHeadingSkeleton />
@@ -147,7 +150,7 @@ export default function MatchDetailLoading() {
       {/* MatchStandingsSection — kicker + heading + head-to-head table rows. */}
       <PageContainer
         as="section"
-        className="bg-cream py-12 sm:py-16"
+        className="bg-cream py-10 sm:py-14"
         aria-hidden="true"
       >
         <SectionHeadingSkeleton />

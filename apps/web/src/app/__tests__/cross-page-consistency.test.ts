@@ -2575,11 +2575,11 @@ const SECTION_SPACING_SITES: Record<string, number> = {
   "app/(main)/privacy/page.tsx": 1,
   "components/club/SiteContents/SiteContents.tsx": 1,
   "components/design-system/CtaBand/CtaBand.tsx": 1,
-  // Migrated by this ticket. (#3335 moved the sites that touch a seam to
-  // `SEAM_SPACING_SITES` below: `hulp`, `ContactPage`, `BestuurPage`, the
-  // `/club` index and `SponsorsPage` no longer carry the plain pair.)
+  // Migrated by this ticket. (#3335 and #3336 moved the sites that touch a
+  // seam to `SEAM_SPACING_SITES` below: `hulp`, `ContactPage`, `BestuurPage`,
+  // the `/club` index, `SponsorsPage` and the team page no longer carry the
+  // plain pair.)
   "app/(main)/kalender/page.tsx": 1, // merged from two containers
-  "app/(main)/ploegen/[slug]/(detail)/page.tsx": 6,
   "components/match/MatchStandingsSection/MatchStandingsSection.tsx": 1,
   "components/match/MatchEventsSection/MatchEventsSection.tsx": 1,
   "components/match/MatchLineupSection/MatchLineupSection.tsx": 1,
@@ -2656,8 +2656,8 @@ function seamSpacingShapes(source: string): Record<SeamSpacingShape, number> {
 
 /**
  * Every file whose sections touch a seam, with the exact number of lines of
- * each shape. Walked against the render on 2026-10-01 (the sibling #3336
- * owns the team, player, staff, opponent and match pages).
+ * each shape. Walked against the render on 2026-10-01 (#3335) and 2026-10-02
+ * (#3336).
  */
 const SEAM_SPACING_SITES: Record<
   string,
@@ -2679,6 +2679,19 @@ const SEAM_SPACING_SITES: Record<
   "components/sponsors/SponsorsPage/SponsorsPage.tsx": { below: 1 },
   // hero → seam → <ArticleBody> → <CtaBand> (membership page only).
   "app/(main)/club/[slug]/page.tsx": { bottom: 1 },
+  // hero → nav → seam → klassement | status line | ranking notice (top
+  // opening, three branches) → seam → wedstrijden / spelers / staf (both) →
+  // seam → info (above, or both when the youth CTA follows) → seam → youth CTA
+  // (above; a bare colour change into the sponsors follows).
+  "app/(main)/ploegen/[slug]/(detail)/page.tsx": {
+    below: 3,
+    both: 4,
+    above: 2,
+  },
+  // hero → seam → lineup | events | standings (first keeps its top) → seam
+  // → <RelatedRow>. Which sections render is data, so one helper hands each
+  // its shape: `bodySectionSpacing`.
+  "app/(main)/wedstrijd/[matchId]/page.tsx": { below: 1, both: 1, above: 1 },
 };
 
 /**
@@ -2696,6 +2709,9 @@ const SEAM_SPACING_LOADING_SITES: Record<
   "app/(main)/hulp/loading.tsx": { below: 1 },
   "components/club/BestuurPage/BoardPageLoading.tsx": { below: 1 },
   "app/(landing)/sponsors/loading.tsx": { below: 1 },
+  // hero → seam → lineup (top opening) → seam → events → seam → standings →
+  // seam → <RelatedRow> (the skeleton draws all three sections).
+  "app/(main)/wedstrijd/[matchId]/loading.tsx": { below: 1, both: 2 },
 };
 
 const NO_SEAM_SHAPES: Record<SeamSpacingShape, number> = {
@@ -2709,7 +2725,7 @@ const NO_SEAM_SHAPES: Record<SeamSpacingShape, number> = {
 const carriesSeamShape = (source: string): boolean =>
   Object.values(seamSpacingShapes(source)).some((n) => n > 0);
 
-describe("a section side that touches a seam gives back one step (#3335)", () => {
+describe("a section side that touches a seam gives back one step (#3335, #3336)", () => {
   it.each(Object.entries(SEAM_SPACING_SITES))(
     "%s — carries exactly the pinned seam shapes",
     (relPath, expected) => {
@@ -2912,7 +2928,7 @@ describe("rule 16's retired-pair exemptions are pinned to their exact pair (#257
  * convention every other rule in this file carries.
  */
 describe("rule 16 catches what it claims to (#2571)", () => {
-  it("covers 26 files and 35 sites in total (plain and seam, one file counted once)", () => {
+  it("covers 27 files and 41 sites in total (plain and seam, one file counted once)", () => {
     // A section site is a plain `py-12 sm:py-16` or a seam shape (#3335); a
     // `bottom` override sits on top of a component's own plain site, so it
     // adds neither a file nor a site.
@@ -2927,8 +2943,8 @@ describe("rule 16 catches what it claims to (#2571)", () => {
     const sites =
       Object.values(SECTION_SPACING_SITES).reduce((a, b) => a + b, 0) +
       seamSites.reduce((a, [, n]) => a + n, 0);
-    expect(files.size).toBe(26);
-    expect(sites).toBe(35);
+    expect(files.size).toBe(27);
+    expect(sites).toBe(41);
   });
 
   it("counts a contiguous pair on one line", () => {

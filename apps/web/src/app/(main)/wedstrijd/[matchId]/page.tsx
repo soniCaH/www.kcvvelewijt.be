@@ -343,6 +343,25 @@ function warnAndDegradeRankingRead(
   return Effect.succeed(null);
 }
 
+/**
+ * A body section's spacing (#3306 / #3336): a side that touches a
+ * `<StripedSeam>` pads `pt-10 sm:pt-14` / `pb-10 sm:pb-14`; every other side
+ * keeps the section's own `py-12 sm:py-16`.
+ *
+ * `seamAbove` is false for the first section (the hero's seam is an opening,
+ * #2426 — it keeps its top); `seamBelow` is false for the last section when
+ * no `<RelatedRow>` follows.
+ */
+function bodySectionSpacing(
+  seamAbove: boolean,
+  seamBelow: boolean,
+): string | undefined {
+  if (seamAbove && seamBelow) return "py-10 sm:py-14";
+  if (seamAbove) return "pt-10 pb-12 sm:pt-14 sm:pb-16";
+  if (seamBelow) return "pt-12 pb-10 sm:pt-16 sm:pb-14";
+  return undefined;
+}
+
 export default async function MatchPage({ params }: MatchPageProps) {
   const { matchId } = await params;
   const numericId = parseInt(matchId, 10);
@@ -572,6 +591,17 @@ export default async function MatchPage({ params }: MatchPageProps) {
   });
   const hasRelated = relatedRowItems.length > 0;
 
+  // Seam air (#3306 / #3336): which body sections render is data, so each
+  // one's spacing is derived from its place in the run. The first sits under
+  // the hero's opening seam and keeps its top; a section with a seam under it
+  // (a later section, or the related row) gives its bottom back; the last
+  // section with nothing below keeps its bottom. Seams sit between every two
+  // neighbours — see the render below.
+  const bodyCount =
+    Number(hasLineup) + Number(hasEvents) + Number(hasStandings);
+  const spacingAt = (position: number) =>
+    bodySectionSpacing(position > 0, position < bodyCount - 1 || hasRelated);
+
   const analyticsParams = {
     match_id: numericId,
     status: match.status,
@@ -627,6 +657,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
           params={analyticsParams}
         >
           <MatchLineupSection
+            className={spacingAt(0)}
             homeTeamName={match.home_team.name}
             awayTeamName={match.away_team.name}
             homeLineup={homeLineup}
@@ -645,6 +676,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
           params={analyticsParams}
         >
           <MatchEventsSection
+            className={spacingAt(Number(hasLineup))}
             homeTeamName={match.home_team.name}
             awayTeamName={match.away_team.name}
             homeTeamLogo={match.home_team.logo}
@@ -668,6 +700,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
       {standingsResult === null ? (
         <MatchStandingsSection
           unavailable
+          className={spacingAt(Number(hasLineup) + Number(hasEvents))}
           homeClubId={match.home_team.id}
           awayClubId={match.away_team.id}
           highlightTeamId={match.kcvv_team_id}
@@ -679,6 +712,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
             params={analyticsParams}
           >
             <MatchStandingsSection
+              className={spacingAt(Number(hasLineup) + Number(hasEvents))}
               entries={standingsResult}
               homeClubId={match.home_team.id}
               awayClubId={match.away_team.id}
