@@ -21,6 +21,7 @@ import {
   EMPTY_DAY_FEED,
 } from "@/app/(main)/kalender/utils";
 import type { CalendarMatch, CalendarEvent } from "@/app/(main)/kalender/utils";
+import { PRESS_DOWN_TRANSITION } from "@/components/design-system/press-down";
 
 export interface CalendarMonthProps {
   matches: CalendarMatch[];
@@ -176,7 +177,8 @@ function SelectedDayDetail({
                 onClick={() => trackKalenderItemClick(event.source)}
                 className={cn(
                   "border-ink bg-cream text-ink shadow-[2px_2px_0_0_var(--color-ink)]",
-                  "flex items-center gap-3 border-2 px-3 py-2 no-underline transition-[transform,box-shadow] duration-300",
+                  "flex items-center gap-3 border-2 px-3 py-2 no-underline",
+                  PRESS_DOWN_TRANSITION,
                   "hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
                 )}
               >

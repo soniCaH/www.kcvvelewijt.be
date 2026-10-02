@@ -104,7 +104,7 @@ export function ScrollArrowButton({
         "shadow-paper-sm",
         "inline-flex items-center justify-center",
         "leading-none",
-        "transition-[transform,box-shadow,opacity] duration-300",
+        "transition-[translate,box-shadow,opacity] duration-300",
         "hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
         // `pointer-events-none` also stops :hover from matching, so a spent
         // arrow held in place by a reserved rail never plays the press-down

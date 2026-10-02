@@ -18,6 +18,7 @@ import type { ResponsibilityPath } from "@/types/responsibility";
 import { ACCENT_GLYPH_CLASS, CATEGORY_META } from "./categoryMeta";
 import { ContactCard } from "./ContactCard";
 import { resolveContact } from "./resolveContact";
+import { PRESS_DOWN_TRANSITION } from "@/components/design-system/press-down";
 
 export interface QuestionCardProps {
   path: ResponsibilityPath;
@@ -52,7 +53,7 @@ export function QuestionCard({
       className={`border-ink bg-cream border-2 shadow-[3px_3px_0_0_var(--color-ink)] ${
         open
           ? ""
-          : "transition-[transform,box-shadow] duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+          : `${PRESS_DOWN_TRANSITION} hover:translate-x-1 hover:translate-y-1 hover:shadow-none`
       }`}
     >
       <h3>

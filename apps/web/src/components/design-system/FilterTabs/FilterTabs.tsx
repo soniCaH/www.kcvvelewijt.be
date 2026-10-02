@@ -192,7 +192,7 @@ const CHIP_BASE_CLASSES = [
   "rounded-none border-2 border-ink",
   "font-mono font-semibold uppercase",
   "px-3 py-2 text-label",
-  "transition-[transform,box-shadow,background-color,color,border-color] duration-300",
+  "transition-[translate,box-shadow,background-color,color,border-color] duration-300",
   "hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
 ] as const;
 

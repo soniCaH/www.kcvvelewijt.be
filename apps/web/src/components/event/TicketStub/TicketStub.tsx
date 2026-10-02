@@ -8,6 +8,7 @@ import {
   DEFAULT_EVENT_TYPE,
   type EventType,
 } from "../event-type-style";
+import { PRESS_DOWN_TRANSITION } from "@/components/design-system/press-down";
 
 // The category type lives in `event-type-style` now (shared with the filter
 // chips), but it types the public `eventType` prop, so re-export it from
@@ -42,7 +43,7 @@ const MONO_LABEL_CLASS = "font-mono text-label leading-label-wrap";
 // ticket sits on its offset shadow and presses into the page on hover/focus,
 // with the transform gated behind motion-safe and a "Meer details →" cue.
 const CARD_CLASS =
-  "border-ink bg-cream text-ink shadow-paper-sm relative flex border-2 transition-[transform,box-shadow] duration-300 " +
+  `border-ink bg-cream text-ink shadow-paper-sm relative flex border-2 ${PRESS_DOWN_TRANSITION}` +
   "hover:shadow-none motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1 " +
   "group-hover:shadow-none motion-safe:group-hover:translate-x-1 motion-safe:group-hover:translate-y-1 " +
   "motion-safe:group-focus-visible:translate-x-1 motion-safe:group-focus-visible:translate-y-1 group-focus-visible:shadow-none";

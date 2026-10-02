@@ -22,6 +22,7 @@ import {
   trackAgendaFilter,
   trackAgendaRowClick,
 } from "./upcoming-matches-analytics";
+import { PRESS_DOWN_TRANSITION } from "@/components/design-system/press-down";
 
 /** Filter value meaning "no team filter" — never a real squad label. */
 const ALL_TEAMS = "all";
@@ -157,7 +158,11 @@ export const UpcomingMatchesClient = ({
         <button
           type="button"
           onClick={handleToggleExpand}
-          className="border-ink bg-cream-soft text-ink shadow-paper-sm mt-6 w-full border-2 px-4 py-3 font-mono text-sm font-bold tracking-wide uppercase transition-[transform,box-shadow] duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none md:w-auto"
+          className={cn(
+            "border-ink bg-cream-soft text-ink shadow-paper-sm mt-6 w-full border-2 px-4 py-3 font-mono text-sm font-bold tracking-wide uppercase",
+            PRESS_DOWN_TRANSITION,
+            "hover:translate-x-1 hover:translate-y-1 hover:shadow-none md:w-auto",
+          )}
         >
           {expanded
             ? "Toon minder ↑"
@@ -367,7 +372,9 @@ const MatchRow = ({ match, kcvvTeamId }: MatchRowProps) => {
       onClick={() => trackAgendaRowClick(match.id)}
       className={cn(
         "border-ink bg-cream group relative grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1 border-2 px-4 py-3",
-        "shadow-paper-sm transition-[transform,box-shadow] duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
+        "shadow-paper-sm",
+        PRESS_DOWN_TRANSITION,
+        "hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
         "sm:grid-cols-[auto_1fr_auto] sm:gap-x-4",
       )}
     >

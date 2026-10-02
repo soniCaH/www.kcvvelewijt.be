@@ -127,15 +127,11 @@ export function StructureDirectory({
                 interactive={interactive}
                 // Dim vacant positions (7o9 · 3) — de-emphasised but reachable;
                 // brighten on hover/focus so recruitment stays a click away.
-                // An interactive card's press-down list has no `opacity`, so the
-                // vacant card adds it (twMerge: the later `transition-[…]` wins).
+                // (The card eases the opacity itself: `<OrgPersonCard>` swaps in
+                // `PRESS_DOWN_TRANSITION_FADE` when it is vacant and interactive.)
                 className={
                   node.members.length === 0
-                    ? cn(
-                        "opacity-65 focus-within:opacity-100 hover:opacity-100",
-                        interactive &&
-                          "transition-[transform,box-shadow,opacity]",
-                      )
+                    ? "opacity-65 focus-within:opacity-100 hover:opacity-100"
                     : undefined
                 }
                 {...(vacantCtaHref ? { vacantCtaHref } : {})}

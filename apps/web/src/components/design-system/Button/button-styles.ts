@@ -24,7 +24,7 @@ export function getButtonClasses({
 
   return cn(
     "group inline-flex items-center justify-center gap-2",
-    "font-medium transition-[transform,box-shadow,background-color,opacity] duration-300",
+    "font-medium transition-[translate,box-shadow,background-color,opacity] duration-300",
     "cursor-pointer",
     "rounded-none border-2 border-ink",
 

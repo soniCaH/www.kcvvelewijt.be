@@ -273,7 +273,7 @@ export function CalendarSubscribePanel({
               type="button"
               onClick={handleCopy}
               disabled={selectedPsdIds.length === 0}
-              className="border-ink bg-jersey-deep text-cream border-2 px-3 py-1.5 font-mono text-[11px] font-semibold tracking-wide uppercase shadow-[2px_2px_0_0_var(--color-ink)] transition-[transform,box-shadow,opacity] duration-300 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[2px_2px_0_0_var(--color-ink)]"
+              className="border-ink bg-jersey-deep text-cream border-2 px-3 py-1.5 font-mono text-[11px] font-semibold tracking-wide uppercase shadow-[2px_2px_0_0_var(--color-ink)] transition-[translate,box-shadow,opacity] duration-300 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[2px_2px_0_0_var(--color-ink)]"
             >
               {copiedUrl === webcalUrl ? "Gekopieerd" : "Kopieer link"}
             </button>

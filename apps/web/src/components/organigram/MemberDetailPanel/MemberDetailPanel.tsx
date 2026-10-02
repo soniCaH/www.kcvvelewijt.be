@@ -498,7 +498,7 @@ function HolderSwitcher({
               tabIndex={active ? 0 : -1}
               onClick={() => onSelect(holder.id)}
               className={cn(
-                "border-ink font-body flex items-center gap-1.5 border-[1.5px] py-1 pr-2.5 pl-1 text-xs transition-[transform,box-shadow,background-color,color]",
+                "border-ink font-body flex items-center gap-1.5 border-[1.5px] py-1 pr-2.5 pl-1 text-xs transition-[translate,box-shadow,background-color,color]",
                 active
                   ? "bg-jersey-deep text-cream shadow-[2px_2px_0_0_var(--color-ink)]"
                   : "bg-cream text-ink hover:translate-x-px hover:translate-y-px",

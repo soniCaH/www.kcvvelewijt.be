@@ -17,8 +17,28 @@
  * this string. <TapedCard interactive="press"> implements the same model via a
  * CSS-variable transform rather than utility classes.
  */
-export const PRESS_DOWN_CLASSES =
-  "transition-[transform,box-shadow] duration-300 hover:shadow-none motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1";
+/**
+ * The press-down's transition, named in ONE place (#2493). The movement is
+ * Tailwind v4's `translate-x-*`/`translate-y-*`, which set the standalone CSS
+ * `translate` property — NOT `transform` — so the list names `translate`
+ * (`transition-[transform,…]` would make the press snap while only the shadow
+ * eased). Keep it a full literal: Tailwind's scanner has to see it, and two
+ * transition-property utilities cannot be merged. A press that also fades
+ * (disabled opacity, a tab's fill) writes its own full list instead.
+ * `<TapedCard>` is the exception that proves it: it moves through a CSS-variable
+ * `transform`, so it names `transform`.
+ */
+export const PRESS_DOWN_TRANSITION =
+  "transition-[translate,box-shadow] duration-300";
+
+/** `PRESS_DOWN_TRANSITION` for a press that also eases `opacity` (a dimmed card). */
+export const PRESS_DOWN_TRANSITION_FADE =
+  "transition-[translate,box-shadow,opacity] duration-300";
+
+export const PRESS_DOWN_HOVER =
+  "hover:shadow-none motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1";
+
+export const PRESS_DOWN_CLASSES = `${PRESS_DOWN_TRANSITION} ${PRESS_DOWN_HOVER}`;
 
 /**
  * The one chip (#3328, decided in #3303): every chip-shaped link on the
