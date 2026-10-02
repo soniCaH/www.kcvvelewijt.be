@@ -10,6 +10,7 @@ import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/thumbnails.css";
 import "yet-another-react-lightbox/plugins/captions.css";
 
+import { Spinner } from "@/components/design-system";
 import { trackEvent } from "@/lib/analytics/track-event";
 
 export interface GalleryLightboxImage {
@@ -33,6 +34,20 @@ export interface GalleryLightboxProps {
 
 // Thumbnails in the (widest) first row — rendered eagerly via `priority`.
 const FIRST_ROW = 4;
+
+// Every lightbox motion is Arrival — a photo entering the screen — on The
+// Curve (DESIGN.md → Motion). The literal is `--ease-out`'s value: the library
+// hands swipe/navigation easing to `Element.animate()`, which cannot resolve
+// `var()`. Under `prefers-reduced-motion: reduce` the library itself skips the
+// slide animations and zeroes the fade, so nothing is gated here.
+const ARRIVAL_MS = 500;
+const THE_CURVE = "cubic-bezier(0, 0, 0.58, 1)";
+const LIGHTBOX_ANIMATION = {
+  fade: ARRIVAL_MS,
+  swipe: ARRIVAL_MS,
+  navigation: ARRIVAL_MS,
+  easing: { fade: THE_CURVE, swipe: THE_CURVE, navigation: THE_CURVE },
+};
 
 const sized = (url: string, w: number) => `${url}?w=${w}&q=80&fm=webp&fit=max`;
 
@@ -119,6 +134,9 @@ export const GalleryLightbox = ({
         close={() => setIndex(-1)}
         slides={slides}
         plugins={[Thumbnails, Zoom, Captions]}
+        animation={LIGHTBOX_ANIMATION}
+        // A visitor-requested photo is loading: the site's waiting device.
+        render={{ iconLoading: () => <Spinner variant="compact" /> }}
         on={{
           view: ({ index: i }) =>
             trackEvent("gallery_image_view", {
