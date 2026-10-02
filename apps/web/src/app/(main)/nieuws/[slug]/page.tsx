@@ -38,7 +38,7 @@ import {
   EditorialHero,
   type HeroMatchData,
 } from "@/components/article/EditorialHero";
-import { PageContainer, UpLink } from "@/components/design-system";
+import { PageContainer, StripedSeam, UpLink } from "@/components/design-system";
 import { MatchGoalsBlock } from "@/components/article/blocks/MatchGoalsBlock";
 import { parsePsdMatchId, toHeroMatchData } from "./utils";
 // Cross-route import: the match fold-in card (#2443/#2581) needs the same
@@ -78,6 +78,7 @@ interface ArticlePageProps {
  * Phase 5.C composition helpers. The page is composed as:
  *
  *   <EditorialHero variant={articleType} placement="detail" />
+ *   <StripedSeam />                           ← full-bleed hero→body seam (#2531)
  *   <ArticleMetadata />                       ← share + reading-time
  *   <SanityArticleBody body />                ← legacy renderer; #1829 tracks migration
  *   <EventDetailBlock isPast />               ← event variant only, when skip-condition passes
@@ -342,6 +343,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
   const shareConfig = {
     url: `${SITE_CONFIG.siteUrl}/nieuws/${article.slug}`,
+    title: article.title,
   };
 
   const readingTime = computeReadingTime(article.body ?? null);
@@ -559,6 +561,13 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         heroMatch,
       })}
 
+      {/* The hero ends here: one seam between two blocks says "the page
+          continues, new subject", and explains the 1040 → 680 width step
+          (#2531 item 8, decided on #3370). Full-bleed, never wrapped in a
+          container. `loading.tsx` draws the same seam in the same spot, so
+          nothing shifts when the page replaces the skeleton. */}
+      <StripedSeam colorPair="ink-cream" height="md" />
+
       {/* Contained event-fact panel (ART-3 Variant B, #2237) — replaces the
           old full-bleed hero strip. Sits between the hero and the article
           body; the component self-skips when the eventFact has no content. */}
@@ -607,10 +616,16 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               // cream into a narrow centered band. The prose container
               // inside ArticleBody handles centering; the page just gets
               // out of the way of the cream bleed.
-              <div className="mb-6 w-full lg:mb-10">
+              // No bottom margin on this wrapper (#2531): the end of the article
+              // has one gap, owned by one element — <EndMark>'s `mb-8`, or the
+              // tail-Q&A section's own `pb-8` — never a stack of margins.
+              <div className="w-full">
                 <ArticleBodyMotion>
                   <ArticleBody
-                    className="article-body"
+                    // <ArticleBody> ships `py-12 sm:py-16` for the surfaces
+                    // that reuse it; here its closing <EndMark> owns the gap
+                    // below (`mb-8`), so the bottom padding goes (#2531).
+                    className="article-body pb-0 sm:pb-0"
                     content={bodyInFlow}
                     subjects={article.subjects ?? null}
                     articleSlug={article.slug}
@@ -624,7 +639,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                     <section
                       data-qa-tail-section="true"
                       aria-label="Q&A"
-                      className="bg-cream w-full px-4 pb-12 sm:pb-16 lg:px-0"
+                      className="bg-cream w-full px-4 pt-12 pb-8 sm:pt-16 lg:px-0"
                     >
                       <div
                         className="mx-auto w-full"
@@ -679,7 +694,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           author={article.author}
           photographer={article.photographer}
           subjects={article.subjects}
-          publishedAt={article.publishedAt}
         />
       ) : null}
 
