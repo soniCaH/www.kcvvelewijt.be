@@ -64,16 +64,4 @@ describe("UpLink", () => {
     expect(className).not.toContain("mt-12");
     expect(className).not.toContain("lg:mt-16");
   });
-
-  it("shows a visible focus ring on keyboard focus, per tone", () => {
-    const { rerender } = render(<UpLink href="/nieuws" label="Nieuws" />);
-    expect(screen.getByTestId("up-link").className).toContain(
-      "focus-visible:outline-jersey-deep",
-    );
-
-    rerender(<UpLink href="/club" label="De club" tone="cream" />);
-    expect(screen.getByTestId("up-link").className).toContain(
-      "focus-visible:outline-warm",
-    );
-  });
 });

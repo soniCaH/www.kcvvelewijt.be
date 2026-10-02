@@ -27,7 +27,6 @@ export function getButtonClasses({
     "font-medium transition-all duration-300",
     "cursor-pointer",
     "rounded-none border-2 border-ink",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-jersey-deep",
 
     {
       // No hover fill: brightness-110 relit jersey-deep to #00884d and dropped

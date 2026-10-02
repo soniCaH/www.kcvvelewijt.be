@@ -188,6 +188,33 @@ const OFF_RAMP_LEADING_PATTERN =
 const OFF_RAMP_TRACKING_PATTERN =
   "(?:^|[\\s:!])-?tracking-(?:tighter|tight|normal|wide|wider|widest|\\[|\\()";
 
+// One Focus Ring Rule (DESIGN.md → Components → Buttons, #2530/#3368). The
+// whole site draws a single ring from `globals.css` (`:focus-visible`, 2px at
+// a 2px offset, colour from `--focus-ring`). Every `@layer base` rule loses to
+// a utility, so any of these on a component either recolours the ring or hides
+// it:
+//   1. an outline/ring utility under a focus-state variant — `focus-visible:`,
+//      `focus-within:`, `group-`/`peer-` `focus`, `focus-visible`,
+//      `focus-within` — or under `has-[…]:` (any condition);
+//   2. a `focus:` ring, or a `focus:` outline other than `none`;
+//   3. `outline-hidden`, `outline-0`, and `outline-none` under ANY prefix
+//      (`md:`, `hover:`, `group-focus:` …) or none — except plain `focus:`.
+// `focus:outline-none` (also under a responsive prefix) stays legal on
+// purpose: it is how a `tabIndex={-1}` scroll target (a section the page
+// moves focus to) opts out of a section-sized box; nothing a visitor can tab
+// to is one. The ring's colour follows the ground (two `> *` rules in
+// `globals.css`, keyed on the `bg-*` utilities); the one sanctioned deviation
+// is the `focus-ring-inset` utility (List Row Fill Rule and its kin), which
+// is a class name, not one of these utilities, so it needs no exemption.
+// Same single-line/no-newline requirement as the patterns above.
+const FOCUS_RING_PATTERN = [
+  "(?<![\\w-])(?:(?:group-|peer-)?focus-(?:visible|within)|(?:group|peer)-focus):-?(?:outline|ring)-",
+  "(?<![\\w-])focus:-?(?:ring-|outline-(?!none(?![\\w-])))",
+  "(?<![\\w-])has-\\[[^\\]]*\\]:-?(?:outline|ring)-",
+  "(?<!(?<![\\w-])focus:)(?<![\\w-])outline-none(?![\\w-])",
+  "(?<![\\w-])outline-(?:hidden|0)(?![\\w-])",
+].join("|");
+
 const matchesClassString = (pattern) =>
   `:matches(Literal[value=/${pattern}/], TemplateElement[value.raw=/${pattern}/])`;
 
@@ -200,6 +227,7 @@ const kcvvPlugin = {
     "no-off-ramp-font-size": builtinRules.get("no-restricted-syntax"),
     "no-off-ramp-leading": builtinRules.get("no-restricted-syntax"),
     "no-off-ramp-tracking": builtinRules.get("no-restricted-syntax"),
+    "no-per-component-focus-ring": builtinRules.get("no-restricted-syntax"),
   },
 };
 
@@ -386,6 +414,24 @@ const eslintConfig = [
           selector: matchesClassString(OFF_RAMP_TRACKING_PATTERN),
           message:
             "Off-ramp tracking — tracking is a property of the type step (apps/web/DESIGN.md → Typography). Each text-* token already carries its own letter-spacing; no component sets tracking by hand. Existing call sites are frozen in eslint-suppressions.json under this rule's own ID; new code must not add a tracking-* utility. Replaced one instead of just moving it? Run `pnpm --filter @kcvv/web lint:prune` in the same commit.",
+        },
+      ],
+    },
+  },
+  {
+    // One Focus Ring Rule (#3368) — own rule ID, own block, the same shape as
+    // its peers (test/spec files exempt, nothing else). The inset ring is the
+    // `focus-ring-inset` utility, so no file needs an exemption.
+    files: ["**/src/**/*.{ts,tsx}"],
+    ignores: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
+    plugins: { kcvv: kcvvPlugin },
+    rules: {
+      "kcvv/no-per-component-focus-ring": [
+        "error",
+        {
+          selector: matchesClassString(FOCUS_RING_PATTERN),
+          message:
+            "A per-component focus ring or a hidden outline — the site draws ONE global focus ring from globals.css (apps/web/DESIGN.md → Buttons). A focus-visible:/focus-within:/group-focus*:/has-[…]: outline or ring utility, a focus: ring, outline-hidden, outline-0 or outline-none (other than plain focus:outline-none) recolours or hides it. The ring colour comes from the ground (globals.css); an inset ring is `focus-ring-inset`; a text-input shell adds `focus-ring-within`.",
         },
       ],
     },

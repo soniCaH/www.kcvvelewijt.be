@@ -155,12 +155,6 @@ describe("Alert", () => {
       expect(button.className).toContain("hover:text-ink");
     });
 
-    it("dismiss button focus-visible ring uses jersey-deep", () => {
-      render(<Alert dismissible>Melding</Alert>);
-      const button = screen.getByRole("button", { name: /sluit melding/i });
-      expect(button.className).toContain("focus-visible:ring-jersey-deep");
-    });
-
     it("should call onDismiss when close button is clicked", async () => {
       const user = userEvent.setup();
       const handleDismiss = vi.fn();

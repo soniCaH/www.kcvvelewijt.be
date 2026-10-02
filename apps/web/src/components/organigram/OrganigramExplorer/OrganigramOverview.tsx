@@ -55,7 +55,7 @@ export function OrganigramOverview({
           type="button"
           onClick={() => setExpanded(true)}
           aria-expanded={false}
-          className={`border-ink bg-cream text-jersey-deep shadow-paper-sm focus-visible:outline-ink inline-flex items-center gap-2 border-2 px-4 py-2.5 font-mono text-xs font-bold tracking-wide uppercase ${PRESS_DOWN_CLASSES} focus-visible:outline-2 focus-visible:outline-offset-2`}
+          className={`border-ink bg-cream text-jersey-deep shadow-paper-sm inline-flex items-center gap-2 border-2 px-4 py-2.5 font-mono text-xs font-bold tracking-wide uppercase ${PRESS_DOWN_CLASSES}`}
         >
           Bekijk het volledige organigram →
         </button>

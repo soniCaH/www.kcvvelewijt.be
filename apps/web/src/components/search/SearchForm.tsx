@@ -87,21 +87,11 @@ export const SearchForm = ({
       data-search-form
       className={cn(
         searchFieldShellClasses,
-        "focus-within:ring-warm transition-shadow focus-within:ring-2",
-        // VR determinism (#3033): Chromium only paints `:focus-within`
-        // when the frame rendering the page is itself focused/active, not
-        // merely when `document.activeElement` is set inside it — an
-        // environment property of whichever headless VR worker renders a
-        // given story, not something a story can force with a script
-        // `.focus()` call (React already performs that call for
-        // `autoFocus` on mount; it never relies on the native `autofocus`
-        // HTML attribute). `data-vr-force-ring` is never rendered by this
-        // component; a Storybook decorator sets it directly on this
-        // element for VR-tagged stories only, painting the ring from a
-        // state the story chooses instead of one dependent on the
-        // runner's frame focus. A real visitor's `/zoeken` never gets
-        // this attribute, so `focus-within:` above is untouched there.
-        "data-[vr-force-ring=true]:ring-warm data-[vr-force-ring=true]:ring-2",
+        // The ring wraps the whole shell (see `focus-ring-within` in
+        // globals.css). VR determinism (#3033): `data-vr-force-ring`, set by
+        // a Storybook decorator on this element (never by the component),
+        // paints the same ring regardless of the runner's frame focus.
+        "focus-ring-within",
       )}
     >
       <input
@@ -110,7 +100,7 @@ export const SearchForm = ({
         onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
         aria-label="Zoekterm"
-        className="text-ink placeholder:text-ink-muted bg-cream text-body-lg min-w-0 flex-1 px-4 py-4 outline-none focus:outline-hidden md:px-5"
+        className="text-ink placeholder:text-ink-muted bg-cream text-body-lg min-w-0 flex-1 px-4 py-4 md:px-5"
         // ZOEK-2: never disable the field — auto-search sets `isLoading` mid-type,
         // and disabling the input blurs it (the typeahead would lose focus on
         // every keystroke). In-flight requests are aborted in <SearchInterface>.

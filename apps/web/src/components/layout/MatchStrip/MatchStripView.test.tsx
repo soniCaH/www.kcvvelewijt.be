@@ -543,22 +543,6 @@ describe("matchDay ground (#2616)", () => {
     expect(within(row).getByText("Winst")).toBeInTheDocument();
   });
 
-  // jersey-deep on jersey-deep-dark is 2.3:1 — the same ratio that forces the
-  // CTA's primary -> inverted swap below. The focus ring needs the same
-  // dark-ground counterpart, or a keyboard user tabbing the ledger on match
-  // day gets no usable indicator at all.
-  it("gives the mobile row's focus ring a dark-ground counterpart", () => {
-    render(
-      <MatchStripView
-        data={{ result: null, fixture: todaysFixture }}
-        matchDay
-      />,
-    );
-    const row = screen.getByRole("link", { name: /^Volgende wedstrijd/ });
-    expect(row).toHaveClass("focus-visible:outline-cream");
-    expect(row).not.toHaveClass("focus-visible:outline-jersey-deep");
-  });
-
   it("defaults the desktop slider to the fixture slide, not the result, when it is match day", () => {
     render(
       <MatchStripView data={{ result, fixture: todaysFixture }} matchDay />,

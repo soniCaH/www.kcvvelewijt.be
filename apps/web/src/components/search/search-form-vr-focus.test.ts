@@ -3,7 +3,7 @@
  *
  * Focus: `forceSearchFocusRing` sets `data-vr-force-ring="true"` on the
  * `[data-search-form]` hook nested inside the given root (the attribute
- * SearchForm.tsx's `data-[vr-force-ring=true]:ring-warm` variant reacts to),
+ * globals.css's `[data-vr-force-ring="true"]` focus-ring rule reacts to),
  * and is a no-op when no such hook exists rather than throwing.
  */
 

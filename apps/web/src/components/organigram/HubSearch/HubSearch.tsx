@@ -109,8 +109,11 @@ function forwardContact(
   return null;
 }
 
+// Result rows are flush, hover-filled list rows inside a scrolling popup — the
+// List Row Fill Rule's case — so the focus ring is inset (an outset one would
+// be clipped by the popup's `overflow-y-auto` and paint over the next row).
 const rowClass = (selected: boolean) =>
-  `flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors ${
+  `flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors focus-ring-inset ${
     selected ? "bg-jersey-deep/10" : "hover:bg-cream-soft"
   } border-paper-edge border-b last:border-b-0`;
 
@@ -545,7 +548,7 @@ export function HubSearch({
       aria-selected={selectedIndex === 0}
       onClick={() => select(answerForward)}
       onMouseEnter={() => setSelectedIndex(0)}
-      className={`border-ink block w-full border-b-2 px-3 py-3 text-left transition-colors ${
+      className={`border-ink focus-ring-inset block w-full border-b-2 px-3 py-3 text-left transition-colors ${
         selectedIndex === 0 ? "bg-jersey-deep/10" : "hover:bg-cream-soft"
       }`}
     >
@@ -609,7 +612,7 @@ export function HubSearch({
       className={`relative ${isHero ? "" : "min-w-0 self-stretch"} ${className}`}
     >
       <div
-        className={`border-ink bg-cream flex items-center gap-2 ${boxBorder} ${boxShadow} ${
+        className={`border-ink bg-cream focus-ring-within flex items-center gap-2 ${boxBorder} ${boxShadow} ${
           isHero ? "px-3 py-3" : SECTION_NAV_TRAILING_SLOT_CLASSES
         }`}
       >
@@ -647,7 +650,7 @@ export function HubSearch({
           // 16px on touch (`pointer-coarse:`), never a width breakpoint —
           // an iPad on its side is still touch at ≥1024px. iOS Safari zooms
           // the page on focus of any field under 16px (#3248).
-          className={`text-ink placeholder:text-ink-muted w-full min-w-0 bg-transparent focus:outline-none ${
+          className={`text-ink placeholder:text-ink-muted w-full min-w-0 bg-transparent ${
             isHero ? "text-body-md" : "text-body-sm pointer-coarse:text-body-md"
           } ${value ? clearGiveBack : ""}`}
         />
@@ -786,7 +789,7 @@ export function HubSearch({
                       query_length: value.length,
                     })
                   }
-                  className={`${CHIP_LINK_CLASSES} border-ink bg-warm text-ink focus-visible:outline-ink mt-3`}
+                  className={`${CHIP_LINK_CLASSES} border-ink bg-warm text-ink mt-3`}
                 >
                   Contacteer de club
                   <ArrowRight size={12} aria-hidden />

@@ -94,7 +94,7 @@ export const GalleryLightbox = ({
                 type="button"
                 onClick={() => setIndex(i)}
                 aria-label={`${alt} vergroten`}
-                className="group focus-visible:outline-ink relative block aspect-square w-full overflow-hidden focus-visible:outline-2 focus-visible:outline-offset-2"
+                className="group relative block aspect-square w-full overflow-hidden"
               >
                 <Image
                   src={sized(img.url, 600)}

@@ -619,13 +619,5 @@ describe("FilterTabs", () => {
       const activeTab = screen.getByRole("button", { name: /all/i });
       expect(activeTab).toHaveFocus();
     });
-
-    it("focus-visible ring uses jersey-deep for keyboard users", () => {
-      render(<FilterTabs tabs={mockTabs} activeTab="all" />);
-
-      const tab = screen.getByRole("button", { name: /all/i });
-      expect(tab.className).toContain("focus-visible:ring-2");
-      expect(tab.className).toContain("focus-visible:ring-jersey-deep");
-    });
   });
 });

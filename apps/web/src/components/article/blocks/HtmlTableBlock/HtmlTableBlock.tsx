@@ -165,7 +165,6 @@ export function HtmlTableBlock({ html, className }: HtmlTableBlockProps) {
         ariaLabel="Scrollable table"
         direction="right"
         trackClassName={cn(
-          "focus:outline-jersey-deep focus:outline-2 focus:outline-offset-2",
           // Table — StandingsTable's quiet register. Direct child of the
           // track (`[&>table]`), not a descendant: a nested table (an
           // editor's own, inside a cell) keeps its own plain markup rather

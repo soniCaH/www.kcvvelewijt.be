@@ -82,3 +82,14 @@ describe("cn — size-* drops both h-* and w-*", () => {
     );
   });
 });
+
+describe("cn — the focus-ring variable survives a merge", () => {
+  it("keeps an arbitrary [--focus-ring:…] property next to a background", () => {
+    // `CalendarMonth`'s selected cell and the error field chrome set the ring
+    // colour with an arbitrary property. It is not a colour utility, so a
+    // `bg-*` after it must not drop it.
+    expect(cn("[--focus-ring:var(--color-ink)]", "bg-cream")).toBe(
+      "[--focus-ring:var(--color-ink)] bg-cream",
+    );
+  });
+});

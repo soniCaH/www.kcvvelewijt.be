@@ -196,7 +196,6 @@ export const Alert = forwardRef<HTMLDivElement, AlertProps>(function Alert(
               "absolute top-2 right-2 inline-flex h-6 items-center justify-center gap-1",
               "rounded-none px-1 py-0.5 transition-colors duration-150",
               "text-ink/60 hover:text-ink hover:bg-ink/5",
-              "focus-visible:ring-jersey-deep focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
             )}
           >
             <X size={14} aria-hidden="true" />

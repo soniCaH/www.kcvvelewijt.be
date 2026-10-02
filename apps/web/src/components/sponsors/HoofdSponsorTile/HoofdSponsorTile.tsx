@@ -62,7 +62,7 @@ export function HoofdSponsorTile({ sponsor }: HoofdSponsorTileProps) {
         aria-label={`Bezoek de website van ${sponsor.name}`}
         data-sponsor-id={sponsor.id}
         data-sponsor-tier={sponsor.tier}
-        className="focus-visible:outline-jersey-deep block focus-visible:outline-2 focus-visible:outline-offset-2"
+        className="block"
       >
         {tile}
       </Link>

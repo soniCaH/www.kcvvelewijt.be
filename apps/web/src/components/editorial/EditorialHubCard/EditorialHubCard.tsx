@@ -126,7 +126,7 @@ export function EditorialHubCard({
         // translate is motion-safe-gated via PRESS_DOWN_CLASSES; the
         // focus-visible press always moves so keyboard focus stays locatable.
         PRESS_DOWN_CLASSES,
-        "focus-visible:outline-jersey-deep focus-visible:translate-x-1 focus-visible:translate-y-1 focus-visible:shadow-none focus-visible:outline-2 focus-visible:outline-offset-2",
+        "focus-visible:translate-x-1 focus-visible:translate-y-1 focus-visible:shadow-none",
       )}
     >
       <div

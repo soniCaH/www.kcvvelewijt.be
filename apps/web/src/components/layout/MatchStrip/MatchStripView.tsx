@@ -513,14 +513,9 @@ function LedgerLinkRow({
       aria-label={label}
       className={cn(
         "flex min-w-0 items-center gap-2.5 px-4 py-2.5 no-underline",
-        "focus-visible:outline-2 focus-visible:outline-offset-[-2px]",
-        // jersey-deep on jersey-deep-dark is 2.3:1 — the same ratio the CTA's
-        // primary fill fails at (see the button-variant swap below) — so the
-        // focus ring needs its own dark-ground counterpart, not just a moved
-        // class.
-        matchDay
-          ? "focus-visible:outline-cream"
-          : "focus-visible:outline-jersey-deep",
+        // The inset ring takes its colour from the ground (globals.css):
+        // warm on the match-day jersey-deep-dark strip, jersey-deep on cream.
+        "focus-ring-inset",
         matchDay ? "hover:bg-cream/10" : "hover:bg-cream-soft",
         !last && "border-b",
         !last && hairline,

@@ -279,19 +279,6 @@ describe("ScrollArrowButton", () => {
         "duration-300",
       );
     });
-
-    it("preserves focus-visible ring for keyboard navigation", () => {
-      render(
-        <ScrollArrowButton
-          direction="left"
-          onClick={vi.fn()}
-          register="paper"
-        />,
-      );
-      const button = screen.getByLabelText("Scroll left");
-      expect(button.className).toContain("focus-visible:ring-2");
-      expect(button.className).toContain("focus-visible:ring-jersey-deep");
-    });
   });
 
   describe("Position", () => {
