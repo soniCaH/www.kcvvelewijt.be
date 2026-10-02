@@ -34,7 +34,7 @@ const WASH =
 
 export function UltrasHero({ joinHref, upLink }: UltrasHeroProps) {
   return (
-    <header className="bg-jersey-deep-dark focus-on-dark relative isolate overflow-hidden">
+    <header className="bg-jersey-deep-dark relative isolate overflow-hidden">
       <Image
         src="/images/ultras.jpg"
         alt="KCVV Ultras aan de omheining"

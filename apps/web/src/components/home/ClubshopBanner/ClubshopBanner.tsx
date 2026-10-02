@@ -33,7 +33,7 @@ export const ClubshopBanner = ({ className }: ClubshopBannerProps) => {
     <section
       aria-label="Clubshop"
       data-testid="clubshop-banner"
-      className={cn("bg-jersey-deep-dark focus-on-dark relative", className)}
+      className={cn("bg-jersey-deep-dark relative", className)}
     >
       {/* Mirrored stripe frame — R6.C. Top seam at -45°, bottom seam
           flipped to +45° so the diagonals lean toward each other and

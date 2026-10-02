@@ -113,7 +113,7 @@ function forwardContact(
 // List Row Fill Rule's case — so the focus ring is inset (an outset one would
 // be clipped by the popup's `overflow-y-auto` and paint over the next row).
 const rowClass = (selected: boolean) =>
-  `flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors focus-visible:outline-offset-[-2px] ${
+  `flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors focus-ring-inset ${
     selected ? "bg-jersey-deep/10" : "hover:bg-cream-soft"
   } border-paper-edge border-b last:border-b-0`;
 
@@ -548,7 +548,7 @@ export function HubSearch({
       aria-selected={selectedIndex === 0}
       onClick={() => select(answerForward)}
       onMouseEnter={() => setSelectedIndex(0)}
-      className={`border-ink block w-full border-b-2 px-3 py-3 text-left transition-colors focus-visible:outline-offset-[-2px] ${
+      className={`border-ink focus-ring-inset block w-full border-b-2 px-3 py-3 text-left transition-colors ${
         selectedIndex === 0 ? "bg-jersey-deep/10" : "hover:bg-cream-soft"
       }`}
     >
@@ -688,7 +688,7 @@ export function HubSearch({
           // (#3043). One step below it can never do that; it still clears the
           // page's own `z-10`/`z-20` content. The `nav` instance is scoped by
           // the section bar's own `z-30` stacking context either way.
-          className={`border-ink bg-cream focus-on-light absolute z-40 mt-2 max-h-96 ${dropdownWidth} overflow-y-auto border-2 shadow-[var(--shadow-paper-sm)]`}
+          className={`border-ink bg-cream absolute z-40 mt-2 max-h-96 ${dropdownWidth} overflow-y-auto border-2 shadow-[var(--shadow-paper-sm)]`}
         >
           {/* `role="listbox"`'s owned children must all be `option`/`group`
               (#3188 — axe `aria-required-children`); the smart-hint banner

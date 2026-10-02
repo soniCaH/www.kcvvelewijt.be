@@ -33,7 +33,7 @@ export type SectionTransitionConfig = {
 // Tailwind background class for each section surface — shared by `SectionStack`
 // so new `SectionBg` values only need to be added here.
 export const BG_CLASS: Record<SectionBg, string> = {
-  "jersey-deep": "bg-jersey-deep focus-on-dark",
+  "jersey-deep": "bg-jersey-deep",
   transparent: "bg-transparent",
 };
 

@@ -510,9 +510,8 @@ describe("NewsCard", () => {
     it("outer card is NOT overflow-hidden — protects tape strips + focus ring", () => {
       // Tape strips translateY(-50%) so they straddle the top edge of
       // the card. Clipping the card would crop them in half. Same for
-      // the cover Link's focus-visible outline-offset-2 — clipping
-      // would hide the outline inside the card. Overflow-hidden is
-      // scoped to the image region only.
+      // the cover Link's focus ring — a clipped card would crop it.
+      // Overflow-hidden is scoped to the image region only.
       const { container } = render(<NewsCard {...defaultProps} />);
       const article = container.querySelector("article");
       expect(article?.className).not.toMatch(/overflow-hidden/);

@@ -34,7 +34,7 @@ export function SearchRelated({ items }: SearchRelatedProps) {
           <li key={item.href}>
             <Link
               href={item.href}
-              className="border-paper-edge text-ink hover:bg-cream block border-b px-3 py-2.5 last:border-b-0 focus-visible:outline-offset-[-2px]"
+              className="border-paper-edge text-ink hover:bg-cream focus-ring-inset block border-b px-3 py-2.5 last:border-b-0"
             >
               <span className="text-jersey-deep font-mono text-[9px] tracking-[0.06em] uppercase">
                 {TYPE_LABEL[item.type]}

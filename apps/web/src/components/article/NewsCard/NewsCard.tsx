@@ -432,7 +432,7 @@ export const NewsCard = ({
           // hands this link the card's ring colour (warm on an ink /
           // jersey-deep card: ~1.3:1 on a cream page). Inset, the ring lands
           // on the card itself, where that colour was chosen for, on any page.
-          className="absolute inset-0 z-10 focus-visible:outline-offset-[-2px]"
+          className="focus-ring-inset absolute inset-0 z-10"
         />
       )}
     </TapedCard>

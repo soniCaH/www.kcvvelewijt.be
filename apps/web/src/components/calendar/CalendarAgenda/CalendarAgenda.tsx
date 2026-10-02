@@ -50,15 +50,13 @@ export interface CalendarAgendaProps {
  * `hover:bg-*` value under `focus-visible:` — plus this inset outline. The
  * fill alone would be too easy to miss against a busy row, and the ring
  * alone is not the literal "same treatment as hover" AC 5 asks for, so
- * `focus-visible` carries both. `-outline-offset-2` draws the ring inside
+ * `focus-visible` carries both. `focus-ring-inset` (globals.css) draws the ring inside
  * the row, so it can never clip into the row above or below in this
  * borders-touch, gap-free list. `<MatchStripView>`'s own flush row list
- * ships the outline half of this (`focus-visible:outline-2
- * focus-visible:outline-offset-[-2px]`) but not the fill half — its rows
+ * ships the outline half of this (`focus-ring-inset`) but not the fill half — its rows
  * predate this rule and were not revisited here.
  */
-const LIST_ROW_FOCUS_CLASSES =
-  "focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-jersey-deep";
+const LIST_ROW_FOCUS_CLASSES = "focus-ring-inset";
 
 /**
  * One match row at list density — reuses the 6.C row vocabulary (crest ·

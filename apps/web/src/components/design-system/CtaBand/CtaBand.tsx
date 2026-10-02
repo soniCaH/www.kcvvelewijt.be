@@ -60,7 +60,7 @@ export function CtaBand({
       <StripedSeam colorPair="ink-cream" height="md" />
       <section
         aria-label={ariaLabel}
-        className="bg-jersey-deep-dark focus-on-dark border-ink border-y-2"
+        className="bg-jersey-deep-dark border-ink border-y-2"
       >
         <PageContainer className="py-12 text-center sm:py-16">
           {/* Column gap, not a heading margin — the heading-to-lead air is

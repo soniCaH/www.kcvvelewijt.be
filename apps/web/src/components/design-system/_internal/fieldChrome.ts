@@ -21,7 +21,7 @@
  *
  * The ring is the site-wide one from `globals.css` (`:focus-visible`, 2px at
  * a 2px offset) — no field class draws it. An error field pins it to
- * jersey-deep (`focus-on-light`): green says "you are here", red (border and
+ * jersey-deep (`[--focus-ring:...]` on the error chrome): green says "you are here", red (border and
  * shadow) says "something is wrong", one job per colour.
  *
  * Rest is already full ink, so the border no longer climbs through the
@@ -79,8 +79,9 @@ const fieldChromeIdle = [
 /** Error-state chrome — replaces idle when `error` prop is set. */
 const fieldChromeError = [
   // Base — same cream surface as idle; only border + shadow turn alert
-  // (`focus-on-light`: the ring stays jersey-deep, even on a dark ground)
-  "font-body w-full border-2 bg-cream transition-all duration-150 focus-on-light",
+  // (`[--focus-ring:…]`: the ring stays jersey-deep whatever ground the field
+  // sits on — the state, not the ground, decides here)
+  "font-body w-full border-2 bg-cream transition-all duration-150 [--focus-ring:var(--color-jersey-deep)]",
   "text-ink placeholder:text-ink/40",
 
   // Border + shadow tinted with alert

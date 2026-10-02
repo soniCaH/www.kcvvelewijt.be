@@ -44,6 +44,10 @@ const PER_COMPONENT_RINGS = [
   'const w = "has-[:focus-visible]:ring-2";',
   'const x = "has-[input:focus-visible]:outline-2";',
   "const y = `has-[:focus]:ring-warm`;",
+  // The retired inset spellings: the one inset is the `focus-ring-inset` utility.
+  'const inset1 = "focus-visible:outline-2 focus-visible:outline-offset-[-2px]";',
+  'const inset2 = "focus-visible:outline-offset-[-2px]";',
+  'const inset3 = "focus-visible:-outline-offset-2";',
   // `outline-0` hides the ring as surely as `outline-none` does.
   'const z = "px-4 outline-0";',
   'const aa = "md:outline-0";',
@@ -54,16 +58,12 @@ const ALLOWED = [
   'const ok1 = "py-10 focus:outline-none sm:py-14";',
   // Look-alikes that are not outline/ring utilities.
   'const ok2 = "focus-visible:translate-x-1 focus-visible:shadow-none";',
-  'const ok3 = "focus-on-dark focus-ring-within";',
-  // A selected state, not a focus state.
-  'const ok4 = "outline-jersey-deep outline-2 -outline-offset-2";',
+  'const ok3 = "focus-ring-inset focus-ring-within";',
   // `focus:outline-none` survives under a responsive / state prefix too.
   'const ok5 = "md:focus:outline-none";',
   // Reveal-on-focus affordances are not rings.
   'const ok6 = "group-focus-visible:opacity-100 group-focus-within:opacity-100";',
   'const ok7 = "focus-within:translate-y-1 has-[img]:p-0";',
-  // The inset offset on its own: a ring only moved, never recoloured or hidden.
-  'const ok8 = "outline-offset-[-2px]";',
   'const ok9 = "has-[:focus-visible]:translate-y-1";',
 ];
 
@@ -91,24 +91,5 @@ describe("focus ring — src-file restricted-syntax rule", () => {
 
   it.each(ALLOWED)("allows %s", (source) => {
     expect(messages.get(source)).toEqual([]);
-  });
-
-  // The List Row Fill Rule's inset ring is the one sanctioned exception, and
-  // it is granted per file, not per class string.
-  it.each([
-    "components/calendar/CalendarAgenda/CalendarAgenda.tsx",
-    "components/layout/MatchStrip/MatchStripView.tsx",
-    "components/calendar/CalendarMonth/CalendarMonth.tsx",
-    "components/calendar/CalendarSubscribePanel/CalendarSubscribePanel.tsx",
-    "components/search/SearchRelated.tsx",
-    "components/organigram/HubSearch/HubSearch.tsx",
-    "components/article/NewsCard/NewsCard.tsx",
-  ])("does not apply to the inset-ring surface in %s", async (file) => {
-    const source =
-      'const row = "focus-visible:outline-2 focus-visible:outline-offset-[-2px]";';
-    const [result] = await eslint.lintText(source, {
-      filePath: join(webDir, "src", file),
-    });
-    expect(result.messages).toEqual([]);
   });
 });

@@ -31,9 +31,9 @@ export interface UpLinkProps {
 // the last one (#2769 / [[reference_twmerge_drops_custom_text_tokens]]).
 // `<MonoLabel>` sidesteps the same trap the same way.
 //
-// Neither tone sets a focus ring: the global one (`globals.css`) is
-// jersey-deep, and the dark band the `cream` tone sits in carries
-// `focus-on-dark`, which turns it warm (this chip is the first focusable
+// Neither tone sets a focus ring: the global one (`globals.css`) takes its
+// colour from the ground the chip sits on — jersey-deep on cream, warm inside
+// the dark band the `cream` tone lives in (this chip is the first focusable
 // element after the header on all 17 routes).
 //
 // `ink` also carries the chip's own top air (#2877): 48px at base, 64px from

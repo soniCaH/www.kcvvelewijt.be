@@ -303,7 +303,7 @@ export function OrganigramExplorer({
       aria-labelledby={titleId}
       onKeyDown={onDialogKeyDown}
       data-testid="organigram-explorer"
-      className="border-ink bg-jersey-deep-dark focus-on-dark text-cream fixed inset-0 z-[80] flex flex-col border-2"
+      className="border-ink bg-jersey-deep-dark text-cream fixed inset-0 z-[80] flex flex-col border-2"
     >
       {/* Top bar */}
       <div className="border-cream/20 flex items-center gap-3 border-b bg-black/20 px-4 py-2.5">

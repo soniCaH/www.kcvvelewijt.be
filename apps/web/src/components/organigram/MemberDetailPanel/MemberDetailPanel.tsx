@@ -261,7 +261,7 @@ export function MemberDetailPanel({
             : {})}
         >
           {/* Header */}
-          <div className="bg-jersey-deep-dark focus-on-dark text-cream relative px-4 py-4">
+          <div className="bg-jersey-deep-dark text-cream relative px-4 py-4">
             <button
               ref={closeRef}
               type="button"

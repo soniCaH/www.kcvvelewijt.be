@@ -56,7 +56,7 @@ const meta = {
   // are evaluated against jersey-deep-dark.
   decorators: [
     (Story) => (
-      <div className="bg-jersey-deep-dark focus-on-dark min-h-screen p-6">
+      <div className="bg-jersey-deep-dark min-h-screen p-6">
         <Story />
       </div>
     ),

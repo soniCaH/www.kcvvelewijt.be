@@ -234,15 +234,9 @@ export interface EmptyStateAction extends StateActionBase {
 export type EmptyStateSurface = "paper" | "bare" | "inverse";
 
 const SURFACE_CLASS: Record<EmptyStateSurface, string> = {
-  // `focus-on-light`: the card is cream-soft even when its host is dark
-  // (`inverse` lives on `/evenementen`'s `focus-on-dark` wrapper), and a ring
-  // drawn on cream-soft is jersey-deep, never warm (1.16:1). `bare` has no
-  // fill of its own, so it takes its host's.
-  paper:
-    "border-ink bg-cream-soft shadow-paper-sm focus-on-light border-2 p-7 sm:p-8",
+  paper: "border-ink bg-cream-soft shadow-paper-sm border-2 p-7 sm:p-8",
   bare: "py-2",
-  inverse:
-    "border-ink bg-cream-soft shadow-paper-sm-soft focus-on-light border-2 p-7 sm:p-8",
+  inverse: "border-ink bg-cream-soft shadow-paper-sm-soft border-2 p-7 sm:p-8",
 };
 
 interface EmptyStateSharedProps {
@@ -340,7 +334,7 @@ export type EmptyStateSlotBackground = "transparent" | "cream-soft";
 
 const SLOT_BACKGROUND_CLASS: Record<EmptyStateSlotBackground, string> = {
   transparent: "border-ink-muted",
-  "cream-soft": "border-ink bg-cream-soft focus-on-light",
+  "cream-soft": "border-ink bg-cream-soft",
 };
 
 /** Held-open register — the original tier "slot" (#2427/#2562). */

@@ -259,7 +259,7 @@ export function CalendarSubscribePanel({
                     // Gap-free segments inside the group's `border-2`: the
                     // inset ring (List Row Fill Rule) keeps it off the
                     // neighbours and the border.
-                    "focus-visible:outline-offset-[-2px]",
+                    "focus-ring-inset",
                     side === tab.value
                       ? "bg-ink text-cream"
                       : "text-ink hover:bg-cream-soft",

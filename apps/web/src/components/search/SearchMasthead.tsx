@@ -36,7 +36,7 @@ export function SearchMasthead({
   hint,
 }: SearchMastheadProps) {
   return (
-    <header className="bg-jersey-deep-dark focus-on-dark border-ink relative overflow-hidden border-b-2">
+    <header className="bg-jersey-deep-dark border-ink relative overflow-hidden border-b-2">
       {/* Diagonal stripe texture — decorative (8s1). */}
       <div
         aria-hidden

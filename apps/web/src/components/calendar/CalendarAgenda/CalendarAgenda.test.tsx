@@ -149,8 +149,7 @@ describe("CalendarAgenda", () => {
     const matchRow = screen.getByTestId("agenda-match-row");
     expect(matchRow.className).toContain("hover:bg-cream-soft/50");
     expect(matchRow.className).toContain("focus-visible:bg-cream-soft/50");
-    expect(matchRow.className).toContain("focus-visible:outline-offset-[-2px]");
-    expect(matchRow.className).toContain("focus-visible:outline-jersey-deep");
+    expect(matchRow.className).toContain("focus-ring-inset");
     expect(matchRow.className).not.toContain("translate");
   });
 
@@ -165,8 +164,7 @@ describe("CalendarAgenda", () => {
     const eventRow = screen.getByTestId("agenda-event-row");
     expect(eventRow.className).toContain("hover:bg-jersey-deep/12");
     expect(eventRow.className).toContain("focus-visible:bg-jersey-deep/12");
-    expect(eventRow.className).toContain("focus-visible:outline-offset-[-2px]");
-    expect(eventRow.className).toContain("focus-visible:outline-jersey-deep");
+    expect(eventRow.className).toContain("focus-ring-inset");
     expect(eventRow.className).not.toContain("translate");
   });
 

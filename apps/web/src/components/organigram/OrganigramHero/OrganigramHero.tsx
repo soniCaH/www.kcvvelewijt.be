@@ -37,7 +37,7 @@ export function OrganigramHero({
   return (
     <header
       id="hub-hero"
-      className="bg-jersey-deep-dark focus-on-dark border-ink relative border-2 px-6 py-6 shadow-[6px_6px_0_0_var(--color-ink)] sm:px-9 sm:py-7"
+      className="bg-jersey-deep-dark border-ink relative border-2 px-6 py-6 shadow-[6px_6px_0_0_var(--color-ink)] sm:px-9 sm:py-7"
     >
       {/* Radial jersey wash — decorative. `inset-0` keeps it bounded to the
           band without an `overflow-hidden` that would clip the search dropdown. */}

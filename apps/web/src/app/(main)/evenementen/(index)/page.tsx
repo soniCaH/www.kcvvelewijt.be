@@ -65,7 +65,7 @@ export default async function EvenementenPage() {
   );
 
   return (
-    <div className="bg-jersey-deep-dark focus-on-dark flex min-h-screen flex-col">
+    <div className="bg-jersey-deep-dark flex min-h-screen flex-col">
       <JsonLd
         data={buildBreadcrumbJsonLd([
           { name: "Home", url: SITE_CONFIG.siteUrl },

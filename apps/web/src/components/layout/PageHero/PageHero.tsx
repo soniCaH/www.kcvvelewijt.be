@@ -349,7 +349,7 @@ function DarkBand({
       data-register="band"
       data-tone="dark"
       data-state={image ? "image" : "typographic"}
-      className={cn("bg-jersey-deep-dark focus-on-dark", className)}
+      className={cn("bg-jersey-deep-dark", className)}
     >
       <PageContainer
         width={width}

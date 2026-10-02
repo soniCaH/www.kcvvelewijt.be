@@ -266,9 +266,9 @@ export function CalendarMonth({
                 // jersey-deep box-shadow (not an outline, which focus would
                 // have to override); focus on the selected cell is an inset
                 // INK ring over it, so focus and selection read differently.
-                "focus-visible:outline-offset-[-2px]",
+                "focus-ring-inset",
                 isSelected
-                  ? "bg-jersey-deep/12 focus-visible:outline-ink shadow-[inset_0_0_0_2px_var(--color-jersey-deep)]"
+                  ? "bg-jersey-deep/12 shadow-[inset_0_0_0_2px_var(--color-jersey-deep)] [--focus-ring:var(--color-ink)]"
                   : "hover:bg-cream-soft/60",
               )}
             >

@@ -823,40 +823,51 @@
      so it rides the element's own box — a focused button that is pressed
      (`translate`) takes its ring with it — and never reflows anything.
 
-     The colour is one variable. Default `jersey-deep` (4.69:1 on cream,
-     3.69:1 on cream-deep); ink was rejected because it is the colour of every
-     border, so an ink ring reads as a thicker border instead of "you are
-     here". A dark surface (`ink`, `jersey-deep`, `jersey-deep-dark`) that
-     holds something focusable adds `focus-on-dark` and the ring turns `warm`
-     (7.30:1 on jersey-deep-dark, 11.88:1 on ink); a light panel nested in
-     such a surface adds `focus-on-light` to turn it back. The ring is drawn
-     on the ground AROUND the focused element, so it is the surface the
-     element sits on that decides, not the element's own fill.
+     The colour is one variable, `--focus-ring`, and it follows the GROUND:
+     the ring is drawn on the surface AROUND the focused element, so it is the
+     surface the element sits on that decides, not the element's own fill. Two
+     `> *` rules below key it on the same Tailwind background utilities the
+     `::selection` rule further down keys its inversion on — a child of an
+     `ink` / `jersey-deep` / `jersey-deep-dark` ground gets `warm` (7.30:1 on
+     jersey-deep-dark, 11.88:1 on ink), a child of a cream ground gets
+     jersey-deep (4.69:1 on cream, 3.69:1 on cream-deep). The `> *` scope is
+     the point: a dark button on a cream page keeps jersey-deep, a cream card
+     inside a dark band gets warm around itself, and every deeper descendant
+     inherits from the nearest ground. Ink was rejected as the light-ground
+     ring: it is the colour of every border, so an ink ring reads as a
+     thicker border instead of "you are here".
+
+     ONE LIST: a new band edits the `::selection` selectors AND the two rules
+     here (they are the same set of utilities). A ground that is NOT one of
+     those utilities (a photo, a gradient, an arbitrary `bg-[…]`) sets
+     `[--focus-ring:var(--color-warm)]` (or `…jersey-deep)`) on itself.
 
      This is `@layer base`, so any utility beats it: a leftover `outline-none`
      / `outline-hidden` / `focus-visible:outline-*` on a component silently
      kills or recolours the ring. None may be added — `eslint.config.mjs`
      (`kcvv/no-per-component-focus-ring`) fails the build on them. The one
-     sanctioned exception is the INSET ring (`outline-offset-[-2px]`, colour
-     still from `--focus-ring`) of the List Row Fill Rule and of the surfaces
-     that share its reason — an outset ring there would be clipped, paint over
-     a neighbour, or land on the wrong ground. The files are listed in
-     `eslint.config.mjs` and in DESIGN.md → The List Row Fill Rule.
-
-     A card / panel PRIMITIVE states the ring for the ground it paints
-     (`TapedCard`, `EmptyState` frames, `HubSearch`'s popup carry
-     `focus-on-light` or `focus-on-dark`), so a band that wraps it never leaks
-     its own colour into it. */
+     sanctioned exception is the `focus-ring-inset` utility below (List Row
+     Fill Rule and the surfaces that share its reason). */
   :root {
+    --focus-ring: var(--color-jersey-deep);
+  }
+
+  :where(.bg-ink, .bg-jersey-deep, .bg-jersey-deep-dark) > * {
+    --focus-ring: var(--color-warm);
+  }
+
+  :where(.bg-cream, .bg-cream-soft, .bg-cream-deep) > * {
     --focus-ring: var(--color-jersey-deep);
   }
 
   /* `[data-vr-force-ring]` is the Storybook VR hook (#3033): Chromium only
      paints `:focus-visible` when the capture frame itself holds OS focus, so a
      story's `play` sets the attribute to paint the ring from declared state.
-     Nothing in product code sets it. */
+     Nothing in product code sets it. `.focus-ring-within` is a text-input
+     shell (see its utility below): the ring wraps the shell, not the input. */
   :focus-visible,
-  [data-vr-force-ring="true"] {
+  [data-vr-force-ring="true"],
+  :where(.focus-ring-within):has(input:focus-visible) {
     outline: 2px solid var(--focus-ring);
     outline-offset: 2px;
   }
@@ -873,6 +884,8 @@
      `<SearchMasthead>`, `<FirstTeamsBlock>`, dark `<MatchStripView>` rows,
      the organigram hero/detail panel, `/club/ultras`), not a colour heuristic
      — a future band adds its selector here rather than guessing from hue.
+     The focus ring's colour keys on the SAME utilities (see "Focus ring"
+     above): a new band edits both lists.
 
      Both forms of each selector are needed: the descendant form (a space
      before `::selection`) covers text inside a child element, but a band's
@@ -1390,20 +1403,24 @@
   padding-right: env(safe-area-inset-right, 0);
 }
 
-/* The two knobs for the global focus ring above. Greppable on purpose: the
-   dark-ground census in #3368's PR is `rg focus-on-dark`. */
-@utility focus-on-dark {
-  --focus-ring: var(--color-warm);
-}
-
-@utility focus-on-light {
-  --focus-ring: var(--color-jersey-deep);
+/* An INSET focus ring (`outline-offset: -2px`), colour still from
+   `--focus-ring`. The one sanctioned exception to the global ring's offset,
+   for surfaces where an outset ring would be clipped, paint over a
+   neighbour, or land on the wrong ground: flush list rows (List Row Fill
+   Rule), gap-free cells/segments inside a `border-2`, rows in a scrolling
+   popup, and a link that covers a whole card. DESIGN.md → The List Row Fill
+   Rule names the sites. */
+@utility focus-ring-inset {
+  &:focus-visible {
+    outline-offset: -2px;
+  }
 }
 
 /* A shell that wraps a text input (`/zoeken`'s field, `/hulp`'s search box)
-   draws the one ring around the whole shell, not around the input inside it —
-   the shell is what the eye reads as the field. The input's own ring is
-   switched off here, in one place, so no component carries an `outline-none`.
+   draws the one ring around the whole shell, not around the input inside it
+   (the base rule above carries the shell's width/offset/colour). The input's
+   own ring is switched off here, in one place, so no component carries an
+   `outline-none`.
 
    The buttons inside the shell (clear, submit) keep a ring of their own, but
    an INSET one: `/zoeken`'s shell is `overflow-hidden`, which clips an outset
@@ -1415,10 +1432,6 @@
    on decides its colour" gives jersey-deep for both (4.69:1 on cream, 3.17:1
    on warm), whatever ground the shell sits on. */
 @utility focus-ring-within {
-  &:has(input:focus-visible) {
-    outline: 2px solid var(--focus-ring);
-    outline-offset: 2px;
-  }
   & input:focus-visible {
     outline: none;
   }

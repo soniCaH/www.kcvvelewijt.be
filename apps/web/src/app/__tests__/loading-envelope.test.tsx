@@ -163,7 +163,7 @@ describe("loading.tsx envelope drift guard", () => {
       // #2555: the route now opens on the shared opening's dark register, so
       // the skeleton leads with the same full-bleed `bg-jersey-deep-dark`
       // band the page paints — the container starts below the seam.
-      expectedRootClass: "bg-jersey-deep-dark focus-on-dark",
+      expectedRootClass: "bg-jersey-deep-dark",
       announcement: "Jeugdwerking laden…",
     },
     {

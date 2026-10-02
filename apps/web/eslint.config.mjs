@@ -202,11 +202,11 @@ const OFF_RAMP_TRACKING_PATTERN =
 // `focus:outline-none` (also under a responsive prefix) stays legal on
 // purpose: it is how a `tabIndex={-1}` scroll target (a section the page
 // moves focus to) opts out of a section-sized box; nothing a visitor can tab
-// to is one. A dark ground says `focus-on-dark` instead of re-colouring a
-// ring. The sanctioned inset rings (List Row Fill Rule and the surfaces that
-// share its reason: gap-free grids/tab groups, scrolling popups, full-card
-// overlay links) are granted per file in the config block below, not per
-// class string. Same single-line/no-newline requirement as the patterns above.
+// to is one. The ring's colour follows the ground (two `> *` rules in
+// `globals.css`, keyed on the `bg-*` utilities); the one sanctioned deviation
+// is the `focus-ring-inset` utility (List Row Fill Rule and its kin), which
+// is a class name, not one of these utilities, so it needs no exemption.
+// Same single-line/no-newline requirement as the patterns above.
 const FOCUS_RING_PATTERN = [
   "(?<![\\w-])(?:(?:group-|peer-)?focus-(?:visible|within)|(?:group|peer)-focus):-?(?:outline|ring)-",
   "(?<![\\w-])focus:-?(?:ring-|outline-(?!none(?![\\w-])))",
@@ -419,30 +419,11 @@ const eslintConfig = [
     },
   },
   {
-    // One Focus Ring Rule (#3368) — own rule ID, own block. The inset ring
-    // (`outline-offset-[-2px]`, DESIGN.md → The List Row Fill Rule) lives in
-    // exactly these files and nowhere else, so the exemption is a file list
-    // here, never an `eslint-disable` there. Each one is a surface where an
-    // outset ring would be clipped or painted over a neighbour, or would land
-    // on the wrong ground:
-    //   - flush list rows: CalendarAgenda, MatchStripView, SearchRelated,
-    //     HubSearch (result rows in a scrolling popup);
-    //   - gap-free cells/segments inside a `border-2`: CalendarMonth (day
-    //     cells), CalendarSubscribePanel (segmented tabs);
-    //   - a link covering a whole dark card, whose outset ring would be drawn
-    //     on the page ground: NewsCard.
+    // One Focus Ring Rule (#3368) — own rule ID, own block, the same shape as
+    // its peers (test/spec files exempt, nothing else). The inset ring is the
+    // `focus-ring-inset` utility, so no file needs an exemption.
     files: ["**/src/**/*.{ts,tsx}"],
-    ignores: [
-      "**/*.test.{ts,tsx}",
-      "**/*.spec.{ts,tsx}",
-      "**/src/components/calendar/CalendarAgenda/CalendarAgenda.tsx",
-      "**/src/components/layout/MatchStrip/MatchStripView.tsx",
-      "**/src/components/search/SearchRelated.tsx",
-      "**/src/components/organigram/HubSearch/HubSearch.tsx",
-      "**/src/components/calendar/CalendarMonth/CalendarMonth.tsx",
-      "**/src/components/calendar/CalendarSubscribePanel/CalendarSubscribePanel.tsx",
-      "**/src/components/article/NewsCard/NewsCard.tsx",
-    ],
+    ignores: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
     plugins: { kcvv: kcvvPlugin },
     rules: {
       "kcvv/no-per-component-focus-ring": [
@@ -450,7 +431,7 @@ const eslintConfig = [
         {
           selector: matchesClassString(FOCUS_RING_PATTERN),
           message:
-            "A per-component focus ring or a hidden outline — the site draws ONE global focus ring from globals.css (apps/web/DESIGN.md → Buttons). A focus-visible:/focus-within:/group-focus*:/has-[…]: outline or ring utility, a focus: ring, outline-hidden, outline-0 or outline-none (other than plain focus:outline-none) recolours or hides it. A dark ground adds `focus-on-dark` instead, a light card `focus-on-light`; a text-input shell adds `focus-ring-within`.",
+            "A per-component focus ring or a hidden outline — the site draws ONE global focus ring from globals.css (apps/web/DESIGN.md → Buttons). A focus-visible:/focus-within:/group-focus*:/has-[…]: outline or ring utility, a focus: ring, outline-hidden, outline-0 or outline-none (other than plain focus:outline-none) recolours or hides it. The ring colour comes from the ground (globals.css); an inset ring is `focus-ring-inset`; a text-input shell adds `focus-ring-within`.",
         },
       ],
     },
