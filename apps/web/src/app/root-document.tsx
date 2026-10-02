@@ -54,16 +54,36 @@ export function RootDocument({
     >
       <head>
         {/* Adobe Typekit (Adobe Fonts) — serves Freight Display/Big Pro + Freight
-            Sans Pro (the body font as of #2174). Loaded async (non-blocking): an
-            injected <script> fetches the kit and calls Typekit.load() in its own
-            onload, so load() never races ahead of the kit defining `Typekit`. If
-            Adobe is slow/down the page is unaffected — text falls back to the
+            Sans Pro (the body font as of #2174). Loaded as the kit's CSS embed,
+            not its JS embed (#3387): the JS loader downloads EVERY face in the
+            kit (19 files) to fire its active/inactive events, whereas the CSS
+            declares the same `@font-face` rules and the browser fetches only the
+            faces the page actually renders. Still non-blocking: an
+            `afterInteractive` script appends the <link> after hydration, so
+            Adobe being slow/down never delays first render — text keeps the
             metric-matched fallback stacks (`Freight Sans/Display Fallback` in
-            globals.css); mono (IBM Plex Mono) is self-hosted via next/font. */}
+            globals.css) until the faces arrive. The font files live on
+            use.typekit.net and the kit CSS @imports a stylesheet from
+            p.typekit.net; the injected <link> is `crossorigin` (both hosts send
+            `access-control-allow-origin: *`) so the CSS, its @import and the
+            fonts all ride the one anonymous connection warmed here. Mono (IBM
+            Plex Mono) is self-hosted via next/font. */}
         {typekitId && (
-          <Script id="typekit-init" strategy="afterInteractive">
-            {`(function(d){var s=d.createElement("script");s.src="https://use.typekit.net/${typekitId}.js";s.async=true;s.onload=function(){try{Typekit.load({async:true});}catch(e){console.error("Typekit load error:",e);}};d.head.appendChild(s);})(document);`}
-          </Script>
+          <>
+            <link
+              rel="preconnect"
+              href="https://use.typekit.net"
+              crossOrigin="anonymous"
+            />
+            <link
+              rel="preconnect"
+              href="https://p.typekit.net"
+              crossOrigin="anonymous"
+            />
+            <Script id="typekit-init" strategy="afterInteractive">
+              {`(function(d){var l=d.createElement("link");l.rel="stylesheet";l.crossOrigin="anonymous";l.href="https://use.typekit.net/${typekitId}.css";d.head.appendChild(l);})(document);`}
+            </Script>
+          </>
         )}
         {head}
       </head>
