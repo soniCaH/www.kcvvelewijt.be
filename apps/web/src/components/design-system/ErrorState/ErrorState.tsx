@@ -33,7 +33,7 @@ interface ErrorStateActionExtra {
   variant?: ErrorStateActionVariant;
   /**
    * Stable analytics slug rendered as `data-error-action` (e.g. `"home"` /
-   * `"search"` / `"retry"`). A page-level `<ErrorAnalytics>` wrapper delegates
+   * `"search"` / `"retry"` / `"news"`). A page-level `<ErrorAnalytics>` wrapper delegates
    * clicks off this marker into `error_action_click` — so the action row stays
    * handler-free and server-renderable. Omit it to render no marker.
    */

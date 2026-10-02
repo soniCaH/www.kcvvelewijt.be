@@ -51,8 +51,8 @@ const META_LABEL = "font-mono text-label uppercase";
  * small-caps. Right cluster: one labelled "Delen" button (ShareNetwork icon
  * + visible text, same mono small-caps register as the facts cluster) that
  * triggers the Web Share API, or the Facebook sharer fallback where Web
- * Share is unavailable. No breadcrumb — that role belongs to the "< Terug
- * naar nieuws" back link on the hero and the type-specific kicker.
+ * Share is unavailable. No breadcrumb — that role belongs to the `<UpLink>`
+ * above the hero (#2570) and the type-specific kicker.
  *
  * No separate Facebook control (#2529 — DESIGN.md "The Tap Target Rule"):
  * `handleNativeShare`'s Facebook-sharer fallback already covers the
