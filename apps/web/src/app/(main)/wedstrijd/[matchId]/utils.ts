@@ -232,3 +232,59 @@ export function hasOpponentPage(
     selectSeniorTeams([kcvvTeam]).length > 0
   );
 }
+
+export type MatchBodySectionKey = "lineup" | "events" | "standings";
+
+export interface MatchBodyPlan {
+  /** The body sections that render, in page order, each with its spacing. */
+  sections: { key: MatchBodySectionKey; spacing: string | undefined }[];
+  /** A seam under the hero: a body section or the related row follows it. */
+  seamUnderHero: boolean;
+  /** A seam between the last body section and the related row. */
+  seamBeforeRelated: boolean;
+}
+
+/**
+ * The one source for the match page's body order, its seams and its section
+ * spacing (#3306 / #3336). The page renders a seam before every section after
+ * the first, so a section's seam sides are exactly its neighbours: the first
+ * sits under the hero's opening seam (#2426) and keeps its top; the last
+ * keeps its bottom when no related row follows. A side that touches a seam
+ * pads `pt-10 sm:pt-14` / `pb-10 sm:pb-14`; every other side keeps the
+ * section's own `py-12 sm:py-16` (`undefined` = no override).
+ */
+export function planMatchBody({
+  hasLineup,
+  hasEvents,
+  hasStandings,
+  hasRelated,
+}: {
+  hasLineup: boolean;
+  hasEvents: boolean;
+  hasStandings: boolean;
+  hasRelated: boolean;
+}): MatchBodyPlan {
+  const present: MatchBodySectionKey[] = [];
+  if (hasLineup) present.push("lineup");
+  if (hasEvents) present.push("events");
+  if (hasStandings) present.push("standings");
+
+  return {
+    sections: present.map((key, i) => ({
+      key,
+      spacing: bodySectionSpacing(i > 0, i < present.length - 1 || hasRelated),
+    })),
+    seamUnderHero: present.length > 0 || hasRelated,
+    seamBeforeRelated: present.length > 0 && hasRelated,
+  };
+}
+
+function bodySectionSpacing(
+  seamAbove: boolean,
+  seamBelow: boolean,
+): string | undefined {
+  if (seamAbove && seamBelow) return "py-10 sm:py-14";
+  if (seamAbove) return "pt-10 pb-12 sm:pt-14 sm:pb-16";
+  if (seamBelow) return "pt-12 pb-10 sm:pt-16 sm:pb-14";
+  return undefined;
+}

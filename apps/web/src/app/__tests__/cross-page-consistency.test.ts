@@ -2689,9 +2689,11 @@ const SEAM_SPACING_SITES: Record<
     above: 2,
   },
   // hero → seam → lineup | events | standings (first keeps its top) → seam
-  // → <RelatedRow>. Which sections render is data, so one helper hands each
-  // its shape: `bodySectionSpacing`.
-  "app/(main)/wedstrijd/[matchId]/page.tsx": { below: 1, both: 1, above: 1 },
+  // → <RelatedRow>. Which sections render is data, so one pure helper
+  // (`planMatchBody`, tested in `utils.test.ts`) hands the page its body
+  // order, its seams and each section's shape; the page carries no class
+  // string of its own.
+  "app/(main)/wedstrijd/[matchId]/utils.ts": { below: 1, both: 1, above: 1 },
 };
 
 /**

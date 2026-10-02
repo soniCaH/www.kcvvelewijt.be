@@ -32,6 +32,7 @@ import { MatchStandingsSection } from "@/components/match/MatchStandingsSection"
 import { RelatedRow } from "@/components/related/RelatedRow";
 import type { RelatedRowItem } from "@/components/related/types";
 import { StripedSeam } from "@/components/design-system";
+import { planMatchBody } from "./utils";
 
 const KCVV_LOGO = fixtureImage("sponsor-logo", 0);
 const OPPONENT_LOGO = fixtureImage("sponsor-logo", 1);
@@ -213,9 +214,21 @@ const relatedRowItems: RelatedRowItem[] = [
   },
 ];
 
+// Every section renders in this story, so the page's own plan (`page.tsx`
+// reads the same helper) hands out the section spacing.
+const spacing = Object.fromEntries(
+  planMatchBody({
+    hasLineup: true,
+    hasEvents: true,
+    hasStandings: true,
+    hasRelated: true,
+  }).sections.map(({ key, spacing }) => [key, spacing]),
+);
+
 /**
  * Page-level composition of the finished-match detail route. Mirrors the
- * section ordering and the `<StripedSeam>` cadence of `page.tsx`.
+ * section ordering, the `<StripedSeam>` cadence and the section spacing of
+ * `page.tsx`.
  */
 function MatchDetailAssembly() {
   return (
@@ -242,6 +255,7 @@ function MatchDetailAssembly() {
       <StripedSeam colorPair="ink-cream" height="md" />
 
       <MatchLineupSection
+        className={spacing.lineup}
         homeTeamName={HOME_NAME}
         awayTeamName={AWAY_NAME}
         homeLineup={homeLineup}
@@ -251,6 +265,7 @@ function MatchDetailAssembly() {
       <StripedSeam colorPair="ink-cream" height="md" />
 
       <MatchEventsSection
+        className={spacing.events}
         homeTeamName={HOME_NAME}
         awayTeamName={AWAY_NAME}
         homeTeamLogo={KCVV_LOGO}
@@ -261,6 +276,7 @@ function MatchDetailAssembly() {
       <StripedSeam colorPair="ink-cream" height="md" />
 
       <MatchStandingsSection
+        className={spacing.standings}
         entries={standings}
         homeClubId={KCVV_CLUB_ID}
         awayClubId={AWAY_CLUB_ID}

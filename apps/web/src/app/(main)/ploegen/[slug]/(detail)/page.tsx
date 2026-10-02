@@ -509,6 +509,10 @@ export default async function TeamPage({ params }: TeamPageProps) {
 
   const analyticsParams = { team_slug: slug };
 
+  // One gate for the youth CTA and for `#info`'s bottom spacing: a seam
+  // follows `#info` exactly when the CTA does.
+  const hasEnrolmentCta = team.teamType === "youth";
+
   // #2443 rule 4 originally put the team's own fixture-list route
   // (`/ploegen/[slug]/wedstrijden`) in the domain tier here. Dropped (review
   // round 1, #2788): it has no Sanity document behind it, so the card was a
@@ -588,8 +592,10 @@ export default async function TeamPage({ params }: TeamPageProps) {
           keeps its plain top; the last (`#info`, or the youth CTA) sits above
           `<SponsorsSection>`, a bare colour change, and keeps its plain
           bottom. The two `py-10` status/notice containers fall under the same
-          rule — they were the first section's own `py-10`, right at 390px and
-          wrong from 640px up. */}
+          rule: they were the first section's own `py-10` (40px at every
+          width, no `sm:` step) and are now `pt-12 pb-10 sm:pt-16 sm:pb-14` —
+          the top grows to the plain opening air (48px, then 64px from
+          640px), the bottom steps 40px to 56px. */}
       {!inCompetition ? (
         <>
           <StripedSeam colorPair="ink-cream" height="md" />
@@ -735,7 +741,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
         tabIndex={-1}
         ariaLabel={sectionLabels.info}
         className={
-          team.teamType === "youth"
+          hasEnrolmentCta
             ? "py-10 focus:outline-none sm:py-14"
             : "pt-10 pb-12 focus:outline-none sm:pt-14 sm:pb-16"
         }
@@ -765,7 +771,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
           click-only analytics today (view→click uncomputable) become
           falsifiable once there is post-go-live traffic. No GTM change — the
           live `team_` trigger regex already matches this event. */}
-      {team.teamType === "youth" ? (
+      {hasEnrolmentCta ? (
         <>
           <StripedSeam colorPair="ink-cream" height="md" />
           <TrackInView

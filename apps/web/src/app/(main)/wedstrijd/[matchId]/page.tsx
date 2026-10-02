@@ -34,7 +34,7 @@
  * capped list instead of one hero card plus a secondary inline link.
  */
 
-import { cache } from "react";
+import { Fragment, cache } from "react";
 import { Effect } from "effect";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -85,6 +85,7 @@ import {
   formatMatchTitle,
   formatMatchDescription,
   hasOpponentPage,
+  planMatchBody,
 } from "./utils";
 
 interface MatchPageProps {
@@ -343,25 +344,6 @@ function warnAndDegradeRankingRead(
   return Effect.succeed(null);
 }
 
-/**
- * A body section's spacing (#3306 / #3336): a side that touches a
- * `<StripedSeam>` pads `pt-10 sm:pt-14` / `pb-10 sm:pb-14`; every other side
- * keeps the section's own `py-12 sm:py-16`.
- *
- * `seamAbove` is false for the first section (the hero's seam is an opening,
- * #2426 — it keeps its top); `seamBelow` is false for the last section when
- * no `<RelatedRow>` follows.
- */
-function bodySectionSpacing(
-  seamAbove: boolean,
-  seamBelow: boolean,
-): string | undefined {
-  if (seamAbove && seamBelow) return "py-10 sm:py-14";
-  if (seamAbove) return "pt-10 pb-12 sm:pt-14 sm:pb-16";
-  if (seamBelow) return "pt-12 pb-10 sm:pt-16 sm:pb-14";
-  return undefined;
-}
-
 export default async function MatchPage({ params }: MatchPageProps) {
   const { matchId } = await params;
   const numericId = parseInt(matchId, 10);
@@ -591,16 +573,14 @@ export default async function MatchPage({ params }: MatchPageProps) {
   });
   const hasRelated = relatedRowItems.length > 0;
 
-  // Seam air (#3306 / #3336): which body sections render is data, so each
-  // one's spacing is derived from its place in the run. The first sits under
-  // the hero's opening seam and keeps its top; a section with a seam under it
-  // (a later section, or the related row) gives its bottom back; the last
-  // section with nothing below keeps its bottom. Seams sit between every two
-  // neighbours — see the render below.
-  const bodyCount =
-    Number(hasLineup) + Number(hasEvents) + Number(hasStandings);
-  const spacingAt = (position: number) =>
-    bodySectionSpacing(position > 0, position < bodyCount - 1 || hasRelated);
+  // Body order, seams and section spacing all come from this one plan
+  // (#3306 / #3336) — see `planMatchBody`.
+  const body = planMatchBody({
+    hasLineup,
+    hasEvents,
+    hasStandings,
+    hasRelated,
+  });
 
   const analyticsParams = {
     match_id: numericId,
@@ -647,84 +627,75 @@ export default async function MatchPage({ params }: MatchPageProps) {
         <MatchHero match={heroRow} />
       </PageContainer>
 
-      {(hasLineup || hasEvents || hasStandings || hasRelated) && (
-        <StripedSeam colorPair="ink-cream" height="md" />
-      )}
+      {body.seamUnderHero && <StripedSeam colorPair="ink-cream" height="md" />}
 
-      {hasLineup && (
-        <TrackInView
-          eventName="match_lineup_section_in_view"
-          params={analyticsParams}
-        >
-          <MatchLineupSection
-            className={spacingAt(0)}
-            homeTeamName={match.home_team.name}
-            awayTeamName={match.away_team.name}
-            homeLineup={homeLineup}
-            awayLineup={awayLineup}
-          />
-        </TrackInView>
-      )}
-
-      {hasLineup && hasEvents && (
-        <StripedSeam colorPair="ink-cream" height="md" />
-      )}
-
-      {hasEvents && (
-        <TrackInView
-          eventName="match_events_section_in_view"
-          params={analyticsParams}
-        >
-          <MatchEventsSection
-            className={spacingAt(Number(hasLineup))}
-            homeTeamName={match.home_team.name}
-            awayTeamName={match.away_team.name}
-            homeTeamLogo={match.home_team.logo}
-            awayTeamLogo={match.away_team.logo}
-            events={events}
-          />
-        </TrackInView>
-      )}
-
-      {/* Seam before the standings when a body section preceded it. */}
-      {hasStandings && (hasLineup || hasEvents) && (
-        <StripedSeam colorPair="ink-cream" height="md" />
-      )}
-
-      {/* Match-day standings (#2162) — league matches only. `<TrackInView>`
-          wraps only the table-rendered branch: `match_standings_in_view`
-          means "a standings table was shown", so it must not fire on the
-          auto-hide (cup/friendly/off-season) branch NOR on the failure-
-          notice branch, which mounts the section but never a table
-          (#2576 review finding 3). */}
-      {standingsResult === null ? (
-        <MatchStandingsSection
-          unavailable
-          className={spacingAt(Number(hasLineup) + Number(hasEvents))}
-          homeClubId={match.home_team.id}
-          awayClubId={match.away_team.id}
-          highlightTeamId={match.kcvv_team_id}
-        />
-      ) : (
-        hasStandings && (
-          <TrackInView
-            eventName="match_standings_in_view"
-            params={analyticsParams}
-          >
-            <MatchStandingsSection
-              className={spacingAt(Number(hasLineup) + Number(hasEvents))}
-              entries={standingsResult}
-              homeClubId={match.home_team.id}
-              awayClubId={match.away_team.id}
-              highlightTeamId={match.kcvv_team_id}
-            />
-          </TrackInView>
-        )
-      )}
+      {body.sections.map(({ key, spacing }, index) => (
+        <Fragment key={key}>
+          {index > 0 && <StripedSeam colorPair="ink-cream" height="md" />}
+          {key === "lineup" && (
+            <TrackInView
+              eventName="match_lineup_section_in_view"
+              params={analyticsParams}
+            >
+              <MatchLineupSection
+                className={spacing}
+                homeTeamName={match.home_team.name}
+                awayTeamName={match.away_team.name}
+                homeLineup={homeLineup}
+                awayLineup={awayLineup}
+              />
+            </TrackInView>
+          )}
+          {key === "events" && (
+            <TrackInView
+              eventName="match_events_section_in_view"
+              params={analyticsParams}
+            >
+              <MatchEventsSection
+                className={spacing}
+                homeTeamName={match.home_team.name}
+                awayTeamName={match.away_team.name}
+                homeTeamLogo={match.home_team.logo}
+                awayTeamLogo={match.away_team.logo}
+                events={events}
+              />
+            </TrackInView>
+          )}
+          {/* Match-day standings (#2162) — league matches only.
+              `<TrackInView>` wraps only the table-rendered branch:
+              `match_standings_in_view` means "a standings table was shown",
+              so it must not fire on the auto-hide (cup/friendly/off-season)
+              branch NOR on the failure-notice branch, which mounts the
+              section but never a table (#2576 review finding 3). */}
+          {key === "standings" &&
+            (standingsResult === null ? (
+              <MatchStandingsSection
+                unavailable
+                className={spacing}
+                homeClubId={match.home_team.id}
+                awayClubId={match.away_team.id}
+                highlightTeamId={match.kcvv_team_id}
+              />
+            ) : (
+              <TrackInView
+                eventName="match_standings_in_view"
+                params={analyticsParams}
+              >
+                <MatchStandingsSection
+                  className={spacing}
+                  entries={standingsResult}
+                  homeClubId={match.home_team.id}
+                  awayClubId={match.away_team.id}
+                  highlightTeamId={match.kcvv_team_id}
+                />
+              </TrackInView>
+            ))}
+        </Fragment>
+      ))}
 
       {/* Seam before the row when a body section preceded it, so it isn't
           flush against the lineup/events/standings block. */}
-      {hasRelated && (hasLineup || hasEvents || hasStandings) && (
+      {body.seamBeforeRelated && (
         <StripedSeam colorPair="ink-cream" height="md" />
       )}
 

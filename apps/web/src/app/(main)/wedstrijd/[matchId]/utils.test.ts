@@ -13,6 +13,7 @@ import {
   formatMatchDescription,
   matchDetailToHeroRow,
   hasOpponentPage,
+  planMatchBody,
 } from "./utils";
 import type { LineupPlayer } from "@/components/match/MatchLineup";
 import type { MatchLineupPlayer } from "@/lib/effect/schemas/match.schema";
@@ -541,4 +542,59 @@ describe("hasOpponentPage", () => {
     expect(hasOpponentPage("cup", aPloeg)).toBe(false);
     expect(hasOpponentPage("league", undefined)).toBe(false);
   });
+});
+
+describe("planMatchBody", () => {
+  const SEAM_ABOVE_AND_BELOW = "py-10 sm:py-14";
+  const SEAM_ABOVE_ONLY = "pt-10 pb-12 sm:pt-14 sm:pb-16";
+  const SEAM_BELOW_ONLY = "pt-12 pb-10 sm:pt-16 sm:pb-14";
+
+  const flags = [true, false];
+  const combinations = flags.flatMap((hasLineup) =>
+    flags.flatMap((hasEvents) =>
+      flags.flatMap((hasStandings) =>
+        flags.map((hasRelated) => ({
+          hasLineup,
+          hasEvents,
+          hasStandings,
+          hasRelated,
+        })),
+      ),
+    ),
+  );
+
+  it.each(combinations)(
+    "lineup=$hasLineup events=$hasEvents standings=$hasStandings related=$hasRelated",
+    (input) => {
+      const { sections, seamUnderHero, seamBeforeRelated } =
+        planMatchBody(input);
+
+      // The sections that render, in page order.
+      expect(sections.map((s) => s.key)).toEqual(
+        [
+          input.hasLineup && "lineup",
+          input.hasEvents && "events",
+          input.hasStandings && "standings",
+        ].filter(Boolean),
+      );
+      expect(seamUnderHero).toBe(sections.length > 0 || input.hasRelated);
+      expect(seamBeforeRelated).toBe(sections.length > 0 && input.hasRelated);
+
+      sections.forEach(({ spacing }, i) => {
+        const seamAbove = i > 0;
+        const seamBelow = i < sections.length - 1 || input.hasRelated;
+        // The first keeps its top (the hero's opening seam), the last keeps
+        // its bottom when nothing follows it; every seam side gives one step.
+        expect(spacing).toBe(
+          seamAbove && seamBelow
+            ? SEAM_ABOVE_AND_BELOW
+            : seamAbove
+              ? SEAM_ABOVE_ONLY
+              : seamBelow
+                ? SEAM_BELOW_ONLY
+                : undefined,
+        );
+      });
+    },
+  );
 });
