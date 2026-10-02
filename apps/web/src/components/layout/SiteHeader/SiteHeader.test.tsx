@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, act } from "@testing-library/react";
+import { render, screen, act, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SiteHeader } from "./SiteHeader";
 
+let mockPathname = "/";
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/",
+  usePathname: () => mockPathname,
 }));
 
 import type { TeamNavVM } from "@/lib/repositories/team.repository";
@@ -30,6 +31,10 @@ const seniorTeams: TeamNavVM[] = [
 ];
 
 describe("SiteHeader", () => {
+  beforeEach(() => {
+    mockPathname = "/";
+  });
+
   it("renders sticky header with top: 0", () => {
     const { container } = render(<SiteHeader />);
     const header = container.querySelector("header");
@@ -240,6 +245,60 @@ describe("SiteHeader", () => {
       expect(document.activeElement).toBe(
         screen.getAllByRole("link", { name: "Nieuws" })[0],
       );
+    });
+  });
+  // #3386: the drawer stays open on a tap so the tapped row's pending dots
+  // (`useLinkStatus`) stay mounted; closing on tap would unmount the link and
+  // lose its status. It closes when the new route arrives (pathname change).
+  describe("drawer closes on arrival, not on tap (#3386)", () => {
+    const drawer = () => within(screen.getByRole("dialog"));
+
+    it("stays open when a row to another page is tapped", async () => {
+      const user = userEvent.setup();
+      render(<SiteHeader seniorTeams={seniorTeams} />);
+      await user.click(screen.getByRole("button", { name: /open menu/i }));
+
+      await user.click(drawer().getByRole("link", { name: "Nieuws" }));
+
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+    });
+
+    it("closes once the pathname changes", async () => {
+      const user = userEvent.setup();
+      const { rerender } = render(<SiteHeader seniorTeams={seniorTeams} />);
+      await user.click(screen.getByRole("button", { name: /open menu/i }));
+      await user.click(drawer().getByRole("link", { name: "Nieuws" }));
+
+      mockPathname = "/nieuws";
+      rerender(<SiteHeader seniorTeams={seniorTeams} />);
+
+      expect(screen.queryByRole("dialog")).toBeNull();
+    });
+
+    it("closes at once when the row for the current page is tapped", async () => {
+      mockPathname = "/nieuws";
+      const user = userEvent.setup();
+      render(<SiteHeader seniorTeams={seniorTeams} />);
+      await user.click(screen.getByRole("button", { name: /open menu/i }));
+
+      await user.click(drawer().getByRole("link", { name: "Nieuws" }));
+
+      expect(screen.queryByRole("dialog")).toBeNull();
+    });
+
+    it("keeps the drawer open for the Word lid CTA, and closes at once on that page", async () => {
+      const user = userEvent.setup();
+      const { unmount } = render(<SiteHeader seniorTeams={seniorTeams} />);
+      await user.click(screen.getByRole("button", { name: /open menu/i }));
+      await user.click(drawer().getByRole("link", { name: "Word lid" }));
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+      unmount();
+
+      mockPathname = "/club/word-lid";
+      render(<SiteHeader seniorTeams={seniorTeams} />);
+      await user.click(screen.getByRole("button", { name: /open menu/i }));
+      await user.click(drawer().getByRole("link", { name: "Word lid" }));
+      expect(screen.queryByRole("dialog")).toBeNull();
     });
   });
 });
