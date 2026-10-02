@@ -52,7 +52,7 @@ export function QuestionCard({
       className={`border-ink bg-cream border-2 shadow-[3px_3px_0_0_var(--color-ink)] ${
         open
           ? ""
-          : "transition-all duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
+          : "transition-[transform,box-shadow] duration-300 hover:translate-x-1 hover:translate-y-1 hover:shadow-none"
       }`}
     >
       <h3>

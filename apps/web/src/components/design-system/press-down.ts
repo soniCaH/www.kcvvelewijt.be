@@ -18,7 +18,7 @@
  * CSS-variable transform rather than utility classes.
  */
 export const PRESS_DOWN_CLASSES =
-  "transition-all duration-300 hover:shadow-none motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1";
+  "transition-[transform,box-shadow] duration-300 hover:shadow-none motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1";
 
 /**
  * The one chip (#3328, decided in #3303): every chip-shaped link on the

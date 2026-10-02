@@ -218,7 +218,7 @@ describe("FilterTabs", () => {
     it("uses the canonical 300ms duration for hover transitions", () => {
       render(<FilterTabs tabs={mockTabs} activeTab="all" />);
       const tab = screen.getByRole("button", { name: "All 10" });
-      expect(tab).toHaveClass("transition-all", "duration-300");
+      expect(tab).toHaveClass("duration-300");
     });
   });
 

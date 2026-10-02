@@ -77,7 +77,7 @@ export const SponsorTile = ({
         // keyboard focus, so pointer and keyboard users get the same feedback.
         framed &&
           sponsor.url &&
-          "transition-all duration-300 group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-none group-focus-visible:translate-x-1 group-focus-visible:translate-y-1 group-focus-visible:shadow-none",
+          "transition-[transform,box-shadow] duration-300 group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-none group-focus-visible:translate-x-1 group-focus-visible:translate-y-1 group-focus-visible:shadow-none",
       )}
     >
       {inner}

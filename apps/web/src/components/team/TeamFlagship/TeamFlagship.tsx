@@ -109,7 +109,7 @@ export function TeamFlagship({
 
       <span
         className={cn(
-          "mt-2 inline-flex items-center gap-1 border-2 px-4 py-2 font-mono text-[11px] tracking-[0.1em] uppercase transition-all duration-300 group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-none",
+          "mt-2 inline-flex items-center gap-1 border-2 px-4 py-2 font-mono text-[11px] tracking-[0.1em] uppercase transition-[transform,box-shadow] duration-300 group-hover:translate-x-1 group-hover:translate-y-1 group-hover:shadow-none",
           isA
             ? "border-cream text-cream shadow-[3px_3px_0_0_var(--color-cream)]"
             : "border-ink text-ink shadow-[3px_3px_0_0_var(--color-ink)]",

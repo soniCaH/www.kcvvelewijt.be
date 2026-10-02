@@ -41,7 +41,7 @@
 /** Default-state chrome (rest, hover, focus, filled, disabled). */
 const fieldChromeIdle = [
   // Base — sharp corners, cream surface, transitions
-  "font-body w-full border-2 bg-cream transition-all duration-150",
+  "font-body w-full border-2 bg-cream transition-[transform,box-shadow,border-color,background-color,opacity] duration-150",
   "text-ink placeholder:text-ink/40",
 
   // Idle border + shadow — full ink; filled (typed, not focused) needs no
@@ -81,7 +81,7 @@ const fieldChromeError = [
   // Base — same cream surface as idle; only border + shadow turn alert
   // (`[--focus-ring:…]`: the ring stays jersey-deep whatever ground the field
   // sits on — the state, not the ground, decides here)
-  "font-body w-full border-2 bg-cream transition-all duration-150 [--focus-ring:var(--color-jersey-deep)]",
+  "font-body w-full border-2 bg-cream transition-[transform,box-shadow,border-color,background-color,opacity] duration-150 [--focus-ring:var(--color-jersey-deep)]",
   "text-ink placeholder:text-ink/40",
 
   // Border + shadow tinted with alert

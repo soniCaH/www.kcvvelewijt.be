@@ -4,7 +4,7 @@ import { Meta } from "@storybook/addon-docs/blocks";
 
 export const CardDemo = ({ label, reveal, bg = "cream", soft = false, children }) => (
   <div
-    className={`group relative border-2 border-ink ${soft ? "shadow-paper-sm-soft" : "shadow-paper-sm"} transition-all duration-300 hover:shadow-none motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1 cursor-pointer`}
+    className={`group relative border-2 border-ink ${soft ? "shadow-paper-sm-soft" : "shadow-paper-sm"} transition-[transform,box-shadow] duration-300 hover:shadow-none motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1 cursor-pointer`}
     style={{ width: '220px', minHeight: '128px', background: `var(--color-${bg})` }}
   >
     <div className="p-4" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -56,8 +56,8 @@ At rest a card casts a hard, un-blurred offset shadow (`shadow-paper-sm` = `4px 
     </tr>
     <tr>
       <td>Transition</td>
-      <td><code>transition-all duration-300</code></td>
-      <td>300ms, all properties (the one canonical timing)</td>
+      <td><code>transition-[transform,box-shadow] duration-300</code></td>
+      <td>300ms, only the two properties that move (the one canonical timing)</td>
     </tr>
     <tr>
       <td>Motion safety</td>

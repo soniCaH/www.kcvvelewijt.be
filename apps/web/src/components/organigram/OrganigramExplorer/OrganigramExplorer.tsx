@@ -561,7 +561,7 @@ export function OrganigramExplorer({
                       data-node-id={child.id}
                       onClick={() => navigate(child.id)}
                       aria-label={`Naar ${child.title}`}
-                      className="transition-all duration-300 hover:shadow-none motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1"
+                      className="transition-[transform,box-shadow] duration-300 hover:shadow-none motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1"
                     >
                       <SpotlightNodeCard node={child} variant="node" />
                     </button>

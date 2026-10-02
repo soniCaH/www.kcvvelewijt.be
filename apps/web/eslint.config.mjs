@@ -84,6 +84,10 @@ const OFF_SCALE_DURATION_PATTERN =
 const ARBITRARY_MOTION_VALUE_PATTERN = "(?:duration|ease|animate)-\\[";
 const UNGUARDED_LOOP_PATTERN =
   "(?<!motion-safe:)(?<!motion-reduce:)animate-(?!none\\b)";
+// `transition-all` (#2493): the shorthand transitions every property, so a
+// `filter` or `background` change nobody meant to animate eases along with
+// the press-down's `transform`/`box-shadow`. Name the properties instead.
+const TRANSITION_ALL_PATTERN = "(?<![\\w-])transition-all(?![\\w-])";
 
 // Token-Only Colour Rule (DESIGN.md → Colors → Named Rules, #2433). This
 // system has one paper, one ink, one green and a small set of named status
@@ -336,6 +340,11 @@ const eslintConfig = [
           selector: matchesClassString(UNGUARDED_LOOP_PATTERN),
           message:
             "Unguarded loop — an animate- utility needs a motion-safe: (or motion-reduce: to remove it) guard so prefers-reduced-motion can stop it (apps/web/DESIGN.md → Motion, the Reduced-Motion Rule).",
+        },
+        {
+          selector: matchesClassString(TRANSITION_ALL_PATTERN),
+          message:
+            "transition-all — list the properties that actually change (transition-[transform,box-shadow] for the press-down, transition-colors for colour-only toggles) so nothing else, filter included, eases along (apps/web/DESIGN.md → Motion, #2493).",
         },
         {
           selector: matchesClassString(RAW_PALETTE_CLASS_PATTERN),

@@ -36,7 +36,7 @@ export interface EventDetailCtasProps {
 const CTA_BASE = cn(
   "inline-flex items-center gap-2 border-2 border-ink px-[18px] py-3",
   "font-mono text-[12px] font-bold tracking-[0.06em] uppercase no-underline",
-  "shadow-paper-sm transition-all duration-300",
+  "shadow-paper-sm transition-[transform,box-shadow] duration-300",
   "hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
   "motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0",
   "cursor-pointer",

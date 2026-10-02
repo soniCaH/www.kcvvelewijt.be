@@ -64,7 +64,7 @@ export const BannerSlot = ({
   const inner = (
     <div
       className={cn(
-        "border-ink shadow-paper-sm w-full rounded-none border-2 transition-all duration-300 group-hover:shadow-none",
+        "border-ink shadow-paper-sm w-full rounded-none border-2 transition-[box-shadow] duration-300 group-hover:shadow-none",
         className,
       )}
     >
@@ -92,7 +92,7 @@ export const BannerSlot = ({
           target="_blank"
           rel="noopener noreferrer"
           data-banner-slot={slot}
-          className="group block transition-all duration-300 motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1"
+          className="group block transition-transform duration-300 motion-safe:hover:translate-x-1 motion-safe:hover:translate-y-1"
         >
           {inner}
         </a>
