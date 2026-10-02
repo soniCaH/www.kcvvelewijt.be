@@ -401,6 +401,35 @@ describe("<ArticleBody>", () => {
     });
   });
 
+  describe("trailing gap ownership (#2531)", () => {
+    const shell = (c: HTMLElement) =>
+      c.querySelector('[data-article-body="true"]') as HTMLElement;
+
+    it("keeps its own py-12 sm:py-16 by default", () => {
+      const { container } = render(
+        <ArticleBody content={[paragraph("Body.")]} />,
+      );
+      expect(shell(container)).toHaveClass("py-12", "sm:py-16");
+    });
+
+    it("drops the bottom padding when <EndMark> renders and owns the gap", () => {
+      const { container } = render(
+        <ArticleBody content={[paragraph("Body.")]} endMarkOwnsTrailingGap />,
+      );
+      expect(shell(container)).toHaveClass("pt-12", "sm:pt-16");
+      expect(shell(container).className).not.toMatch(/(^|\s)(sm:)?py-/);
+      expect(shell(container).className).not.toMatch(/(^|\s)(sm:)?pb-/);
+    });
+
+    it("keeps its padding when no <EndMark> renders, so the next block is never flush", () => {
+      const { container } = render(
+        <ArticleBody content={[paragraph("")]} endMarkOwnsTrailingGap />,
+      );
+      expect(container.querySelector('[data-endmark="star"]')).toBeNull();
+      expect(shell(container)).toHaveClass("py-12", "sm:py-16");
+    });
+  });
+
   describe("EndMark closer", () => {
     it("renders <EndMark> after the last body block when content is non-empty", () => {
       const content = [paragraph("Body content.")];

@@ -39,7 +39,10 @@ import {
   type HeroMatchData,
 } from "@/components/article/EditorialHero";
 import { PageContainer, StripedSeam, UpLink } from "@/components/design-system";
-import { MatchGoalsBlock } from "@/components/article/blocks/MatchGoalsBlock";
+import {
+  MatchGoalsBlock,
+  hasGoalEvents,
+} from "@/components/article/blocks/MatchGoalsBlock";
 import { parsePsdMatchId, toHeroMatchData } from "./utils";
 // Cross-route import: the match fold-in card (#2443/#2581) needs the same
 // title formatting `/wedstrijd/[matchId]` uses for its own hero — no reason
@@ -113,7 +116,6 @@ function renderArticleHero({
   article,
   title,
   primaryCategory,
-  publishedDate,
   firstTransferFact,
   firstEventFact,
   heroMatch,
@@ -148,7 +150,6 @@ function renderArticleHero({
           title={titleProp}
           lead={lead}
           author={author}
-          date={publishedDate}
           subjects={article.subjects ?? null}
           coverImage={landscapeCover}
           priority
@@ -162,7 +163,6 @@ function renderArticleHero({
           title={titleProp}
           lead={lead}
           author={author}
-          date={publishedDate}
           feature={firstTransferFact ?? null}
           coverImage={landscapeCover}
           priority
@@ -176,7 +176,6 @@ function renderArticleHero({
           title={titleProp}
           lead={lead}
           author={author}
-          date={publishedDate}
           feature={firstEventFact ?? null}
           coverImage={landscapeCover}
           priority
@@ -194,7 +193,6 @@ function renderArticleHero({
           title={titleProp}
           lead={lead}
           author={author}
-          date={publishedDate}
           coverImage={landscapeCover}
           priority
           match={heroMatch}
@@ -210,7 +208,6 @@ function renderArticleHero({
           title={titleProp}
           lead={lead}
           author={author}
-          date={publishedDate}
           category={primaryCategory}
           coverImage={landscapeCover}
           priority
@@ -406,6 +403,17 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   ]);
   const heroMatch = matchDetail ? toHeroMatchData(matchDetail) : null;
 
+  // Recap-only goalscorer roll-call; the block itself auto-hides without a goal.
+  const showsGoals =
+    article.articleType === "matchRecap" &&
+    !!matchDetail &&
+    hasGoalEvents(matchDetail.events ?? []);
+  // The end of the article has one gap, owned by the element directly above
+  // the credits: <EndMark>'s `mb-8`, or the tail Q&A's `pb-8`. Only when no
+  // body renders, or the goals roll-call (no bottom spacing) sits in between,
+  // do the credits carry the gap themselves (#2531).
+  const creditsCarryTopGap = !(body && body.length > 0) || showsGoals;
+
   // Domain tier (#2443 rule 4): the match this article previews/recaps is
   // bounded (one destination) and defining (it's THE match the article is
   // about) — but a match is not a Sanity document (see `RelatedContentItem`'s
@@ -555,7 +563,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         article,
         title: article.title,
         primaryCategory: primaryCategory?.name,
-        publishedDate,
         firstTransferFact,
         firstEventFact,
         heroMatch,
@@ -622,10 +629,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               <div className="w-full">
                 <ArticleBodyMotion>
                   <ArticleBody
-                    // <ArticleBody> ships `py-12 sm:py-16` for the surfaces
-                    // that reuse it; here its closing <EndMark> owns the gap
-                    // below (`mb-8`), so the bottom padding goes (#2531).
-                    className="article-body pb-0 sm:pb-0"
+                    className="article-body"
+                    endMarkOwnsTrailingGap
                     content={bodyInFlow}
                     subjects={article.subjects ?? null}
                     articleSlug={article.slug}
@@ -654,15 +659,18 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
                             Q&amp;A.
                           </EditorialHeading>
                         </header>
-                        {/* `<QaBlock>` ships its own `my-12`; the last block's
-                            bottom margin would stack on this section's `pb-8`
-                            above the credits, so it is cancelled (#2531). */}
-                        <div className="flex flex-col gap-12 [&>:last-child]:mb-0">
-                          {tailBlocks.map((block) => (
+                        <div className="flex flex-col gap-12">
+                          {tailBlocks.map((block, i) => (
                             <QaBlock
                               key={block._key}
                               value={block}
                               subjects={article.subjects ?? null}
+                              // The last block's own `my-12` bottom margin
+                              // would stack on this section's `pb-8` above
+                              // the credits (#2531).
+                              className={
+                                i === tailBlocks.length - 1 ? "mb-0" : undefined
+                              }
                             />
                           ))}
                         </div>
@@ -676,7 +684,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         : null}
 
       {/* Recap-only goalscorer roll-call (auto-hides on no goals). */}
-      {article.articleType === "matchRecap" && matchDetail ? (
+      {showsGoals ? (
         <MatchGoalsBlock
           homeTeamName={matchDetail.home_team.name}
           awayTeamName={matchDetail.away_team.name}
@@ -697,6 +705,11 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           author={article.author}
           photographer={article.photographer}
           subjects={article.subjects}
+          // The credits add no top margin of their own: the gap above is
+          // <EndMark>'s `mb-8` (or the tail Q&A's `pb-8`). Where neither sits
+          // directly above — no body, or the goals roll-call in between —
+          // the credits carry the one 32px gap themselves (#2531).
+          className={creditsCarryTopGap ? "mt-8" : undefined}
         />
       ) : null}
 

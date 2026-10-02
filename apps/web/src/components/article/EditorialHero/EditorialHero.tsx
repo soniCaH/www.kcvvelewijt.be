@@ -113,9 +113,10 @@ interface EditorialHeroSharedProps {
   priority?: boolean;
   /**
    * Optional pre-formatted Dutch publish date (e.g. `"15 mei 2026"`).
-   * Appended to the kicker on `placement="homepage"` only — the homepage has
-   * no metadata bar. On the detail page `<ArticleMetadata>` is the date's one
-   * home (#2531), so the kicker drops it. Homepage kicker per variant:
+   * Homepage placement only — it has no metadata bar, so the date goes in the
+   * kicker (and is the event strip's fallback). The detail page does not pass
+   * it: `<ArticleMetadata>` is the date's one home there (#2531), and the
+   * component ignores it on `placement="detail"`. Homepage kicker per variant:
    * - announcement → `Aankondiging · ${category} · ${date}`
    * - interview    → `Interview` (+ optional jersey/position) `· ${date}`
    * - event        → `Event | ${ageGroup||competitionTag} · ${date}`
@@ -401,8 +402,9 @@ function renderMatchEditorial(
 ) {
   // Kicker mirrors the match-page status vocabulary (<MatchHero>): preview →
   // VOORBESCHOUWING, recap → MATCHVERSLAG. When the cover score bar is present
-  // it carries the competition + match date (so `date` is passed undefined);
-  // when the match 404s the bar is gone, so the kicker keeps the article date.
+  // it carries the competition + match date (so `date` is passed undefined).
+  // `date` is only ever set on the homepage placement (#2531): on detail the
+  // metadata bar owns the publish date, even when the match 404s.
   const label = variant === "matchPreview" ? "Voorbeschouwing" : "Matchverslag";
   const items = buildPlainKickerItems(label, [], date);
   return (

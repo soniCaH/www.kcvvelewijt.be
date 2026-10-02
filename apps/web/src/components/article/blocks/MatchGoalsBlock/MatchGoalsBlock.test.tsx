@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { MatchGoalsBlock } from "./MatchGoalsBlock";
+import { MatchGoalsBlock, hasGoalEvents } from "./MatchGoalsBlock";
 import type { MatchEvent } from "@/components/match/MatchEvents";
 
 const GOALS: MatchEvent[] = [
@@ -65,5 +65,15 @@ describe("MatchGoalsBlock", () => {
       <MatchGoalsBlock {...baseProps} events={[]} />,
     );
     expect(container).toBeEmptyDOMElement();
+  });
+});
+
+describe("hasGoalEvents", () => {
+  it("is true only when at least one goal event exists", () => {
+    expect(hasGoalEvents(GOALS)).toBe(true);
+    expect(hasGoalEvents([])).toBe(false);
+    expect(
+      hasGoalEvents([{ id: 3, type: "yellow_card", minute: 10, team: "home" }]),
+    ).toBe(false);
   });
 });

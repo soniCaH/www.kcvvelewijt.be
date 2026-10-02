@@ -29,6 +29,15 @@ export interface MatchGoalsBlockProps {
   className?: string;
 }
 
+/**
+ * Whether the roll-call renders at all — the block auto-hides without a goal.
+ * Exported so the page can tell if something sits between the article body
+ * and what follows (#2531).
+ */
+export function hasGoalEvents(events: readonly MatchEvent[]): boolean {
+  return events.some((event) => event.type === "goal");
+}
+
 export function MatchGoalsBlock({
   homeTeamName,
   awayTeamName,
@@ -40,8 +49,7 @@ export function MatchGoalsBlock({
 }: MatchGoalsBlockProps) {
   // Auto-hide when there are no goals (preview has none; a 0-0 recap none
   // either) — the section only earns its space when there is a roll-call.
-  const hasGoals = events.some((event) => event.type === "goal");
-  if (!hasGoals) return null;
+  if (!hasGoalEvents(events)) return null;
 
   return (
     <section

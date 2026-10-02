@@ -27,6 +27,31 @@ const PLAYER_SUBJECTS: IndexedSubject[] = [
   },
 ];
 
+describe("QaBlock outer margin (#2531)", () => {
+  const value = {
+    pairs: [
+      {
+        _key: "p1",
+        tag: "standard" as const,
+        question: "Vraag?",
+        respondents: [{ answer: makeAnswer("Antwoord.") }],
+      },
+    ],
+  } as unknown as Parameters<typeof QaBlock>[0]["value"];
+
+  it("keeps my-12 by default", () => {
+    render(<QaBlock value={value} />);
+    expect(screen.getByTestId("qa-block")).toHaveClass("my-12");
+  });
+
+  it("lets the caller zero the bottom margin through className", () => {
+    render(<QaBlock value={value} className="mb-0" />);
+    const el = screen.getByTestId("qa-block");
+    // `mb-0` follows `my-12`, so it wins for the bottom edge only.
+    expect(el).toHaveClass("my-12", "mb-0");
+  });
+});
+
 describe("QaBlock", () => {
   it("renders two standard-tagged pairs in document order through <QARow>", () => {
     render(

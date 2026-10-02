@@ -19,6 +19,7 @@ import {
   QaGroupRapidFire,
   type QaGroupRapidFireRespondent,
 } from "./QaGroupRapidFire";
+import { cn } from "@/lib/utils/cn";
 import { flattenAnswerToString } from "./flattenAnswerToString";
 
 export interface QaPairRespondentValue {
@@ -54,6 +55,12 @@ export interface QaBlockProps {
    * `respondentKey`.
    */
   subjects?: IndexedSubject[] | null;
+  /**
+   * Extra classes on the outer wrapper. The block ships its own `my-12`; a
+   * caller that owns the spacing around it (the article's tail Q&A section,
+   * #2531) overrides one edge, e.g. `mb-0`.
+   */
+  className?: string;
 }
 
 type Unit =
@@ -166,7 +173,11 @@ function mapStandardRespondents(
  *   - Before/after `key`, `quote`, or `rapid-fire` units: no rule — those
  *     blocks provide their own visual boundary.
  */
-export const QaBlock = ({ value, subjects = null }: QaBlockProps) => {
+export const QaBlock = ({
+  value,
+  subjects = null,
+  className,
+}: QaBlockProps) => {
   const pairs = value.pairs ?? [];
   if (pairs.length === 0) return null;
 
@@ -329,7 +340,7 @@ export const QaBlock = ({ value, subjects = null }: QaBlockProps) => {
     // below give it ~80px total breathing room (same as the original
     // `my-10 hr + my-10 hr` rhythm).
     <div
-      className="not-prose my-12 flex flex-col gap-10"
+      className={cn("not-prose my-12 flex flex-col gap-10", className)}
       data-testid="qa-block"
     >
       {rendered}

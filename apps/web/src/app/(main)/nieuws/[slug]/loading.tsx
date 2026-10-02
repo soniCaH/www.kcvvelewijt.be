@@ -78,12 +78,15 @@ export default function ArticleDetailLoading() {
         </PageContainer>
       </div>
 
-      {/* Prose body — narrow reading column (680). Matches `<ArticleBody>`'s
-          own `py-12 sm:py-16` (#2571). */}
+      {/* Prose body — narrow reading column (680). Matches the real page's
+          `<ArticleBody>`: `pt-12 sm:pt-16` on top (#2571) and no bottom
+          padding, because its closing `<EndMark>` owns the gap below
+          (`mt-12` above it, `mb-8` below, #2531) — the bar at the end stands
+          in for that closer. */}
       <PageContainer
         as="section"
         width="prose"
-        className="bg-cream py-12 sm:py-16"
+        className="bg-cream pt-12 sm:pt-16"
         aria-hidden="true"
       >
         <div className="space-y-3">
@@ -96,12 +99,13 @@ export default function ArticleDetailLoading() {
           <Skeleton className="h-4 w-full" />
           <Skeleton className="h-4 w-2/3" />
         </div>
+        <Skeleton className="mx-auto mt-12 mb-8 h-3.5 w-full max-w-[560px]" />
       </PageContainer>
 
-      {/* "Blijf nog even hangen." related slider — cream band, wide (1040) (#2443/#2581). */}
+      {/* "Blijf nog even hangen." related slider — cream band, wide (1040) (#2443/#2581). Padding mirrors `<RelatedRow>`'s own (#2531). */}
       <section
         aria-hidden="true"
-        className="bg-cream w-full px-4 py-16 lg:py-24"
+        className="bg-cream w-full px-4 pt-8 pb-16 lg:pt-10 lg:pb-24"
       >
         <PageContainer className="px-0">
           <Skeleton className="mb-8 h-9 w-56" />
