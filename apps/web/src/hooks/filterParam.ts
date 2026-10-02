@@ -1,17 +1,11 @@
 /**
- * Shared, non-hook primitives behind `useRouterFilterParam` /
- * `useHistoryFilterParam` (#2779, split per #2783 review finding 2).
+ * Shared, non-hook primitives behind `useHistoryFilterParam` (#2779, #2783
+ * review finding 2).
  *
- * These used to live inside one `useFilterParam` hook whose `writeVia`
- * option picked between calling `useSearchParams()`/`useRouter()` or not —
- * safe only while every caller passed a compile-time literal, which nothing
- * enforced, and which needed `eslint-disable-next-line
- * react-hooks/rules-of-hooks` on both conditional calls to get past a lint
- * rule that exists specifically to catch a caller getting this wrong.
- * Splitting into two hooks over these plain functions means each hook calls
- * only the navigation hooks it needs, unconditionally — zero eslint-disables,
- * and picking the wrong mode is a static import choice, not a runtime option
- * whose safety rested on a comment.
+ * `useHistoryFilterParam` is the only filter-param hook: a router-backed twin
+ * (`useRouterFilterParam`) existed until #3382 moved its last caller,
+ * `/kalender`, onto history writes — every router write there cost a
+ * server round-trip on a `force-dynamic` route.
  *
  * `writeHistoryFilterParam` is also exported standalone for a caller whose
  * own async orchestration already owns the read side and only needs the
@@ -25,8 +19,7 @@
  *  any value `values` doesn't recognise — the `isX(value): value is X` type
  *  guard every filter-URL call site in this codebase used to hand-roll once
  *  each. Exported so a caller with its own narrow-or-fallback shape for a
- *  facet this hook doesn't own (e.g. `CalendarWidget`'s `?view=`) can reuse
- *  it instead of reinventing it (#2783 review finding 9). */
+ *  facet the hook doesn't own can reuse it (#2783 review finding 9). */
 export function narrowParam<T extends string>(
   raw: string | null,
   values: readonly T[],

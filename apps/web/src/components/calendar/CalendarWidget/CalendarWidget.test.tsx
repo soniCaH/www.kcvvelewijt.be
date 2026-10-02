@@ -6,8 +6,9 @@
  * and the subscribe toggle.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { renderToString } from "react-dom/server";
 import { CalendarWidget } from "./CalendarWidget";
 import type {
   CalendarMatchFixture,
@@ -44,13 +45,19 @@ vi.mock("next/link", () => ({
   ),
 }));
 
+// The widget writes `?type=` / `?view=` through `history.pushState` (#3382),
+// never the router — `useSearchParams` is deliberately absent from this mock so
+// a regression to it throws, and `mockPush` proves `router.push` is never hit.
 const mockPush = vi.fn();
-let mockSearchParams = new URLSearchParams();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush }),
-  useSearchParams: () => mockSearchParams,
 }));
+
+/** Sets the live URL the widget's history hooks read on mount. */
+function setUrl(search = "") {
+  window.history.replaceState({}, "", `/kalender${search}`);
+}
 
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
@@ -111,7 +118,9 @@ const defaultProps = {
 describe("CalendarWidget", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockSearchParams = new URLSearchParams();
+    // A spy left un-restored by an earlier test would keep recording calls.
+    vi.restoreAllMocks();
+    setUrl();
     vi.spyOn(DateTime, "now").mockReturnValue(
       DateTime.fromISO("2026-03-15T12:00:00") as DateTime<true>,
     );
@@ -152,7 +161,7 @@ describe("CalendarWidget", () => {
     });
 
     it("explicit ?view=month wins over the phone agenda default", () => {
-      mockSearchParams = new URLSearchParams("view=month");
+      setUrl("?view=month");
       const original = window.matchMedia;
       window.matchMedia = vi.fn().mockReturnValue({
         matches: true,
@@ -168,13 +177,13 @@ describe("CalendarWidget", () => {
     });
 
     it("shows week view when ?view=week", () => {
-      mockSearchParams = new URLSearchParams("view=week");
+      setUrl("?view=week");
       render(<CalendarWidget {...defaultProps} />);
       expect(screen.getByTestId("week-grid")).toBeInTheDocument();
     });
 
     it("shows agenda view when ?view=agenda", () => {
-      mockSearchParams = new URLSearchParams("view=agenda");
+      setUrl("?view=agenda");
       render(<CalendarWidget {...defaultProps} />);
       expect(screen.getByTestId("calendar-agenda")).toBeInTheDocument();
     });
@@ -183,10 +192,7 @@ describe("CalendarWidget", () => {
       const user = userEvent.setup();
       render(<CalendarWidget {...defaultProps} />);
       await user.click(screen.getByRole("button", { name: "Agenda" }));
-      expect(mockPush).toHaveBeenCalledWith(
-        expect.stringContaining("view=agenda"),
-        expect.anything(),
-      );
+      expect(window.location.search).toBe("?view=agenda");
     });
 
     it("week tab is hidden on mobile (hidden md:inline-flex)", () => {
@@ -207,10 +213,11 @@ describe("CalendarWidget", () => {
 
     it("dedup guard: re-selecting the active view pushes nothing and fires no analytics", async () => {
       const user = userEvent.setup();
+      const pushStateSpy = vi.spyOn(window.history, "pushState");
       render(<CalendarWidget {...defaultProps} />);
       // Default view is month — clicking Maand again is a no-op.
       await user.click(screen.getByRole("button", { name: "Maand" }));
-      expect(mockPush).not.toHaveBeenCalled();
+      expect(pushStateSpy).not.toHaveBeenCalled();
       expect(trackEvent).not.toHaveBeenCalled();
     });
   });
@@ -224,7 +231,7 @@ describe("CalendarWidget", () => {
     });
 
     it("labels the period with a week range for week view", () => {
-      mockSearchParams = new URLSearchParams("view=week");
+      setUrl("?view=week");
       render(<CalendarWidget {...defaultProps} />);
       expect(screen.getByTestId("period-label")).toHaveTextContent(
         "9 - 15 maart 2026",
@@ -242,7 +249,7 @@ describe("CalendarWidget", () => {
 
     it("steps by week in week view", async () => {
       const user = userEvent.setup();
-      mockSearchParams = new URLSearchParams("view=week");
+      setUrl("?view=week");
       render(<CalendarWidget {...defaultProps} />);
       await user.click(screen.getByLabelText("Volgende week"));
       expect(screen.getByTestId("period-label")).toHaveTextContent(
@@ -294,6 +301,125 @@ describe("CalendarWidget", () => {
     });
   });
 
+  describe("history-backed URL state (#3382)", () => {
+    it("a chip tap and a view-tab tap each pushState and never router.push", async () => {
+      const user = userEvent.setup();
+      const pushStateSpy = vi.spyOn(window.history, "pushState");
+      render(<CalendarWidget {...defaultProps} />);
+
+      await user.click(screen.getByRole("button", { name: "Wedstrijden" }));
+      expect(pushStateSpy).toHaveBeenCalledTimes(1);
+
+      await user.click(screen.getByRole("button", { name: "Agenda" }));
+      expect(pushStateSpy).toHaveBeenCalledTimes(2);
+      expect(mockPush).not.toHaveBeenCalled();
+    });
+
+    it("writing type keeps an existing view param, and the reverse", async () => {
+      const user = userEvent.setup();
+      setUrl("?view=agenda");
+      render(<CalendarWidget {...defaultProps} />);
+
+      await user.click(screen.getByRole("button", { name: "Wedstrijden" }));
+      expect(window.location.search).toBe("?view=agenda&type=Wedstrijden");
+
+      await user.click(screen.getByRole("button", { name: "Week" }));
+      expect(window.location.search).toBe("?view=week&type=Wedstrijden");
+    });
+
+    it("selecting the default chip drops type from the URL and keeps view", async () => {
+      const user = userEvent.setup();
+      setUrl("?view=agenda&type=Wedstrijden");
+      render(<CalendarWidget {...defaultProps} />);
+
+      await user.click(screen.getByRole("button", { name: "Alles" }));
+      expect(window.location.search).toBe("?view=agenda");
+    });
+
+    it("a popstate back to an earlier URL restores both the chip and the view", async () => {
+      const user = userEvent.setup();
+      render(<CalendarWidget {...defaultProps} />);
+      await user.click(screen.getByRole("button", { name: "Wedstrijden" }));
+      await user.click(screen.getByRole("button", { name: "Agenda" }));
+      expect(screen.getByRole("button", { name: "Agenda" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+
+      // What the browser does on Back: the URL moves, then `popstate` fires.
+      window.history.replaceState({}, "", "/kalender?view=week&type=Clubevent");
+      act(() => {
+        window.dispatchEvent(new PopStateEvent("popstate"));
+      });
+      expect(screen.getByRole("button", { name: "Clubevent" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      expect(screen.getByRole("button", { name: "Week" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+
+      window.history.replaceState({}, "", "/kalender");
+      act(() => {
+        window.dispatchEvent(new PopStateEvent("popstate"));
+      });
+      expect(screen.getByRole("button", { name: "Alles" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      expect(screen.getByRole("button", { name: "Maand" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+    });
+  });
+
+  describe("server-seeded first render (#3382)", () => {
+    // `renderToString` runs no effects, so this is exactly the HTML the
+    // `force-dynamic` page ships — a deep link must not paint month / "all".
+    it("renders the deep-linked chip and view before any effect runs", () => {
+      const html = renderToString(
+        <CalendarWidget
+          {...defaultProps}
+          initialView="agenda"
+          initialType="Wedstrijden"
+        />,
+      );
+      expect(html).toContain('data-testid="calendar-agenda"');
+      expect(html).not.toContain('data-testid="month-grid"');
+      expect(html).toMatch(/aria-pressed="true"[^>]*><span>Wedstrijden</);
+    });
+
+    it("narrows an untrusted initial value and keeps the month default", () => {
+      const html = renderToString(
+        <CalendarWidget
+          {...defaultProps}
+          initialView="<script>"
+          initialType="nope"
+        />,
+      );
+      expect(html).toContain('data-testid="month-grid"');
+      expect(html).toMatch(/aria-pressed="true"[^>]*><span>Alles</);
+    });
+
+    it("lets the phone default apply when the URL carries no view", () => {
+      const original = window.matchMedia;
+      window.matchMedia = vi.fn().mockReturnValue({
+        matches: true,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+      } as unknown as MediaQueryList);
+      try {
+        setUrl("?type=Wedstrijden");
+        render(<CalendarWidget {...defaultProps} initialType="Wedstrijden" />);
+        expect(screen.getByTestId("calendar-agenda")).toBeInTheDocument();
+      } finally {
+        window.matchMedia = original;
+      }
+    });
+  });
+
   describe("by-type filter", () => {
     it("renders the by-type chips", () => {
       render(<CalendarWidget {...defaultProps} />);
@@ -307,7 +433,7 @@ describe("CalendarWidget", () => {
     });
 
     it("marks the active ?type= chip as pressed", () => {
-      mockSearchParams = new URLSearchParams("type=Wedstrijden");
+      setUrl("?type=Wedstrijden");
       render(<CalendarWidget {...defaultProps} />);
       expect(
         screen.getByRole("button", { name: "Wedstrijden" }),
@@ -318,10 +444,7 @@ describe("CalendarWidget", () => {
       const user = userEvent.setup();
       render(<CalendarWidget {...defaultProps} />);
       await user.click(screen.getByRole("button", { name: "Wedstrijden" }));
-      expect(mockPush).toHaveBeenCalledWith(
-        expect.stringContaining("type=Wedstrijden"),
-        expect.anything(),
-      );
+      expect(window.location.search).toBe("?type=Wedstrijden");
       expect(trackEvent).toHaveBeenCalledWith("kalender_filter", {
         kalender_type: "Wedstrijden",
       });
@@ -329,15 +452,16 @@ describe("CalendarWidget", () => {
 
     it("dedup guard: re-pressing the active chip pushes nothing and fires no analytics", async () => {
       const user = userEvent.setup();
-      mockSearchParams = new URLSearchParams("type=Wedstrijden");
+      setUrl("?type=Wedstrijden");
+      const pushStateSpy = vi.spyOn(window.history, "pushState");
       render(<CalendarWidget {...defaultProps} />);
       await user.click(screen.getByRole("button", { name: "Wedstrijden" }));
-      expect(mockPush).not.toHaveBeenCalled();
+      expect(pushStateSpy).not.toHaveBeenCalled();
       expect(trackEvent).not.toHaveBeenCalled();
     });
 
     it("renders the filtered-to-zero state + reset when a type has no items", () => {
-      mockSearchParams = new URLSearchParams("type=Supportersactiviteit");
+      setUrl("?type=Supportersactiviteit");
       render(<CalendarWidget {...defaultProps} />);
       expect(screen.getByRole("status")).toHaveTextContent(
         /Geen evenementen in de categorie Supportersactiviteit/i,
@@ -349,10 +473,10 @@ describe("CalendarWidget", () => {
 
     it("clicking 'Toon alles' resets the URL to /kalender", async () => {
       const user = userEvent.setup();
-      mockSearchParams = new URLSearchParams("type=Supportersactiviteit");
+      setUrl("?type=Supportersactiviteit");
       render(<CalendarWidget {...defaultProps} />);
       await user.click(screen.getByRole("button", { name: "Toon alles" }));
-      expect(mockPush).toHaveBeenCalledWith("/kalender", expect.anything());
+      expect(window.location.search).toBe("");
     });
 
     it("marks 'Toon alles' with the kalender source + active facet for the global analytics listener (#2719), and its own setType still fires kalender_filter", async () => {
@@ -361,7 +485,7 @@ describe("CalendarWidget", () => {
       // is only to supply the `analyticsSource`/`analyticsFacet` structural
       // props, rendered as inert `data-*` attributes on the undo button.
       const user = userEvent.setup();
-      mockSearchParams = new URLSearchParams("type=Supportersactiviteit");
+      setUrl("?type=Supportersactiviteit");
       render(<CalendarWidget {...defaultProps} />);
       const undo = screen.getByRole("button", { name: "Toon alles" });
       expect(undo).toHaveAttribute("data-empty-state-undo-source", "kalender");
