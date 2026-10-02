@@ -36,6 +36,19 @@ const meta: Meta<typeof MembershipForm> = {
   ],
 };
 
+/** Fill the required fields and press submit — shared by the submit-state stories. */
+async function fillAndSubmit(canvasElement: HTMLElement) {
+  const canvas = within(canvasElement);
+  await userEvent.type(canvas.getByLabelText(/Voornaam/), "Jan");
+  await userEvent.type(canvas.getByLabelText(/Achternaam/), "Peeters");
+  await userEvent.type(canvas.getByLabelText(/Geboortedatum/), "1990-06-15");
+  await userEvent.selectOptions(canvas.getByLabelText(/Geslacht/), "m");
+  await userEvent.type(canvas.getByLabelText(/Gemeente/), "Elewijt");
+  await userEvent.type(canvas.getByLabelText(/^E-mail/), "jan@example.com");
+  await userEvent.click(canvas.getByLabelText(/privacyverklaring/i));
+  await userEvent.click(canvas.getByText(/Verstuur aanvraag/));
+}
+
 export default meta;
 type Story = StoryObj<typeof meta>;
 
@@ -72,16 +85,55 @@ export const TransportFailure: Story = {
     };
   },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await userEvent.type(canvas.getByLabelText(/Voornaam/), "Jan");
-    await userEvent.type(canvas.getByLabelText(/Achternaam/), "Peeters");
-    await userEvent.type(canvas.getByLabelText(/Geboortedatum/), "1990-06-15");
-    await userEvent.selectOptions(canvas.getByLabelText(/Geslacht/), "m");
-    await userEvent.type(canvas.getByLabelText(/Gemeente/), "Elewijt");
-    await userEvent.type(canvas.getByLabelText(/^E-mail/), "jan@example.com");
-    await userEvent.click(canvas.getByLabelText(/privacyverklaring/i));
-    await userEvent.click(canvas.getByText(/Verstuur aanvraag/));
-    await canvas.findByRole("alert");
+    await fillAndSubmit(canvasElement);
+    await within(canvasElement).findByRole("alert");
+  },
+};
+
+/**
+ * The request is in flight (#3384) — the submit button swaps its label for the
+ * compact dots, stays disabled and keeps its width. The `fetch` never settles,
+ * so the frame is stable for VR.
+ */
+export const Submitting: Story = {
+  args: { defaultRole: "vrijwilliger" },
+  beforeEach: () => {
+    const original = globalThis.fetch;
+    globalThis.fetch = () => new Promise(() => {});
+    return () => {
+      globalThis.fetch = original;
+    };
+  },
+  play: async ({ canvasElement }) => {
+    await fillAndSubmit(canvasElement);
+    await within(canvasElement).findByRole("button", { name: "Versturen…" });
+  },
+};
+
+/**
+ * The request succeeded (#3384) — the confirmation card replaces the form and
+ * its heading takes focus.
+ */
+export const Success: Story = {
+  args: { defaultRole: "vrijwilliger" },
+  beforeEach: () => {
+    const original = globalThis.fetch;
+    globalThis.fetch = () =>
+      Promise.resolve(
+        new Response(JSON.stringify({ ok: true }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }),
+      );
+    return () => {
+      globalThis.fetch = original;
+    };
+  },
+  play: async ({ canvasElement }) => {
+    await fillAndSubmit(canvasElement);
+    await within(canvasElement).findByRole("heading", {
+      name: "Bedankt voor je interesse!",
+    });
   },
 };
 

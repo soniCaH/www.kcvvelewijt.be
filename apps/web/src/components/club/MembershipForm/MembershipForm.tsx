@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import {
+  useEffect,
   useId,
   useRef,
   useMemo,
@@ -21,6 +22,7 @@ import {
   Input,
   Label,
   Select,
+  Spinner,
   StampBadge,
 } from "@/components/design-system";
 import { trackEvent } from "@/lib/analytics/track-event";
@@ -143,6 +145,7 @@ function MembershipFormFields({
   const uid = useId();
   const fieldId = (name: string) => `${uid}-${name}`;
   const roleRef = useRef<HTMLSelectElement>(null);
+  const confirmationRef = useRef<HTMLHeadingElement>(null);
 
   // A draft beats `defaultRole` / `defaultBirthDate`: the visitor's own
   // answer beats the link.
@@ -190,6 +193,23 @@ function MembershipFormFields({
   const [state, setState] = useState<SubmitState>("idle");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState("");
+
+  // The submit button unmounts with the form, so focus would fall to <body>
+  // and the confirmation can sit above the viewport on a long form (#3384).
+  useEffect(() => {
+    if (state !== "success") return;
+    const heading = confirmationRef.current;
+    if (!heading) return;
+    // `preventScroll`: the scroll below is the one that honours reduced motion.
+    heading.focus({ preventScroll: true });
+    const prefersReduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    heading.scrollIntoView({
+      behavior: prefersReduced ? "instant" : "smooth",
+      block: "start",
+    });
+  }, [state]);
 
   const clearForm = () => {
     setValues(EMPTY_DRAFT);
@@ -318,7 +338,11 @@ function MembershipFormFields({
         <StampBadge tone="jersey" rotation={-2} position="top-right">
           ✓ ONTVANGEN
         </StampBadge>
-        <h2 className="font-display mb-3 text-[32px] leading-[1.05] font-black">
+        <h2
+          ref={confirmationRef}
+          tabIndex={-1}
+          className="font-display mb-3 text-[32px] leading-[1.05] font-black focus:outline-none"
+        >
           Bedankt voor je interesse!
         </h2>
         <p className="text-ink text-body-md">
@@ -599,8 +623,27 @@ function MembershipFormFields({
             withArrow
             type="submit"
             disabled={state === "submitting"}
+            // Replaces the name the hidden label would give; the spinner's own
+            // label is not part of a button's name.
+            aria-label={state === "submitting" ? "Versturen…" : undefined}
+            className={
+              state === "submitting"
+                ? "relative [&>[aria-hidden=true]]:invisible"
+                : "relative"
+            }
           >
-            Verstuur aanvraag
+            {/* The label stays in flow, only hidden, so the button keeps its
+                width; the arrow is hidden with it and the dots sit on top. */}
+            <span className={state === "submitting" ? "invisible" : undefined}>
+              Verstuur aanvraag
+            </span>
+            {state === "submitting" ? (
+              <Spinner
+                variant="compact"
+                label="Versturen…"
+                className="absolute inset-0 justify-center"
+              />
+            ) : null}
           </Button>
         </div>
       </form>
