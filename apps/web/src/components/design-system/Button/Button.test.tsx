@@ -213,15 +213,6 @@ describe("Button", () => {
   });
 
   describe("Accessibility", () => {
-    it("should have focus-visible styles", () => {
-      render(<Button>Focus me</Button>);
-      const button = screen.getByRole("button");
-      expect(button).toHaveClass(
-        "focus-visible:outline-none",
-        "focus-visible:ring-2",
-      );
-    });
-
     it("should be keyboard accessible", async () => {
       const user = userEvent.setup();
       render(

@@ -7,17 +7,22 @@
  *
  * Eight-state machine, uniform across `<Input>`, `<Select>`, `<Textarea>`:
  *
- * | State        | Border       | Shadow                            | Transform             |
- * | ------------ | ------------ | --------------------------------- | --------------------- |
- * | Default      | 2px ink      | --shadow-paper-sm (4×4)           | —                     |
- * | Hover        | 2px ink      | --shadow-paper-sm-hover (3×3)     | translate(1px, 1px)   |
- * | Focus        | 2px ink      | 0 0 0 0                           | translate(2px, 2px)   |
- * | Filled       | 2px ink      | --shadow-paper-sm                 | —                     |
- * | Filled+focus | 2px ink      | 0 0 0 0                           | translate(2px, 2px)   |
- * | Error        | 2px alert    | --shadow-paper-sm-alert (4×4)     | —                     |
- * | Error+focus  | 2px alert    | 0 0 0 0                           | translate(2px, 2px)   |
- * | Disabled     | 2px ink/15   | --shadow-paper-sm-soft (inherits  | —                     |
- * |              |              |  field opacity-50)                |                       |
+ * | State        | Border       | Shadow                            | Transform             | Ring                   |
+ * | ------------ | ------------ | --------------------------------- | --------------------- | ---------------------- |
+ * | Default      | 2px ink      | --shadow-paper-sm (4×4)           | —                     | —                      |
+ * | Hover        | 2px ink      | --shadow-paper-sm-hover (3×3)     | translate(1px, 1px)   | —                      |
+ * | Focus        | 2px ink      | 0 0 0 0                           | translate(2px, 2px)   | global focus ring      |
+ * | Filled       | 2px ink      | --shadow-paper-sm                 | —                     | —                      |
+ * | Filled+focus | 2px ink      | 0 0 0 0                           | translate(2px, 2px)   | global focus ring      |
+ * | Error        | 2px alert    | --shadow-paper-sm-alert (4×4)     | —                     | —                      |
+ * | Error+focus  | 2px alert    | 0 0 0 0                           | translate(2px, 2px)   | jersey-deep (always)   |
+ * | Disabled     | 2px ink/15   | --shadow-paper-sm-soft (inherits  | —                     | —                      |
+ * |              |              |  field opacity-50)                |                       |                        |
+ *
+ * The ring is the site-wide one from `globals.css` (`:focus-visible`, 2px at
+ * a 2px offset) — no field class draws it. An error field pins it to
+ * jersey-deep (`focus-on-light`): green says "you are here", red (border and
+ * shadow) says "something is wrong", one job per colour.
  *
  * Rest is already full ink, so the border no longer climbs through the
  * states: hover and filled read as ink too, and the shadow (compression on
@@ -36,7 +41,7 @@
 /** Default-state chrome (rest, hover, focus, filled, disabled). */
 const fieldChromeIdle = [
   // Base — sharp corners, cream surface, transitions
-  "font-body w-full border-2 bg-cream transition-all duration-150 focus:outline-hidden",
+  "font-body w-full border-2 bg-cream transition-all duration-150",
   "text-ink placeholder:text-ink/40",
 
   // Idle border + shadow — full ink; filled (typed, not focused) needs no
@@ -74,7 +79,8 @@ const fieldChromeIdle = [
 /** Error-state chrome — replaces idle when `error` prop is set. */
 const fieldChromeError = [
   // Base — same cream surface as idle; only border + shadow turn alert
-  "font-body w-full border-2 bg-cream transition-all duration-150 focus:outline-hidden",
+  // (`focus-on-light`: the ring stays jersey-deep, even on a dark ground)
+  "font-body w-full border-2 bg-cream transition-all duration-150 focus-on-light",
   "text-ink placeholder:text-ink/40",
 
   // Border + shadow tinted with alert

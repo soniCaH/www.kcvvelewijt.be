@@ -689,7 +689,7 @@ export function TeamAgendaRow({
       href={`/wedstrijd/${match.id}`}
       aria-label={matchLabel}
       onClick={onNavigate}
-      className="focus-visible:outline-ink block no-underline focus-visible:outline-2 focus-visible:outline-offset-2"
+      className="block no-underline"
     >
       <article
         data-testid="team-agenda-row"

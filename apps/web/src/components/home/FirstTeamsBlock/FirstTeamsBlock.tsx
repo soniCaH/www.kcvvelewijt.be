@@ -287,7 +287,10 @@ export function FirstTeamsBlock({
   const headingId = useId();
 
   return (
-    <section aria-labelledby={headingId} className="bg-jersey-deep-dark">
+    <section
+      aria-labelledby={headingId}
+      className="bg-jersey-deep-dark focus-on-dark"
+    >
       <StripedSeam colorPair="cream-jersey-deep" height="md" />
       <div className="mx-auto max-w-[var(--container-index)] px-4 py-10 md:px-8 md:py-12">
         <div className="mb-6 flex items-end justify-between gap-4 md:mb-8">

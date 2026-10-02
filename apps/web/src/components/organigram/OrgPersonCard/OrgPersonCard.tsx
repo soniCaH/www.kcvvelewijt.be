@@ -187,8 +187,7 @@ export function OrgPersonCard({
     state === "vacant"
       ? "bg-warm shadow-paper-sm"
       : "bg-cream shadow-[3px_3px_0_0_var(--color-ink)]",
-    interactive &&
-      `focus-visible:outline-ink w-full cursor-pointer ${PRESS_DOWN_CLASSES} focus-visible:outline-2 focus-visible:outline-offset-2`,
+    interactive && `w-full cursor-pointer ${PRESS_DOWN_CLASSES}`,
     className,
   );
 
@@ -249,7 +248,7 @@ export function OrgPersonCard({
             <Link
               href={vacantCtaHref}
               data-testid="org-person-card-vacant-cta"
-              className={`${CHIP_LINK_CLASSES} border-ink bg-cream text-ink focus-visible:outline-ink mt-2.5`}
+              className={`${CHIP_LINK_CLASSES} border-ink bg-cream text-ink mt-2.5`}
             >
               Iets voor jou? →
             </Link>

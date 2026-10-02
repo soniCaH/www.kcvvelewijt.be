@@ -106,7 +106,6 @@ export function ScrollArrowButton({
         "leading-none",
         "transition-all duration-300",
         "hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
-        "focus-visible:ring-jersey-deep focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
         // `pointer-events-none` also stops :hover from matching, so a spent
         // arrow held in place by a reserved rail never plays the press-down
         // animation for a click it will not accept.

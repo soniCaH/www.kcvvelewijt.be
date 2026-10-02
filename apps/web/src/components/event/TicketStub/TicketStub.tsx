@@ -115,10 +115,7 @@ export function TicketStub({
   const meta = buildMeta(start, end, location);
 
   return (
-    <Link
-      href={href}
-      className="group focus-visible:outline-jersey-deep block focus-visible:outline-2 focus-visible:outline-offset-2"
-    >
+    <Link href={href} className="group block">
       <div data-testid="ticket-stub-card" className={CARD_CLASS}>
         <div
           data-testid="ticket-stub-date"

@@ -178,7 +178,6 @@ function SelectedDayDetail({
                   "border-ink bg-cream text-ink shadow-[2px_2px_0_0_var(--color-ink)]",
                   "flex items-center gap-3 border-2 px-3 py-2 no-underline transition-all duration-300",
                   "hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
-                  "focus-visible:outline-ink focus-visible:outline-2 focus-visible:outline-offset-2",
                 )}
               >
                 {time && (
@@ -261,7 +260,6 @@ export function CalendarMonth({
               className={cn(
                 "border-paper-edge flex min-h-[108px] flex-col items-stretch border-r border-b border-dashed p-1.5 text-left transition-colors last:border-r-0",
                 "[&:nth-child(7n)]:border-r-0",
-                "focus-visible:outline-jersey-deep focus-visible:outline-2 focus-visible:-outline-offset-2",
                 isSelected
                   ? "bg-jersey-deep/12 outline-jersey-deep outline-2 -outline-offset-2"
                   : "hover:bg-cream-soft/60",

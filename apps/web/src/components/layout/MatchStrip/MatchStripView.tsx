@@ -101,7 +101,7 @@ export function MatchStripView({
         // the light ground's green top rule has no direct dark analogue once
         // the whole band already IS green.
         matchDay
-          ? "bg-jersey-deep-dark border-t-cream/25 border-b-cream/15"
+          ? "bg-jersey-deep-dark focus-on-dark border-t-cream/25 border-b-cream/15"
           : "bg-cream border-t-jersey-deep/35 border-b-ink/15",
       )}
     >

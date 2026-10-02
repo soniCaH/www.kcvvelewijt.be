@@ -39,7 +39,7 @@ const CTA_BASE = cn(
   "shadow-paper-sm transition-all duration-300",
   "hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
   "motion-reduce:transition-none motion-reduce:hover:translate-x-0 motion-reduce:hover:translate-y-0",
-  "cursor-pointer focus-visible:ring-jersey-deep focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+  "cursor-pointer",
 );
 
 /**

@@ -71,6 +71,20 @@ describe("TapedCard", () => {
     expect(el.className).toMatch(/text-cream/);
   });
 
+  it.each(["ink", "jersey-deep"] as const)(
+    "bg=%s turns the global focus ring warm for what it holds; a light card does not",
+    (bg) => {
+      const dark = render(<TapedCard bg={bg}>X</TapedCard>);
+      expect((dark.container.firstChild as HTMLElement).className).toContain(
+        "focus-on-dark",
+      );
+      const light = render(<TapedCard bg="cream">X</TapedCard>);
+      expect(
+        (light.container.firstChild as HTMLElement).className,
+      ).not.toContain("focus-on-dark");
+    },
+  );
+
   it("padding='none' applies p-0 (no padding)", () => {
     const { container } = render(<TapedCard padding="none">X</TapedCard>);
     expect((container.firstChild as HTMLElement).className).toMatch(/p-0/);

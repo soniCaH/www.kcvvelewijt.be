@@ -65,9 +65,11 @@ const SHADOW_CLASS: Record<TapedCardShadow, string> = {
 const BG_CLASS: Record<TapedCardBg, string> = {
   cream: "bg-cream text-ink",
   "cream-soft": "bg-cream-soft text-ink",
-  ink: "bg-ink text-cream",
+  // `focus-on-dark`: a dark card turns the global focus ring warm for
+  // whatever it holds (a jersey-deep ring disappears on jersey-deep).
+  ink: "bg-ink text-cream focus-on-dark",
   jersey: "bg-jersey text-ink",
-  "jersey-deep": "bg-jersey-deep text-cream",
+  "jersey-deep": "bg-jersey-deep text-cream focus-on-dark",
 };
 
 const PADDING_CLASS: Record<TapedCardPadding, string> = {

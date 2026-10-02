@@ -609,7 +609,7 @@ export function HubSearch({
       className={`relative ${isHero ? "" : "min-w-0 self-stretch"} ${className}`}
     >
       <div
-        className={`border-ink bg-cream flex items-center gap-2 ${boxBorder} ${boxShadow} ${
+        className={`border-ink bg-cream focus-ring-within flex items-center gap-2 ${boxBorder} ${boxShadow} ${
           isHero ? "px-3 py-3" : SECTION_NAV_TRAILING_SLOT_CLASSES
         }`}
       >
@@ -647,7 +647,7 @@ export function HubSearch({
           // 16px on touch (`pointer-coarse:`), never a width breakpoint —
           // an iPad on its side is still touch at ≥1024px. iOS Safari zooms
           // the page on focus of any field under 16px (#3248).
-          className={`text-ink placeholder:text-ink-muted w-full min-w-0 bg-transparent focus:outline-none ${
+          className={`text-ink placeholder:text-ink-muted w-full min-w-0 bg-transparent ${
             isHero ? "text-body-md" : "text-body-sm pointer-coarse:text-body-md"
           } ${value ? clearGiveBack : ""}`}
         />
@@ -786,7 +786,7 @@ export function HubSearch({
                       query_length: value.length,
                     })
                   }
-                  className={`${CHIP_LINK_CLASSES} border-ink bg-warm text-ink focus-visible:outline-ink mt-3`}
+                  className={`${CHIP_LINK_CLASSES} border-ink bg-warm text-ink mt-3`}
                 >
                   Contacteer de club
                   <ArrowRight size={12} aria-hidden />

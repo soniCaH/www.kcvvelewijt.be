@@ -110,7 +110,7 @@ function FeaturedEventUnavailableNotice() {
     <section
       data-testid="featured-event-band"
       aria-label="Aanstaand evenement"
-      className="bg-jersey-deep text-cream py-12 md:py-16"
+      className="bg-jersey-deep text-cream focus-on-dark py-12 md:py-16"
     >
       <div className="mx-auto max-w-[var(--container-index)] px-4 md:px-8">
         <div className="mb-6 flex flex-col gap-2">
@@ -208,7 +208,7 @@ export const FeaturedEventBand = ({
     <section
       data-testid="featured-event-band"
       aria-label="Aanstaand evenement"
-      className="bg-jersey-deep text-cream py-12 md:py-16"
+      className="bg-jersey-deep text-cream focus-on-dark py-12 md:py-16"
     >
       <div className="mx-auto grid max-w-[var(--container-index)] grid-cols-1 items-stretch gap-8 px-4 md:grid-cols-[1fr_1.4fr] md:gap-12 md:px-8">
         <TapedFigure

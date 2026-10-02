@@ -261,7 +261,7 @@ export function MemberDetailPanel({
             : {})}
         >
           {/* Header */}
-          <div className="bg-jersey-deep-dark text-cream relative px-4 py-4">
+          <div className="bg-jersey-deep-dark focus-on-dark text-cream relative px-4 py-4">
             <button
               ref={closeRef}
               type="button"
@@ -323,7 +323,7 @@ export function MemberDetailPanel({
                 </p>
                 <Link
                   href={vacantCtaHref}
-                  className={`${CHIP_LINK_CLASSES} border-ink bg-warm text-ink focus-visible:outline-ink self-start`}
+                  className={`${CHIP_LINK_CLASSES} border-ink bg-warm text-ink self-start`}
                 >
                   Iets voor jou?
                   <ArrowRight size={12} aria-hidden />
@@ -398,7 +398,7 @@ export function MemberDetailPanel({
                 {activeHolder?.href && (
                   <Link
                     href={activeHolder.href}
-                    className={`${CHIP_LINK_CLASSES} border-ink bg-cream text-ink focus-visible:outline-ink self-start`}
+                    className={`${CHIP_LINK_CLASSES} border-ink bg-cream text-ink self-start`}
                   >
                     Volledig profiel
                     <ArrowRight size={12} aria-hidden />

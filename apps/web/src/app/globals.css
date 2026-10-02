@@ -818,6 +818,41 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* ===== Focus ring (#2530 decision, built in #3368) =====
+     One ring for the whole site: 2px at a 2px offset, drawn as an `outline`
+     so it rides the element's own box — a focused button that is pressed
+     (`translate`) takes its ring with it — and never reflows anything.
+
+     The colour is one variable. Default `jersey-deep` (4.69:1 on cream,
+     3.69:1 on cream-deep); ink was rejected because it is the colour of every
+     border, so an ink ring reads as a thicker border instead of "you are
+     here". A dark surface (`ink`, `jersey-deep`, `jersey-deep-dark`) that
+     holds something focusable adds `focus-on-dark` and the ring turns `warm`
+     (7.30:1 on jersey-deep-dark, 11.88:1 on ink); a light panel nested in
+     such a surface adds `focus-on-light` to turn it back. The ring is drawn
+     on the ground AROUND the focused element, so it is the surface the
+     element sits on that decides, not the element's own fill.
+
+     This is `@layer base`, so any utility beats it: a leftover `outline-none`
+     / `outline-hidden` / `focus-visible:outline-*` on a component silently
+     kills or recolours the ring. None may be added — `eslint.config.mjs`
+     (`kcvv/no-per-component-focus-ring`) fails the build on them. The one
+     sanctioned exception is the inset list-row ring of the List Row Fill
+     Rule, which keeps its own `outline-offset-[-2px]`. */
+  :root {
+    --focus-ring: var(--color-jersey-deep);
+  }
+
+  /* `[data-vr-force-ring]` is the Storybook VR hook (#3033): Chromium only
+     paints `:focus-visible` when the capture frame itself holds OS focus, so a
+     story's `play` sets the attribute to paint the ring from declared state.
+     Nothing in product code sets it. */
+  :focus-visible,
+  [data-vr-force-ring="true"] {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
   /* ===== Text selection (#2610, decision-sheet §8 D0 — C6) =====
      Jersey-deep ground, cream text — the site's one selection mark. Inverted
      inside an ink or jersey-deep(-dark) band: on those grounds the default
@@ -1345,6 +1380,32 @@
 
 .pr-safe {
   padding-right: env(safe-area-inset-right, 0);
+}
+
+/* The two knobs for the global focus ring above. Greppable on purpose: the
+   dark-ground census in #3368's PR is `rg focus-on-dark`. */
+@utility focus-on-dark {
+  --focus-ring: var(--color-warm);
+}
+
+@utility focus-on-light {
+  --focus-ring: var(--color-jersey-deep);
+}
+
+/* A shell that wraps a text input (`/zoeken`'s field, `/hulp`'s search box)
+   draws the one ring around the whole shell, not around the input inside it —
+   the shell is what the eye reads as the field, and its `overflow-hidden`
+   would clip an inner ring. The input's own ring is switched off here, in one
+   place, so no component carries an `outline-none` of its own. Buttons inside
+   the shell (clear, submit) keep their own ring. */
+@utility focus-ring-within {
+  &:has(input:focus-visible) {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+  & input:focus-visible {
+    outline: none;
+  }
 }
 
 /* Read-more affordances ("Lees verder →") sit hidden at rest and are revealed

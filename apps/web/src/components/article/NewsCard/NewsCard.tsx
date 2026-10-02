@@ -427,11 +427,7 @@ export const NewsCard = ({
           data-rotation={rotation}
           data-aspect={aspectRatio}
           data-bg={bg}
-          className={cn(
-            "absolute inset-0 z-10 focus-visible:outline-2 focus-visible:outline-offset-2",
-            // Outline tone follows surface — ink outline disappears on bg=ink.
-            isDark ? "focus-visible:outline-warm" : "focus-visible:outline-ink",
-          )}
+          className="absolute inset-0 z-10"
         />
       )}
     </TapedCard>

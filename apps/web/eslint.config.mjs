@@ -188,6 +188,21 @@ const OFF_RAMP_LEADING_PATTERN =
 const OFF_RAMP_TRACKING_PATTERN =
   "(?:^|[\\s:!])-?tracking-(?:tighter|tight|normal|wide|wider|widest|\\[|\\()";
 
+// One Focus Ring Rule (DESIGN.md → Components → Buttons, #2530/#3368). The
+// whole site draws a single ring from `globals.css` (`:focus-visible`, 2px at
+// a 2px offset, colour from `--focus-ring`). Every `@layer base` rule loses to
+// a utility, so any of these on a component either recolours the ring or hides
+// it: a `focus-visible:`/`focus:` outline or ring utility, `outline-hidden`,
+// or a bare `outline-none`. `focus:outline-none` stays legal on purpose — it is
+// how a `tabIndex={-1}` scroll target (a section the page moves focus to)
+// opts out of a section-sized box; nothing a visitor can tab to is one.
+// A dark ground says `focus-on-dark` instead of re-colouring a ring. The one
+// sanctioned inset ring is the List Row Fill Rule's, granted per file in the
+// config block below, not per class string. Same single-line/no-newline
+// requirement as the patterns above.
+const FOCUS_RING_PATTERN =
+  "(?:^|[\\s:!])(?:focus-visible:-?(?:outline|ring)-|focus:-?(?:ring-|outline-(?!none(?![\\w-])))|outline-hidden(?![\\w-]))|(?:^|[\\s!])outline-none(?![\\w-])";
+
 const matchesClassString = (pattern) =>
   `:matches(Literal[value=/${pattern}/], TemplateElement[value.raw=/${pattern}/])`;
 
@@ -200,6 +215,7 @@ const kcvvPlugin = {
     "no-off-ramp-font-size": builtinRules.get("no-restricted-syntax"),
     "no-off-ramp-leading": builtinRules.get("no-restricted-syntax"),
     "no-off-ramp-tracking": builtinRules.get("no-restricted-syntax"),
+    "no-per-component-focus-ring": builtinRules.get("no-restricted-syntax"),
   },
 };
 
@@ -386,6 +402,29 @@ const eslintConfig = [
           selector: matchesClassString(OFF_RAMP_TRACKING_PATTERN),
           message:
             "Off-ramp tracking — tracking is a property of the type step (apps/web/DESIGN.md → Typography). Each text-* token already carries its own letter-spacing; no component sets tracking by hand. Existing call sites are frozen in eslint-suppressions.json under this rule's own ID; new code must not add a tracking-* utility. Replaced one instead of just moving it? Run `pnpm --filter @kcvv/web lint:prune` in the same commit.",
+        },
+      ],
+    },
+  },
+  {
+    // One Focus Ring Rule (#3368) — own rule ID, own block: the List Row Fill
+    // Rule's inset ring lives in exactly these two files and nowhere else, so
+    // the exemption is a file list here, never an `eslint-disable` there.
+    files: ["**/src/**/*.{ts,tsx}"],
+    ignores: [
+      "**/*.test.{ts,tsx}",
+      "**/*.spec.{ts,tsx}",
+      "**/src/components/calendar/CalendarAgenda/CalendarAgenda.tsx",
+      "**/src/components/layout/MatchStrip/MatchStripView.tsx",
+    ],
+    plugins: { kcvv: kcvvPlugin },
+    rules: {
+      "kcvv/no-per-component-focus-ring": [
+        "error",
+        {
+          selector: matchesClassString(FOCUS_RING_PATTERN),
+          message:
+            "A per-component focus ring or a hidden outline — the site draws ONE global focus ring from globals.css (apps/web/DESIGN.md → Buttons). A focus-visible:/focus: outline or ring utility, outline-hidden or a bare outline-none recolours or hides it. A dark ground adds `focus-on-dark` instead; a text-input shell adds `focus-ring-within`.",
         },
       ],
     },

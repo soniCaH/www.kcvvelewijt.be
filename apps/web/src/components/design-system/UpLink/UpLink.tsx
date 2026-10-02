@@ -31,10 +31,10 @@ export interface UpLinkProps {
 // the last one (#2769 / [[reference_twmerge_drops_custom_text_tokens]]).
 // `<MonoLabel>` sidesteps the same trap the same way.
 //
-// Each tone also carries its own `focus-visible:outline-*` colour — jersey-
-// deep against the cream/paper surface, warm against `jersey-deep-dark`
-// (the UA default outline is invisible there, and this chip is now the
-// first focusable element after the header on all 17 routes).
+// Neither tone sets a focus ring: the global one (`globals.css`) is
+// jersey-deep, and the dark band the `cream` tone sits in carries
+// `focus-on-dark`, which turns it warm (this chip is the first focusable
+// element after the header on all 17 routes).
 //
 // `ink` also carries the chip's own top air (#2877): 48px at base, 64px from
 // `lg` up. Every route used to supply this itself via its own container
@@ -58,9 +58,8 @@ export const UP_LINK_TOP_AIR: Record<UpLinkTone, string> = {
 };
 
 const TONE_CLASS: Record<UpLinkTone, string> = {
-  ink: `${UP_LINK_TOP_AIR.ink} border-ink bg-cream text-ink focus-visible:outline-jersey-deep`,
-  cream:
-    "border-cream bg-transparent text-cream shadow-warm focus-visible:outline-warm",
+  ink: `${UP_LINK_TOP_AIR.ink} border-ink bg-cream text-ink`,
+  cream: "border-cream bg-transparent text-cream shadow-warm",
 };
 
 /**

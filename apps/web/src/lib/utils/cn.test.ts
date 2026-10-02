@@ -82,3 +82,19 @@ describe("cn — size-* drops both h-* and w-*", () => {
     );
   });
 });
+
+describe("cn — the focus-ring knobs survive a merge", () => {
+  it("keeps focus-on-dark / focus-on-light / focus-ring-within next to a background", () => {
+    // These are `@utility` names tailwind-merge has never heard of. If a future
+    // tailwind-merge starts filing them under a colour group, a dark surface's
+    // `focus-on-dark` would be silently dropped by the `bg-*` after it and the
+    // global ring would go back to jersey-deep on jersey-deep.
+    expect(cn("focus-on-dark", "bg-jersey-deep-dark")).toBe(
+      "focus-on-dark bg-jersey-deep-dark",
+    );
+    expect(cn("focus-on-light", "bg-cream")).toBe("focus-on-light bg-cream");
+    expect(cn("border-ink", "focus-ring-within", "border-alert")).toBe(
+      "focus-ring-within border-alert",
+    );
+  });
+});

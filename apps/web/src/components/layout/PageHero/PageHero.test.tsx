@@ -196,6 +196,8 @@ describe("PageHero", () => {
       const root = screen.getByTestId("page-hero");
       expect(root).toHaveAttribute("data-tone", "dark");
       expect(root).toHaveClass("bg-jersey-deep-dark");
+      // The dark band turns the global focus ring warm for its up-link / CTAs.
+      expect(root).toHaveClass("focus-on-dark");
       expect(container.querySelector("img")).toHaveAttribute("alt", "");
       expect(screen.getByRole("heading", { level: 1 })).toHaveAttribute(
         "data-size",
