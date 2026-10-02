@@ -2,7 +2,6 @@ import {
   resolveSubject,
   type IndexedSubject,
 } from "@/components/article/SubjectAttribution";
-import { formatArticleDate } from "@/lib/utils/dates";
 import { cn } from "@/lib/utils/cn";
 
 /**
@@ -11,19 +10,19 @@ import { cn } from "@/lib/utils/cn";
  * reuse).
  *
  * Centered framed block sitting between `<EndMark>` and `<RelatedRow>`
- * in the article footer. Composes four optional rows in fixed order:
+ * in the article footer. Composes three optional rows in fixed order:
  *
  *   ─────────────────────────────────
  *   Door            {author}
  *   Met             {subjects[]}
  *   Beeld           {photographer}
- *   Gepubliceerd    {publishedAt}
  *   ─────────────────────────────────
  *
  * Every row is conditional: drop the row when its source field is blank.
- * The interview variant renders at minimum `Met` + `Gepubliceerd` (the
- * subjects[] validator guarantees subjects on interviews; publishedAt is
- * populated on any published doc). Other variants only render when at
+ * The publish date is not a credit: `<ArticleMetadata>` is its one home on
+ * the article page (#2531). The interview variant renders at minimum `Met`
+ * (the subjects[] validator guarantees subjects on interviews). Other
+ * variants only render when at
  * least one of `author`, `photographer`, or `subjects[]` is populated;
  * the page-level wrapper is responsible for skipping the block entirely
  * when nothing would render — the component itself returns `null` in
@@ -53,11 +52,6 @@ export interface ArticleCreditsProps {
    * are silently dropped from the list.
    */
   subjects?: IndexedSubject[] | null;
-  /**
-   * `article.publishedAt` ISO string. Rendered after `Gepubliceerd` as
-   * `d MMMM yyyy` (per `formatArticleDate`). Omit the row when blank.
-   */
-  publishedAt?: string | null;
   className?: string;
 }
 
@@ -80,7 +74,6 @@ function buildRows({
   author,
   photographer,
   subjects,
-  publishedAt,
 }: ArticleCreditsProps): CreditRow[] {
   const rows: CreditRow[] = [];
   const trimmedAuthor = author?.trim();
@@ -95,14 +88,6 @@ function buildRows({
   if (trimmedPhotographer) {
     rows.push({ key: "beeld", label: "Beeld", value: trimmedPhotographer });
   }
-  const trimmedDate = publishedAt?.trim();
-  if (trimmedDate) {
-    rows.push({
-      key: "gepubliceerd",
-      label: "Gepubliceerd",
-      value: formatArticleDate(trimmedDate),
-    });
-  }
   return rows;
 }
 
@@ -115,12 +100,12 @@ export function ArticleCredits(props: ArticleCreditsProps) {
       data-article-credits="true"
       aria-label="Credits"
       className={cn(
-        // Tight `my-6` (1.5rem) on each side — the tail-Q&A section
-        // above ships `pb-12 lg:pb-16` and <RelatedRow> below ships
-        // `py-16 lg:py-24`, so the surrounding sections own the bigger
-        // breathing room. The credits block only needs enough margin to
-        // sit visually inside its own framed boundary.
-        "border-ink mx-auto my-6 w-full border-t border-b px-7 py-6 text-center",
+        // No top margin (#2531): the gap above is one element's — <EndMark>'s
+        // `mb-8`, or the tail-Q&A section's own `pb-8` — so the credits never
+        // stack a second margin on it. `mb-6` stays: <RelatedRow> below ships
+        // `py-16 lg:py-24`, so it owns the bigger breathing room and the
+        // credits only need enough margin to sit inside their frame.
+        "border-ink mx-auto mb-6 w-full border-t border-b px-7 py-6 text-center",
         props.className,
       )}
       style={{ maxWidth: "var(--container-prose)" }}
