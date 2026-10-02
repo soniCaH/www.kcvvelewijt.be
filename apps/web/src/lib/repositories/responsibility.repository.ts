@@ -21,7 +21,7 @@ const RESPONSIBILITY_PATHS_QUERY =
     teamRole,
     "position": organigramNode->title,
     "roleCode": organigramNode->roleCode,
-    "members": organigramNode->members[]->{
+    "members": organigramNode->members[@->archived != true]->{
       "id": _id,
       "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),
       "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",
@@ -42,11 +42,9 @@ const RESPONSIBILITY_PATHS_QUERY =
       teamRole,
       "position": organigramNode->title,
       "roleCode": organigramNode->roleCode,
-      "members": organigramNode->members[]->{
+      "members": organigramNode->members[@->archived != true]->{
         "id": _id,
         "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),
-        "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",
-        "psdImageUrl": psdImage.asset->url + "?w=200&q=80&fm=webp&fit=max",
         email, phone
       },
       "nodeId": organigramNode->_id,
@@ -60,7 +58,18 @@ const RESPONSIBILITY_PATHS_QUERY =
 }`);
 
 type PathRow = RESPONSIBILITY_PATHS_QUERY_RESULT[number];
-type ContactRow = NonNullable<PathRow["primaryContact"]>;
+type PrimaryContactRow = NonNullable<PathRow["primaryContact"]>;
+type MemberRow = NonNullable<NonNullable<PrimaryContactRow["members"]>[number]>;
+// Only the primary contact projects member photos (a step contact renders no
+// avatar), so the photo fields are optional for the step rows that share this
+// mapper.
+type ContactRow = Omit<PrimaryContactRow, "members"> & {
+  members: Array<
+    | (Pick<MemberRow, "id" | "name" | "email" | "phone"> &
+        Partial<Pick<MemberRow, "photoUrl" | "psdImageUrl">>)
+    | null
+  > | null;
+};
 
 function toContact(c: ContactRow): Contact {
   // Default to "manual" for a null `contactType` (legacy docs or incomplete

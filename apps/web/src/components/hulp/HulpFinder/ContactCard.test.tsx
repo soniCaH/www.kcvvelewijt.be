@@ -26,8 +26,8 @@ describe("ContactCard", () => {
     ).toHaveAttribute("href", "tel:+32470123456");
   });
 
-  it("shows the member's photo when there is one, a monogram otherwise", () => {
-    const { container, rerender } = render(
+  it("shows the member's photo when there is one", () => {
+    const { container } = render(
       <ContactCard
         contact={{
           name: "Jan Willems",
@@ -39,7 +39,10 @@ describe("ContactCard", () => {
     expect(
       container.querySelector('[data-round-avatar="photo"]'),
     ).not.toBeNull();
-    rerender(
+  });
+
+  it("shows a monogram when the member has no photo", () => {
+    const { container } = render(
       <ContactCard contact={{ name: "Jan Willems", role: "Voorzitter" }} />,
     );
     expect(

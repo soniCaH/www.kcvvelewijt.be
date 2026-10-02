@@ -206,6 +206,15 @@ describe("ResponsibilityRepository", () => {
       expect(members?.[2]).not.toHaveProperty("imageUrl");
     });
 
+    it("asks Sanity for non-archived members only, so members[0] matches the organigram card", async () => {
+      mockFetch.mockResolvedValueOnce([]);
+
+      await runFindAll();
+
+      const query = mockFetch.mock.calls.at(-1)?.[0] as string;
+      expect(query.match(/members\[@->archived != true\]->/g)).toHaveLength(2);
+    });
+
     it("maps manual contact with inline fields", async () => {
       const row = makePathRow({
         primaryContact: makeContact({
