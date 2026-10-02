@@ -43,19 +43,14 @@ import {
   MatchGoalsBlock,
   hasGoalEvents,
 } from "@/components/article/blocks/MatchGoalsBlock";
-import { parsePsdMatchId, toHeroMatchData } from "./utils";
+import { parsePsdMatchId, splitArticleBody, toHeroMatchData } from "./utils";
 // Cross-route import: the match fold-in card (#2443/#2581) needs the same
 // title formatting `/wedstrijd/[matchId]` uses for its own hero — no reason
 // to hand-roll a second copy (review round 1, #2788).
 import { formatMatchTitle } from "@/app/(main)/wedstrijd/[matchId]/utils";
 import { ArticleMetadata } from "@/components/article/ArticleMetadata";
 import { ArticleBodyMotion } from "@/components/article/ArticleBodyMotion";
-import {
-  ArticleBody,
-  qaBlocksToTailSection,
-} from "@/components/article/ArticleBody";
-import { QaBlock } from "@/components/article/blocks/QaBlock";
-import { EditorialHeading } from "@/components/design-system/EditorialHeading";
+import { ArticleBody, QaTailSection } from "@/components/article/ArticleBody";
 import { ArticleCredits } from "@/components/article/ArticleCredits";
 import { ArticleCtaBand } from "@/components/article/ArticleCtaBand";
 import { RelatedRow } from "@/components/related/RelatedRow";
@@ -408,11 +403,19 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     article.articleType === "matchRecap" &&
     !!matchDetail &&
     hasGoalEvents(matchDetail.events ?? []);
+  // What the body renders, derived once (#2531): the shell, the tail section
+  // and the credits' top gap all flow from this one value. The first eventFact
+  // of an event article is hoisted into the event panel above the body
+  // (ArticleBody's docstring defers this absorption to the page, #2237).
+  const bodyLayout = splitArticleBody(
+    body,
+    article.articleType === "event" ? firstEventFact?._key : undefined,
+  );
   // The end of the article has one gap, owned by the element directly above
-  // the credits: <EndMark>'s `mb-8`, or the tail Q&A's `pb-8`. Only when no
-  // body renders, or the goals roll-call (no bottom spacing) sits in between,
-  // do the credits carry the gap themselves (#2531).
-  const creditsCarryTopGap = !(body && body.length > 0) || showsGoals;
+  // the credits: <EndMark>'s `mb-8`, or the tail Q&A's `pb-8`. Only when
+  // neither sits there (no body content), or the goals roll-call (no bottom
+  // spacing) sits in between, do the credits carry the gap themselves.
+  const creditsCarryTopGap = !bodyLayout.endGapOwnedAbove || showsGoals;
 
   // Domain tier (#2443 rule 4): the match this article previews/recaps is
   // bounded (one destination) and defining (it's THE match the article is
@@ -593,95 +596,42 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
         articleType={article.articleType}
       />
 
-      {body && body.length > 0
-        ? (() => {
-            // Phase 5.C: hoist `groupAtTail` qaBlocks out of the in-flow
-            // body before rendering through <ArticleBody>. Tail blocks
-            // render after <EndMark> under an EditorialHeading-headed
-            // Q&A section per `tail-qa-header-locked.md` (5.d-tail-qa-header
-            // lock, supersedes the original MonoLabel header in
-            // `interview-locked.md`).
-            const { inFlow, tailBlocks } = qaBlocksToTailSection(body);
-            const hasTail = tailBlocks.length > 0;
-            // The first eventFact on an event article is hoisted into the
-            // <EventDetailBlock> panel above the body (ArticleBody's
-            // docstring defers this absorption to the page) — drop it from
-            // the in-flow body so it doesn't also render as an inline
-            // polaroid. Later eventFacts stay inline. (#2237)
-            const hoistedEventKey =
-              article.articleType === "event"
-                ? firstEventFact?._key
-                : undefined;
-            const bodyInFlow = hoistedEventKey
-              ? inFlow.filter((b) => b._key !== hoistedEventKey)
-              : inFlow;
-            return (
-              // Phase 5.C cream-shell composition: <ArticleBody> ships its
-              // own `bg-cream w-full` outer wrapper that's meant to bleed
-              // edge-to-edge. Wrapping it in a centered `max-w-… mx-auto px-…`
-              // (the legacy <SanityArticleBody> width gate) would box the
-              // cream into a narrow centered band. The prose container
-              // inside ArticleBody handles centering; the page just gets
-              // out of the way of the cream bleed.
-              // No bottom margin on this wrapper (#2531): the end of the article
-              // has one gap, owned by one element — <EndMark>'s `mb-8`, or the
-              // tail-Q&A section's own `pb-8` — never a stack of margins.
-              <div className="w-full">
-                <ArticleBodyMotion>
-                  <ArticleBody
-                    className="article-body"
-                    endMarkOwnsTrailingGap
-                    content={bodyInFlow}
-                    subjects={article.subjects ?? null}
-                    articleSlug={article.slug}
-                    articleType={article.articleType}
-                  />
-                  {hasTail ? (
-                    // Tail section mirrors ArticleBody's shell pattern so
-                    // the cream continues edge-to-edge under the Q&A
-                    // group. Outer = `bg-cream w-full`, inner = prose
-                    // container at `--container-prose`.
-                    <section
-                      data-qa-tail-section="true"
-                      aria-label="Q&A"
-                      className="bg-cream w-full px-4 pt-12 pb-8 sm:pt-16 lg:px-0"
-                    >
-                      <div
-                        className="mx-auto w-full"
-                        style={{ maxWidth: "var(--container-prose)" }}
-                      >
-                        <header className="mb-8 text-center">
-                          <EditorialHeading
-                            level={2}
-                            size="display-xl"
-                            emphasis={{ text: "Q&A", highlight: true }}
-                          >
-                            Q&amp;A.
-                          </EditorialHeading>
-                        </header>
-                        <div className="flex flex-col gap-12">
-                          {tailBlocks.map((block, i) => (
-                            <QaBlock
-                              key={block._key}
-                              value={block}
-                              subjects={article.subjects ?? null}
-                              // The last block's own `my-12` bottom margin
-                              // would stack on this section's `pb-8` above
-                              // the credits (#2531).
-                              className={
-                                i === tailBlocks.length - 1 ? "mb-0" : undefined
-                              }
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </section>
-                  ) : null}
-                </ArticleBodyMotion>
-              </div>
-            );
-          })()
-        : null}
+      {bodyLayout.rendersArticleBody || bodyLayout.hasTail ? (
+        // Phase 5.C cream-shell composition: <ArticleBody> ships its own
+        // `bg-cream w-full` outer wrapper that's meant to bleed edge-to-edge.
+        // Wrapping it in a centered `max-w-… mx-auto px-…` (the legacy
+        // <SanityArticleBody> width gate) would box the cream into a narrow
+        // centered band. The prose container inside ArticleBody handles
+        // centering; the page just gets out of the way of the cream bleed.
+        // No bottom margin on this wrapper (#2531): the end of the article
+        // has one gap, owned by one element — <EndMark>'s `mb-8`, or the
+        // tail-Q&A section's own `pb-8` — never a stack of margins.
+        <div className="w-full">
+          <ArticleBodyMotion>
+            {bodyLayout.rendersArticleBody ? (
+              <ArticleBody
+                className="article-body"
+                endMarkOwnsTrailingGap
+                content={bodyLayout.bodyInFlow}
+                subjects={article.subjects ?? null}
+                articleSlug={article.slug}
+                articleType={article.articleType}
+              />
+            ) : null}
+            {/* Phase 5.C: `groupAtTail` qaBlocks are hoisted out of the
+                in-flow body and render after <EndMark> under an
+                EditorialHeading-headed Q&A section per
+                `tail-qa-header-locked.md`. Independent of whether the shell
+                above renders. */}
+            {bodyLayout.hasTail ? (
+              <QaTailSection
+                blocks={bodyLayout.tailBlocks}
+                subjects={article.subjects ?? null}
+              />
+            ) : null}
+          </ArticleBodyMotion>
+        </div>
+      ) : null}
 
       {/* Recap-only goalscorer roll-call (auto-hides on no goals). */}
       {showsGoals ? (

@@ -266,6 +266,15 @@ function blockHasRenderableOutput(block: PortableTextBlock): boolean {
 }
 
 /**
+ * Does any block of `content` render something? `<ArticleBody>` closes with
+ * `<EndMark>` exactly when this holds, and the article page skips the body
+ * shell when it does not (#2531) — both go through this one predicate.
+ */
+export function hasRenderableBody(content: PortableTextBlock[]): boolean {
+  return content.some(blockHasRenderableOutput);
+}
+
+/**
  * Known social hosts → the brand icon that turns a plain body link into a
  * recognisable affordance (CMS-2). Returns null for everything else, so
  * ordinary external links keep the canonical `.prose-link` highlighter marker.
@@ -877,14 +886,14 @@ export function ArticleBody({
   // render, inside BlockquoteGroup) — it depends only on `components`,
   // which is itself already built once per render.
   const blockquoteGroupComponents = buildBlockquoteGroupComponents(components);
-  const hasRenderableBody = content.some(blockHasRenderableOutput);
+  const closesWithEndMark = hasRenderableBody(content);
 
   return (
     <div
       data-article-body="true"
       className={cn(
         "bg-cream w-full px-4 lg:px-0",
-        endMarkOwnsTrailingGap && hasRenderableBody
+        endMarkOwnsTrailingGap && closesWithEndMark
           ? "pt-12 sm:pt-16"
           : "py-12 sm:py-16",
         className,
@@ -911,7 +920,7 @@ export function ArticleBody({
               blockquoteGroupComponents,
             )
           : null}
-        {hasRenderableBody ? (
+        {closesWithEndMark ? (
           <EndMark label={endMarkLabelFor(articleType)} />
         ) : null}
       </div>
