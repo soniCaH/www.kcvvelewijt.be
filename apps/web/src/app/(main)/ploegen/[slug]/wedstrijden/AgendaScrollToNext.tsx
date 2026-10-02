@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { scrollIntoViewMotionSafe } from "@/lib/utils/scroll-into-view";
 
 interface AgendaScrollToNextProps {
   /** data-next-match attribute value to find in the DOM */
@@ -16,13 +17,7 @@ export function AgendaScrollToNext({ nextMatchId }: AgendaScrollToNextProps) {
     if (nextMatchId === null) return;
     const anchor = document.querySelector(`[data-match-id="${nextMatchId}"]`);
     if (!anchor) return;
-    const prefersReduced = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    anchor.scrollIntoView({
-      behavior: prefersReduced ? "instant" : "smooth",
-      block: "center",
-    });
+    scrollIntoViewMotionSafe(anchor, { block: "center" });
   }, [nextMatchId]);
 
   return null;

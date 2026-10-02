@@ -5,7 +5,6 @@ import {
   fireEvent,
   waitFor,
   act,
-  within,
 } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { hydrateRoot } from "react-dom/client";
@@ -113,8 +112,7 @@ describe("MembershipForm", () => {
   describe("submitting and success (#3384)", () => {
     const submitForm = () =>
       fireEvent.submit(screen.getByText(/Verstuur aanvraag/).closest("form")!);
-
-    it("moves focus to the confirmation heading after a successful submit", async () => {
+    const stubSuccessFetch = () =>
       vi.stubGlobal(
         "fetch",
         vi.fn(() =>
@@ -125,8 +123,10 @@ describe("MembershipForm", () => {
           }),
         ),
       );
-      const scrollIntoView = vi.fn();
-      window.HTMLElement.prototype.scrollIntoView = scrollIntoView;
+
+    it("moves focus to the confirmation heading and scrolls to it after a successful submit", async () => {
+      stubSuccessFetch();
+      const scrollIntoView = vi.spyOn(HTMLElement.prototype, "scrollIntoView");
 
       render(<MembershipForm defaultRole="vrijwilliger" />);
       fillRequiredFields();
@@ -138,45 +138,7 @@ describe("MembershipForm", () => {
       await waitFor(() => expect(document.activeElement).toBe(heading));
       expect(heading).toHaveAttribute("tabindex", "-1");
       expect(scrollIntoView).toHaveBeenCalledWith(
-        expect.objectContaining({ behavior: "smooth" }),
-      );
-    });
-
-    it("scrolls instantly to the confirmation under reduced motion", async () => {
-      vi.stubGlobal(
-        "fetch",
-        vi.fn(() =>
-          Promise.resolve({
-            ok: true,
-            status: 200,
-            json: () => Promise.resolve({ ok: true }),
-          }),
-        ),
-      );
-      // happy-dom's matchMedia ignores the query, so answer it explicitly.
-      vi.stubGlobal(
-        "matchMedia",
-        vi.fn((query: string) => ({
-          matches: query === "(prefers-reduced-motion: reduce)",
-          media: query,
-          addEventListener: () => {},
-          removeEventListener: () => {},
-        })),
-      );
-      const scrollIntoView = vi.fn();
-      window.HTMLElement.prototype.scrollIntoView = scrollIntoView;
-
-      render(<MembershipForm defaultRole="vrijwilliger" />);
-      fillRequiredFields();
-      submitForm();
-
-      await screen.findByRole("heading", {
-        name: "Bedankt voor je interesse!",
-      });
-      await waitFor(() =>
-        expect(scrollIntoView).toHaveBeenCalledWith(
-          expect.objectContaining({ behavior: "instant" }),
-        ),
+        expect.objectContaining({ block: "start" }),
       );
     });
 
@@ -190,11 +152,41 @@ describe("MembershipForm", () => {
       fillRequiredFields();
       submitForm();
 
-      const button = await screen.findByRole("button", { name: /versturen/i });
+      const button = await screen.findByRole("button", { name: "Versturen…" });
       expect(button).toBeDisabled();
       expect(button).toHaveAttribute("type", "submit");
-      expect(within(button).getByRole("status")).toBeInTheDocument();
       expect(button.querySelector(".kcvv-spinner-pulse")).not.toBeNull();
+    });
+
+    it("announces the wait from a live region outside the button, empty when idle", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(() => new Promise(() => {})),
+      );
+
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      const liveRegion = () =>
+        document.querySelector<HTMLElement>('form [aria-live="polite"]')!;
+      expect(liveRegion()).toBeEmptyDOMElement();
+
+      fillRequiredFields();
+      submitForm();
+
+      await waitFor(() => expect(liveRegion()).toHaveTextContent("Versturen…"));
+    });
+
+    it("keeps the footer caption as it was while sending", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(() => new Promise(() => {})),
+      );
+
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      submitForm();
+
+      await screen.findByRole("button", { name: "Versturen…" });
+      expect(screen.getByText("Word lid van KCVV")).toBeInTheDocument();
     });
   });
 

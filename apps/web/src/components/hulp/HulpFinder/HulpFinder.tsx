@@ -58,6 +58,7 @@ import {
 } from "./categoryMeta";
 import { QuestionCard } from "./QuestionCard";
 import { PRESS_DOWN_TRANSITION } from "@/components/design-system/press-down";
+import { scrollIntoViewMotionSafe } from "@/lib/utils/scroll-into-view";
 
 const AUDIENCE_PARAM = "audience";
 const CATEGORY_PARAM = "categorie";
@@ -210,9 +211,8 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
       // re-runs `fromHash()` every time `reveal` changes identity, so a dep
       // would re-reveal the hashed question on every unrelated card click.
       if (id === openIdRef.current && !wrongCategory && !wrongAudience) {
-        document
-          .getElementById(id)
-          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+        const target = document.getElementById(id);
+        if (target) scrollIntoViewMotionSafe(target, { block: "center" });
         return;
       }
       pendingScroll.current = id;
@@ -249,7 +249,7 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
     if (!id) return;
     const el = document.getElementById(id);
     if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      scrollIntoViewMotionSafe(el, { block: "center" });
       pendingScroll.current = null;
     }
   }, [openId, category]);
@@ -261,7 +261,9 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
   useEffect(() => {
     if (!scrollToTopRef.current) return;
     scrollToTopRef.current = false;
-    finderRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (finderRef.current) {
+      scrollIntoViewMotionSafe(finderRef.current, { block: "start" });
+    }
   }, [category]);
 
   // Dedup guard: re-pressing the already-active audience chip is a no-op —
@@ -314,9 +316,8 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
           view: "cards",
           trigger: event.currentTarget,
         });
-        document
-          .getElementById("structuur")
-          ?.scrollIntoView({ behavior: "smooth" });
+        const structuur = document.getElementById("structuur");
+        if (structuur) scrollIntoViewMotionSafe(structuur);
       }
     },
     [panel, trackOrganigramLink],

@@ -22,10 +22,10 @@ import {
   Input,
   Label,
   Select,
-  Spinner,
   StampBadge,
 } from "@/components/design-system";
 import { trackEvent } from "@/lib/analytics/track-event";
+import { scrollIntoViewMotionSafe } from "@/lib/utils/scroll-into-view";
 import {
   clearDraft,
   EMPTY_DRAFT,
@@ -202,13 +202,7 @@ function MembershipFormFields({
     if (!heading) return;
     // `preventScroll`: the scroll below is the one that honours reduced motion.
     heading.focus({ preventScroll: true });
-    const prefersReduced = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    heading.scrollIntoView({
-      behavior: prefersReduced ? "instant" : "smooth",
-      block: "start",
-    });
+    scrollIntoViewMotionSafe(heading, { block: "start" });
   }, [state]);
 
   const clearForm = () => {
@@ -586,6 +580,15 @@ function MembershipFormFields({
 
         <TurnstileWidget onToken={setTurnstileToken} />
 
+        {/* The wait is announced from here: a button's children are
+            presentational, so the spinner inside it is never spoken. Always
+            mounted, empty when idle, so the change is what gets announced.
+            `aria-live`, not `role="status"`: the `/club/word-lid` loading
+            skeleton renders this form and may hold exactly one status. */}
+        <span aria-live="polite" className="sr-only">
+          {state === "submitting" ? "Versturen…" : ""}
+        </span>
+
         {generalError ? (
           <p
             role="alert"
@@ -616,34 +619,16 @@ function MembershipFormFields({
 
         <div className="border-paper-edge mt-7 flex items-center justify-between border-t border-dashed pt-4">
           <span className="text-ink-muted font-mono text-[11px] tracking-[0.08em] uppercase">
-            {state === "submitting" ? "Versturen…" : "Word lid van KCVV"}
+            Word lid van KCVV
           </span>
           <Button
             variant="secondary"
             withArrow
             type="submit"
-            disabled={state === "submitting"}
-            // Replaces the name the hidden label would give; the spinner's own
-            // label is not part of a button's name.
-            aria-label={state === "submitting" ? "Versturen…" : undefined}
-            className={
-              state === "submitting"
-                ? "relative [&>[aria-hidden=true]]:invisible"
-                : "relative"
-            }
+            loading={state === "submitting"}
+            loadingLabel="Versturen…"
           >
-            {/* The label stays in flow, only hidden, so the button keeps its
-                width; the arrow is hidden with it and the dots sit on top. */}
-            <span className={state === "submitting" ? "invisible" : undefined}>
-              Verstuur aanvraag
-            </span>
-            {state === "submitting" ? (
-              <Spinner
-                variant="compact"
-                label="Versturen…"
-                className="absolute inset-0 justify-center"
-              />
-            ) : null}
+            Verstuur aanvraag
           </Button>
         </div>
       </form>

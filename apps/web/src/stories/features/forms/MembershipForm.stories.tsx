@@ -36,6 +36,15 @@ const meta: Meta<typeof MembershipForm> = {
   ],
 };
 
+/** Swap `fetch` for `impl`; the returned cleanup puts the original back. */
+function stubFetch(impl: typeof fetch) {
+  const original = globalThis.fetch;
+  globalThis.fetch = impl;
+  return () => {
+    globalThis.fetch = original;
+  };
+}
+
 /** Fill the required fields and press submit — shared by the submit-state stories. */
 async function fillAndSubmit(canvasElement: HTMLElement) {
   const canvas = within(canvasElement);
@@ -77,13 +86,7 @@ export const MinderjarigeJeugdspeler: Story = {
  */
 export const TransportFailure: Story = {
   args: { defaultRole: "vrijwilliger" },
-  beforeEach: () => {
-    const original = globalThis.fetch;
-    globalThis.fetch = () => Promise.reject(new Error("Network error"));
-    return () => {
-      globalThis.fetch = original;
-    };
-  },
+  beforeEach: () => stubFetch(() => Promise.reject(new Error("Network error"))),
   play: async ({ canvasElement }) => {
     await fillAndSubmit(canvasElement);
     await within(canvasElement).findByRole("alert");
@@ -97,13 +100,7 @@ export const TransportFailure: Story = {
  */
 export const Submitting: Story = {
   args: { defaultRole: "vrijwilliger" },
-  beforeEach: () => {
-    const original = globalThis.fetch;
-    globalThis.fetch = () => new Promise(() => {});
-    return () => {
-      globalThis.fetch = original;
-    };
-  },
+  beforeEach: () => stubFetch(() => new Promise(() => {})),
   play: async ({ canvasElement }) => {
     await fillAndSubmit(canvasElement);
     await within(canvasElement).findByRole("button", { name: "Versturen…" });
@@ -116,19 +113,15 @@ export const Submitting: Story = {
  */
 export const Success: Story = {
   args: { defaultRole: "vrijwilliger" },
-  beforeEach: () => {
-    const original = globalThis.fetch;
-    globalThis.fetch = () =>
+  beforeEach: () =>
+    stubFetch(() =>
       Promise.resolve(
         new Response(JSON.stringify({ ok: true }), {
           status: 200,
           headers: { "Content-Type": "application/json" },
         }),
-      );
-    return () => {
-      globalThis.fetch = original;
-    };
-  },
+      ),
+    ),
   play: async ({ canvasElement }) => {
     await fillAndSubmit(canvasElement);
     await within(canvasElement).findByRole("heading", {
