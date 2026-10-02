@@ -74,4 +74,20 @@ describe("SponsorTile", () => {
     expect(img).not.toHaveClass("group-hover:grayscale-0");
     expect(img).not.toHaveClass("group-focus-visible:grayscale-0");
   });
+
+  it("presses the tile down on hover only when it is framed AND a link", () => {
+    const { rerender } = render(<SponsorTile sponsor={base} framed />);
+    const framedTile = screen.getByRole("link").firstElementChild;
+    expect(framedTile).toHaveClass(
+      "group-hover:translate-x-1",
+      "group-focus-visible:translate-x-1",
+      "transition-[translate,box-shadow]",
+    );
+
+    rerender(<SponsorTile sponsor={base} />);
+    const unframedTile = screen.getByRole("link").firstElementChild;
+    expect(unframedTile).not.toHaveClass("group-hover:translate-x-1");
+    expect(unframedTile).not.toHaveClass("group-hover:shadow-none");
+    expect(unframedTile).not.toHaveClass("transition-[translate,box-shadow]");
+  });
 });
