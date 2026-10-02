@@ -56,3 +56,24 @@ export const HUB_SEARCH_PATHS: ResponsibilityPath[] = [
     steps: [],
   },
 ];
+
+/** Same paths, but "blessure" is answered by a named member with a photo. */
+export const HUB_SEARCH_PATHS_FORWARD_PHOTO: ResponsibilityPath[] =
+  HUB_SEARCH_PATHS.map((path) =>
+    path.id === "blessure"
+      ? {
+          ...path,
+          primaryContact: {
+            contactType: "position",
+            position: "Gerechtigd correspondent",
+            members: [
+              {
+                id: "staff-gc",
+                name: "Luc Boons",
+                imageUrl: "/player-fixtures/player-schulz.jpg",
+              },
+            ],
+          },
+        }
+      : path,
+  );

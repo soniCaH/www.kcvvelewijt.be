@@ -2,7 +2,11 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { within, userEvent, waitFor, expect } from "storybook/test";
 import { useEffect, type ReactNode } from "react";
 import { HubSearch } from "./HubSearch";
-import { HUB_SEARCH_MEMBERS, HUB_SEARCH_PATHS } from "./hub-search.fixture";
+import {
+  HUB_SEARCH_MEMBERS,
+  HUB_SEARCH_PATHS,
+  HUB_SEARCH_PATHS_FORWARD_PHOTO,
+} from "./hub-search.fixture";
 import type { SemanticSearchResult } from "@/hooks/useSemanticSearch";
 
 /** A canned semantic hit for a fixture path (slug == path id). */
@@ -117,6 +121,13 @@ export const AnswerForward: Story = {
       ),
   ],
   play: typePlay("mijn kind heeft zich bezeerd"),
+};
+
+/** Answer-forward whose contact has a photo — the 24px avatar shows it, not a monogram. */
+export const AnswerForwardWithPhoto: Story = {
+  args: { responsibilityPaths: HUB_SEARCH_PATHS_FORWARD_PHOTO },
+  decorators: AnswerForward.decorators,
+  play: AnswerForward.play,
 };
 
 /** List-only + smart hint — weaker matches (< 0.5) interleave with people. */

@@ -8,7 +8,11 @@ import {
   HubSearchQueryProvider,
   useHubSearchTopInsetPublisher,
 } from "./HubSearchQueryProvider";
-import { HUB_SEARCH_MEMBERS, HUB_SEARCH_PATHS } from "./hub-search.fixture";
+import {
+  HUB_SEARCH_MEMBERS,
+  HUB_SEARCH_PATHS,
+  HUB_SEARCH_PATHS_FORWARD_PHOTO,
+} from "./hub-search.fixture";
 import type { SemanticSearchResult } from "@/hooks/useSemanticSearch";
 
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
@@ -61,11 +65,11 @@ function hit(slug: string, score: number): SemanticSearchResult {
   };
 }
 
-function renderSearch() {
+function renderSearch(responsibilityPaths = HUB_SEARCH_PATHS) {
   return render(
     <HubSearch
       members={HUB_SEARCH_MEMBERS}
-      responsibilityPaths={HUB_SEARCH_PATHS}
+      responsibilityPaths={responsibilityPaths}
     />,
   );
 }
@@ -187,6 +191,24 @@ describe("HubSearch", () => {
     expect(
       screen.getByText(/Verwittig de gerechtigd correspondent/i),
     ).toBeInTheDocument();
+  });
+
+  it("shows the forward contact's photo, and a monogram when there is none", async () => {
+    setSemantic({ results: [hit("blessure", 0.82)], executedQuery: "bezeerd" });
+    const { container, unmount } = renderSearch(HUB_SEARCH_PATHS_FORWARD_PHOTO);
+    typeQuery("bezeerd");
+    await screen.findByText(/Lees volledig antwoord/i);
+    expect(
+      container.querySelector('[data-round-avatar="photo"][data-size="24"]'),
+    ).not.toBeNull();
+    unmount();
+
+    const plain = renderSearch();
+    typeQuery("bezeerd");
+    await screen.findByText(/Lees volledig antwoord/i);
+    expect(
+      plain.container.querySelector('[data-round-avatar="photo"]'),
+    ).toBeNull();
   });
 
   it("stays list-only (no answer-forward) when the top score < 0.5", async () => {

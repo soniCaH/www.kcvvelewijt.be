@@ -26,6 +26,30 @@ describe("ContactCard", () => {
     ).toHaveAttribute("href", "tel:+32470123456");
   });
 
+  it("shows the member's photo when there is one", () => {
+    const { container } = render(
+      <ContactCard
+        contact={{
+          name: "Jan Willems",
+          role: "Voorzitter",
+          imageUrl: "/jan.webp",
+        }}
+      />,
+    );
+    expect(
+      container.querySelector('[data-round-avatar="photo"]'),
+    ).not.toBeNull();
+  });
+
+  it("shows a monogram when the member has no photo", () => {
+    const { container } = render(
+      <ContactCard contact={{ name: "Jan Willems", role: "Voorzitter" }} />,
+    );
+    expect(
+      container.querySelector('[data-round-avatar="monogram"]'),
+    ).not.toBeNull();
+  });
+
   it("fires onContactClick with the channel when email/phone is clicked", () => {
     const onContactClick = vi.fn();
     render(

@@ -3,16 +3,15 @@
 /**
  * ContactCard — the finder's single contact, in the locked **person vocabulary**
  * (7o6c · 4 / reuses `<OrgPersonCard>`'s round avatar — the shared
- * `<RoundAvatar>` monogram · name first-semibold + last-italic · mono function label ·
+ * `<RoundAvatar>` photo or monogram · name first-semibold + last-italic · mono function label ·
  * tappable ✉/☎ (only when present), NOT `<TeamStaff>`'s post-#2575 3:4
  * card, which is a directory of people rather than a chart of positions).
  * A `position` contact also gets a **"Toon in structuur →"** cross-link
  * that opens the `<MemberDetailPanel>` (handled by the finder via
  * `useHubMemberPanel()`); `team-role` gets a plain "Vind je ploeg →" link.
  *
- * Responsibility contacts carry no photo (the `Contact` member shape is
- * `{ id, name, email?, phone? }`), so the avatar is monogram-only — the common
- * case for KCVV people regardless.
+ * The avatar shows the member's photo when one exists (the same image source
+ * the organigram card beside it uses — #3333), a monogram otherwise.
  */
 
 import Link from "next/link";
@@ -68,7 +67,11 @@ export function ContactCard({
   return (
     <div>
       <div className="border-ink bg-cream-soft flex items-center gap-3 border-2 p-3 shadow-[2px_2px_0_0_var(--color-ink)]">
-        <RoundAvatar size={40} name={contact.name} />
+        <RoundAvatar
+          size={40}
+          name={contact.name}
+          photoUrl={contact.imageUrl}
+        />
 
         <span className="min-w-0 flex-1 leading-tight">
           {hasName && (

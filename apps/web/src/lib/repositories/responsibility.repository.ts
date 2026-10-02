@@ -21,9 +21,11 @@ const RESPONSIBILITY_PATHS_QUERY =
     teamRole,
     "position": organigramNode->title,
     "roleCode": organigramNode->roleCode,
-    "members": organigramNode->members[]->{
+    "members": organigramNode->members[@->archived != true]->{
       "id": _id,
       "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),
+      "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",
+      "psdImageUrl": psdImage.asset->url + "?w=200&q=80&fm=webp&fit=max",
       email, phone
     },
     "nodeId": organigramNode->_id,
@@ -40,7 +42,7 @@ const RESPONSIBILITY_PATHS_QUERY =
       teamRole,
       "position": organigramNode->title,
       "roleCode": organigramNode->roleCode,
-      "members": organigramNode->members[]->{
+      "members": organigramNode->members[@->archived != true]->{
         "id": _id,
         "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),
         email, phone
@@ -56,7 +58,18 @@ const RESPONSIBILITY_PATHS_QUERY =
 }`);
 
 type PathRow = RESPONSIBILITY_PATHS_QUERY_RESULT[number];
-type ContactRow = NonNullable<PathRow["primaryContact"]>;
+type PrimaryContactRow = NonNullable<PathRow["primaryContact"]>;
+type MemberRow = NonNullable<NonNullable<PrimaryContactRow["members"]>[number]>;
+// Only the primary contact projects member photos (a step contact renders no
+// avatar), so the photo fields are optional for the step rows that share this
+// mapper.
+type ContactRow = Omit<PrimaryContactRow, "members"> & {
+  members: Array<
+    | (Pick<MemberRow, "id" | "name" | "email" | "phone"> &
+        Partial<Pick<MemberRow, "photoUrl" | "psdImageUrl">>)
+    | null
+  > | null;
+};
 
 function toContact(c: ContactRow): Contact {
   // Default to "manual" for a null `contactType` (legacy docs or incomplete
@@ -81,12 +94,18 @@ function toContact(c: ContactRow): Contact {
           ? {
               members: c.members
                 .filter((m): m is NonNullable<typeof m> => m != null)
-                .map((m) => ({
-                  id: m.id ?? "",
-                  name: (m.name ?? "").replace(/\s+/g, " ").trim(),
-                  ...(m.email ? { email: m.email } : {}),
-                  ...(m.phone ? { phone: m.phone } : {}),
-                })),
+                .map((m) => {
+                  // Editorial `photo` wins over the sync-owned `psdImage` —
+                  // the same ?? chain the organigram (staff.repository.ts) uses.
+                  const imageUrl = m.photoUrl ?? m.psdImageUrl;
+                  return {
+                    id: m.id ?? "",
+                    name: (m.name ?? "").replace(/\s+/g, " ").trim(),
+                    ...(imageUrl ? { imageUrl } : {}),
+                    ...(m.email ? { email: m.email } : {}),
+                    ...(m.phone ? { phone: m.phone } : {}),
+                  };
+                }),
             }
           : {}),
         ...(c.nodeId ? { nodeId: c.nodeId } : {}),

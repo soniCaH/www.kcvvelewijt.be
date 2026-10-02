@@ -86,13 +86,15 @@ export interface HubSearchProps {
 /** A light contact label for the answer-forward card (no resolveContact dep). */
 function forwardContact(
   path: ResponsibilityPath,
-): { name: string; sub?: string } | null {
+): { name: string; sub?: string; imageUrl?: string } | null {
   const contact = path.primaryContact;
   if (contact.contactType === "position") {
-    const memberName = contact.members?.[0]?.name?.trim();
+    const member = contact.members?.[0];
+    const memberName = member?.name?.trim();
     if (memberName) {
       return {
         name: memberName,
+        ...(member?.imageUrl ? { imageUrl: member.imageUrl } : {}),
         ...(contact.position ? { sub: contact.position } : {}),
       };
     }
@@ -559,7 +561,11 @@ export function HubSearch({
       <span className="mt-2 flex items-center justify-between gap-2">
         {forwardContactInfo ? (
           <span className="flex min-w-0 items-center gap-2">
-            <RoundAvatar size={24} name={forwardContactInfo.name} />
+            <RoundAvatar
+              size={24}
+              name={forwardContactInfo.name}
+              photoUrl={forwardContactInfo.imageUrl}
+            />
             <span
               title={`${forwardContactInfo.name}${
                 forwardContactInfo.sub ? ` · ${forwardContactInfo.sub}` : ""
