@@ -304,6 +304,16 @@
 
   /* ===== Typography ===== */
 
+  /* Namespace reset (#3365, the sibling of #2520). Tailwind's own `--font-sans`
+     / `--font-serif` / `--font-mono` stacks stay in the theme until this
+     clears them, so `font-serif` rendered Georgia and `font-sans` rendered
+     system-ui on every component that reached for them. It MUST sit before
+     every `--font-*` declaration below — `initial` clears the whole namespace
+     up to this point, so a reset placed after them deletes the Freight faces.
+     One name per face: `font-display` (Freight Display), `font-display-big`,
+     `font-body` (the hand-written class below), `font-mono`. */
+  --font-*: initial;
+
   /* Font Families — all three Freight families ride the Adobe Typekit kit;
      IBM Plex Mono is self-hosted via next/font/google. Body is Freight Sans Pro
      (#2174 — replaced Montserrat, reversing master-design decision-log entry 19),
@@ -361,6 +371,7 @@
      `--radius-DEFAULT` / `--radius-card` tokens were removed because nothing
      consumed them once the loading skeletons were squared off. Circles use
      Tailwind's built-in `rounded-full`. */
+  --radius-*: initial;
 
   /* ===== Box Shadows ===== */
 
@@ -368,6 +379,7 @@
      whole vocabulary. The pre-redesign blurred set (`sm`, `DEFAULT`, `md`,
      `lg`, `card-hover`, `input`, `input-focus`) was removed here: zero
      consumers, and reintroducing a blur would break the paper idiom. */
+  --shadow-*: initial;
   --shadow-none: none;
 
   /* ===== Redesign / Cream Surface (Phase 0) ===== */

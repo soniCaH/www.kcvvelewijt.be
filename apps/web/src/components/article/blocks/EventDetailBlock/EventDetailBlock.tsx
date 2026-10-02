@@ -230,7 +230,7 @@ function FactCell({ label, value }: { label: string; value: string }) {
       <span className="text-jersey-deep">
         <MonoLabel size="sm">{label}</MonoLabel>
       </span>
-      <span className="text-ink font-serif text-[18px] leading-snug font-medium italic">
+      <span className="text-ink font-display text-[18px] leading-snug font-medium italic">
         {value}
       </span>
     </div>
@@ -251,7 +251,7 @@ function SessionsGrid({ sessions }: { sessions: ResolvedSession[] }) {
             <dt className="text-ink-muted font-mono text-[10px] leading-tight tracking-[0.18em] uppercase">
               {weekdayAbbrev(session.date)} · {session.date.day}
             </dt>
-            <dd className="text-ink m-0 font-serif text-[14px] leading-tight font-bold italic">
+            <dd className="text-ink font-display m-0 text-[14px] leading-tight font-bold italic">
               {session.date.weekday.replace(/^./, (c) => c.toUpperCase())}
             </dd>
             <dd className="text-ink-muted m-0 font-mono text-[11px] leading-tight tracking-[0.06em]">
@@ -282,7 +282,7 @@ function MetaList({ rows }: { rows: MetaRow[] }) {
           <dt className="text-ink-muted font-mono text-[10px] leading-tight tracking-[0.16em] uppercase">
             {row.label}
           </dt>
-          <dd className="text-ink m-0 font-serif text-[14px] leading-snug">
+          <dd className="text-ink font-display m-0 text-[14px] leading-snug">
             {row.value}
           </dd>
         </div>
@@ -312,7 +312,7 @@ function Note({ blocks }: { blocks: PortableTextBlock[] }) {
   return (
     <div
       data-event-detail-note="true"
-      className="text-ink font-serif text-[15px] leading-[1.5] italic"
+      className="text-ink font-display text-[15px] leading-[1.5] italic"
     >
       <PortableText value={blocks} />
     </div>
@@ -410,7 +410,7 @@ export function EventDetailBlock({
             {title ? (
               <p
                 data-event-detail-title="true"
-                className="text-ink m-0 font-serif text-[24px] leading-[1.08] font-black italic"
+                className="text-ink font-display m-0 text-[24px] leading-[1.08] font-black italic"
               >
                 {title}
               </p>

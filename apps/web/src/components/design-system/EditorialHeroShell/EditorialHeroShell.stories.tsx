@@ -23,11 +23,11 @@ const editorialPlaceholder = (
     <p className="text-ink-muted font-mono text-[10px] tracking-[0.18em] uppercase">
       KICKER · MONO · ROW
     </p>
-    <h1 className="text-ink font-serif text-5xl leading-tight font-black">
+    <h1 className="text-ink font-display text-5xl leading-tight font-black">
       Headline column placeholder.
     </h1>
     {/* Mirrors <EditorialLead>'s measure (#2645). */}
-    <p className="text-ink max-w-[var(--container-prose)] font-serif text-xl italic">
+    <p className="text-ink font-display max-w-[var(--container-prose)] text-xl italic">
       Editorial lead placeholder paragraph.
     </p>
   </>

@@ -164,7 +164,7 @@ export function TransferFactCard({ fact, className }: TransferFactCardProps) {
         ) : null}
         <p
           data-transfer-fact-route="true"
-          className="text-ink text-body-sm m-0 font-serif italic"
+          className="text-ink text-body-sm font-display m-0 italic"
         >
           {route}
         </p>

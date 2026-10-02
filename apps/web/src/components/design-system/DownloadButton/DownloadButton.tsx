@@ -226,7 +226,7 @@ export const DownloadButton = ({
             <span>{fileType.subtitle}</span>
           </span>
           {description && (
-            <span className="text-ink mt-1 font-serif text-[14px] italic">
+            <span className="text-ink font-display mt-1 text-[14px] italic">
               {description}
             </span>
           )}
