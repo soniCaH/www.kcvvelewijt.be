@@ -329,7 +329,7 @@ jobs:
       # for its own `vars` (KCVV_API_URL, NEXT_PUBLIC_SANITY_DATASET), which
       # this job's coverage run never reads.
       - name: Upload coverage
-        uses: codecov/codecov-action@v7.0.0
+        uses: codecov/codecov-action@v7.1.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: apps/web/coverage
