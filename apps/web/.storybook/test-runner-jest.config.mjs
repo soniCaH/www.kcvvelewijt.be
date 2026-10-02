@@ -18,6 +18,19 @@ const config = {
     : base.reporters,
   // `--shard` must split the suite, not take a random third per shard (#3275).
   testSequencer: "<rootDir>/apps/web/.storybook/stable-shard-sequencer.mjs",
+  // Partial raster re-draws only the rectangle that changed (an image that
+  // finished loading) on top of the tile's old pixels. Where that rectangle
+  // cuts across a rotated edge, the edge's anti-aliasing depends on how many
+  // frames were painted before the load — so the same story at the same commit
+  // gave three different PNGs in six runs. Full re-raster gave one PNG in eight
+  // (flake ledger class O).
+  testEnvironmentOptions: {
+    ...base.testEnvironmentOptions,
+    "jest-playwright": {
+      ...base.testEnvironmentOptions["jest-playwright"],
+      launchOptions: { args: ["--disable-partial-raster"] },
+    },
+  },
 };
 
 export default config;
