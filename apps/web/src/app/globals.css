@@ -167,10 +167,11 @@
   align-items: center;
 }
 
+/* `--spinner-dot` recolours the dots on a dark ground (set by the caller). */
 .kcvv-spinner-pulse > span {
   width: 6px;
   height: 6px;
-  background: var(--color-jersey-deep);
+  background: var(--spinner-dot, var(--color-jersey-deep));
   border-radius: 50%;
   animation: kcvv-spinner-dot-pulse 1.2s ease-in-out infinite;
 }

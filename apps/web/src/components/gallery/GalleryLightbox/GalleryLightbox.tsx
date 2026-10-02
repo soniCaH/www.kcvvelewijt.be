@@ -36,10 +36,12 @@ export interface GalleryLightboxProps {
 const FIRST_ROW = 4;
 
 // Every lightbox motion is Arrival — a photo entering the screen — on The
-// Curve (DESIGN.md → Motion). The literal is `--ease-out`'s value: the library
-// hands swipe/navigation easing to `Element.animate()`, which cannot resolve
-// `var()`. Under `prefers-reduced-motion: reduce` the library itself skips the
-// slide animations and zeroes the fade, so nothing is gated here.
+// Curve (DESIGN.md → Motion). The literal is `--ease-out`'s value (a test pins
+// them together): the library also feeds `easing.fade` to `Element.animate()`
+// (pull-to-close release), which rejects `var()`. Under
+// `prefers-reduced-motion: reduce` the library itself skips the slide
+// animations and zeroes the fade, so nothing is gated here. One exception no
+// prop reaches: the Zoom plugin hardcodes `ease-in-out` for a fresh zoom.
 const ARRIVAL_MS = 500;
 const THE_CURVE = "cubic-bezier(0, 0, 0.58, 1)";
 const LIGHTBOX_ANIMATION = {
@@ -135,8 +137,21 @@ export const GalleryLightbox = ({
         slides={slides}
         plugins={[Thumbnails, Zoom, Captions]}
         animation={LIGHTBOX_ANIMATION}
-        // A visitor-requested photo is loading: the site's waiting device.
-        render={{ iconLoading: () => <Spinner variant="compact" /> }}
+        render={{
+          // A visitor-requested photo is loading: the site's waiting device.
+          // `yarl__slide_loading` is the library's own class for its default
+          // icon: it brings the delayed fade-in (no flash on a fast load) and
+          // the reduced-motion opt-out; `aria-hidden` keeps the carousel's
+          // live region as quiet as it was with the library icon.
+          iconLoading: () => (
+            <div className="yarl__slide_loading" aria-hidden="true">
+              <Spinner
+                variant="compact"
+                className="[--spinner-dot:var(--color-cream)]"
+              />
+            </div>
+          ),
+        }}
         on={{
           view: ({ index: i }) =>
             trackEvent("gallery_image_view", {
