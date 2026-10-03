@@ -24,23 +24,39 @@ function hit(slug: string, score: number): SemanticSearchResult {
 /**
  * Stub `POST /api/search` so the (otherwise backend-dependent) semantic answer
  * lane renders deterministically in Storybook. `mode: "error"` exercises the
- * keyword fallback.
+ * keyword fallback; `"hang"` never answers (the wait holds still), `"once"`
+ * answers the first request then hangs (a re-search left in flight), and
+ * `"late"` answers after `delayMs` (the answer lands after the member rows).
  */
 function SemanticStub({
   results,
   mode = "ok",
+  delayMs = 0,
   children,
 }: {
   results: SemanticSearchResult[];
-  mode?: "ok" | "error";
+  mode?: "ok" | "error" | "hang" | "once" | "late";
+  delayMs?: number;
   children: ReactNode;
 }) {
   useEffect(() => {
     const original = window.fetch;
+    let calls = 0;
     window.fetch = async (input, init) => {
       const url = typeof input === "string" ? input : input.toString();
       if (url.includes("/api/search")) {
+        calls += 1;
         if (mode === "error") return new Response("nope", { status: 503 });
+        if (mode === "hang" || (mode === "once" && calls > 1)) {
+          // Honour the hook's abort, so a superseded request still ends.
+          return new Promise<Response>((_, reject) =>
+            init?.signal?.addEventListener("abort", () =>
+              reject(new DOMException("Aborted", "AbortError")),
+            ),
+          );
+        }
+        if (mode === "late")
+          await new Promise((resolve) => setTimeout(resolve, delayMs));
         return new Response(JSON.stringify({ results }), {
           status: 200,
           headers: { "Content-Type": "application/json" },
@@ -51,7 +67,7 @@ function SemanticStub({
     return () => {
       window.fetch = original;
     };
-  }, [results, mode]);
+  }, [results, mode, delayMs]);
   return <>{children}</>;
 }
 
@@ -196,4 +212,117 @@ export const NoResults: Story = {
       ),
   ],
   play: typePlay("zzzzz"),
+};
+
+/**
+ * The answer lane is still loading (#3399): a search is a request the visitor
+ * made, so it waits with the scarf, in the slot the answer will land — not a
+ * pulse skeleton. The member row that already matched stays on screen and
+ * usable. The request never answers, so the capture holds still.
+ */
+export const Waiting: Story = {
+  decorators: [
+    (Story) =>
+      heroBand(
+        <SemanticStub results={[]} mode="hang">
+          <Story />
+        </SemanticStub>,
+      ),
+  ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const input = canvas.getByLabelText("Zoek een persoon of hulpvraag");
+    await userEvent.click(input);
+    await userEvent.type(input, "in");
+    const popup = await canvas.findByTestId("hub-search-popup");
+    // People lane debounces (200ms); the answer lane never settles.
+    await within(popup).findByText("Inge De Wit");
+    await expect(
+      popup.querySelector(".kcvv-spinner-scarf--primary"),
+    ).not.toBeNull();
+  },
+};
+
+/**
+ * Re-search (#3399): the answer lane settled, then the visitor types on. The
+ * old rows stay — dimmed to half opacity after a 150 ms delay, `aria-busy` on
+ * the listbox — until the next answer swaps in at once. `play` asserts the
+ * busy flag and the settled dim (computed style: VR cannot see a broken
+ * transition); the capture is taken at rest.
+ */
+export const ReSearching: Story = {
+  decorators: [
+    (Story) =>
+      heroBand(
+        <SemanticStub results={[hit("inschrijven", 0.44)]} mode="once">
+          <Story />
+        </SemanticStub>,
+      ),
+  ],
+  play: async (context) => {
+    await typePlay("in")(context);
+    const canvas = within(context.canvasElement);
+    await userEvent.type(
+      canvas.getByLabelText("Zoek een persoon of hulpvraag"),
+      "s",
+    );
+    const listbox = await canvas.findByRole("listbox");
+    await waitFor(() => expect(listbox).toHaveAttribute("aria-busy", "true"));
+    // Rows stay usable.
+    await expect(within(listbox).getAllByRole("option").length).toBeGreaterThan(
+      0,
+    );
+    // 150 ms delay + 150 ms fade, then at rest at half opacity.
+    await waitFor(() => expect(getComputedStyle(listbox).opacity).toBe("0.5"), {
+      timeout: 2000,
+    });
+  },
+};
+
+/**
+ * The answer-forward card lands after the member rows (#3399). It opens its
+ * own room: its wrapper grows from zero to its natural height at the Arrival
+ * speed (`500ms`), so the rows slide down instead of jumping. Not baselined:
+ * the end state is `AnswerForward`'s, and a screenshot cannot see the
+ * transition.
+ */
+export const LateAnswerCard: Story = {
+  tags: ["!vr"],
+  decorators: [
+    (Story) =>
+      heroBand(
+        <SemanticStub
+          results={[hit("blessure", 0.82)]}
+          mode="late"
+          delayMs={400}
+        >
+          <Story />
+        </SemanticStub>,
+      ),
+  ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const input = canvas.getByLabelText("Zoek een persoon of hulpvraag");
+    await userEvent.click(input);
+    await userEvent.type(input, "in");
+    await canvas.findByText("Inge De Wit");
+    const card = await canvas.findByText(
+      /Lees volledig antwoord/i,
+      {},
+      { timeout: 5000 },
+    );
+    const room = card.closest(".grid") as HTMLElement;
+    // The VR runner freezes every transition to 0s before `play`, so there is
+    // no motion to measure there; `pnpm test:storybook` is where this runs.
+    if (navigator.userAgent.includes("StorybookTestRunner")) return;
+    // Height is travel: under `prefers-reduced-motion` the room opens at once.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      await expect(getComputedStyle(room).transitionProperty).toBe("none");
+      return;
+    }
+    await expect(getComputedStyle(room).transitionProperty).toBe(
+      "grid-template-rows",
+    );
+    await expect(getComputedStyle(room).transitionDuration).toBe("0.5s");
+  },
 };

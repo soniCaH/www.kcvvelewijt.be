@@ -27,6 +27,8 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
+import { HeightGrow } from "@/components/design-system/HeightGrow";
+import { Spinner } from "@/components/design-system/Spinner";
 import {
   ArrowRight,
   MagnifyingGlass,
@@ -36,6 +38,7 @@ import {
 } from "@/lib/icons.redesign";
 import { trackEvent } from "@/lib/analytics/track-event";
 import { getCategoryInfo } from "@/lib/responsibility-utils";
+import { cn } from "@/lib/utils/cn";
 import { revealHash } from "@/lib/utils/same-page-anchor";
 import { useSemanticSearch } from "@/hooks/useSemanticSearch";
 import { useHubMemberPanel } from "@/components/organigram/HubMemberPanel";
@@ -60,6 +63,15 @@ import {
   type HubResponsibilityResult,
   type HubSearchResult,
 } from "./hub-search";
+
+/**
+ * Stale rows during a re-search (#3399, as #3396): half opacity at the Chrome
+ * speed (`150ms`, `ease-out`) after a 150 ms delay. Applied only while stale,
+ * so the arrival is an instant swap back to full opacity. No `motion-reduce`
+ * opt-out: opacity is not travel (Reduced-Motion Rule).
+ */
+const STALE_DIM =
+  "opacity-50 transition-opacity delay-150 duration-150 ease-out";
 
 export type HubSearchVariant = "hero" | "nav";
 
@@ -388,6 +400,12 @@ export function HubSearch({
     semanticAnswers.length === 0 &&
     literalAnswers.length === 0;
 
+  // Re-search (#3399): the answer lane is loading a new query while the
+  // previous query's semantic rows are still on screen. They stay — dimmed,
+  // busy, usable — instead of giving way to the scarf. Literal and member hits
+  // are fresh (they follow the typed query), so they alone never dim.
+  const reSearching = !answersSettled && semanticAnswers.length > 0;
+
   const items: HubSearchResult[] = answerForward
     ? [answerForward, ...rows]
     : rows;
@@ -398,6 +416,33 @@ export function HubSearch({
   // message and the contact escape — so the combobox is honestly collapsed
   // there, and the `role="status"` region announces the empty result (#3188).
   const listboxOpen = showResults && (showShimmer || items.length > 0);
+
+  // Does the answer-forward card land above rows already on screen? Latched at
+  // the commit the card appears, from the PREVIOUS commit's `rowsShown`: a card
+  // that arrives in the same commit as its rows has nothing to make room above,
+  // so it appears at once, and a card replaced by a newer answer (the wrapper
+  // stays mounted) does not grow again (#3399, as #3396). Render-phase state so
+  // no effect has to run a frame late.
+  const rowsShown =
+    showResults && (showShimmer ? memberResults.length : rows.length) > 0;
+  const forwardNow = answerForward !== null;
+  const [forwardRoom, setForwardRoom] = useState({
+    rowsShown: false,
+    forwardShown: false,
+    grow: false,
+  });
+  if (
+    forwardRoom.rowsShown !== rowsShown ||
+    forwardRoom.forwardShown !== forwardNow
+  ) {
+    setForwardRoom({
+      rowsShown,
+      forwardShown: forwardNow,
+      grow:
+        forwardNow &&
+        (forwardRoom.forwardShown ? forwardRoom.grow : forwardRoom.rowsShown),
+    });
+  }
 
   // `selectedIndex` is a numeric index into `navItems`, so any recomposition of
   // the list — the shimmer→settled flip, an answer-forward card sliding into
@@ -720,14 +765,16 @@ export function HubSearch({
                   />
                 ))}
               </div>
-              <div aria-hidden className="px-3 py-2.5">
-                <div className="flex items-center gap-3">
-                  <div className="bg-cream-soft h-10 w-10 flex-shrink-0 rounded-full motion-safe:animate-pulse" />
-                  <div className="flex-1 space-y-1.5">
-                    <div className="bg-cream-soft h-2.5 w-1/3 motion-safe:animate-pulse" />
-                    <div className="bg-cream-soft h-2.5 w-3/4 motion-safe:animate-pulse" />
-                  </div>
-                </div>
+              {/* A search is a request the visitor made, so it waits with the
+                  scarf (Waiting-Device Rule, #3399) in the slot the answer
+                  will land. `h-15` is the old skeleton row's height (40px
+                  avatar + 2 × 10px), so the swap adds none. `aria-hidden`:
+                  the `role="status"` below already announces the wait. */}
+              <div
+                aria-hidden
+                className="flex h-15 items-center justify-center"
+              >
+                <Spinner size="md" variant="primary" />
               </div>
             </>
           ) : items.length > 0 ? (
@@ -742,8 +789,23 @@ export function HubSearch({
                       ? "Beste match"
                       : "Slim gezocht",
                 )}
-              <div id={listboxId} role="listbox" aria-label="Zoekresultaten">
-                {forwardCard}
+              <div
+                id={listboxId}
+                role="listbox"
+                aria-label="Zoekresultaten"
+                // Re-search: the old rows stay, dimmed and busy, until the
+                // lane settles; arrival is an instant swap back (#3399).
+                aria-busy={reSearching ? true : undefined}
+                className={cn(reSearching && STALE_DIM)}
+              >
+                {forwardCard && (
+                  // It opens its own room above rows already on screen, at
+                  // the Arrival speed. `bleed` off: the popup scrolls, and the
+                  // flush card paints inside its own box.
+                  <HeightGrow enter={forwardRoom.grow} bleed={false}>
+                    {forwardCard}
+                  </HeightGrow>
+                )}
                 {rows.map((result, i) => {
                   const index = answerForward ? i + 1 : i;
                   const optionId = `${listboxId}-opt-${index}`;
