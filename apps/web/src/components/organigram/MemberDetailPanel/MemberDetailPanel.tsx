@@ -13,6 +13,7 @@ import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import type { OrgChartMember, OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
 import { cn } from "@/lib/utils/cn";
+import { overlayFade } from "@/components/design-system/overlay-fade";
 import { revealHash } from "@/lib/utils/same-page-anchor";
 import { findMemberResponsibilities } from "@/lib/responsibility-utils";
 import { splitDisplayName } from "@/components/organigram/OrgPersonCard";
@@ -43,7 +44,11 @@ import { ArrowRight, Envelope, Phone, X } from "@/lib/icons.redesign";
  */
 
 export interface MemberDetailPanelProps {
-  /** The position to show. `null` (with `open`) renders nothing. */
+  /**
+   * The position to show. `null` (with `open`) leaves the panel hidden. The
+   * caller keeps the node on close, so the content does not blank while the
+   * panel fades out (#3389).
+   */
   node: OrgChartNode | null;
   open: boolean;
   onClose: () => void;
@@ -111,15 +116,16 @@ export function MemberDetailPanel({
   const closeRef = useRef<HTMLButtonElement>(null);
 
   // Selected holder for a shared position. `null` → fall back to the resolved
-  // initial holder. Reset synchronously (no flash) when the shown node changes,
-  // so every fresh open lands on holder #1 (7o5). The host clears `node` on
-  // close (`HubMemberPanel`), so reopening the same position is a node change
-  // too — the user never resumes on the holder they last switched to.
+  // initial holder. Reset synchronously (no flash) when the panel opens on a
+  // position, so every fresh open lands on holder #1 (7o5) — including
+  // reopening the same position. Closing does NOT reset: the content stays
+  // as-is while the panel fades out (#3389).
   const [selectedHolderId, setSelectedHolderId] = useState<string | null>(null);
-  const prevNodeIdRef = useRef(node?.id);
-  if (prevNodeIdRef.current !== node?.id) {
-    prevNodeIdRef.current = node?.id;
-    setSelectedHolderId(null);
+  const openNodeId = open ? node?.id : undefined;
+  const [prevOpenNodeId, setPrevOpenNodeId] = useState(openNodeId);
+  if (prevOpenNodeId !== openNodeId) {
+    setPrevOpenNodeId(openNodeId);
+    if (openNodeId !== undefined) setSelectedHolderId(null);
   }
 
   const members = node?.members ?? [];
@@ -168,8 +174,6 @@ export function MemberDetailPanel({
     };
   }, [open]);
 
-  if (!open || !node) return null;
-
   const isVacant = members.length === 0;
   const isShared = members.length >= 2;
   const holderResponsibilities =
@@ -212,7 +216,10 @@ export function MemberDetailPanel({
 
   return (
     <div
-      className="fixed inset-0 z-[90] flex items-end justify-center sm:items-stretch sm:justify-end"
+      {...overlayFade(
+        open && !!node,
+        "fixed inset-0 z-[90] flex items-end justify-center sm:items-stretch sm:justify-end",
+      )}
       onKeyDown={onContainerKeyDown}
       data-testid="member-detail-panel-overlay"
     >
@@ -228,139 +235,140 @@ export function MemberDetailPanel({
         className="bg-ink/40 absolute inset-0 cursor-default sm:bg-transparent"
       />
 
-      <div
-        ref={panelRef}
-        role="dialog"
-        aria-modal="true"
-        aria-label={`Contactgegevens — ${activeName}`}
-        data-testid="member-detail-panel"
-        className={cn(
-          "border-ink bg-cream relative flex max-h-[88vh] w-full flex-col overflow-y-auto border-2 shadow-[0_-6px_0_0_var(--color-ink)]",
-          "sm:h-full sm:max-h-none sm:w-[380px] sm:max-w-[88vw] sm:border-l-2 sm:shadow-[-6px_0_0_0_var(--color-ink)]",
-        )}
-      >
-        {/* Shared: holder-switcher above the header (lands on holder #1). */}
-        {isShared && (
-          <HolderSwitcher
-            holders={members}
-            activeId={activeHolderId}
-            onSelect={setSelectedHolderId}
-            tabId={tabId}
-            panelId={panelId}
-          />
-        )}
-
+      {node && (
         <div
-          {...(isShared
-            ? {
-                role: "tabpanel",
-                id: panelId,
-                "aria-labelledby": activeHolderId
-                  ? tabId(activeHolderId)
-                  : undefined,
-              }
-            : {})}
+          ref={panelRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Contactgegevens — ${activeName}`}
+          data-testid="member-detail-panel"
+          className={cn(
+            "border-ink bg-cream relative flex max-h-[88vh] w-full flex-col overflow-y-auto border-2 shadow-[0_-6px_0_0_var(--color-ink)]",
+            "sm:h-full sm:max-h-none sm:w-[380px] sm:max-w-[88vw] sm:border-l-2 sm:shadow-[-6px_0_0_0_var(--color-ink)]",
+          )}
         >
-          {/* Header */}
-          <div className="bg-jersey-deep-dark text-cream relative px-4 py-4">
-            <button
-              ref={closeRef}
-              type="button"
-              onClick={onClose}
-              aria-label="Sluiten"
-              // A 44px square meets the ≥44px tap-target floor (MOB-5) while
-              // staying a tidy bordered close box in the dark header.
-              className="border-cream/50 text-cream hover:border-cream absolute top-3 right-3 flex h-11 w-11 items-center justify-center border-[1.5px]"
-            >
-              <X size={14} aria-hidden />
-            </button>
+          {/* Shared: holder-switcher above the header (lands on holder #1). */}
+          {isShared && (
+            <HolderSwitcher
+              holders={members}
+              activeId={activeHolderId}
+              onSelect={setSelectedHolderId}
+              tabId={tabId}
+              panelId={panelId}
+            />
+          )}
 
-            <p className="text-warm font-mono text-[11px] tracking-[0.1em] uppercase">
-              {deriveKicker(node)}
-            </p>
+          <div
+            {...(isShared
+              ? {
+                  role: "tabpanel",
+                  id: panelId,
+                  "aria-labelledby": activeHolderId
+                    ? tabId(activeHolderId)
+                    : undefined,
+                }
+              : {})}
+          >
+            {/* Header */}
+            <div className="bg-jersey-deep-dark text-cream relative px-4 py-4">
+              <button
+                ref={closeRef}
+                type="button"
+                onClick={onClose}
+                aria-label="Sluiten"
+                // A 44px square meets the ≥44px tap-target floor (MOB-5) while
+                // staying a tidy bordered close box in the dark header.
+                className="border-cream/50 text-cream hover:border-cream absolute top-3 right-3 flex h-11 w-11 items-center justify-center border-[1.5px]"
+              >
+                <X size={14} aria-hidden />
+              </button>
 
-            <div className="mt-2.5 flex items-center gap-3">
-              <RoundAvatar
-                size={64}
-                name={activeName}
-                photoUrl={activeHolder?.imageUrl}
-                glyph={isVacant ? "+" : undefined}
-                dashed={isVacant}
-              />
-              {/* A vacant node's title / an active holder's name is
+              <p className="text-warm font-mono text-[11px] tracking-[0.1em] uppercase">
+                {deriveKicker(node)}
+              </p>
+
+              <div className="mt-2.5 flex items-center gap-3">
+                <RoundAvatar
+                  size={64}
+                  name={activeName}
+                  photoUrl={activeHolder?.imageUrl}
+                  glyph={isVacant ? "+" : undefined}
+                  dashed={isVacant}
+                />
+                {/* A vacant node's title / an active holder's name is
                   free-text/unbounded — per DESIGN.md's Hyphenation Rule it
                   carries `hyphens-auto` AND `break-words`, verified in
                   Chrome and Safari, or the panel's `overflow-y-auto` (which
                   forces `overflow-x: auto` too) gets a horizontal
                   scrollbar. */}
-              <div className="min-w-0">
-                <p className="font-display text-[23px] leading-none font-black break-words hyphens-auto italic">
-                  {isVacant ? node.title : activeName}
-                </p>
-                {(isVacant || node.roleCode) && (
-                  <p className="mt-1.5 flex items-center gap-1.5">
-                    {isVacant && (
-                      <span className="text-cream-quiet font-mono text-[11px] tracking-[0.04em] uppercase">
-                        Vacante functie
-                      </span>
-                    )}
-                    {node.roleCode && (
-                      <span className="border-ink bg-warm text-ink border-[1.5px] px-1.5 py-px font-mono text-[11px] font-semibold tracking-[0.05em] uppercase">
-                        {node.roleCode}
-                      </span>
-                    )}
+                <div className="min-w-0">
+                  <p className="font-display text-[23px] leading-none font-black break-words hyphens-auto italic">
+                    {isVacant ? node.title : activeName}
                   </p>
-                )}
+                  {(isVacant || node.roleCode) && (
+                    <p className="mt-1.5 flex items-center gap-1.5">
+                      {isVacant && (
+                        <span className="text-cream-quiet font-mono text-[11px] tracking-[0.04em] uppercase">
+                          Vacante functie
+                        </span>
+                      )}
+                      {node.roleCode && (
+                        <span className="border-ink bg-warm text-ink border-[1.5px] px-1.5 py-px font-mono text-[11px] font-semibold tracking-[0.05em] uppercase">
+                          {node.roleCode}
+                        </span>
+                      )}
+                    </p>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Body */}
-          <div className="flex flex-col gap-4 px-4 py-4">
-            {isVacant ? (
-              <>
-                <p className="text-ink text-sm leading-relaxed">
-                  Deze plek is vrij — misschien iets voor jou?
-                </p>
-                <Link
-                  href={vacantCtaHref}
-                  className={`${CHIP_LINK_CLASSES} border-ink bg-warm text-ink self-start`}
-                >
-                  Iets voor jou?
-                  <ArrowRight size={12} aria-hidden />
-                  <LinkPendingDots spaced={false} />
-                </Link>
-              </>
-            ) : (
-              <>
-                {(mailValue || telValue) && (
-                  <div className="flex gap-2.5">
-                    {mailValue && (
-                      <ContactAction
-                        kind="mail"
-                        href={`mailto:${mailValue}`}
-                        label="Mail"
-                      />
-                    )}
-                    {telValue && (
-                      <ContactAction
-                        kind="phone"
-                        href={`tel:${telValue}`}
-                        label="Bel"
-                      />
-                    )}
-                  </div>
-                )}
+            {/* Body */}
+            <div className="flex flex-col gap-4 px-4 py-4">
+              {isVacant ? (
+                <>
+                  <p className="text-ink text-sm leading-relaxed">
+                    Deze plek is vrij — misschien iets voor jou?
+                  </p>
+                  <Link
+                    href={vacantCtaHref}
+                    className={`${CHIP_LINK_CLASSES} border-ink bg-warm text-ink self-start`}
+                  >
+                    Iets voor jou?
+                    <ArrowRight size={12} aria-hidden />
+                    <LinkPendingDots spaced={false} />
+                  </Link>
+                </>
+              ) : (
+                <>
+                  {(mailValue || telValue) && (
+                    <div className="flex gap-2.5">
+                      {mailValue && (
+                        <ContactAction
+                          kind="mail"
+                          href={`mailto:${mailValue}`}
+                          label="Mail"
+                        />
+                      )}
+                      {telValue && (
+                        <ContactAction
+                          kind="phone"
+                          href={`tel:${telValue}`}
+                          label="Bel"
+                        />
+                      )}
+                    </div>
+                  )}
 
-                {holderResponsibilities.length > 0 && (
-                  <div>
-                    <p className="text-ink-muted mb-2 font-mono text-[11px] tracking-[0.1em] uppercase">
-                      Helpt met
-                    </p>
-                    <ul className="flex flex-wrap gap-1.5">
-                      {holderResponsibilities.map((path) => (
-                        <li key={path.id}>
-                          {/* Deep-link the question's slug (7o9 / F10): the
+                  {holderResponsibilities.length > 0 && (
+                    <div>
+                      <p className="text-ink-muted mb-2 font-mono text-[11px] tracking-[0.1em] uppercase">
+                        Helpt met
+                      </p>
+                      <ul className="flex flex-wrap gap-1.5">
+                        {holderResponsibilities.map((path) => (
+                          <li key={path.id}>
+                            {/* Deep-link the question's slug (7o9 / F10): the
                               finder's hashchange `reveal()` opens + scrolls to
                               that answer. Close WITHOUT the usual focus-restore —
                               null the return target first so the panel's close
@@ -376,42 +384,44 @@ export function MemberDetailPanel({
                               (`handleSamePageAnchorClick`) doesn't fit here:
                               it pushState's without firing the `hashchange`
                               that HulpFinder's reveal() needs. */}
-                          <a
-                            href={`#${path.id}`}
-                            onClick={() => {
-                              if (returnFocusRef) returnFocusRef.current = null;
-                              onClose();
-                              // The anchor's own default covers a hash that
-                              // actually changes; this covers re-picking the
-                              // question the hash already holds, where the
-                              // browser fires no `hashchange` at all.
-                              revealHash(path.id);
-                            }}
-                            className="border-jersey-deep text-jersey-deep hover:bg-jersey-deep hover:text-cream inline-block border-[1.5px] px-2 py-1 font-mono text-[11px] tracking-[0.02em] uppercase transition-colors"
-                          >
-                            {path.question}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                            <a
+                              href={`#${path.id}`}
+                              onClick={() => {
+                                if (returnFocusRef)
+                                  returnFocusRef.current = null;
+                                onClose();
+                                // The anchor's own default covers a hash that
+                                // actually changes; this covers re-picking the
+                                // question the hash already holds, where the
+                                // browser fires no `hashchange` at all.
+                                revealHash(path.id);
+                              }}
+                              className="border-jersey-deep text-jersey-deep hover:bg-jersey-deep hover:text-cream inline-block border-[1.5px] px-2 py-1 font-mono text-[11px] tracking-[0.02em] uppercase transition-colors"
+                            >
+                              {path.question}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
 
-                {activeHolder?.href && (
-                  <Link
-                    href={activeHolder.href}
-                    className={`${CHIP_LINK_CLASSES} border-ink bg-cream text-ink self-start`}
-                  >
-                    Volledig profiel
-                    <ArrowRight size={12} aria-hidden />
-                    <LinkPendingDots spaced={false} />
-                  </Link>
-                )}
-              </>
-            )}
+                  {activeHolder?.href && (
+                    <Link
+                      href={activeHolder.href}
+                      className={`${CHIP_LINK_CLASSES} border-ink bg-cream text-ink self-start`}
+                    >
+                      Volledig profiel
+                      <ArrowRight size={12} aria-hidden />
+                      <LinkPendingDots spaced={false} />
+                    </Link>
+                  )}
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

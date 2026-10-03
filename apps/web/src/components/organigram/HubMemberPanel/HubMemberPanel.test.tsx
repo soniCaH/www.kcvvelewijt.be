@@ -189,6 +189,20 @@ describe("HubMemberPanel", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
+  it("keeps the closed panel's content in the DOM so it can fade out", async () => {
+    const user = userEvent.setup();
+    window.history.replaceState(null, "", "/hulp?member=president");
+    renderHub();
+    await user.click(screen.getByRole("button", { name: "Sluiten" }));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.getByTestId("member-detail-panel-overlay")).toHaveAttribute(
+      "hidden",
+    );
+    expect(screen.getByTestId("member-detail-panel")).toHaveTextContent(
+      "Jan Voorzitter",
+    );
+  });
+
   it("clears the deep-link params when the panel is closed", async () => {
     const user = userEvent.setup();
     window.history.replaceState(null, "", "/hulp?member=president");

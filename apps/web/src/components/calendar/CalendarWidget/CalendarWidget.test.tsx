@@ -285,9 +285,13 @@ describe("CalendarWidget", () => {
     it("toggles the subscribe panel", async () => {
       const user = userEvent.setup();
       render(<CalendarWidget {...defaultProps} />);
-      expect(screen.queryByTestId("subscribe-panel")).not.toBeInTheDocument();
+      expect(screen.getByTestId("subscribe-panel")).toHaveAttribute("hidden");
       await user.click(screen.getByRole("button", { name: /Abonneer/ }));
-      expect(screen.getByTestId("subscribe-panel")).toBeInTheDocument();
+      expect(screen.getByTestId("subscribe-panel")).not.toHaveAttribute(
+        "hidden",
+      );
+      await user.click(screen.getByRole("button", { name: /Abonneer/ }));
+      expect(screen.getByTestId("subscribe-panel")).toHaveAttribute("hidden");
     });
 
     it("fires kalender_subscribe_open on open only (not on collapse)", async () => {

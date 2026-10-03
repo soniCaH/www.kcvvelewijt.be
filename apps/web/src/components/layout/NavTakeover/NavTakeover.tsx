@@ -7,6 +7,7 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import { Button } from "@/components/design-system/Button";
+import { overlayFade } from "@/components/design-system/overlay-fade";
 import { X } from "@/lib/icons.redesign";
 
 export interface NavTakeoverProps {
@@ -29,8 +30,10 @@ export interface NavTakeoverProps {
    * viewport crossed into the `lg` desktop layout (#2850) — at that width
    * `returnFocusRef` (the hamburger) is `lg:hidden`, so focusing it would
    * land focus on a hidden element, which is worse than the bug this fixes.
-   * Typically the desktop nav row's first link. Omitted, focus simply lands
-   * wherever the browser puts it once this panel unmounts (`document.body`).
+   * Typically the desktop nav row's first link. Omitted, nothing moves focus:
+   * the panel stays mounted but turns `inert` as the close starts, so the
+   * browser drops focus from the focused element inside it onto
+   * `document.body`.
    */
   autoCloseFocusRef?: React.RefObject<HTMLElement | null>;
 }
@@ -190,17 +193,16 @@ export const NavTakeover = ({
     }
   };
 
-  if (!open) return null;
-
+  // Stays mounted when closed (`hidden` + `inert`) so the close can fade out.
   return (
     <div
+      {...overlayFade(open, "bg-cream fixed inset-0 z-[60] flex flex-col")}
       ref={panelRef}
       id="nav-takeover"
       role="dialog"
       aria-modal="true"
       aria-label="Navigatiemenu"
       onKeyDown={handleTabTrap}
-      className="bg-cream fixed inset-0 z-[60] flex flex-col"
     >
       {/* Top bar — same height as the closed header */}
       <div className="border-paper-edge flex h-16 shrink-0 items-center justify-between border-b px-4 lg:px-8">

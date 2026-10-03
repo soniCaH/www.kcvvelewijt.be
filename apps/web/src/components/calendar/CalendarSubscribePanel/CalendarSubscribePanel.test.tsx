@@ -59,16 +59,19 @@ describe("CalendarSubscribePanel", () => {
   });
 
   describe("visibility", () => {
-    it("renders nothing when isOpen is false", () => {
-      const { container } = render(
-        <CalendarSubscribePanel {...defaultProps} isOpen={false} />,
-      );
-      expect(container.firstChild).toBeNull();
+    it("stays mounted but hidden and inert when isOpen is false (so it can fade out)", () => {
+      render(<CalendarSubscribePanel {...defaultProps} isOpen={false} />);
+      const panel = screen.getByTestId("subscribe-panel");
+      expect(panel).toHaveAttribute("hidden");
+      expect(panel).toHaveAttribute("inert");
+      expect(screen.queryByRole("button")).toBeNull();
     });
 
     it("renders the panel when isOpen is true", () => {
       render(<CalendarSubscribePanel {...defaultProps} />);
-      expect(screen.getByTestId("subscribe-panel")).toBeInTheDocument();
+      const panel = screen.getByTestId("subscribe-panel");
+      expect(panel).not.toHaveAttribute("hidden");
+      expect(panel).not.toHaveAttribute("inert");
     });
 
     it("always shows the QR stub", () => {

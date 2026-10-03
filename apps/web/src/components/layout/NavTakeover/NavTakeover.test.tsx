@@ -11,8 +11,8 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("NavTakeover", () => {
-  it("renders nothing when closed", () => {
-    const { container } = render(
+  it("stays mounted but hidden and inert when closed (so it can fade out)", () => {
+    render(
       <NavTakeover
         open={false}
         onOpenChange={() => {}}
@@ -21,7 +21,22 @@ describe("NavTakeover", () => {
         <NavTakeoverItem label="Home" href="/" />
       </NavTakeover>,
     );
-    expect(container.querySelector('[role="dialog"]')).toBeNull();
+    const panel = document.getElementById("nav-takeover");
+    expect(panel).toBeInTheDocument();
+    expect(panel).toHaveAttribute("hidden");
+    expect(panel).toHaveAttribute("inert");
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("is neither hidden nor inert when open", () => {
+    render(
+      <NavTakeover open onOpenChange={() => {}} wordmark={<span>WM</span>}>
+        <NavTakeoverItem label="Home" href="/" />
+      </NavTakeover>,
+    );
+    const panel = screen.getByRole("dialog");
+    expect(panel).not.toHaveAttribute("hidden");
+    expect(panel).not.toHaveAttribute("inert");
   });
 
   it("renders dialog with wordmark + close button when open", () => {

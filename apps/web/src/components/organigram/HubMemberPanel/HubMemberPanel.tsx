@@ -125,11 +125,10 @@ export function HubMemberPanel({
   );
 
   const handleClose = useCallback(() => {
+    // Keep the node (and the initial holder): the panel fades out for 150ms and
+    // would blank mid-fade if its content were cleared (#3389). It resets to
+    // holder #1 (7o5) itself on every fresh open.
     setOpen(false);
-    // Clear the shown node so a reopen of the same position is a node change —
-    // the panel resets to holder #1 (7o5) rather than resuming the last holder.
-    setOpenNode(null);
-    setInitialHolderId(undefined);
     replaceMemberParams(null, null);
   }, []);
 

@@ -107,18 +107,62 @@ afterEach(() => {
 
 describe("MemberDetailPanel", () => {
   describe("closed states", () => {
-    it("renders nothing when open is false", () => {
-      const { container } = render(
+    it("stays mounted but hidden and inert when open is false (so it can fade out)", () => {
+      render(
         <MemberDetailPanel node={singleNode} open={false} onClose={noop} />,
       );
-      expect(container).toBeEmptyDOMElement();
+      const overlay = screen.getByTestId("member-detail-panel-overlay");
+      expect(overlay).toHaveAttribute("hidden");
+      expect(overlay).toHaveAttribute("inert");
+      expect(screen.queryByRole("dialog")).toBeNull();
     });
 
-    it("renders nothing when node is null", () => {
-      const { container } = render(
-        <MemberDetailPanel node={null} open={true} onClose={noop} />,
+    it("keeps its content in the DOM when it closes, so the fade does not blank", () => {
+      const { rerender } = render(
+        <MemberDetailPanel node={singleNode} open onClose={noop} />,
       );
-      expect(container).toBeEmptyDOMElement();
+      rerender(
+        <MemberDetailPanel node={singleNode} open={false} onClose={noop} />,
+      );
+      expect(screen.getByTestId("member-detail-panel-overlay")).toHaveAttribute(
+        "hidden",
+      );
+      expect(screen.getByText("Luc Boons")).toBeInTheDocument();
+    });
+
+    it("is hidden, with no dialog, when node is null", () => {
+      render(<MemberDetailPanel node={null} open={true} onClose={noop} />);
+      expect(screen.getByTestId("member-detail-panel-overlay")).toHaveAttribute(
+        "hidden",
+      );
+      expect(screen.queryByRole("dialog")).toBeNull();
+    });
+
+    it("is visible and interactive when open with a node", () => {
+      render(<MemberDetailPanel node={singleNode} open onClose={noop} />);
+      const overlay = screen.getByTestId("member-detail-panel-overlay");
+      expect(overlay).not.toHaveAttribute("hidden");
+      expect(overlay).not.toHaveAttribute("inert");
+    });
+
+    it("re-lands on holder #1 when reopened after closing on another holder", async () => {
+      const user = userEvent.setup();
+      const { rerender } = render(
+        <MemberDetailPanel node={sharedNode} open onClose={noop} />,
+      );
+      await user.click(screen.getByRole("tab", { name: /Nina/ }));
+      rerender(
+        <MemberDetailPanel node={sharedNode} open={false} onClose={noop} />,
+      );
+      // Still on Nina while the panel fades out — no flip back to Els.
+      expect(
+        screen.getByRole("tab", { name: /Nina/, hidden: true }),
+      ).toHaveAttribute("aria-selected", "true");
+      rerender(<MemberDetailPanel node={sharedNode} open onClose={noop} />);
+      expect(screen.getByRole("tab", { name: /Els/ })).toHaveAttribute(
+        "aria-selected",
+        "true",
+      );
     });
   });
 
