@@ -14,9 +14,13 @@ import { SearchResults } from "./SearchResults";
 import { SearchPreSearchCard } from "./SearchPreSearchCard";
 import { SearchAnswerCard } from "./SearchAnswerCard";
 import { SearchRelated } from "./SearchRelated";
-import { useSemanticAugment } from "./useSemanticAugment";
-import { EmptyState, PageContainer, Spinner } from "@/components/design-system";
-import { HeightGrow } from "@/components/design-system/height-grow";
+import { useSemanticAugment, type SemanticAugment } from "./useSemanticAugment";
+import {
+  EmptyState,
+  HeightGrow,
+  PageContainer,
+  Spinner,
+} from "@/components/design-system";
 import { useSearchAnalytics } from "@/hooks/useSearchAnalytics";
 import { usePendingDelay } from "@/hooks/usePendingDelay";
 import { filterByActiveType } from "./search-filter-utils";
@@ -28,6 +32,15 @@ import type {
 } from "@/types/search";
 
 export type { SearchResultType, SearchResult, SearchResponse };
+
+/**
+ * Stale content during a re-search (#3396): half opacity at the Chrome speed
+ * (`150ms`, `ease-out`) after a 150 ms delay. Applied only while stale, so the
+ * arrival is an instant swap back to full opacity. No `motion-reduce` opt-out:
+ * opacity is not travel (Reduced-Motion Rule).
+ */
+const STALE_DIM =
+  "opacity-50 transition-opacity delay-150 duration-150 ease-out";
 
 export interface SearchInterfaceProps {
   /**
@@ -231,24 +244,63 @@ export const SearchInterface = ({
   // the same one the CSS dim waits out, so a fast answer shows neither.
   const showFloatingScarf = usePendingDelay(isReSearching);
   const showResults = !error && (!isLoading || isReSearching);
+  // A list (or its no-results card) is really on screen: not under the 2-char
+  // floor, and not the URL-sync commit before the first fetch has settled.
+  const listOnScreen =
+    showResults && query.trim().length >= 2 && lastSettledQuery !== null;
+  // The query the rows on screen answered. It leads `query` for a commit when
+  // the URL changes (back/forward, `?q=`), so the count line never flickers
+  // new → old → new.
+  const resultsQuery =
+    lastSettledQuery !== null && lastSettledQuery !== query.trim()
+      ? lastSettledQuery
+      : query;
+
+  // The semantic lane goes `pending` the moment the query changes. Keep the
+  // last settled augment (the "Slim antwoord" card or "Gerelateerd" links) on
+  // screen, dimmed like the list, until the new one settles, so the list does
+  // not jump up and slide down again (#3396). Render-phase state, keyed by
+  // content because `useSemanticAugment` returns a fresh object every render.
+  // Dropped below the 2-char floor and on a failed search, where the list it
+  // belonged to is gone too.
+  const [settledAugment, setSettledAugment] = useState<{
+    key: string;
+    value: SemanticAugment;
+  } | null>(null);
+  const augmentKey = JSON.stringify(augment);
+  const nextSettledAugment =
+    query.trim().length < 2 || error
+      ? null
+      : augment.kind === "pending" || settledAugment?.key === augmentKey
+        ? settledAugment
+        : { key: augmentKey, value: augment };
+  if (nextSettledAugment !== settledAugment) {
+    setSettledAugment(nextSettledAugment);
+  }
+  const staleAugment =
+    augment.kind === "pending" && showResults
+      ? (settledAugment?.value ?? null)
+      : null;
+  const shownAugment = staleAugment ?? augment;
 
   // Does the answer card land above a list that was already on screen? Latched
-  // at the commit the card appears, from the PREVIOUS commit's `showResults`:
+  // at the commit the card appears, from the PREVIOUS commit's `listOnScreen`:
   // a card that arrives in the same commit as the list has nothing to make
-  // room above, so it appears at once (#3396). Render-phase state, like the
-  // URL sync below, so no effect has to run a frame late.
-  const answerNow = augment.kind === "answer";
+  // room above, so it appears at once, and a card replaced by a newer answer
+  // (the stale one stays mounted) does not grow again (#3396). Render-phase
+  // state, like the URL sync below, so no effect has to run a frame late.
+  const answerNow = shownAugment.kind === "answer";
   const [answerRoom, setAnswerRoom] = useState({
     listShown: false,
     answerShown: false,
     grow: false,
   });
   if (
-    answerRoom.listShown !== showResults ||
+    answerRoom.listShown !== listOnScreen ||
     answerRoom.answerShown !== answerNow
   ) {
     setAnswerRoom({
-      listShown: showResults,
+      listShown: listOnScreen,
       answerShown: answerNow,
       grow:
         answerNow &&
@@ -488,13 +540,17 @@ export const SearchInterface = ({
                 screen, its wrapper grows from nothing at the Arrival speed so
                 the list slides down instead of jumping. The wrapper's own
                 gap is dropped and re-spent inside it (`pb-8`), so the whole
-                32px grows with it rather than snapping in at the first frame. */}
-            {augment.kind === "answer" && (
+                32px grows with it rather than snapping in at the first frame.
+                While a re-search is pending the previous answer stays,
+                dimmed, and is replaced in place (no second grow). */}
+            {shownAugment.kind === "answer" && (
               <HeightGrow enter={answerRoom.grow} className="mb-0">
-                <div className="pb-8">
+                {/* `pt-1` / `pb-8`: room for the card's tilt and shadow,
+                    which the clip would otherwise cut (see HeightGrow). */}
+                <div className={cn("pt-1 pb-8", staleAugment && STALE_DIM)}>
                   <SearchAnswerCard
-                    answer={augment.answer}
-                    sources={augment.sources}
+                    answer={shownAugment.answer}
+                    sources={shownAugment.sources}
                   />
                 </div>
               </HeightGrow>
@@ -600,35 +656,33 @@ export const SearchInterface = ({
                 </EmptyState>
               )}
 
-            {/* Results. During a re-search (#3396) the old list stays: dimmed
-                to half opacity at the Chrome speed (`150ms`, `ease-out`) after
-                a 150 ms delay, `aria-busy` from the first frame, rows still
-                clickable. The transition classes exist only while
-                re-searching, so arrival is an instant swap back to full
-                opacity — no fade-in, no stagger (typeahead replays the
-                arrival on every pause, and a list is scanned, not read in
-                order). No `motion-reduce` opt-out on the dim: opacity is not
-                travel (Reduced-Motion Rule). The scarf floats over it,
-                absolutely positioned so it adds no height. The no-results
-                card and the failure notice never get an entrance.
+            {/* Results. During a re-search (#3396) the old list stays: an
+                inner wrapper dims it (`STALE_DIM`) and carries `aria-busy`
+                from the first frame; rows stay clickable. The host is
+                undimmed and not busy, so the floating scarf, a sibling of
+                that wrapper, renders at full strength and its `role="status"`
+                is not inside a busy region. Arrival is an instant swap back
+                to full opacity — no fade-in, no stagger (typeahead replays
+                the arrival on every pause, and a list is scanned, not read in
+                order). The scarf is absolutely positioned so it adds no
+                height. The no-results card and the failure notice never get
+                an entrance.
 
-                The count line names the query the old rows answered
-                (`lastSettledQuery`), not the one typed since. */}
+                The count line names the query the rows on screen answered
+                (`resultsQuery`), not the one typed since. */}
             {showResults && (
-              <div
-                aria-busy={isLoading ? true : undefined}
-                className={cn(
-                  "relative",
-                  isReSearching &&
-                    "opacity-50 transition-opacity delay-150 duration-150 ease-out",
-                )}
-              >
-                <SearchResults
-                  results={results}
-                  query={isLoading ? (lastSettledQuery ?? query) : query}
-                  activeType={activeType}
-                  onResultClick={analytics.trackResultClicked}
-                />
+              <div className="relative">
+                <div
+                  aria-busy={isReSearching ? true : undefined}
+                  className={cn(isReSearching && STALE_DIM)}
+                >
+                  <SearchResults
+                    results={results}
+                    query={resultsQuery}
+                    activeType={activeType}
+                    onResultClick={analytics.trackResultClicked}
+                  />
+                </div>
                 {showFloatingScarf && (
                   <div className="pointer-events-none absolute inset-x-0 top-12 flex justify-center">
                     <Spinner size="lg" variant="primary" />
@@ -641,8 +695,10 @@ export const SearchInterface = ({
                 links sit BELOW the lexical results; supplementary, not a
                 headline. Renders nothing when there's a high-confidence answer
                 (mutually exclusive) or on low scores / endpoint failure. */}
-            {augment.kind === "related" && (
-              <SearchRelated items={augment.items} />
+            {shownAugment.kind === "related" && (
+              <div className={cn(staleAugment && STALE_DIM)}>
+                <SearchRelated items={shownAugment.items} />
+              </div>
             )}
           </>
         )}

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
-import { HeightGrow } from "./height-grow";
+import { HeightGrow } from "./HeightGrow";
 
 const root = (container: HTMLElement) => container.firstElementChild!;
 
@@ -50,5 +50,18 @@ describe("HeightGrow", () => {
     expect(inner.className).toContain("min-h-0");
     expect(inner.className).toContain("overflow-hidden");
     expect(root(container).className).not.toContain("opacity");
+  });
+
+  it("has no vertical padding or margin on the clip, so a collapsed wrapper paints nothing", () => {
+    const { getByText } = render(<HeightGrow open={false}>content</HeightGrow>);
+
+    // Side room only; vertical room belongs to the content, hidden at 0fr.
+    // Real layout is asserted by the `Closed` story's `play`.
+    const classes = getByText("content").className.split(" ");
+    expect(classes).toContain("-mx-3");
+    expect(classes).toContain("px-3");
+    expect(
+      classes.filter((c) => /^-?(p|py|pt|pb|m|my|mt|mb)-/.test(c)),
+    ).toEqual([]);
   });
 });

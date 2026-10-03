@@ -418,7 +418,9 @@ export const ReSearching: Story = {
       {},
       { timeout: 5000 },
     );
-    const region = count.closest("div.relative") as HTMLElement;
+    // The dimmed, busy wrapper around the list; the scarf floats beside it.
+    const region = count.closest("div.space-y-6")!.parentElement as HTMLElement;
+    const host = region.parentElement as HTMLElement;
 
     await userEvent.type(canvas.getByRole("textbox"), " Mechelen{enter}");
 
@@ -429,8 +431,11 @@ export const ReSearching: Story = {
     await waitFor(() => expect(getComputedStyle(region).opacity).toBe("0.5"), {
       timeout: 2000,
     });
-    // The scarf floats over the list and adds no height to it.
-    const scarf = await within(region).findByRole("status");
+    // The scarf floats over the list and adds no height to it. It sits in the
+    // undimmed host, not inside the dimmed, busy region.
+    const scarf = await within(host).findByRole("status");
+    await expect(region.contains(scarf)).toBe(false);
+    await expect(getComputedStyle(host).opacity).toBe("1");
     await expect(getComputedStyle(scarf.parentElement!).position).toBe(
       "absolute",
     );
@@ -457,7 +462,7 @@ export const LateAnswerCard: Story = {
   beforeEach() {
     return mockFetch(mockResponse, {
       semantic: smartAnswerResponse,
-      semanticDelay: 1200,
+      semanticDelay: 100,
     });
   },
   play: async ({ canvasElement }) => {
@@ -494,7 +499,7 @@ export const LateAnswerCard: Story = {
     );
     await expect(getComputedStyle(room).transitionDuration).toBe("0.5s");
     const before = count.getBoundingClientRect().top;
-    await new Promise((resolve) => setTimeout(resolve, 700));
+    await new Promise((resolve) => setTimeout(resolve, 550));
     const after = count.getBoundingClientRect().top;
     await expect(after - before).toBeGreaterThan(100);
   },

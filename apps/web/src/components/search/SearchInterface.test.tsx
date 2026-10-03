@@ -8,6 +8,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, waitFor, within, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SearchInterface } from "./SearchInterface";
+import { SearchResults } from "./SearchResults";
 import { createMockSearchResponse } from "@/../tests/helpers/search.helpers";
 import { trackEvent } from "@/lib/analytics/track-event";
 import { useSemanticAugment, type SemanticAugment } from "./useSemanticAugment";
@@ -82,6 +83,14 @@ vi.mock("./useSemanticAugment", () => ({
   useSemanticAugment: vi.fn(() => ({ kind: "none" })),
 }));
 const mockUseSemanticAugment = vi.mocked(useSemanticAugment);
+
+// Passes through to the real list; records the props each render saw, so a
+// test can assert on a commit the DOM never settles in (#3396, count line).
+vi.mock("./SearchResults", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./SearchResults")>();
+  return { SearchResults: vi.fn(actual.SearchResults) };
+});
+const mockSearchResults = vi.mocked(SearchResults);
 
 const setupUser = () =>
   userEvent.setup({ advanceTimers: vi.advanceTimersByTimeAsync });
@@ -1932,20 +1941,27 @@ describe("SearchInterface", () => {
   });
 
   describe("Re-search keeps the old results on screen (#3396)", () => {
+    // The dimmed, busy wrapper around the list. Its parent is the undimmed
+    // `relative` host the floating scarf also sits in.
     const resultsRegion = () =>
-      screen.getByText(/resultaten voor/i).closest("div.relative");
+      screen.getByText(/resultaten voor/i).closest("div.space-y-6")!
+        .parentElement!;
 
-    /** Settle a first search for "first", then start a second that never resolves. */
-    async function startReSearch() {
+    /**
+     * Settle a first search for "first", then start a second that never
+     * resolves. `beforeReSearch` runs once the first list is on screen.
+     */
+    async function startReSearch(beforeReSearch?: () => void) {
       setMockSearchParams({ q: "first" });
       fetchMock.mockResolvedValueOnce({
         ok: true,
         json: async () => createMockSearchResponse("first"),
       });
-      render(<SearchInterface />);
+      const view = render(<SearchInterface />);
       await waitFor(() => {
         expect(screen.getByText(/resultaten voor/i)).toBeInTheDocument();
       });
+      beforeReSearch?.();
 
       let resolveSecond!: (value: unknown) => void;
       fetchMock.mockReturnValueOnce(
@@ -1959,7 +1975,7 @@ describe("SearchInterface", () => {
       await waitFor(() => {
         expect(fetchMock).toHaveBeenCalledTimes(2);
       });
-      return { resolveSecond };
+      return { resolveSecond, ...view };
     }
 
     it("shows the centred scarf at once on a first search: there is nothing to keep", async () => {
@@ -2013,11 +2029,19 @@ describe("SearchInterface", () => {
         vi.advanceTimersByTime(1);
       });
       const scarf = screen.getByRole("status");
-      const float = scarf.parentElement!;
-      expect(float).toHaveClass("absolute", "pointer-events-none");
-      // Inside the results region, so it floats over the dimmed list.
-      expect(resultsRegion()).toContainElement(scarf);
-      expect(resultsRegion()).toHaveClass("relative");
+      expect(scarf.parentElement).toHaveClass(
+        "absolute",
+        "pointer-events-none",
+      );
+      // Floats over the list from an undimmed, non-busy host: a sibling of
+      // the dimmed wrapper, so it renders at full strength and its status is
+      // not announced from inside a busy region.
+      const host = resultsRegion().parentElement!;
+      expect(host).toHaveClass("relative");
+      expect(host).toContainElement(scarf);
+      expect(resultsRegion()).not.toContainElement(scarf);
+      expect(scarf.closest("[aria-busy]")).toBeNull();
+      expect(scarf.closest(".opacity-50")).toBeNull();
     });
 
     it("swaps the new list in at full opacity the moment it arrives: no fade-in", async () => {
@@ -2071,6 +2095,72 @@ describe("SearchInterface", () => {
         "absolute",
       );
     });
+
+    it("never names the typed-ahead query over the old rows, even on the URL-synced commit before loading starts", async () => {
+      await startReSearch();
+
+      // Every render with the old rows saw the query they answered. Before
+      // the fix the label went first → second → first → second.
+      const queriesSeenWithRows = mockSearchResults.mock.calls
+        .filter(([props]) => props.results.length > 0)
+        .map(([props]) => props.query);
+      // The re-search began after the first list settled; none of its commits
+      // may show the new query over the old rows.
+      expect(queriesSeenWithRows).not.toContain("second");
+    });
+
+    it("keeps the last settled answer card on screen, dimmed, then replaces it in place without growing again", async () => {
+      const answerA: SemanticAugment = {
+        kind: "answer",
+        answer: "Eerste antwoord.",
+        sources: [],
+      };
+      const answerB: SemanticAugment = {
+        kind: "answer",
+        answer: "Tweede antwoord.",
+        sources: [],
+      };
+      const room = () =>
+        screen.getByText("Slim antwoord").closest("[class*='grid-rows-']")!;
+
+      const { rerender } = await startReSearch(() => {
+        // The card lands after the list: it grows.
+        mockUseSemanticAugment.mockReturnValue(answerA);
+      });
+      // (`startReSearch` re-rendered via the URL change with `answerA`.)
+      expect(screen.getByText(/eerste antwoord/i)).toBeInTheDocument();
+      const roomBefore = room();
+
+      // The new query's augment is pending: the old card stays, dimmed.
+      mockUseSemanticAugment.mockReturnValue({ kind: "pending" });
+      rerender(<SearchInterface />);
+      expect(screen.getByText(/eerste antwoord/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/eerste antwoord/i).closest(".opacity-50"),
+      ).not.toBeNull();
+
+      // The new answer swaps in, undimmed, in the same mounted room.
+      mockUseSemanticAugment.mockReturnValue(answerB);
+      rerender(<SearchInterface />);
+      expect(screen.getByText(/tweede antwoord/i)).toBeInTheDocument();
+      expect(screen.queryByText(/eerste antwoord/i)).not.toBeInTheDocument();
+      expect(
+        screen.getByText(/tweede antwoord/i).closest(".opacity-50"),
+      ).toBeNull();
+      expect(room()).toBe(roomBefore);
+    });
+
+    it("shows no stale answer on a first search or after a failure", async () => {
+      mockUseSemanticAugment.mockReturnValue({ kind: "pending" });
+      setMockSearchParams({ q: "first" });
+      fetchMock.mockReturnValueOnce(new Promise(() => {}));
+      render(<SearchInterface />);
+
+      await waitFor(() => {
+        expect(screen.getByRole("status")).toBeInTheDocument();
+      });
+      expect(screen.queryByText("Slim antwoord")).not.toBeInTheDocument();
+    });
   });
 
   describe("The answer card opens its own room (#3396)", () => {
@@ -2123,6 +2213,20 @@ describe("SearchInterface", () => {
       await waitFor(() => {
         expect(screen.getByText(/resultaten voor/i)).toBeInTheDocument();
       });
+      expect(cardRoom().className).not.toContain("starting:");
+    });
+
+    it("does not grow for an answer that arrives with no list on screen, even right after the pre-fetch commit", async () => {
+      // First render: no answer yet. The commit before the fetch starts has
+      // `showResults` true but nothing rendered a list; the answer arrives in
+      // the very next commit.
+      mockUseSemanticAugment
+        .mockReturnValueOnce({ kind: "none" })
+        .mockReturnValue(answer);
+      setMockSearchParams({ q: "first" });
+      fetchMock.mockReturnValueOnce(new Promise(() => {}));
+      render(<SearchInterface />);
+
       expect(cardRoom().className).not.toContain("starting:");
     });
 

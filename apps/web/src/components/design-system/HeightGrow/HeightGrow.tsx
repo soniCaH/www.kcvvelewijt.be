@@ -18,8 +18,13 @@
  * Under `prefers-reduced-motion` the transition is gone: height is travel, so
  * the change is instant (Reduced-Motion Rule).
  *
- * The inner clip pads and un-pads by `0.75rem` (`p-3 -m-3`) so `overflow-hidden`
- * does not cut off a paper card's offset shadow and rotated corners once grown.
+ * Collapsed means nothing is painted: the clip has no vertical padding or
+ * margin, so at `0fr` it is exactly zero tall and its content (including that
+ * content's own padding) is hidden. Only the sides get room, `-mx-3 px-3`, for
+ * a paper card's offset shadow and rotated corners. Content that paints above
+ * or below its own box brings its own vertical padding, as the `/zoeken` card
+ * does (`pt-1 pb-8`: a 0.5° tilt overshoots its top edge by about 3px, the
+ * offset shadow its bottom by 6px).
  * Keep the class lists below full literals: Tailwind's scanner has to see them.
  */
 import type { ReactNode } from "react";
@@ -50,7 +55,7 @@ export function HeightGrow({
         className,
       )}
     >
-      <div className="-m-3 min-h-0 overflow-hidden p-3">{children}</div>
+      <div className="-mx-3 min-h-0 overflow-hidden px-3">{children}</div>
     </div>
   );
 }
