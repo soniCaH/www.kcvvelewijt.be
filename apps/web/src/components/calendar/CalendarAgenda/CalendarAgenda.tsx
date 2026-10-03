@@ -372,7 +372,7 @@ function AgendaEventRow({ event }: { event: CalendarEvent }) {
         {event.title}
       </span>
       <EventTypeTag eventType={event.eventType} />
-      <LinkPendingDots placement="corner" className="top-1 right-1" />
+      <LinkPendingDots placement="corner" className="bottom-1 left-2" />
     </Link>
   );
 }

@@ -203,7 +203,7 @@ export function SiteHeader({ seniorTeams, className }: SiteHeaderProps) {
                       // the same type recipe — that is 20px font-display, this
                       // is 11px mono. Desktop-only, so it never showed up in
                       // the 390px walk.
-                      "relative -my-2 py-2",
+                      "relative -my-2 block py-2",
                       CHROME_NAV_TYPE,
                       isActive(item.href)
                         ? "text-jersey-deep"
@@ -216,7 +216,7 @@ export function SiteHeader({ seniorTeams, className }: SiteHeaderProps) {
                     <span className={NAV_LABEL_TRUNCATE}>{item.label}</span>
                     <LinkPendingDots
                       placement="corner"
-                      className="top-full left-1/2 -translate-x-1/2"
+                      className="top-full right-auto left-1/2 -translate-x-1/2"
                     />
                   </Link>
                 </li>
