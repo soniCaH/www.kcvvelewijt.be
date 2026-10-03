@@ -333,4 +333,65 @@ describe("NavTakeoverItem", () => {
       "aria-current",
     );
   });
+
+  describe("row rules (#3392)", () => {
+    it("hands each row its index and the panel the step, so the delay is pure CSS", () => {
+      render(
+        <NavTakeover
+          open
+          onOpenChange={() => {}}
+          wordmark={<span>WM</span>}
+          rowCount={12}
+        >
+          <NavTakeoverItem label="Eerste" href="/a" index={0} />
+          <NavTakeoverItem label="Derde" href="/c" index={2} />
+        </NavTakeover>,
+      );
+      const nav = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
+      expect(nav.style.getPropertyValue("--rule-step")).toBe("24.54ms");
+      expect(
+        screen
+          .getByRole("link", { name: /Derde/ })
+          .style.getPropertyValue("--rule-index"),
+      ).toBe("2");
+    });
+
+    it("keeps the 30ms step for today's 9 rows", () => {
+      render(
+        <NavTakeover
+          open
+          onOpenChange={() => {}}
+          wordmark={<span>WM</span>}
+          rowCount={9}
+        >
+          <NavTakeoverItem label="Eerste" href="/a" />
+        </NavTakeover>,
+      );
+      expect(
+        screen
+          .getByRole("navigation", { name: "Hoofdnavigatie" })
+          .style.getPropertyValue("--rule-step"),
+      ).toBe("30ms");
+    });
+
+    it("draws the rule on a pseudo-element and never gates the row itself", () => {
+      render(<NavTakeoverItem label="Nieuws" href="/nieuws" index={1} />);
+      const link = screen.getByRole("link", { name: /Nieuws/ });
+      // The old hairline was `border-b border-paper-edge`; it stays in the box
+      // (transparent) so the row height is unchanged, and the ::after paints it.
+      expect(link).toHaveClass("border-b", "border-transparent");
+      expect(link).not.toHaveClass("border-paper-edge");
+      expect(link).toHaveClass("after:bg-paper-edge", "after:origin-left");
+      // Draw: the CSS `scale` property (not `transform`), from zero, at Arrival speed.
+      expect(link).toHaveClass(
+        "after:starting:scale-x-0",
+        "after:transition-[scale]",
+        "after:duration-500",
+        "after:ease-out",
+        "motion-reduce:after:transition-none",
+      );
+      // Decoration only: nothing on the row's text or pointer handling moves.
+      expect(link.className).not.toMatch(/pointer-events|opacity/);
+    });
+  });
 });

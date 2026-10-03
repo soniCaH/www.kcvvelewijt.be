@@ -11,8 +11,9 @@
  * lands at once, and nothing waits on an event that never fires. A browser
  * without `allow-discrete` falls back to today's hard cut.
  *
- * Only the close animates. There is no `starting:` entrance — the open is
- * instant, as before (a menu entrance is #2498's call).
+ * Only the close animates. There is no `starting:` entrance on the panel — the
+ * open is instant, as before. The one open-side motion is the mobile menu's row
+ * rules drawing in (#3392, decided in #2498), which lives on `<NavTakeoverItem>`.
  *
  * Usage: `<div {...overlayFade(open, "own classes")}>`.
  * Focus return and scroll-lock release stay keyed on `open`, so they happen when

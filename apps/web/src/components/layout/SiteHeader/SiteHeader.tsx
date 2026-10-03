@@ -271,10 +271,12 @@ export function SiteHeader({ seniorTeams, className }: SiteHeaderProps) {
         wordmark={<Wordmark />}
         returnFocusRef={hamburgerRef}
         autoCloseFocusRef={firstDesktopNavLinkRef}
+        rowCount={menuItems.length}
       >
-        {menuItems.map((item) => (
+        {menuItems.map((item, index) => (
           <NavTakeoverItem
             key={item.href}
+            index={index}
             label={item.label}
             href={item.href}
             active={isActive(item.href)}
