@@ -14,21 +14,26 @@
  * Only the close animates. There is no `starting:` entrance — the open is
  * instant, as before (a menu entrance is #2498's call).
  *
- * Usage: `<div {...overlayFadeAttrs(open)} className={cn(overlayFadeClasses(open), …)}>`.
+ * Usage: `<div {...overlayFade(open, "own classes")}>`.
  * Focus return and scroll-lock release stay keyed on `open`, so they happen when
  * the close STARTS, while the panel is still fading — `inert` already removed it
  * from the tab order and the accessibility tree.
  */
 import { cn } from "@/lib/utils/cn";
 
-export function overlayFadeAttrs(open: boolean) {
-  return { hidden: !open, inert: !open };
-}
-
-/** Keep the class list a full literal: Tailwind's scanner has to see it. */
-export function overlayFadeClasses(open: boolean): string {
-  return cn(
-    "transition-[opacity,display] transition-discrete duration-150 ease-out motion-reduce:transition-none",
-    !open && "opacity-0",
-  );
+/**
+ * Spread onto the panel's root element: `<div {...overlayFade(open, "fixed …")}>`.
+ * `className` is the panel's own classes, merged with the fade ones. Keep the
+ * class list below a full literal: Tailwind's scanner has to see it.
+ */
+export function overlayFade(open: boolean, className?: string) {
+  return {
+    hidden: !open,
+    inert: !open,
+    className: cn(
+      "transition-[opacity,display] transition-discrete duration-150 ease-out motion-reduce:transition-none",
+      !open && "opacity-0",
+      className,
+    ),
+  };
 }

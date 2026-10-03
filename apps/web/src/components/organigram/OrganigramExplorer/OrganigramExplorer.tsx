@@ -24,10 +24,7 @@ import {
   Envelope,
   X,
 } from "@/lib/icons.redesign";
-import {
-  overlayFadeAttrs,
-  overlayFadeClasses,
-} from "@/components/design-system/overlay-fade";
+import { overlayFade } from "@/components/design-system/overlay-fade";
 import { PRESS_DOWN_CLASSES } from "@/components/design-system/press-down";
 import { EditorialLink } from "@/components/design-system/EditorialLink";
 import { ScrollRail } from "@/components/design-system/ScrollHint/ScrollRail";
@@ -301,17 +298,16 @@ export function OrganigramExplorer({
 
   return (
     <div
-      {...overlayFadeAttrs(open)}
+      {...overlayFade(
+        open,
+        "border-ink bg-jersey-deep-dark text-cream fixed inset-0 z-[80] flex flex-col border-2",
+      )}
       ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
       onKeyDown={onDialogKeyDown}
       data-testid="organigram-explorer"
-      className={cn(
-        "border-ink bg-jersey-deep-dark text-cream fixed inset-0 z-[80] flex flex-col border-2",
-        overlayFadeClasses(open),
-      )}
     >
       {/* Top bar */}
       <div className="border-cream/20 flex items-center gap-3 border-b bg-black/20 px-4 py-2.5">

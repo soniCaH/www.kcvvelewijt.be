@@ -42,8 +42,37 @@ describe("OrganigramExplorer — gating + a11y shell", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  it("plays its entrance when a mounted-closed explorer opens", () => {
+  it("reveals the pre-mounted entrance element on open (the CSS animation restarts as display flips)", () => {
     const { rerender } = render(
+      <OrganigramExplorer
+        nodes={explorerFixture}
+        open={false}
+        onClose={vi.fn()}
+      />,
+    );
+    const closedPop = screen
+      .getByTestId("organigram-explorer")
+      .querySelector(".spotlight-pop");
+    expect(closedPop?.closest("[hidden]")).not.toBeNull();
+    rerender(
+      <OrganigramExplorer nodes={explorerFixture} open onClose={vi.fn()} />,
+    );
+    // Same node: the replay comes from `display: none` -> `flex`, not a remount.
+    const openPop = screen.getByRole("dialog").querySelector(".spotlight-pop");
+    expect(openPop).toBe(closedPop);
+    expect(openPop?.closest("[hidden]")).toBeNull();
+  });
+
+  it("remounts the entrance element when reopened after navigating away", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(
+      <OrganigramExplorer nodes={explorerFixture} open onClose={vi.fn()} />,
+    );
+    await user.click(screen.getByRole("button", { name: /^Omhoog naar / }));
+    const navigatedPop = screen
+      .getByRole("dialog")
+      .querySelector(".spotlight-pop");
+    rerender(
       <OrganigramExplorer
         nodes={explorerFixture}
         open={false}
@@ -53,10 +82,12 @@ describe("OrganigramExplorer — gating + a11y shell", () => {
     rerender(
       <OrganigramExplorer nodes={explorerFixture} open onClose={vi.fn()} />,
     );
-    const explorer = screen.getByRole("dialog");
-    expect(explorer).not.toHaveAttribute("hidden");
-    // `.spotlight-pop` is the CSS entrance; it restarts when display flips.
-    expect(explorer.querySelector(".spotlight-pop")).toBeInTheDocument();
+    // Reopening resets focus to the landing node: the keyed wrapper is a new
+    // element, so the entrance replays from scratch.
+    const reopenedPop = screen
+      .getByRole("dialog")
+      .querySelector(".spotlight-pop");
+    expect(reopenedPop).not.toBe(navigatedPop);
   });
 
   it("is a labelled modal dialog wrapping the stage, with a polite live region", () => {

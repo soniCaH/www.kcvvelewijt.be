@@ -9,10 +9,7 @@ import {
   CALENDAR_EVENTS_PARAM,
   CALENDAR_EVENTS_PARAM_VALUE,
 } from "@/lib/utils/calendar-feed-query";
-import {
-  overlayFadeAttrs,
-  overlayFadeClasses,
-} from "@/components/design-system/overlay-fade";
+import { overlayFade } from "@/components/design-system/overlay-fade";
 import type { CalendarTeamInfo } from "@/app/(main)/kalender/utils";
 
 export interface CalendarSubscribePanelProps {
@@ -148,12 +145,11 @@ export function CalendarSubscribePanel({
 
   return (
     <div
-      {...overlayFadeAttrs(isOpen)}
-      data-testid="subscribe-panel"
-      className={cn(
+      {...overlayFade(
+        isOpen,
         "border-paper-edge bg-cream-soft border-b-2 border-dashed p-4",
-        overlayFadeClasses(isOpen),
       )}
+      data-testid="subscribe-panel"
     >
       {/* Seizoenskaart — a perforated "abonnement" ticket (6d5 lock). The QR
           lives in the always-visible left stub; the body carries the team

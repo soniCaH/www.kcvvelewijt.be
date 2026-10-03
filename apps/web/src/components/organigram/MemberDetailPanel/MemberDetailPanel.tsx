@@ -13,10 +13,7 @@ import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import type { OrgChartMember, OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
 import { cn } from "@/lib/utils/cn";
-import {
-  overlayFadeAttrs,
-  overlayFadeClasses,
-} from "@/components/design-system/overlay-fade";
+import { overlayFade } from "@/components/design-system/overlay-fade";
 import { revealHash } from "@/lib/utils/same-page-anchor";
 import { findMemberResponsibilities } from "@/lib/responsibility-utils";
 import { splitDisplayName } from "@/components/organigram/OrgPersonCard";
@@ -219,10 +216,9 @@ export function MemberDetailPanel({
 
   return (
     <div
-      {...overlayFadeAttrs(open && !!node)}
-      className={cn(
+      {...overlayFade(
+        open && !!node,
         "fixed inset-0 z-[90] flex items-end justify-center sm:items-stretch sm:justify-end",
-        overlayFadeClasses(open && !!node),
       )}
       onKeyDown={onContainerKeyDown}
       data-testid="member-detail-panel-overlay"
