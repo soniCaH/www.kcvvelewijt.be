@@ -365,19 +365,19 @@ function ReservationHero({
 
 /**
  * The card a tapped fixture row grows into (#3397). Only the full hero joins:
- * the reservation stub hero has no row to meet. `update="none"` keeps a live
- * score refresh from animating; the rest of the page cuts (see `globals.css`).
+ * the reservation stub hero has no row to meet. The boundary opts in on `share`
+ * only, so it takes part when a tapped row of the same match is the other end
+ * and never on a plain arrival, a leave or a live score refresh. No `id`
+ * (stories, previews): nothing to pair with, the card renders bare.
  */
 function FullHero(props: { match: MatchHeroMatch; className?: string }) {
+  const { id } = props.match;
+  if (id === undefined) return <FullHeroCard {...props} />;
   return (
     <ViewTransition
-      name={
-        props.match.id === undefined
-          ? undefined
-          : matchTravelName(props.match.id)
-      }
-      default={props.match.id === undefined ? "none" : MATCH_TRAVEL_CLASS}
-      update="none"
+      name={matchTravelName(id)}
+      default="none"
+      share={MATCH_TRAVEL_CLASS}
     >
       <FullHeroCard {...props} />
     </ViewTransition>

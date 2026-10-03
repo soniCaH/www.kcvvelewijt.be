@@ -3,9 +3,10 @@
 /**
  * MatchTravelLink — the `<Link>` of a fixture row that opens `/wedstrijd/<id>`,
  * and the source end of the shared-element travel into the match hero (#3397,
- * decided in #2501). `<CalendarAgenda>`, `<TeamAgendaRow>` and
- * `<MatchStripView>` use it in place of `<Link>`; the transition logic lives
- * here once (and in `useMatchTravel`).
+ * decided in #2501). `<CalendarAgenda>`, `<TeamAgendaRow>`,
+ * `<MatchStripView>`'s phone ledger and `<UpcomingMatchesClient>` use it in
+ * place of `<Link>`; the transition logic lives here once (and in
+ * `useMatchTravel`).
  *
  * The `<ViewTransition>` is always mounted around the link (a boundary that
  * appears on click would remount the `<Link>` and drop `<LinkPendingDots>`'s
@@ -16,6 +17,7 @@ import { ViewTransition } from "react";
 import Link from "next/link";
 import type { ComponentProps } from "react";
 import { useMatchTravel } from "@/hooks/useMatchTravel";
+import { MATCH_TRAVEL_CLASS } from "@/lib/utils/match-travel";
 
 export interface MatchTravelLinkProps extends Omit<
   ComponentProps<typeof Link>,
@@ -35,9 +37,25 @@ export function MatchTravelLink({
       <Link
         {...props}
         href={`/wedstrijd/${matchId}`}
+        // The `match-travel` transition type `globals.css` keys the page cut on.
+        // Harmless on a navigation that starts no view transition.
+        transitionTypes={[MATCH_TRAVEL_CLASS]}
         onClick={(event) => {
-          travel.onClick();
           onClick?.(event);
+          // Only a click `<Link>` will turn into a navigation is a tap: a
+          // modified or non-primary click, or one the consumer cancelled, opens
+          // nothing in this tab.
+          if (
+            event.defaultPrevented ||
+            event.button !== 0 ||
+            event.metaKey ||
+            event.ctrlKey ||
+            event.shiftKey ||
+            event.altKey
+          ) {
+            return;
+          }
+          travel.onClick();
         }}
       />
     </ViewTransition>

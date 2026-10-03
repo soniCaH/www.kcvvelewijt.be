@@ -10,11 +10,19 @@ vi.mock("react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("react")>()),
   ViewTransition: ({
     name,
+    share,
+    default: all,
     children,
   }: {
     name?: string;
+    share?: string;
+    default?: string;
     children: ReactNode;
-  }) => <div data-view-transition={name}>{children}</div>,
+  }) => (
+    <div data-view-transition={name} data-share={share} data-default={all}>
+      {children}
+    </div>
+  ),
 }));
 
 const homeTeam = { id: 1235, name: "KCVV Elewijt" };
@@ -40,6 +48,9 @@ describe("MatchHero travel target (#3397)", () => {
       '[data-view-transition="match-card-3740"]',
     );
     expect(target).not.toBeNull();
+    // Opts in on `share` only: a plain arrival or leave starts no transition.
+    expect(target).toHaveAttribute("data-default", "none");
+    expect(target).toHaveAttribute("data-share", "match-travel");
     expect(target?.querySelector("section")).not.toBeNull();
   });
 

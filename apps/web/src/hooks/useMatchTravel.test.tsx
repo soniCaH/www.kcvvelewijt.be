@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { renderHook, act, fireEvent } from "@testing-library/react";
+import { renderHook, act } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { createElement } from "react";
 
@@ -38,11 +38,11 @@ describe("useMatchTravel", () => {
   afterEach(() => {
     pathnameMock.value = "/kalender";
     vi.unstubAllGlobals();
-    // Link click that resets the module-level state between tests.
-    const a = document.createElement("a");
-    document.body.append(a);
-    fireEvent.click(a);
-    a.remove();
+    // Spend the module-level tap between tests: it commits a navigation.
+    const { rerender } = renderRows();
+    pathnameMock.value = "/elders";
+    rerender();
+    pathnameMock.value = "/kalender";
   });
 
   it("sets no name at render", () => {
@@ -94,26 +94,37 @@ describe("useMatchTravel", () => {
     expect(names(result)).toEqual([undefined, undefined, undefined]);
   });
 
-  it("names a row that stays mounted (the strip) again when the visitor comes back, until another link is tapped", () => {
+  it("opts in on share only, so a plain arrival or leave starts no transition", () => {
+    mockReducedMotion(false);
+    const { result } = renderRows();
+    expect(result.current.list.transition).toEqual({ default: "none" });
+    act(() => result.current.list.onClick());
+    expect(result.current.list.transition).toEqual({
+      name: "match-card-42",
+      default: "none",
+      share: "match-travel",
+    });
+  });
+
+  it("drops the tap once the navigation commits, whatever started it", () => {
     mockReducedMotion(false);
     const { result, rerender } = renderRows();
     act(() => result.current.strip.onClick());
     expect(names(result)).toEqual(["match-card-42", undefined, undefined]);
 
+    // A route change (link, `router.push`, back/forward) is a pathname change.
     pathnameMock.value = "/wedstrijd/42";
     rerender();
-    expect(names(result)).toEqual([undefined, undefined, undefined]);
-
     pathnameMock.value = "/kalender";
     rerender();
-    expect(names(result)).toEqual(["match-card-42", undefined, undefined]);
-
-    const link = document.createElement("a");
-    document.body.append(link);
-    act(() => {
-      fireEvent.click(link);
-    });
-    link.remove();
     expect(names(result)).toEqual([undefined, undefined, undefined]);
+  });
+
+  it("keeps the tap while a row mounts before the navigation commits", () => {
+    mockReducedMotion(false);
+    const { result } = renderRows();
+    act(() => result.current.list.onClick());
+    renderRows(); // the page the tap leaves from keeps rendering rows
+    expect(names(result)).toEqual([undefined, "match-card-42", undefined]);
   });
 });
