@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
-import { fn } from "storybook/test";
+import { expect, fn, within } from "storybook/test";
 import { FirstAid, SoccerBall } from "@/lib/icons.redesign";
 import { FilterTabs, type FilterTab, type FilterTabsProps } from "./FilterTabs";
 
@@ -290,8 +290,8 @@ export const WithLeadingGlyph: Story = {
 /**
  * A request waiting on a chip (#3388). The chip that is becoming active shows
  * the compact dots after its label, in the chip's own text colour (cream on
- * the active ink chip). The dots appear 150 ms after `pendingTab` is set (a
- * CSS delay); the capture is taken after it, with the loop at rest.
+ * the active ink chip). The dots mount 150 ms after `pendingTab` is set, so
+ * `play` waits for them and the capture is taken after, with the loop at rest.
  */
 export const PendingActiveChip: Story = {
   args: {
@@ -300,6 +300,11 @@ export const PendingActiveChip: Story = {
     pendingTab: "jeugd",
     showCounts: false,
     ariaLabel: "Filter news by category",
+  },
+  play: async ({ canvasElement }) => {
+    await expect(
+      await within(canvasElement).findByRole("status", { hidden: true }),
+    ).toBeInTheDocument();
   },
 };
 

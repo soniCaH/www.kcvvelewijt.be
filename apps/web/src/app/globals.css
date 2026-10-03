@@ -190,32 +190,6 @@
   }
 }
 
-/* A request made from a filter chip waits as the dots on that chip (#3388).
-   The 150 ms delay is CSS, not a timer: `steps(1, end)` holds the `from`
-   frame for the whole duration, then jumps to `to`. The `from` frame takes
-   no room (zero width, and a margin that cancels the chip's `gap-2`), so a
-   fetch that answers inside 150 ms neither shows dots nor nudges the chips
-   to its right. The delay is the signal, not motion: it stays under
-   `prefers-reduced-motion` (only the dot loop stops). */
-@keyframes kcvv-pending-reveal {
-  from {
-    max-width: 0;
-    margin-left: -0.5rem;
-    opacity: 0;
-  }
-  to {
-    max-width: 2rem;
-    margin-left: 0;
-    opacity: 1;
-  }
-}
-
-.kcvv-pending-reveal {
-  display: inline-flex;
-  overflow: hidden;
-  animation: kcvv-pending-reveal 150ms steps(1, end) both;
-}
-
 /* ===== Alert ticket-stub perforation (Phase 2.A.5) =====
 
    The "tear" effect on the left notch column of <Alert> (Direction B —

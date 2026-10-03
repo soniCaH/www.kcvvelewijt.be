@@ -67,13 +67,21 @@ describe("FilterTabs", () => {
   });
 
   describe("pendingTab (#3388)", () => {
+    beforeEach(() => vi.useFakeTimers());
+    afterEach(() => vi.useRealTimers());
+
     const pulseIn = (name: string) =>
       screen.getByRole("button", { name }).querySelector(".kcvv-spinner-pulse");
+    const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms));
 
-    it("renders the dots only in the matching chip, after its label", () => {
+    it("shows the dots after 150 ms, not before, only in the matching chip and after its label", () => {
       render(
         <FilterTabs tabs={mockTabs} activeTab="active" pendingTab="active" />,
       );
+
+      advance(149);
+      expect(pulseIn("Active 5")).toBeNull();
+      advance(1);
 
       expect(pulseIn("Active 5")).not.toBeNull();
       expect(pulseIn("All 10")).toBeNull();
@@ -84,11 +92,46 @@ describe("FilterTabs", () => {
       );
     });
 
+    it("takes no room before the delay: a fast answer changes nothing", () => {
+      const { rerender } = render(
+        <FilterTabs tabs={mockTabs} activeTab="active" pendingTab="active" />,
+      );
+      const chip = screen.getByRole("button", { name: "Active 5" });
+      const before = chip.innerHTML;
+
+      advance(100);
+      rerender(<FilterTabs tabs={mockTabs} activeTab="active" />);
+      advance(100);
+
+      expect(chip.innerHTML).toBe(before);
+      expect(pulseIn("Active 5")).toBeNull();
+    });
+
+    it("restarts the delay when the pending chip changes", () => {
+      const { rerender } = render(
+        <FilterTabs tabs={mockTabs} activeTab="active" pendingTab="active" />,
+      );
+      advance(100);
+      rerender(
+        <FilterTabs
+          tabs={mockTabs}
+          activeTab="archived"
+          pendingTab="archived"
+        />,
+      );
+      advance(100);
+      expect(pulseIn("Archived 2")).toBeNull();
+      advance(50);
+      expect(pulseIn("Archived 2")).not.toBeNull();
+    });
+
     it("keeps the dots out of the accessible name and the live regions", () => {
       render(
         <FilterTabs tabs={mockTabs} activeTab="active" pendingTab="active" />,
       );
+      advance(150);
 
+      expect(pulseIn("Active 5")).not.toBeNull();
       expect(
         screen.getByRole("button", { name: "Active 5" }),
       ).toBeInTheDocument();
@@ -99,11 +142,13 @@ describe("FilterTabs", () => {
       const { rerender } = render(
         <FilterTabs tabs={mockTabs} activeTab="all" />,
       );
+      advance(150);
       expect(document.querySelector(".kcvv-spinner-pulse")).toBeNull();
 
       rerender(
         <FilterTabs tabs={mockTabs} activeTab="all" pendingTab="nope" />,
       );
+      advance(150);
       expect(document.querySelector(".kcvv-spinner-pulse")).toBeNull();
     });
   });

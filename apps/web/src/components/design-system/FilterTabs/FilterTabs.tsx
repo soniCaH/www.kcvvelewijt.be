@@ -114,6 +114,7 @@
 
 import { cn } from "@/lib/utils/cn";
 import { Spinner } from "@/components/design-system/Spinner";
+import { usePendingDelay } from "@/hooks/usePendingDelay";
 import { ScrollRail } from "@/components/design-system/ScrollHint/ScrollRail";
 import type { RedesignIconProps } from "@/lib/icons.redesign";
 import type { ComponentType } from "react";
@@ -182,8 +183,8 @@ export interface FilterTabsProps {
    *  fade's start colour (#2805). */
   surface?: FilterTabsSurface;
   /** The value of the chip whose request is pending (#3388): that chip shows
-   *  the compact dots after its label, 150 ms after it is set (CSS delay —
-   *  `.kcvv-pending-reveal`), in the chip's own text colour so they read on
+   *  the compact dots after its label, 150 ms after it is set
+   *  (`usePendingDelay`, so a fast answer shows nothing and shifts nothing), in the chip's own text colour so they read on
    *  the active ink chip. Absent → no chip shows dots. */
   pendingTab?: string;
 }
@@ -213,6 +214,7 @@ export function FilterTabs({
   surface = "paper",
   pendingTab,
 }: FilterTabsProps) {
+  const showPending = usePendingDelay(pendingTab !== undefined, pendingTab);
   const renderTab = (tab: FilterTab) => {
     const isActive = activeTab === tab.value;
     const Icon = tab.icon;
@@ -253,17 +255,15 @@ export function FilterTabs({
             {tab.count}
           </span>
         )}
-        {pendingTab === tab.value && (
+        {showPending && pendingTab === tab.value && (
           // Decorative, like `<LinkPendingDots>`: a live region injected on a
           // tap would rename the focused chip ("B-Ploeg Laden…"); the grid's
           // `aria-busy` is the signal for assistive tech.
-          <span className="kcvv-pending-reveal">
-            <Spinner
-              variant="compact"
-              aria-hidden="true"
-              className="[--spinner-dot:currentColor]"
-            />
-          </span>
+          <Spinner
+            variant="compact"
+            aria-hidden="true"
+            className="[--spinner-dot:currentColor]"
+          />
         )}
       </>
     );
