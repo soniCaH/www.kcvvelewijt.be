@@ -8,7 +8,7 @@ vi.mock("next/navigation", () => ({
   usePathname: () => pathnameMock.value,
 }));
 
-import { useMatchTravel } from "./useMatchTravel";
+import { useTravel } from "./useTravel";
 
 function mockReducedMotion(reduce: boolean) {
   vi.stubGlobal(
@@ -25,16 +25,16 @@ function mockReducedMotion(reduce: boolean) {
 /** Three row instances on one page (a match may sit in the strip and in a list at once). */
 function renderRows() {
   return renderHook(() => ({
-    strip: useMatchTravel(42),
-    list: useMatchTravel(42),
-    other: useMatchTravel(7),
+    strip: useTravel("match", "/wedstrijd/42"),
+    list: useTravel("match", "/wedstrijd/42"),
+    other: useTravel("match", "/wedstrijd/7"),
   }));
 }
 
 const names = (r: ReturnType<typeof renderRows>["result"]) =>
   Object.values(r.current).map((row) => row.transition.name);
 
-describe("useMatchTravel", () => {
+describe("useTravel", () => {
   afterEach(() => {
     pathnameMock.value = "/kalender";
     vi.unstubAllGlobals();
@@ -56,19 +56,21 @@ describe("useMatchTravel", () => {
     const { result } = renderRows();
     act(() => result.current.list.onClick());
     const Probe = () => {
-      const { transition } = useMatchTravel(42);
+      const { transition } = useTravel("match", "/wedstrijd/42");
       return createElement("div", { "data-name": transition.name });
     };
-    expect(renderToString(createElement(Probe))).not.toContain("match-card-42");
+    expect(renderToString(createElement(Probe))).not.toContain(
+      "match-travel-42",
+    );
   });
 
   it("names only the clicked row, never two equal names", () => {
     mockReducedMotion(false);
     const { result } = renderRows();
     act(() => result.current.list.onClick());
-    expect(names(result)).toEqual([undefined, "match-card-42", undefined]);
+    expect(names(result)).toEqual([undefined, "match-travel-42", undefined]);
     act(() => result.current.strip.onClick());
-    expect(names(result)).toEqual(["match-card-42", undefined, undefined]);
+    expect(names(result)).toEqual(["match-travel-42", undefined, undefined]);
   });
 
   it("sets no name on the own-match page", () => {
@@ -84,7 +86,52 @@ describe("useMatchTravel", () => {
     pathnameMock.value = "/wedstrijd/99";
     const { result } = renderRows();
     act(() => result.current.other.onClick());
-    expect(names(result)).toEqual([undefined, undefined, "match-card-7"]);
+    expect(names(result)).toEqual([undefined, undefined, "match-travel-7"]);
+  });
+
+  it("names a tapped news card or squad card after its own kind and slug", () => {
+    mockReducedMotion(false);
+    const { result } = renderHook(() => ({
+      card: useTravel("article", "/nieuws/winst"),
+      sameSlugPlayer: useTravel("player", "/spelers/winst"),
+    }));
+    act(() => result.current.card.onClick());
+    expect(result.current.card.transition.name).toBe("article-travel-winst");
+    expect(result.current.sameSlugPlayer.transition.name).toBeUndefined();
+  });
+
+  it("sets no name on the detail page of its own record, whatever the kind", () => {
+    mockReducedMotion(false);
+    pathnameMock.value = "/nieuws/winst";
+    const { result } = renderHook(() => useTravel("article", "/nieuws/winst"));
+    act(() => result.current.onClick());
+    expect(result.current.transition.name).toBeUndefined();
+  });
+
+  it.each([
+    ["no kind", undefined, "/nieuws/winst"],
+    ["no href", "article", undefined],
+    ["a listing href", "article", "/nieuws"],
+    ["another kind's href", "player", "/nieuws/winst"],
+  ] as const)("is inert for %s: no name, no tap recorded", (_l, kind, href) => {
+    mockReducedMotion(false);
+    const { result } = renderHook(() => useTravel(kind, href));
+    let recorded = true;
+    act(() => {
+      recorded = result.current.onClick();
+    });
+    expect(recorded).toBe(false);
+    expect(result.current.transition).toEqual({ default: "none" });
+  });
+
+  it("says whether a tap was recorded", () => {
+    mockReducedMotion(false);
+    const { result } = renderHook(() => useTravel("article", "/nieuws/winst"));
+    let recorded = false;
+    act(() => {
+      recorded = result.current.onClick();
+    });
+    expect(recorded).toBe(true);
   });
 
   it("sets no name under prefers-reduced-motion", () => {
@@ -100,9 +147,9 @@ describe("useMatchTravel", () => {
     expect(result.current.list.transition).toEqual({ default: "none" });
     act(() => result.current.list.onClick());
     expect(result.current.list.transition).toEqual({
-      name: "match-card-42",
+      name: "match-travel-42",
       default: "none",
-      share: "match-travel",
+      share: "travel",
     });
   });
 
@@ -110,7 +157,7 @@ describe("useMatchTravel", () => {
     mockReducedMotion(false);
     const { result, rerender } = renderRows();
     act(() => result.current.strip.onClick());
-    expect(names(result)).toEqual(["match-card-42", undefined, undefined]);
+    expect(names(result)).toEqual(["match-travel-42", undefined, undefined]);
 
     // A route change (link, `router.push`, back/forward) is a pathname change.
     pathnameMock.value = "/wedstrijd/42";
@@ -125,6 +172,6 @@ describe("useMatchTravel", () => {
     const { result } = renderRows();
     act(() => result.current.list.onClick());
     renderRows(); // the page the tap leaves from keeps rendering rows
-    expect(names(result)).toEqual([undefined, "match-card-42", undefined]);
+    expect(names(result)).toEqual([undefined, "match-travel-42", undefined]);
   });
 });

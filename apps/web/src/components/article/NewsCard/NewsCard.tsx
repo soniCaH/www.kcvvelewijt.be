@@ -1,9 +1,9 @@
 // apps/web/src/components/article/NewsCard/NewsCard.tsx
-import Link from "next/link";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
+import { TravelLink, TravelScope, TravelTarget } from "@/components/travel";
 import {
   TapedCard,
   type TapedCardBg,
@@ -211,7 +211,7 @@ export const NewsCard = ({
   // listing get the md-equivalent.
   const metaPadding = variant === "featured" ? "p-8" : "p-5";
 
-  return (
+  const card = (
     <TapedCard
       as="article"
       rotation={rotation}
@@ -274,21 +274,25 @@ export const NewsCard = ({
         )}
       >
         {imageUrl ? (
-          <Image
-            src={imageUrl}
-            alt=""
-            fill
-            className="object-cover"
-            style={{ filter: "var(--filter-photo-newsprint)" }}
-            sizes={
-              compactSizes +
-              (variant === "featured"
-                ? "(max-width: 768px) 100vw, 66vw"
-                : "(max-width: 768px) 100vw, 33vw")
-            }
-            placeholder={imageLqip ? "blur" : "empty"}
-            blurDataURL={imageLqip ?? undefined}
-          />
+          // The photo is what grows into the article's cover (#3405) — only
+          // when `href` is an article, and never the region around it.
+          <TravelTarget>
+            <Image
+              src={imageUrl}
+              alt=""
+              fill
+              className="object-cover"
+              style={{ filter: "var(--filter-photo-newsprint)" }}
+              sizes={
+                compactSizes +
+                (variant === "featured"
+                  ? "(max-width: 768px) 100vw, 66vw"
+                  : "(max-width: 768px) 100vw, 33vw")
+              }
+              placeholder={imageLqip ? "blur" : "empty"}
+              blurDataURL={imageLqip ?? undefined}
+            />
+          </TravelTarget>
         ) : artefact ? (
           artefact
         ) : (
@@ -420,8 +424,7 @@ export const NewsCard = ({
       </div>
 
       {href && (
-        <Link
-          href={href}
+        <TravelLink
           aria-label={title.trim() || "Nieuwsbericht"}
           data-variant={variant}
           data-phone-layout={phoneLayout}
@@ -439,8 +442,14 @@ export const NewsCard = ({
             tone={isDark ? "light" : "default"}
             placement="corner"
           />
-        </Link>
+        </TravelLink>
       )}
     </TapedCard>
+  );
+
+  return (
+    <TravelScope kind="article" href={href}>
+      {card}
+    </TravelScope>
   );
 };

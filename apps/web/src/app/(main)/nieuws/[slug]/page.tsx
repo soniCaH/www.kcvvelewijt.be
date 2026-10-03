@@ -142,6 +142,7 @@ function renderArticleHero({
         <EditorialHero
           variant="interview"
           placement="detail"
+          slug={article.slug}
           title={titleProp}
           lead={lead}
           author={author}
@@ -155,6 +156,7 @@ function renderArticleHero({
         <EditorialHero
           variant="transfer"
           placement="detail"
+          slug={article.slug}
           title={titleProp}
           lead={lead}
           author={author}
@@ -168,6 +170,7 @@ function renderArticleHero({
         <EditorialHero
           variant="event"
           placement="detail"
+          slug={article.slug}
           title={titleProp}
           lead={lead}
           author={author}
@@ -185,6 +188,7 @@ function renderArticleHero({
         <EditorialHero
           variant={article.articleType}
           placement="detail"
+          slug={article.slug}
           title={titleProp}
           lead={lead}
           author={author}
@@ -200,6 +204,7 @@ function renderArticleHero({
         <EditorialHero
           variant="announcement"
           placement="detail"
+          slug={article.slug}
           title={titleProp}
           lead={lead}
           author={author}

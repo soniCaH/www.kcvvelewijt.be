@@ -1,8 +1,8 @@
 import Image from "next/image";
-import Link from "next/link";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
+import { TravelLink, TravelScope, TravelTarget } from "@/components/travel";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
 import { PRESS_DOWN_CLASSES } from "@/components/design-system/press-down";
 
@@ -103,14 +103,13 @@ export function EditorialHubCard({
   // One element, two tags: `next/link` for a route, a plain anchor for a
   // document (see `external`). Everything below — classes, analytics markers,
   // children — is identical either way.
-  const Wrapper = external ? "a" : Link;
+  const Wrapper = external ? "a" : TravelLink;
   const externalProps = external
-    ? { target: "_blank" as const, rel: "noopener noreferrer" }
+    ? { href, target: "_blank" as const, rel: "noopener noreferrer" }
     : {};
 
-  return (
+  const card = (
     <Wrapper
-      href={href}
       {...externalProps}
       // Inert analytics markers — read by a page-scoped click-delegation
       // wrapper (<EditorialHubAnalytics>); no per-card onClick.
@@ -144,14 +143,16 @@ export function EditorialHubCard({
           // exception, so a nav-tile photo gets the same warm-tint filter as
           // a news cover. Decorative either way (the card's own title names
           // the tile), never greyscale (that treatment is sponsor-logo only).
-          <Image
-            src={imageUrl}
-            alt=""
-            fill
-            sizes={sizes ?? DEFAULT_NEWS_SIZES}
-            className="object-cover"
-            style={{ filter: "var(--filter-photo-newsprint)" }}
-          />
+          <TravelTarget>
+            <Image
+              src={imageUrl}
+              alt=""
+              fill
+              sizes={sizes ?? DEFAULT_NEWS_SIZES}
+              className="object-cover"
+              style={{ filter: "var(--filter-photo-newsprint)" }}
+            />
+          </TravelTarget>
         )}
         {isNav ? (
           <>
@@ -198,5 +199,15 @@ export function EditorialHubCard({
       </div>
       <LinkPendingDots tone={isNav ? "light" : "default"} placement="corner" />
     </Wrapper>
+  );
+
+  // A news card that opens an article lets its cover grow into the article's
+  // own cover (#3405), the photo alone — never the scrim, pill or glyph around
+  // it. A nav tile's cover is not the destination's picture, and a document is
+  // no route.
+  return (
+    <TravelScope kind={isNav || external ? undefined : "article"} href={href}>
+      {card}
+    </TravelScope>
   );
 }

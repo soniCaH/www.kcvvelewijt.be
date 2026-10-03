@@ -45,12 +45,12 @@ describe("MatchHero travel target (#3397)", () => {
       />,
     );
     const target = container.querySelector(
-      '[data-view-transition="match-card-3740"]',
+      '[data-view-transition="match-travel-3740"]',
     );
     expect(target).not.toBeNull();
     // Opts in on `share` only: a plain arrival or leave starts no transition.
     expect(target).toHaveAttribute("data-default", "none");
-    expect(target).toHaveAttribute("data-share", "match-travel");
+    expect(target).toHaveAttribute("data-share", "travel");
     expect(target?.querySelector("section")).not.toBeNull();
   });
 

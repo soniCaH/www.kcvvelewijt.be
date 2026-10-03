@@ -1844,21 +1844,23 @@ html {
   }
 }
 
-/* Match travel (#3397, decided in #2501): a tapped fixture row grows into the
-   match hero. `useMatchTravel` names the tapped row on click and `<MatchHero>`
-   names its card (`match-card-<id>`); both carry the view-transition-class
-   `match-travel` (MATCH_TRAVEL_CLASS) on `share` only, so a transition starts
-   only for that pair. The tap also adds the `match-travel` transition type:
-   the page cut is keyed on it, so no other view transition is touched. Only the
-   card moves, for 300 ms on the site's one curve (The Press, DESIGN.md →
-   Motion). Reduced motion needs no rule: no tap is recorded, nothing pairs. */
-:root:active-view-transition-type(match-travel)::view-transition-old(root),
-:root:active-view-transition-type(match-travel)::view-transition-new(root) {
+/* Travel (#3397, #3405; decided in #2501, #3400): a tapped list item grows into
+   its detail page. The tapped source (`useTravel`, on click) and the detail end
+   (`<TravelDestination>`) carry one name per record (`<kind>-travel-<id>`: a
+   fixture row and the match hero, a news card's cover and the article's cover,
+   a squad card's photo and the player's) and the view-transition-class `travel`
+   (TRAVEL_CLASS) on `share` only, so a transition starts only for that pair.
+   The tap also adds the `travel` transition type: the page cut is keyed on it,
+   so no other view transition is touched. Only the named element moves, for
+   300 ms on the site's one curve (The Press, DESIGN.md → Motion). Reduced
+   motion needs no rule: no tap is recorded, nothing pairs. */
+:root:active-view-transition-type(travel)::view-transition-old(root),
+:root:active-view-transition-type(travel)::view-transition-new(root) {
   animation: none;
 }
-::view-transition-group(*.match-travel),
-::view-transition-old(*.match-travel),
-::view-transition-new(*.match-travel) {
+::view-transition-group(*.travel),
+::view-transition-old(*.travel),
+::view-transition-new(*.travel) {
   animation-duration: 300ms;
   animation-timing-function: var(--ease-out);
 }

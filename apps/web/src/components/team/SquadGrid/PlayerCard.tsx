@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { cn } from "@/lib/utils/cn";
+import { TravelLink, TravelScope, TravelTarget } from "@/components/travel";
 import { TapedCard } from "@/components/design-system/TapedCard";
 import {
   JerseyIllustration,
@@ -87,25 +87,31 @@ export function PlayerCard({
           /* Multiply drops a studio cutout's white matte onto the card's
              cream (#2633, deciding #2590). Every consumer blends since
              #2901; see `blendPhoto` for the trade-off it accepts. */
-          <Image
-            src={photoUrl!}
-            alt=""
-            width={300}
-            height={400}
-            unoptimized
-            className={cn(
-              "block h-full w-full object-cover",
-              blendPhoto && "mix-blend-multiply",
-            )}
-            style={{ filter: "var(--filter-photo-newsprint)" }}
-          />
+          <TravelTarget>
+            <Image
+              src={photoUrl!}
+              alt=""
+              width={300}
+              height={400}
+              unoptimized
+              className={cn(
+                "block h-full w-full object-cover",
+                blendPhoto && "mix-blend-multiply",
+              )}
+              style={{ filter: "var(--filter-photo-newsprint)" }}
+            />
+          </TravelTarget>
         ) : (
-          <JerseyIllustration
-            variant="card"
-            seed={playerFigureSeed({ id })}
-            garment={garment}
-            data-testid="player-card-illustration"
-          />
+          // The photo or the jersey figure grows into the player profile's
+          // (#3405) — never the number disc beside it.
+          <TravelTarget>
+            <JerseyIllustration
+              variant="card"
+              seed={playerFigureSeed({ id })}
+              garment={garment}
+              data-testid="player-card-illustration"
+            />
+          </TravelTarget>
         )}
 
         {jerseyNumber !== undefined ? (
@@ -175,20 +181,23 @@ export function PlayerCard({
   );
 
   if (href) {
+    // A staff card is rendered by this same component but its `/staf/` href is
+    // no player profile: the scope stays inert and it keeps the cut.
     return (
-      <Link
-        href={href}
-        data-testid="player-card"
-        aria-label={
-          hasPosition
-            ? `${firstName} ${lastName} — ${position}`
-            : `${firstName} ${lastName}`
-        }
-        className="relative block h-full"
-      >
-        {card}
-        <LinkPendingDots placement="corner" />
-      </Link>
+      <TravelScope kind="player" href={href}>
+        <TravelLink
+          data-testid="player-card"
+          aria-label={
+            hasPosition
+              ? `${firstName} ${lastName} — ${position}`
+              : `${firstName} ${lastName}`
+          }
+          className="relative block h-full"
+        >
+          {card}
+          <LinkPendingDots placement="corner" />
+        </TravelLink>
+      </TravelScope>
     );
   }
 

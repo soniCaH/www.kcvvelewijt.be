@@ -55,7 +55,7 @@ export const Upcoming: Story = {
 
 /**
  * The travel target (#3397): with the match `id` set (the match page always
- * does) the card is a `<ViewTransition name="match-card-<id>">` boundary, the
+ * does) the card is a `<ViewTransition name="match-travel-<id>">` boundary (`<TravelDestination>`), the
  * end a tapped fixture row grows into. It renders exactly as `Upcoming` — the
  * boundary is invisible at rest — so this story only keeps the named path
  * rendering and covered.
