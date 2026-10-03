@@ -19,10 +19,10 @@
 
 import {
   useEffect,
+  useEffectEvent,
   useId,
   useRef,
   type MouseEvent,
-  type TransitionEvent,
 } from "react";
 import { CaretDown } from "@/lib/icons.redesign";
 import type { ResponsibilityPath } from "@/types/responsibility";
@@ -32,6 +32,17 @@ import { resolveContact } from "./resolveContact";
 import { PRESS_DOWN_TRANSITION } from "@/components/design-system/press-down";
 import { HeightGrow } from "@/components/design-system/HeightGrow";
 import { scrollIntoViewMotionSafe } from "@/lib/utils/scroll-into-view";
+
+/** Keys that scroll the page: pressing one while an answer grows is the visitor scrolling. */
+const SCROLL_KEYS = new Set([
+  " ",
+  "PageUp",
+  "PageDown",
+  "Home",
+  "End",
+  "ArrowUp",
+  "ArrowDown",
+]);
 
 /**
  * Scroll-back guard (#3398): a tall answer closing above this card can leave
@@ -54,6 +65,11 @@ export interface QuestionCardProps {
   /** Whether this card's answer is expanded (single-open, owned by the finder). */
   open: boolean;
   onToggle: () => void;
+  /**
+   * The answer has finished opening (its height transition ended, or it was
+   * already open on mount): geometry is final, so a caller can scroll to it.
+   */
+  onOpenSettled?: () => void;
   onContactClick?: (channel: "email" | "phone") => void;
   onStepLinkClick?: (stepIndex: number) => void;
   onShowInStructure?: (
@@ -66,6 +82,7 @@ export function QuestionCard({
   path,
   open,
   onToggle,
+  onOpenSettled,
   onContactClick,
   onStepLinkClick,
   onShowInStructure,
@@ -78,34 +95,54 @@ export function QuestionCard({
   const contact = resolveContact(path.primaryContact);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Under reduced motion no transition runs, so no `transitionend` comes: the
-  // height is already final once the open has rendered. A card that mounts
-  // open (a story) is not an open.
-  const wasOpen = useRef(open);
-  useEffect(() => {
-    if (
-      open &&
-      !wasOpen.current &&
-      cardRef.current &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      showHeaderIfAbove(cardRef.current);
-    }
-    wasOpen.current = open;
-  }, [open]);
-
-  // Only this card's own height transition, and only the opening one: the
-  // closing answer settles to zero without a say in where the header is.
-  const handleHeightEnd = (event: TransitionEvent<HTMLDivElement>) => {
-    if (
-      open &&
-      event.target === event.currentTarget &&
-      event.propertyName === "grid-template-rows" &&
-      cardRef.current
-    ) {
-      showHeaderIfAbove(cardRef.current);
-    }
+  // The scroll-back guard belongs to a TAPPED open only. A programmatic open
+  // (`reveal()`: a search pick, `?vraag=`, a hash) scrolls the card to the
+  // centre once it settles, via `onOpenSettled`, and must not be pulled to the
+  // top as well. The tap arms an `AbortController`; the visitor scrolling on
+  // purpose while the answer grows (`wheel`, `touchmove`, a scroll key) aborts
+  // it, so the guard never yanks them back. Armed at the tap, gone at settle.
+  const armedGuard = useRef<AbortController | null>(null);
+  const disarmGuard = () => {
+    armedGuard.current?.abort();
+    armedGuard.current = null;
   };
+  useEffect(() => disarmGuard, []);
+
+  const handleToggle = () => {
+    disarmGuard();
+    if (!open) {
+      const guard = new AbortController();
+      const cancel = () => guard.abort();
+      const listener = { passive: true, signal: guard.signal };
+      window.addEventListener("wheel", cancel, listener);
+      window.addEventListener("touchmove", cancel, listener);
+      window.addEventListener(
+        "keydown",
+        (event) => {
+          if (SCROLL_KEYS.has(event.key)) cancel();
+        },
+        listener,
+      );
+      armedGuard.current = guard;
+    }
+    onToggle();
+  };
+
+  const handleOpenSettled = () => {
+    const guard = armedGuard.current;
+    if (guard && !guard.signal.aborted && cardRef.current) {
+      showHeaderIfAbove(cardRef.current);
+    }
+    disarmGuard();
+    onOpenSettled?.();
+  };
+
+  // A card that mounts already open (a category switch reveals it) has no
+  // transition to wait for: its geometry is final now.
+  const settleIfMountedOpen = useEffectEvent(() => {
+    if (open) onOpenSettled?.();
+  });
+  useEffect(() => settleIfMountedOpen(), []);
 
   return (
     <div
@@ -120,7 +157,7 @@ export function QuestionCard({
         <button
           type="button"
           id={headerId}
-          onClick={onToggle}
+          onClick={handleToggle}
           aria-expanded={open}
           aria-controls={panelId}
           className="flex w-full items-center gap-3 p-3 text-left"
@@ -144,7 +181,7 @@ export function QuestionCard({
         </button>
       </h3>
 
-      <HeightGrow open={open} bleed={false} onTransitionEnd={handleHeightEnd}>
+      <HeightGrow open={open} bleed={false} onOpenSettled={handleOpenSettled}>
         <div
           id={panelId}
           role="region"

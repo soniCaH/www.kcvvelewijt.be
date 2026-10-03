@@ -125,13 +125,15 @@ describe("HulpFinder", () => {
   it("is single-open: opening a second question closes the first", () => {
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
     fireEvent.click(q(/mijn kind is geblesseerd/i));
-    expect(
-      screen.getByText(/eerste zorg gaat altijd voor/i),
-    ).toBeInTheDocument();
+    expect(q(/mijn kind is geblesseerd/i)).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
     fireEvent.click(q(/hoe schrijf ik mijn kind in/i));
-    expect(
-      screen.getByText(/inschrijven kan het hele seizoen/i),
-    ).toBeInTheDocument();
+    expect(q(/hoe schrijf ik mijn kind in/i)).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
     // The first answer stays mounted so it can shrink away, but is inert.
     expect(
       screen
@@ -390,6 +392,48 @@ describe("HulpFinder", () => {
     scrollIntoView.mockClear();
     window.dispatchEvent(new HashChangeEvent("hashchange"));
     expect(scrollIntoView).toHaveBeenCalled();
+  });
+
+  it("a revealed question scrolls to the centre once its answer has settled, not before", () => {
+    // Already in the question's own category, so the card stays mounted.
+    setUrl("/hulp?categorie=administratief");
+    render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
+    scrollIntoView.mockClear();
+    // A hash for a card that is already rendered (closed): it flips open and
+    // grows, so the scroll waits for the height transition to end.
+    act(() => {
+      window.location.hash = "#inschrijven";
+      window.dispatchEvent(new HashChangeEvent("hashchange"));
+    });
+    expect(q(/hoe schrijf ik mijn kind in/i)).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+    expect(scrollIntoView).not.toHaveBeenCalled();
+
+    const grow = document
+      .getElementById("inschrijven")!
+      .querySelector('[role="region"]')!.parentElement!.parentElement!;
+    const event = new Event("transitionend", { bubbles: true });
+    Object.defineProperty(event, "propertyName", {
+      value: "grid-template-rows",
+    });
+    act(() => {
+      grow.dispatchEvent(event);
+    });
+    // One scroll, to the centre, and no scroll-back guard on top of it.
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView).toHaveBeenCalledWith(
+      expect.objectContaining({ block: "center" }),
+    );
+  });
+
+  it("a revealed question that mounts already open scrolls at once (a category switch)", () => {
+    setUrl("/hulp#blessure");
+    render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
+    expect(scrollIntoView).toHaveBeenCalledWith(
+      expect.objectContaining({ block: "center" }),
+    );
   });
 
   it("a #<slug> deep-link rewrites the URL in place — both params, the slug hash, no new history entry", () => {

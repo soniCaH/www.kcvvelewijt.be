@@ -85,6 +85,9 @@ describe("QuestionCard", () => {
   });
 
   describe("scroll-back guard (#3398)", () => {
+    // happy-dom may lack `scrollIntoView`; define it for the block and put back
+    // exactly what was there (restoreAllMocks does not undo an assignment).
+    const original = Element.prototype.scrollIntoView;
     const scrollIntoView = vi.fn();
     let top = 0;
     let reduced = false;
@@ -104,14 +107,22 @@ describe("QuestionCard", () => {
       );
     });
     afterEach(() => {
+      Element.prototype.scrollIntoView = original;
       document.documentElement.style.scrollPaddingTop = "";
       vi.restoreAllMocks();
       vi.unstubAllGlobals();
       reduced = false;
     });
 
-    const openCard = () => {
-      render(<QuestionCard path={path} open onToggle={noop} />);
+    const closed = <QuestionCard path={path} open={false} onToggle={noop} />;
+    const opened = <QuestionCard path={path} open onToggle={noop} />;
+    const header = () =>
+      screen.getByRole("button", { name: /hoe schrijf ik/i });
+    /** The visitor taps the header; the finder then flips `open`. */
+    const tapOpen = () => {
+      const view = render(closed);
+      fireEvent.click(header());
+      view.rerender(opened);
       return growOf(panelOf(/inschrijven kan het hele seizoen/i));
     };
     // happy-dom's TransitionEvent drops `propertyName` from its init, so build
@@ -124,9 +135,9 @@ describe("QuestionCard", () => {
     const heightEnded = (el: Element) =>
       transitionEnd(el, "grid-template-rows");
 
-    it("shows the header at the top when it ended up under the sticky nav", () => {
+    it("shows the header at the top when a tapped open ended up under the sticky nav", () => {
       top = 20;
-      heightEnded(openCard());
+      heightEnded(tapOpen());
       expect(scrollIntoView).toHaveBeenCalledWith({
         block: "start",
         behavior: "smooth",
@@ -135,13 +146,13 @@ describe("QuestionCard", () => {
 
     it("does nothing when the header is already visible", () => {
       top = 200;
-      heightEnded(openCard());
+      heightEnded(tapOpen());
       expect(scrollIntoView).not.toHaveBeenCalled();
     });
 
     it("ignores other properties and a child's transition", () => {
       top = 20;
-      const grow = openCard();
+      const grow = tapOpen();
       transitionEnd(grow, "opacity");
       heightEnded(screen.getByText("Mail de jeugdsecretaris."));
       expect(scrollIntoView).not.toHaveBeenCalled();
@@ -149,19 +160,49 @@ describe("QuestionCard", () => {
 
     it("does not run when a card finishes closing", () => {
       top = 20;
-      render(<QuestionCard path={path} open={false} onToggle={noop} />);
+      render(closed);
       heightEnded(growOf(panelOf(/inschrijven kan het hele seizoen/i)));
       expect(scrollIntoView).not.toHaveBeenCalled();
     });
 
-    it("under reduced motion runs at once on open, instantly", () => {
+    it("does not run for a programmatic open (reveal): that one scrolls to the centre", () => {
+      top = 20;
+      const view = render(closed);
+      view.rerender(opened);
+      heightEnded(growOf(panelOf(/inschrijven kan het hele seizoen/i)));
+      expect(scrollIntoView).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ["wheel", () => window.dispatchEvent(new Event("wheel"))],
+      ["touchmove", () => window.dispatchEvent(new Event("touchmove"))],
+      [
+        "a scroll key",
+        () => window.dispatchEvent(new KeyboardEvent("keydown", { key: " " })),
+      ],
+    ])(
+      "stands down when the visitor scrolls (%s) while it grows",
+      (_, scroll) => {
+        top = 20;
+        const grow = tapOpen();
+        scroll();
+        heightEnded(grow);
+        expect(scrollIntoView).not.toHaveBeenCalled();
+      },
+    );
+
+    it("a key that does not scroll leaves the guard armed", () => {
+      top = 20;
+      const grow = tapOpen();
+      window.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
+      heightEnded(grow);
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    });
+
+    it("under reduced motion a tapped open runs at once, instantly", () => {
       top = 20;
       reduced = true;
-      const { rerender } = render(
-        <QuestionCard path={path} open={false} onToggle={noop} />,
-      );
-      expect(scrollIntoView).not.toHaveBeenCalled();
-      rerender(<QuestionCard path={path} open onToggle={noop} />);
+      tapOpen();
       expect(scrollIntoView).toHaveBeenCalledWith({
         block: "start",
         behavior: "instant",
@@ -171,8 +212,21 @@ describe("QuestionCard", () => {
     it("does not run for a card that mounts already open", () => {
       top = 20;
       reduced = true;
-      render(<QuestionCard path={path} open onToggle={noop} />);
+      render(opened);
       expect(scrollIntoView).not.toHaveBeenCalled();
     });
+  });
+
+  it("reports an open as settled to its caller, also when it mounts open", () => {
+    const onOpenSettled = vi.fn();
+    render(
+      <QuestionCard
+        path={path}
+        open
+        onToggle={noop}
+        onOpenSettled={onOpenSettled}
+      />,
+    );
+    expect(onOpenSettled).toHaveBeenCalledTimes(1);
   });
 });

@@ -157,10 +157,30 @@ const VIEWPORTS = [
   { width: 1280, height: 900 },
 ] as const;
 
+/**
+ * Waits until the answer's grow (`<HeightGrow>`, 500ms, #3398) has finished:
+ * its height reads the same on two consecutive polls, so a hit-area
+ * measurement never lands on a half-open panel.
+ */
+async function waitForHeightSettled(region: Locator): Promise<void> {
+  let previous: number | null = null;
+  await expect
+    .poll(async () => {
+      const height = (await region.boundingBox())?.height ?? 0;
+      const settled = height > 0 && height === previous;
+      previous = height;
+      return settled;
+    })
+    .toBe(true);
+}
+
 /** Opens answers on /hulp until one carries a contact card with actions. */
 async function openAnswerWithContact(page: Page): Promise<Locator | null> {
-  const actions = page.locator(
-    '#hulp a[aria-label^="E-mail"], #hulp a[aria-label^="Bel "]',
+  // Closed answers stay mounted, `inert` and clipped to zero height (#3398), so
+  // only the open region's links count.
+  const openRegion = page.locator('#hulp [role="region"]:not([inert])');
+  const actions = openRegion.locator(
+    'a[aria-label^="E-mail"], a[aria-label^="Bel "]',
   );
   const toggles = page.locator("#hulp button[aria-expanded]");
   await toggles.first().waitFor();
@@ -173,7 +193,13 @@ async function openAnswerWithContact(page: Page): Promise<Locator | null> {
   const n = Math.min(await toggles.count(), 20);
   for (let i = 0; i < n; i++) {
     await toggles.nth(i).click();
-    if ((await actions.count()) > 0) return actions;
+    if ((await actions.count()) > 0) {
+      await waitForHeightSettled(openRegion);
+      // …and the scroll-back guard that may follow it (smooth under the page's
+      // `scroll-behavior`), or it would move the control mid-measurement.
+      await waitForScrollSettled(page);
+      return actions;
+    }
     await toggles.nth(i).click();
   }
   return null;

@@ -243,17 +243,18 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
     return () => window.removeEventListener("hashchange", fromHash);
   }, [reveal]);
 
-  // Scroll a deep-linked question into view once it has rendered — runs when a
-  // reveal changes the open question / category, not on every render.
-  useEffect(() => {
-    const id = pendingScroll.current;
-    if (!id) return;
+  // Scroll a revealed question to the centre once its answer has finished
+  // opening, so the scroll is measured against settled geometry (a smooth scroll
+  // started while a sibling answer is still shrinking lands off). A card that
+  // mounts already open reports settled at once. A tapped open never sets
+  // `pendingScroll`: that one gets the card's own scroll-back guard instead.
+  const handleOpenSettled = useCallback((id: string) => {
+    if (pendingScroll.current !== id) return;
     const el = document.getElementById(id);
-    if (el) {
-      scrollIntoViewMotionSafe(el, { block: "center" });
-      pendingScroll.current = null;
-    }
-  }, [openId, category]);
+    if (!el) return;
+    pendingScroll.current = null;
+    scrollIntoViewMotionSafe(el, { block: "center" });
+  }, []);
 
   // "Alle N →" switches from the multi-category "Alles" preview to one category's
   // full list, which makes the finder SHORTER — a fixed scroll position would
@@ -330,6 +331,7 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
         path={path}
         open={openId === path.id}
         onToggle={() => handleToggle(path.id)}
+        onOpenSettled={() => handleOpenSettled(path.id)}
         onContactClick={(channel) => trackContactClicked(path.id, channel)}
         onStepLinkClick={(index) => trackStepLinkClicked(path.id, index)}
         onShowInStructure={(event, nodeId) =>
