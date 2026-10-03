@@ -65,15 +65,20 @@ export const Open: Story = {
    */
   play: async ({ canvasElement }) => {
     if (navigator.userAgent.includes("StorybookTestRunner")) return;
+    const panel = getComputedStyle(within(canvasElement).getByRole("dialog"));
     const rule = (name: string) =>
       getComputedStyle(
         within(canvasElement).getByRole("link", { name }),
         "::after",
       );
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      await expect(panel.transitionProperty).toBe("none");
       await expect(rule("Nieuws").transitionProperty).toBe("none");
       return;
     }
+    // The panel itself fades in (and out) at the Chrome speed, words included.
+    await expect(panel.transitionProperty).toContain("opacity");
+    await expect(panel.transitionDuration).toBe("0.15s");
     await expect(rule("Nieuws").transitionProperty).toBe("scale");
     await expect(rule("Nieuws").transitionDuration).toBe("0.5s");
     await expect(rule("Nieuws").transitionDelay).toBe("0s");

@@ -45,6 +45,22 @@ describe("NavTakeover", () => {
     expect(panel).not.toHaveAttribute("inert");
   });
 
+  it("fades in on open (#3392): its own starting:opacity-0, no pointer gating", () => {
+    render(
+      <NavTakeover
+        open
+        onOpenChange={() => {}}
+        wordmark={<span>WM</span>}
+        rowCount={1}
+      >
+        <NavTakeoverItem label="Home" href="/" />
+      </NavTakeover>,
+    );
+    const panel = screen.getByRole("dialog");
+    expect(panel).toHaveClass("starting:opacity-0", "duration-150");
+    expect(panel.className).not.toMatch(/pointer-events/);
+  });
+
   it("renders dialog with wordmark + close button when open", () => {
     render(
       <NavTakeover

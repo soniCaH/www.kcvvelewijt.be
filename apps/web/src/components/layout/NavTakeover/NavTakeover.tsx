@@ -206,7 +206,14 @@ export const NavTakeover = ({
   // Stays mounted when closed (`hidden` + `inert`) so the close can fade out.
   return (
     <div
-      {...overlayFade(open, "bg-cream fixed inset-0 z-[60] flex flex-col")}
+      {...overlayFade(
+        open,
+        // `starting:opacity-0` is the menu's own fade-in (#3392, decided in
+        // #2498): the panel comes back from `display: none` at opacity 0 and
+        // the helper's 150ms opacity transition carries it to 1. Not in
+        // `overlayFade` itself — the other three panels open instantly.
+        "bg-cream fixed inset-0 z-[60] flex flex-col starting:opacity-0",
+      )}
       ref={panelRef}
       id="nav-takeover"
       role="dialog"
