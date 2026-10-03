@@ -9,6 +9,7 @@
  */
 
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { List } from "@/lib/icons.redesign";
 import type { SemanticRelatedItem } from "./useSemanticAugment";
 
@@ -34,7 +35,7 @@ export function SearchRelated({ items }: SearchRelatedProps) {
           <li key={item.href}>
             <Link
               href={item.href}
-              className="border-paper-edge text-ink hover:bg-cream focus-ring-inset block border-b px-3 py-2.5 last:border-b-0"
+              className="border-paper-edge text-ink hover:bg-cream focus-ring-inset relative block border-b px-3 py-2.5 last:border-b-0"
             >
               <span className="text-jersey-deep font-mono text-[9px] tracking-[0.06em] uppercase">
                 {TYPE_LABEL[item.type]}
@@ -47,6 +48,7 @@ export function SearchRelated({ items }: SearchRelatedProps) {
                   {item.excerpt}
                 </span>
               )}
+              <LinkPendingDots placement="corner" className="top-1 right-1" />
             </Link>
           </li>
         ))}

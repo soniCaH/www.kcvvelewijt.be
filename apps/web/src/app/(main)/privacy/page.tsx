@@ -9,6 +9,7 @@
  */
 
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { DottedDivider, PageContainer } from "@/components/design-system";
 import { PageHero } from "@/components/layout/PageHero";
@@ -123,6 +124,7 @@ export default function PrivacyPage() {
             Wanneer je je inschrijft via{" "}
             <Link href="/club/word-lid" className="prose-link">
               /club/word-lid
+              <LinkPendingDots />
             </Link>
             , verwerken we enkel de gegevens die nodig zijn om je inschrijving
             op te volgen:
@@ -285,6 +287,7 @@ export default function PrivacyPage() {
             contact met ons op via de{" "}
             <Link href="/hulp" className="prose-link">
               hulppagina
+              <LinkPendingDots />
             </Link>{" "}
             of stuur een e-mail naar{" "}
             <a href="mailto:info@kcvvelewijt.be" className="prose-link">

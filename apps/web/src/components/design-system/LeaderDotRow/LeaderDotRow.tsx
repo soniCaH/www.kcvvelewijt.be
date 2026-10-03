@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 
 import { cn } from "@/lib/utils/cn";
 
@@ -94,6 +95,7 @@ export function LeaderDotRow({
       )}
     >
       {contents}
+      <LinkPendingDots spaced={false} />
     </Link>
   );
 }

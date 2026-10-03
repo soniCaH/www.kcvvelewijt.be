@@ -12,6 +12,7 @@
  */
 
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { EmptyState } from "@/components/design-system";
 
 export interface SearchNoResultsCardProps {
@@ -40,14 +41,17 @@ export function SearchNoResultsCard({ query }: SearchNoResultsCardProps) {
       Probeer een andere term — of spring meteen naar{" "}
       <Link href="/nieuws" className={WAY_FORWARD_LINK_CLASS}>
         nieuws
+        <LinkPendingDots />
       </Link>
       ,{" "}
       <Link href="/ploegen" className={WAY_FORWARD_LINK_CLASS}>
         ploegen
+        <LinkPendingDots />
       </Link>{" "}
       of{" "}
       <Link href="/ploegen" className={WAY_FORWARD_LINK_CLASS}>
         spelers
+        <LinkPendingDots />
       </Link>
       .
     </EmptyState>

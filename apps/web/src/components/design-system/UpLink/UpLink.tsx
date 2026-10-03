@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { CaretLeft } from "@/lib/icons.redesign";
 import { CHIP_LINK_CLASSES } from "../press-down";
 import { trackEvent } from "@/lib/analytics/track-event";
@@ -112,6 +113,10 @@ export function UpLink({ href, label, tone = "ink", className }: UpLinkProps) {
     >
       <CaretLeft aria-hidden size={12} />
       {label}
+      <LinkPendingDots
+        spaced={false}
+        tone={tone === "cream" ? "light" : "default"}
+      />
     </Link>
   );
 }

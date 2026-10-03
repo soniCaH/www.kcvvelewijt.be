@@ -11,6 +11,7 @@ import {
   type RefObject,
 } from "react";
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import type { OrgChartNode } from "@/types/organigram";
 import { cn } from "@/lib/utils/cn";
 import { deriveCardState } from "@/components/organigram/OrgPersonCard";
@@ -501,6 +502,7 @@ export function OrganigramExplorer({
                               >
                                 {member.name?.trim() || "—"}{" "}
                                 <ArrowRight size={10} aria-hidden />
+                                <LinkPendingDots spaced={false} tone="light" />
                               </Link>
                             ) : (
                               <span className="text-cream-quiet font-mono text-[11px]">

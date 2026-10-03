@@ -119,6 +119,7 @@ import type {
 // from: a real `<Link>` needs the app-router context none of these render
 // trees provide, and the mock is what those peer files reach for instead.
 vi.mock("next/link", () => ({
+  useLinkStatus: () => ({ pending: false }),
   default: ({
     children,
     href,

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import {
   useEffect,
   useId,
@@ -573,6 +574,7 @@ function MembershipFormFields({
                 and restored when the visitor comes back. */}
             <Link href="/privacy" className="prose-link underline">
               privacyverklaring
+              <LinkPendingDots />
             </Link>
             .
           </CheckboxField>

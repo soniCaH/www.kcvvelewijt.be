@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { cn } from "@/lib/utils/cn";
 import { handleSamePageAnchorClick } from "@/lib/utils/same-page-anchor";
 
@@ -39,6 +40,7 @@ export function NavTakeoverItem({
       )}
     >
       <span>{label}</span>
+      <LinkPendingDots spaced={false} />
     </Link>
   );
 }

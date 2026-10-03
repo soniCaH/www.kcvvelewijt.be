@@ -16,6 +16,7 @@
 import { useId } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { EditorialHeading, StripedSeam } from "@/components/design-system";
 import { assertNever } from "@/lib/utils/assert-never";
 import type { MatchesSliderPlaceholderVM } from "@/lib/repositories/homepage.repository";
@@ -146,6 +147,7 @@ function Mededeling({ text, href }: MededelingVM) {
       {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
     >
       {text}
+      <LinkPendingDots tone="light" />
     </Link>
   );
 }
@@ -306,6 +308,7 @@ export function FirstTeamsBlock({
             className="text-warm hover:text-cream -my-2 shrink-0 py-2 font-mono text-xs font-semibold tracking-wide uppercase transition-colors"
           >
             Volledige kalender <span aria-hidden="true">→</span>
+            <LinkPendingDots tone="light" />
           </Link>
         </div>
         {rows.length > 0 ? (

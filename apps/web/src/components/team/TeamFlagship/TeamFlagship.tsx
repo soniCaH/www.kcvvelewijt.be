@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { cn } from "@/lib/utils/cn";
 import { EditorialHeading } from "@/components/design-system/EditorialHeading";
 import { JerseyShirt } from "@/components/design-system/JerseyShirt";
@@ -129,7 +130,7 @@ export function TeamFlagship({
       data-testid="team-flagship"
       data-variant={variant}
       aria-label={`${category} — bekijk ploeg`}
-      className={cn("group block", className)}
+      className={cn("group relative block", className)}
     >
       <TapedCard
         as="div"
@@ -159,6 +160,7 @@ export function TeamFlagship({
           </>
         )}
       </TapedCard>
+      <LinkPendingDots tone={isA ? "light" : "default"} placement="corner" />
     </Link>
   );
 }

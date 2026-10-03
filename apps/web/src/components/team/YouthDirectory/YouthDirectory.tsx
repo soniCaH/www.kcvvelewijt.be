@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 import { EditorialHeading } from "@/components/design-system/EditorialHeading";
@@ -158,7 +159,7 @@ export function YouthDirectory({
                   href={`/ploegen/${team.slug}`}
                   data-testid="youth-team-card"
                   aria-label={`${caption} — bekijk ploeg`}
-                  className="block"
+                  className="relative block"
                 >
                   <TapedCard
                     rotation={CARD_ROTATIONS[slot]}
@@ -233,6 +234,7 @@ export function YouthDirectory({
                       </p>
                     ) : null}
                   </TapedCard>
+                  <LinkPendingDots placement="corner" />
                 </Link>
               );
             })}

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
@@ -117,7 +118,7 @@ export function EditorialHubCard({
       data-tag={tag}
       data-article-id-hashed={articleIdHashed}
       className={cn(
-        "group border-ink shadow-paper-sm bg-cream-soft flex h-full flex-col overflow-hidden border-2",
+        "group border-ink shadow-paper-sm bg-cream-soft relative flex h-full flex-col overflow-hidden border-2",
         // Not a <TapedCard>, so it reads the slot angle a <TapedCardGrid> sets
         // directly; `0deg` outside a grid keeps a standalone card flat (#2569).
         "rotate-[var(--taped-card-rotation,0deg)]",
@@ -195,6 +196,7 @@ export function EditorialHubCard({
           </span>
         </span>
       </div>
+      <LinkPendingDots tone={isNav ? "light" : "default"} placement="corner" />
     </Wrapper>
   );
 }

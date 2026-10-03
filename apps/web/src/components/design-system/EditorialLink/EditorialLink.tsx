@@ -1,4 +1,5 @@
 import Link, { type LinkProps } from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { cn } from "@/lib/utils/cn";
 
 export type EditorialLinkTone = "light" | "dark";
@@ -74,6 +75,10 @@ export const EditorialLink = ({
           →
         </span>
       )}
+      <LinkPendingDots
+        spaced={false}
+        tone={tone === "dark" ? "light" : "default"}
+      />
     </Link>
   );
 };

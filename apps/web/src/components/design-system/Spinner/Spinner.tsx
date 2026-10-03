@@ -16,13 +16,13 @@
  * form. Animations honour `prefers-reduced-motion` via the global CSS rule.
  */
 
-import { forwardRef, type HTMLAttributes } from "react";
+import { forwardRef, type HTMLAttributes, type Ref } from "react";
 import { cn } from "@/lib/utils/cn";
 
 export type SpinnerSize = "sm" | "md" | "lg" | "xl";
 export type SpinnerVariant = "primary" | "secondary" | "white" | "compact";
 
-export interface SpinnerProps extends HTMLAttributes<HTMLDivElement> {
+export interface SpinnerProps extends HTMLAttributes<HTMLElement> {
   /**
    * Size of the spinner. Applies only to scarf variants
    * (primary / secondary / white). Ignored for compact.
@@ -47,14 +47,17 @@ export interface SpinnerProps extends HTMLAttributes<HTMLDivElement> {
   className?: string;
 }
 
-export const Spinner = forwardRef<HTMLDivElement, SpinnerProps>(
+export const Spinner = forwardRef<HTMLElement, SpinnerProps>(
   (
     { size = "md", variant = "compact", label = "Laden…", className, ...props },
     ref,
   ) => {
     if (variant === "compact") {
+      // A `span`, not a `div`: the dots ride inside paragraphs and anchors
+      // (`LinkPendingDots`, #3386), where a block-level root is a DOM-nesting
+      // error.
       return (
-        <div
+        <span
           ref={ref}
           role="status"
           aria-label={label}
@@ -67,13 +70,13 @@ export const Spinner = forwardRef<HTMLDivElement, SpinnerProps>(
             <span />
           </span>
           <span className="sr-only">{label}</span>
-        </div>
+        </span>
       );
     }
 
     return (
       <div
-        ref={ref}
+        ref={ref as Ref<HTMLDivElement>}
         role="status"
         aria-label={label}
         className={cn("inline-flex items-center justify-center", className)}

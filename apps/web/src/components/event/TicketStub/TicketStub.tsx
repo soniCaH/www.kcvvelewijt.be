@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import type { DateTime } from "luxon";
 import { MonoLabel } from "@/components/design-system";
 import { cn } from "@/lib/utils/cn";
@@ -116,7 +117,7 @@ export function TicketStub({
   const meta = buildMeta(start, end, location);
 
   return (
-    <Link href={href} className="group block">
+    <Link href={href} className="group relative block">
       <div data-testid="ticket-stub-card" className={CARD_CLASS}>
         <div
           data-testid="ticket-stub-date"
@@ -169,6 +170,7 @@ export function TicketStub({
           Meer details →
         </span>
       </div>
+      <LinkPendingDots placement="corner" />
     </Link>
   );
 }

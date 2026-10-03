@@ -45,6 +45,15 @@ describe("Spinner", () => {
     });
   });
 
+  describe("Compact root element", () => {
+    it("should render a span so it is valid inside a <p> and an <a> (#3386)", () => {
+      // A `div` inside a paragraph or an anchor in a paragraph is a DOM-nesting
+      // error; the dots ride inside prose links.
+      render(<Spinner variant="compact" />);
+      expect(screen.getByRole("status").tagName).toBe("SPAN");
+    });
+  });
+
   describe("Sizes (scarf variants)", () => {
     it("should render medium size by default", () => {
       const { container } = render(<Spinner variant="primary" />);
@@ -156,7 +165,7 @@ describe("Spinner", () => {
     it("should forward ref", () => {
       const ref = { current: null };
       render(<Spinner ref={ref} />);
-      expect(ref.current).toBeInstanceOf(HTMLDivElement);
+      expect(ref.current).toBeInstanceOf(HTMLElement);
     });
   });
 

@@ -11,6 +11,7 @@ import { SearchNoResultsCard } from "./SearchNoResultsCard";
 // className must be forwarded — the .prose-link marker assertion below
 // reads it off the rendered anchor.
 vi.mock("next/link", () => ({
+  useLinkStatus: () => ({ pending: false }),
   default: ({
     children,
     href,

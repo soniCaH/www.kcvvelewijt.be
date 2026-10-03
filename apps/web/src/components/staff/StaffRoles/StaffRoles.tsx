@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { TapedCard } from "@/components/design-system/TapedCard";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
 import { PageContainer, SectionHeader } from "@/components/design-system";
@@ -98,7 +99,7 @@ export function StaffRoles({
               <Link
                 key={resp.slug}
                 href={`/hulp#${encodeURIComponent(resp.slug)}`}
-                className="group block"
+                className="group relative block"
                 data-testid="staff-responsibility-card"
               >
                 <TapedCard
@@ -124,6 +125,7 @@ export function StaffRoles({
                     aria-hidden="true"
                   />
                 </TapedCard>
+                <LinkPendingDots placement="corner" />
               </Link>
             ))}
           </div>

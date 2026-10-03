@@ -12,6 +12,7 @@ import { render, screen } from "@testing-library/react";
 import { SearchAnswerCard } from "./SearchAnswerCard";
 
 vi.mock("next/link", () => ({
+  useLinkStatus: () => ({ pending: false }),
   default: ({ children, href }: { children: ReactNode; href: string }) => (
     <a href={href}>{children}</a>
   ),

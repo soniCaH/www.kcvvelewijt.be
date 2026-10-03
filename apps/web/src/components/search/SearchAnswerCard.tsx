@@ -17,6 +17,7 @@
  */
 
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { TapedCard } from "@/components/design-system";
 import { Sparkle, Warning } from "@/lib/icons.redesign";
 
@@ -101,6 +102,7 @@ export function SearchAnswerCard({ answer, sources }: SearchAnswerCardProps) {
                 className="hover-underline-thicken text-jersey-deep font-mono text-[11px] font-semibold underline-offset-2"
               >
                 {source.title}
+                <LinkPendingDots />
               </Link>
             </li>
           ))}

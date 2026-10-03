@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils/cn";
 import { Button, getButtonClasses } from "@/components/design-system/Button";
@@ -67,17 +68,28 @@ const Wordmark = () => (
     // only the desktop row reaches the xl/2xl steps — a takeover opened
     // below `lg` now closes itself before the viewport can ever reach `xl`
     // (#2850), so it can no longer render them too.
-    className="font-display -my-1 inline-block py-1 text-[20px] leading-none font-black whitespace-nowrap italic no-underline xl:text-[24px] 2xl:text-[28px]"
+    className="font-display relative -my-1 inline-block py-1 text-[20px] leading-none font-black whitespace-nowrap italic no-underline xl:text-[24px] 2xl:text-[28px]"
   >
     <span className="text-ink">
       KCVV <span className="text-jersey-deep">Elewijt</span>
     </span>
+    <LinkPendingDots placement="corner" className="top-0 -right-7" />
   </Link>
 );
 
 export function SiteHeader({ seniorTeams, className }: SiteHeaderProps) {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // The drawer stays open on a tap so the tapped row's `LinkPendingDots`
+  // (`useLinkStatus`) stay mounted — closing on tap unmounts the link and with
+  // it its pending status (#3386, decided at #2499). It closes on arrival
+  // instead: when the pathname changes. Adjusting state during render on a
+  // prop change is React's documented alternative to an effect.
+  const [lastPathname, setLastPathname] = useState(pathname);
+  if (pathname !== lastPathname) {
+    setLastPathname(pathname);
+    setDrawerOpen(false);
+  }
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const headerRef = useRef<HTMLElement>(null);
   // Where NavTakeover sends focus when it retires itself because the
@@ -107,14 +119,16 @@ export function SiteHeader({ seniorTeams, className }: SiteHeaderProps) {
   // above cannot reach it. It could get its own — but the panel is client-only
   // (delegation elsewhere exists to keep Server Components server-rendered,
   // which buys nothing here) and every row already owns an `onNavigate`
-  // callback for the drawer close. Tracking rides that rather than adding a
+  // callback. Tracking rides that rather than adding a
   // second mechanism and a persistently-mounted wrapper to hang it on.
   const handleTakeoverNavigate = useCallback(
     (destination: string) => {
       trackNavClick({ destination, source: "takeover" });
-      setDrawerOpen(false);
+      // A tap on the page we are already on navigates nowhere, so the
+      // pathname never changes and nothing else would close the drawer.
+      if (destination === pathname) setDrawerOpen(false);
     },
-    [trackNavClick],
+    [trackNavClick, pathname],
   );
 
   const seniorMenuItems = (seniorTeams ?? []).map((t) =>
@@ -160,9 +174,10 @@ export function SiteHeader({ seniorTeams, className }: SiteHeaderProps) {
             href="/zoeken"
             aria-label="Zoeken"
             data-nav-source="mobile"
-            className="text-ink hover:text-jersey-deep inline-flex h-11 w-11 items-center justify-center transition-colors"
+            className="text-ink hover:text-jersey-deep relative inline-flex h-11 w-11 items-center justify-center transition-colors"
           >
             <MagnifyingGlass size={20} aria-hidden="true" />
+            <LinkPendingDots placement="corner" className="top-0 right-0" />
           </Link>
         </div>
 
@@ -188,15 +203,21 @@ export function SiteHeader({ seniorTeams, className }: SiteHeaderProps) {
                       // the same type recipe — that is 20px font-display, this
                       // is 11px mono. Desktop-only, so it never showed up in
                       // the 390px walk.
-                      "-my-2 py-2",
+                      "relative -my-2 block py-2",
                       CHROME_NAV_TYPE,
-                      NAV_LABEL_TRUNCATE,
                       isActive(item.href)
                         ? "text-jersey-deep"
                         : "text-ink hover:text-jersey-deep",
                     )}
                   >
-                    {item.label}
+                    {/* On an inner span, not the link: `truncate` is `overflow:
+                        hidden`, which would clip the dots drawn below the
+                        link's box. */}
+                    <span className={NAV_LABEL_TRUNCATE}>{item.label}</span>
+                    <LinkPendingDots
+                      placement="corner"
+                      className="top-full right-auto left-1/2 -translate-x-1/2"
+                    />
                   </Link>
                 </li>
               ))}
@@ -224,19 +245,21 @@ export function SiteHeader({ seniorTeams, className }: SiteHeaderProps) {
               // (review finding on #3071: the un-cancelled box widened both
               // to ~29px and shrank the nav column enough to truncate more
               // 14ch-capped team labels at 1024px).
-              className="text-ink hover:text-jersey-deep -mx-[13px] inline-flex h-11 w-11 items-center justify-center transition-colors"
+              className="text-ink hover:text-jersey-deep relative -mx-[13px] inline-flex h-11 w-11 items-center justify-center transition-colors"
             >
               <MagnifyingGlass size={18} aria-hidden="true" />
+              <LinkPendingDots placement="corner" className="top-0 right-0" />
             </Link>
             <Link
               href="/club/word-lid"
               data-nav-source="desktop"
               className={cn(
-                "border-ink text-ink hover:border-jersey-deep hover:text-jersey-deep inline-flex items-center border px-2.5 py-1.5 duration-150 xl:px-3.5 xl:py-2",
+                "border-ink text-ink hover:border-jersey-deep hover:text-jersey-deep relative inline-flex items-center border px-2.5 py-1.5 duration-150 xl:px-3.5 xl:py-2",
                 CHROME_NAV_TYPE,
               )}
             >
               Word lid
+              <LinkPendingDots placement="corner" className="-top-2 -right-2" />
             </Link>
           </div>
         </div>
@@ -270,6 +293,7 @@ export function SiteHeader({ seniorTeams, className }: SiteHeaderProps) {
             })}
           >
             Word lid
+            <LinkPendingDots spaced={false} tone="light" />
           </Link>
         </div>
       </NavTakeover>

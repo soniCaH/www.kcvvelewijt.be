@@ -9,6 +9,7 @@ import {
   type RefObject,
 } from "react";
 import Link from "next/link";
+import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import type { OrgChartMember, OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
 import { cn } from "@/lib/utils/cn";
@@ -327,6 +328,7 @@ export function MemberDetailPanel({
                 >
                   Iets voor jou?
                   <ArrowRight size={12} aria-hidden />
+                  <LinkPendingDots spaced={false} />
                 </Link>
               </>
             ) : (
@@ -402,6 +404,7 @@ export function MemberDetailPanel({
                   >
                     Volledig profiel
                     <ArrowRight size={12} aria-hidden />
+                    <LinkPendingDots spaced={false} />
                   </Link>
                 )}
               </>
