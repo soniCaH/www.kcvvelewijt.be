@@ -360,6 +360,10 @@ export type { CrestProps } from "./Crest";
 export { LoadMoreFooter } from "./LoadMoreFooter";
 export type { LoadMoreFooterProps } from "./LoadMoreFooter";
 
+// HeightGrow
+export { HeightGrow } from "./HeightGrow";
+export type { HeightGrowProps } from "./HeightGrow";
+
 // Press-down (canonical paper press-down hover)
 export { PRESS_DOWN_CLASSES, PRESS_DOWN_TRANSITION } from "./press-down";
 

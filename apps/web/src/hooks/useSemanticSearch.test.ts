@@ -171,6 +171,48 @@ describe("useSemanticSearch", () => {
     expect(result.current.answer).toBeUndefined();
   });
 
+  it("keeps the last answer while a new query is pending, then replaces it", async () => {
+    const hit = {
+      id: "doc-abc",
+      slug: "kantine",
+      type: "responsibility",
+      score: 0.9,
+      title: "Kantine",
+      excerpt: "De kantine...",
+    };
+    vi.mocked(fetch).mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ results: [hit], answer: "Eerste." }),
+    } as Response);
+
+    const { result } = renderHook(() =>
+      useSemanticSearch({ type: "responsibility", debounceMs: 0 }),
+    );
+    act(() => result.current.search("kantine"));
+    await waitFor(() => expect(result.current.answer).toBe("Eerste."));
+
+    // A re-search in flight: the old answer (and results) are still held.
+    let resolveSecond!: (value: Response) => void;
+    vi.mocked(fetch).mockReturnValueOnce(
+      new Promise<Response>((resolve) => {
+        resolveSecond = resolve;
+      }),
+    );
+    act(() => result.current.search("kantine open"));
+    await waitFor(() => expect(result.current.loading).toBe(true));
+    expect(result.current.answer).toBe("Eerste.");
+    expect(result.current.results).toHaveLength(1);
+    expect(result.current.executedQuery).toBe("kantine");
+
+    await act(async () => {
+      resolveSecond({
+        ok: true,
+        json: async () => ({ results: [hit], answer: "Tweede." }),
+      } as Response);
+    });
+    await waitFor(() => expect(result.current.answer).toBe("Tweede."));
+  });
+
   it("clears results on clear()", () => {
     const { result } = renderHook(() => useSemanticSearch());
     act(() => result.current.clear());
