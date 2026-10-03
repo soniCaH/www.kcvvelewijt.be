@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useSyncExternalStore } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { cn } from "@/lib/utils/cn";
 import { trackEvent } from "@/lib/analytics/track-event";
@@ -9,6 +9,10 @@ import {
   CALENDAR_EVENTS_PARAM,
   CALENDAR_EVENTS_PARAM_VALUE,
 } from "@/lib/utils/calendar-feed-query";
+import {
+  overlayFadeAttrs,
+  overlayFadeClasses,
+} from "@/components/design-system/overlay-fade";
 import type { CalendarTeamInfo } from "@/app/(main)/kalender/utils";
 
 export interface CalendarSubscribePanelProps {
@@ -50,6 +54,8 @@ function computeInitialSelection(
   return new Set(teams.map((t) => t.id));
 }
 
+const subscribeNever = () => () => {};
+
 export function CalendarSubscribePanel({
   teams,
   preselectedTeamLabel,
@@ -79,10 +85,14 @@ export function CalendarSubscribePanel({
   // first attempt's timer clear the second attempt's confirmation early.
   const clearCopiedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const host =
-    typeof window !== "undefined"
-      ? window.location.host
-      : (process.env.NEXT_PUBLIC_HOST ?? "kcvvelewijt.be");
+  // The panel is always mounted now (closed = `hidden`), so its QR is part of
+  // the server HTML. `useSyncExternalStore` hydrates with the server host and
+  // re-renders with the real one, instead of mismatching the QR on hydration.
+  const host = useSyncExternalStore(
+    subscribeNever,
+    () => window.location.host,
+    () => process.env.NEXT_PUBLIC_HOST ?? "kcvvelewijt.be",
+  );
 
   const selectedPsdIds = teams
     .filter((t) => selectedTeamIds.has(t.id))
@@ -134,14 +144,16 @@ export function CalendarSubscribePanel({
     }
   }
 
-  if (!isOpen) return null;
-
   const unselectedTeams = teams.filter((t) => !selectedTeamIds.has(t.id));
 
   return (
     <div
+      {...overlayFadeAttrs(isOpen)}
       data-testid="subscribe-panel"
-      className="border-paper-edge bg-cream-soft border-b-2 border-dashed p-4"
+      className={cn(
+        "border-paper-edge bg-cream-soft border-b-2 border-dashed p-4",
+        overlayFadeClasses(isOpen),
+      )}
     >
       {/* Seizoenskaart — a perforated "abonnement" ticket (6d5 lock). The QR
           lives in the always-visible left stub; the body carries the team

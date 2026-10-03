@@ -7,6 +7,11 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
 import { Button } from "@/components/design-system/Button";
+import {
+  overlayFadeAttrs,
+  overlayFadeClasses,
+} from "@/components/design-system/overlay-fade";
+import { cn } from "@/lib/utils/cn";
 import { X } from "@/lib/icons.redesign";
 
 export interface NavTakeoverProps {
@@ -190,17 +195,20 @@ export const NavTakeover = ({
     }
   };
 
-  if (!open) return null;
-
+  // Stays mounted when closed (`hidden` + `inert`) so the close can fade out.
   return (
     <div
+      {...overlayFadeAttrs(open)}
       ref={panelRef}
       id="nav-takeover"
       role="dialog"
       aria-modal="true"
       aria-label="Navigatiemenu"
       onKeyDown={handleTabTrap}
-      className="bg-cream fixed inset-0 z-[60] flex flex-col"
+      className={cn(
+        "bg-cream fixed inset-0 z-[60] flex flex-col",
+        overlayFadeClasses(open),
+      )}
     >
       {/* Top bar — same height as the closed header */}
       <div className="border-paper-edge flex h-16 shrink-0 items-center justify-between border-b px-4 lg:px-8">

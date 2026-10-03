@@ -28,15 +28,35 @@ function open(props: Partial<Parameters<typeof OrganigramExplorer>[0]> = {}) {
 }
 
 describe("OrganigramExplorer — gating + a11y shell", () => {
-  it("renders nothing when closed", () => {
-    const { container } = render(
+  it("stays mounted but hidden and inert when closed (so it can fade out)", () => {
+    render(
       <OrganigramExplorer
         nodes={explorerFixture}
         open={false}
         onClose={vi.fn()}
       />,
     );
-    expect(container).toBeEmptyDOMElement();
+    const explorer = screen.getByTestId("organigram-explorer");
+    expect(explorer).toHaveAttribute("hidden");
+    expect(explorer).toHaveAttribute("inert");
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
+  it("plays its entrance when a mounted-closed explorer opens", () => {
+    const { rerender } = render(
+      <OrganigramExplorer
+        nodes={explorerFixture}
+        open={false}
+        onClose={vi.fn()}
+      />,
+    );
+    rerender(
+      <OrganigramExplorer nodes={explorerFixture} open onClose={vi.fn()} />,
+    );
+    const explorer = screen.getByRole("dialog");
+    expect(explorer).not.toHaveAttribute("hidden");
+    // `.spotlight-pop` is the CSS entrance; it restarts when display flips.
+    expect(explorer.querySelector(".spotlight-pop")).toBeInTheDocument();
   });
 
   it("is a labelled modal dialog wrapping the stage, with a polite live region", () => {
