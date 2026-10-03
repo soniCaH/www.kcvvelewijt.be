@@ -22,16 +22,16 @@
     "lint": "eslint ."
   },
   "peerDependencies": {
-    "@sanity/icons": "5.2.2",
-    "sanity": "6.15.0"
+    "@sanity/icons": "5.2.3",
+    "sanity": "6.17.0"
   },
   "devDependencies": {
     "@sanity/eslint-config-studio": "7.0.0",
-    "@sanity/icons": "5.2.2",
+    "@sanity/icons": "5.2.3",
     "@types/react-dom": "19.2.7",
     "@typescript/native-preview": "7.0.0-dev.20260707.2",
     "eslint": "10.9.1",
-    "sanity": "6.15.0",
+    "sanity": "6.17.0",
     "typescript": "6.0.3"
   }
 }
