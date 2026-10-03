@@ -13,11 +13,23 @@ import { formatArticleDate } from "@/lib/utils/dates";
 import { articleTypeCardLabel } from "@/lib/utils/article-type-label";
 import { narrowParam, writeHistoryFilterParam } from "@/hooks/filterParam";
 import { LISTING_BATCH_SIZE, LISTING_INITIAL_TOTAL } from "@/lib/constants";
+import { cn } from "@/lib/utils/cn";
 import { deduplicateById, type Paginated } from "@/lib/utils/pagination";
 import {
   filteredEmptyBody,
   pendingEmptyBody,
 } from "@/lib/utils/empty-state-copy";
+
+/** Back to the top once a category's batch has landed, or its fetch failed
+ *  (the notice sits above the grid). The preference is read at the call, not
+ *  cached: it can change while the page is open. Everything that travels
+ *  arrives instantly under `prefers-reduced-motion` (DESIGN.md → Motion). */
+function scrollToTop() {
+  const reduceMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
+  window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+}
 
 interface Category {
   id: string;
@@ -57,8 +69,19 @@ export function NewsListingClient({
   );
   const [gridArticles, setGridArticles] = useState(initialArticles);
   const [hasMore, setHasMore] = useState(initialHasMore);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<{
+  // Two requests, two devices (#3388): a pending category switch waits on the
+  // chip that made it and dims the stale grid; a pending load-more waits in
+  // the footer. One shared flag spun both for the same request.
+  const [isSwitching, setIsSwitching] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  // …and two errors: a failed category fetch reports above the grid, where
+  // the visitor's eyes are after the scroll to the top; a failed load-more
+  // stays in the footer at the foot of the batch it failed to extend.
+  const [categoryError, setCategoryError] = useState<{
+    message: string;
+    retry: () => void;
+  } | null>(null);
+  const [loadMoreError, setLoadMoreError] = useState<{
     message: string;
     retry: () => void;
   } | null>(null);
@@ -74,8 +97,8 @@ export function NewsListingClient({
     if (!hasMore || isLoadingRef.current) return;
     isLoadingRef.current = true;
     const requestId = categoryRequestId.current;
-    setIsLoading(true);
-    setError(null);
+    setIsLoadingMore(true);
+    setLoadMoreError(null);
 
     try {
       const category = activeCategory === "all" ? undefined : activeCategory;
@@ -99,17 +122,17 @@ export function NewsListingClient({
     } catch (err) {
       if (requestId !== categoryRequestId.current) return;
       console.error("[loadMore] Failed to load articles:", err);
-      setError({
+      setLoadMoreError({
         message: "Artikelen laden mislukt.",
         retry: () => {
-          setError(null);
+          setLoadMoreError(null);
           loadMoreRef.current();
         },
       });
     } finally {
       isLoadingRef.current = false;
       if (requestId === categoryRequestId.current) {
-        setIsLoading(false);
+        setIsLoadingMore(false);
       }
     }
   }, [hasMore, activeCategory, fetchArticles]);
@@ -149,8 +172,12 @@ export function NewsListingClient({
       const prevCategory = activeCategory;
       const requestId = ++categoryRequestId.current;
       setActiveCategory(category);
-      setIsLoading(true);
-      setError(null);
+      setIsSwitching(true);
+      // A load-more the switch supersedes is discarded on arrival; its
+      // footer spinner must not outlive the batch it was loading.
+      setIsLoadingMore(false);
+      setCategoryError(null);
+      setLoadMoreError(null);
 
       const categoryFilter = category === "all" ? undefined : category;
 
@@ -173,21 +200,22 @@ export function NewsListingClient({
             route: "/nieuws",
           });
         }
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        scrollToTop();
       } catch (err) {
         if (requestId !== categoryRequestId.current) return;
         setActiveCategory(prevCategory);
         console.error("[handleCategoryChange] Failed to load articles:", err);
-        setError({
+        setCategoryError({
           message: "Artikelen laden mislukt.",
           retry: () => {
-            setError(null);
+            setCategoryError(null);
             applyCategoryRef.current(category, { updateUrl: true });
           },
         });
+        scrollToTop();
       } finally {
         if (requestId === categoryRequestId.current) {
-          setIsLoading(false);
+          setIsSwitching(false);
         }
       }
     },
@@ -249,7 +277,7 @@ export function NewsListingClient({
     [undoAllCategories, activeCategory],
   );
 
-  const isEmpty = gridArticles.length === 0 && !isLoading;
+  const isEmpty = gridArticles.length === 0 && !isSwitching && !isLoadingMore;
 
   return (
     <div className="w-full">
@@ -283,6 +311,7 @@ export function NewsListingClient({
             }
             renderAsLinks={false}
             onChange={handleCategoryChange}
+            pendingCategory={isSwitching ? activeCategory : undefined}
           />
         </PageContainer>
       </div>
@@ -295,30 +324,62 @@ export function NewsListingClient({
             homepage, where it is editorially chosen (#2569 / decision #2431). */}
         {/* The grid renders nothing of its own when the list is empty, so the
             empty state below is the only branch this page needs. */}
-        <TapedCardGrid columns={3} gap="md" className="mb-6">
-          {gridArticles.map((article) => (
-            <NewsCard
-              key={article.id}
-              title={article.title}
-              href={`/nieuws/${article.slug}`}
-              imageUrl={article.coverImageUrl ?? undefined}
-              badge={article.tags[0] ?? undefined}
-              typeLabel={articleTypeCardLabel(article.articleType)}
-              date={
-                article.publishedAt
-                  ? formatArticleDate(new Date(article.publishedAt))
-                  : undefined
-              }
-            />
-          ))}
-        </TapedCardGrid>
+        {/* A failed category fetch reports here, above the grid, where the
+            scroll to the top lands (#3388). Same notice the footer renders
+            for a failed load-more. */}
+        {categoryError && (
+          <EmptyState
+            tier="slot"
+            reason="unavailable"
+            live
+            emphasis={{ text: "mislukt" }}
+            action={{ label: "Probeer opnieuw", onClick: categoryError.retry }}
+            className="mb-6"
+          >
+            {categoryError.message}
+          </EmptyState>
+        )}
+
+        {/* While a category fetch is pending the stale grid dims to half
+            opacity at the Chrome speed (`150ms`, `ease-out`) after a 150 ms
+            delay — the same delay as the chip's dots, so a fast answer shows
+            neither. The transition classes exist only while pending, so
+            arrival is an instant swap back to full opacity. No
+            `motion-reduce` opt-out: opacity is not travel (Reduced-Motion
+            Rule). Cards stay clickable. */}
+        <div
+          aria-busy={isSwitching ? true : undefined}
+          className={cn(
+            isSwitching &&
+              "opacity-50 transition-opacity delay-150 duration-150 ease-out",
+          )}
+        >
+          <TapedCardGrid columns={3} gap="md" className="mb-6">
+            {gridArticles.map((article) => (
+              <NewsCard
+                key={article.id}
+                title={article.title}
+                href={`/nieuws/${article.slug}`}
+                imageUrl={article.coverImageUrl ?? undefined}
+                badge={article.tags[0] ?? undefined}
+                typeLabel={articleTypeCardLabel(article.articleType)}
+                date={
+                  article.publishedAt
+                    ? formatArticleDate(new Date(article.publishedAt))
+                    : undefined
+                }
+              />
+            ))}
+          </TapedCardGrid>
+        </div>
 
         {/* Empty state. `activeCategoryLabel` is resolved here, not hoisted —
             the `.find()` it runs has no reason to pay for itself on every
             render of an infinite-scroll page when it's read only in this
             branch (#2562 review round 3, D6). */}
         {isEmpty &&
-          !error &&
+          !categoryError &&
+          !loadMoreError &&
           (() => {
             // Names the active facet by label ("Jeugd"), not a generic
             // "deze categorie" — the copy is the tell (#2427 rule 5). `null`
@@ -359,17 +420,22 @@ export function NewsListingClient({
             );
           })()}
 
-        {/* Error retry · in-flight spinner · load-more (NEWS-1, #2237 —
-            replaces the old infinite scroll). Appends LISTING_BATCH_SIZE
-            more articles per click. */}
+        {/* Load-more error retry · in-flight spinner · load-more (NEWS-1,
+            #2237 — replaces the old infinite scroll). Appends
+            LISTING_BATCH_SIZE more articles per click. Load-more only: a
+            category switch waits on its chip (#3388). */}
         <LoadMoreFooter
           label="Meer nieuws laden"
-          hasMore={hasMore}
-          isLoading={isLoading}
+          // No button while a switch is pending: it would extend the old
+          // list with the new category's filter.
+          hasMore={hasMore && !isSwitching}
+          isLoading={isLoadingMore}
           error={
-            error ? { message: error.message, emphasis: "mislukt" } : undefined
+            loadMoreError
+              ? { message: loadMoreError.message, emphasis: "mislukt" }
+              : undefined
           }
-          onLoadMore={error ? error.retry : loadMore}
+          onLoadMore={loadMoreError ? loadMoreError.retry : loadMore}
         />
       </PageContainer>
     </div>
