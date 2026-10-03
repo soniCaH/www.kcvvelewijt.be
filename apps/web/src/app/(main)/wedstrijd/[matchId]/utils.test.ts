@@ -343,6 +343,8 @@ describe("matchDetailToHeroRow (#2802 review — the fourth adapter)", () => {
     const matchRow = asRowKind(row, "match", "expected match kind");
     expect(matchRow.homeTeam.name).toBe("KCVV Elewijt");
     expect(matchRow.awayTeam.name).toBe("KFC Turnhout");
+    // The hero names its card by the match id (#3397).
+    expect(matchRow.id).toBe(match.id);
   });
 
   it("builds the reservation branch with the single reserving team, never a fabricated opponent", () => {
