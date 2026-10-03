@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, act } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  act,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useEffect } from "react";
 import { FakeIntersectionObserver } from "@/../tests/helpers/fake-observers.helpers";
@@ -244,6 +250,199 @@ describe("HubSearch", () => {
       "true",
     );
     expect(screen.getByRole("listbox")).toHaveAttribute("aria-busy", "true");
+  });
+
+  // #3399 — a search is a request the visitor made: it waits with the scarf
+  // (Waiting-Device Rule), not a pulse skeleton.
+  describe("waiting device (#3399)", () => {
+    const scarf = () =>
+      screen
+        .getByTestId("hub-search-popup")
+        .querySelector(".kcvv-spinner-scarf--primary");
+
+    /** The grow wrapper around the answer-forward card, or null. */
+    const forwardGrow = () =>
+      screen.getByText(/Lees volledig antwoord/i).closest(".grid");
+
+    it("waits with the scarf, not a skeleton, in the slot the answer will land", async () => {
+      setSemantic({ results: [], executedQuery: "" });
+      renderSearch();
+      typeQuery("in");
+      await screen.findByText(/Slim zoeken/i);
+      expect(scarf()).toBeInTheDocument();
+      expect(
+        screen
+          .getByTestId("hub-search-popup")
+          .querySelector("[class*='animate-pulse']"),
+      ).toBeNull();
+      // The sr-only status already announces the wait; the scarf's own
+      // `role="status"` must not announce it a second time.
+      expect(scarf()?.closest("[aria-hidden='true']")).not.toBeNull();
+    });
+
+    it("keeps the member rows on screen and usable while the scarf waits", async () => {
+      setSemantic({ results: [], executedQuery: "" });
+      renderSearch();
+      typeQuery("in");
+      expect(await screen.findByText("Inge De Wit")).toBeInTheDocument();
+      expect(scarf()).toBeInTheDocument();
+    });
+
+    it("shows no scarf once the lane settles, and none on the empty state", async () => {
+      setSemantic({ results: [], executedQuery: "zzzzz" });
+      renderSearch();
+      typeQuery("zzzzz");
+      await screen.findByText(/Geen resultaten voor/);
+      expect(scarf()).toBeNull();
+    });
+
+    it("dims only the stale answers, busy, while a re-search is pending — and swaps back at once", async () => {
+      setSemantic({ results: [hit("blessure", 0.44)], executedQuery: "in" });
+      const view = renderSearch();
+      typeQuery("in");
+      const listbox = await screen.findByRole("listbox");
+      const stale = await screen.findByText(
+        "Wat moet ik doen bij een blessure?",
+      );
+      const answerRow = stale.closest("button")!;
+      expect(listbox).not.toHaveAttribute("aria-busy");
+      expect(answerRow).not.toHaveClass("opacity-50");
+
+      // The query moves on; the hook still holds the previous result set.
+      typeQuery("inge");
+      const busy = screen.getByRole("listbox");
+      expect(busy).toHaveAttribute("aria-busy", "true");
+      // The old answer stays, at the Chrome speed after a 150 ms delay.
+      expect(answerRow).toBeVisible();
+      expect(answerRow).toHaveClass(
+        "opacity-50",
+        "delay-150",
+        "duration-150",
+        "ease-out",
+      );
+      // A member row follows the typed query: fresh, never dimmed.
+      const memberRow = (await screen.findByText("Inge De Wit")).closest(
+        "button",
+      )!;
+      expect(memberRow).not.toHaveClass("opacity-50");
+      expect(busy).not.toHaveClass("opacity-50");
+
+      setSemantic({ results: [hit("blessure", 0.44)], executedQuery: "inge" });
+      view.rerender(
+        <HubSearch
+          members={HUB_SEARCH_MEMBERS}
+          responsibilityPaths={HUB_SEARCH_PATHS}
+        />,
+      );
+      expect(screen.getByRole("listbox")).not.toHaveAttribute("aria-busy");
+      expect(
+        screen
+          .getByText("Wat moet ik doen bij een blessure?")
+          .closest("button"),
+      ).not.toHaveClass("opacity-50");
+    });
+
+    it("floats the scarf over the dimmed rows after the delay, as /zoeken does, adding no height", async () => {
+      setSemantic({ results: [hit("blessure", 0.44)], executedQuery: "in" });
+      renderSearch();
+      typeQuery("in");
+      await screen.findByText("Wat moet ik doen bij een blessure?");
+      typeQuery("inge");
+      // A fast answer shows no scarf; a slow one shows it after 150 ms.
+      expect(scarf()).toBeNull();
+      await waitFor(() => expect(scarf()).toBeInTheDocument());
+      const float = scarf()!.closest(".absolute")!;
+      expect(float).toHaveClass("pointer-events-none");
+      expect(float).toHaveAttribute("aria-hidden", "true");
+      // A sibling of the busy listbox, not inside it.
+      expect(screen.getByRole("listbox")).not.toContainElement(
+        float as HTMLElement,
+      );
+    });
+
+    it("opens the answer-forward card's own room when it lands above rows already on screen", async () => {
+      setSemantic({ results: [], executedQuery: "" });
+      const view = renderSearch();
+      typeQuery("in");
+      await screen.findByText("Inge De Wit");
+
+      setSemantic({ results: [hit("inschrijven", 0.82)], executedQuery: "in" });
+      view.rerender(
+        <HubSearch
+          members={HUB_SEARCH_MEMBERS}
+          responsibilityPaths={HUB_SEARCH_PATHS}
+        />,
+      );
+      const grow = await waitFor(() => {
+        const el = forwardGrow();
+        if (!el) throw new Error("no forward card yet");
+        return el;
+      });
+      // Height only, at the Arrival speed — the one HeightGrow, not a second.
+      expect(grow).toHaveClass(
+        "starting:grid-rows-[0fr]",
+        "duration-500",
+        "ease-out",
+      );
+    });
+
+    it("shows the card at once when it arrives with the rows", async () => {
+      setSemantic({ results: [hit("blessure", 0.82)], executedQuery: "x" });
+      renderSearch();
+      typeQuery("x");
+      await screen.findByText(/Lees volledig antwoord/i);
+      expect(forwardGrow()).not.toHaveClass("starting:grid-rows-[0fr]");
+    });
+
+    it("shows the card at once when the popup is closed and reopened", async () => {
+      setSemantic({ results: [], executedQuery: "" });
+      const view = renderSearch();
+      const input = typeQuery("in");
+      await screen.findByText("Inge De Wit");
+      setSemantic({ results: [hit("inschrijven", 0.82)], executedQuery: "in" });
+      view.rerender(
+        <HubSearch
+          members={HUB_SEARCH_MEMBERS}
+          responsibilityPaths={HUB_SEARCH_PATHS}
+        />,
+      );
+      await screen.findByText(/Lees volledig antwoord/i);
+      expect(forwardGrow()).toHaveClass("starting:grid-rows-[0fr]");
+
+      fireEvent.keyDown(input, { key: "Escape" });
+      expect(screen.queryByTestId("hub-search-popup")).toBeNull();
+      fireEvent.focus(input);
+      await screen.findByText(/Lees volledig antwoord/i);
+      // Remounted with its rows: nothing to make room above, no second grow.
+      expect(forwardGrow()).not.toHaveClass("starting:grid-rows-[0fr]");
+    });
+
+    it("does not grow the card again when a newer answer replaces it", async () => {
+      setSemantic({ results: [], executedQuery: "" });
+      const view = renderSearch();
+      typeQuery("in");
+      await screen.findByText("Inge De Wit");
+      setSemantic({ results: [hit("inschrijven", 0.82)], executedQuery: "in" });
+      view.rerender(
+        <HubSearch
+          members={HUB_SEARCH_MEMBERS}
+          responsibilityPaths={HUB_SEARCH_PATHS}
+        />,
+      );
+      await screen.findByText(/Lees volledig antwoord/i);
+      const before = forwardGrow();
+
+      setSemantic({ results: [hit("blessure", 0.82)], executedQuery: "in" });
+      view.rerender(
+        <HubSearch
+          members={HUB_SEARCH_MEMBERS}
+          responsibilityPaths={HUB_SEARCH_PATHS}
+        />,
+      );
+      await screen.findByText("Wat moet ik doen bij een blessure?");
+      // Same mounted wrapper: replaced in place, no second entrance.
+      expect(forwardGrow()).toBe(before);
+    });
   });
 
   // #3092 — an editor's keyword must find its path whatever semantic ranks.

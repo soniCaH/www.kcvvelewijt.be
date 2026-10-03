@@ -35,6 +35,14 @@ export interface HeightGrowProps {
   open?: boolean;
   /** Grow from zero when this mounts. @default false */
   enter?: boolean;
+  /**
+   * Give the clip side room (`-mx-3 px-3`) for a paper card's offset shadow and
+   * rotated corners. Turn it off inside a scroll container (`overflow-y-auto`
+   * makes `overflow-x` scroll too, so the bleed would add a horizontal
+   * scrollbar) with content that paints inside its own box, like a flush row.
+   * @default true
+   */
+  bleed?: boolean;
   /** Classes for the outer wrapper (margins, spacing). */
   className?: string;
   children: ReactNode;
@@ -43,6 +51,7 @@ export interface HeightGrowProps {
 export function HeightGrow({
   open = true,
   enter = false,
+  bleed = true,
   className,
   children,
 }: HeightGrowProps) {
@@ -55,7 +64,9 @@ export function HeightGrow({
         className,
       )}
     >
-      <div className="-mx-3 min-h-0 overflow-hidden px-3">{children}</div>
+      <div className={cn("min-h-0 overflow-hidden", bleed && "-mx-3 px-3")}>
+        {children}
+      </div>
     </div>
   );
 }

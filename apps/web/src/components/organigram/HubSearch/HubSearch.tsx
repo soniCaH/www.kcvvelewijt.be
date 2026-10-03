@@ -28,6 +28,13 @@ import { useEffect, useId, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import {
+  HeightGrow,
+  useGrowOnLanding,
+} from "@/components/design-system/HeightGrow";
+import { Spinner } from "@/components/design-system/Spinner";
+import { STALE_DIM } from "@/components/design-system/stale-dim";
+import { usePendingDelay } from "@/hooks/usePendingDelay";
+import {
   ArrowRight,
   MagnifyingGlass,
   Question,
@@ -36,6 +43,7 @@ import {
 } from "@/lib/icons.redesign";
 import { trackEvent } from "@/lib/analytics/track-event";
 import { getCategoryInfo } from "@/lib/responsibility-utils";
+import { cn } from "@/lib/utils/cn";
 import { revealHash } from "@/lib/utils/same-page-anchor";
 import { useSemanticSearch } from "@/hooks/useSemanticSearch";
 import { useHubMemberPanel } from "@/components/organigram/HubMemberPanel";
@@ -125,6 +133,8 @@ interface RowProps<T extends HubSearchResult> {
   /** `select` from the parent — called only in the row's click handler. */
   onSelect: (result: HubSearchResult) => void;
   onHover: () => void;
+  /** The previous query's answer, dimmed until the lane settles (#3399). */
+  stale?: boolean;
 }
 
 /** Person result row — keeps `select` out of the parent's render path. */
@@ -194,6 +204,7 @@ function AnswerRow({
   selected,
   onSelect,
   onHover,
+  stale,
 }: RowProps<HubResponsibilityResult>) {
   return (
     <button
@@ -203,7 +214,7 @@ function AnswerRow({
       aria-selected={selected}
       onClick={() => onSelect(result)}
       onMouseEnter={onHover}
-      className={`${rowClass(selected)} items-start`}
+      className={cn(rowClass(selected), "items-start", stale && STALE_DIM)}
     >
       <span className="text-jersey-deep mt-0.5 flex-shrink-0">
         <Question size={20} aria-hidden />
@@ -388,6 +399,25 @@ export function HubSearch({
     semanticAnswers.length === 0 &&
     literalAnswers.length === 0;
 
+  // Re-search (#3399): the answer lane is loading a new query while the
+  // previous query's semantic rows are still on screen. They stay — dimmed and
+  // usable — instead of giving way to the scarf. Only they are stale: member
+  // and literal hits follow the typed query, so they never dim.
+  const reSearching = !answersSettled && semanticAnswers.length > 0;
+  const staleAnswerIds = reSearching
+    ? new Set(
+        semanticAnswers
+          .filter((a) => !literalAnswers.some((l) => l.path.id === a.path.id))
+          .map((a) => a.path.id),
+      )
+    : null;
+  const isStale = (result: HubSearchResult) =>
+    result.type === "responsibility" &&
+    (staleAnswerIds?.has(result.path.id) ?? false);
+  // The scarf floats over the dimmed rows only after the Chrome-speed delay the
+  // CSS dim waits out too, so a fast answer shows neither (as on `/zoeken`).
+  const showFloatingScarf = usePendingDelay(reSearching);
+
   const items: HubSearchResult[] = answerForward
     ? [answerForward, ...rows]
     : rows;
@@ -398,6 +428,13 @@ export function HubSearch({
   // message and the contact escape — so the combobox is honestly collapsed
   // there, and the `role="status"` region announces the empty result (#3188).
   const listboxOpen = showResults && (showShimmer || items.length > 0);
+
+  // Does the answer-forward card land above rows already on screen? Grow only
+  // then; with its rows, replacing an older answer, or on a reopened popup it
+  // appears at once (#3399, see `useGrowOnLanding`).
+  const rowsShown =
+    showResults && (showShimmer ? memberResults.length : rows.length) > 0;
+  const growForward = useGrowOnLanding(rowsShown, answerForward !== null);
 
   // `selectedIndex` is a numeric index into `navItems`, so any recomposition of
   // the list — the shimmer→settled flip, an answer-forward card sliding into
@@ -549,9 +586,11 @@ export function HubSearch({
       aria-selected={selectedIndex === 0}
       onClick={() => select(answerForward)}
       onMouseEnter={() => setSelectedIndex(0)}
-      className={`border-ink focus-ring-inset block w-full border-b-2 px-3 py-3 text-left transition-colors ${
-        selectedIndex === 0 ? "bg-jersey-deep/10" : "hover:bg-cream-soft"
-      }`}
+      className={cn(
+        "border-ink focus-ring-inset block w-full border-b-2 px-3 py-3 text-left transition-colors",
+        selectedIndex === 0 ? "bg-jersey-deep/10" : "hover:bg-cream-soft",
+        isStale(answerForward) && STALE_DIM,
+      )}
     >
       <span className="text-jersey-deep block font-mono text-[11px] font-semibold tracking-[0.08em] uppercase">
         {getCategoryInfo(answerForward.path.category).label}
@@ -720,14 +759,16 @@ export function HubSearch({
                   />
                 ))}
               </div>
-              <div aria-hidden className="px-3 py-2.5">
-                <div className="flex items-center gap-3">
-                  <div className="bg-cream-soft h-10 w-10 flex-shrink-0 rounded-full motion-safe:animate-pulse" />
-                  <div className="flex-1 space-y-1.5">
-                    <div className="bg-cream-soft h-2.5 w-1/3 motion-safe:animate-pulse" />
-                    <div className="bg-cream-soft h-2.5 w-3/4 motion-safe:animate-pulse" />
-                  </div>
-                </div>
+              {/* A search is a request the visitor made, so it waits with the
+                  scarf (Waiting-Device Rule, #3399) in the slot the answer
+                  will land. `h-15` is the old skeleton row's height (40px
+                  avatar + 2 × 10px), so the swap adds none. `aria-hidden`:
+                  the `role="status"` below already announces the wait. */}
+              <div
+                aria-hidden
+                className="flex h-15 items-center justify-center"
+              >
+                <Spinner size="md" variant="primary" />
               </div>
             </>
           ) : items.length > 0 ? (
@@ -742,33 +783,62 @@ export function HubSearch({
                       ? "Beste match"
                       : "Slim gezocht",
                 )}
-              <div id={listboxId} role="listbox" aria-label="Zoekresultaten">
-                {forwardCard}
-                {rows.map((result, i) => {
-                  const index = answerForward ? i + 1 : i;
-                  const optionId = `${listboxId}-opt-${index}`;
-                  const selected = index === selectedIndex;
-                  const onHover = () => setSelectedIndex(index);
-                  return result.type === "member" ? (
-                    <MemberRow
-                      key={`member-${result.member.id}`}
-                      result={result}
-                      optionId={optionId}
-                      selected={selected}
-                      onSelect={select}
-                      onHover={onHover}
-                    />
-                  ) : (
-                    <AnswerRow
-                      key={`answer-${result.path.id}`}
-                      result={result}
-                      optionId={optionId}
-                      selected={selected}
-                      onSelect={select}
-                      onHover={onHover}
-                    />
-                  );
-                })}
+              <div className="relative">
+                <div
+                  id={listboxId}
+                  role="listbox"
+                  aria-label="Zoekresultaten"
+                  // Re-search (#3399): the listbox is the region being replaced,
+                  // so it carries `aria-busy` (members and answers alike are in
+                  // flux); only the stale answers dim, so fresh rows read fresh.
+                  // Arrival is an instant swap back.
+                  aria-busy={reSearching ? true : undefined}
+                >
+                  {forwardCard && (
+                    // It opens its own room above rows already on screen, at
+                    // the Arrival speed. `bleed` off: the popup scrolls, and the
+                    // flush card paints inside its own box.
+                    <HeightGrow enter={growForward} bleed={false}>
+                      {forwardCard}
+                    </HeightGrow>
+                  )}
+                  {rows.map((result, i) => {
+                    const index = answerForward ? i + 1 : i;
+                    const optionId = `${listboxId}-opt-${index}`;
+                    const selected = index === selectedIndex;
+                    const onHover = () => setSelectedIndex(index);
+                    return result.type === "member" ? (
+                      <MemberRow
+                        key={`member-${result.member.id}`}
+                        result={result}
+                        optionId={optionId}
+                        selected={selected}
+                        onSelect={select}
+                        onHover={onHover}
+                      />
+                    ) : (
+                      <AnswerRow
+                        key={`answer-${result.path.id}`}
+                        result={result}
+                        optionId={optionId}
+                        selected={selected}
+                        onSelect={select}
+                        onHover={onHover}
+                        stale={isStale(result)}
+                      />
+                    );
+                  })}
+                </div>
+                {showFloatingScarf && (
+                  // A sibling of the busy listbox, absolutely positioned: it
+                  // adds no height. `aria-hidden`: the status region speaks.
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0 flex items-center justify-center"
+                  >
+                    <Spinner size="md" variant="primary" />
+                  </div>
+                )}
               </div>
             </>
           ) : (
