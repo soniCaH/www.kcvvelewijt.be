@@ -446,15 +446,19 @@ export const ReSearching: Story = {
  * The answer card lands about a second after the list (#3396). It opens its own
  * room: the card's wrapper grows from zero to its natural height at the Arrival
  * speed (`500ms`), so the list slides down instead of jumping. `play` watches
- * the list move. Tagged `vr-skip`: the end state is `WithSmartAnswer`'s, and a
+ * the list move. Not baselined: the end state is `WithSmartAnswer`'s, and a
  * screenshot cannot see the transition.
  */
 export const LateAnswerCard: Story = {
-  tags: ["vr-skip"],
   args: {
     initialQuery: "lid worden",
   },
   parameters: {
+    // vr.disable: the end state is WithSmartAnswer's baseline; the story exists to time a transition VR freezes
+    // Repro: capture it and diff against WithSmartAnswer — same frame, a duplicate baseline that proves nothing
+    // Approved by: @soniCaH / https://github.com/soniCaH/www.kcvvelewijt.be/pull/3407
+    // Re-evaluate: 2027-04-03
+    vr: { disable: true },
     nextjs: {
       navigation: { pathname: "/zoeken", query: { q: "lid worden" } },
     },
