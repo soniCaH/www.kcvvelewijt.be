@@ -7,7 +7,7 @@ import {
   afterEach,
   type MockInstance,
 } from "vitest";
-import { act, render, screen, fireEvent } from "@testing-library/react";
+import { act, render, screen, fireEvent, within } from "@testing-library/react";
 import { HulpFinder } from "./HulpFinder";
 import { FINDER_FIXTURE_PATHS } from "./__fixtures__/paths.fixture";
 import { trackEvent } from "@/lib/analytics/track-event";
@@ -78,6 +78,13 @@ afterEach(() => {
 });
 
 const q = (re: RegExp) => screen.getByRole("button", { name: re });
+/**
+ * The open question's answer. Closed answers stay mounted (inert, #3398) and
+ * testing-library does not know `inert`, so scope to the panel the header
+ * controls rather than the whole document.
+ */
+const answerOf = (re: RegExp) =>
+  within(document.getElementById(q(re).getAttribute("aria-controls")!)!);
 const qMaybe = (re: RegExp) => screen.queryByRole("button", { name: re });
 
 describe("HulpFinder", () => {
@@ -118,16 +125,25 @@ describe("HulpFinder", () => {
   it("is single-open: opening a second question closes the first", () => {
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
     fireEvent.click(q(/mijn kind is geblesseerd/i));
-    expect(
-      screen.getByText(/eerste zorg gaat altijd voor/i),
-    ).toBeInTheDocument();
+    expect(q(/mijn kind is geblesseerd/i)).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
     fireEvent.click(q(/hoe schrijf ik mijn kind in/i));
+    expect(q(/hoe schrijf ik mijn kind in/i)).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+    // The first answer stays mounted so it can shrink away, but is inert.
     expect(
-      screen.getByText(/inschrijven kan het hele seizoen/i),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByText(/eerste zorg gaat altijd voor/i),
-    ).not.toBeInTheDocument();
+      screen
+        .getByText(/eerste zorg gaat altijd voor/i)
+        .closest('[role="region"]'),
+    ).toHaveAttribute("inert");
+    expect(q(/mijn kind is geblesseerd/i)).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
   });
 
   it("fires responsibility_view when a question opens", () => {
@@ -139,7 +155,9 @@ describe("HulpFinder", () => {
   it("fires responsibility_contact_clicked from the answer's contact", () => {
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
     fireEvent.click(q(/hoe schrijf ik mijn kind in/i));
-    const email = screen.getByRole("link", { name: /e-mail/i });
+    const email = answerOf(/hoe schrijf ik mijn kind in/i).getByRole("link", {
+      name: /e-mail/i,
+    });
     // Following the `mailto:` would move happy-dom off the origin, and every
     // later relative `replaceState` in this file would then silently no-op.
     email.addEventListener("click", (event) => event.preventDefault());
@@ -150,7 +168,11 @@ describe("HulpFinder", () => {
   it("fires responsibility_organigram_link with the node id from 'Toon in structuur'", () => {
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
     fireEvent.click(q(/mijn kind is geblesseerd/i));
-    fireEvent.click(screen.getByRole("link", { name: /toon in structuur/i }));
+    fireEvent.click(
+      answerOf(/mijn kind is geblesseerd/i).getByRole("link", {
+        name: /toon in structuur/i,
+      }),
+    );
     expect(trackOrganigramLink).toHaveBeenCalledWith("blessure", "node-gc");
   });
 
@@ -159,7 +181,11 @@ describe("HulpFinder", () => {
     mockPanel = { openMemberById, openMember: vi.fn() };
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
     fireEvent.click(q(/mijn kind is geblesseerd/i));
-    fireEvent.click(screen.getByRole("link", { name: /toon in structuur/i }));
+    fireEvent.click(
+      answerOf(/mijn kind is geblesseerd/i).getByRole("link", {
+        name: /toon in structuur/i,
+      }),
+    );
     expect(openMemberById).toHaveBeenCalledWith(
       "node-gc",
       expect.objectContaining({ view: "cards" }),
@@ -366,6 +392,48 @@ describe("HulpFinder", () => {
     scrollIntoView.mockClear();
     window.dispatchEvent(new HashChangeEvent("hashchange"));
     expect(scrollIntoView).toHaveBeenCalled();
+  });
+
+  it("a revealed question scrolls to the centre once its answer has settled, not before", () => {
+    // Already in the question's own category, so the card stays mounted.
+    setUrl("/hulp?categorie=administratief");
+    render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
+    scrollIntoView.mockClear();
+    // A hash for a card that is already rendered (closed): it flips open and
+    // grows, so the scroll waits for the height transition to end.
+    act(() => {
+      window.location.hash = "#inschrijven";
+      window.dispatchEvent(new HashChangeEvent("hashchange"));
+    });
+    expect(q(/hoe schrijf ik mijn kind in/i)).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+    expect(scrollIntoView).not.toHaveBeenCalled();
+
+    const grow = document
+      .getElementById("inschrijven")!
+      .querySelector('[role="region"]')!.parentElement!.parentElement!;
+    const event = new Event("transitionend", { bubbles: true });
+    Object.defineProperty(event, "propertyName", {
+      value: "grid-template-rows",
+    });
+    act(() => {
+      grow.dispatchEvent(event);
+    });
+    // One scroll, to the centre, and no scroll-back guard on top of it.
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView).toHaveBeenCalledWith(
+      expect.objectContaining({ block: "center" }),
+    );
+  });
+
+  it("a revealed question that mounts already open scrolls at once (a category switch)", () => {
+    setUrl("/hulp#blessure");
+    render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
+    expect(scrollIntoView).toHaveBeenCalledWith(
+      expect.objectContaining({ block: "center" }),
+    );
   });
 
   it("a #<slug> deep-link rewrites the URL in place — both params, the slug hash, no new history entry", () => {

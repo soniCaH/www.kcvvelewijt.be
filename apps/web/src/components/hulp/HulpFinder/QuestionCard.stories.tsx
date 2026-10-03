@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { fn } from "storybook/test";
+import { expect, fn, within } from "storybook/test";
 import { QuestionCard } from "./QuestionCard";
 import type { ResponsibilityPath } from "@/types/responsibility";
 
@@ -74,9 +74,29 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Collapsed — the default browse state (admin glyph, ink). */
+/**
+ * Collapsed — the default browse state (admin glyph, ink). The answer stays
+ * mounted but `inert`, in a zero-height row that animates at the Arrival speed
+ * (#3398); `play` checks the transition, which a VR capture cannot see.
+ */
 export const Closed: Story = {
   args: { path: admin, open: false },
+  play: async ({ canvasElement }) => {
+    if (navigator.userAgent.includes("StorybookTestRunner")) return;
+    const panel = within(canvasElement)
+      .getByText(/inschrijven kan het hele seizoen/i)
+      .closest("[role='region']") as HTMLElement;
+    await expect(panel).toHaveAttribute("inert");
+    const grow = panel.parentElement?.parentElement as HTMLElement;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      await expect(getComputedStyle(grow).transitionProperty).toBe("none");
+      return;
+    }
+    await expect(getComputedStyle(grow).transitionProperty).toBe(
+      "grid-template-rows",
+    );
+    await expect(getComputedStyle(grow).transitionDuration).toBe("0.5s");
+  },
 };
 
 /** Open — summary · numbered steps · person-vocab contact. */

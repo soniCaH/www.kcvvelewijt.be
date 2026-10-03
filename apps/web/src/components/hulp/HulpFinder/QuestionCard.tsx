@@ -7,24 +7,69 @@
  * · the person-vocab `<ContactCard>`. Open/close state is owned by `<HulpFinder>`
  * (single-open); this card is presentational + accessible.
  *
+ * The answer stays mounted while closed so it can shrink away (#3398): a
+ * `<HeightGrow>` row transition, Arrival speed, so the closing and the opening
+ * answer move together. Closed, it is `inert`: out of the tab order and the
+ * accessibility tree.
+ *
  * A11y: the header is a heading-wrapped `<button>` with `aria-expanded` /
  * `aria-controls`; the panel is a `region` labelled by the header. The whole row
  * is the tap target. Press-down hover only while collapsed.
  */
 
-import { useId, type MouseEvent } from "react";
+import {
+  useEffect,
+  useEffectEvent,
+  useId,
+  useRef,
+  type MouseEvent,
+} from "react";
 import { CaretDown } from "@/lib/icons.redesign";
 import type { ResponsibilityPath } from "@/types/responsibility";
 import { ACCENT_GLYPH_CLASS, CATEGORY_META } from "./categoryMeta";
 import { ContactCard } from "./ContactCard";
 import { resolveContact } from "./resolveContact";
 import { PRESS_DOWN_TRANSITION } from "@/components/design-system/press-down";
+import { HeightGrow } from "@/components/design-system/HeightGrow";
+import { scrollIntoViewMotionSafe } from "@/lib/utils/scroll-into-view";
+
+/** Keys that scroll the page: pressing one while an answer grows is the visitor scrolling. */
+const SCROLL_KEYS = new Set([
+  " ",
+  "PageUp",
+  "PageDown",
+  "Home",
+  "End",
+  "ArrowUp",
+  "ArrowDown",
+]);
+
+/**
+ * Scroll-back guard (#3398): a tall answer closing above this card can leave
+ * its header off the top, so once the heights have settled, bring it back just
+ * under the sticky bar. The bar's height is `scroll-padding-top` on `<html>`
+ * (DESIGN.md → The Derived Anchor Offset Rule), which `scrollIntoView` also
+ * honours. Most taps never trigger it.
+ */
+function showHeaderIfAbove(card: HTMLElement) {
+  const offset =
+    parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) ||
+    0;
+  if (card.getBoundingClientRect().top < offset) {
+    scrollIntoViewMotionSafe(card, { block: "start" });
+  }
+}
 
 export interface QuestionCardProps {
   path: ResponsibilityPath;
   /** Whether this card's answer is expanded (single-open, owned by the finder). */
   open: boolean;
   onToggle: () => void;
+  /**
+   * The answer has finished opening (its height transition ended, or it was
+   * already open on mount): geometry is final, so a caller can scroll to it.
+   */
+  onOpenSettled?: () => void;
   onContactClick?: (channel: "email" | "phone") => void;
   onStepLinkClick?: (stepIndex: number) => void;
   onShowInStructure?: (
@@ -37,6 +82,7 @@ export function QuestionCard({
   path,
   open,
   onToggle,
+  onOpenSettled,
   onContactClick,
   onStepLinkClick,
   onShowInStructure,
@@ -47,9 +93,60 @@ export function QuestionCard({
   const headerId = `${baseId}-header`;
   const panelId = `${baseId}-panel`;
   const contact = resolveContact(path.primaryContact);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // The scroll-back guard belongs to a TAPPED open only. A programmatic open
+  // (`reveal()`: a search pick, `?vraag=`, a hash) scrolls the card to the
+  // centre once it settles, via `onOpenSettled`, and must not be pulled to the
+  // top as well. The tap arms an `AbortController`; the visitor scrolling on
+  // purpose while the answer grows (`wheel`, `touchmove`, a scroll key) aborts
+  // it, so the guard never yanks them back. Armed at the tap, gone at settle.
+  const armedGuard = useRef<AbortController | null>(null);
+  const disarmGuard = () => {
+    armedGuard.current?.abort();
+    armedGuard.current = null;
+  };
+  useEffect(() => disarmGuard, []);
+
+  const handleToggle = () => {
+    disarmGuard();
+    if (!open) {
+      const guard = new AbortController();
+      const cancel = () => guard.abort();
+      const listener = { passive: true, signal: guard.signal };
+      window.addEventListener("wheel", cancel, listener);
+      window.addEventListener("touchmove", cancel, listener);
+      window.addEventListener(
+        "keydown",
+        (event) => {
+          if (SCROLL_KEYS.has(event.key)) cancel();
+        },
+        listener,
+      );
+      armedGuard.current = guard;
+    }
+    onToggle();
+  };
+
+  const handleOpenSettled = () => {
+    const guard = armedGuard.current;
+    if (guard && !guard.signal.aborted && cardRef.current) {
+      showHeaderIfAbove(cardRef.current);
+    }
+    disarmGuard();
+    onOpenSettled?.();
+  };
+
+  // A card that mounts already open (a category switch reveals it) has no
+  // transition to wait for: its geometry is final now.
+  const settleIfMountedOpen = useEffectEvent(() => {
+    if (open) onOpenSettled?.();
+  });
+  useEffect(() => settleIfMountedOpen(), []);
 
   return (
     <div
+      ref={cardRef}
       className={`border-ink bg-cream border-2 shadow-[3px_3px_0_0_var(--color-ink)] ${
         open
           ? ""
@@ -60,9 +157,9 @@ export function QuestionCard({
         <button
           type="button"
           id={headerId}
-          onClick={onToggle}
+          onClick={handleToggle}
           aria-expanded={open}
-          aria-controls={open ? panelId : undefined}
+          aria-controls={panelId}
           className="flex w-full items-center gap-3 p-3 text-left"
         >
           <span
@@ -84,11 +181,12 @@ export function QuestionCard({
         </button>
       </h3>
 
-      {open && (
+      <HeightGrow open={open} bleed={false} onOpenSettled={handleOpenSettled}>
         <div
           id={panelId}
           role="region"
           aria-labelledby={headerId}
+          inert={!open}
           className="border-paper-edge border-t-2 border-dashed p-4"
         >
           <p className="text-ink mb-3 text-[14px] leading-relaxed">
@@ -145,7 +243,7 @@ export function QuestionCard({
             onShowInStructure={onShowInStructure}
           />
         </div>
-      )}
+      </HeightGrow>
     </div>
   );
 }

@@ -14,6 +14,9 @@
  * - `open={false}`: collapsed to `0fr`. The content stays in the DOM and the
  *   accessibility tree; hiding it from them is the caller's call.
  *
+ * `onOpenSettled` tells the caller when an open has finished, so it can scroll
+ * against settled geometry (see the prop).
+ *
  * Height only: the content is visible from the first frame (no opacity).
  * Under `prefers-reduced-motion` the transition is gone: height is travel, so
  * the change is instant (Reduced-Motion Rule).
@@ -27,7 +30,7 @@
  * offset shadow its bottom by 6px).
  * Keep the class lists below full literals: Tailwind's scanner has to see them.
  */
-import type { ReactNode } from "react";
+import { useEffect, useRef, type ReactNode, type TransitionEvent } from "react";
 import { cn } from "@/lib/utils/cn";
 
 export interface HeightGrowProps {
@@ -45,6 +48,14 @@ export interface HeightGrowProps {
   bleed?: boolean;
   /** Classes for the outer wrapper (margins, spacing). */
   className?: string;
+  /**
+   * The height has finished growing to `open` (#3398), so geometry measured
+   * now is final: on the wrapper's own `grid-template-rows` `transitionend`,
+   * or, under `prefers-reduced-motion` where no transition (and no event)
+   * comes, right after the open commits. Not on a mount that is already open,
+   * and not on a close.
+   */
+  onOpenSettled?: () => void;
   children: ReactNode;
 }
 
@@ -53,10 +64,36 @@ export function HeightGrow({
   enter = false,
   bleed = true,
   className,
+  onOpenSettled,
   children,
 }: HeightGrowProps) {
+  // Reduced motion runs no transition, so no `transitionend`: the height is
+  // final as soon as the open has committed.
+  const wasOpen = useRef(open);
+  useEffect(() => {
+    if (
+      open &&
+      !wasOpen.current &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      onOpenSettled?.();
+    }
+    wasOpen.current = open;
+  }, [open, onOpenSettled]);
+
+  const handleTransitionEnd = (event: TransitionEvent<HTMLDivElement>) => {
+    if (
+      open &&
+      event.target === event.currentTarget &&
+      event.propertyName === "grid-template-rows"
+    ) {
+      onOpenSettled?.();
+    }
+  };
+
   return (
     <div
+      onTransitionEnd={handleTransitionEnd}
       className={cn(
         "grid transition-[grid-template-rows] duration-500 ease-out motion-reduce:transition-none",
         open ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
