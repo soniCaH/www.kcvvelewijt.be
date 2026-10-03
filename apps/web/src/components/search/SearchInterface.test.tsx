@@ -2132,7 +2132,10 @@ describe("SearchInterface", () => {
       const roomBefore = room();
 
       // The new query's augment is pending: the old card stays, dimmed.
-      mockUseSemanticAugment.mockReturnValue({ kind: "pending" });
+      mockUseSemanticAugment.mockReturnValue({
+        kind: "pending",
+        previous: answerA,
+      });
       rerender(<SearchInterface />);
       expect(screen.getByText(/eerste antwoord/i)).toBeInTheDocument();
       expect(
@@ -2187,15 +2190,9 @@ describe("SearchInterface", () => {
       rerender(<SearchInterface />);
 
       const room = cardRoom();
-      expect(room).toHaveClass(
-        "starting:grid-rows-[0fr]",
-        "transition-[grid-template-rows]",
-        "duration-500",
-        "ease-out",
-        "motion-reduce:transition-none",
-      );
-      // Height only: the card itself is visible from the first frame.
-      expect(room.className).not.toContain("opacity");
+      // Only `enter` is SearchInterface's call; the speed, the property and
+      // reduced motion are HeightGrow's, asserted by its stories.
+      expect(room).toHaveClass("starting:grid-rows-[0fr]");
     });
 
     it("appears at once when there is no list on screen yet", async () => {

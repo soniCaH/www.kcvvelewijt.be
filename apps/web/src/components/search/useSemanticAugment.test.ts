@@ -126,6 +126,25 @@ describe("useSemanticAugment", () => {
     expect(run().kind).toBe("pending");
   });
 
+  it("hands the last settled query's augment to a pending one as `previous`, and none before any 2+ char fetch settled", () => {
+    setHook({
+      executedQuery: "oud",
+      answer: "Het oude antwoord.",
+      results: [result({ score: 0.9 })],
+    });
+    expect(run("nieuw")).toEqual({
+      kind: "pending",
+      previous: {
+        kind: "answer",
+        answer: "Het oude antwoord.",
+        sources: [{ title: "Titel", href: "/nieuws/slug-1" }],
+      },
+    });
+
+    setHook({ executedQuery: "", results: [result({ score: 0.9 })] });
+    expect(run("nieuw")).toEqual({ kind: "pending" });
+  });
+
   it("returns 'none', not 'pending', below the 2-char floor even when executedQuery hasn't caught up", () => {
     setHook({ executedQuery: "" });
     expect(run("a").kind).toBe("none");

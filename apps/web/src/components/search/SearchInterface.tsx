@@ -14,7 +14,7 @@ import { SearchResults } from "./SearchResults";
 import { SearchPreSearchCard } from "./SearchPreSearchCard";
 import { SearchAnswerCard } from "./SearchAnswerCard";
 import { SearchRelated } from "./SearchRelated";
-import { useSemanticAugment, type SemanticAugment } from "./useSemanticAugment";
+import { useSemanticAugment } from "./useSemanticAugment";
 import {
   EmptyState,
   HeightGrow,
@@ -259,27 +259,11 @@ export const SearchInterface = ({
   // The semantic lane goes `pending` the moment the query changes. Keep the
   // last settled augment (the "Slim antwoord" card or "Gerelateerd" links) on
   // screen, dimmed like the list, until the new one settles, so the list does
-  // not jump up and slide down again (#3396). Render-phase state, keyed by
-  // content because `useSemanticAugment` returns a fresh object every render.
-  // Dropped below the 2-char floor and on a failed search, where the list it
-  // belonged to is gone too.
-  const [settledAugment, setSettledAugment] = useState<{
-    key: string;
-    value: SemanticAugment;
-  } | null>(null);
-  const augmentKey = JSON.stringify(augment);
-  const nextSettledAugment =
-    query.trim().length < 2 || error
-      ? null
-      : augment.kind === "pending" || settledAugment?.key === augmentKey
-        ? settledAugment
-        : { key: augmentKey, value: augment };
-  if (nextSettledAugment !== settledAugment) {
-    setSettledAugment(nextSettledAugment);
-  }
+  // not jump up and slide down again (#3396). Not after a failed search: the
+  // list it belonged to is gone too.
   const staleAugment =
-    augment.kind === "pending" && showResults
-      ? (settledAugment?.value ?? null)
+    augment.kind === "pending" && showResults && !error
+      ? (augment.previous ?? null)
       : null;
   const shownAugment = staleAugment ?? augment;
 

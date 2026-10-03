@@ -85,8 +85,6 @@ export function useSemanticSearch(
         return;
       }
 
-      setAnswer(undefined);
-
       timerRef.current = setTimeout(async () => {
         abortRef.current?.abort();
         const controller = new AbortController();

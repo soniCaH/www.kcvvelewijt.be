@@ -60,11 +60,22 @@ export interface SemanticRelatedItem {
   href: string;
 }
 
-export type SemanticAugment =
+/** A settled augment: what the score gate made of one fetch's results. */
+export type SettledAugment =
   | { kind: "answer"; answer: string; sources: SearchAnswerSource[] }
   | { kind: "related"; items: SemanticRelatedItem[] }
-  | { kind: "none" }
-  | { kind: "pending" };
+  | { kind: "none" };
+
+export type SemanticAugment =
+  | SettledAugment
+  /**
+   * Still waiting on the current query. `previous` is what the last settled
+   * query's results make of the gate (absent before any 2+ char fetch has
+   * settled): `useSemanticSearch` keeps its `results` and `answer` while a new
+   * query is pending, so a caller can keep the old card on screen until the new
+   * one settles instead of unmounting it (#3396).
+   */
+  | { kind: "pending"; previous?: SettledAugment };
 
 /**
  * Derive a destination URL from a semantic hit's type + slug. Mirrors the
@@ -103,12 +114,27 @@ export function useSemanticAugment(
   // search is empty, not merely unsettled.
   if (trimmed.length < 2) return { kind: "none" };
 
+  const settled = settle(results, answer, excludeUrls);
+
   // Still waiting on the debounce + fetch for THIS query. Distinct from
   // `none` (see docblock) — a caller that needs to know whether an answer
   // will suppress something of its own (`SearchInterface`, #2824) must wait
   // for this to clear before treating "no answer yet" as "no answer".
-  if (executedQuery !== trimmed) return { kind: "pending" };
+  if (executedQuery !== trimmed) {
+    return executedQuery.length >= 2
+      ? { kind: "pending", previous: settled }
+      : { kind: "pending" };
+  }
 
+  return settled;
+}
+
+/** Run the score gate over one fetch's results. */
+function settle(
+  results: SemanticSearchResult[],
+  answer: string | undefined,
+  excludeUrls: ReadonlySet<string>,
+): SettledAugment {
   // Gate on the genuine top score (BEFORE de-dup) — using `!(x >= n)` so a
   // missing / NaN score is treated as below-threshold rather than slipping
   // through (`undefined < 0.35` is `false`).
