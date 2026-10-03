@@ -87,6 +87,7 @@ export function matchDetailToHeroRow(match: MatchDetail): MatchHeroRow {
       return {
         ...common,
         kind,
+        id: match.id,
         homeTeam: transformHomeTeam(match),
         awayTeam: transformAwayTeam(match),
       };

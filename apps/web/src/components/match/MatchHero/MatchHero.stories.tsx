@@ -53,6 +53,17 @@ export const Upcoming: Story = {
   args: { match: { ...baseMatch, status: "scheduled" } },
 };
 
+/**
+ * The travel target (#3397): with the match `id` set (the match page always
+ * does) the card is a `<ViewTransition name="match-card-<id>">` boundary, the
+ * end a tapped fixture row grows into. It renders exactly as `Upcoming` — the
+ * boundary is invisible at rest — so this story only keeps the named path
+ * rendering and covered.
+ */
+export const TravelTarget: Story = {
+  args: { match: { ...baseMatch, id: 3740, status: "scheduled" } },
+};
+
 export const Finished: Story = {
   args: {
     match: {

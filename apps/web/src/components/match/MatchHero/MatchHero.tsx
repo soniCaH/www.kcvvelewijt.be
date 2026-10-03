@@ -1,4 +1,6 @@
+import { ViewTransition } from "react";
 import Image from "next/image";
+import { MATCH_TRAVEL_CLASS, matchTravelName } from "@/lib/utils/match-travel";
 import { toMatchDisplayZone } from "@/lib/utils/dates";
 import { deriveSeason } from "@/lib/utils/season";
 import { TapedCard } from "@/components/design-system/TapedCard";
@@ -45,6 +47,11 @@ interface MatchHeroCommon {
 export interface MatchHeroMatch extends MatchHeroCommon {
   /** Discriminant against `MatchHeroReservation`/`MatchHeroReduced`. */
   kind: "match";
+  /**
+   * The match id — names the card for the fixture row that grows into it
+   * (#3397). Absent (stories, previews): the card takes no part in the travel.
+   */
+  id?: number;
   homeTeam: MatchHeroTeam;
   awayTeam: MatchHeroTeam;
 }
@@ -356,7 +363,28 @@ function ReservationHero({
   );
 }
 
-function FullHero({
+/**
+ * The card a tapped fixture row grows into (#3397). Only the full hero joins:
+ * the reservation stub hero has no row to meet. The boundary opts in on `share`
+ * only, so it takes part when a tapped row of the same match is the other end
+ * and never on a plain arrival, a leave or a live score refresh. No `id`
+ * (stories, previews): nothing to pair with, the card renders bare.
+ */
+function FullHero(props: { match: MatchHeroMatch; className?: string }) {
+  const { id } = props.match;
+  if (id === undefined) return <FullHeroCard {...props} />;
+  return (
+    <ViewTransition
+      name={matchTravelName(id)}
+      default="none"
+      share={MATCH_TRAVEL_CLASS}
+    >
+      <FullHeroCard {...props} />
+    </ViewTransition>
+  );
+}
+
+function FullHeroCard({
   match,
   className,
 }: {

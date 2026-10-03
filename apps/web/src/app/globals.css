@@ -1843,3 +1843,22 @@ html {
     animation: none;
   }
 }
+
+/* Match travel (#3397, decided in #2501): a tapped fixture row grows into the
+   match hero. `useMatchTravel` names the tapped row on click and `<MatchHero>`
+   names its card (`match-card-<id>`); both carry the view-transition-class
+   `match-travel` (MATCH_TRAVEL_CLASS) on `share` only, so a transition starts
+   only for that pair. The tap also adds the `match-travel` transition type:
+   the page cut is keyed on it, so no other view transition is touched. Only the
+   card moves, for 300 ms on the site's one curve (The Press, DESIGN.md →
+   Motion). Reduced motion needs no rule: no tap is recorded, nothing pairs. */
+:root:active-view-transition-type(match-travel)::view-transition-old(root),
+:root:active-view-transition-type(match-travel)::view-transition-new(root) {
+  animation: none;
+}
+::view-transition-group(*.match-travel),
+::view-transition-old(*.match-travel),
+::view-transition-new(*.match-travel) {
+  animation-duration: 300ms;
+  animation-timing-function: var(--ease-out);
+}
