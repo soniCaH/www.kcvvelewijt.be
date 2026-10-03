@@ -363,6 +363,10 @@ export type { LoadMoreFooterProps } from "./LoadMoreFooter";
 // HeightGrow
 export { HeightGrow } from "./HeightGrow";
 export type { HeightGrowProps } from "./HeightGrow";
+export { useGrowOnLanding } from "./HeightGrow";
+
+// Stale content dim (a re-search / filter switch in flight)
+export { STALE_DIM } from "./stale-dim";
 
 // Press-down (canonical paper press-down hover)
 export { PRESS_DOWN_CLASSES, PRESS_DOWN_TRANSITION } from "./press-down";

@@ -20,6 +20,8 @@ import {
   HeightGrow,
   PageContainer,
   Spinner,
+  STALE_DIM,
+  useGrowOnLanding,
 } from "@/components/design-system";
 import { useSearchAnalytics } from "@/hooks/useSearchAnalytics";
 import { usePendingDelay } from "@/hooks/usePendingDelay";
@@ -32,15 +34,6 @@ import type {
 } from "@/types/search";
 
 export type { SearchResultType, SearchResult, SearchResponse };
-
-/**
- * Stale content during a re-search (#3396): half opacity at the Chrome speed
- * (`150ms`, `ease-out`) after a 150 ms delay. Applied only while stale, so the
- * arrival is an instant swap back to full opacity. No `motion-reduce` opt-out:
- * opacity is not travel (Reduced-Motion Rule).
- */
-const STALE_DIM =
-  "opacity-50 transition-opacity delay-150 duration-150 ease-out";
 
 export interface SearchInterfaceProps {
   /**
@@ -267,30 +260,11 @@ export const SearchInterface = ({
       : null;
   const shownAugment = staleAugment ?? augment;
 
-  // Does the answer card land above a list that was already on screen? Latched
-  // at the commit the card appears, from the PREVIOUS commit's `listOnScreen`:
-  // a card that arrives in the same commit as the list has nothing to make
-  // room above, so it appears at once, and a card replaced by a newer answer
-  // (the stale one stays mounted) does not grow again (#3396). Render-phase
-  // state, like the URL sync below, so no effect has to run a frame late.
+  // Does the answer card land above a list that was already on screen? Grow
+  // only then; with its list, or replacing an older answer, it appears at
+  // once (#3396, see `useGrowOnLanding`).
   const answerNow = shownAugment.kind === "answer";
-  const [answerRoom, setAnswerRoom] = useState({
-    listShown: false,
-    answerShown: false,
-    grow: false,
-  });
-  if (
-    answerRoom.listShown !== listOnScreen ||
-    answerRoom.answerShown !== answerNow
-  ) {
-    setAnswerRoom({
-      listShown: listOnScreen,
-      answerShown: answerNow,
-      grow:
-        answerNow &&
-        (answerRoom.answerShown ? answerRoom.grow : answerRoom.listShown),
-    });
-  }
+  const growAnswer = useGrowOnLanding(listOnScreen, answerNow);
 
   // Track analytics based on filtered results (respects active filter)
   // Only fires after a successful fetch (no load, no error) for the query
@@ -528,7 +502,7 @@ export const SearchInterface = ({
                 While a re-search is pending the previous answer stays,
                 dimmed, and is replaced in place (no second grow). */}
             {shownAugment.kind === "answer" && (
-              <HeightGrow enter={answerRoom.grow} className="mb-0">
+              <HeightGrow enter={growAnswer} className="mb-0">
                 {/* `pt-1` / `pb-8`: room for the card's tilt and shadow,
                     which the clip would otherwise cut (see HeightGrow). */}
                 <div className={cn("pt-1 pb-8", staleAugment && STALE_DIM)}>

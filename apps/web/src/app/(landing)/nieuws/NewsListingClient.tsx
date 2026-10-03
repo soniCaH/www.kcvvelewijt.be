@@ -7,6 +7,7 @@ import {
   EmptyState,
   LoadMoreFooter,
   PageContainer,
+  STALE_DIM,
   TapedCardGrid,
 } from "@/components/design-system";
 import { formatArticleDate } from "@/lib/utils/dates";
@@ -346,11 +347,7 @@ export function NewsListingClient({
             Rule). Cards stay clickable. */}
         <div
           aria-busy={isSwitching ? true : undefined}
-          className={
-            isSwitching
-              ? "opacity-50 transition-opacity delay-150 duration-150 ease-out"
-              : undefined
-          }
+          className={isSwitching ? STALE_DIM : undefined}
         >
           <TapedCardGrid columns={3} gap="md" className="mb-6">
             {gridArticles.map((article) => (

@@ -245,16 +245,18 @@ export const Waiting: Story = {
 
 /**
  * Re-search (#3399): the answer lane settled, then the visitor types on. The
- * old rows stay — dimmed to half opacity after a 150 ms delay, `aria-busy` on
- * the listbox — until the next answer swaps in at once. `play` asserts the
- * busy flag and the settled dim (computed style: VR cannot see a broken
+ * previous query's answer stays — dimmed to half opacity after a 150 ms delay —
+ * with the scarf floating over it, and `aria-busy` on the listbox, until the
+ * next answer swaps in at once. The member row that already matches the new
+ * query is fresh and stays at full opacity. `play` asserts the busy flag, the
+ * settled dim and the floating scarf (computed style: VR cannot see a broken
  * transition); the capture is taken at rest.
  */
 export const ReSearching: Story = {
   decorators: [
     (Story) =>
       heroBand(
-        <SemanticStub results={[hit("inschrijven", 0.44)]} mode="once">
+        <SemanticStub results={[hit("blessure", 0.44)]} mode="once">
           <Story />
         </SemanticStub>,
       ),
@@ -264,18 +266,34 @@ export const ReSearching: Story = {
     const canvas = within(context.canvasElement);
     await userEvent.type(
       canvas.getByLabelText("Zoek een persoon of hulpvraag"),
-      "s",
+      "ge",
     );
     const listbox = await canvas.findByRole("listbox");
     await waitFor(() => expect(listbox).toHaveAttribute("aria-busy", "true"));
-    // Rows stay usable.
-    await expect(within(listbox).getAllByRole("option").length).toBeGreaterThan(
-      0,
-    );
+    const stale = within(listbox)
+      .getByText("Wat moet ik doen bij een blessure?")
+      .closest("button") as HTMLElement;
+    const fresh = within(listbox)
+      .getByText("Inge De Wit")
+      .closest("button") as HTMLElement;
     // 150 ms delay + 150 ms fade, then at rest at half opacity.
-    await waitFor(() => expect(getComputedStyle(listbox).opacity).toBe("0.5"), {
+    await waitFor(() => expect(getComputedStyle(stale).opacity).toBe("0.5"), {
       timeout: 2000,
     });
+    await expect(getComputedStyle(fresh).opacity).toBe("1");
+    await expect(getComputedStyle(listbox).opacity).toBe("1");
+    // The scarf floats over the rows after the same delay and adds no height.
+    const popup = canvas.getByTestId("hub-search-popup");
+    await waitFor(() =>
+      expect(
+        popup.querySelector(".kcvv-spinner-scarf--primary"),
+      ).not.toBeNull(),
+    );
+    const float = popup
+      .querySelector(".kcvv-spinner-scarf--primary")!
+      .closest(".absolute") as HTMLElement;
+    await expect(getComputedStyle(float).position).toBe("absolute");
+    await expect(listbox.contains(float)).toBe(false);
   },
 };
 
