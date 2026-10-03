@@ -25,13 +25,10 @@
  *                does not cover the title via `className`.
  */
 
-import { useEffect, useState } from "react";
 import { useLinkStatus } from "next/link";
 import { Spinner } from "@/components/design-system/Spinner";
+import { usePendingDelay } from "@/hooks/usePendingDelay";
 import { cn } from "@/lib/utils/cn";
-
-/** The Chrome speed (DESIGN.md → Motion Vocabulary): no new number. */
-const PENDING_DELAY_MS = 150;
 
 export type LinkPendingDotsPlacement = "inline" | "corner";
 export type LinkPendingDotsTone = "default" | "light";
@@ -68,22 +65,10 @@ export function LinkPendingDots({
   className,
 }: LinkPendingDotsProps) {
   const { pending } = useLinkStatus();
-  const [elapsed, setElapsed] = useState(false);
+  // Unmounted until the delay has passed — see `usePendingDelay`.
+  const showDots = usePendingDelay(pending);
 
-  // The delay is a timer, not a CSS fade: a faded-in span still takes its
-  // inline size (and a flex parent's `gap`) from the first pending frame, so
-  // every tap would re-wrap prose or recentre a button, even on a fast
-  // connection. Unmounted until `PENDING_DELAY_MS`, it takes no room at all.
-  useEffect(() => {
-    if (!pending) return;
-    const timer = setTimeout(() => setElapsed(true), PENDING_DELAY_MS);
-    return () => {
-      clearTimeout(timer);
-      setElapsed(false);
-    };
-  }, [pending]);
-
-  if (!pending || !elapsed) return null;
+  if (!showDots) return null;
 
   return (
     // Decorative for assistive tech: a visual tap acknowledgement only. A

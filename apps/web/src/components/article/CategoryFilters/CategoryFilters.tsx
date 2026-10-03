@@ -30,6 +30,8 @@ interface CategoryFiltersProps {
   showCounts?: boolean;
   renderAsLinks?: boolean;
   onChange?: (category: string) => void;
+  /** Slug of the category whose fetch is pending — its chip shows the dots. */
+  pendingCategory?: string;
 }
 
 /**
@@ -43,6 +45,7 @@ interface CategoryFiltersProps {
  * @param showCounts - Whether to display article counts for each category
  * @param renderAsLinks - When `true`, tabs render as links with hrefs; when `false`, tabs render as interactive buttons
  * @param onChange - Callback invoked with the selected category slug when `renderAsLinks` is `false`
+ * @param pendingCategory - Slug (or `"all"`) of the chip whose fetch is pending; it shows the compact dots
  * @returns A React element containing the category filter tabs
  */
 export function CategoryFilters({
@@ -51,6 +54,7 @@ export function CategoryFilters({
   showCounts = false,
   renderAsLinks = true,
   onChange,
+  pendingCategory,
 }: CategoryFiltersProps) {
   // Convert categories to FilterTab format with hrefs for Next.js routing
   const tabs: FilterTab[] = useMemo(() => {
@@ -76,6 +80,7 @@ export function CategoryFilters({
       showCounts={showCounts}
       renderAsLinks={renderAsLinks}
       onChange={onChange}
+      pendingTab={pendingCategory}
       ariaLabel="Filter news by category"
     />
   );

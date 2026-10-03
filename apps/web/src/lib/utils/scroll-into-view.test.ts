@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { scrollIntoViewMotionSafe } from "./scroll-into-view";
+import {
+  scrollIntoViewMotionSafe,
+  scrollToTopMotionSafe,
+} from "./scroll-into-view";
 
 function stubReducedMotion(reduce: boolean) {
   // happy-dom's matchMedia ignores the query, so answer it explicitly.
@@ -41,4 +44,22 @@ describe("scrollIntoViewMotionSafe", () => {
     scrollIntoViewMotionSafe(el);
     expect(el.scrollIntoView).toHaveBeenCalledWith({ behavior: "smooth" });
   });
+});
+
+describe("scrollToTopMotionSafe", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it.each([
+    [false, "smooth"],
+    [true, "auto"],
+  ])(
+    "with reduced motion %s scrolls to the top with behavior %s",
+    (reduce, behavior) => {
+      stubReducedMotion(reduce);
+      const scrollTo = vi.fn();
+      vi.stubGlobal("scrollTo", scrollTo);
+      scrollToTopMotionSafe();
+      expect(scrollTo).toHaveBeenCalledWith({ top: 0, behavior });
+    },
+  );
 });
