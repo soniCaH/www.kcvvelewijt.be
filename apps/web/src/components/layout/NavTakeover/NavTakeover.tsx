@@ -3,6 +3,7 @@
 import {
   useEffect,
   useRef,
+  type CSSProperties,
   type ReactNode,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
@@ -36,6 +37,14 @@ export interface NavTakeoverProps {
    * `document.body`.
    */
   autoCloseFocusRef?: React.RefObject<HTMLElement | null>;
+  /**
+   * How many `<NavTakeoverItem>` rows the menu holds, each given its `index`.
+   * Set as `--rule-count` on the `<nav>`, from which every row works out its
+   * rule's draw delay so the last rule never starts after 270ms however many
+   * senior teams `buildMenuItems` adds (#3392). Required: a row's `index`
+   * means nothing without it.
+   */
+  rowCount: number;
 }
 
 const FOCUSABLE_SELECTOR =
@@ -92,6 +101,7 @@ export const NavTakeover = ({
   onOpenChange,
   wordmark,
   children,
+  rowCount,
   returnFocusRef,
   autoCloseFocusRef,
 }: NavTakeoverProps) => {
@@ -196,7 +206,14 @@ export const NavTakeover = ({
   // Stays mounted when closed (`hidden` + `inert`) so the close can fade out.
   return (
     <div
-      {...overlayFade(open, "bg-cream fixed inset-0 z-[60] flex flex-col")}
+      {...overlayFade(
+        open,
+        // `starting:opacity-0` is the menu's own fade-in (#3392, decided in
+        // #2498): the panel comes back from `display: none` at opacity 0 and
+        // the helper's 150ms opacity transition carries it to 1. Not in
+        // `overlayFade` itself — the other three panels open instantly.
+        "bg-cream fixed inset-0 z-[60] flex flex-col starting:opacity-0",
+      )}
       ref={panelRef}
       id="nav-takeover"
       role="dialog"
@@ -221,6 +238,7 @@ export const NavTakeover = ({
       <nav
         aria-label="Hoofdnavigatie"
         className="flex flex-1 flex-col overflow-y-auto px-4 py-4 lg:px-8"
+        style={{ "--rule-count": rowCount } as CSSProperties}
       >
         {children}
       </nav>

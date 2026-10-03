@@ -11,8 +11,11 @@
  * lands at once, and nothing waits on an event that never fires. A browser
  * without `allow-discrete` falls back to today's hard cut.
  *
- * Only the close animates. There is no `starting:` entrance — the open is
- * instant, as before (a menu entrance is #2498's call).
+ * Only the close animates here. The helper has no `starting:` entrance, so a
+ * panel that uses it as-is opens instantly. `<NavTakeover>` alone adds one (#3392,
+ * decided in #2498): its own `starting:opacity-0` class makes the same 150ms
+ * opacity transition run on open, and its row rules draw in on top
+ * (`<NavTakeoverItem>`). Under `motion-reduce:transition-none` neither runs.
  *
  * Usage: `<div {...overlayFade(open, "own classes")}>`.
  * Focus return and scroll-lock release stay keyed on `open`, so they happen when

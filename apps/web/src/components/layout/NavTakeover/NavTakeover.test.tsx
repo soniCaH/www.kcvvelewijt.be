@@ -17,6 +17,7 @@ describe("NavTakeover", () => {
         open={false}
         onOpenChange={() => {}}
         wordmark={<span>WM</span>}
+        rowCount={1}
       >
         <NavTakeoverItem label="Home" href="/" />
       </NavTakeover>,
@@ -30,7 +31,12 @@ describe("NavTakeover", () => {
 
   it("is neither hidden nor inert when open", () => {
     render(
-      <NavTakeover open onOpenChange={() => {}} wordmark={<span>WM</span>}>
+      <NavTakeover
+        open
+        onOpenChange={() => {}}
+        wordmark={<span>WM</span>}
+        rowCount={1}
+      >
         <NavTakeoverItem label="Home" href="/" />
       </NavTakeover>,
     );
@@ -39,9 +45,30 @@ describe("NavTakeover", () => {
     expect(panel).not.toHaveAttribute("inert");
   });
 
+  it("fades in on open (#3392): its own starting:opacity-0, no pointer gating", () => {
+    render(
+      <NavTakeover
+        open
+        onOpenChange={() => {}}
+        wordmark={<span>WM</span>}
+        rowCount={1}
+      >
+        <NavTakeoverItem label="Home" href="/" />
+      </NavTakeover>,
+    );
+    const panel = screen.getByRole("dialog");
+    expect(panel).toHaveClass("starting:opacity-0", "duration-150");
+    expect(panel.className).not.toMatch(/pointer-events/);
+  });
+
   it("renders dialog with wordmark + close button when open", () => {
     render(
-      <NavTakeover open onOpenChange={() => {}} wordmark={<span>WM</span>}>
+      <NavTakeover
+        open
+        onOpenChange={() => {}}
+        wordmark={<span>WM</span>}
+        rowCount={1}
+      >
         <NavTakeoverItem label="Home" href="/" />
       </NavTakeover>,
     );
@@ -52,7 +79,12 @@ describe("NavTakeover", () => {
 
   it("locks body scroll while open and restores it on close", () => {
     const { rerender } = render(
-      <NavTakeover open onOpenChange={() => {}} wordmark={<span>WM</span>}>
+      <NavTakeover
+        open
+        onOpenChange={() => {}}
+        wordmark={<span>WM</span>}
+        rowCount={1}
+      >
         <NavTakeoverItem label="Home" href="/" />
       </NavTakeover>,
     );
@@ -62,6 +94,7 @@ describe("NavTakeover", () => {
         open={false}
         onOpenChange={() => {}}
         wordmark={<span>WM</span>}
+        rowCount={1}
       >
         <NavTakeoverItem label="Home" href="/" />
       </NavTakeover>,
@@ -73,7 +106,12 @@ describe("NavTakeover", () => {
     const user = userEvent.setup();
     const onOpenChange = vi.fn();
     render(
-      <NavTakeover open onOpenChange={onOpenChange} wordmark={<span>WM</span>}>
+      <NavTakeover
+        open
+        onOpenChange={onOpenChange}
+        wordmark={<span>WM</span>}
+        rowCount={1}
+      >
         <NavTakeoverItem label="Home" href="/" />
       </NavTakeover>,
     );
@@ -84,7 +122,12 @@ describe("NavTakeover", () => {
   it("calls onOpenChange(false) when Escape is pressed", () => {
     const onOpenChange = vi.fn();
     render(
-      <NavTakeover open onOpenChange={onOpenChange} wordmark={<span>WM</span>}>
+      <NavTakeover
+        open
+        onOpenChange={onOpenChange}
+        wordmark={<span>WM</span>}
+        rowCount={1}
+      >
         <NavTakeoverItem label="Home" href="/" />
       </NavTakeover>,
     );
@@ -104,6 +147,7 @@ describe("NavTakeover", () => {
             open={open}
             onOpenChange={() => {}}
             wordmark={<span>WM</span>}
+            rowCount={1}
             returnFocusRef={triggerRef}
           >
             <NavTakeoverItem label="Home" href="/" />
@@ -128,6 +172,7 @@ describe("NavTakeover", () => {
             open={false}
             onOpenChange={() => {}}
             wordmark={<span>WM</span>}
+            rowCount={1}
             returnFocusRef={triggerRef}
           >
             <NavTakeoverItem label="Home" href="/" />
@@ -215,6 +260,7 @@ describe("NavTakeover", () => {
             open={open}
             onOpenChange={setOpen}
             wordmark={<span>WM</span>}
+            rowCount={1}
             returnFocusRef={triggerRef}
             autoCloseFocusRef={desktopLinkRef}
           >
@@ -332,5 +378,85 @@ describe("NavTakeoverItem", () => {
     expect(screen.getByRole("link", { name: "Nieuws" })).not.toHaveAttribute(
       "aria-current",
     );
+  });
+
+  describe("row rules (#3392)", () => {
+    // Renders a menu of `rows` rows and returns the nav's `--rule-count` plus
+    // each row's `--rule-index` — the two inputs of the CSS delay.
+    const renderMenu = (rows: number) => {
+      render(
+        <NavTakeover
+          open
+          onOpenChange={() => {}}
+          wordmark={<span>WM</span>}
+          rowCount={rows}
+        >
+          {Array.from({ length: rows }, (_, i) => (
+            <NavTakeoverItem
+              key={i}
+              label={`Rij ${i}`}
+              href={`/rij-${i}`}
+              index={i}
+            />
+          ))}
+        </NavTakeover>,
+      );
+      const nav = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
+      return {
+        count: nav.style.getPropertyValue("--rule-count"),
+        indexes: screen
+          .getAllByRole("link")
+          .map((a) => a.style.getPropertyValue("--rule-index")),
+      };
+    };
+
+    // The delay is `index × min(30ms, 270ms / max(count − 1, 1))`, evaluated by
+    // the browser from the rendered custom properties and the class below
+    // (the story's `play` reads the computed value in a real browser).
+    const delayMs = (count: string, index: string) =>
+      Number(index) * Math.min(30, 270 / Math.max(Number(count) - 1, 1));
+
+    it("9 rows: step 30ms, the last rule starts at 240ms", () => {
+      const { count, indexes } = renderMenu(9);
+      expect(count).toBe("9");
+      expect(indexes).toEqual(["0", "1", "2", "3", "4", "5", "6", "7", "8"]);
+      expect(delayMs(count, indexes[1])).toBe(30);
+      expect(delayMs(count, indexes[8])).toBe(240);
+    });
+
+    it("12 rows: the step shrinks to 270/11ms, the last rule starts at exactly the 270ms cap", () => {
+      const { count, indexes } = renderMenu(12);
+      expect(count).toBe("12");
+      expect(indexes[11]).toBe("11");
+      expect(delayMs(count, indexes[1])).toBe(270 / 11);
+      expect(delayMs(count, indexes[11])).toBe(270);
+    });
+
+    it("computes that delay in the row's ::after class — the same formula as the test", () => {
+      render(<NavTakeoverItem label="Nieuws" href="/nieuws" index={1} />);
+      expect(screen.getByRole("link", { name: /Nieuws/ })).toHaveClass(
+        "after:delay-[calc(var(--rule-index,0)*min(30ms,270ms/max(var(--rule-count,1)_-_1,1)))]",
+      );
+    });
+
+    it("draws the rule on a pseudo-element and never gates the row itself", () => {
+      render(<NavTakeoverItem label="Nieuws" href="/nieuws" index={1} />);
+      const link = screen.getByRole("link", { name: /Nieuws/ });
+      // The old hairline was `border-b border-paper-edge`; it stays in the box
+      // (transparent) so the row height is unchanged, and the ::after paints it.
+      expect(link).toHaveClass("border-b", "border-transparent");
+      expect(link).not.toHaveClass("border-paper-edge");
+      expect(link).toHaveClass("after:bg-paper-edge", "after:origin-left");
+      // Draw: the CSS `scale` property (not `transform`), from zero, at Arrival speed.
+      expect(link).toHaveClass(
+        "after:starting:scale-x-0",
+        "after:transition-[scale]",
+        "after:duration-500",
+        "after:ease-out",
+        "motion-reduce:after:transition-none",
+      );
+      // Decoration only: nothing on the row's text or pointer handling moves.
+      expect(link.className).not.toMatch(/pointer-events|opacity/);
+    });
   });
 });
