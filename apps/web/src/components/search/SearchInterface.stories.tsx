@@ -474,17 +474,25 @@ export const LateAnswerCard: Story = {
     );
     const room = card.closest("[class*='grid-rows-']") as HTMLElement;
 
-    // The transition names the property it animates, at the Arrival speed.
-    await expect(getComputedStyle(room).transitionProperty).toBe(
-      "grid-template-rows",
-    );
-    await expect(getComputedStyle(room).transitionDuration).toBe("0.5s");
-
     // The page's 32px gap is spent inside the room, so it grows with it
     // instead of snapping in at the first frame.
     await expect(getComputedStyle(room).marginBottom).toBe("0px");
 
-    // The list slides down by the card's height as the room opens.
+    // The VR runner freezes every transition to 0s before `play` (its
+    // determinism stylesheet, `.storybook/test-runner.ts`), so there is no
+    // motion to measure there; `pnpm test:storybook` is where this runs.
+    if (navigator.userAgent.includes("StorybookTestRunner")) return;
+    // Height is travel: under `prefers-reduced-motion` the room opens at once.
+    // Otherwise the transition names the property it animates, at the Arrival
+    // speed, and the list slides down by the card's height.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      await expect(getComputedStyle(room).transitionProperty).toBe("none");
+      return;
+    }
+    await expect(getComputedStyle(room).transitionProperty).toBe(
+      "grid-template-rows",
+    );
+    await expect(getComputedStyle(room).transitionDuration).toBe("0.5s");
     const before = count.getBoundingClientRect().top;
     await new Promise((resolve) => setTimeout(resolve, 700));
     const after = count.getBoundingClientRect().top;
