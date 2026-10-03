@@ -1,6 +1,5 @@
-import { ViewTransition } from "react";
 import Image from "next/image";
-import { MATCH_TRAVEL_CLASS, matchTravelName } from "@/lib/utils/match-travel";
+import { TravelDestination } from "@/components/travel";
 import { toMatchDisplayZone } from "@/lib/utils/dates";
 import { deriveSeason } from "@/lib/utils/season";
 import { TapedCard } from "@/components/design-system/TapedCard";
@@ -371,16 +370,10 @@ function ReservationHero({
  * (stories, previews): nothing to pair with, the card renders bare.
  */
 function FullHero(props: { match: MatchHeroMatch; className?: string }) {
-  const { id } = props.match;
-  if (id === undefined) return <FullHeroCard {...props} />;
   return (
-    <ViewTransition
-      name={matchTravelName(id)}
-      default="none"
-      share={MATCH_TRAVEL_CLASS}
-    >
+    <TravelDestination kind="match" id={props.match.id}>
       <FullHeroCard {...props} />
-    </ViewTransition>
+    </TravelDestination>
   );
 }
 
