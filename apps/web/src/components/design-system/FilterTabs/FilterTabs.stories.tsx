@@ -288,6 +288,22 @@ export const WithLeadingGlyph: Story = {
 };
 
 /**
+ * A request waiting on a chip (#3388). The chip that is becoming active shows
+ * the compact dots after its label, in the chip's own text colour (cream on
+ * the active ink chip). The dots appear 150 ms after `pendingTab` is set (a
+ * CSS delay); the capture is taken after it, with the loop at rest.
+ */
+export const PendingActiveChip: Story = {
+  args: {
+    tabs: categoryTabs,
+    activeTab: "jeugd",
+    pendingTab: "jeugd",
+    showCounts: false,
+    ariaLabel: "Filter news by category",
+  },
+};
+
+/**
  * With Link rendering - for Next.js routing.
  * Tabs render as <a> tags with href attributes.
  */
