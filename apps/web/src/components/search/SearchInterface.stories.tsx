@@ -6,7 +6,7 @@
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { within } from "storybook/test";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 import { SearchInterface } from "./SearchInterface";
 import type { SearchResponse } from "@/types/search";
 import { fixtureImage } from "@test-fixtures/images";
@@ -178,12 +178,20 @@ function mockFetch(
   {
     semantic = noSemantic,
     delay = 0,
-  }: { semantic?: SemanticResponse; delay?: number } = {},
+    semanticDelay = 0,
+  }: {
+    semantic?: SemanticResponse;
+    delay?: number;
+    /** Extra wait on the semantic POST only — the answer lands after the list. */
+    semanticDelay?: number;
+  } = {},
 ) {
   const original = globalThis.fetch;
   globalThis.fetch = async (_url: RequestInfo | URL, init?: RequestInit) => {
-    if (delay > 0) await new Promise((r) => setTimeout(r, delay));
-    const body = init?.method === "POST" ? semantic : lexical;
+    const isSemantic = init?.method === "POST";
+    const wait = delay + (isSemantic ? semanticDelay : 0);
+    if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+    const body = isSemantic ? semantic : lexical;
     return new Response(JSON.stringify(body), {
       status: 200,
       headers: { "Content-Type": "application/json" },
@@ -206,6 +214,30 @@ function mockFetchError() {
 function mockFetchPending() {
   const original = globalThis.fetch;
   globalThis.fetch = async () => new Promise(() => {});
+  return () => {
+    globalThis.fetch = original;
+  };
+}
+
+// The first lexical GET resolves; every later one never does — a re-search left
+// in flight, so the dimmed list and its floating scarf hold still.
+function mockFetchFirstThenPending(lexical: SearchResponse) {
+  const original = globalThis.fetch;
+  let lexicalCalls = 0;
+  globalThis.fetch = async (_url: RequestInfo | URL, init?: RequestInit) => {
+    if (init?.method === "POST") {
+      return new Response(JSON.stringify(noSemantic), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    lexicalCalls += 1;
+    if (lexicalCalls > 1) return new Promise<Response>(() => {});
+    return new Response(JSON.stringify(lexical), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  };
   return () => {
     globalThis.fetch = original;
   };
@@ -362,4 +394,100 @@ export const FetchError: Story = {
   // debounce + its own round trip) hasn't settled yet, capturing neither
   // the notice nor anything else in its place.
   play: waitForSemantic(/mislukt/i),
+};
+
+/**
+ * Re-search (#3396): the visitor types on while a list is on screen. The old
+ * list stays — dimmed to half opacity after a 150 ms delay, `aria-busy` on its
+ * region, the scarf floating over it. `play` types onto the query, then asserts
+ * the busy flag, the settled dim (computed style, since VR cannot see a broken
+ * transition) and the floating scarf; the capture is taken at rest.
+ */
+export const ReSearching: Story = {
+  args: {
+    initialQuery: "KCVV",
+  },
+  parameters: SEARCH_NAVIGATION_PARAMS,
+  beforeEach() {
+    return mockFetchFirstThenPending(mockResponse);
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const count = await canvas.findByText(
+      /resultaten voor/i,
+      {},
+      { timeout: 5000 },
+    );
+    const region = count.closest("div.relative") as HTMLElement;
+
+    await userEvent.type(canvas.getByRole("textbox"), " Mechelen{enter}");
+
+    await waitFor(() => expect(region).toHaveAttribute("aria-busy", "true"));
+    // Rows stay usable: the old list is still there, links and all.
+    await expect(within(region).getAllByRole("link").length).toBeGreaterThan(0);
+    // 150 ms delay + 150 ms fade, then at rest at half opacity.
+    await waitFor(() => expect(getComputedStyle(region).opacity).toBe("0.5"), {
+      timeout: 2000,
+    });
+    // The scarf floats over the list and adds no height to it.
+    const scarf = await within(region).findByRole("status");
+    await expect(getComputedStyle(scarf.parentElement!).position).toBe(
+      "absolute",
+    );
+  },
+};
+
+/**
+ * The answer card lands about a second after the list (#3396). It opens its own
+ * room: the card's wrapper grows from zero to its natural height at the Arrival
+ * speed (`500ms`), so the list slides down instead of jumping. `play` watches
+ * the list move. Tagged `vr-skip`: the end state is `WithSmartAnswer`'s, and a
+ * screenshot cannot see the transition.
+ */
+export const LateAnswerCard: Story = {
+  tags: ["vr-skip"],
+  args: {
+    initialQuery: "lid worden",
+  },
+  parameters: {
+    nextjs: {
+      navigation: { pathname: "/zoeken", query: { q: "lid worden" } },
+    },
+  },
+  beforeEach() {
+    return mockFetch(mockResponse, {
+      semantic: smartAnswerResponse,
+      semanticDelay: 1200,
+    });
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const count = await canvas.findByText(
+      /resultaten voor/i,
+      {},
+      { timeout: 5000 },
+    );
+    const card = await canvas.findByText(
+      /slim antwoord/i,
+      {},
+      { timeout: 5000 },
+    );
+    const room = card.closest("[class*='grid-rows-']") as HTMLElement;
+
+    // The transition names the property it animates, at the Arrival speed.
+    await expect(getComputedStyle(room).transitionProperty).toBe(
+      "grid-template-rows",
+    );
+    await expect(getComputedStyle(room).transitionDuration).toBe("0.5s");
+
+    // The page's 32px gap is spent inside the room, so it grows with it
+    // instead of snapping in at the first frame.
+    await expect(getComputedStyle(room).marginBottom).toBe("0px");
+
+    // The list slides down by the card's height as the room opens.
+    const before = count.getBoundingClientRect().top;
+    await new Promise((resolve) => setTimeout(resolve, 700));
+    const after = count.getBoundingClientRect().top;
+    await expect(after - before).toBeGreaterThan(100);
+  },
 };

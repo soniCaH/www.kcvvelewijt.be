@@ -16,8 +16,11 @@ import { SearchAnswerCard } from "./SearchAnswerCard";
 import { SearchRelated } from "./SearchRelated";
 import { useSemanticAugment } from "./useSemanticAugment";
 import { EmptyState, PageContainer, Spinner } from "@/components/design-system";
+import { HeightGrow } from "@/components/design-system/height-grow";
 import { useSearchAnalytics } from "@/hooks/useSearchAnalytics";
+import { usePendingDelay } from "@/hooks/usePendingDelay";
 import { filterByActiveType } from "./search-filter-utils";
+import { cn } from "@/lib/utils/cn";
 import type {
   SearchResultType,
   SearchResult,
@@ -218,6 +221,40 @@ export const SearchInterface = ({
   // (`AbortSignal.timeout(15_000)`, `app/api/search/route.ts`) — this can't
   // leave the spinner up indefinitely.
   const awaitingSemantic = error && !isLoading && augment.kind === "pending";
+
+  // Re-search (#3396): a previous result set is still on screen while the next
+  // one loads. It stays — dimmed, busy, rows usable — instead of unmounting
+  // for the scarf; only an empty slot (a first search, or the wait after a
+  // failure, where `results` is already `[]`) gets the centred scarf.
+  const isReSearching = isLoading && results.length > 0;
+  // The scarf floats over that dimmed list only after the Chrome-speed delay,
+  // the same one the CSS dim waits out, so a fast answer shows neither.
+  const showFloatingScarf = usePendingDelay(isReSearching);
+  const showResults = !error && (!isLoading || isReSearching);
+
+  // Does the answer card land above a list that was already on screen? Latched
+  // at the commit the card appears, from the PREVIOUS commit's `showResults`:
+  // a card that arrives in the same commit as the list has nothing to make
+  // room above, so it appears at once (#3396). Render-phase state, like the
+  // URL sync below, so no effect has to run a frame late.
+  const answerNow = augment.kind === "answer";
+  const [answerRoom, setAnswerRoom] = useState({
+    listShown: false,
+    answerShown: false,
+    grow: false,
+  });
+  if (
+    answerRoom.listShown !== showResults ||
+    answerRoom.answerShown !== answerNow
+  ) {
+    setAnswerRoom({
+      listShown: showResults,
+      answerShown: answerNow,
+      grow:
+        answerNow &&
+        (answerRoom.answerShown ? answerRoom.grow : answerRoom.listShown),
+    });
+  }
 
   // Track analytics based on filtered results (respects active filter)
   // Only fires after a successful fetch (no load, no error) for the query
@@ -447,11 +484,20 @@ export const SearchInterface = ({
           <>
             {/* High-confidence semantic answer (8s5 / ZOEK-3) — the "Slim
                 antwoord" card sits ABOVE the lexical results. */}
+            {/* It opens its own room (#3396): above a list already on
+                screen, its wrapper grows from nothing at the Arrival speed so
+                the list slides down instead of jumping. The wrapper's own
+                gap is dropped and re-spent inside it (`pb-8`), so the whole
+                32px grows with it rather than snapping in at the first frame. */}
             {augment.kind === "answer" && (
-              <SearchAnswerCard
-                answer={augment.answer}
-                sources={augment.sources}
-              />
+              <HeightGrow enter={answerRoom.grow} className="mb-0">
+                <div className="pb-8">
+                  <SearchAnswerCard
+                    answer={augment.answer}
+                    sources={augment.sources}
+                  />
+                </div>
+              </HeightGrow>
             )}
 
             {/* Filters */}
@@ -485,7 +531,7 @@ export const SearchInterface = ({
                 passed to `<SearchForm isLoading>` above — the form (and a
                 retry) must stay usable through this wait, only the results
                 slot is idle. */}
-            {(isLoading || awaitingSemantic) && (
+            {!isReSearching && (isLoading || awaitingSemantic) && (
               <div className="flex justify-center py-12">
                 <Spinner size="lg" variant="primary" />
               </div>
@@ -554,14 +600,41 @@ export const SearchInterface = ({
                 </EmptyState>
               )}
 
-            {/* Results */}
-            {!isLoading && !error && (
-              <SearchResults
-                results={results}
-                query={query}
-                activeType={activeType}
-                onResultClick={analytics.trackResultClicked}
-              />
+            {/* Results. During a re-search (#3396) the old list stays: dimmed
+                to half opacity at the Chrome speed (`150ms`, `ease-out`) after
+                a 150 ms delay, `aria-busy` from the first frame, rows still
+                clickable. The transition classes exist only while
+                re-searching, so arrival is an instant swap back to full
+                opacity — no fade-in, no stagger (typeahead replays the
+                arrival on every pause, and a list is scanned, not read in
+                order). No `motion-reduce` opt-out on the dim: opacity is not
+                travel (Reduced-Motion Rule). The scarf floats over it,
+                absolutely positioned so it adds no height. The no-results
+                card and the failure notice never get an entrance.
+
+                The count line names the query the old rows answered
+                (`lastSettledQuery`), not the one typed since. */}
+            {showResults && (
+              <div
+                aria-busy={isLoading ? true : undefined}
+                className={cn(
+                  "relative",
+                  isReSearching &&
+                    "opacity-50 transition-opacity delay-150 duration-150 ease-out",
+                )}
+              >
+                <SearchResults
+                  results={results}
+                  query={isLoading ? (lastSettledQuery ?? query) : query}
+                  activeType={activeType}
+                  onResultClick={analytics.trackResultClicked}
+                />
+                {showFloatingScarf && (
+                  <div className="pointer-events-none absolute inset-x-0 top-12 flex justify-center">
+                    <Spinner size="lg" variant="primary" />
+                  </div>
+                )}
+              </div>
             )}
 
             {/* Low-confidence semantic fallback (8s5 / ZOEK-3) — "Gerelateerd"

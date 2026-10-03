@@ -1930,4 +1930,222 @@ describe("SearchInterface", () => {
       expect(noResultsCalls()).toHaveLength(0);
     });
   });
+
+  describe("Re-search keeps the old results on screen (#3396)", () => {
+    const resultsRegion = () =>
+      screen.getByText(/resultaten voor/i).closest("div.relative");
+
+    /** Settle a first search for "first", then start a second that never resolves. */
+    async function startReSearch() {
+      setMockSearchParams({ q: "first" });
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => createMockSearchResponse("first"),
+      });
+      render(<SearchInterface />);
+      await waitFor(() => {
+        expect(screen.getByText(/resultaten voor/i)).toBeInTheDocument();
+      });
+
+      let resolveSecond!: (value: unknown) => void;
+      fetchMock.mockReturnValueOnce(
+        new Promise((resolve) => {
+          resolveSecond = resolve;
+        }),
+      );
+      act(() => {
+        setMockSearchParams({ q: "second" });
+      });
+      await waitFor(() => {
+        expect(fetchMock).toHaveBeenCalledTimes(2);
+      });
+      return { resolveSecond };
+    }
+
+    it("shows the centred scarf at once on a first search: there is nothing to keep", async () => {
+      setMockSearchParams({ q: "first" });
+      fetchMock.mockReturnValueOnce(new Promise(() => {}));
+      render(<SearchInterface />);
+
+      await waitFor(() => {
+        expect(screen.getByRole("status")).toBeInTheDocument();
+      });
+      expect(screen.queryByText(/resultaten voor/i)).not.toBeInTheDocument();
+    });
+
+    it("keeps the old list mounted, busy and dimmed after the delay, rows still usable", async () => {
+      await startReSearch();
+
+      const region = resultsRegion();
+      expect(region).toHaveAttribute("aria-busy", "true");
+      // Dim at the Chrome speed, after the 150ms delay — CSS only, so the
+      // transition classes are the contract (jsdom runs no transitions).
+      expect(region).toHaveClass(
+        "opacity-50",
+        "transition-opacity",
+        "delay-150",
+        "duration-150",
+        "ease-out",
+      );
+      // Nothing blocks the rows: the dim is not an overlay.
+      expect(screen.getAllByRole("link").length).toBeGreaterThan(0);
+      expect(region).not.toHaveClass("pointer-events-none");
+    });
+
+    it("keeps naming the query the old rows answered, not the one typed since", async () => {
+      await startReSearch();
+
+      expect(screen.getByText("first")).toBeInTheDocument();
+      expect(screen.queryByText("second")).not.toBeInTheDocument();
+    });
+
+    it("floats the scarf over the list after the same 150ms delay, adding no height", async () => {
+      await startReSearch();
+
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+
+      act(() => {
+        vi.advanceTimersByTime(149);
+      });
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+
+      act(() => {
+        vi.advanceTimersByTime(1);
+      });
+      const scarf = screen.getByRole("status");
+      const float = scarf.parentElement!;
+      expect(float).toHaveClass("absolute", "pointer-events-none");
+      // Inside the results region, so it floats over the dimmed list.
+      expect(resultsRegion()).toContainElement(scarf);
+      expect(resultsRegion()).toHaveClass("relative");
+    });
+
+    it("swaps the new list in at full opacity the moment it arrives: no fade-in", async () => {
+      const { resolveSecond } = await startReSearch();
+      act(() => {
+        vi.advanceTimersByTime(150);
+      });
+
+      await act(async () => {
+        resolveSecond({
+          ok: true,
+          json: async () => createMockSearchResponse("second"),
+        });
+      });
+
+      await waitFor(() => {
+        expect(screen.queryByRole("status")).not.toBeInTheDocument();
+      });
+      const region = resultsRegion();
+      expect(region).not.toHaveAttribute("aria-busy");
+      expect(region?.className).not.toMatch(
+        /opacity|transition|delay|duration/,
+      );
+      expect(screen.getByText("second")).toBeInTheDocument();
+    });
+
+    it("drops the old list for the failure notice at once when the re-search fails", async () => {
+      await startReSearch();
+      // Supersede the pending second request with one that fails.
+      fetchMock.mockRejectedValueOnce(new Error("Network error"));
+      act(() => {
+        setMockSearchParams({ q: "third" });
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
+      });
+      expect(screen.queryByText(/resultaten voor/i)).not.toBeInTheDocument();
+    });
+
+    it("keeps the centred scarf, not a floating one, while awaiting the semantic lane after a failure", async () => {
+      mockUseSemanticAugment.mockReturnValue({ kind: "pending" });
+      setMockSearchParams({ q: "first" });
+      fetchMock.mockRejectedValueOnce(new Error("Network error"));
+      render(<SearchInterface />);
+
+      await waitFor(() => {
+        expect(screen.getByRole("status")).toBeInTheDocument();
+      });
+      expect(screen.getByRole("status").parentElement).not.toHaveClass(
+        "absolute",
+      );
+    });
+  });
+
+  describe("The answer card opens its own room (#3396)", () => {
+    const answer: SemanticAugment = {
+      kind: "answer",
+      answer: "Het eerste elftal speelt zaterdag om 15u.",
+      sources: [{ title: "Speeldag", href: "/nieuws/speeldag" }],
+    };
+    const cardRoom = () =>
+      screen.getByText("Slim antwoord").closest("[class*='grid-rows-']")!;
+
+    it("grows from zero height when it lands above a list already on screen", async () => {
+      setMockSearchParams({ q: "first" });
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => createMockSearchResponse("first"),
+      });
+      const { rerender } = render(<SearchInterface />);
+      await waitFor(() => {
+        expect(screen.getByText(/resultaten voor/i)).toBeInTheDocument();
+      });
+
+      mockUseSemanticAugment.mockReturnValue(answer);
+      rerender(<SearchInterface />);
+
+      const room = cardRoom();
+      expect(room).toHaveClass(
+        "starting:grid-rows-[0fr]",
+        "transition-[grid-template-rows]",
+        "duration-500",
+        "ease-out",
+        "motion-reduce:transition-none",
+      );
+      // Height only: the card itself is visible from the first frame.
+      expect(room.className).not.toContain("opacity");
+    });
+
+    it("appears at once when there is no list on screen yet", async () => {
+      mockUseSemanticAugment.mockReturnValue(answer);
+      setMockSearchParams({ q: "first" });
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => createMockSearchResponse("first"),
+      });
+      render(<SearchInterface />);
+
+      // Card is up while the lexical fetch is still in flight …
+      expect(cardRoom().className).not.toContain("starting:");
+      // … and stays a no-grow card when the list lands under it.
+      await waitFor(() => {
+        expect(screen.getByText(/resultaten voor/i)).toBeInTheDocument();
+      });
+      expect(cardRoom().className).not.toContain("starting:");
+    });
+
+    it("gives the no-results card and the failure notice no entrance", async () => {
+      setMockSearchParams({ q: "first" });
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ results: [], count: 0, query: "first" }),
+      });
+      const { container } = render(<SearchInterface />);
+      await waitFor(() => {
+        expect(screen.queryByRole("status")).not.toBeInTheDocument();
+      });
+      expect(container.innerHTML).not.toContain("starting:");
+
+      fetchMock.mockRejectedValueOnce(new Error("Network error"));
+      act(() => {
+        setMockSearchParams({ q: "second" });
+      });
+      await waitFor(() => {
+        expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
+      });
+      expect(container.innerHTML).not.toContain("starting:");
+    });
+  });
 });
