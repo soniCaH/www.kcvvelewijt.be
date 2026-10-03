@@ -2,6 +2,7 @@
 
 import { useMemo, type CSSProperties } from "react";
 import Link from "next/link";
+import { MatchTravelLink } from "@/components/match/MatchTravelLink";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import {
   EditorialHeading,
@@ -199,8 +200,8 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
     .join(", ");
 
   return (
-    <Link
-      href={`/wedstrijd/${match.id}`}
+    <MatchTravelLink
+      matchId={match.id}
       aria-label={rowLabel}
       data-testid="agenda-match-row"
       onClick={() => trackKalenderItemClick("match")}
@@ -342,7 +343,7 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
         <MatchVenueTag isHome={isHome} />
       </div>
       <LinkPendingDots placement="corner" className="top-1 right-1" />
-    </Link>
+    </MatchTravelLink>
   );
 }
 

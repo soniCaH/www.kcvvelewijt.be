@@ -53,6 +53,7 @@ const mockPush = vi.fn();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush }),
+  usePathname: () => "/kalender",
 }));
 
 /** Sets the live URL the widget's history hooks read on mount. */

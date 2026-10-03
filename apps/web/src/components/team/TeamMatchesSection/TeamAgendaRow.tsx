@@ -47,7 +47,7 @@
  * Design lock: docs/design/mockups/phase-6-team/detail-ia-locked.md §3
  */
 import { Fragment } from "react";
-import Link from "next/link";
+import { MatchTravelLink } from "@/components/match/MatchTravelLink";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { Crest, PRESS_DOWN_CLASSES } from "@/components/design-system";
 import { cn } from "@/lib/utils/cn";
@@ -686,8 +686,8 @@ export function TeamAgendaRow({
   const mobileCaption = buildCaption(mobileKindWord);
 
   return (
-    <Link
-      href={`/wedstrijd/${match.id}`}
+    <MatchTravelLink
+      matchId={match.id}
       aria-label={matchLabel}
       onClick={onNavigate}
       className="relative block no-underline"
@@ -803,6 +803,6 @@ export function TeamAgendaRow({
         tone={featured ? "light" : "default"}
         placement="corner"
       />
-    </Link>
+    </MatchTravelLink>
   );
 }

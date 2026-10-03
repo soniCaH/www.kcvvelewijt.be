@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { MatchTravelLink } from "@/components/match/MatchTravelLink";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { cn } from "@/lib/utils/cn";
 import { formatMatchWidgetDate } from "@/lib/utils/dates";
@@ -369,8 +370,8 @@ const MatchRow = ({ match, kcvvTeamId }: MatchRowProps) => {
     .join(" · ");
 
   return (
-    <Link
-      href={`/wedstrijd/${match.id}`}
+    <MatchTravelLink
+      matchId={match.id}
       onClick={() => trackAgendaRowClick(match.id)}
       className={cn(
         "border-ink bg-cream group relative grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1 border-2 px-4 py-3",
@@ -403,6 +404,6 @@ const MatchRow = ({ match, kcvvTeamId }: MatchRowProps) => {
         {kcvvSide && <HomeAwayBadge side={kcvvSide} />}
       </span>
       <LinkPendingDots placement="corner" className="top-1 right-1" />
-    </Link>
+    </MatchTravelLink>
   );
 };

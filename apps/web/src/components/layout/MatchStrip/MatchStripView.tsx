@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { MatchTravelLink } from "@/components/match/MatchTravelLink";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
@@ -509,8 +510,8 @@ function LedgerLinkRow({
       : `${leadWordA11y} wedstrijd ${dateLabel}${match.time ? ` om ${match.time}` : ""}: KCVV Elewijt tegen ${opponent.name}`;
 
   return (
-    <Link
-      href={`/wedstrijd/${match.id}`}
+    <MatchTravelLink
+      matchId={match.id}
       aria-label={label}
       className={cn(
         "relative flex min-w-0 items-center gap-2.5 px-4 py-2.5 no-underline",
@@ -566,7 +567,7 @@ function LedgerLinkRow({
         placement="corner"
         className="top-1 right-1"
       />
-    </Link>
+    </MatchTravelLink>
   );
 }
 
