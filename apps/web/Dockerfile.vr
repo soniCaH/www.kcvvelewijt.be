@@ -7,7 +7,7 @@
 # Build context is the repo root (see apps/web/docker-compose.vr.yml) so the
 # workspace manifests can be copied for a cached pnpm install layer.
 
-FROM mcr.microsoft.com/playwright:v1.60.0-noble
+FROM mcr.microsoft.com/playwright:v1.63.0-noble
 
 # Content-addressed staleness check (#3141): `vr:build-image` (apps/web/scripts/
 # vr-build-image.mjs) stamps this label with a hash of pnpm-lock.yaml +
