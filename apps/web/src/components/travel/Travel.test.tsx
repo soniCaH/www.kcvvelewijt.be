@@ -7,16 +7,23 @@ const pathnameMock = vi.hoisted(() => ({ value: "/nieuws" }));
 vi.mock("next/navigation", () => ({ usePathname: () => pathnameMock.value }));
 
 const linkProps = vi.hoisted(() => vi.fn());
-// Stands in for `next/link` to observe the props `<Link>` receives, and to keep
-// a click from navigating.
+// Stands in for `next/link`: like Next's, it reads `transitionTypes` as the
+// click navigates (after the consumer's `onClick`), and keeps the click from
+// navigating.
 vi.mock("next/link", () => ({
   default: ({
     transitionTypes,
+    onClick,
     ...props
-  }: ComponentProps<"a"> & { transitionTypes?: string[] }) => {
-    linkProps({ transitionTypes });
-    return <a {...props} />;
-  },
+  }: ComponentProps<"a"> & { transitionTypes?: string[] }) => (
+    <a
+      {...props}
+      onClick={(event) => {
+        onClick?.(event);
+        linkProps({ transitionTypes: [...(transitionTypes ?? [])] });
+      }}
+    />
+  ),
 }));
 
 // The stock `react` build used by Vitest renders `<ViewTransition>` as a bare
@@ -64,11 +71,11 @@ const names = () =>
 /** A news card: the link is an overlay NEXT to the photo that travels. */
 function Card({ slug, label }: { slug: string; label: string }) {
   return (
-    <TravelScope kind="article" id={slug} href={`/nieuws/${slug}`}>
+    <TravelScope kind="article" href={`/nieuws/${slug}`}>
       <TravelTarget>
         <div>photo {label}</div>
       </TravelTarget>
-      <TravelLink href={`/nieuws/${slug}`} aria-label={label} />
+      <TravelLink aria-label={label} />
     </TravelScope>
   );
 }
@@ -133,16 +140,25 @@ describe("travel source", () => {
     expect(names()).toEqual([null]);
   });
 
-  it("works without a scope — a link and a target that name nothing", () => {
+  it("names nothing when the href is not the kind's detail page", () => {
     render(
-      <>
+      <TravelScope kind="article" href="/spelers/jan">
         <TravelTarget>
           <div>photo</div>
         </TravelTarget>
-        <TravelLink href="/nieuws/a" aria-label="a" />
-      </>,
+        <TravelLink aria-label="jan" />
+      </TravelScope>,
     );
-    fireEvent.click(screen.getByRole("link", { name: "a" }));
+    fireEvent.click(screen.getByRole("link", { name: "jan" }));
+    expect(names()).toEqual([null]);
+  });
+
+  it("a target outside any scope is plain", () => {
+    render(
+      <TravelTarget>
+        <div>photo</div>
+      </TravelTarget>,
+    );
     expect(names()).toEqual([null]);
   });
 });
@@ -159,16 +175,80 @@ describe("TravelLink", () => {
     vi.unstubAllGlobals();
   });
 
-  it("adds the transition type the page cut is keyed on", () => {
+  it("links to the href its scope was given", () => {
     render(<Card slug="winst" label="winst" />);
-    expect(linkProps).toHaveBeenLastCalledWith(
-      expect.objectContaining({ transitionTypes: ["travel"] }),
+    expect(screen.getByRole("link", { name: "winst" })).toHaveAttribute(
+      "href",
+      "/nieuws/winst",
     );
+  });
+
+  it("needs a scope", () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    expect(() => render(<TravelLink aria-label="a" />)).toThrow(/TravelScope/);
+    vi.restoreAllMocks();
+  });
+
+  describe("transition types, read by Next when the click happens", () => {
+    const typesAtClick = () => linkProps.mock.lastCall?.[0].transitionTypes;
+    const renderCard = (transitionTypes?: string[], travels = true) =>
+      render(
+        <TravelScope
+          kind={travels ? "article" : undefined}
+          href="/nieuws/winst"
+        >
+          <TravelLink aria-label="winst" transitionTypes={transitionTypes} />
+        </TravelScope>,
+      );
+    const click = (init?: object) =>
+      fireEvent.click(screen.getByRole("link", { name: "winst" }), init);
+
+    it("adds `travel` when the click recorded a tap", () => {
+      renderCard();
+      click();
+      expect(typesAtClick()).toEqual(["travel"]);
+    });
+
+    it("keeps the consumer's own types and adds `travel` after them", () => {
+      renderCard(["other"]);
+      click();
+      expect(typesAtClick()).toEqual(["other", "travel"]);
+    });
+
+    it("adds no `travel` when no tap was recorded, but keeps the consumer's", () => {
+      renderCard(["other"]);
+      click({ metaKey: true });
+      expect(typesAtClick()).toEqual(["other"]);
+    });
+
+    it("adds no `travel` under reduced motion", () => {
+      reducedMotion(true);
+      renderCard();
+      click();
+      expect(typesAtClick()).toEqual([]);
+    });
+
+    it("adds no `travel` for a scope that never travels", () => {
+      renderCard(undefined, false);
+      click();
+      expect(typesAtClick()).toEqual([]);
+    });
+
+    it("starts clean on the next click", () => {
+      renderCard();
+      click();
+      click({ shiftKey: true });
+      expect(typesAtClick()).toEqual([]);
+    });
   });
 
   it("still calls the consumer's own onClick", () => {
     const onClick = vi.fn();
-    render(<TravelLink href="/nieuws/a" onClick={onClick} aria-label="a" />);
+    render(
+      <TravelScope kind="article" href="/nieuws/a">
+        <TravelLink onClick={onClick} aria-label="a" />
+      </TravelScope>,
+    );
     fireEvent.click(screen.getByRole("link", { name: "a" }));
     expect(onClick).toHaveBeenCalledTimes(1);
   });
@@ -177,15 +257,11 @@ describe("TravelLink", () => {
     const row = () => screen.getByRole("link", { name: "winst" });
     const renderCard = (onClick?: (e: React.MouseEvent) => void) =>
       render(
-        <TravelScope kind="article" id="winst" href="/nieuws/winst">
+        <TravelScope kind="article" href="/nieuws/winst">
           <TravelTarget>
             <div>photo</div>
           </TravelTarget>
-          <TravelLink
-            href="/nieuws/winst"
-            aria-label="winst"
-            onClick={onClick}
-          />
+          <TravelLink aria-label="winst" onClick={onClick} />
         </TravelScope>,
       );
     const tapped = () => names()[0] !== null;

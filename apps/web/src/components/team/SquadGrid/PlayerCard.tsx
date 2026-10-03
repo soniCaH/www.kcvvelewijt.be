@@ -1,9 +1,6 @@
-import { Fragment } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { cn } from "@/lib/utils/cn";
-import { travelSlug } from "@/lib/utils/travel";
 import { TravelLink, TravelScope, TravelTarget } from "@/components/travel";
 import { TapedCard } from "@/components/design-system/TapedCard";
 import {
@@ -74,12 +71,6 @@ export function PlayerCard({
 }: PlayerCardProps) {
   const hasPhoto = photoUrl !== undefined && photoUrl !== "";
   const hasPosition = position !== undefined && position !== "";
-  // A player card lets its photo (or its jersey figure) grow into the player
-  // profile's (#3405). A staff card is rendered by this same component but its
-  // `/staf/` href is no player profile: it keeps the cut.
-  const slug = travelSlug("player", href);
-  const Target = slug ? TravelTarget : Fragment;
-  const CardLink = slug ? TravelLink : Link;
 
   const inner = (
     <>
@@ -87,16 +78,16 @@ export function PlayerCard({
           backdrop the photo multiplies against — the same token the card
           already paints, so nothing moves, but the blend stops depending
           silently on <TapedCard> painting cream two levels up. */}
-      <Target>
-        <div
-          data-testid="player-card-figure"
-          data-state={hasPhoto ? "photo" : "illustration"}
-          className="border-paper-edge bg-cream relative aspect-[3/4] overflow-hidden border"
-        >
-          {hasPhoto ? (
-            /* Multiply drops a studio cutout's white matte onto the card's
+      <div
+        data-testid="player-card-figure"
+        data-state={hasPhoto ? "photo" : "illustration"}
+        className="border-paper-edge bg-cream relative aspect-[3/4] overflow-hidden border"
+      >
+        {hasPhoto ? (
+          /* Multiply drops a studio cutout's white matte onto the card's
              cream (#2633, deciding #2590). Every consumer blends since
              #2901; see `blendPhoto` for the trade-off it accepts. */
+          <TravelTarget>
             <Image
               src={photoUrl!}
               alt=""
@@ -109,30 +100,34 @@ export function PlayerCard({
               )}
               style={{ filter: "var(--filter-photo-newsprint)" }}
             />
-          ) : (
+          </TravelTarget>
+        ) : (
+          // The photo or the jersey figure grows into the player profile's
+          // (#3405) — never the number disc beside it.
+          <TravelTarget>
             <JerseyIllustration
               variant="card"
               seed={playerFigureSeed({ id })}
               garment={garment}
               data-testid="player-card-illustration"
             />
-          )}
+          </TravelTarget>
+        )}
 
-          {jerseyNumber !== undefined ? (
-            <span
-              data-testid="player-card-number"
-              aria-hidden="true"
-              // A shirt number beside a name is a TAG, not the card's subject
-              // (#2516 rule 1) — mono (#2579 supersedes #2610's tabular-nums).
-              // font-bold, not font-black (#2579 review): IBM Plex Mono loads
-              // only up to 700, so 900 was already clamping to 700.
-              className="bg-jersey-deep text-cream border-ink absolute top-1.5 left-1.5 grid h-[26px] w-[26px] place-items-center border-[1.5px] font-mono text-sm font-bold"
-            >
-              {jerseyNumber}
-            </span>
-          ) : null}
-        </div>
-      </Target>
+        {jerseyNumber !== undefined ? (
+          <span
+            data-testid="player-card-number"
+            aria-hidden="true"
+            // A shirt number beside a name is a TAG, not the card's subject
+            // (#2516 rule 1) — mono (#2579 supersedes #2610's tabular-nums).
+            // font-bold, not font-black (#2579 review): IBM Plex Mono loads
+            // only up to 700, so 900 was already clamping to 700.
+            className="bg-jersey-deep text-cream border-ink absolute top-1.5 left-1.5 grid h-[26px] w-[26px] place-items-center border-[1.5px] font-mono text-sm font-bold"
+          >
+            {jerseyNumber}
+          </span>
+        ) : null}
+      </div>
 
       {/* Name — first semibold + last italic (6.A rhythm). `line-clamp-3`
           (#2549 rule 3 — normal-type headline, the card's subject): moot in
@@ -186,27 +181,23 @@ export function PlayerCard({
   );
 
   if (href) {
-    const link = (
-      <CardLink
-        href={href}
-        data-testid="player-card"
-        aria-label={
-          hasPosition
-            ? `${firstName} ${lastName} — ${position}`
-            : `${firstName} ${lastName}`
-        }
-        className="relative block h-full"
-      >
-        {card}
-        <LinkPendingDots placement="corner" />
-      </CardLink>
-    );
-    return slug ? (
-      <TravelScope kind="player" id={slug} href={`/spelers/${slug}`}>
-        {link}
+    // A staff card is rendered by this same component but its `/staf/` href is
+    // no player profile: the scope stays inert and it keeps the cut.
+    return (
+      <TravelScope kind="player" href={href}>
+        <TravelLink
+          data-testid="player-card"
+          aria-label={
+            hasPosition
+              ? `${firstName} ${lastName} — ${position}`
+              : `${firstName} ${lastName}`
+          }
+          className="relative block h-full"
+        >
+          {card}
+          <LinkPendingDots placement="corner" />
+        </TravelLink>
       </TravelScope>
-    ) : (
-      link
     );
   }
 

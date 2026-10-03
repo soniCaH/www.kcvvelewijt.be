@@ -10,11 +10,13 @@
  * Three pieces, because the tapped link and the element that travels are not
  * always the same node (a news card's link is an empty overlay beside its
  * photo):
- * - `<TravelScope>` owns the tap state of one source (kind + id + href) and
- *   offers it to the two below.
- * - `<TravelLink>` is the `<Link>` that records the tap.
- * - `<TravelTarget>` wraps the element that travels (the row itself, or the
- *   photo) in the `<ViewTransition>` the tap names.
+ * - `<TravelScope>` owns the tap state of one source. It is told the one
+ *   `href` the source opens and reads kind + id off it: an href that is not
+ *   that kind's detail route (a listing, a staff page) makes the scope inert.
+ * - `<TravelLink>` is the `<Link>` to that `href` and records the tap.
+ * - `<TravelTarget>` wraps the element that travels, the PHOTO and nothing
+ *   around it (no badge, overlay, tape or text), in the `<ViewTransition>` the
+ *   tap names.
  *
  * The `<ViewTransition>` is always mounted (a boundary that appears on click
  * would remount the `<Link>` and drop `<LinkPendingDots>`'s pending state);
@@ -32,44 +34,61 @@ import Link from "next/link";
 import { useTravel, type Travel } from "@/hooks/useTravel";
 import { TRAVEL_CLASS, type TravelKind } from "@/lib/utils/travel";
 
-const TravelContext = createContext<Travel | null>(null);
+// Next reads `transitionTypes` once per click, from the props of the render
+// that last ran, so state cannot carry "this click recorded a tap" into it.
+// The list is filled in the click handler instead (which runs first): the
+// consumer's types, plus `travel` (the type `globals.css` keys the page cut on)
+// only when this click recorded a tap. One list serves every link: it is
+// rebuilt on each click and read synchronously by the same click.
+const clickTypes: string[] = [];
+
+const TravelContext = createContext<{
+  href: string | undefined;
+  travel: Travel;
+} | null>(null);
 
 export function TravelScope({
   kind,
-  id,
   href,
   children,
 }: {
-  kind: TravelKind;
-  id: number | string;
-  /** The detail page this source opens. */
-  href: string;
+  /** The kind of detail page this source may open; absent: never travels. */
+  kind?: TravelKind;
+  /** Where the source goes. Absent: a card without a link. */
+  href: string | undefined;
   children: ReactNode;
 }) {
-  return (
-    <TravelContext value={useTravel(kind, id, href)}>{children}</TravelContext>
-  );
+  const travel = useTravel(kind, href);
+  return <TravelContext value={{ href, travel }}>{children}</TravelContext>;
 }
 
 export function TravelTarget({ children }: { children: ReactNode }) {
-  const travel = useContext(TravelContext);
+  const scope = useContext(TravelContext);
   return (
-    <ViewTransition {...(travel?.transition ?? { default: "none" })}>
+    <ViewTransition {...(scope?.travel.transition ?? { default: "none" })}>
       {children}
     </ViewTransition>
   );
 }
 
-export function TravelLink({ onClick, ...props }: ComponentProps<typeof Link>) {
-  const travel = useContext(TravelContext);
+export function TravelLink({
+  onClick,
+  transitionTypes,
+  ...props
+}: Omit<ComponentProps<typeof Link>, "href">) {
+  const scope = useContext(TravelContext);
+  if (scope?.href === undefined) {
+    throw new Error("<TravelLink> needs a <TravelScope> with an href");
+  }
   return (
     <Link
       {...props}
-      // The transition type `globals.css` keys the page cut on. Harmless on a
-      // navigation that starts no view transition.
-      transitionTypes={[TRAVEL_CLASS]}
+      href={scope.href}
+      transitionTypes={clickTypes}
       onClick={(event) => {
         onClick?.(event);
+        clickTypes.length = 0;
+        clickTypes.push(...(transitionTypes ?? []));
         // Only a click `<Link>` will turn into a navigation is a tap: a
         // modified or non-primary click, or one the consumer cancelled, opens
         // nothing in this tab.
@@ -83,7 +102,7 @@ export function TravelLink({ onClick, ...props }: ComponentProps<typeof Link>) {
         ) {
           return;
         }
-        travel?.onClick();
+        if (scope.travel.onClick()) clickTypes.push(TRAVEL_CLASS);
       }}
     />
   );

@@ -44,7 +44,12 @@ import {
   type ViewTransition,
 } from "react";
 import { usePathname } from "next/navigation";
-import { TRAVEL_CLASS, travelName, type TravelKind } from "@/lib/utils/travel";
+import {
+  TRAVEL_CLASS,
+  travelId,
+  travelName,
+  type TravelKind,
+} from "@/lib/utils/travel";
 
 let tappedKey: string | null = null;
 const listeners = new Set<() => void>();
@@ -64,18 +69,23 @@ function subscribe(listener: () => void) {
 
 export interface Travel {
   transition: ComponentProps<typeof ViewTransition>;
-  onClick: () => void;
+  /** Records the tap. `false`: nothing was recorded (reduced motion, no travel). */
+  onClick: () => boolean;
 }
 
 /**
- * @param href The detail page the source opens: while it is the current page,
- *   the source takes no name (its detail end holds it).
+ * @param kind The kind of detail page the source may open; `undefined`: this
+ *   source never travels.
+ * @param href The one place the source opens, from which the record's id is
+ *   read. Not the detail route of `kind` (a listing, a staff page, no href at
+ *   all): the source takes no part and the plain cut stays. While `href` is the
+ *   current page, the source takes no name either (its detail end holds it).
  */
 export function useTravel(
-  kind: TravelKind,
-  id: number | string,
-  href: string,
+  kind: TravelKind | undefined,
+  href: string | undefined,
 ): Travel {
+  const id = kind === undefined ? undefined : travelId(kind, href);
   const key = useId();
   const pathname = usePathname();
   const tapped = useSyncExternalStore(
@@ -94,19 +104,33 @@ export function useTravel(
     setTapped(null);
   }, [pathname]);
 
+  // A source on a page (not in a layout) unmounts with the navigation it
+  // started, so it never sees the pathname change above. Its cleanup is a
+  // passive effect: it runs after the commit, by when the browser has captured
+  // the old snapshot with the name the tap set, so the pair still forms.
+  useEffect(
+    () => () => {
+      if (tappedKey === key) setTapped(null);
+    },
+    [key],
+  );
+
+  if (kind === undefined || id === undefined) {
+    return { transition: { default: "none" }, onClick: () => false };
+  }
+
   const named = tapped && pathname !== href;
 
   return {
     transition: named
-      ? {
-          name: travelName(kind, id),
-          default: "none",
-          share: TRAVEL_CLASS,
-        }
+      ? { name: travelName(kind, id), default: "none", share: TRAVEL_CLASS }
       : { default: "none" },
     onClick: () => {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        return false;
+      }
       setTapped(key);
+      return true;
     },
   };
 }

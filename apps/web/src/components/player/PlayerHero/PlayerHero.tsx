@@ -109,8 +109,8 @@ export interface PlayerHeroProps {
   /** Active-team label resolved by the page (e.g. "A-Ploeg", "U17"). */
   teamLabel?: string;
   /**
-   * The route slug: names the figure so a tapped squad card's photo can grow
-   * into it (#3405). Absent (stories, previews): the figure takes no part in
+   * The route slug: names the photo (or jersey figure) so a tapped squad card's
+   * can grow into it (#3405). Absent (stories, previews): it takes no part in
    * the travel.
    */
   slug?: string;
@@ -281,16 +281,16 @@ export function PlayerHero({
         data-state={figureState}
         className="w-full max-w-[320px] justify-self-start sm:justify-self-end"
       >
-        <TravelDestination kind="player" id={slug}>
-          <TapedFigure
-            aspect="portrait-3-4"
-            rotation="b"
-            tape={{ color: "jersey-deep", length: "md", seed: id }}
-            bg="cream-soft"
-            tint={hasPhoto ? "newsprint" : "none"}
-            padding="none"
-          >
-            {hasPhoto ? (
+        <TapedFigure
+          aspect="portrait-3-4"
+          rotation="b"
+          tape={{ color: "jersey-deep", length: "md", seed: id }}
+          bg="cream-soft"
+          tint={hasPhoto ? "newsprint" : "none"}
+          padding="none"
+        >
+          {hasPhoto ? (
+            <TravelDestination kind="player" id={slug}>
               <Image
                 src={photoUrl}
                 alt=""
@@ -308,15 +308,17 @@ export function PlayerHero({
                 // (#2901 review).
                 className="bg-cream-soft block h-full w-full object-cover mix-blend-multiply"
               />
-            ) : (
+            </TravelDestination>
+          ) : (
+            <TravelDestination kind="player" id={slug}>
               <JerseyIllustration
                 variant="hero"
                 seed={playerFigureSeed({ id })}
                 data-testid="player-hero-illustration"
               />
-            )}
-          </TapedFigure>
-        </TravelDestination>
+            </TravelDestination>
+          )}
+        </TapedFigure>
       </div>
     </section>
   );

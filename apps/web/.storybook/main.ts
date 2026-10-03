@@ -54,6 +54,11 @@ const config: StorybookConfig = {
       // `test/storybook/settle.ts` (#3146) — a `play`-only helper stories
       // import to wait out a late remeasure before asserting an absence.
       "@test-storybook": resolve(__dirname, "../test/storybook"),
+      // Storybook's `next/link` mock spreads every prop it does not know onto
+      // its `<a>`, so `transitionTypes` (the travel links, #3405) logs React's
+      // "unknown prop on a DOM element" in each story that has one. This
+      // wrapper drops the prop and renders the mock.
+      "next/link": resolve(__dirname, "next-link.tsx"),
     };
     return cfg;
   },

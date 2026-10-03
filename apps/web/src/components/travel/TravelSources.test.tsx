@@ -79,7 +79,9 @@ describe("news card → article", () => {
     fireEvent.click(screen.getByRole("link"));
     expect(named(container)).toEqual(["article-travel-winst"]);
     const boundary = container.querySelector("[data-vt]");
-    expect(boundary).toContainElement(
+    // The photo and nothing around it: not its region, not the link.
+    expect(boundary?.querySelector("img")).not.toBeNull();
+    expect(boundary).not.toContainElement(
       screen.getByTestId("newscard-image-region"),
     );
     expect(boundary).not.toContainElement(screen.getByRole("link"));
@@ -160,7 +162,9 @@ describe("homepage lead → article", () => {
       />,
     );
     expect(named(detail.container)).toEqual(["article-travel-winst"]);
-    expect(detail.container.querySelector("[data-vt] figure")).not.toBeNull();
+    // The photo alone, not the taped figure (tape, day block, score bar) nor the text.
+    expect(detail.container.querySelector("[data-vt] img")).not.toBeNull();
+    expect(detail.container.querySelector("[data-vt] figure")).toBeNull();
     expect(detail.container.querySelector("[data-vt] h1")).toBeNull();
   });
 
@@ -192,22 +196,33 @@ describe("squad card → player profile", () => {
     />
   );
 
-  it("names the photo figure once tapped", () => {
-    const { container } = render(player());
+  it("names the photo alone once tapped, not the number disc beside it", () => {
+    const { container } = render(player({ jerseyNumber: 7 }));
     expect(named(container)).toEqual([]);
     fireEvent.click(screen.getByRole("link"));
     expect(named(container)).toEqual(["player-travel-jan-1"]);
-    expect(container.querySelector("[data-vt]")).toContainElement(
+    const boundary = container.querySelector("[data-vt]");
+    expect(boundary?.querySelector("img")).not.toBeNull();
+    expect(boundary).not.toContainElement(
       screen.getByTestId("player-card-figure"),
+    );
+    expect(boundary).not.toContainElement(
+      screen.getByTestId("player-card-number"),
     );
   });
 
-  it("names the jersey figure when there is no photo", () => {
-    const { container } = render(player({ photoUrl: undefined }));
+  it("names the jersey figure alone when there is no photo", () => {
+    const { container } = render(
+      player({ photoUrl: undefined, jerseyNumber: 7 }),
+    );
     fireEvent.click(screen.getByRole("link"));
     expect(named(container)).toEqual(["player-travel-jan-1"]);
-    expect(container.querySelector("[data-vt]")).toContainElement(
+    const boundary = container.querySelector("[data-vt]");
+    expect(boundary).toContainElement(
       screen.getByTestId("player-card-illustration"),
+    );
+    expect(boundary).not.toContainElement(
+      screen.getByTestId("player-card-number"),
     );
   });
 
@@ -223,7 +238,7 @@ describe("squad card → player profile", () => {
 });
 
 describe("player profile", () => {
-  it("carries the player's name on its figure — photo or jersey — always", () => {
+  it("carries the player's name on its photo — or jersey figure — always", () => {
     const withPhoto = render(
       <PlayerHero
         id="a1"
@@ -234,9 +249,9 @@ describe("player profile", () => {
       />,
     );
     expect(named(withPhoto.container)).toEqual(["player-travel-jan-1"]);
-    expect(withPhoto.container.querySelector("[data-vt]")).toContainElement(
-      screen.getByTestId("player-hero-figure").querySelector("figure"),
-    );
+    // The photo, not the taped figure around it.
+    expect(withPhoto.container.querySelector("[data-vt] img")).not.toBeNull();
+    expect(withPhoto.container.querySelector("[data-vt] figure")).toBeNull();
     withPhoto.unmount();
 
     const jersey = render(

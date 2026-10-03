@@ -25,9 +25,9 @@ function mockReducedMotion(reduce: boolean) {
 /** Three row instances on one page (a match may sit in the strip and in a list at once). */
 function renderRows() {
   return renderHook(() => ({
-    strip: useTravel("match", 42, "/wedstrijd/42"),
-    list: useTravel("match", 42, "/wedstrijd/42"),
-    other: useTravel("match", 7, "/wedstrijd/7"),
+    strip: useTravel("match", "/wedstrijd/42"),
+    list: useTravel("match", "/wedstrijd/42"),
+    other: useTravel("match", "/wedstrijd/7"),
   }));
 }
 
@@ -56,7 +56,7 @@ describe("useTravel", () => {
     const { result } = renderRows();
     act(() => result.current.list.onClick());
     const Probe = () => {
-      const { transition } = useTravel("match", 42, "/wedstrijd/42");
+      const { transition } = useTravel("match", "/wedstrijd/42");
       return createElement("div", { "data-name": transition.name });
     };
     expect(renderToString(createElement(Probe))).not.toContain(
@@ -92,8 +92,8 @@ describe("useTravel", () => {
   it("names a tapped news card or squad card after its own kind and slug", () => {
     mockReducedMotion(false);
     const { result } = renderHook(() => ({
-      card: useTravel("article", "winst", "/nieuws/winst"),
-      sameSlugPlayer: useTravel("player", "winst", "/spelers/winst"),
+      card: useTravel("article", "/nieuws/winst"),
+      sameSlugPlayer: useTravel("player", "/spelers/winst"),
     }));
     act(() => result.current.card.onClick());
     expect(result.current.card.transition.name).toBe("article-travel-winst");
@@ -103,11 +103,35 @@ describe("useTravel", () => {
   it("sets no name on the detail page of its own record, whatever the kind", () => {
     mockReducedMotion(false);
     pathnameMock.value = "/nieuws/winst";
-    const { result } = renderHook(() =>
-      useTravel("article", "winst", "/nieuws/winst"),
-    );
+    const { result } = renderHook(() => useTravel("article", "/nieuws/winst"));
     act(() => result.current.onClick());
     expect(result.current.transition.name).toBeUndefined();
+  });
+
+  it.each([
+    ["no kind", undefined, "/nieuws/winst"],
+    ["no href", "article", undefined],
+    ["a listing href", "article", "/nieuws"],
+    ["another kind's href", "player", "/nieuws/winst"],
+  ] as const)("is inert for %s: no name, no tap recorded", (_l, kind, href) => {
+    mockReducedMotion(false);
+    const { result } = renderHook(() => useTravel(kind, href));
+    let recorded = true;
+    act(() => {
+      recorded = result.current.onClick();
+    });
+    expect(recorded).toBe(false);
+    expect(result.current.transition).toEqual({ default: "none" });
+  });
+
+  it("says whether a tap was recorded", () => {
+    mockReducedMotion(false);
+    const { result } = renderHook(() => useTravel("article", "/nieuws/winst"));
+    let recorded = false;
+    act(() => {
+      recorded = result.current.onClick();
+    });
+    expect(recorded).toBe(true);
   });
 
   it("sets no name under prefers-reduced-motion", () => {

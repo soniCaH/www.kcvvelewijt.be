@@ -136,9 +136,9 @@ interface EditorialHeroSharedProps {
 interface DetailPlacementProps {
   placement?: "detail";
   /**
-   * The article's slug: names the cover so a tapped news card's cover can grow
-   * into it (#3405). Absent (stories, previews): the cover takes no part in
-   * the travel.
+   * The article's slug: names the cover photo so a tapped news card's photo can
+   * grow into it (#3405). Absent (stories, previews): the cover takes no part
+   * in the travel.
    */
   slug?: string;
 }
@@ -225,9 +225,10 @@ interface EditorialHeroCoverProps {
   /** Stable identity (the article title) the cover's tape angle derives from. */
   seed: string;
   /**
-   * The article's slug, which the cover travels under (#3405): the homepage
-   * placement is the source end (a tap on the hero link grows the cover into the
-   * article's), the detail placement the destination. Absent: no travel.
+   * The article's slug, which the cover PHOTO travels under (#3405) — not the
+   * tape, the day block or the score bar around it. The homepage placement is
+   * the source end (a tap on the hero link), the detail placement the
+   * destination. Absent: no travel.
    */
   slug?: string;
   placement?: EditorialHeroPlacement;
@@ -243,7 +244,17 @@ function EditorialHeroCover({
   slug,
   placement,
 }: EditorialHeroCoverProps) {
-  const figure = (
+  const photo = (
+    <Image
+      src={coverImage.url}
+      alt=""
+      fill
+      priority={priority}
+      sizes="(min-width: 1024px) 440px, 100vw"
+      className="object-cover"
+    />
+  );
+  return (
     <TapedFigure
       aspect={aspect}
       rotation="b"
@@ -258,24 +269,15 @@ function EditorialHeroCover({
           "transition-[box-shadow] duration-300 group-hover:shadow-none group-focus-visible:shadow-none",
       )}
     >
-      <Image
-        src={coverImage.url}
-        alt=""
-        fill
-        priority={priority}
-        sizes="(min-width: 1024px) 440px, 100vw"
-        className="object-cover"
-      />
+      {placement === "homepage" ? (
+        <TravelTarget>{photo}</TravelTarget>
+      ) : (
+        <TravelDestination kind="article" id={slug}>
+          {photo}
+        </TravelDestination>
+      )}
       {overlay}
     </TapedFigure>
-  );
-  if (slug === undefined) return figure;
-  return placement === "homepage" ? (
-    <TravelTarget>{figure}</TravelTarget>
-  ) : (
-    <TravelDestination kind="article" id={slug}>
-      {figure}
-    </TravelDestination>
   );
 }
 
@@ -626,9 +628,8 @@ export function EditorialHero(props: EditorialHeroProps) {
     // `pressOnHover` shadow collapse on <EditorialHeroCover>), matching
     // every other interactive paper surface (e.g. /jeugd's cards).
     return (
-      <TravelScope kind="article" id={slug} href={`/nieuws/${slug}`}>
+      <TravelScope kind="article" href={`/nieuws/${slug}`}>
         <TravelLink
-          href={`/nieuws/${slug}`}
           // Distinguishes this from every `<NewsCard>`/`<FeaturedUitgelichtRow>`
           // link on the same page, which also match `a[href^="/nieuws/"]` —
           // `apps/web/test/e2e/homepage.spec.ts`'s #2912 test anchors on this

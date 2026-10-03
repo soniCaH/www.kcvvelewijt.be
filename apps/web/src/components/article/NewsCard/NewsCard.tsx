@@ -1,10 +1,8 @@
 // apps/web/src/components/article/NewsCard/NewsCard.tsx
-import Link from "next/link";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import Image from "next/image";
-import { Fragment, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
-import { travelSlug } from "@/lib/utils/travel";
 import { TravelLink, TravelScope, TravelTarget } from "@/components/travel";
 import {
   TapedCard,
@@ -213,13 +211,6 @@ export const NewsCard = ({
   // listing get the md-equivalent.
   const metaPadding = variant === "featured" ? "p-8" : "p-5";
 
-  // A card that opens an article lets its cover grow into the article's own
-  // cover (#3405). Only the photo travels: no photo, or any other href, keeps
-  // the cut.
-  const slug = imageUrl ? travelSlug("article", href) : undefined;
-  const Target = slug ? TravelTarget : Fragment;
-  const CardLink = slug ? TravelLink : Link;
-
   const card = (
     <TapedCard
       as="article"
@@ -272,18 +263,20 @@ export const NewsCard = ({
           so `<Image fill>` cover-cropping behaves without clipping the
           card's tape strips or focus outline. The ink rule on the meta
           panel below divides image from caption. */}
-      <Target>
-        <div
-          data-testid="newscard-image-region"
-          data-aspect={aspectRatio}
-          className={cn(
-            "relative w-full overflow-hidden",
-            ASPECT_CLASS[aspectRatio],
-            // Stretches to the text column's height; `object-cover` crops it.
-            compact && "max-sm:aspect-auto max-sm:w-28 max-sm:shrink-0",
-          )}
-        >
-          {imageUrl ? (
+      <div
+        data-testid="newscard-image-region"
+        data-aspect={aspectRatio}
+        className={cn(
+          "relative w-full overflow-hidden",
+          ASPECT_CLASS[aspectRatio],
+          // Stretches to the text column's height; `object-cover` crops it.
+          compact && "max-sm:aspect-auto max-sm:w-28 max-sm:shrink-0",
+        )}
+      >
+        {imageUrl ? (
+          // The photo is what grows into the article's cover (#3405) — only
+          // when `href` is an article, and never the region around it.
+          <TravelTarget>
             <Image
               src={imageUrl}
               alt=""
@@ -299,21 +292,21 @@ export const NewsCard = ({
               placeholder={imageLqip ? "blur" : "empty"}
               blurDataURL={imageLqip ?? undefined}
             />
-          ) : artefact ? (
-            artefact
-          ) : (
-            <div
-              data-testid="newscard-image-fallback"
-              aria-hidden="true"
-              className="absolute inset-0 opacity-30"
-              style={{
-                backgroundImage:
-                  "repeating-linear-gradient(135deg, transparent 0, transparent 12px, var(--color-jersey-deep) 12px, var(--color-jersey-deep) 13px)",
-              }}
-            />
-          )}
-        </div>
-      </Target>
+          </TravelTarget>
+        ) : artefact ? (
+          artefact
+        ) : (
+          <div
+            data-testid="newscard-image-fallback"
+            aria-hidden="true"
+            className="absolute inset-0 opacity-30"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(135deg, transparent 0, transparent 12px, var(--color-jersey-deep) 12px, var(--color-jersey-deep) 13px)",
+            }}
+          />
+        )}
+      </div>
 
       {/* Meta panel — divided from the image by a single 1px ink rule per
           R10 §"Structural changes". On dark backgrounds, switch the rule
@@ -431,8 +424,7 @@ export const NewsCard = ({
       </div>
 
       {href && (
-        <CardLink
-          href={href}
+        <TravelLink
           aria-label={title.trim() || "Nieuwsbericht"}
           data-variant={variant}
           data-phone-layout={phoneLayout}
@@ -450,16 +442,14 @@ export const NewsCard = ({
             tone={isDark ? "light" : "default"}
             placement="corner"
           />
-        </CardLink>
+        </TravelLink>
       )}
     </TapedCard>
   );
 
-  return slug ? (
-    <TravelScope kind="article" id={slug} href={`/nieuws/${slug}`}>
+  return (
+    <TravelScope kind="article" href={href}>
       {card}
     </TravelScope>
-  ) : (
-    card
   );
 };

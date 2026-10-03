@@ -21,11 +21,10 @@ export interface MatchTravelLinkProps extends Omit<
 }
 
 export function MatchTravelLink({ matchId, ...props }: MatchTravelLinkProps) {
-  const href = `/wedstrijd/${matchId}`;
   return (
-    <TravelScope kind="match" id={matchId} href={href}>
+    <TravelScope kind="match" href={`/wedstrijd/${matchId}`}>
       <TravelTarget>
-        <TravelLink {...props} href={href} />
+        <TravelLink {...props} />
       </TravelTarget>
     </TravelScope>
   );
