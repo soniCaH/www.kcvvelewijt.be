@@ -20,7 +20,12 @@
  * (R1.5). Image constraint: landscape only (audit §I1).
  */
 import Image from "next/image";
-import Link from "next/link";
+import {
+  TravelDestination,
+  TravelLink,
+  TravelScope,
+  TravelTarget,
+} from "@/components/travel";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import type { PortableTextBlock } from "@portabletext/react";
 import {
@@ -130,7 +135,12 @@ interface EditorialHeroSharedProps {
 // link target, detail (default) does not.
 interface DetailPlacementProps {
   placement?: "detail";
-  slug?: never;
+  /**
+   * The article's slug: names the cover so a tapped news card's cover can grow
+   * into it (#3405). Absent (stories, previews): the cover takes no part in
+   * the travel.
+   */
+  slug?: string;
 }
 
 interface HomepagePlacementProps {
@@ -214,6 +224,13 @@ interface EditorialHeroCoverProps {
   priority?: boolean;
   /** Stable identity (the article title) the cover's tape angle derives from. */
   seed: string;
+  /**
+   * The article's slug, which the cover travels under (#3405): the homepage
+   * placement is the source end (a tap on the hero link grows the cover into the
+   * article's), the detail placement the destination. Absent: no travel.
+   */
+  slug?: string;
+  placement?: EditorialHeroPlacement;
 }
 
 function EditorialHeroCover({
@@ -223,8 +240,10 @@ function EditorialHeroCover({
   pressOnHover,
   priority,
   seed,
+  slug,
+  placement,
 }: EditorialHeroCoverProps) {
-  return (
+  const figure = (
     <TapedFigure
       aspect={aspect}
       rotation="b"
@@ -249,6 +268,14 @@ function EditorialHeroCover({
       />
       {overlay}
     </TapedFigure>
+  );
+  if (slug === undefined) return figure;
+  return placement === "homepage" ? (
+    <TravelTarget>{figure}</TravelTarget>
+  ) : (
+    <TravelDestination kind="article" id={slug}>
+      {figure}
+    </TravelDestination>
   );
 }
 
@@ -574,6 +601,8 @@ export function EditorialHero(props: EditorialHeroProps) {
             pressOnHover={pressOnHover}
             priority={priority}
             seed={serializeTitle(title)}
+            slug={slug}
+            placement={placement}
           />
         ) : undefined
       }
@@ -597,34 +626,36 @@ export function EditorialHero(props: EditorialHeroProps) {
     // `pressOnHover` shadow collapse on <EditorialHeroCover>), matching
     // every other interactive paper surface (e.g. /jeugd's cards).
     return (
-      <Link
-        href={`/nieuws/${slug}`}
-        // Distinguishes this from every `<NewsCard>`/`<FeaturedUitgelichtRow>`
-        // link on the same page, which also match `a[href^="/nieuws/"]` —
-        // `apps/web/test/e2e/homepage.spec.ts`'s #2912 test anchors on this
-        // rather than guessing DOM position or link count.
-        data-testid="homepage-hero-link"
-        className={cn("group relative block", PRESS_DOWN_CLASSES)}
-        aria-label={serializeTitle(title)}
-      >
-        {body}
-        {/* The shell renders an `mx-auto max-w-[var(--container-wide)]` <section> with
+      <TravelScope kind="article" id={slug} href={`/nieuws/${slug}`}>
+        <TravelLink
+          href={`/nieuws/${slug}`}
+          // Distinguishes this from every `<NewsCard>`/`<FeaturedUitgelichtRow>`
+          // link on the same page, which also match `a[href^="/nieuws/"]` —
+          // `apps/web/test/e2e/homepage.spec.ts`'s #2912 test anchors on this
+          // rather than guessing DOM position or link count.
+          data-testid="homepage-hero-link"
+          className={cn("group relative block", PRESS_DOWN_CLASSES)}
+          aria-label={serializeTitle(title)}
+        >
+          {body}
+          {/* The shell renders an `mx-auto max-w-[var(--container-wide)]` <section> with
             a bottom divider line; pin "Lees verder" inside the same inner
             container so it aligns flush with the divider's right edge
             rather than the outer link's wrapper-padded edge. */}
-        <PageContainer width="index" className="mt-2 flex justify-end">
-          {/* `reveal-on-hover` (globals.css) hides the cue at rest only where
+          <PageContainer width="index" className="mt-2 flex justify-end">
+            {/* `reveal-on-hover` (globals.css) hides the cue at rest only where
               hovering exists — on touch it stays on, so the hero's one
               affordance is never invisible (#2393). */}
-          <span
-            aria-hidden="true"
-            className="text-jersey-deep reveal-on-hover pointer-events-none font-mono text-xs leading-none font-bold uppercase group-hover:opacity-100 group-focus-visible:opacity-100"
-          >
-            ★ Lees verder →
-          </span>
-        </PageContainer>
-        <LinkPendingDots placement="corner" />
-      </Link>
+            <span
+              aria-hidden="true"
+              className="text-jersey-deep reveal-on-hover pointer-events-none font-mono text-xs leading-none font-bold uppercase group-hover:opacity-100 group-focus-visible:opacity-100"
+            >
+              ★ Lees verder →
+            </span>
+          </PageContainer>
+          <LinkPendingDots placement="corner" />
+        </TravelLink>
+      </TravelScope>
     );
   }
   // Detail placement — wrap in a marker span so

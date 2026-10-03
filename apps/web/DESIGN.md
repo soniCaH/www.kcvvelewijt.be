@@ -386,7 +386,7 @@ Motion here is **functional, not decorative**. Every duration answers exactly on
 ### Motion Vocabulary
 
 - **Chrome** (`150ms`, `var(--ease-out)`): colour and border changes — nav links, chips, text links, filter bars.
-- **The Press** (`300ms`, `var(--ease-out)`): the press-down on cards and buttons, and the travel of a tapped fixture row into the match hero (#3397: `useMatchTravel` names the tapped row, `<MatchHero>` its card, `globals.css` cuts the rest of the page; under `prefers-reduced-motion: reduce` no name is set and the page cuts).
+- **The Press** (`300ms`, `var(--ease-out)`): the press-down on cards and buttons, and the travel of a tapped list item into its detail page (#3397, #3405: a fixture row grows into the match hero, a news card's cover into the article's cover, a squad card's photo into the player's — only the photo or the row moves, never titles or text. `useTravel` names the tapped source, `<TravelDestination>` the detail end, `globals.css` cuts the rest of the page; under `prefers-reduced-motion: reduce` no name is set and the page cuts, and back is always a cut).
 - **Arrival** (`500ms`, `var(--ease-out)`): anything entering the screen — scroll reveals, and a height change (below).
 - **The Curve** (`cubic-bezier(0, 0, 0.58, 1)`): the plain CSS `ease-out`.
 - **The Scarf**: the barber-pole spinner (`<Spinner variant="primary">`). Search only.

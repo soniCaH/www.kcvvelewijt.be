@@ -2,8 +2,10 @@
 import Link from "next/link";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import Image from "next/image";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
+import { travelSlug } from "@/lib/utils/travel";
+import { TravelLink, TravelScope, TravelTarget } from "@/components/travel";
 import {
   TapedCard,
   type TapedCardBg,
@@ -211,7 +213,14 @@ export const NewsCard = ({
   // listing get the md-equivalent.
   const metaPadding = variant === "featured" ? "p-8" : "p-5";
 
-  return (
+  // A card that opens an article lets its cover grow into the article's own
+  // cover (#3405). Only the photo travels: no photo, or any other href, keeps
+  // the cut.
+  const slug = imageUrl ? travelSlug("article", href) : undefined;
+  const Target = slug ? TravelTarget : Fragment;
+  const CardLink = slug ? TravelLink : Link;
+
+  const card = (
     <TapedCard
       as="article"
       rotation={rotation}
@@ -263,46 +272,48 @@ export const NewsCard = ({
           so `<Image fill>` cover-cropping behaves without clipping the
           card's tape strips or focus outline. The ink rule on the meta
           panel below divides image from caption. */}
-      <div
-        data-testid="newscard-image-region"
-        data-aspect={aspectRatio}
-        className={cn(
-          "relative w-full overflow-hidden",
-          ASPECT_CLASS[aspectRatio],
-          // Stretches to the text column's height; `object-cover` crops it.
-          compact && "max-sm:aspect-auto max-sm:w-28 max-sm:shrink-0",
-        )}
-      >
-        {imageUrl ? (
-          <Image
-            src={imageUrl}
-            alt=""
-            fill
-            className="object-cover"
-            style={{ filter: "var(--filter-photo-newsprint)" }}
-            sizes={
-              compactSizes +
-              (variant === "featured"
-                ? "(max-width: 768px) 100vw, 66vw"
-                : "(max-width: 768px) 100vw, 33vw")
-            }
-            placeholder={imageLqip ? "blur" : "empty"}
-            blurDataURL={imageLqip ?? undefined}
-          />
-        ) : artefact ? (
-          artefact
-        ) : (
-          <div
-            data-testid="newscard-image-fallback"
-            aria-hidden="true"
-            className="absolute inset-0 opacity-30"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(135deg, transparent 0, transparent 12px, var(--color-jersey-deep) 12px, var(--color-jersey-deep) 13px)",
-            }}
-          />
-        )}
-      </div>
+      <Target>
+        <div
+          data-testid="newscard-image-region"
+          data-aspect={aspectRatio}
+          className={cn(
+            "relative w-full overflow-hidden",
+            ASPECT_CLASS[aspectRatio],
+            // Stretches to the text column's height; `object-cover` crops it.
+            compact && "max-sm:aspect-auto max-sm:w-28 max-sm:shrink-0",
+          )}
+        >
+          {imageUrl ? (
+            <Image
+              src={imageUrl}
+              alt=""
+              fill
+              className="object-cover"
+              style={{ filter: "var(--filter-photo-newsprint)" }}
+              sizes={
+                compactSizes +
+                (variant === "featured"
+                  ? "(max-width: 768px) 100vw, 66vw"
+                  : "(max-width: 768px) 100vw, 33vw")
+              }
+              placeholder={imageLqip ? "blur" : "empty"}
+              blurDataURL={imageLqip ?? undefined}
+            />
+          ) : artefact ? (
+            artefact
+          ) : (
+            <div
+              data-testid="newscard-image-fallback"
+              aria-hidden="true"
+              className="absolute inset-0 opacity-30"
+              style={{
+                backgroundImage:
+                  "repeating-linear-gradient(135deg, transparent 0, transparent 12px, var(--color-jersey-deep) 12px, var(--color-jersey-deep) 13px)",
+              }}
+            />
+          )}
+        </div>
+      </Target>
 
       {/* Meta panel — divided from the image by a single 1px ink rule per
           R10 §"Structural changes". On dark backgrounds, switch the rule
@@ -420,7 +431,7 @@ export const NewsCard = ({
       </div>
 
       {href && (
-        <Link
+        <CardLink
           href={href}
           aria-label={title.trim() || "Nieuwsbericht"}
           data-variant={variant}
@@ -439,8 +450,16 @@ export const NewsCard = ({
             tone={isDark ? "light" : "default"}
             placement="corner"
           />
-        </Link>
+        </CardLink>
       )}
     </TapedCard>
+  );
+
+  return slug ? (
+    <TravelScope kind="article" id={slug} href={`/nieuws/${slug}`}>
+      {card}
+    </TravelScope>
+  ) : (
+    card
   );
 };

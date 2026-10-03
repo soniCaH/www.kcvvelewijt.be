@@ -67,6 +67,7 @@
 import { Fragment } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
+import { TravelDestination } from "@/components/travel";
 import { TapedFigure } from "@/components/design-system/TapedFigure";
 import { NumberDisplay } from "@/components/design-system/NumberDisplay";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
@@ -107,6 +108,12 @@ export interface PlayerHeroProps {
   jerseyNumber?: number;
   /** Active-team label resolved by the page (e.g. "A-Ploeg", "U17"). */
   teamLabel?: string;
+  /**
+   * The route slug: names the figure so a tapped squad card's photo can grow
+   * into it (#3405). Absent (stories, previews): the figure takes no part in
+   * the travel.
+   */
+  slug?: string;
   className?: string;
 }
 
@@ -177,6 +184,7 @@ export function PlayerHero({
   birthDate,
   jerseyNumber,
   teamLabel,
+  slug,
   className,
 }: PlayerHeroProps) {
   const hasPhoto = photoUrl !== undefined && photoUrl !== "";
@@ -273,40 +281,42 @@ export function PlayerHero({
         data-state={figureState}
         className="w-full max-w-[320px] justify-self-start sm:justify-self-end"
       >
-        <TapedFigure
-          aspect="portrait-3-4"
-          rotation="b"
-          tape={{ color: "jersey-deep", length: "md", seed: id }}
-          bg="cream-soft"
-          tint={hasPhoto ? "newsprint" : "none"}
-          padding="none"
-        >
-          {hasPhoto ? (
-            <Image
-              src={photoUrl}
-              alt=""
-              width={400}
-              height={533}
-              unoptimized
-              // Multiply drops a studio cutout's white matte onto the cream
-              // ground, the same treatment <PlayerCard> gives the squad grid
-              // (#2633, extended to every person surface in #2901).
-              //
-              // The ground is painted here rather than reached through to
-              // <TapedFigure bg> two levels up: PlayerCard removed that same
-              // silent dependency on purpose, and the blend would break
-              // quietly the day `TapedFigureBg` gains a non-cream value
-              // (#2901 review).
-              className="bg-cream-soft block h-full w-full object-cover mix-blend-multiply"
-            />
-          ) : (
-            <JerseyIllustration
-              variant="hero"
-              seed={playerFigureSeed({ id })}
-              data-testid="player-hero-illustration"
-            />
-          )}
-        </TapedFigure>
+        <TravelDestination kind="player" id={slug}>
+          <TapedFigure
+            aspect="portrait-3-4"
+            rotation="b"
+            tape={{ color: "jersey-deep", length: "md", seed: id }}
+            bg="cream-soft"
+            tint={hasPhoto ? "newsprint" : "none"}
+            padding="none"
+          >
+            {hasPhoto ? (
+              <Image
+                src={photoUrl}
+                alt=""
+                width={400}
+                height={533}
+                unoptimized
+                // Multiply drops a studio cutout's white matte onto the cream
+                // ground, the same treatment <PlayerCard> gives the squad grid
+                // (#2633, extended to every person surface in #2901).
+                //
+                // The ground is painted here rather than reached through to
+                // <TapedFigure bg> two levels up: PlayerCard removed that same
+                // silent dependency on purpose, and the blend would break
+                // quietly the day `TapedFigureBg` gains a non-cream value
+                // (#2901 review).
+                className="bg-cream-soft block h-full w-full object-cover mix-blend-multiply"
+              />
+            ) : (
+              <JerseyIllustration
+                variant="hero"
+                seed={playerFigureSeed({ id })}
+                data-testid="player-hero-illustration"
+              />
+            )}
+          </TapedFigure>
+        </TravelDestination>
       </div>
     </section>
   );

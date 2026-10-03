@@ -277,6 +277,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
           birthDate={player.birthDate}
           jerseyNumber={player.number}
           teamLabel={player.teamLabel}
+          slug={slug}
         />
       </PageContainer>
       <StripedSeam colorPair="ink-cream" height="md" />

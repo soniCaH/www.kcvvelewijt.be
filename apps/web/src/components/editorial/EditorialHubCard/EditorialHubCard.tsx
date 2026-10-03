@@ -1,8 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
+import { travelSlug } from "@/lib/utils/travel";
+import { TravelLink, TravelScope, TravelTarget } from "@/components/travel";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
 import { PRESS_DOWN_CLASSES } from "@/components/design-system/press-down";
 
@@ -103,12 +105,18 @@ export function EditorialHubCard({
   // One element, two tags: `next/link` for a route, a plain anchor for a
   // document (see `external`). Everything below — classes, analytics markers,
   // children — is identical either way.
-  const Wrapper = external ? "a" : Link;
+  // A news card that opens an article lets its cover grow into the article's
+  // own cover (#3405); a nav tile's cover is not the destination's picture, and
+  // a card without a photo has none to grow.
+  const slug =
+    isNav || external || !imageUrl ? undefined : travelSlug("article", href);
+  const Wrapper = external ? "a" : slug ? TravelLink : Link;
+  const Target = slug ? TravelTarget : Fragment;
   const externalProps = external
     ? { target: "_blank" as const, rel: "noopener noreferrer" }
     : {};
 
-  return (
+  const card = (
     <Wrapper
       href={href}
       {...externalProps}
@@ -130,57 +138,59 @@ export function EditorialHubCard({
         "focus-visible:translate-x-1 focus-visible:translate-y-1 focus-visible:shadow-none",
       )}
     >
-      <div
-        className={cn(
-          "border-ink relative flex aspect-[16/9] border-b-2",
-          isNav
-            ? "bg-jersey-deep items-center justify-center"
-            : "bg-cream-deep items-start",
-        )}
-      >
-        {imageUrl && (
-          // One cover <Image>, shared by both variants — DESIGN.md's
-          // "photographs get a newsprint treatment" names no per-variant
-          // exception, so a nav-tile photo gets the same warm-tint filter as
-          // a news cover. Decorative either way (the card's own title names
-          // the tile), never greyscale (that treatment is sponsor-logo only).
-          <Image
-            src={imageUrl}
-            alt=""
-            fill
-            sizes={sizes ?? DEFAULT_NEWS_SIZES}
-            className="object-cover"
-            style={{ filter: "var(--filter-photo-newsprint)" }}
-          />
-        )}
-        {isNav ? (
-          <>
-            {imageUrl && (
-              // Flat jersey-deep-dark scrim (~62%) keeps the pill and glyph
-              // legible over a photo — deliberately flat, not
-              // `--gradient-jersey-deep-overlay` (see DESIGN.md's "No Filler
-              // Photo, Ever Rule"). The no-image branch below renders
-              // neither this nor the <Image> above — the flat
-              // `bg-jersey-deep` fallback stays byte-for-byte unchanged.
-              <span
-                aria-hidden="true"
-                className="bg-jersey-deep-dark/62 absolute inset-0"
-              />
-            )}
-            {/* Pill always renders; an empty `tag` is an empty pill (7j3). */}
-            <span className="absolute top-2.5 left-2.5 z-10">
-              <MonoLabel variant="pill-cream">{tag}</MonoLabel>
-            </span>
-            {/* Only needs its own stacking context above the photo/scrim;
+      <Target>
+        <div
+          className={cn(
+            "border-ink relative flex aspect-[16/9] border-b-2",
+            isNav
+              ? "bg-jersey-deep items-center justify-center"
+              : "bg-cream-deep items-start",
+          )}
+        >
+          {imageUrl && (
+            // One cover <Image>, shared by both variants — DESIGN.md's
+            // "photographs get a newsprint treatment" names no per-variant
+            // exception, so a nav-tile photo gets the same warm-tint filter as
+            // a news cover. Decorative either way (the card's own title names
+            // the tile), never greyscale (that treatment is sponsor-logo only).
+            <Image
+              src={imageUrl}
+              alt=""
+              fill
+              sizes={sizes ?? DEFAULT_NEWS_SIZES}
+              className="object-cover"
+              style={{ filter: "var(--filter-photo-newsprint)" }}
+            />
+          )}
+          {isNav ? (
+            <>
+              {imageUrl && (
+                // Flat jersey-deep-dark scrim (~62%) keeps the pill and glyph
+                // legible over a photo — deliberately flat, not
+                // `--gradient-jersey-deep-overlay` (see DESIGN.md's "No Filler
+                // Photo, Ever Rule"). The no-image branch below renders
+                // neither this nor the <Image> above — the flat
+                // `bg-jersey-deep` fallback stays byte-for-byte unchanged.
+                <span
+                  aria-hidden="true"
+                  className="bg-jersey-deep-dark/62 absolute inset-0"
+                />
+              )}
+              {/* Pill always renders; an empty `tag` is an empty pill (7j3). */}
+              <span className="absolute top-2.5 left-2.5 z-10">
+                <MonoLabel variant="pill-cream">{tag}</MonoLabel>
+              </span>
+              {/* Only needs its own stacking context above the photo/scrim;
                 the no-image branch renders the bare icon, unchanged. */}
-            {imageUrl ? <span className="relative z-10">{icon}</span> : icon}
-          </>
-        ) : (
-          <span className="relative z-10 m-2.5">
-            <MonoLabel variant="pill-jersey-deep">{tag}</MonoLabel>
-          </span>
-        )}
-      </div>
+              {imageUrl ? <span className="relative z-10">{icon}</span> : icon}
+            </>
+          ) : (
+            <span className="relative z-10 m-2.5">
+              <MonoLabel variant="pill-jersey-deep">{tag}</MonoLabel>
+            </span>
+          )}
+        </div>
+      </Target>
 
       <div className="flex flex-col gap-2 p-3.5">
         <span className="text-ink font-display line-clamp-3 text-lg leading-tight font-extrabold italic">
@@ -198,5 +208,13 @@ export function EditorialHubCard({
       </div>
       <LinkPendingDots tone={isNav ? "light" : "default"} placement="corner" />
     </Wrapper>
+  );
+
+  return slug ? (
+    <TravelScope kind="article" id={slug} href={`/nieuws/${slug}`}>
+      {card}
+    </TravelScope>
+  ) : (
+    card
   );
 }
