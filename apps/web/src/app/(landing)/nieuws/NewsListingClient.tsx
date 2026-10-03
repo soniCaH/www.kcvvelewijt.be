@@ -13,23 +13,15 @@ import { formatArticleDate } from "@/lib/utils/dates";
 import { articleTypeCardLabel } from "@/lib/utils/article-type-label";
 import { narrowParam, writeHistoryFilterParam } from "@/hooks/filterParam";
 import { LISTING_BATCH_SIZE, LISTING_INITIAL_TOTAL } from "@/lib/constants";
-import { cn } from "@/lib/utils/cn";
+import { scrollToTopMotionSafe } from "@/lib/utils/scroll-into-view";
 import { deduplicateById, type Paginated } from "@/lib/utils/pagination";
 import {
   filteredEmptyBody,
   pendingEmptyBody,
 } from "@/lib/utils/empty-state-copy";
 
-/** Back to the top once a category's batch has landed, or its fetch failed
- *  (the notice sits above the grid). The preference is read at the call, not
- *  cached: it can change while the page is open. Everything that travels
- *  arrives instantly under `prefers-reduced-motion` (DESIGN.md → Motion). */
-function scrollToTop() {
-  const reduceMotion = window.matchMedia(
-    "(prefers-reduced-motion: reduce)",
-  ).matches;
-  window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
-}
+/** A failed fetch's notice and the retry that re-runs it. */
+type ErrorNotice = { message: string; retry: () => void };
 
 interface Category {
   id: string;
@@ -77,16 +69,11 @@ export function NewsListingClient({
   // …and two errors: a failed category fetch reports above the grid, where
   // the visitor's eyes are after the scroll to the top; a failed load-more
   // stays in the footer at the foot of the batch it failed to extend.
-  const [categoryError, setCategoryError] = useState<{
-    message: string;
-    retry: () => void;
-  } | null>(null);
-  const [loadMoreError, setLoadMoreError] = useState<{
-    message: string;
-    retry: () => void;
-  } | null>(null);
+  const [categoryError, setCategoryError] = useState<ErrorNotice | null>(null);
+  const [loadMoreError, setLoadMoreError] = useState<ErrorNotice | null>(null);
   const categoryRequestId = useRef(0);
   const isLoadingRef = useRef(false);
+  const isSwitchingRef = useRef(false);
   const nextOffsetRef = useRef(initialArticles.length);
   const loadMoreRef = useRef<() => void>(() => {});
   const applyCategoryRef = useRef<
@@ -94,10 +81,15 @@ export function NewsListingClient({
   >(() => {});
 
   const loadMore = useCallback(async () => {
-    if (!hasMore || isLoadingRef.current) return;
+    // Not while a switch is pending: the button stays mounted (a fast switch
+    // must not blink the footer), but would extend the old list with the new
+    // category's filter.
+    if (!hasMore || isLoadingRef.current || isSwitchingRef.current) return;
     isLoadingRef.current = true;
     const requestId = categoryRequestId.current;
     setIsLoadingMore(true);
+    // One notice at a time: a retry of a failed switch is no longer showing.
+    setCategoryError(null);
     setLoadMoreError(null);
 
     try {
@@ -130,8 +122,10 @@ export function NewsListingClient({
         },
       });
     } finally {
-      isLoadingRef.current = false;
+      // A superseded load-more must not release a lock it no longer owns:
+      // the switch already reset it, and a newer load-more may hold it.
       if (requestId === categoryRequestId.current) {
+        isLoadingRef.current = false;
         setIsLoadingMore(false);
       }
     }
@@ -172,9 +166,11 @@ export function NewsListingClient({
       const prevCategory = activeCategory;
       const requestId = ++categoryRequestId.current;
       setActiveCategory(category);
+      isSwitchingRef.current = true;
       setIsSwitching(true);
       // A load-more the switch supersedes is discarded on arrival; its
-      // footer spinner must not outlive the batch it was loading.
+      // footer spinner and lock must not outlive the batch it was loading.
+      isLoadingRef.current = false;
       setIsLoadingMore(false);
       setCategoryError(null);
       setLoadMoreError(null);
@@ -200,7 +196,7 @@ export function NewsListingClient({
             route: "/nieuws",
           });
         }
-        scrollToTop();
+        scrollToTopMotionSafe();
       } catch (err) {
         if (requestId !== categoryRequestId.current) return;
         setActiveCategory(prevCategory);
@@ -209,12 +205,13 @@ export function NewsListingClient({
           message: "Artikelen laden mislukt.",
           retry: () => {
             setCategoryError(null);
-            applyCategoryRef.current(category, { updateUrl: true });
+            applyCategoryRef.current(category, { updateUrl });
           },
         });
-        scrollToTop();
+        scrollToTopMotionSafe();
       } finally {
         if (requestId === categoryRequestId.current) {
+          isSwitchingRef.current = false;
           setIsSwitching(false);
         }
       }
@@ -349,10 +346,11 @@ export function NewsListingClient({
             Rule). Cards stay clickable. */}
         <div
           aria-busy={isSwitching ? true : undefined}
-          className={cn(
-            isSwitching &&
-              "opacity-50 transition-opacity delay-150 duration-150 ease-out",
-          )}
+          className={
+            isSwitching
+              ? "opacity-50 transition-opacity delay-150 duration-150 ease-out"
+              : undefined
+          }
         >
           <TapedCardGrid columns={3} gap="md" className="mb-6">
             {gridArticles.map((article) => (
@@ -426,9 +424,7 @@ export function NewsListingClient({
             category switch waits on its chip (#3388). */}
         <LoadMoreFooter
           label="Meer nieuws laden"
-          // No button while a switch is pending: it would extend the old
-          // list with the new category's filter.
-          hasMore={hasMore && !isSwitching}
+          hasMore={hasMore}
           isLoading={isLoadingMore}
           error={
             loadMoreError

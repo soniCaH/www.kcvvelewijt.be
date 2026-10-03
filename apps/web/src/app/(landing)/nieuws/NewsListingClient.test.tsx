@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   render,
   screen,
@@ -552,6 +552,23 @@ describe("NewsListingClient", () => {
   });
 
   describe("a pending category switch (#3388)", () => {
+    // The chip's dots wait 150 ms (`usePendingDelay`): fake timers per
+    // apps/web/CLAUDE.md, with the `jest` stub Testing Library's `waitFor`
+    // needs to step a fake clock.
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.stubGlobal("jest", { advanceTimersByTime: vi.advanceTimersByTime });
+    });
+    afterEach(() => {
+      vi.useRealTimers();
+      vi.unstubAllGlobals();
+    });
+
+    const advance = (ms: number) =>
+      act(async () => {
+        await vi.advanceTimersByTimeAsync(ms);
+      });
+
     const renderListing = (
       overrides: Partial<React.ComponentProps<typeof NewsListingClient>> = {},
     ) =>
@@ -588,7 +605,12 @@ describe("NewsListingClient", () => {
       expect(container.querySelector("[aria-busy]")).toBeNull();
       fireEvent.click(screen.getByRole("button", { name: "Jeugd" }));
 
-      await waitFor(() => expect(pulseIn("Jeugd")).not.toBeNull());
+      // After 150 ms, not before: a fast answer shows no dots (the dim is a
+      // CSS transition with the same delay).
+      await advance(149);
+      expect(pulseIn("Jeugd")).toBeNull();
+      await advance(1);
+      expect(pulseIn("Jeugd")).not.toBeNull();
       // Only the chip that made the request waits.
       expect(pulseIn("Alles")).toBeNull();
       expect(pulseIn("Eerste ploeg")).toBeNull();
@@ -597,15 +619,13 @@ describe("NewsListingClient", () => {
       expect(grid).toHaveClass("opacity-50", "delay-150");
       // The footer is not a second device for the same request.
       expect(screen.queryByRole("status")).not.toBeInTheDocument();
-      expect(
-        screen.queryByRole("button", { name: "Meer nieuws laden" }),
-      ).not.toBeInTheDocument();
 
       resolve({
         items: [makeArticle({ id: "j1", title: "Jeugd" })],
         hasMore: false,
       });
-      await waitFor(() => expect(pulseIn("Jeugd")).toBeNull());
+      await advance(0);
+      expect(pulseIn("Jeugd")).toBeNull();
       // Arrival is an instant swap: no busy flag, no dim left behind.
       expect(container.querySelector("[aria-busy]")).toBeNull();
       expect(container.querySelector(".opacity-50")).toBeNull();
@@ -615,7 +635,7 @@ describe("NewsListingClient", () => {
       mockFetchArticles.mockResolvedValueOnce({ items: [], hasMore: false });
       renderListing();
       fireEvent.click(screen.getByRole("button", { name: "Jeugd" }));
-      await waitFor(() => expect(pulseIn("Jeugd")).toBeNull());
+      await advance(0);
 
       hangFetch();
       window.history.pushState({}, "", "/nieuws");
@@ -623,7 +643,8 @@ describe("NewsListingClient", () => {
         window.dispatchEvent(new PopStateEvent("popstate"));
       });
 
-      await waitFor(() => expect(pulseIn("Alles")).not.toBeNull());
+      await advance(150);
+      expect(pulseIn("Alles")).not.toBeNull();
       expect(pulseIn("Jeugd")).toBeNull();
     });
 
@@ -633,7 +654,8 @@ describe("NewsListingClient", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "Jeugd" }));
 
-      await waitFor(() => expect(pulseIn("Jeugd")).not.toBeNull());
+      await advance(150);
+      expect(pulseIn("Jeugd")).not.toBeNull();
       expect(screen.queryByText(/geen artikelen/i)).not.toBeInTheDocument();
       expect(screen.queryByText(/nog geen artikelen/i)).not.toBeInTheDocument();
     });
@@ -678,6 +700,96 @@ describe("NewsListingClient", () => {
       expect(
         screen.queryByRole("button", { name: "Probeer opnieuw" }),
       ).toBeNull();
+    });
+
+    it("keeps the load-more button mounted and inert while a switch is pending", async () => {
+      hangFetch();
+      renderListing();
+
+      fireEvent.click(screen.getByRole("button", { name: "Jeugd" }));
+      await advance(150);
+
+      // Unmounting it would blink the footer on a fast switch.
+      clickLoadMore();
+      expect(mockFetchArticles).toHaveBeenCalledTimes(1);
+      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    });
+
+    it("shows one failure notice at a time: a failed load-more replaces a failed switch's", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+      mockFetchArticles.mockRejectedValue(new Error("boom"));
+      renderListing();
+
+      fireEvent.click(screen.getByRole("button", { name: "Jeugd" }));
+      await screen.findByRole("button", { name: "Probeer opnieuw" });
+
+      clickLoadMore();
+      await advance(0);
+
+      expect(
+        screen.getAllByRole("button", { name: "Probeer opnieuw" }),
+      ).toHaveLength(1);
+    });
+
+    it("lets 'Meer nieuws laden' work right after a switch cut off an in-flight load-more", async () => {
+      vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+      let resolveStale!: (value: unknown) => void;
+      mockFetchArticles.mockReturnValueOnce(
+        new Promise((res) => {
+          resolveStale = res;
+        }),
+      );
+      renderListing();
+      clickLoadMore();
+
+      mockFetchArticles.mockResolvedValueOnce({
+        items: [makeArticle({ id: "j1", title: "Jeugd Article" })],
+        hasMore: true,
+      });
+      fireEvent.click(screen.getByRole("button", { name: "Jeugd" }));
+      await advance(0);
+      expect(mockFetchArticles).toHaveBeenCalledTimes(2);
+
+      // The superseded fetch is still out; the button must not wait for it.
+      mockFetchArticles.mockResolvedValueOnce({ items: [], hasMore: false });
+      clickLoadMore();
+      expect(mockFetchArticles).toHaveBeenCalledTimes(3);
+
+      resolveStale({ items: [], hasMore: false });
+      await advance(0);
+    });
+
+    it("retries a failed popstate switch without pushing a history entry", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+      mockFetchArticles.mockResolvedValueOnce({
+        items: [makeArticle({ id: "j1", title: "Jeugd Article" })],
+        hasMore: false,
+      });
+      renderListing();
+      fireEvent.click(screen.getByRole("button", { name: "Jeugd" }));
+      await advance(0);
+
+      mockFetchArticles.mockRejectedValueOnce(new Error("boom"));
+      window.history.pushState({}, "", "/nieuws");
+      const pushStateSpy = vi.spyOn(window.history, "pushState");
+      act(() => {
+        window.dispatchEvent(new PopStateEvent("popstate"));
+      });
+      await advance(0);
+
+      mockFetchArticles.mockResolvedValueOnce({
+        items: [makeArticle({ id: "a2", title: "All Article" })],
+        hasMore: false,
+      });
+      fireEvent.click(screen.getByRole("button", { name: "Probeer opnieuw" }));
+      await advance(0);
+
+      expect(
+        screen.getByRole("heading", { name: /^All Article\.?$/ }),
+      ).toBeInTheDocument();
+      expect(pushStateSpy).not.toHaveBeenCalled();
     });
 
     it("keeps a failed load-more in the footer, below the grid", async () => {
