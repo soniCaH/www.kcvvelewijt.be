@@ -7,18 +7,47 @@
  * · the person-vocab `<ContactCard>`. Open/close state is owned by `<HulpFinder>`
  * (single-open); this card is presentational + accessible.
  *
+ * The answer stays mounted while closed so it can shrink away (#3398): a
+ * `<HeightGrow>` row transition, Arrival speed, so the closing and the opening
+ * answer move together. Closed, it is `inert`: out of the tab order and the
+ * accessibility tree.
+ *
  * A11y: the header is a heading-wrapped `<button>` with `aria-expanded` /
  * `aria-controls`; the panel is a `region` labelled by the header. The whole row
  * is the tap target. Press-down hover only while collapsed.
  */
 
-import { useId, type MouseEvent } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  type MouseEvent,
+  type TransitionEvent,
+} from "react";
 import { CaretDown } from "@/lib/icons.redesign";
 import type { ResponsibilityPath } from "@/types/responsibility";
 import { ACCENT_GLYPH_CLASS, CATEGORY_META } from "./categoryMeta";
 import { ContactCard } from "./ContactCard";
 import { resolveContact } from "./resolveContact";
 import { PRESS_DOWN_TRANSITION } from "@/components/design-system/press-down";
+import { HeightGrow } from "@/components/design-system/HeightGrow";
+import { scrollIntoViewMotionSafe } from "@/lib/utils/scroll-into-view";
+
+/**
+ * Scroll-back guard (#3398): a tall answer closing above this card can leave
+ * its header off the top, so once the heights have settled, bring it back just
+ * under the sticky bar. The bar's height is `scroll-padding-top` on `<html>`
+ * (DESIGN.md → The Derived Anchor Offset Rule), which `scrollIntoView` also
+ * honours. Most taps never trigger it.
+ */
+function showHeaderIfAbove(card: HTMLElement) {
+  const offset =
+    parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) ||
+    0;
+  if (card.getBoundingClientRect().top < offset) {
+    scrollIntoViewMotionSafe(card, { block: "start" });
+  }
+}
 
 export interface QuestionCardProps {
   path: ResponsibilityPath;
@@ -47,9 +76,40 @@ export function QuestionCard({
   const headerId = `${baseId}-header`;
   const panelId = `${baseId}-panel`;
   const contact = resolveContact(path.primaryContact);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Under reduced motion no transition runs, so no `transitionend` comes: the
+  // height is already final once the open has rendered. A card that mounts
+  // open (a story) is not an open.
+  const wasOpen = useRef(open);
+  useEffect(() => {
+    if (
+      open &&
+      !wasOpen.current &&
+      cardRef.current &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      showHeaderIfAbove(cardRef.current);
+    }
+    wasOpen.current = open;
+  }, [open]);
+
+  // Only this card's own height transition, and only the opening one: the
+  // closing answer settles to zero without a say in where the header is.
+  const handleHeightEnd = (event: TransitionEvent<HTMLDivElement>) => {
+    if (
+      open &&
+      event.target === event.currentTarget &&
+      event.propertyName === "grid-template-rows" &&
+      cardRef.current
+    ) {
+      showHeaderIfAbove(cardRef.current);
+    }
+  };
 
   return (
     <div
+      ref={cardRef}
       className={`border-ink bg-cream border-2 shadow-[3px_3px_0_0_var(--color-ink)] ${
         open
           ? ""
@@ -62,7 +122,7 @@ export function QuestionCard({
           id={headerId}
           onClick={onToggle}
           aria-expanded={open}
-          aria-controls={open ? panelId : undefined}
+          aria-controls={panelId}
           className="flex w-full items-center gap-3 p-3 text-left"
         >
           <span
@@ -84,11 +144,12 @@ export function QuestionCard({
         </button>
       </h3>
 
-      {open && (
+      <HeightGrow open={open} bleed={false} onTransitionEnd={handleHeightEnd}>
         <div
           id={panelId}
           role="region"
           aria-labelledby={headerId}
+          inert={!open}
           className="border-paper-edge border-t-2 border-dashed p-4"
         >
           <p className="text-ink mb-3 text-[14px] leading-relaxed">
@@ -145,7 +206,7 @@ export function QuestionCard({
             onShowInStructure={onShowInStructure}
           />
         </div>
-      )}
+      </HeightGrow>
     </div>
   );
 }

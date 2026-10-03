@@ -27,7 +27,7 @@
  * offset shadow its bottom by 6px).
  * Keep the class lists below full literals: Tailwind's scanner has to see them.
  */
-import type { ReactNode } from "react";
+import type { ReactNode, TransitionEvent } from "react";
 import { cn } from "@/lib/utils/cn";
 
 export interface HeightGrowProps {
@@ -45,6 +45,13 @@ export interface HeightGrowProps {
   bleed?: boolean;
   /** Classes for the outer wrapper (margins, spacing). */
   className?: string;
+  /**
+   * Fires for every transition that ends on the wrapper or inside it. Check
+   * `event.target === event.currentTarget` and `propertyName ===
+   * "grid-template-rows"` to catch the height change itself. It never fires
+   * under `prefers-reduced-motion`, where no transition runs.
+   */
+  onTransitionEnd?: (event: TransitionEvent<HTMLDivElement>) => void;
   children: ReactNode;
 }
 
@@ -53,10 +60,12 @@ export function HeightGrow({
   enter = false,
   bleed = true,
   className,
+  onTransitionEnd,
   children,
 }: HeightGrowProps) {
   return (
     <div
+      onTransitionEnd={onTransitionEnd}
       className={cn(
         "grid transition-[grid-template-rows] duration-500 ease-out motion-reduce:transition-none",
         open ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
