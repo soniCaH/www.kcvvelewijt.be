@@ -10,7 +10,6 @@ import {
 import { Button } from "@/components/design-system/Button";
 import { overlayFade } from "@/components/design-system/overlay-fade";
 import { X } from "@/lib/icons.redesign";
-import { ruleStepMs } from "./ruleStagger";
 
 export interface NavTakeoverProps {
   open: boolean;
@@ -39,12 +38,13 @@ export interface NavTakeoverProps {
    */
   autoCloseFocusRef?: React.RefObject<HTMLElement | null>;
   /**
-   * How many `<NavTakeoverItem>` rows the menu holds. Sets the step between
-   * two row rules' draws (`ruleStepMs`) so the last rule never starts after
-   * 270ms however many senior teams `buildMenuItems` adds (#3392). Omitted,
-   * rules step at 30ms.
+   * How many `<NavTakeoverItem>` rows the menu holds, each given its `index`.
+   * Set as `--rule-count` on the `<nav>`, from which every row works out its
+   * rule's draw delay so the last rule never starts after 270ms however many
+   * senior teams `buildMenuItems` adds (#3392). Required: a row's `index`
+   * means nothing without it.
    */
-  rowCount?: number;
+  rowCount: number;
 }
 
 const FOCUSABLE_SELECTOR =
@@ -231,11 +231,7 @@ export const NavTakeover = ({
       <nav
         aria-label="Hoofdnavigatie"
         className="flex flex-1 flex-col overflow-y-auto px-4 py-4 lg:px-8"
-        style={
-          rowCount === undefined
-            ? undefined
-            : ({ "--rule-step": `${ruleStepMs(rowCount)}ms` } as CSSProperties)
-        }
+        style={{ "--rule-count": rowCount } as CSSProperties}
       >
         {children}
       </nav>

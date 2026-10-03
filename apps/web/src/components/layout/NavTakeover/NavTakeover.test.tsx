@@ -17,6 +17,7 @@ describe("NavTakeover", () => {
         open={false}
         onOpenChange={() => {}}
         wordmark={<span>WM</span>}
+        rowCount={1}
       >
         <NavTakeoverItem label="Home" href="/" />
       </NavTakeover>,
@@ -30,7 +31,12 @@ describe("NavTakeover", () => {
 
   it("is neither hidden nor inert when open", () => {
     render(
-      <NavTakeover open onOpenChange={() => {}} wordmark={<span>WM</span>}>
+      <NavTakeover
+        open
+        onOpenChange={() => {}}
+        wordmark={<span>WM</span>}
+        rowCount={1}
+      >
         <NavTakeoverItem label="Home" href="/" />
       </NavTakeover>,
     );
@@ -41,7 +47,12 @@ describe("NavTakeover", () => {
 
   it("renders dialog with wordmark + close button when open", () => {
     render(
-      <NavTakeover open onOpenChange={() => {}} wordmark={<span>WM</span>}>
+      <NavTakeover
+        open
+        onOpenChange={() => {}}
+        wordmark={<span>WM</span>}
+        rowCount={1}
+      >
         <NavTakeoverItem label="Home" href="/" />
       </NavTakeover>,
     );
@@ -52,7 +63,12 @@ describe("NavTakeover", () => {
 
   it("locks body scroll while open and restores it on close", () => {
     const { rerender } = render(
-      <NavTakeover open onOpenChange={() => {}} wordmark={<span>WM</span>}>
+      <NavTakeover
+        open
+        onOpenChange={() => {}}
+        wordmark={<span>WM</span>}
+        rowCount={1}
+      >
         <NavTakeoverItem label="Home" href="/" />
       </NavTakeover>,
     );
@@ -62,6 +78,7 @@ describe("NavTakeover", () => {
         open={false}
         onOpenChange={() => {}}
         wordmark={<span>WM</span>}
+        rowCount={1}
       >
         <NavTakeoverItem label="Home" href="/" />
       </NavTakeover>,
@@ -73,7 +90,12 @@ describe("NavTakeover", () => {
     const user = userEvent.setup();
     const onOpenChange = vi.fn();
     render(
-      <NavTakeover open onOpenChange={onOpenChange} wordmark={<span>WM</span>}>
+      <NavTakeover
+        open
+        onOpenChange={onOpenChange}
+        wordmark={<span>WM</span>}
+        rowCount={1}
+      >
         <NavTakeoverItem label="Home" href="/" />
       </NavTakeover>,
     );
@@ -84,7 +106,12 @@ describe("NavTakeover", () => {
   it("calls onOpenChange(false) when Escape is pressed", () => {
     const onOpenChange = vi.fn();
     render(
-      <NavTakeover open onOpenChange={onOpenChange} wordmark={<span>WM</span>}>
+      <NavTakeover
+        open
+        onOpenChange={onOpenChange}
+        wordmark={<span>WM</span>}
+        rowCount={1}
+      >
         <NavTakeoverItem label="Home" href="/" />
       </NavTakeover>,
     );
@@ -104,6 +131,7 @@ describe("NavTakeover", () => {
             open={open}
             onOpenChange={() => {}}
             wordmark={<span>WM</span>}
+            rowCount={1}
             returnFocusRef={triggerRef}
           >
             <NavTakeoverItem label="Home" href="/" />
@@ -128,6 +156,7 @@ describe("NavTakeover", () => {
             open={false}
             onOpenChange={() => {}}
             wordmark={<span>WM</span>}
+            rowCount={1}
             returnFocusRef={triggerRef}
           >
             <NavTakeoverItem label="Home" href="/" />
@@ -215,6 +244,7 @@ describe("NavTakeover", () => {
             open={open}
             onOpenChange={setOpen}
             wordmark={<span>WM</span>}
+            rowCount={1}
             returnFocusRef={triggerRef}
             autoCloseFocusRef={desktopLinkRef}
           >
@@ -335,43 +365,62 @@ describe("NavTakeoverItem", () => {
   });
 
   describe("row rules (#3392)", () => {
-    it("hands each row its index and the panel the step, so the delay is pure CSS", () => {
+    // Renders a menu of `rows` rows and returns the nav's `--rule-count` plus
+    // each row's `--rule-index` — the two inputs of the CSS delay.
+    const renderMenu = (rows: number) => {
       render(
         <NavTakeover
           open
           onOpenChange={() => {}}
           wordmark={<span>WM</span>}
-          rowCount={12}
+          rowCount={rows}
         >
-          <NavTakeoverItem label="Eerste" href="/a" index={0} />
-          <NavTakeoverItem label="Derde" href="/c" index={2} />
+          {Array.from({ length: rows }, (_, i) => (
+            <NavTakeoverItem
+              key={i}
+              label={`Rij ${i}`}
+              href={`/rij-${i}`}
+              index={i}
+            />
+          ))}
         </NavTakeover>,
       );
       const nav = screen.getByRole("navigation", { name: "Hoofdnavigatie" });
-      expect(nav.style.getPropertyValue("--rule-step")).toBe("24.54ms");
-      expect(
-        screen
-          .getByRole("link", { name: /Derde/ })
-          .style.getPropertyValue("--rule-index"),
-      ).toBe("2");
+      return {
+        count: nav.style.getPropertyValue("--rule-count"),
+        indexes: screen
+          .getAllByRole("link")
+          .map((a) => a.style.getPropertyValue("--rule-index")),
+      };
+    };
+
+    // The delay is `index × min(30ms, 270ms / max(count − 1, 1))`, evaluated by
+    // the browser from the rendered custom properties and the class below
+    // (the story's `play` reads the computed value in a real browser).
+    const delayMs = (count: string, index: string) =>
+      Number(index) * Math.min(30, 270 / Math.max(Number(count) - 1, 1));
+
+    it("9 rows: step 30ms, the last rule starts at 240ms", () => {
+      const { count, indexes } = renderMenu(9);
+      expect(count).toBe("9");
+      expect(indexes).toEqual(["0", "1", "2", "3", "4", "5", "6", "7", "8"]);
+      expect(delayMs(count, indexes[1])).toBe(30);
+      expect(delayMs(count, indexes[8])).toBe(240);
     });
 
-    it("keeps the 30ms step for today's 9 rows", () => {
-      render(
-        <NavTakeover
-          open
-          onOpenChange={() => {}}
-          wordmark={<span>WM</span>}
-          rowCount={9}
-        >
-          <NavTakeoverItem label="Eerste" href="/a" />
-        </NavTakeover>,
+    it("12 rows: the step shrinks to 270/11ms, the last rule starts at exactly the 270ms cap", () => {
+      const { count, indexes } = renderMenu(12);
+      expect(count).toBe("12");
+      expect(indexes[11]).toBe("11");
+      expect(delayMs(count, indexes[1])).toBe(270 / 11);
+      expect(delayMs(count, indexes[11])).toBe(270);
+    });
+
+    it("computes that delay in the row's ::after class — the same formula as the test", () => {
+      render(<NavTakeoverItem label="Nieuws" href="/nieuws" index={1} />);
+      expect(screen.getByRole("link", { name: /Nieuws/ })).toHaveClass(
+        "after:delay-[calc(var(--rule-index,0)*min(30ms,270ms/max(var(--rule-count,1)_-_1,1)))]",
       );
-      expect(
-        screen
-          .getByRole("navigation", { name: "Hoofdnavigatie" })
-          .style.getPropertyValue("--rule-step"),
-      ).toBe("30ms");
     });
 
     it("draws the rule on a pseudo-element and never gates the row itself", () => {
