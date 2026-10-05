@@ -23,18 +23,8 @@ export const Default: Story = {
   parameters: {
     docs: {
       description: {
-        story: "Desktop — 21:9 photo, words overlaid bottom-left.",
-      },
-    },
-  },
-};
-
-export const Mobile: Story = {
-  parameters: {
-    vr: { viewports: ["mobile"] },
-    docs: {
-      description: {
-        story: "Phone — 4:3 photo, words below on the dark field.",
+        story:
+          "Desktop and tablet — 21:9 photo (26rem tall at the least), words overlaid bottom-left. Phone — 4:3 photo with the words below it on the dark field.",
       },
     },
   },

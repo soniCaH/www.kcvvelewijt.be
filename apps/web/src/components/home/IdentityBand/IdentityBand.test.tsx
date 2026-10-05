@@ -17,6 +17,15 @@ describe("IdentityBand", () => {
     ).toBeInTheDocument();
   });
 
+  it("is a landmark named by its heading", () => {
+    render(<IdentityBand />);
+    expect(
+      screen.getByRole("region", {
+        name: /er is maar één plezante compagnie/i,
+      }),
+    ).toBeInTheDocument();
+  });
+
   it("renders the heading as an h2, never an h1", () => {
     const { container } = render(<IdentityBand />);
     expect(

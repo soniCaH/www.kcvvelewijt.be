@@ -73,7 +73,11 @@ import {
   EditorialHero,
   toEditorialHeroProps,
 } from "@/components/article/EditorialHero";
-import { PageContainer, SectionStack } from "@/components/design-system";
+import {
+  PageContainer,
+  SectionStack,
+  StripedSeam,
+} from "@/components/design-system";
 import type { SectionConfig } from "@/components/design-system";
 import { mapMatchesToUpcomingMatches } from "@/lib/mappers";
 import { getTeamMatches } from "@/lib/server/match-data";
@@ -383,7 +387,18 @@ export default async function HomePage() {
   const identityBandSection: SectionConfig = {
     key: "identity-band",
     bg: "transparent",
-    content: <IdentityBand />,
+    // Uitgelicht's cream-soft field is the band's lower edge. Without it the
+    // dark band would run straight into the next band's `bg-jersey-deep`
+    // (the featured event) with no edge, so close it with a seam — the
+    // mirror of the flipped one `<FirstTeamsBlock>` ends on.
+    content: (
+      <>
+        <IdentityBand />
+        {uitgelichtSection ? null : (
+          <StripedSeam colorPair="cream-jersey-deep" height="md" />
+        )}
+      </>
+    ),
     paddingTop: "pt-0",
     paddingBottom: "pb-0",
   };

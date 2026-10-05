@@ -94,13 +94,15 @@ describe("PageHero", () => {
     expect(img).toHaveAttribute("src", "/images/youth-trainers.jpg");
   });
 
-  it("renders children in the words column of the cream band (#3417)", () => {
-    render(
+  it("renders children in the words column of the cream band, not beside the photo (#3417)", () => {
+    const { container } = render(
       <PageHero {...defaultProps} image="/images/word-lid-trainer.jpg">
         <p>Praktische info</p>
       </PageHero>,
     );
-    expect(screen.getByText("Praktische info")).toBeInTheDocument();
+    const column = screen.getByText("Praktische info").parentElement;
+    expect(column).toContainElement(screen.getByRole("heading", { level: 1 }));
+    expect(column).not.toContainElement(container.querySelector("img"));
   });
 
   it("keeps the hero image decorative — the h1 already names the page", () => {

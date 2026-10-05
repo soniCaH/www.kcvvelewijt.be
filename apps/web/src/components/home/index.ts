@@ -48,7 +48,6 @@ export {
 export type { FirstTeamsBlockProps, FirstTeamVM } from "./FirstTeamsBlock";
 
 export { IdentityBand } from "./IdentityBand";
-export type { IdentityBandProps } from "./IdentityBand";
 
 export { YouthSection, YouthBackdrop } from "./YouthSection";
 export type { YouthSectionProps } from "./YouthSection";

@@ -51,7 +51,11 @@ export default function WordLidLoading() {
           </p>
         </PageHero>
 
-        <MembershipForm />
+        {/* The cream band owns no bottom margin (unlike \`register="minimal"\`'s
+            baked-in \`mb-10\`) — same gap /kalender puts under its hero. */}
+        <div className="mt-10">
+          <MembershipForm />
+        </div>
       </PageContainer>
     </div>
   );
