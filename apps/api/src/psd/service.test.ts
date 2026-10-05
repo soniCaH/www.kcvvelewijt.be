@@ -1570,6 +1570,57 @@ describe("PsdService.getMatchDetail — status/score backfill from season list",
     },
   );
 
+  it("backfills a settled result over a non-settled /info (stopped, then ruled a forfeit)", async () => {
+    const stoppedDetail = {
+      general: { ...previewDetailResponse.general, status: 3 },
+    };
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => stoppedDetail,
+      text: async () => JSON.stringify(stoppedDetail),
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(99), {
+      kvMock: indexKvMock({
+        teamId: 1,
+        competitionType: "league",
+        status: "forfeited",
+        homeScore: 0,
+        awayScore: 5,
+      }),
+    });
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.status).toBe("forfeited");
+      expect(result.right.away_team.score).toBe(5);
+    }
+  });
+
+  it("keeps a future /info preview when a stale index still says postponed", async () => {
+    // The match was put back on the calendar under the same id; the index
+    // (cached up to 12h) has not caught up yet.
+    const futureDetail = {
+      general: { ...previewDetailResponse.general, date: "2099-01-15 15:00" },
+    };
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => futureDetail,
+      text: async () => JSON.stringify(futureDetail),
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(99), {
+      kvMock: indexKvMock({
+        teamId: 1,
+        competitionType: "league",
+        status: "postponed",
+      }),
+    });
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") expect(result.right.status).toBe("scheduled");
+  });
+
   it("does not downgrade a result /info already reports (forward-only)", async () => {
     // /info reports finished 2-0; a stale index still says "scheduled" — keep
     // the richer /info result rather than reverting to a preview.

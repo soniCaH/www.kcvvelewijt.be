@@ -38,6 +38,7 @@ import {
   type CompetitionLabelMap,
   resolveCompetitionType,
   mapGameStatus,
+  isSettledMatchStatus,
   transformFootbalistoMatchDetail,
   transformFootbalistoRankingEntry,
   stripPsdName,
@@ -832,7 +833,12 @@ export const PsdServiceLive = Layer.effect(
                 // cancelled — while `/info` is still preview-shaped (null goals
                 // → "scheduled"), backfill status + score forward so the page
                 // stops showing a preview for a match that already happened.
-                // Forward-only: never downgrade an outcome `/info` reports.
+                // A settled result also overrides a non-settled `/info` (a
+                // stopped match later ruled a forfeit). Never downgrade a result
+                // `/info` already reports. Stopped / postponed / cancelled can
+                // be undone (the match is put back on the calendar under the
+                // same id) and the index may be 12h stale, so those only win
+                // once kickoff has passed.
                 //
                 // Best-effort: this reads the match-team index, cached up to 12h
                 // (MATCH_TEAM_INDEX_TTL) since team assignments change weekly. So
@@ -842,7 +848,11 @@ export const PsdServiceLive = Layer.effect(
                 // settling (a few hours later), which the report-pending TTL in
                 // `matchDetailTtl` keeps re-checking rather than pinning stale.
                 const backfill =
-                  entry.status !== "scheduled" && detail.status === "scheduled";
+                  (isSettledMatchStatus(entry.status) &&
+                    !isSettledMatchStatus(detail.status)) ||
+                  (entry.status !== "scheduled" &&
+                    detail.status === "scheduled" &&
+                    new Date(detail.date).getTime() < Date.now());
 
                 const enriched = {
                   ...detail,
