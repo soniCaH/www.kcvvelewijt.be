@@ -107,7 +107,7 @@ export const CLUB_HUB_CARDS: ClubHubCard[] = [
     href: "/club/word-lid",
     title: "Word lid",
     arrowText: "Schrijf je in",
-    imageUrl: "/images/youth-trainers.jpg",
+    imageUrl: "/images/word-lid-trainer.jpg",
   },
   {
     variant: "nav",

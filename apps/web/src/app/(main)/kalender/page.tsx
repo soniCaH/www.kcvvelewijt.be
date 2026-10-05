@@ -192,7 +192,7 @@ export default async function CalendarPage({
           kicker="Kalender"
           headline="Wedstrijdkalender"
           lead="Bekijk alle wedstrijden en activiteiten van KCVV Elewijt."
-          image="/images/youth-trainers.jpg"
+          image="/images/kalender-matchday.jpg"
         />
         {/* The taped-card hero owns no bottom margin of its own (unlike
             `register="minimal"`'s baked-in `mb-10`) — matches that same

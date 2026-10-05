@@ -1,0 +1,1 @@
+export { IdentityBand } from "./IdentityBand";

@@ -94,6 +94,17 @@ describe("PageHero", () => {
     expect(img).toHaveAttribute("src", "/images/youth-trainers.jpg");
   });
 
+  it("renders children in the words column of the cream band, not beside the photo (#3417)", () => {
+    const { container } = render(
+      <PageHero {...defaultProps} image="/images/word-lid-trainer.jpg">
+        <p>Praktische info</p>
+      </PageHero>,
+    );
+    const column = screen.getByText("Praktische info").parentElement;
+    expect(column).toContainElement(screen.getByRole("heading", { level: 1 }));
+    expect(column).not.toContainElement(container.querySelector("img"));
+  });
+
   it("keeps the hero image decorative — the h1 already names the page", () => {
     // #2559 rule 1. The empty alt is a decision, not a parameter default:
     // there is no prop a caller could pass to override it.

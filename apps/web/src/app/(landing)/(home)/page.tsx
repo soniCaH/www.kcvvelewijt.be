@@ -65,6 +65,7 @@ import {
   deriveFirstTeamVM,
   selectSeniorTeams,
   ClubshopBanner,
+  IdentityBand,
   YouthBackdrop,
   YouthSection,
 } from "@/components/home";
@@ -72,7 +73,11 @@ import {
   EditorialHero,
   toEditorialHeroProps,
 } from "@/components/article/EditorialHero";
-import { PageContainer, SectionStack } from "@/components/design-system";
+import {
+  PageContainer,
+  SectionStack,
+  StripedSeam,
+} from "@/components/design-system";
 import type { SectionConfig } from "@/components/design-system";
 import { mapMatchesToUpcomingMatches } from "@/lib/mappers";
 import { getTeamMatches } from "@/lib/server/match-data";
@@ -376,6 +381,28 @@ export default async function HomePage() {
     paddingBottom: "pb-0",
   };
 
+  // "Er is maar één plezante compagnie." over the youth huddle (#3417).
+  // Self-contained dark band with no seam of its own — `firstTeamsSection`
+  // already closes with one — so the SectionStack wrapper stays flush.
+  const identityBandSection: SectionConfig = {
+    key: "identity-band",
+    bg: "transparent",
+    // Uitgelicht's cream-soft field is the band's lower edge. Without it the
+    // dark band would run straight into the next band's `bg-jersey-deep`
+    // (the featured event) with no edge, so close it with a seam — the
+    // mirror of the flipped one `<FirstTeamsBlock>` ends on.
+    content: (
+      <>
+        <IdentityBand />
+        {uitgelichtSection ? null : (
+          <StripedSeam colorPair="cream-jersey-deep" height="md" />
+        )}
+      </>
+    ),
+    paddingTop: "pt-0",
+    paddingBottom: "pb-0",
+  };
+
   // Unconditional (#2505/#2844/#2944), same as `upcomingMatchesSection`
   // below: `<FeaturedEventBand>` itself decides null-vs-notice from `event`
   // + `unavailable`, so the section config here never nulls out — one rule,
@@ -508,6 +535,10 @@ export default async function HomePage() {
             // behind the hero and three Uitgelicht cards, which contradicted
             // product principle 1 ("the result is the headline").
             firstTeamsSection,
+            // #3417: who the club is, once. Directly after "Eerste ploegen."
+            // (whose closing seam is the band's top edge), before
+            // "Uitgelicht." — never above the hero (#2387).
+            identityBandSection,
             uitgelichtSection,
             featuredEventSection,
             bannerSlotASection,

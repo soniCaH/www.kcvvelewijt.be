@@ -68,6 +68,8 @@ export type SectionHeaderBase = {
   ruled?: boolean;
   /** Override the rendered heading level. Default: h2 */
   as?: "h1" | "h2" | "h3";
+  /** `id` of the rendered heading, for a section's `aria-labelledby`. */
+  id?: string;
   className?: string;
 };
 
@@ -121,6 +123,7 @@ export const SectionHeader = ({
   variant = "light",
   ruled = false,
   as = "h2",
+  id,
   className,
 }: SectionHeaderProps) => {
   const isDark = variant === "dark";
@@ -150,6 +153,7 @@ export const SectionHeader = ({
       size={size}
       emphasis={emphasis}
       tone={isDark ? "cream" : "ink"}
+      id={id}
     >
       {title}
     </EditorialHeading>

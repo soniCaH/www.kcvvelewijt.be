@@ -121,6 +121,16 @@ describe("SectionHeader", () => {
     });
   });
 
+  describe("Heading id", () => {
+    it("passes id to the heading so a section can name itself by it", () => {
+      render(<SectionHeader title="Nieuws" id="news-heading" />);
+      expect(screen.getByRole("heading", { name: "Nieuws." })).toHaveAttribute(
+        "id",
+        "news-heading",
+      );
+    });
+  });
+
   describe("Ruled variant", () => {
     it("does not render ruled markup by default", () => {
       const { container } = render(<SectionHeader title="Nieuws" />);

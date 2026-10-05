@@ -23,7 +23,7 @@ const CANONICAL_TRIGGER_REGEX =
   "responsibility_|search_|organigram_|related_content_|related_article_|" +
   "article_|event_|player_|match_|team_|clubshop_banner_|kalender_|sponsor_|" +
   "banner_|nav_|footer_|jeugd_|hub_|board_|geschiedenis_|ultras_|membership_|" +
-  "error_|gallery_|empty_state_|inhoud_";
+  "error_|gallery_|empty_state_|inhoud_|identity_band_";
 
 describe("analytics-taxonomy", () => {
   it("buildTriggerRegex() equals the canonical string", () => {

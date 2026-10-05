@@ -29,7 +29,7 @@ export default function WordLidLoading() {
 
       <PageContainer width="prose">
         <PageHero
-          register="minimal"
+          image="/images/word-lid-trainer.jpg"
           kicker="Sluit je aan"
           headline="Doe mee"
           accent="mee"
@@ -41,9 +41,21 @@ export default function WordLidLoading() {
               Praktische info
             </EditorialLink>
           </p>
+          <p className="text-body-md mt-2">
+            <a
+              href="/downloads/intern-reglement-jeugd-2026.pdf"
+              className="prose-link"
+            >
+              Intern reglement jeugd (pdf)
+            </a>
+          </p>
         </PageHero>
 
-        <MembershipForm />
+        {/* The cream band owns no bottom margin (unlike \`register="minimal"\`'s
+            baked-in \`mb-10\`) — same gap /kalender puts under its hero. */}
+        <div className="mt-10">
+          <MembershipForm />
+        </div>
       </PageContainer>
     </div>
   );
