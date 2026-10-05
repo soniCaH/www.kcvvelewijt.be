@@ -35,7 +35,9 @@ const COLUMNS_CLASS: Record<TapedCardGridColumns, string> = {
 };
 
 const GAP_CLASS: Record<TapedCardGridGap, string> = {
-  sm: "gap-3",
+  // Tight on one column; once cards sit side by side their lean and offset
+  // shadow need air, or neighbours nearly touch (club + jeugd hubs).
+  sm: "gap-3 sm:gap-6 lg:gap-8",
   md: "gap-6",
   lg: "gap-10",
 };
