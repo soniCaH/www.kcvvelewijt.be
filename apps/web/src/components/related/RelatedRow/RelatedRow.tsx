@@ -263,8 +263,11 @@ export function RelatedRow({
         />
         {/* ART-2 (#2237): a roomier gap than the cards need cramped in —
             `gap-6 md:gap-8` is now `<HorizontalSlider>`'s own default
-            (#2444 resolution), so no override is needed here any more. */}
-        <HorizontalSlider>
+            (#2444 resolution), so no override is needed here any more.
+            The side padding is room for the tilt: a leaning card's corner
+            and its offset shadow poke a few px past the track, and the
+            scroller clipped them at the first and last card. */}
+        <HorizontalSlider trackClassName="px-2">
           {items.map((item, i) => {
             const position = i + 1;
             return (

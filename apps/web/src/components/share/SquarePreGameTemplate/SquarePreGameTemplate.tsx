@@ -60,16 +60,18 @@ export function SquarePreGameTemplate({
             style={{ margin: "36px 0 32px" }}
           />
         )}
+        {/* Over a photo the face owns the top 60%: smaller names keep the
+            stack in the bottom band, clear of the eyes. */}
         <ShareName
-          fontSize={116}
-          style={hasImage ? { marginTop: "32px" } : undefined}
+          fontSize={hasImage ? 80 : 116}
+          style={hasImage ? { marginTop: "24px" } : undefined}
         >
           {home}
         </ShareName>
         {away && (
           <>
-            <Dash fontSize={70} style={{ margin: "6px 0" }} />
-            <ShareName fontSize={116} accent>
+            <Dash fontSize={hasImage ? 48 : 70} style={{ margin: "6px 0" }} />
+            <ShareName fontSize={hasImage ? 80 : 116} accent>
               {away}
             </ShareName>
           </>

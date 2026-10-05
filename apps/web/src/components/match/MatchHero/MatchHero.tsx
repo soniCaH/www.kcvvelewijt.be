@@ -150,6 +150,17 @@ function MetaLine({ parts }: { parts: string[] }) {
   );
 }
 
+function VsMark() {
+  return (
+    <span
+      data-score-state="vs"
+      className="font-display text-ink-muted text-[22px] leading-none lowercase italic"
+    >
+      vs
+    </span>
+  );
+}
+
 function ScoreRegion({
   status,
   homeScore,
@@ -161,27 +172,20 @@ function ScoreRegion({
 }) {
   switch (status) {
     case "scheduled":
-      return (
-        <span
-          data-score-state="vs"
-          className="font-display text-ink-muted text-[22px] leading-none lowercase italic"
-        >
-          vs
-        </span>
-      );
+      return <VsMark />;
     case "finished":
     case "forfeited":
     case "postponed":
     case "cancelled":
     case "stopped": {
-      // The scoreline is inside the page's <h1> (#2555), so what it contributes
-      // to the accessible name matters. A postponed or scoreless match paints
-      // three em dashes, which read as "em dash em dash em dash" — so the
-      // placeholders go silent and a hidden "vs" carries the name instead. That
-      // is the rule the retired `formatMatchTitle` applied: the score form only
-      // when both scores are actually numbers, otherwise "A vs B".
-      const hasScores =
-        typeof homeScore === "number" && typeof awayScore === "number";
+      // The score form only when both scores are actually numbers, otherwise
+      // "A vs B" — the rule the retired `formatMatchTitle` applied. A scoreless
+      // match used to paint three 34px em dashes, which ate ~118px and cut the
+      // team names to three letters on a phone; the status badge (FF, STOP…)
+      // already says why there is no score.
+      if (typeof homeScore !== "number" || typeof awayScore !== "number") {
+        return <VsMark />;
+      }
       return (
         <div
           data-score-state="numeric"
@@ -191,16 +195,11 @@ function ScoreRegion({
           // NumberDisplay.tsx for the full measurement this rests on).
           className="font-display-big text-ink flex items-baseline gap-2 text-[34px] leading-none font-black"
         >
-          {hasScores ? null : <span className="sr-only">vs</span>}
-          <span aria-hidden={!hasScores}>
-            {typeof homeScore === "number" ? homeScore : "—"}
-          </span>
+          <span>{homeScore}</span>
           <span aria-hidden="true" className="text-ink-muted">
             {"—"}
           </span>
-          <span aria-hidden={!hasScores}>
-            {typeof awayScore === "number" ? awayScore : "—"}
-          </span>
+          <span>{awayScore}</span>
         </div>
       );
     }
@@ -250,7 +249,7 @@ function TeamSlot({
       )}
       <span
         title={team.name.trim() || undefined}
-        className="font-display text-ink min-w-0 flex-1 truncate text-[18px] leading-tight italic md:text-[22px]"
+        className="font-display text-ink line-clamp-2 min-w-0 flex-1 text-[18px] leading-tight break-words italic md:text-[22px]"
       >
         {team.name}
       </span>

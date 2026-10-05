@@ -1546,6 +1546,30 @@ describe("PsdService.getMatchDetail — status/score backfill from season list",
     }
   });
 
+  it.each(["stopped", "postponed", "cancelled"] as const)(
+    "backfills a %s status when /info still says scheduled",
+    async (status) => {
+      // A match abandoned in the 89' (#3464, 26 Sep 2026) carries STOP in the
+      // season list while `/info` can still be preview-shaped — the page kept
+      // saying VOORBESCHOUWING for a match that had been played.
+      (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        ok: true,
+        json: async () => previewDetailResponse,
+        text: async () => JSON.stringify(previewDetailResponse),
+      });
+
+      const result = await runService((svc) => svc.getMatchDetail(99), {
+        kvMock: indexKvMock({ teamId: 1, competitionType: "league", status }),
+      });
+
+      expect(result._tag).toBe("Right");
+      if (result._tag === "Right") {
+        expect(result.right.status).toBe(status);
+        expect(result.right.home_team.score).toBeUndefined();
+      }
+    },
+  );
+
   it("does not downgrade a result /info already reports (forward-only)", async () => {
     // /info reports finished 2-0; a stale index still says "scheduled" — keep
     // the richer /info result rather than reverting to a preview.
