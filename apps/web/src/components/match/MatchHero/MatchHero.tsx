@@ -249,7 +249,7 @@ function TeamSlot({
       )}
       <span
         title={team.name.trim() || undefined}
-        className="font-display text-ink line-clamp-2 min-w-0 flex-1 text-[18px] leading-tight break-words italic md:text-[22px]"
+        className="font-display text-ink min-w-0 flex-1 truncate text-[18px] leading-tight italic md:text-[22px]"
       >
         {team.name}
       </span>
