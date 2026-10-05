@@ -67,7 +67,9 @@ export function SquareResultTemplate({
         )}
         <Kicker>Eindstand</Kicker>
         <Scoreline
-          fontSize={286}
+          // Over a photo the face owns the top 60%; the full-size stack ran
+          // straight across the eyes, so it shrinks to fit the bottom band.
+          fontSize={hasImage ? 170 : 286}
           style={{
             marginTop: "14px",
             textShadow: hasImage ? "8px 12px 0 rgba(0,0,0,0.45)" : undefined,
@@ -77,12 +79,12 @@ export function SquareResultTemplate({
         </Scoreline>
         <Headline
           punctuation={m.punctuation}
-          fontSize={116}
+          fontSize={hasImage ? 84 : 116}
           style={{ marginTop: "18px" }}
         >
           {m.headline}
         </Headline>
-        {competition && (
+        {competition && !hasImage && (
           <Meta style={{ marginTop: "36px" }}>{competition}</Meta>
         )}
       </ShareMid>

@@ -95,10 +95,8 @@ describe("MatchHero", () => {
             match={{ ...baseMatch, date: finishedMatchDate, status }}
           />,
         );
-        // The em-dash placeholders still paint — `textContent` keeps them — so
-        // this asserts the accessible NAME, which is what `aria-hidden` moves.
         const heading = screen.getByRole("heading", { level: 1 });
-        expect(heading.textContent).toContain("—");
+        expect(heading.textContent).not.toContain("—");
         expect(heading).toHaveAccessibleName(/KCVV Elewijt\s*vs\s*RC Mechelen/);
       },
     );
@@ -198,7 +196,7 @@ describe("MatchHero", () => {
       );
     });
 
-    it("renders em-dash placeholders when score is missing on a finished status", () => {
+    it("paints 'vs', not em-dash placeholders, when a cancelled match has no score", () => {
       render(
         <MatchHero
           match={{
@@ -208,9 +206,9 @@ describe("MatchHero", () => {
           }}
         />,
       );
-      // The score region itself + the em-dash separator all use "—".
-      // Two missing-score slots + the separator = three em-dashes.
-      expect(screen.getAllByText("—")).toHaveLength(3);
+      // Three 34px dashes left a phone ~3 letters per team name.
+      expect(screen.queryByText("—")).toBeNull();
+      expect(screen.getByText("vs")).toHaveAttribute("data-score-state", "vs");
     });
   });
 

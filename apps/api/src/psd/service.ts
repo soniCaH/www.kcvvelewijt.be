@@ -827,12 +827,18 @@ export const PsdServiceLive = Layer.effect(
                 const entry = index[String(matchId)];
                 if (!entry) return detail;
                 // The season-games list is authoritative for status + score and
-                // reflects the final result before `/info` catches up (PSD fills
+                // reflects the outcome before `/info` catches up (PSD fills
                 // goals/lineups a while after full-time). When the list already
-                // has a settled result but `/info` is still preview-shaped (null
-                // goals → "scheduled"), backfill status + score forward so the
-                // page shows MATCHVERSLAG with the score instead of the preview.
-                // Forward-only: never downgrade a result `/info` already reports.
+                // has any outcome — a result, but also stopped / postponed /
+                // cancelled — while `/info` is still preview-shaped (null goals
+                // → "scheduled"), backfill status + score forward so the page
+                // stops showing a preview for a match that already happened.
+                // A settled result also overrides a non-settled `/info` (a
+                // stopped match later ruled a forfeit). Never downgrade a result
+                // `/info` already reports. Stopped / postponed / cancelled can
+                // be undone (the match is put back on the calendar under the
+                // same id) and the index may be 12h stale, so those only win
+                // once kickoff has passed.
                 //
                 // Best-effort: this reads the match-team index, cached up to 12h
                 // (MATCH_TEAM_INDEX_TTL) since team assignments change weekly. So
@@ -842,8 +848,11 @@ export const PsdServiceLive = Layer.effect(
                 // settling (a few hours later), which the report-pending TTL in
                 // `matchDetailTtl` keeps re-checking rather than pinning stale.
                 const backfill =
-                  isSettledMatchStatus(entry.status) &&
-                  !isSettledMatchStatus(detail.status);
+                  (isSettledMatchStatus(entry.status) &&
+                    !isSettledMatchStatus(detail.status)) ||
+                  (entry.status !== "scheduled" &&
+                    detail.status === "scheduled" &&
+                    new Date(detail.date).getTime() < Date.now());
 
                 const enriched = {
                   ...detail,

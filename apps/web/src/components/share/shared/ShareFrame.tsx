@@ -22,6 +22,10 @@ const SharePaletteContext = createContext<SharePalette>(
   resolvePalette("cream", "neutral"),
 );
 
+// True inside a frame that paints a player photo: ShareMid then drops its
+// content into the bottom band so the text never crosses the face.
+const SharePhotoContext = createContext(false);
+
 /** Read the resolved palette of the enclosing {@link ShareFrame}. */
 export function useSharePalette(): SharePalette {
   return useContext(SharePaletteContext);
@@ -90,91 +94,103 @@ export function ShareFrame({
 
   return (
     <SharePaletteContext.Provider value={palette}>
-      <div
-        style={{
-          width: `${width}px`,
-          height: `${height}px`,
-          position: "relative",
-          overflow: "hidden",
-          background: register === "image" ? TOKENS.jerseyDeepDark : surface,
-          backgroundImage: register === "image" ? undefined : GRAIN_DATA_URL,
-          fontFamily: BODY_FONT,
-          color: palette.text,
-        }}
-      >
-        {register === "image" && photoUrl && (
-          <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              // Route + sanitize at the sink: remote CDN images go through the
-              // same-origin Next optimizer (so html-to-image can read them),
-              // every path runs through a recognized sanitizer (js/xss-through-dom).
-              src={toSameOriginImage(photoUrl, 1080)}
-              alt=""
-              aria-hidden="true"
-              crossOrigin="anonymous"
-              style={{
-                position: "absolute",
-                inset: 0,
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                filter: "sepia(0.32) saturate(0.85) contrast(1.05)",
-                zIndex: 0,
-              }}
-            />
-            {/* paper-grain over the photo */}
-            <div
-              aria-hidden="true"
-              style={{
-                position: "absolute",
-                inset: 0,
-                backgroundImage: GRAIN_DATA_URL,
-                mixBlendMode: "multiply",
-                zIndex: 0,
-              }}
-            />
-            {/* jersey-deep gradient overlay keeps text legible */}
-            <div
-              aria-hidden="true"
-              style={{
-                position: "absolute",
-                inset: 0,
-                background: overlayGradient(overlay),
-                zIndex: 1,
-              }}
-            />
-          </>
-        )}
-
-        {decor && (
-          <div
-            aria-hidden="true"
-            style={{
-              position: "absolute",
-              inset: 0,
-              zIndex: 0,
-              overflow: "hidden",
-            }}
-          >
-            {decor}
-          </div>
-        )}
-
+      <SharePhotoContext.Provider value={register === "image" && !!photoUrl}>
         <div
           style={{
+            width: `${width}px`,
+            height: `${height}px`,
             position: "relative",
-            zIndex: 2,
-            height: "100%",
-            display: "flex",
-            flexDirection: "column",
-            padding,
+            overflow: "hidden",
+            background: register === "image" ? TOKENS.jerseyDeepDark : surface,
+            backgroundImage: register === "image" ? undefined : GRAIN_DATA_URL,
+            fontFamily: BODY_FONT,
             color: palette.text,
           }}
         >
-          {children}
+          {register === "image" && photoUrl && (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                // Route + sanitize at the sink: remote CDN images go through the
+                // same-origin Next optimizer (so html-to-image can read them),
+                // every path runs through a recognized sanitizer (js/xss-through-dom).
+                src={toSameOriginImage(photoUrl, 1080)}
+                alt=""
+                aria-hidden="true"
+                crossOrigin="anonymous"
+                // The photo owns the TOP of the frame and fades into the dark
+                // ground; the text sits below it (ShareMid). Full-bleed, a
+                // square player portrait put the eyes at ~40% height — right
+                // where the score and headline land. A story frame gets a square
+                // box (eyes at ~20%), a square frame the top 62%.
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: height > width ? `${width}px` : "62%",
+                  objectFit: "cover",
+                  objectPosition: "50% 15%",
+                  maskImage: "linear-gradient(180deg, #000 70%, transparent)",
+                  WebkitMaskImage:
+                    "linear-gradient(180deg, #000 70%, transparent)",
+                  filter: "sepia(0.32) saturate(0.85) contrast(1.05)",
+                  zIndex: 0,
+                }}
+              />
+              {/* paper-grain over the photo */}
+              <div
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  backgroundImage: GRAIN_DATA_URL,
+                  mixBlendMode: "multiply",
+                  zIndex: 0,
+                }}
+              />
+              {/* jersey-deep gradient overlay keeps text legible */}
+              <div
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background: overlayGradient(overlay),
+                  zIndex: 1,
+                }}
+              />
+            </>
+          )}
+
+          {decor && (
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                inset: 0,
+                zIndex: 0,
+                overflow: "hidden",
+              }}
+            >
+              {decor}
+            </div>
+          )}
+
+          <div
+            style={{
+              position: "relative",
+              zIndex: 2,
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+              padding,
+              color: palette.text,
+            }}
+          >
+            {children}
+          </div>
         </div>
-      </div>
+      </SharePhotoContext.Provider>
     </SharePaletteContext.Provider>
   );
 }
@@ -252,6 +268,7 @@ export function ShareMid({
   children: React.ReactNode;
   style?: React.CSSProperties;
 }) {
+  const overPhoto = useContext(SharePhotoContext);
   return (
     <div
       style={{
@@ -268,6 +285,9 @@ export function ShareMid({
             }
           : {}),
         ...style,
+        // Over a photo the face owns the upper half: the content sits at the
+        // bottom, on the darkest part of the gradient (overlayGradient).
+        ...(overPhoto ? { justifyContent: "flex-end", gap: "40px" } : {}),
       }}
     >
       {children}
