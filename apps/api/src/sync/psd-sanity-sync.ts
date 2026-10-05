@@ -298,6 +298,19 @@ const CYCLE_STAFF_IDS_KEY = "sync:cycle-staff-ids";
 const CYCLE_TEAM_IDS_KEY = "sync:cycle-team-ids";
 
 /**
+ * PSD staff the sync must never write to Sanity. For people who asked to be
+ * removed from the site but keep their PSD login, so removing them in PSD is
+ * not an option. Deleting their Sanity doc alone does not hold: the next run
+ * recreates it with `archived: false`. Skipped on both the team-scoped and
+ * the club-wide path, and left out of every team's `staffPsdIds`.
+ * After adding an id here, delete the person's `staffMember-psd-<id>` doc
+ * and its references in Sanity by hand.
+ */
+const SYNC_EXCLUDED_STAFF_PSD_IDS: ReadonlySet<string> = new Set(["257"]);
+const isSyncExcludedStaff = (m: { readonly id: number }) =>
+  SYNC_EXCLUDED_STAFF_PSD_IDS.has(String(m.id));
+
+/**
  * Sub-cursor within the team the outer cursor currently points at (#2900).
  * Tracks which of the CURRENT team's players/staff have already been fully
  * committed to Sanity this pass, so a run cut off mid-team resumes with
@@ -559,10 +572,11 @@ export const runSync = Effect.gen(function* () {
       }),
     );
 
-  const [members, staffMembers] = yield* Effect.all(
+  const [members, rawStaff] = yield* Effect.all(
     [psd.getRawMembers(team.id), psd.getRawStaff(team.id)],
     { concurrency: 2 },
   );
+  const staffMembers = rawStaff.filter((m) => !isSyncExcludedStaff(m));
   const { players, unknown } = partitionMembers(members);
   yield* Effect.log(
     `team ${team.id}: ${players.length} players, ${staffMembers.length} staff`,
@@ -788,7 +802,10 @@ export const runSync = Effect.gen(function* () {
         // firstName — skip nameless/non-person rows so no junk staffMember doc
         // is created. status is always "staff" here but filter defensively.
         const clubStaff = clubRaw.filter(
-          (m) => m.status === "staff" && m.firstName.trim() !== "",
+          (m) =>
+            m.status === "staff" &&
+            m.firstName.trim() !== "" &&
+            !isSyncExcludedStaff(m),
         );
         // Team-attached staff were already upserted during their team's run;
         // only the genuinely team-less members still need writing.

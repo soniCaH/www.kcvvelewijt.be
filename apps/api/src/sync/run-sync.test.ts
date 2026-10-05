@@ -937,6 +937,47 @@ describe("runSync", () => {
     expect(uploadStaffImage).not.toHaveBeenCalled();
   });
 
+  it("never writes a sync-excluded staff member, on either path", async () => {
+    const kvStub = makeKvStub();
+    // 257 is on SYNC_EXCLUDED_STAFF_PSD_IDS: they keep their PSD login but
+    // asked to be removed from the site.
+    const teamStaff: PsdMember[] = [ONE_STAFF, { ...ONE_STAFF, id: 257 }];
+    const clubStaff: PsdClubStaffMember[] = [
+      {
+        id: 257,
+        firstName: "Excluded",
+        lastName: "Member",
+        birthDate: null,
+        functionTitle: "Bestuurslid",
+        status: "staff",
+      },
+    ];
+    const { upsertStaff, upsertTeam, writerMock, readerMock } =
+      makeSanityMocks();
+    const psdMock = makePsdTeamClientMock(
+      [ONE_TEAM],
+      [ONE_PLAYER],
+      teamStaff,
+      clubStaff,
+    );
+
+    await Effect.runPromise(
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
+      ),
+    );
+
+    expect(upsertStaff).toHaveBeenCalledWith(
+      expect.objectContaining({ psdId: "8001" }),
+    );
+    expect(upsertStaff).not.toHaveBeenCalledWith(
+      expect.objectContaining({ psdId: "257" }),
+    );
+    expect(upsertTeam).toHaveBeenCalledWith(
+      expect.objectContaining({ staffPsdIds: ["8001"] }),
+    );
+  });
+
   it("skips staff archival when the club-wide staff fetch fails", async () => {
     const kvStub = makeKvStub();
 
