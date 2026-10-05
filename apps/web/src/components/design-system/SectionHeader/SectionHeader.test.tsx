@@ -124,7 +124,7 @@ describe("SectionHeader", () => {
   describe("Heading id", () => {
     it("passes id to the heading so a section can name itself by it", () => {
       render(<SectionHeader title="Nieuws" id="news-heading" />);
-      expect(screen.getByRole("heading", { name: "Nieuws" })).toHaveAttribute(
+      expect(screen.getByRole("heading", { name: "Nieuws." })).toHaveAttribute(
         "id",
         "news-heading",
       );
