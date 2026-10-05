@@ -298,15 +298,21 @@ const CYCLE_STAFF_IDS_KEY = "sync:cycle-staff-ids";
 const CYCLE_TEAM_IDS_KEY = "sync:cycle-team-ids";
 
 /**
- * PSD staff the sync must never write to Sanity. For people who asked to be
- * removed from the site but keep their PSD login, so removing them in PSD is
- * not an option. Deleting their Sanity doc alone does not hold: the next run
- * recreates it with `archived: false`. Skipped on both the team-scoped and
- * the club-wide path, and left out of every team's `staffPsdIds`.
- * After adding an id here, delete the person's `staffMember-psd-<id>` doc
- * and its references in Sanity by hand.
+ * PSD staff the sync must never write to Sanity. For people who must leave
+ * the site but stay in PSD (they keep their login, or the removal is temporary).
+ * Deleting or archiving their Sanity doc alone does not hold: the next run
+ * recreates it, or resets `archived: false`. Skipped on both the
+ * team-scoped and the club-wide path, and left out of every team's
+ * `staffPsdIds`.
+ * After adding an id here, delete (permanent) or archive (temporary) the
+ * person's `staffMember-psd-<id>` doc and unlink its references by hand.
+ * Removing an id later lets the next run write the person back, with
+ * `archived: false`.
  */
-const SYNC_EXCLUDED_STAFF_PSD_IDS: ReadonlySet<string> = new Set(["257"]);
+const SYNC_EXCLUDED_STAFF_PSD_IDS: ReadonlySet<string> = new Set([
+  "257", // removed for good, at their request
+  "10061", // temporary — remove this line when it ends
+]);
 const isSyncExcludedStaff = (m: { readonly id: number }) =>
   SYNC_EXCLUDED_STAFF_PSD_IDS.has(String(m.id));
 
