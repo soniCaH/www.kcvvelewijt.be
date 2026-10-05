@@ -89,6 +89,25 @@ describe("HomepageAnalytics", () => {
     });
   });
 
+  it.each(["word_lid", "onze_club"])(
+    "fires identity_band_click with cta %s",
+    async (cta) => {
+      render(
+        <HomepageAnalytics>
+          <a href="/test-route" data-identity-cta={cta}>
+            Knop
+          </a>
+        </HomepageAnalytics>,
+      );
+
+      await userEvent.click(screen.getByRole("link", { name: "Knop" }));
+
+      expect(mockTrackEvent).toHaveBeenCalledWith("identity_band_click", {
+        cta,
+      });
+    },
+  );
+
   it("ignores clicks on unmarked links", async () => {
     render(
       <HomepageAnalytics>

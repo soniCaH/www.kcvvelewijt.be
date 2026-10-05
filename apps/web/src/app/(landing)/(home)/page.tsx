@@ -65,6 +65,7 @@ import {
   deriveFirstTeamVM,
   selectSeniorTeams,
   ClubshopBanner,
+  IdentityBand,
   YouthBackdrop,
   YouthSection,
 } from "@/components/home";
@@ -376,6 +377,17 @@ export default async function HomePage() {
     paddingBottom: "pb-0",
   };
 
+  // "Er is maar één plezante compagnie." over the youth huddle (#3417).
+  // Self-contained dark band with no seam of its own — `firstTeamsSection`
+  // already closes with one — so the SectionStack wrapper stays flush.
+  const identityBandSection: SectionConfig = {
+    key: "identity-band",
+    bg: "transparent",
+    content: <IdentityBand />,
+    paddingTop: "pt-0",
+    paddingBottom: "pb-0",
+  };
+
   // Unconditional (#2505/#2844/#2944), same as `upcomingMatchesSection`
   // below: `<FeaturedEventBand>` itself decides null-vs-notice from `event`
   // + `unavailable`, so the section config here never nulls out — one rule,
@@ -508,6 +520,10 @@ export default async function HomePage() {
             // behind the hero and three Uitgelicht cards, which contradicted
             // product principle 1 ("the result is the headline").
             firstTeamsSection,
+            // #3417: who the club is, once. Directly after "Eerste ploegen."
+            // (whose closing seam is the band's top edge), before
+            // "Uitgelicht." — never above the hero (#2387).
+            identityBandSection,
             uitgelichtSection,
             featuredEventSection,
             bannerSlotASection,

@@ -64,6 +64,10 @@ export const prefixes = [
   // (which of the four groups) and `position` (rank inside it) dimensions, so
   // this prefix is the whole taxonomy change — no new custom definitions.
   "inhoud_",
+  // Homepage identity band (#3417). `identity_band_click` only; reuses the
+  // already-registered `cta` dimension (`word_lid` / `onze_club`) — no new
+  // custom definitions.
+  "identity_band_",
 ];
 
 /** The canonical GTM Custom-Event trigger RegEx (prefixes joined with `|`). */
