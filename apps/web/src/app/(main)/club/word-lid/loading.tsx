@@ -29,7 +29,7 @@ export default function WordLidLoading() {
 
       <PageContainer width="prose">
         <PageHero
-          register="minimal"
+          image="/images/word-lid-trainer.jpg"
           kicker="Sluit je aan"
           headline="Doe mee"
           accent="mee"
@@ -40,6 +40,14 @@ export default function WordLidLoading() {
             <EditorialLink href="/club/praktische-informatie">
               Praktische info
             </EditorialLink>
+          </p>
+          <p className="text-body-md mt-2">
+            <a
+              href="/downloads/intern-reglement-jeugd-2026.pdf"
+              className="prose-link"
+            >
+              Intern reglement jeugd (pdf)
+            </a>
           </p>
         </PageHero>
 

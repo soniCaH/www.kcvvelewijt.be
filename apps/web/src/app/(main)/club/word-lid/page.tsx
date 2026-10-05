@@ -47,7 +47,7 @@ export default function WordLidPage() {
       />
       <PageContainer width="prose">
         <PageHero
-          register="minimal"
+          image="/images/word-lid-trainer.jpg"
           kicker="Sluit je aan"
           headline="Doe mee"
           accent="mee"

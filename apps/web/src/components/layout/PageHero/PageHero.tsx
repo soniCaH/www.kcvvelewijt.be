@@ -51,8 +51,9 @@ import {
  * | `band` · `dark` | a front door whose opening carries **a group portrait of the people the page is about** | full-bleed `jersey-deep-dark` field — owns its own container, never wrap it |
  * | `minimal` | a listing you scroll, or a text / legal page | no band at all; content starts immediately |
  *
- * "Of the people the page is about" is load-bearing: `/kalender` shows a people
- * photo too, but it is decorative stock, so `/kalender` stays cream.
+ * "Of the people the page is about" is load-bearing: `/kalender` shows a club
+ * photo too (players in club kit, seen from behind), but it is not a group
+ * portrait of the people the page is about, so `/kalender` stays cream.
  *
  * `tone` follows the field, and the kicker follows the tone — jersey-deep mono
  * on cream, cream `<MonoLabel>` on dark. `minimal` inherits the page's own
@@ -131,7 +132,9 @@ export interface PageHeroProps {
   width?: PageContainerWidth;
   /**
    * Trailing opening content — a published date, a sibling link, an intro
-   * paragraph. `minimal` only: the band registers are a locked composition.
+   * paragraph. `minimal`, and `band` · `cream` (under the lead and CTA, in the
+   * words column — `/club/word-lid`'s practical-info links, #3417). `band` ·
+   * `dark` is a locked composition and ignores it.
    */
   children?: ReactNode;
   /** Optional CTA rendered as a primary `<LinkButton>`. Band · cream only. */
@@ -432,6 +435,7 @@ export function PageHero(props: PageHeroProps) {
     image,
     cta,
     adornment,
+    children,
     size = "default",
     className,
     upLink,
@@ -506,6 +510,8 @@ export function PageHero(props: PageHeroProps) {
           </LinkButton>
         </div>
       ) : null}
+
+      {children}
     </div>
   );
 

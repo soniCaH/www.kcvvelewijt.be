@@ -4,7 +4,7 @@
  * by-type chips on top, then a paper/ink panel (toolbar = view toggle · shared
  * period nav · subscribe) over a month grid.
  *
- * The hero's kicker/headline/lead and its `/images/youth-trainers.jpg` photo
+ * The hero's kicker/headline/lead and its `/images/kalender-matchday.jpg` photo
  * are all fixed copy/bundled assets, not data, so per #2432 §2 this reuses
  * the real `<PageHero>` unshimmered — default size (not compact), with the
  * image, matching the real page's own call exactly.
@@ -31,7 +31,7 @@ export default function CalendarLoading() {
           kicker="Kalender"
           headline="Wedstrijdkalender"
           lead="Bekijk alle wedstrijden en activiteiten van KCVV Elewijt."
-          image="/images/youth-trainers.jpg"
+          image="/images/kalender-matchday.jpg"
         />
 
         {/* Matches CalendarWidget's root <div className="space-y-4"> */}
