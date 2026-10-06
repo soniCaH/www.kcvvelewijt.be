@@ -340,6 +340,16 @@ async function waitForFontsSettled(timeoutMs: number) {
   ]);
 }
 
+// Runs in the page context: two animation frames, so layout and the
+// re-renders it triggers have painted. Capped at `frameTimeoutMs` — rAF never
+// fires while Chromium is not painting.
+function waitTwoFrames(frameTimeoutMs: number) {
+  return new Promise<void>((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    setTimeout(resolve, frameTimeoutMs);
+  });
+}
+
 // Runs in the page context (self-contained, like `waitForFontsSettled`):
 // flips lazy images to eager, then waits — capped at `loadTimeoutMs` per
 // stage — for every image to load and decode. Called once at the load
@@ -770,14 +780,7 @@ const config: TestRunnerConfig = {
       // decode and paint every image once at the load viewport before any
       // resize.
       await page.evaluate(waitForImagesSettled, IMAGE_LOAD_TIMEOUT_MS);
-      await page.evaluate(
-        (frameTimeoutMs: number) =>
-          new Promise<void>((resolve) => {
-            requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
-            setTimeout(resolve, frameTimeoutMs);
-          }),
-        FRAME_WAIT_TIMEOUT_MS,
-      );
+      await page.evaluate(waitTwoFrames, FRAME_WAIT_TIMEOUT_MS);
 
       for (const name of requestedViewports) {
         const vp = VIEWPORTS[name];
@@ -847,16 +850,7 @@ const config: TestRunnerConfig = {
         // Wait for two animation frames so that ResizeObserver callbacks
         // (e.g. useScrollHint in FilterTabs) and the React re-renders they
         // trigger have been painted before the screenshot is taken.
-        await page.evaluate(
-          (frameTimeoutMs: number) =>
-            new Promise<void>((resolve) => {
-              requestAnimationFrame(() =>
-                requestAnimationFrame(() => resolve()),
-              );
-              setTimeout(resolve, frameTimeoutMs);
-            }),
-          FRAME_WAIT_TIMEOUT_MS,
-        );
+        await page.evaluate(waitTwoFrames, FRAME_WAIT_TIMEOUT_MS);
 
         // Structural assertions (#2861) scoped to this viewport — real
         // `scrollWidth` vs `clientWidth` on a fixture, checked on every VR run
