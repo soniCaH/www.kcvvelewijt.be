@@ -340,6 +340,62 @@ async function waitForFontsSettled(timeoutMs: number) {
   ]);
 }
 
+// Runs in the page context (self-contained, like `waitForFontsSettled`):
+// flips lazy images to eager, then waits — capped at `loadTimeoutMs` per
+// stage — for every image to load and decode. Called once at the load
+// viewport, before the capture loop resizes anything, and again per viewport.
+async function waitForImagesSettled(loadTimeoutMs: number) {
+  for (const img of Array.from(document.images)) {
+    if (img.loading === "lazy") img.loading = "eager";
+  }
+  const imageWaits = Array.from(document.images)
+    .filter((img) => !img.complete)
+    .map(
+      (img) =>
+        new Promise<void>((resolve) => {
+          img.addEventListener("load", () => resolve(), {
+            once: true,
+          });
+          img.addEventListener(
+            "error",
+            () => {
+              console.warn(`[VR] image failed to load: ${img.src}`);
+              resolve();
+            },
+            { once: true },
+          );
+        }),
+    );
+  if (imageWaits.length > 0) {
+    await Promise.race([
+      Promise.all(imageWaits),
+      new Promise((resolve) => setTimeout(resolve, loadTimeoutMs)),
+    ]);
+  }
+  // `img.complete === true` (and the `load` event having fired) only
+  // means bytes arrived — the bitmap may still be undecoded and not
+  // yet committed to the compositor when `page.screenshot()` runs,
+  // producing intermittent low-res / placeholder-bleed diffs in CI.
+  // `HTMLImageElement.decode()` resolves only once the bitmap is
+  // decoded and ready to paint, which is the actual guarantee
+  // `page.screenshot()` needs. This is the fix for #1731 (NewsGrid
+  // tablet tile flake) and is intentionally applied to every image,
+  // not just NewsGrid's, so any future story with srcset-driven
+  // tiles inherits the same guarantee.
+  // Capped like the load wait above: `decode()` can stay pending,
+  // and `allSettled` alone waits for every one of them.
+  await Promise.race([
+    Promise.allSettled(
+      Array.from(document.images).map((img) =>
+        img.decode().catch(() => {
+          console.warn(`[VR] image failed to decode: ${img.src}`);
+        }),
+      ),
+    ),
+    new Promise((resolve) => setTimeout(resolve, loadTimeoutMs)),
+  ]);
+}
+
 // Replaces `@storybook/test-runner`'s vendored `waitForPageReady` (#3137,
 // flake ledger class G — see #3108's root cause): three uncapped
 // `page.waitForLoadState` calls plus an uncapped `document.fonts.ready`
@@ -705,6 +761,23 @@ const config: TestRunnerConfig = {
       await page.mouse.move(-1, -1);
       await waitForPageReadyCapped(page, NETWORK_IDLE_TIMEOUT_MS);
       await page.evaluate(waitForFontsSettled, FONT_LOAD_TIMEOUT_MS);
+      // Chromium decodes a downscaled image at the size it is FIRST rastered
+      // at and keeps that decode across later resizes. If a photo's bytes land
+      // after the loop below has already shrunk the page to mobile, its mobile
+      // pixels differ from a run where it was first drawn at the load
+      // viewport — `kalender-matchday.jpg` in the CalendarWidget route skeleton
+      // flipped 999 px that way, decided only by network timing. So load,
+      // decode and paint every image once at the load viewport before any
+      // resize.
+      await page.evaluate(waitForImagesSettled, IMAGE_LOAD_TIMEOUT_MS);
+      await page.evaluate(
+        (frameTimeoutMs: number) =>
+          new Promise<void>((resolve) => {
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+            setTimeout(resolve, frameTimeoutMs);
+          }),
+        FRAME_WAIT_TIMEOUT_MS,
+      );
 
       for (const name of requestedViewports) {
         const vp = VIEWPORTS[name];
@@ -770,60 +843,7 @@ const config: TestRunnerConfig = {
             // networkidle is a soft signal — fall through to the explicit
             // per-image waits, which are what actually gate the screenshot.
           });
-        await page.evaluate(
-          async ([loadTimeoutMs]: [number]) => {
-            for (const img of Array.from(document.images)) {
-              if (img.loading === "lazy") img.loading = "eager";
-            }
-            const imageWaits = Array.from(document.images)
-              .filter((img) => !img.complete)
-              .map(
-                (img) =>
-                  new Promise<void>((resolve) => {
-                    img.addEventListener("load", () => resolve(), {
-                      once: true,
-                    });
-                    img.addEventListener(
-                      "error",
-                      () => {
-                        console.warn(`[VR] image failed to load: ${img.src}`);
-                        resolve();
-                      },
-                      { once: true },
-                    );
-                  }),
-              );
-            if (imageWaits.length > 0) {
-              await Promise.race([
-                Promise.all(imageWaits),
-                new Promise((resolve) => setTimeout(resolve, loadTimeoutMs)),
-              ]);
-            }
-            // `img.complete === true` (and the `load` event having fired) only
-            // means bytes arrived — the bitmap may still be undecoded and not
-            // yet committed to the compositor when `page.screenshot()` runs,
-            // producing intermittent low-res / placeholder-bleed diffs in CI.
-            // `HTMLImageElement.decode()` resolves only once the bitmap is
-            // decoded and ready to paint, which is the actual guarantee
-            // `page.screenshot()` needs. This is the fix for #1731 (NewsGrid
-            // tablet tile flake) and is intentionally applied to every image,
-            // not just NewsGrid's, so any future story with srcset-driven
-            // tiles inherits the same guarantee.
-            // Capped like the load wait above: `decode()` can stay pending,
-            // and `allSettled` alone waits for every one of them.
-            await Promise.race([
-              Promise.allSettled(
-                Array.from(document.images).map((img) =>
-                  img.decode().catch(() => {
-                    console.warn(`[VR] image failed to decode: ${img.src}`);
-                  }),
-                ),
-              ),
-              new Promise((resolve) => setTimeout(resolve, loadTimeoutMs)),
-            ]);
-          },
-          [IMAGE_LOAD_TIMEOUT_MS] as [number],
-        );
+        await page.evaluate(waitForImagesSettled, IMAGE_LOAD_TIMEOUT_MS);
         // Wait for two animation frames so that ResizeObserver callbacks
         // (e.g. useScrollHint in FilterTabs) and the React re-renders they
         // trigger have been painted before the screenshot is taken.
