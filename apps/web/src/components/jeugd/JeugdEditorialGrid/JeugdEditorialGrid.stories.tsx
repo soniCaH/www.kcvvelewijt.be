@@ -68,7 +68,7 @@ export const WithArticles: Story = {
 /**
  * No Jeugd articles — the hub collapses to the six pinned nav cards. This is
  * also the mixed tile-treatment story (#2965): 3 with a club photo (#3072) behind
- * a jersey-deep-dark scrim ("Word lid van KCVV", "Ons leerplan", "Trainingen
+ * a jersey-deep-dark scrim ("Word lid van KCVV", "Onze opleidingsvisie", "Trainingen
  * & ProSoccerData") and 3 on the flat bg-jersey-deep + glyph fallback
  * ("Organigram", "Wie contacteer ik?", "Blessure of medisch attest?") — the
  * VR baseline for the mixed grid.

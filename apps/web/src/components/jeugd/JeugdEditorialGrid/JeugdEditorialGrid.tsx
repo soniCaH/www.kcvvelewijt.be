@@ -39,7 +39,7 @@ interface NavCardConfig {
  * one is the duplicate #2965 was filed for, and a test asserts the count.
  *
  * Three of the six carry an `image` (#2965): "Word lid van KCVV",
- * "Ons leerplan" and "Trainingen & ProSoccerData" — club photos from the
+ * "Onze opleidingsvisie" and "Trainingen & ProSoccerData" — club photos from the
  * 2026-09-05 Jeugdwedstrijddag, owner-approved (#3072). The other three
  * ("Organigram", "Wie contacteer ik?", "Blessure of medisch attest?") have
  * none: no photo exists that actually depicts those, and a generic stand-in
@@ -61,9 +61,13 @@ const NAV_CARDS: NavCardConfig[] = [
     // that promise: the full jeugdopleiding curriculum, and the club's
     // most-searched document (17 clicks / 695 impressions a year). It lived
     // only on the legacy Drupal host until this change.
-    title: "Ons leerplan",
+    //
+    // 2026-10: the jeugdwerking delivered its current opleidingsvisie
+    // (versie 10, december 2024), which replaces the 2019 leerplan here.
+    // The 2019 file stays in `public/downloads/` so search links keep working.
+    title: "Onze opleidingsvisie",
     arrowText: "Download",
-    href: "/downloads/leerplan-jeugdopleiding-2019.pdf",
+    href: "/downloads/opleidingsvisie-jeugd-2024.pdf",
     iconName: "DownloadSimple",
     external: true,
     image: "/images/jeugd/leerplan-sprint-met-trainer.jpg",

@@ -52,7 +52,7 @@ describe("JeugdEditorialGrid", () => {
     render(<JeugdEditorialGrid articles={[]} />);
 
     expect(screen.getByText("Word lid van KCVV")).toBeInTheDocument();
-    expect(screen.getByText("Ons leerplan")).toBeInTheDocument();
+    expect(screen.getByText("Onze opleidingsvisie")).toBeInTheDocument();
     expect(screen.getByText("Trainingen & ProSoccerData")).toBeInTheDocument();
     expect(screen.getByText("Organigram")).toBeInTheDocument();
     expect(screen.getByText("Wie contacteer ik?")).toBeInTheDocument();
@@ -76,10 +76,12 @@ describe("JeugdEditorialGrid", () => {
     expect(hrefs).toContain("/hulp#prosoccerdata-gebruiken");
     expect(hrefs).toContain("/hulp?categorie=medisch#hulp");
 
-    // #2960: the jeugdvisie tile is now the leerplan download. `/jeugd#visie`
-    // scrolled to a single sentence on this same page; the leerplan is the
-    // long form of the same promise.
-    expect(hrefs).toContain("/downloads/leerplan-jeugdopleiding-2019.pdf");
+    // #2960: the jeugdvisie tile is a document download, not `/jeugd#visie`
+    // (a single sentence on this same page). Since 2026-10 that document is
+    // the jeugdwerking's current opleidingsvisie (versie 10, december 2024),
+    // which supersedes the 2019 leerplan.
+    expect(hrefs).toContain("/downloads/opleidingsvisie-jeugd-2024.pdf");
+    expect(hrefs).not.toContain("/downloads/leerplan-jeugdopleiding-2019.pdf");
     expect(hrefs).not.toContain("/jeugd#visie");
 
     // Exactly one card may still point at the bare hub — "Wie contacteer ik?",
@@ -98,17 +100,17 @@ describe("JeugdEditorialGrid", () => {
     expect(hrefs).not.toContain("/jeugd/medisch");
   });
 
-  it("renders the leerplan tile as a document link, not a route (#2960)", () => {
+  it("renders the opleidingsvisie tile as a document link, not a route (#2960)", () => {
     render(<JeugdEditorialGrid articles={[]} />);
 
     const pdf = screen
       .getAllByRole("link")
       .find((l) =>
-        l.getAttribute("href")?.endsWith("leerplan-jeugdopleiding-2019.pdf"),
+        l.getAttribute("href")?.endsWith("opleidingsvisie-jeugd-2024.pdf"),
       );
-    expect(pdf, "leerplan tile missing").toBeDefined();
+    expect(pdf, "opleidingsvisie tile missing").toBeDefined();
 
-    // `next/link` has no file-extension guard: it would prefetch 642 KB on
+    // `next/link` has no file-extension guard: it would prefetch ~400 KB on
     // viewport entry for every visitor, and open the PDF in the same tab over
     // the site. A plain anchor opts out of both.
     expect(pdf!).toHaveAttribute("target", "_blank");
@@ -199,7 +201,7 @@ describe("JeugdEditorialGrid", () => {
   it("wires a photo to exactly the three approved nav tiles (#2965)", () => {
     const { container } = render(<JeugdEditorialGrid articles={[]} />);
 
-    // "Word lid van KCVV", "Ons leerplan" and "Trainingen & ProSoccerData"
+    // "Word lid van KCVV", "Onze opleidingsvisie" and "Trainingen & ProSoccerData"
     // each ship a club photo (#3072); the other three nav tiles
     // ("Organigram", "Wie contacteer ik?", "Blessure of medisch attest?")
     // render no filler photo and keep today's flat bg-jersey-deep + glyph.
@@ -250,7 +252,9 @@ describe("JeugdEditorialGrid", () => {
 
       expect(screen.getByText("Sanity Nav Card 1")).toBeInTheDocument();
       expect(screen.getByText("Sanity Nav Card 2")).toBeInTheDocument();
-      expect(screen.queryByText("Ons leerplan")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("Onze opleidingsvisie"),
+      ).not.toBeInTheDocument();
     });
 
     it("renders nav card links from Sanity config", () => {
@@ -334,7 +338,7 @@ describe("JeugdEditorialGrid", () => {
       render(<JeugdEditorialGrid articles={[]} editorialConfig={null} />);
 
       expect(screen.getByText("Word lid van KCVV")).toBeInTheDocument();
-      expect(screen.getByText("Ons leerplan")).toBeInTheDocument();
+      expect(screen.getByText("Onze opleidingsvisie")).toBeInTheDocument();
     });
 
     it("falls back to hardcoded defaults when editorialConfig is undefined", () => {
