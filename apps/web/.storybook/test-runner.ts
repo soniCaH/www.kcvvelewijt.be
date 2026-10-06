@@ -340,6 +340,124 @@ async function waitForFontsSettled(timeoutMs: number) {
   ]);
 }
 
+// Runs in the page context. Chromium decodes a downscaled image at a size
+// picked from the viewport it is rastered at, and after a resize it sometimes
+// reuses the decode it already has and sometimes decodes again — at random.
+// So the same story could capture two different mobile photos: the CalendarWidget
+// route skeleton flipped 999 px inside `kalender-matchday.jpg` (flake ledger
+// row 33). A fresh load at the capture viewport gave one PNG in 43 runs. A
+// per-viewport query string makes every image a new resource, so it is
+// fetched and decoded fresh at this viewport, whatever came before: one PNG in
+// 24 runs, even after desktop → tablet → mobile.
+function freshImageDecodes(viewport: string) {
+  const bust = (url: string) => {
+    if (url.startsWith("data:") || url.startsWith("blob:")) return url;
+    const next = new URL(url, location.href);
+    next.searchParams.set("__vr", viewport);
+    return next.href;
+  };
+  const bustSrcset = (srcset: string) =>
+    srcset
+      .split(",")
+      .map((candidate) => {
+        const [url = "", ...descriptor] = candidate.trim().split(/\s+/);
+        return [bust(url), ...descriptor].join(" ");
+      })
+      .join(", ");
+  for (const source of Array.from(
+    document.querySelectorAll("source[srcset]"),
+  )) {
+    const el = source as HTMLSourceElement;
+    el.srcset = bustSrcset(el.srcset);
+  }
+  for (const img of Array.from(document.images)) {
+    if (img.srcset) img.srcset = bustSrcset(img.srcset);
+    const src = img.getAttribute("src");
+    if (src) img.src = bust(src);
+  }
+}
+
+// Runs in the page context: scroll to the bottom and back, one frame each
+// (capped at `frameTimeoutMs`), so every IntersectionObserver fires — that is
+// what starts a `next/image` lazy load, not the `loading` attribute.
+async function scrollThroughPage(frameTimeoutMs: number) {
+  const nextFrame = () =>
+    Promise.race([
+      new Promise((r) => requestAnimationFrame(() => r(undefined))),
+      new Promise((r) => setTimeout(r, frameTimeoutMs)),
+    ]);
+  window.scrollTo(0, document.documentElement.scrollHeight);
+  await nextFrame();
+  window.scrollTo(0, 0);
+  await nextFrame();
+}
+
+// Runs in the page context: two animation frames, so layout and the
+// re-renders it triggers have painted. Capped at `frameTimeoutMs` — rAF never
+// fires while Chromium is not painting.
+function waitTwoFrames(frameTimeoutMs: number) {
+  return new Promise<void>((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    setTimeout(resolve, frameTimeoutMs);
+  });
+}
+
+// Runs in the page context (self-contained, like `waitForFontsSettled`):
+// flips lazy images to eager, then waits — capped at `loadTimeoutMs` per
+// stage — for every image to load and decode. Called once at the load
+// viewport, before the capture loop resizes anything, and again per viewport.
+async function waitForImagesSettled(loadTimeoutMs: number) {
+  for (const img of Array.from(document.images)) {
+    if (img.loading === "lazy") img.loading = "eager";
+  }
+  const imageWaits = Array.from(document.images)
+    .filter((img) => !img.complete)
+    .map(
+      (img) =>
+        new Promise<void>((resolve) => {
+          img.addEventListener("load", () => resolve(), {
+            once: true,
+          });
+          img.addEventListener(
+            "error",
+            () => {
+              console.warn(`[VR] image failed to load: ${img.src}`);
+              resolve();
+            },
+            { once: true },
+          );
+        }),
+    );
+  if (imageWaits.length > 0) {
+    await Promise.race([
+      Promise.all(imageWaits),
+      new Promise((resolve) => setTimeout(resolve, loadTimeoutMs)),
+    ]);
+  }
+  // `img.complete === true` (and the `load` event having fired) only
+  // means bytes arrived — the bitmap may still be undecoded and not
+  // yet committed to the compositor when `page.screenshot()` runs,
+  // producing intermittent low-res / placeholder-bleed diffs in CI.
+  // `HTMLImageElement.decode()` resolves only once the bitmap is
+  // decoded and ready to paint, which is the actual guarantee
+  // `page.screenshot()` needs. This is the fix for #1731 (NewsGrid
+  // tablet tile flake) and is intentionally applied to every image,
+  // not just NewsGrid's, so any future story with srcset-driven
+  // tiles inherits the same guarantee.
+  // Capped like the load wait above: `decode()` can stay pending,
+  // and `allSettled` alone waits for every one of them.
+  await Promise.race([
+    Promise.allSettled(
+      Array.from(document.images).map((img) =>
+        img.decode().catch(() => {
+          console.warn(`[VR] image failed to decode: ${img.src}`);
+        }),
+      ),
+    ),
+    new Promise((resolve) => setTimeout(resolve, loadTimeoutMs)),
+  ]);
+}
+
 // Replaces `@storybook/test-runner`'s vendored `waitForPageReady` (#3137,
 // flake ledger class G — see #3108's root cause): three uncapped
 // `page.waitForLoadState` calls plus an uncapped `document.fonts.ready`
@@ -705,10 +823,10 @@ const config: TestRunnerConfig = {
       await page.mouse.move(-1, -1);
       await waitForPageReadyCapped(page, NETWORK_IDLE_TIMEOUT_MS);
       await page.evaluate(waitForFontsSettled, FONT_LOAD_TIMEOUT_MS);
-
       for (const name of requestedViewports) {
         const vp = VIEWPORTS[name];
         await page.setViewportSize(vp);
+        await page.evaluate(freshImageDecodes, name);
         // `page.setViewportSize` returns as soon as the browser has accepted the
         // resize, but CSS reflow + the next paint pass happen asynchronously.
         // Poll on the document's own `clientWidth` so we don't proceed until the
@@ -747,18 +865,7 @@ const config: TestRunnerConfig = {
         // empty even after the eager flip. Scroll to bottom + back to top
         // first so every IO callback fires, then flip the attribute as a
         // belt-and-braces, then wait. Test-runner-only.
-        await page.evaluate(async (frameTimeoutMs: number) => {
-          const nextFrame = () =>
-            Promise.race([
-              new Promise((r) => requestAnimationFrame(() => r(undefined))),
-              new Promise((r) => setTimeout(r, frameTimeoutMs)),
-            ]);
-          const fullHeight = document.documentElement.scrollHeight;
-          window.scrollTo(0, fullHeight);
-          await nextFrame();
-          window.scrollTo(0, 0);
-          await nextFrame();
-        }, FRAME_WAIT_TIMEOUT_MS);
+        await page.evaluate(scrollThroughPage, FRAME_WAIT_TIMEOUT_MS);
         // After `setViewportSize`, the browser may pick a different `srcset`
         // candidate for every `<img>` and kick off a fresh network request. Wait
         // for the network to settle so the per-image load/decode pair below
@@ -770,73 +877,11 @@ const config: TestRunnerConfig = {
             // networkidle is a soft signal — fall through to the explicit
             // per-image waits, which are what actually gate the screenshot.
           });
-        await page.evaluate(
-          async ([loadTimeoutMs]: [number]) => {
-            for (const img of Array.from(document.images)) {
-              if (img.loading === "lazy") img.loading = "eager";
-            }
-            const imageWaits = Array.from(document.images)
-              .filter((img) => !img.complete)
-              .map(
-                (img) =>
-                  new Promise<void>((resolve) => {
-                    img.addEventListener("load", () => resolve(), {
-                      once: true,
-                    });
-                    img.addEventListener(
-                      "error",
-                      () => {
-                        console.warn(`[VR] image failed to load: ${img.src}`);
-                        resolve();
-                      },
-                      { once: true },
-                    );
-                  }),
-              );
-            if (imageWaits.length > 0) {
-              await Promise.race([
-                Promise.all(imageWaits),
-                new Promise((resolve) => setTimeout(resolve, loadTimeoutMs)),
-              ]);
-            }
-            // `img.complete === true` (and the `load` event having fired) only
-            // means bytes arrived — the bitmap may still be undecoded and not
-            // yet committed to the compositor when `page.screenshot()` runs,
-            // producing intermittent low-res / placeholder-bleed diffs in CI.
-            // `HTMLImageElement.decode()` resolves only once the bitmap is
-            // decoded and ready to paint, which is the actual guarantee
-            // `page.screenshot()` needs. This is the fix for #1731 (NewsGrid
-            // tablet tile flake) and is intentionally applied to every image,
-            // not just NewsGrid's, so any future story with srcset-driven
-            // tiles inherits the same guarantee.
-            // Capped like the load wait above: `decode()` can stay pending,
-            // and `allSettled` alone waits for every one of them.
-            await Promise.race([
-              Promise.allSettled(
-                Array.from(document.images).map((img) =>
-                  img.decode().catch(() => {
-                    console.warn(`[VR] image failed to decode: ${img.src}`);
-                  }),
-                ),
-              ),
-              new Promise((resolve) => setTimeout(resolve, loadTimeoutMs)),
-            ]);
-          },
-          [IMAGE_LOAD_TIMEOUT_MS] as [number],
-        );
+        await page.evaluate(waitForImagesSettled, IMAGE_LOAD_TIMEOUT_MS);
         // Wait for two animation frames so that ResizeObserver callbacks
         // (e.g. useScrollHint in FilterTabs) and the React re-renders they
         // trigger have been painted before the screenshot is taken.
-        await page.evaluate(
-          (frameTimeoutMs: number) =>
-            new Promise<void>((resolve) => {
-              requestAnimationFrame(() =>
-                requestAnimationFrame(() => resolve()),
-              );
-              setTimeout(resolve, frameTimeoutMs);
-            }),
-          FRAME_WAIT_TIMEOUT_MS,
-        );
+        await page.evaluate(waitTwoFrames, FRAME_WAIT_TIMEOUT_MS);
 
         // Structural assertions (#2861) scoped to this viewport — real
         // `scrollWidth` vs `clientWidth` on a fixture, checked on every VR run
