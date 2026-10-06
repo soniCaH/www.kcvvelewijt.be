@@ -305,6 +305,32 @@ function socialBrandFor(
   return null;
 }
 
+/**
+ * A list item whose only visible text is one or more social links. A bullet
+ * list made only of these renders as a row of brand buttons, not as bullets
+ * with a box on each line.
+ */
+function isSocialOnlyListItem(item: PortableTextBlock): boolean {
+  const socialKeys = new Set(
+    (item.markDefs ?? [])
+      .filter(
+        (d) =>
+          d._type === "link" &&
+          typeof d.href === "string" &&
+          d.href.startsWith("http") &&
+          socialBrandFor(d.href) !== null,
+      )
+      .map((d) => d._key),
+  );
+  const spans = (item.children as { text?: string; marks?: string[] }[]).filter(
+    (c) => (c.text ?? "").trim() !== "",
+  );
+  return (
+    spans.length > 0 &&
+    spans.every((c) => (c.marks ?? []).some((m) => socialKeys.has(m)))
+  );
+}
+
 function TransferFactGroup({ facts }: { facts: TransferFactValue[] }) {
   if (facts.length === 0) return null;
   if (facts.length === 1) {
@@ -771,9 +797,17 @@ export function buildComponents({
     // not wrapped in `prose`, so lists need explicit markers/indent here or they
     // render as flat text.
     list: {
-      bullet: ({ children }) => (
-        <ul className="my-4 list-disc space-y-1 pl-6">{children}</ul>
-      ),
+      bullet: ({ children, value }) =>
+        value.children.every(isSocialOnlyListItem) ? (
+          <ul
+            data-article-list="social"
+            className="my-4 flex flex-wrap gap-3 [&>li]:pl-0"
+          >
+            {children}
+          </ul>
+        ) : (
+          <ul className="my-4 list-disc space-y-1 pl-6">{children}</ul>
+        ),
       number: ({ children }) => (
         <ol className="my-4 list-decimal space-y-1 pl-6">{children}</ol>
       ),
