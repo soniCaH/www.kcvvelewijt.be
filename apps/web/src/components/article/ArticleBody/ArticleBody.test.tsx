@@ -221,6 +221,24 @@ describe("<ArticleBody>", () => {
       expect(mixed.container.querySelector("ul")?.className).toContain(
         "list-disc",
       );
+
+      const nested = render(
+        <ArticleBody
+          content={[
+            paragraph("First paragraph, plain (DropCap target)."),
+            item("fb", "Facebook", "https://facebook.com/KCVVElewijt/"),
+            {
+              ...paragraph("Een gewone sub-bullet"),
+              _key: "sub",
+              listItem: "bullet",
+              level: 2,
+            } as PortableTextBlock,
+          ]}
+        />,
+      );
+      expect(nested.container.querySelector("ul")?.className).toContain(
+        "list-disc",
+      );
     });
 
     it("recognises social subdomains (m.facebook.com) but not look-alikes", () => {

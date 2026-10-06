@@ -322,9 +322,15 @@ function isSocialOnlyListItem(item: PortableTextBlock): boolean {
       )
       .map((d) => d._key),
   );
-  const spans = (item.children as { text?: string; marks?: string[] }[]).filter(
-    (c) => (c.text ?? "").trim() !== "",
-  );
+  const children = item.children as {
+    _type: string;
+    text?: string;
+    marks?: string[];
+  }[];
+  // A nested list is appended to its parent item's children (`@list`) — that
+  // is other content, so the item keeps its bullet.
+  if (children.some((c) => c._type !== "span")) return false;
+  const spans = children.filter((c) => (c.text ?? "").trim() !== "");
   return (
     spans.length > 0 &&
     spans.every((c) => (c.marks ?? []).some((m) => socialKeys.has(m)))
