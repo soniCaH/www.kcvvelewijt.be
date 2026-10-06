@@ -4,45 +4,57 @@ Consult this when working with Sanity, the BFF, Effect patterns, or the api-cont
 
 ## Stack Quick Reference
 
-| Concern           | Location                       | Pattern                                            |
-| ----------------- | ------------------------------ | -------------------------------------------------- |
-| Sanity queries    | `apps/web/src/lib/sanity/`     | GROQ via `@sanity/client`                          |
-| Effect schemas    | `packages/api-contract/src/`   | `S.Struct`, never `S.Unknown`                      |
-| BFF endpoints     | `apps/api/src/`                | Hono + Cloudflare Workers + wrangler               |
-| Web data fetching | `apps/web/src/lib/effect/`     | Effect + HttpClient                                |
-| Studio schemas    | `packages/sanity-schemas/src/` | Sanity schema definitions (shared by both studios) |
+| Concern            | Location                                         | Pattern                                                                 |
+| ------------------ | ------------------------------------------------ | ----------------------------------------------------------------------- |
+| Sanity reads       | `apps/web/src/lib/repositories/*.repository.ts`  | `defineQuery` + `fetchGroq` (`lib/sanity/fetch-groq.ts`), `Context.Tag` |
+| Effect schemas     | `packages/api-contract/src/schemas/`             | `Schema as S` from `effect`, never `S.Unknown`                          |
+| API definition     | `packages/api-contract/src/api/`                 | `@effect/platform` `HttpApiGroup` / `HttpApiEndpoint`, merged `PsdApi`  |
+| BFF handlers       | `apps/api/src/handlers/`                         | `HttpApiBuilder` on Cloudflare Workers, KV via `TypedKvCache`           |
+| Web BFF client     | `apps/web/src/lib/effect/services/BffService.ts` | `HttpApiClient.make(PsdApi)`                                            |
+| Web Effect runtime | `apps/web/src/lib/effect/runtime.ts`             | `runPromise` — error channel must be `never`                            |
+| Studio schemas     | `packages/sanity-schemas/src/`                   | Sanity schema definitions (shared by both studios)                      |
 
-## Sanity Patterns
+## Sanity Reads
+
+Never call `sanityClient.fetch` directly. Every read goes through `fetchGroq`, which fails with a typed `SanityReadError`. Query result types come from `apps/web/src/lib/sanity/sanity.types.ts` (typegen).
 
 ```typescript
-// Standard GROQ query with projection
-const query = groq`*[_type == "article" && slug.current == $slug][0]{
-  _id,
-  title,
-  "slug": slug.current,
-  publishedAt,
-  body[]{
-    ...,
-    _type == "image" => { ..., asset-> }
-  }
-}`;
+import { defineQuery } from "groq";
+import { fetchGroq } from "../sanity/fetch-groq";
+import type { PAGE_BY_SLUG_QUERY_RESULT } from "../sanity/sanity.types";
 
-// Always pass type param to createClient fetch
-const result = await client.fetch<SanityArticle>(query, { slug });
+const PAGE_BY_SLUG_QUERY = defineQuery(`*[_type == "page" && slug.current == $slug][0] { ... }`);
+
+// Inside the repository's Layer
+findBySlug: (slug) =>
+  fetchGroq<PAGE_BY_SLUG_QUERY_RESULT>(PAGE_BY_SLUG_QUERY, { slug }).pipe(
+    Effect.map((row) => row ?? null),
+  ),
 ```
 
-## Effect Patterns
+## Running Effects in a Page
+
+`runPromise` from `@/lib/effect/runtime` only accepts an effect whose error channel is `never`, so every failure is resolved at the call site (#2433):
+
+- **Section read** (the page survives without it): `degradeSection(effect, fallback, note)` from `lib/effect/degrade.ts`. Use `degradeSectionFlagged` when the fallback value (e.g. `null`) is also a real result.
+- **Subject read** (the page is about it): `Effect.orDie` with a one-line reason — a failure goes to the global boundary.
+- **BFF call**: `Effect.catchAll`/`Effect.catchTags`, not `degradeSection` — a BFF error is classified permanent vs. transient first.
 
 ```typescript
-// Service layer — always return Effect, never throw
-const getMatches = (teamId: string) =>
-  HttpClient.get(`/matches/${teamId}`).pipe(
-    Effect.flatMap((r) => S.decode(MatchesResponseSchema)(r.json)),
-    Effect.mapError((e) => new BffError({ cause: e })),
-  );
+import { runPromise } from "@/lib/effect/runtime";
+import { BffService } from "@/lib/effect/services/BffService";
 
-// In Next.js server components
-const matches = await Effect.runPromise(getMatches(teamId));
+const matches = await runPromise(
+  Effect.gen(function* () {
+    const bff = yield* BffService;
+    return yield* bff.getNextMatches();
+  }).pipe(
+    Effect.catchAll((error) => {
+      console.error("[HomePage] Failed to fetch matches:", error);
+      return Effect.succeed(null);
+    }),
+  ),
+);
 ```
 
 ## api-contract Rules
@@ -50,7 +62,7 @@ const matches = await Effect.runPromise(getMatches(teamId));
 - `moduleResolution: bundler` — no `.js` extensions on imports inside `packages/api-contract/src/`
 - After any change: `pnpm turbo build --filter=@kcvv/web` — tsc passing ≠ Turbopack happy
 - Barrel re-export pitfall: never `export * from A` + `export * from B` if A re-exports something from B
-- Only match/ranking/stats endpoints belong in PsdApi — players/teams come from Sanity
+- `PsdApi` groups today: `matches`, `ranking`, `opponent`, `related`, `search`, `forms`. Players, teams, staff and articles come from Sanity repositories, not the BFF
 
 ## BFF / Wrangler
 
@@ -59,7 +71,7 @@ Use Node 24 — the repo's own floor (`.nvmrc`, `package.json` → `engines.node
 **Production deploys from CI on merge to `main`** (`ci.yml`'s `deploy` job) — a hand deploy from a worktree is the exception, not the normal path. When you do need one, both CI deploy jobs build `api-contract` first; skip that step and a manual deploy can bundle a missing or stale contract.
 
 ```bash
-# Build api-contract first — both CI deploy jobs do this before deploying (ci.yml:643, :700)
+# Build api-contract first — both CI deploy jobs do this before deploying (ci.yml "Build api-contract" steps)
 corepack pnpm turbo build --filter=@kcvv/api-contract
 
 # Staging first — verify there before production. `deploy` is a pnpm BUILT-IN
