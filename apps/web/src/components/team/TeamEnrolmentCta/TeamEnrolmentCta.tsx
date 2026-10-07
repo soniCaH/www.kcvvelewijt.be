@@ -102,7 +102,7 @@ export const TeamEnrolmentCta = ({
       </div>
 
       <p className="text-cream relative z-10 mt-4 mb-6 text-base leading-relaxed">
-        Er is maar één plezante compagnie — en die begint op het veld.
+        Er is maar 1 plezante compagnie — en die begint op het veld.
       </p>
 
       <LinkButton

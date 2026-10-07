@@ -40,7 +40,7 @@ export const SiteFooter = ({ className }: SiteFooterProps) => {
             <span className="text-jersey-deep">Elewijt</span>
           </h2>
           <p className="font-display text-ink text-display-sm mt-4 font-bold italic">
-            Er is maar één{" "}
+            Er is maar 1{" "}
             <em className="text-jersey-deep font-extrabold">plezante</em>{" "}
             compagnie.
           </p>
