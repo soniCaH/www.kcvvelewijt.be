@@ -64,8 +64,9 @@ export const ARTICLES_QUERY =
   body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId, archived } } } }
 }`);
 
+// One entry per (published article, tag) pair — `findTags` counts them.
 const ARTICLE_TAGS_QUERY = defineQuery(
-  `array::unique(*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())].tags[])`,
+  `*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())]{ "tags": array::unique(tags) }.tags[]`,
 );
 
 // Intentionally pure chronological order — paginated listings power the
@@ -454,6 +455,20 @@ export function toHomepageArticles(
   return articles.map((a) => toHomepageArticle(a));
 }
 
+/** A tag and how many published articles carry it. */
+export interface TagCount {
+  name: string;
+  count: number;
+}
+
+function countTags(tags: ARTICLE_TAGS_QUERY_RESULT): TagCount[] {
+  const counts = new Map<string, number>();
+  for (const tag of tags) {
+    if (tag != null) counts.set(tag, (counts.get(tag) ?? 0) + 1);
+  }
+  return [...counts].map(([name, count]) => ({ name, count }));
+}
+
 // ─── Service ─────────────────────────────────────────────────────────────────
 
 export interface ArticleRepositoryInterface {
@@ -466,10 +481,7 @@ export interface ArticleRepositoryInterface {
     limit: number;
     category?: string;
   }) => Effect.Effect<ArticleVM[], SanityReadError>;
-  readonly findTags: () => Effect.Effect<
-    ARTICLE_TAGS_QUERY_RESULT,
-    SanityReadError
-  >;
+  readonly findTags: () => Effect.Effect<TagCount[], SanityReadError>;
   readonly findRelated: (
     documentId: string,
   ) => Effect.Effect<ArticleVM[], SanityReadError>;
@@ -526,7 +538,10 @@ export const ArticleRepositoryLive = Layer.succeed(ArticleRepository, {
       end: offset + limit,
       category: category ?? "",
     }).pipe(Effect.map((rows) => rows.map(widenToArticleVM))),
-  findTags: () => fetchGroq<ARTICLE_TAGS_QUERY_RESULT>(ARTICLE_TAGS_QUERY),
+  findTags: () =>
+    fetchGroq<ARTICLE_TAGS_QUERY_RESULT>(ARTICLE_TAGS_QUERY).pipe(
+      Effect.map(countTags),
+    ),
   // Tagged for the same reason as `findBySlug` — this one is read by four
   // routes, three of which also had their window shortened by #2563.
   findRelated,
