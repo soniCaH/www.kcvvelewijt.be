@@ -115,7 +115,7 @@ export const SingleTeamNoFilter: Story = {
 };
 
 /**
- * A youth tournament placeholder (#2606) among the other-teams agenda — no
+ * A youth tournament placeholder (#2606) in the match agenda — no
  * opponent, no link, the club crest and the competition subject instead of
  * "KCVV Elewijt — KCVV Elewijt" (#2688).
  */

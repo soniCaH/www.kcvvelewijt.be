@@ -9,14 +9,14 @@ import { assertNever } from "@/lib/utils/assert-never";
 import type { UpcomingRow } from "@/components/match/types";
 
 /**
- * Map Match (domain model) to the homepage other-teams agenda's row shape.
+ * Map Match (domain model) to the homepage match agenda's row shape.
  *
  * Branches on `matchRowKind()` (#2606/#2696) into the three `UpcomingRow`
  * members (#2688/#2802) — a pitch reservation has no opponent to map onto
  * `homeTeam`/`awayTeam`, so building one unconditionally rendered
  * "KCVV Elewijt — KCVV Elewijt" on `<UpcomingMatchesClient>`, the surface
- * most likely to carry one (it renders exactly the non-senior/youth
- * matches, and youth tournaments are where reservations come from). A
+ * most likely to carry one (it renders every team's next match, youth
+ * included, and youth tournaments are where reservations come from). A
  * tournament fixture with no result yet gets the same reduced treatment for
  * the same reason every other renderer of this predicate does —
  * `<UpcomingMatchesClient>` had no such branch before this ticket.

@@ -356,9 +356,9 @@ describe("UpcomingMatches", () => {
     });
   });
 
-  // #2606, #2688 — the other-teams agenda is the surface most likely to carry
-  // a pitch-reservation placeholder: it renders exactly the non-senior/youth
-  // matches, and youth tournaments are where reservations come from. Before
+  // #2606, #2688 — the match agenda is the surface most likely to carry
+  // a pitch-reservation placeholder: it renders every team's next match,
+  // youth included, and youth tournaments are where reservations come from. Before
   // #2688 this row rendered as an ordinary linked "KCVV Elewijt — KCVV
   // Elewijt" fixture with a home badge — nothing pinned it.
   describe("pitch-reservation placeholder (#2606, #2688)", () => {
