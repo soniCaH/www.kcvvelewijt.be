@@ -38,22 +38,24 @@ findBySlug: (slug) =>
 
 - **Section read** (the page survives without it): `degradeSection(effect, fallback, note)` from `lib/effect/degrade.ts`. Use `degradeSectionFlagged` when the fallback value (e.g. `null`) is also a real result.
 - **Subject read** (the page is about it): `Effect.orDie` with a one-line reason — a failure goes to the global boundary.
-- **BFF call**: `Effect.catchAll`/`Effect.catchTags`, not `degradeSection` — a BFF error is classified permanent vs. transient first.
+- **BFF call**: classify first, not `degradeSection`. `degradeIfPermanent` (`lib/effect/degrade-if-permanent.ts`) degrades only the permanent tags in `PERMANENT_BFF_TAGS` (`HttpNotFound`, `ParseError`, `HttpApiDecodeError`). A transient failure (timeout, 502/503) still rejects, so ISR serves the last good page instead of caching the fallback. Once the read is already a rejected `Promise`, classify with `isPermanentBffFailure` (`lib/effect/classify-bff-failure.ts`).
 
 ```typescript
 import { runPromise } from "@/lib/effect/runtime";
 import { BffService } from "@/lib/effect/services/BffService";
+import { degradeIfPermanent } from "@/lib/effect/degrade-if-permanent";
 
-const matches = await runPromise(
-  Effect.gen(function* () {
-    const bff = yield* BffService;
-    return yield* bff.getNextMatches();
-  }).pipe(
-    Effect.catchAll((error) => {
-      console.error("[HomePage] Failed to fetch matches:", error);
-      return Effect.succeed(null);
+// From `ploegen/[slug]/(detail)/page.tsx`
+const standings = await runPromise(
+  degradeIfPermanent(
+    Effect.gen(function* () {
+      const bff = yield* BffService;
+      return yield* bff.getRanking(psdTeamId);
     }),
-  ),
+    null, // permanent failure → section shows "unavailable"
+    // What is left is transient by construction; orDie only satisfies
+    // runPromise's `never` channel — it still rejects, as intended.
+  ).pipe(Effect.orDie),
 );
 ```
 
