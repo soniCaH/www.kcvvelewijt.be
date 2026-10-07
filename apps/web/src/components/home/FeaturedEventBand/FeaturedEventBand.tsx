@@ -163,8 +163,22 @@ function formatDateTime(dateStart: string, dateEnd?: string | null): string {
 }
 
 /**
- * Every drop-if-empty condition in one place: null event, missing cover
- * image, invalid date, or start time already past. A type guard rather than
+ * Shown when the event has no cover of its own (#3434) — most club events
+ * have no poster. One fixed collage of real club photos (camp lunch, camp,
+ * Halloween training, the title party) on felt, never a grey box. The figure
+ * has no caption, so the alt carries the moment (TapedFigure's either-or,
+ * #2559) — and says these are club scenes, not this event.
+ */
+const FALLBACK_COVER: FeaturedEventBandImage = {
+  url: "/images/event-fallback.jpg",
+  alt: "Sfeerbeelden van KCVV Elewijt: middageten op jeugdkamp, een kamp in het zand, Halloweentraining en het kampioenenfeest",
+};
+
+/**
+ * The band's drop-if-empty conditions: null event, empty title or slug,
+ * invalid date, or start time already past (`toFeaturedEventBandEvent` drops
+ * a missing `dateStart` before this). A missing cover is not one —
+ * `FALLBACK_COVER` fills it (#3434). A type guard rather than
  * a plain boolean so the one call site below both makes the hold-vs-drop
  * decision exactly once (review finding on #2944 — two copies of `return
  * unavailable ? <Notice /> : null` risked a third drop condition someday
@@ -174,8 +188,8 @@ function formatDateTime(dateStart: string, dateEnd?: string | null): string {
 function isRenderableEvent(
   event: FeaturedEventBandEvent | null,
   now: DateTime,
-): event is FeaturedEventBandEvent & { coverImage: FeaturedEventBandImage } {
-  if (!event || !event.coverImage) return false;
+): event is FeaturedEventBandEvent {
+  if (!event || !event.title.trim() || !event.slug) return false;
   const start = toDisplayZone(event.dateStart);
   return start.isValid && start >= now;
 }
@@ -195,6 +209,7 @@ export const FeaturedEventBand = ({
     return unavailable ? <FeaturedEventUnavailableNotice /> : null;
   }
 
+  const cover = event.coverImage ?? FALLBACK_COVER;
   const location = event.location?.trim() || "Kantine";
   const ctaUrl = event.externalLink?.url || `/evenementen/${event.slug}`;
   const ctaLabel = event.externalLink?.label || "Lees verder";
@@ -218,8 +233,8 @@ export const FeaturedEventBand = ({
           bg="cream"
         >
           <Image
-            src={event.coverImage.url}
-            alt={event.coverImage.alt}
+            src={cover.url}
+            alt={cover.alt}
             fill
             className="object-cover"
             sizes="(max-width: 880px) 100vw, 40vw"

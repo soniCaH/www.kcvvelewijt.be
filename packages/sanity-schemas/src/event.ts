@@ -54,7 +54,8 @@ export const event = defineType({
       type: 'image',
       group: 'inhoud',
       options: {hotspot: true},
-      description: 'Sfeerbeeld bovenaan de detailpagina, in kleur getoond. Dient ook als deelafbeelding als er geen aparte OG-afbeelding is.',
+      description:
+        'Optioneel. Sfeerbeeld bovenaan de detailpagina, in kleur getoond. Dient ook als deelafbeelding als er geen aparte OG-afbeelding is. Zonder foto toont de detailpagina het evenement zonder beeld, en toont de homepage een vaste collage van clubfoto\'s.',
       fields: [
         defineField({
           name: 'alt',
