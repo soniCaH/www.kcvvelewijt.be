@@ -280,7 +280,7 @@ function MembershipFormFields({
           municipality,
           email,
           priorClub: priorClub || undefined,
-          remark: remark.trim() || undefined,
+          remark: remark || undefined,
           parentEmail: minor ? parentEmail : undefined,
           parentalConsent: minor ? parentalConsent : undefined,
           medicalCertAcknowledged: isPlayer
@@ -303,6 +303,7 @@ function MembershipFormFields({
           role,
           is_minor: minor,
           has_prior_club: priorClub.trim() !== "",
+          has_remark: remark.trim() !== "",
         });
         clearDraft();
         setState("success");
@@ -512,20 +513,6 @@ function MembershipFormFields({
               error={fieldErrors.priorClub}
             />
           </div>
-          <div className="md:col-span-2">
-            <Label htmlFor={fieldId("remark")} optional>
-              Opmerking
-            </Label>
-            <Textarea
-              id={fieldId("remark")}
-              name="remark"
-              rows={4}
-              maxLength={1000}
-              value={remark}
-              onChange={(e) => setField("remark", e.target.value)}
-              error={fieldErrors.remark}
-            />
-          </div>
         </div>
 
         {isPlayer ? (
@@ -573,6 +560,20 @@ function MembershipFormFields({
             </CheckboxField>
           </div>
         ) : null}
+
+        <div className="mt-6">
+          <Label htmlFor={fieldId("remark")} optional>
+            Opmerking
+          </Label>
+          <Textarea
+            id={fieldId("remark")}
+            name="remark"
+            rows={4}
+            maxLength={1000}
+            value={remark}
+            onChange={(e) => setField("remark", e.target.value)}
+          />
+        </div>
 
         <div className="mt-6">
           <CheckboxField

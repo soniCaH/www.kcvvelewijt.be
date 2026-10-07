@@ -697,6 +697,22 @@ describe("MembershipForm", () => {
       expect(storedDraft()).toMatchObject({ firstName: "Jan" });
     });
 
+    it("keeps a draft saved before a field was added", async () => {
+      const { remark: _remark, ...olderDraft } = {
+        ...EMPTY_DRAFT,
+        role: "vrijwilliger" as const,
+        firstName: "Jan",
+      };
+      window.sessionStorage.setItem(
+        DRAFT_STORAGE_KEY,
+        JSON.stringify(olderDraft),
+      );
+      render(<MembershipForm />);
+      expect(await screen.findByText(RESTORED_NOTE)).toBeInTheDocument();
+      expect(screen.getByLabelText(/Voornaam/)).toHaveValue("Jan");
+      expect(screen.getByLabelText(/Opmerking/)).toHaveValue("");
+    });
+
     it("ignores a malformed draft", () => {
       window.sessionStorage.setItem(DRAFT_STORAGE_KEY, '{"firstName":3}');
       render(<MembershipForm />);

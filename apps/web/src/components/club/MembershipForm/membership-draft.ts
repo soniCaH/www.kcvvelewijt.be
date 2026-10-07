@@ -85,7 +85,13 @@ export function readDraft(): MembershipDraft | null {
   try {
     const raw = storage()?.getItem(DRAFT_STORAGE_KEY);
     if (!raw) return null;
-    const parsed: unknown = JSON.parse(raw);
+    const stored: unknown = JSON.parse(raw);
+    // A field added after the draft was saved (#3433's `remark`) starts empty
+    // instead of throwing the whole draft away.
+    const parsed: unknown =
+      typeof stored === "object" && stored !== null
+        ? { ...EMPTY_DRAFT, ...stored }
+        : stored;
     return isDraft(parsed) && !isEmptyDraft(parsed) ? parsed : null;
   } catch {
     return null;
