@@ -39,7 +39,7 @@ function applicantHtml(payload: MembershipRequest): string {
     `<p>Beste ${esc(payload.firstName)},</p>
      <p>We hebben je inschrijving als <strong>${ROLE_LABELS[payload.role]}</strong> goed ontvangen.
         Iemand van de club neemt binnenkort contact met je op.</p>
-     <p>Er is maar één plezante compagnie. Tot snel!</p>`,
+     <p>Er is maar 1 plezante compagnie. Tot snel!</p>`,
   );
 }
 

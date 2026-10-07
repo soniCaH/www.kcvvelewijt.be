@@ -87,7 +87,7 @@ import { buildSportsClubJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title = "Er is maar één plezante compagnie";
+  const title = "Er is maar 1 plezante compagnie";
   const description = "Startpagina van stamnummer 00055: KCVV Elewijt.";
   return {
     title,
@@ -376,7 +376,7 @@ export default async function HomePage() {
     paddingBottom: "pb-0",
   };
 
-  // "Er is maar één plezante compagnie." over the youth huddle (#3417).
+  // "Er is maar 1 plezante compagnie." over the youth huddle (#3417).
   // Self-contained dark band with no seam of its own — `firstTeamsSection`
   // already closes with one — so the SectionStack wrapper stays flush.
   const identityBandSection: SectionConfig = {

@@ -509,7 +509,7 @@
       "kind": "custom",
       "refersTo": "headline",
       "description": "Serif display type set tight with exactly one emphasis moment — an accent italic word — and an auto-terminated period. The accent em drops to Freight Display Pro because Freight Big Pro has no 900 italic.",
-      "html": "<h2 class=\"ds-heading\">Er is maar één <em>plezante</em> compagnie.</h2>",
+      "html": "<h2 class=\"ds-heading\">Er is maar 1 <em>plezante</em> compagnie.</h2>",
       "css": ".ds-heading { margin: 0; max-width: 12ch; font-family: var(--font-display-big, \"freight-big-pro\", Georgia, serif); font-size: clamp(2.5rem, 1.5rem + 5vw, 4rem); font-weight: 900; line-height: 1; letter-spacing: -0.035em; color: var(--color-ink, #0a0a0a); } .ds-heading em { font-family: var(--font-display, \"freight-display-pro\", Georgia, serif); font-weight: 700; font-style: italic; color: var(--color-jersey-deep, #008755); }"
     },
     {

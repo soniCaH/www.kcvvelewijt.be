@@ -23,7 +23,7 @@ describe("SiteFooter", () => {
 
   it("renders the motto with jersey-deep emphasis on 'plezante'", () => {
     render(<SiteFooter />);
-    expect(screen.getByText(/Er is maar één/i)).toBeInTheDocument();
+    expect(screen.getByText(/Er is maar 1/i)).toBeInTheDocument();
     const plezante = screen.getByText("plezante");
     expect(plezante.className).toMatch(/text-jersey-deep/);
   });

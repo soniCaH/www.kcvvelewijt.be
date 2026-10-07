@@ -67,7 +67,7 @@ Amateur clubs at this level either run a template site or live entirely on Faceb
 
 - **Name:** KCVV Elewijt. Stamnummer **55**.
 - **Origin is told, never asserted:** the club reached its present form through takeovers and mergers, so **1909 is not the club's to market**. The year may be narrated as history alongside the mergers that produced it — `/club/geschiedenis` is the one place that does — and never stated as a bare founding fact in copy, chrome, structured data or `llms.txt`. Where the fact is useful, write it qualified ("ontstaan uit fusies; de oudste voorloper speelde vanaf 1909"), not as a founding date (#2422, #2435).
-- **Motto:** "Er is maar één plezante compagnie" — the club's only tagline. Never "meer dan een club" or any invented variant.
+- **Motto:** "Er is maar 1 plezante compagnie" — the club's only tagline. Never "meer dan een club" or any invented variant.
 - **Club colours:** green and white.
 - **Voice:** Dutch, plain, club-insider warmth without corporate polish. Never fabricate club history, honours, quotes, testimonials or magazine/edition chrome.
 - **Typography is fixed:** Freight Sans Pro (body), Freight Display / Freight Big Pro (headings), IBM Plex Mono. No new typefaces.
