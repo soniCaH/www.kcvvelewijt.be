@@ -187,6 +187,37 @@ describe("NewsListingClient", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("keeps filtering on a tag that has no chip (#3432)", async () => {
+    // "Football Manager" has too few articles for a chip, but an old link
+    // to `?categorie=Football Manager` must still filter — load-more asks
+    // for the same tag, and no chip (not even "Alles") reads as active.
+    mockFetchArticles.mockResolvedValueOnce({ items: [], hasMore: false });
+    render(
+      <NewsListingClient
+        initialArticles={[makeArticle({ id: "fm1" })]}
+        categories={categories}
+        filterSlugs={["Eerste ploeg", "Jeugd", "Football Manager"]}
+        hasMore={true}
+        initialCategory="Football Manager"
+        fetchArticles={mockFetchArticles}
+      />,
+    );
+
+    for (const name of ["Alles", "Eerste ploeg", "Jeugd"]) {
+      expect(screen.getByRole("button", { name })).toHaveAttribute(
+        "aria-pressed",
+        "false",
+      );
+    }
+
+    clickLoadMore();
+    await waitFor(() =>
+      expect(mockFetchArticles).toHaveBeenCalledWith(
+        expect.objectContaining({ category: "Football Manager" }),
+      ),
+    );
+  });
+
   it("renders category filter tabs as buttons", () => {
     render(
       <NewsListingClient

@@ -148,6 +148,23 @@ export const WithActiveCategory: Story = {
   },
 };
 
+/**
+ * Filtered on a tag that has no chip (#3432) — too few articles for one, but
+ * an old `?categorie=` link still filters. No chip reads as pressed.
+ */
+export const HiddenTagFilter: Story = {
+  args: {
+    initialArticles: gridArticles.slice(0, 2),
+    categories: mockCategories,
+    filterSlugs: [
+      ...mockCategories.map((c) => c.attributes.slug),
+      "football-manager",
+    ],
+    hasMore: false,
+    initialCategory: "football-manager",
+  },
+};
+
 /** Empty state when no articles match */
 export const EmptyState: Story = {
   args: {

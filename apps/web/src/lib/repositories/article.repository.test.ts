@@ -1045,8 +1045,10 @@ describe("ArticleRepository", () => {
   });
 
   describe("findTags", () => {
-    it("returns array of tag strings", async () => {
-      mockFetch.mockResolvedValueOnce(["Eerste ploeg", "Jeugd", null]);
+    it("counts the published articles per tag, skipping null tags (#3432)", async () => {
+      // One entry per (article, tag) pair — the query already de-duplicates
+      // tags within one article.
+      mockFetch.mockResolvedValueOnce(["Jeugd", "A-Ploeg", "Jeugd", null]);
 
       const tags = await runWithRepo(
         Effect.gen(function* () {
@@ -1055,7 +1057,10 @@ describe("ArticleRepository", () => {
         }),
       );
 
-      expect(tags).toEqual(["Eerste ploeg", "Jeugd", null]);
+      expect(tags).toEqual([
+        { name: "Jeugd", count: 2 },
+        { name: "A-Ploeg", count: 1 },
+      ]);
     });
   });
 

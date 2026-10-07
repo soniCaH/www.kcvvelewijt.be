@@ -10,7 +10,10 @@
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
 import { degradeSection } from "@/lib/effect/degrade";
-import { ArticleRepository } from "@/lib/repositories/article.repository";
+import {
+  ArticleRepository,
+  type TagCount,
+} from "@/lib/repositories/article.repository";
 import type { Metadata } from "next";
 import { SITE_CONFIG } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -22,6 +25,7 @@ import { LISTING_INITIAL_TOTAL } from "@/lib/constants";
 import { NewsListingClient } from "./NewsListingClient";
 import { fetchArticlesAction } from "./actions";
 import { NEWS_KICKER, NEWS_HEADLINE } from "./copy";
+import { toCategoryChips } from "./categories";
 
 interface NewsPageProps {
   searchParams: Promise<{ categorie?: string }>;
@@ -46,7 +50,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
   const params = await searchParams;
   const categorySlug = params.categorie;
 
-  // Fetch unique tags (lightweight) and initial paginated batch in parallel.
+  // Fetch tag counts (lightweight) and initial paginated batch in parallel.
   // `ArticleRepository.findTags` carries a typed `SanityReadError` (#2864),
   // so the guard must be `degradeSection` — a plain `Effect.catchAll` would
   // only catch that channel, not a stray defect elsewhere in the same
@@ -65,10 +69,9 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
       degradeSection(
         Effect.gen(function* () {
           const repo = yield* ArticleRepository;
-          const tags = yield* repo.findTags();
-          return tags.filter((t: string | null): t is string => t != null);
+          return yield* repo.findTags();
         }),
-        [] as string[],
+        [] as TagCount[],
         "[NewsPage] tags read failed; falling back to an empty category list.",
       ),
     ),
@@ -82,10 +85,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
     }),
   ]);
 
-  const categories = [...allTags].sort().map((tag) => ({
-    id: tag,
-    attributes: { name: tag, slug: tag },
-  }));
+  const categories = toCategoryChips(allTags);
 
   return (
     <>
@@ -108,6 +108,7 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
       <NewsListingClient
         initialArticles={initialBatch.items}
         categories={categories}
+        filterSlugs={allTags.map((t) => t.name)}
         hasMore={initialBatch.hasMore}
         initialCategory={categorySlug}
         fetchArticles={fetchArticlesAction}
