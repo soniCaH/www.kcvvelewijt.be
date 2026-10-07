@@ -391,7 +391,7 @@ jobs:
         run: pnpm --filter @kcvv/web run vr:build-storybook
 
       - name: Upload Storybook static
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: storybook-static
           path: apps/web/storybook-static
@@ -554,7 +554,7 @@ jobs:
       # The story ids this shard visited, for the gate's coverage count (#3275).
       - name: Upload visited story ids
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: vr-visited-${{ matrix.shard }}
           path: vr-visited-${{ matrix.shard }}.txt
@@ -566,7 +566,7 @@ jobs:
       # gathers all three by pattern.
       - name: Upload diff PNGs on failure
         if: failure()
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: vr-diff-output-${{ matrix.shard }}
           path: |
