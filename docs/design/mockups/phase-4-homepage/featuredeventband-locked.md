@@ -74,15 +74,15 @@ in. Phase 4 introduces a `warm` variant:
 
 ## Data flow
 
-| Field          | Source                                                             | Notes                                                                                                     |
-| -------------- | ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| `event`        | `EventRepository.findNextFeatured()` (existing)                    | Returns next future event with `featuredOnHome === true`                                                  |
-| `title`        | Sanity `event.title` (PortableText with optional accent decorator) | Rendered via `<EditorialHeading>`                                                                         |
-| `dateStart`    | Sanity `event.dateStart` (datetime)                                | Required                                                                                                  |
-| `dateEnd`      | Sanity `event.dateEnd` (datetime)                                  | Optional; if present, format as range                                                                     |
-| `coverImage`   | Sanity `event.coverImage`                                          | Required for FeaturedEventBand to show — if missing, treat as empty and return null                       |
-| `externalLink` | Sanity `event.externalLink {url, label}`                           | Optional; falls back to internal `/evenementen/{slug}`                                                    |
-| `location`     | _NOT in schema today_                                              | Phase 4 hardcodes "Kantine" as default. Future schema field if location varies (Phase 6 events redesign). |
+| Field          | Source                                                             | Notes                                                                                                                                                         |
+| -------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `event`        | `EventRepository.findNextFeatured()` (existing)                    | Returns next future event with `featuredOnHome === true`                                                                                                      |
+| `title`        | Sanity `event.title` (PortableText with optional accent decorator) | Rendered via `<EditorialHeading>`                                                                                                                             |
+| `dateStart`    | Sanity `event.dateStart` (datetime)                                | Required                                                                                                                                                      |
+| `dateEnd`      | Sanity `event.dateEnd` (datetime)                                  | Optional; if present, format as range                                                                                                                         |
+| `coverImage`   | Sanity `event.coverImage`                                          | Optional since #3434 (2026-10-07): if missing, the band shows a fixed collage of club photos (`/images/event-fallback.jpg`). Was: required, else return null. |
+| `externalLink` | Sanity `event.externalLink {url, label}`                           | Optional; falls back to internal `/evenementen/{slug}`                                                                                                        |
+| `location`     | _NOT in schema today_                                              | Phase 4 hardcodes "Kantine" as default. Future schema field if location varies (Phase 6 events redesign).                                                     |
 
 ## Reuse mandate
 
