@@ -178,10 +178,9 @@ export interface UpcomingMatch extends UpcomingRowCommon {
   /**
    * Discriminant against `UpcomingReservation`/`UpcomingReducedMatch` below —
    * required, mirroring `ScheduleMatch`/`ScheduleReservation` (#2688). The
-   * homepage's other-teams agenda (`<UpcomingMatchesClient>`) is the surface
-   * most likely to carry a pitch reservation: it renders exactly the
-   * non-senior/youth matches, and youth tournaments are where reservations
-   * come from.
+   * homepage's match agenda (`<UpcomingMatchesClient>`) is the surface most
+   * likely to carry a pitch reservation: it renders every team's next match,
+   * youth included, and youth tournaments are where reservations come from.
    */
   kind: "match";
   /** Home team */
@@ -203,8 +202,8 @@ export interface UpcomingMatch extends UpcomingRowCommon {
 }
 
 /**
- * A pitch-reservation placeholder (#2606) on the homepage's other-teams
- * agenda (`<UpcomingMatchesClient>`). `UpcomingRowCommon` plus the one
+ * A pitch-reservation placeholder (#2606) on the homepage's match agenda
+ * (`<UpcomingMatchesClient>`). `UpcomingRowCommon` plus the one
  * reserving club — no `kcvvTeamId`: nothing reads it
  * (`<UpcomingMatchesClient>`'s own `kcvvTeamId` is always the club-id prop,
  * never a field read off a row).
@@ -222,7 +221,7 @@ export interface UpcomingReservation extends UpcomingRowCommon {
 
 /**
  * A tournament fixture with a hidden result (#2696) on the homepage's
- * other-teams agenda — `UpcomingRowCommon` plus the other club, mirroring
+ * match agenda — `UpcomingRowCommon` plus the other club, mirroring
  * `UpcomingReservation`'s shape. `<UpcomingMatchesClient>` had no reduced
  * treatment at all before this ticket (unlike
  * `<TeamAgendaRow>`/`<MatchStripView>`/`/kalender`, whose adapters already

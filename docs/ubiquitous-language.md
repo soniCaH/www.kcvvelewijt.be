@@ -54,7 +54,7 @@ A fixture where both sides are the same club (`home_team.id === away_team.id`). 
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Match.is_placeholder`  | Contract field (optional boolean), computed by the BFF from club-id equality                                                                             |
 | `ScheduleReservation`   | Web view-model — the `kind: "reservation"` member of `ScheduleRow`, carrying one `team` (never `homeTeam`/`awayTeam`) and no score (#2688)               |
-| `UpcomingReservation`   | Web view-model — the `UpcomingRow` reservation member, used by the homepage's other-teams agenda (#2688)                                                 |
+| `UpcomingReservation`   | Web view-model — the `UpcomingRow` reservation member, used by the homepage's match agenda (#2688)                                                       |
 | `CalendarReservation`   | Web view-model — the `CalendarMatch` reservation member on `/kalender`, carrying one `club` (#2802). Replaced the flat `isPlaceholder: boolean` route VM |
 | `reservationView()`     | `apps/web/src/lib/utils/match-display.ts` — the shared subject/status derivation every renderer of a reservation uses                                    |
 | `reservationRowLabel()` | `apps/web/src/lib/utils/match-display.ts` — the shared accessible-name sentence every reservation row's `aria-label` builds from (#2688)                 |
@@ -75,7 +75,7 @@ The **register** a row/page renders in when it has no confirmed two-sided fixtur
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `matchRowKind()`       | `apps/web/src/lib/utils/match-display.ts` — the one function deciding `kind`, including the register. The reduced half is gated on a scoreline existing, not on `isPlayedMatch` (#2696) |
 | `ScheduleReducedMatch` | The `kind: "reduced"` member of `ScheduleRow` — one `team` (the other club, by club id), no `homeTeam`/`awayTeam`/scores (#2802)                                                        |
-| `UpcomingReducedMatch` | The same member on the homepage other-teams agenda ([#2802])                                                                                                                            |
+| `UpcomingReducedMatch` | The same member on the homepage match agenda ([#2802])                                                                                                                                  |
 | `CalendarReducedMatch` | The same member on `/kalender`, carrying one `club` ([#2802])                                                                                                                           |
 
 **A reduced row is not a permanent classification.** The four adapters re-ask `matchRowKind()` on every call, so the moment PSD publishes a scoreline the same fixture id transforms into the `"match"` member and the row reverts to the full scoreboard — the club really was the opponent after all. That transition is asserted in all four adapters' tests ([#2802]).

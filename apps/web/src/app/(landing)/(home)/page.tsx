@@ -246,8 +246,8 @@ export default async function HomePage() {
   const featuredEvent: EventVM | null =
     featuredEventResult === READ_FAILED ? null : featuredEventResult;
 
-  // Senior teams (A/B) — drive the "Eerste ploegen" block and are de-duplicated
-  // out of the generic "Komende wedstrijden" agenda below (#2211). The senior
+  // Senior teams (A/B) — drive the "Eerste ploegen" block (#2211). The
+  // "Komende wedstrijden" agenda below lists them too (#3429). The senior
   // nav set = non-youth teams (age not "U*"); a psdId is required to fetch their
   // matches feed. Sorted by slug so a-ploeg renders before b-ploeg.
   const seniorTeams = selectSeniorTeams(teamsResult);
@@ -273,7 +273,6 @@ export default async function HomePage() {
       now,
     );
   });
-  const seniorPsdIds = new Set(seniorTeams.map((t) => Number(t.psdId)));
   // #2399: "no matches" has two causes — a failed read and a genuinely empty
   // feed — and the page used to render both by dropping the match sections and
   // looking finished. Both BFF reads therefore fall back to `null` rather than
@@ -290,13 +289,9 @@ export default async function HomePage() {
   const heroProps = heroArticle ? toEditorialHeroProps(heroArticle) : null;
   const uitgelichtArticles = articles.slice(1, 4).map(toUitgelichtArticle);
   const newsGridArticles = toHomepageArticles(articles.slice(4, 10));
-  // A/B now live in the "Eerste ploegen" block, so the agenda becomes the
-  // other-teams agenda (#2211). Matches with no team id stay (can't classify).
-  const upcomingMatches = mapMatchesToUpcomingMatches(
-    matches.filter(
-      (m) => m.kcvv_team_id == null || !seniorPsdIds.has(m.kcvv_team_id),
-    ),
-  );
+  // The agenda lists every team, A and B included, even though they also have
+  // the "Eerste ploegen" block above (#3429 — the club wants it complete).
+  const upcomingMatches = mapMatchesToUpcomingMatches(matches);
   const featuredEventBandEvent = toFeaturedEventBandEvent(featuredEvent);
 
   if (articles.length === 0 && matches.length === 0) {
