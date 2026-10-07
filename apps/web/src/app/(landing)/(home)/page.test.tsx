@@ -231,28 +231,26 @@ const seniorTeamFixture: TeamNavVM = {
   teamImageUrl: null,
 };
 
-// A match belonging to the senior team above (`kcvv_team_id` matches its
-// `psdId`) — `page.tsx`'s senior-team dedupe (#2211) filters it OUT of
-// `upcomingMatches`, so the agenda's own filtered list ends up empty even
-// though the raw `getNextMatches()` read succeeded with a row. That is the
-// exact shape review finding 3 named: "any midweek where every live fixture
-// belongs to A/B empties `upcomingMatches` on its own" — enough fields for
-// `matchRowKind` + `mapMatchToUpcomingMatch`, though its content is never
-// rendered (it's filtered before reaching `<UpcomingMatches>`).
-const seniorTeamOnlyMatchFixture = {
-  id: 501,
-  date: new Date("2026-07-15T20:00:00Z"),
-  time: "20:00",
-  venue: null,
-  home_team: { id: 1235, name: "KCVV Elewijt", logo: null, score: null },
-  away_team: { id: 628, name: "City Pirates", logo: null, score: null },
-  status: "scheduled",
-  competition: "3e Nationale",
-  competitionType: "league",
-  kcvv_team_id: 101,
-  kcvv_team_label: null,
-  is_placeholder: false,
-} as unknown as Match;
+// One upcoming match per team: A-ploeg (`kcvv_team_id` matches
+// `seniorTeamFixture.psdId`), B-ploeg and a youth side. Since #3429 the agenda
+// keeps every one of them — enough fields for `matchRowKind` +
+// `mapMatchToUpcomingMatch`, with a distinct opponent per row to find it by.
+const agendaMatch = (id: number, kcvvTeamId: number, opponent: string) =>
+  ({
+    id,
+    date: new Date("2026-07-15T20:00:00Z"),
+    time: "20:00",
+    venue: null,
+    home_team: { id: 1235, name: "KCVV Elewijt", logo: null, score: null },
+    away_team: { id: id + 1000, name: opponent, logo: null, score: null },
+    status: "scheduled",
+    competition: "3e Nationale",
+    competitionType: "league",
+    kcvv_team_id: kcvvTeamId,
+    kcvv_team_label: null,
+    is_placeholder: false,
+  }) as unknown as Match;
+const seniorTeamMatchFixture = agendaMatch(501, 101, "City Pirates");
 
 describe("/ — the agenda's outage signal is its own read (#2505 review finding 3)", () => {
   beforeEach(() => {
@@ -312,22 +310,19 @@ describe("/ — the agenda's outage signal is its own read (#2505 review finding
 
   it("does not claim the agenda is unavailable when only a senior team's own fan-out fails", async () => {
     // The discriminating case: the agenda's own read (getNextMatches)
-    // succeeds — with a row, even — but every one of those rows belongs to
-    // a senior team, so the senior-team dedupe (#2211) filters
-    // `upcomingMatches` down to empty on its own. Meanwhile that same
-    // senior team's per-team fetch (getMatches, via getTeamMatches) fails,
-    // which flips the combined `firstTeamsReadFailed` (and so
-    // <FirstTeamsBlock>'s own `unavailable`) without the agenda's own
-    // signal (`matchesResult === null`) ever going true. Reverting
-    // `upcomingMatchesReadFailed` back to `firstTeamsReadFailed` turns this test
-    // red: the agenda would wrongly print the outage notice.
+    // succeeds empty, while a senior team's per-team fetch (getMatches, via
+    // getTeamMatches) fails. That flips the combined `firstTeamsReadFailed`
+    // (and so <FirstTeamsBlock>'s own `unavailable`) without the agenda's own
+    // signal (`matchesResult === null`) ever going true. The agenda must be
+    // empty for this to discriminate: `<UpcomingMatches>` only reads
+    // `unavailable` when it has no rows. Reverting `upcomingMatchesReadFailed`
+    // back to `firstTeamsReadFailed` turns this test red: the agenda would
+    // wrongly print the outage notice.
     mockTeamsFindAll.mockReturnValue(Effect.succeed([seniorTeamFixture]));
     mockGetMatches.mockReturnValue(
       Effect.fail(new HttpBadGateway({ error: "upstream is down" })),
     );
-    mockGetNextMatches.mockReturnValue(
-      Effect.succeed([seniorTeamOnlyMatchFixture]),
-    );
+    mockGetNextMatches.mockReturnValue(Effect.succeed([]));
 
     const element = await HomePage();
     render(element);
@@ -342,17 +337,50 @@ describe("/ — the agenda's outage signal is its own read (#2505 review finding
       within(firstTeams).getByText(/even niet beschikbaar/i),
     ).toBeInTheDocument();
 
-    // The agenda must NOT: its own read succeeded (the row that emptied its
-    // filtered list is real, not a failure), so it drops silently — the
-    // outage notice must be absent everywhere on the page, and since
-    // `<UpcomingMatches>` returns `null` on a genuinely empty, available
-    // feed, its own "Komende wedstrijden" region shouldn't render at all.
+    // The agenda must NOT: its own read succeeded empty, so it drops
+    // silently — no outage notice, and no "Komende wedstrijden" region.
     expect(
       screen.queryByText(/Komende wedstrijden zijn even niet beschikbaar/i),
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("region", { name: "Komende wedstrijden" }),
     ).not.toBeInTheDocument();
+  });
+});
+
+describe("/ — the agenda lists every team, A and B included (#3429)", () => {
+  beforeEach(() => {
+    mockGetHomepage.mockReturnValue(
+      Effect.succeed({
+        banners: { bannerSlotA: null, bannerSlotB: null, bannerSlotC: null },
+        placeholder: null,
+      }),
+    );
+    mockTeamsFindAll.mockReturnValue(Effect.succeed([seniorTeamFixture]));
+    mockGetMatches.mockReturnValue(Effect.succeed([]));
+    mockFindNextFeatured.mockReturnValue(Effect.succeed(null));
+  });
+
+  it("keeps senior and youth matches in the agenda", async () => {
+    mockGetNextMatches.mockReturnValue(
+      Effect.succeed([
+        seniorTeamMatchFixture,
+        agendaMatch(502, 102, "Racing Mechelen"),
+        agendaMatch(503, 215, "SK Londerzeel"),
+      ]),
+    );
+
+    const element = await HomePage();
+    render(element);
+
+    const agenda = screen.getByRole("region", { name: "Komende wedstrijden" });
+    for (const opponent of [
+      "City Pirates",
+      "Racing Mechelen",
+      "SK Londerzeel",
+    ]) {
+      expect(within(agenda).getByText(opponent)).toBeInTheDocument();
+    }
   });
 });
 

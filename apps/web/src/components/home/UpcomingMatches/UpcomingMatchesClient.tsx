@@ -106,10 +106,10 @@ export const UpcomingMatchesClient = ({
   // The list cannot run away: `getNextMatches` returns exactly ONE fixture per
   // visible team — never a team's season — so its length is the club's team
   // count, not the calendar's. Today that is 21 teams past the BFF's
-  // `showInNavigation != false` gate, of which the homepage routes the 3 senior
-  // sides to `<FirstTeamsBlock>`, leaving at most 18 rows here. A cap would be
-  // an arbitrary number sitting in front of a bound the data already enforces,
-  // and virtualising 18 rows costs more than it saves.
+  // `showInNavigation != false` gate, so at most 21 rows here — the senior sides
+  // included since #3429. A cap would be an arbitrary number sitting in front
+  // of a bound the data already enforces, and virtualising 21 rows costs more
+  // than it saves.
   //
   // `apps/api/src/psd/service.test.ts` locks the one-row-per-team invariant. If
   // that test ever goes red, this line is what needs a real cap.
@@ -262,7 +262,7 @@ interface MatchRowProps {
 }
 
 /**
- * The other-teams agenda's reduced row for a pitch-reservation placeholder
+ * The match agenda's reduced row for a pitch-reservation placeholder
  * (#2606) or a tournament fixture with a hidden result (#2696/#2802) — no
  * opponent slot (a self-match has none, and a not-yet-played tournament
  * fixture's opponent is deliberately unnamed as one), no `<Link>` (mirrors
