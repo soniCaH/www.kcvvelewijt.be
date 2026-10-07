@@ -51,8 +51,12 @@ const standings = await runPromise(
     Effect.gen(function* () {
       const bff = yield* BffService;
       return yield* bff.getRanking(psdTeamId);
-    }),
-    null, // permanent failure → section shows "unavailable"
+    }).pipe(
+      // A 404 here means "no ranking published yet" — resolve it to an empty
+      // table BEFORE classifying, or the page loses its `no-table` state.
+      Effect.catchTag("HttpNotFound", () => Effect.succeed([])),
+    ),
+    null, // other permanent failure → section shows "unavailable"
     // What is left is transient by construction; orDie only satisfies
     // runPromise's `never` channel — it still rejects, as intended.
   ).pipe(Effect.orDie),
