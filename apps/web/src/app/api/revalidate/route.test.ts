@@ -122,6 +122,15 @@ describe("POST /api/revalidate", () => {
     expect(revalidateTag).toHaveBeenCalledWith("articles", "max");
   });
 
+  it("busts /evenementen on an article change", async () => {
+    // articleType=event articles join the /evenementen feed (#1968), and that
+    // read is untagged — without this a new event article stayed off the list
+    // for up to the page's 1h `revalidate`.
+    const res = await post({ _type: "article", slug: "hello" });
+    expect(res.status).toBe(200);
+    expect(revalidatePath).toHaveBeenCalledWith("/evenementen");
+  });
+
   it.each([
     ["article", { _type: "article", slug: "hello" }],
     ["team", { _type: "team", slug: "kcvve-u15" }],

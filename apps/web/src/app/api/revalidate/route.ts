@@ -73,9 +73,11 @@ function targets(
 ): { paths: string[]; tags: string[] } | null {
   const detail = (prefix: string) => slugs.map((s) => `${prefix}/${s}`);
   switch (type) {
+    // `articleType: "event"` articles also list on /evenementen (#1968), and
+    // that read is untagged, so the path bust is the only thing clearing it.
     case "article":
       return {
-        paths: ["/", "/nieuws", CONTENTS, ...detail("/nieuws")],
+        paths: ["/", "/nieuws", "/evenementen", CONTENTS, ...detail("/nieuws")],
         tags: [SANITY_TAGS.articles],
       };
     case "player":

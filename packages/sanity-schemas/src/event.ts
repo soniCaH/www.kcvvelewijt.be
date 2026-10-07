@@ -4,6 +4,8 @@ export const event = defineType({
   name: 'event',
   title: 'Event',
   type: 'document',
+  description:
+    'Een kort agenda-item zonder artikel. Schrijf je er een volledig artikel over? Maak dan een artikel van het type Event — dat verschijnt vanzelf in /evenementen en /kalender. Nooit allebei, anders staat het evenement dubbel in de agenda.',
   // Editor-UX rework groups (#1507). `inhoud` is the default tab; `eventType`
   // (chosen first) drives the agenda colour-coding.
   groups: [
