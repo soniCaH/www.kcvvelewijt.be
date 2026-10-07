@@ -28,8 +28,7 @@ export const metadata: Metadata = {
     template: "%s | KCVV Elewijt",
     default: "KCVV Elewijt - Officiële Website",
   },
-  description:
-    "KCVV Elewijt voetbalclub met stamnummer 55 - Er is maar één plezante compagnie",
+  description: SITE_CONFIG.description,
   keywords: ["KCVV Elewijt", "voetbal", "football", "Elewijt", "voetbalclub"],
   icons: {
     icon: "/icon.png",

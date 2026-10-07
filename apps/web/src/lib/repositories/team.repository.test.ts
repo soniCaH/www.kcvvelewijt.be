@@ -136,7 +136,7 @@ describe("TeamRepository", () => {
         footbelId: 12345,
         division: "3de Afdeling",
         divisionFull: "3de Afdeling VFV A",
-        tagline: "Er is maar één plezante compagnie",
+        tagline: "Er is maar 1 plezante compagnie",
         teamImageUrl: "https://cdn.sanity.io/team.webp",
         body: null,
         contactInfo: null,
@@ -195,7 +195,7 @@ describe("TeamRepository", () => {
       expect(t.teamImageUrl).toBe("https://cdn.sanity.io/team.webp");
 
       // Computed fields (absorbed from utils.ts)
-      expect(t.tagline).toBe("Er is maar één plezante compagnie");
+      expect(t.tagline).toBe("Er is maar 1 plezante compagnie");
       expect(t.teamType).toBe("senior");
       expect(t.ageGroup).toBeUndefined(); // "A" doesn't match U-pattern
 
@@ -301,7 +301,7 @@ describe("TeamRepository", () => {
 
       // An editorial line still comes through untouched.
       mockFetch.mockResolvedValueOnce(
-        makeDetailRow({ tagline: "Er is maar één plezante compagnie" }),
+        makeDetailRow({ tagline: "Er is maar 1 plezante compagnie" }),
       );
       const t2 = await runWithRepo(
         Effect.gen(function* () {
@@ -309,7 +309,7 @@ describe("TeamRepository", () => {
           return yield* repo.findBySlug("test");
         }),
       );
-      expect(t2!.tagline).toBe("Er is maar één plezante compagnie");
+      expect(t2!.tagline).toBe("Er is maar 1 plezante compagnie");
     });
 
     it("computes teamType: youth for U-ages, senior otherwise", async () => {
@@ -511,7 +511,7 @@ describe("TeamRepository", () => {
         age: "A",
         division: "3de Afdeling",
         divisionFull: "3de Afdeling VFV A",
-        tagline: "Er is maar één plezante compagnie",
+        tagline: "Er is maar 1 plezante compagnie",
         teamImageUrl: "https://cdn.sanity.io/team.webp",
         staff: [
           {
@@ -547,7 +547,7 @@ describe("TeamRepository", () => {
         age: "A",
         division: "3de Afdeling",
         divisionFull: "3de Afdeling VFV A",
-        tagline: "Er is maar één plezante compagnie",
+        tagline: "Er is maar 1 plezante compagnie",
         teamImageUrl: "https://cdn.sanity.io/team.webp",
         staff: [{ firstName: "Piet", lastName: "Pieters", role: "" }],
       });

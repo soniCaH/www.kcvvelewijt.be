@@ -86,7 +86,7 @@ export const NoImageTypographic: Story = {
     kicker: "Onze club",
     headline: "De plezantste compagnie",
     accent: "compagnie",
-    lead: "Er is maar één plezante compagnie.",
+    lead: "Er is maar 1 plezante compagnie.",
   },
 };
 
@@ -172,7 +172,7 @@ export const Minimal: Story = {
     register: "minimal",
     kicker: "KCVV Elewijt",
     headline: "Onze ploegen",
-    lead: "Van de eerste ploeg tot de allerkleinsten — één plezante compagnie.",
+    lead: "Van de eerste ploeg tot de allerkleinsten — 1 plezante compagnie.",
   },
 };
 

@@ -49,7 +49,7 @@ export const IdentityBand = () => {
             <SectionHeader
               id={headingId}
               kicker={[{ label: "KCVV Elewijt · Stamnummer 55", size: "md" }]}
-              title="Er is maar één plezante compagnie."
+              title="Er is maar 1 plezante compagnie."
               variant="dark"
               emphasis={{ text: "plezante", tone: "warm" }}
               className="max-w-3xl"

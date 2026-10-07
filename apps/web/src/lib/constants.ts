@@ -14,9 +14,8 @@ export const BRAND = {
 // Site Configuration
 export const SITE_CONFIG = {
   title: "KCVV Elewijt",
-  subTitle: "Er is maar één plezante compagnie",
   description:
-    "KCVV Elewijt voetbalclub met stamnummer 55 - Er is maar één plezante compagnie",
+    "KCVV Elewijt voetbalclub met stamnummer 55 - Er is maar 1 plezante compagnie",
   siteUrl: "https://www.kcvvelewijt.be",
   fbAppId: "679332239478086",
   stamnummer: 55,
