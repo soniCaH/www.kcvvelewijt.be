@@ -109,6 +109,60 @@ describe("MembershipForm", () => {
     );
   });
 
+  describe("remark (#3433)", () => {
+    const postedBody = (fetchMock: ReturnType<typeof vi.fn>) =>
+      JSON.parse(
+        (fetchMock.mock.calls[0] as [string, RequestInit])[1].body as string,
+      );
+
+    it("offers an optional, labelled remark field capped at 1000 characters", () => {
+      render(<MembershipForm />);
+      const remark = screen.getByLabelText(/Opmerking/);
+      expect(remark.tagName).toBe("TEXTAREA");
+      expect(remark).toHaveAttribute("maxLength", "1000");
+      expect(remark).not.toBeRequired();
+    });
+
+    it("sends the remark with the application", async () => {
+      const fetchMock = vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve({ ok: true }),
+        }),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      fireEvent.change(screen.getByLabelText(/Opmerking/), {
+        target: { value: "Mijn zoon is keeper." },
+      });
+      fireEvent.submit(screen.getByText(/Verstuur aanvraag/).closest("form")!);
+
+      await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+      expect(postedBody(fetchMock).remark).toBe("Mijn zoon is keeper.");
+    });
+
+    it("leaves an empty remark out of the request", async () => {
+      const fetchMock = vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve({ ok: true }),
+        }),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      fireEvent.submit(screen.getByText(/Verstuur aanvraag/).closest("form")!);
+
+      await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+      expect(postedBody(fetchMock)).not.toHaveProperty("remark");
+    });
+  });
+
   describe("submitting and success (#3384)", () => {
     const submitForm = () =>
       fireEvent.submit(screen.getByText(/Verstuur aanvraag/).closest("form")!);
@@ -338,6 +392,7 @@ describe("MembershipForm", () => {
         municipality: "Elewijt",
         email: "jan@example.com",
         priorClub: "FC Zemst",
+        remark: "Mijn zoon is keeper.",
         parentEmail: "ouder@example.com",
         parentalConsent: true,
         medicalCertAcknowledged: true,
@@ -360,6 +415,9 @@ describe("MembershipForm", () => {
         "jan@example.com",
       );
       expect(screen.getByLabelText(/Vorige club/)).toHaveValue("FC Zemst");
+      expect(screen.getByLabelText(/Opmerking/)).toHaveValue(
+        "Mijn zoon is keeper.",
+      );
       expect(screen.getByLabelText(/E-mail ouder\/voogd/i)).toHaveValue(
         "ouder@example.com",
       );
@@ -407,6 +465,9 @@ describe("MembershipForm", () => {
       fireEvent.change(screen.getByLabelText(/Vorige club/), {
         target: { value: "FC Zemst" },
       });
+      fireEvent.change(screen.getByLabelText(/Opmerking/), {
+        target: { value: "Mijn zoon is keeper." },
+      });
       fireEvent.change(screen.getByLabelText(/E-mail ouder\/voogd/i), {
         target: { value: "ouder@example.com" },
       });
@@ -423,6 +484,7 @@ describe("MembershipForm", () => {
         municipality: "Elewijt",
         email: "jan@example.com",
         priorClub: "FC Zemst",
+        remark: "Mijn zoon is keeper.",
         parentEmail: "ouder@example.com",
         parentalConsent: true,
         medicalCertAcknowledged: true,

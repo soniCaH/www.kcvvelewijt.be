@@ -50,6 +50,7 @@ export type MembershipApplication = {
   municipality?: string;
   email?: string;
   priorClub?: string;
+  remark?: string;
   parentEmail?: string;
   parentalConsent?: boolean;
   medicalCertAcknowledged?: boolean;

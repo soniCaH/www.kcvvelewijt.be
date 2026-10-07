@@ -15,6 +15,7 @@ export interface MembershipDraft {
   municipality: string;
   email: string;
   priorClub: string;
+  remark: string;
   parentEmail: string;
   parentalConsent: boolean;
   medicalCertAcknowledged: boolean;
@@ -30,6 +31,7 @@ export const EMPTY_DRAFT: MembershipDraft = {
   municipality: "",
   email: "",
   priorClub: "",
+  remark: "",
   parentEmail: "",
   parentalConsent: false,
   medicalCertAcknowledged: false,

@@ -118,6 +118,14 @@ export const membershipApplication = defineType({
       description: 'Optioneel opgegeven door de aanvrager.',
     }),
     defineField({
+      name: 'remark',
+      title: 'Opmerking',
+      type: 'text',
+      group: 'aanvraag',
+      readOnly: true,
+      description: 'Vrije opmerking van de aanvrager, optioneel (max. 1000 tekens).',
+    }),
+    defineField({
       name: 'parentEmail',
       title: 'Ouder/voogd e-mail',
       type: 'string',

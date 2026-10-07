@@ -24,6 +24,7 @@ import {
   Label,
   Select,
   StampBadge,
+  Textarea,
 } from "@/components/design-system";
 import { trackEvent } from "@/lib/analytics/track-event";
 import { scrollIntoViewMotionSafe } from "@/lib/utils/scroll-into-view";
@@ -168,6 +169,7 @@ function MembershipFormFields({
     municipality,
     email,
     priorClub,
+    remark,
     parentEmail,
     parentalConsent,
     medicalCertAcknowledged,
@@ -278,6 +280,7 @@ function MembershipFormFields({
           municipality,
           email,
           priorClub: priorClub || undefined,
+          remark: remark.trim() || undefined,
           parentEmail: minor ? parentEmail : undefined,
           parentalConsent: minor ? parentalConsent : undefined,
           medicalCertAcknowledged: isPlayer
@@ -507,6 +510,20 @@ function MembershipFormFields({
               value={priorClub}
               onChange={(e) => setField("priorClub", e.target.value)}
               error={fieldErrors.priorClub}
+            />
+          </div>
+          <div className="md:col-span-2">
+            <Label htmlFor={fieldId("remark")} optional>
+              Opmerking
+            </Label>
+            <Textarea
+              id={fieldId("remark")}
+              name="remark"
+              rows={4}
+              maxLength={1000}
+              value={remark}
+              onChange={(e) => setField("remark", e.target.value)}
+              error={fieldErrors.remark}
             />
           </div>
         </div>

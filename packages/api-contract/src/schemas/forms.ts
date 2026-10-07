@@ -43,6 +43,8 @@ export class MembershipRequest extends S.Class<MembershipRequest>(
   municipality: S.Trim.pipe(S.minLength(1), S.maxLength(100)),
   email: Email,
   priorClub: S.optional(S.Trim.pipe(S.maxLength(200))),
+  /** Free remark for the club — longer than 1000 is a 400, never a silent cut. */
+  remark: S.optional(S.Trim.pipe(S.maxLength(1000))),
   /** Parent/guardian email — required server-side only when the applicant is a minor. */
   parentEmail: S.optional(Email),
   parentalConsent: S.optional(S.Boolean),
