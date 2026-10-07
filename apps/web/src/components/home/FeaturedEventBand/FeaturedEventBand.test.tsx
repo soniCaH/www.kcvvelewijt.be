@@ -46,9 +46,12 @@ describe("FeaturedEventBand", () => {
       expect(container.firstChild).toBeNull();
     });
 
-    it("returns null when coverImage is missing", () => {
+    it.each([
+      ["title", { title: " " }],
+      ["slug", { slug: "" }],
+    ])("returns null when %s is empty", (_, patch) => {
       const { container } = render(
-        <FeaturedEventBand event={{ ...event, coverImage: null }} now={NOW} />,
+        <FeaturedEventBand event={{ ...event, ...patch }} now={NOW} />,
       );
       expect(container.firstChild).toBeNull();
     });
@@ -128,6 +131,19 @@ describe("FeaturedEventBand", () => {
       render(<FeaturedEventBand event={event} now={NOW} />);
       const img = screen.getByAltText("Sponsorfeest cover");
       expect(img).toBeInTheDocument();
+    });
+
+    it("renders the fixed club collage when the event has no cover (#3434)", () => {
+      const { container } = render(
+        <FeaturedEventBand event={{ ...event, coverImage: null }} now={NOW} />,
+      );
+      expect(screen.getByTestId("featured-event-band")).toBeInTheDocument();
+      // Uncaptioned figure: the alt carries the moment (TapedFigure rule).
+      const img = container.querySelector("img");
+      expect(img?.getAttribute("alt")).toMatch(
+        /^Sfeerbeelden van KCVV Elewijt/,
+      );
+      expect(img?.getAttribute("src")).toContain("event-fallback.jpg");
     });
 
     it("falls back to 'Kantine' when location is missing", () => {

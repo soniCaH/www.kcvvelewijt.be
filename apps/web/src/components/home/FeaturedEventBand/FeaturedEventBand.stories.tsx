@@ -62,6 +62,15 @@ export const NoExternalLink: Story = {
   },
 };
 
+/** No cover of its own (#3434) — most club events have no poster, so the
+ *  band shows one fixed club photo instead of dropping. */
+export const NoCover: Story = {
+  args: {
+    event: { ...baseEvent, coverImage: null },
+    now: REFERENCE_NOW,
+  },
+};
+
 export const MultiDay: Story = {
   args: {
     event: {
