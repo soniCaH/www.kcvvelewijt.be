@@ -1,4 +1,5 @@
 export {LinkToPsdAction} from './actions/link-to-psd'
+export {withPublishedAtDefault} from './actions/publish-with-published-at'
 export {
   ArticleTagsInput,
   applyArticleTagsInput,
