@@ -23,6 +23,7 @@ import {
   trackAgendaExpand,
   trackAgendaFilter,
   trackAgendaRowClick,
+  type AgendaSurface,
 } from "./upcoming-matches-analytics";
 import { PRESS_DOWN_TRANSITION } from "@/components/design-system/press-down";
 
@@ -37,6 +38,8 @@ export interface UpcomingMatchesClientProps {
   initialVisible: number;
   kcvvTeamId: number;
   initialExpanded?: boolean;
+  /** See `UpcomingMatchesProps.surface`. @default "home" */
+  surface?: AgendaSurface;
 }
 
 const matchTimestamp = (m: UpcomingRow): number => {
@@ -63,6 +66,7 @@ export const UpcomingMatchesClient = ({
   initialVisible,
   kcvvTeamId,
   initialExpanded = false,
+  surface = "home",
 }: UpcomingMatchesClientProps) => {
   const [expanded, setExpanded] = useState(initialExpanded);
   const [selectedTeam, setSelectedTeam] = useState<string>(ALL_TEAMS);
@@ -151,7 +155,7 @@ export const UpcomingMatchesClient = ({
       <ul className="flex flex-col gap-3">
         {visible.map((match) => (
           <li key={match.id}>
-            <MatchRow match={match} kcvvTeamId={kcvvTeamId} />
+            <MatchRow match={match} kcvvTeamId={kcvvTeamId} surface={surface} />
           </li>
         ))}
       </ul>
@@ -172,7 +176,8 @@ export const UpcomingMatchesClient = ({
         </button>
       )}
 
-      {expanded && (
+      {/* Not on `/kalender`, the page it would link to (#3430). */}
+      {expanded && surface === "home" && (
         <div className="mt-6">
           <Link
             href="/kalender"
@@ -259,6 +264,7 @@ const HomeAwayBadge = ({ side }: { side: KcvvSide }) => {
 interface MatchRowProps {
   match: UpcomingRow;
   kcvvTeamId: number;
+  surface: AgendaSurface;
 }
 
 /**
@@ -337,7 +343,7 @@ const ReservationMatchRow = ({
   );
 };
 
-const MatchRow = ({ match, kcvvTeamId }: MatchRowProps) => {
+const MatchRow = ({ match, kcvvTeamId, surface }: MatchRowProps) => {
   // Enumerated positively (#2802 review) — a negated
   // `kind !== "match"` catch-all would silently route any future fourth
   // `kind` into the reduced row too, with no compile error.
@@ -372,7 +378,7 @@ const MatchRow = ({ match, kcvvTeamId }: MatchRowProps) => {
   return (
     <MatchTravelLink
       matchId={match.id}
-      onClick={() => trackAgendaRowClick(match.id)}
+      onClick={() => trackAgendaRowClick(match.id, surface)}
       className={cn(
         "border-ink bg-cream group relative grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1 border-2 px-4 py-3",
         "shadow-paper-sm",

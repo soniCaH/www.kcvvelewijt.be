@@ -2,7 +2,8 @@ import { trackEvent } from "@/lib/analytics/track-event";
 import { slugify } from "@/lib/utils/slugify";
 
 /**
- * Analytics for the homepage "Komende wedstrijden" agenda (#2398).
+ * Analytics for the "Komende wedstrijden" agenda (#2398), on the homepage and,
+ * since #3430, on `/kalender`.
  *
  * Every event here starts with `match_`, a prefix already in
  * `scripts/analytics-taxonomy.mjs` — so the live GTM trigger RegEx is unchanged
@@ -14,8 +15,10 @@ import { slugify } from "@/lib/utils/slugify";
  * Sanity ids, so nothing needs hashing.
  */
 
-/** `source` value identifying this surface among `match_card_click` emitters. */
-const AGENDA_SOURCE = "home_agenda";
+/** Where the agenda renders. `source` on `match_card_click` names it, so the
+ *  two placements stay apart in one report; the other agenda events carry
+ *  none and split by page path. */
+export type AgendaSurface = "home" | "kalender";
 
 /**
  * Fire when a team chip is selected. `filter` is the squad label ("U15") or
@@ -58,6 +61,12 @@ export function trackAgendaCollapse(count: number): void {
  * `<FirstTeamsBlock>` sends, and pushing a label into a slug dimension would
  * poison it for both surfaces.
  */
-export function trackAgendaRowClick(matchId: number): void {
-  trackEvent("match_card_click", { match_id: matchId, source: AGENDA_SOURCE });
+export function trackAgendaRowClick(
+  matchId: number,
+  surface: AgendaSurface,
+): void {
+  trackEvent("match_card_click", {
+    match_id: matchId,
+    source: `${surface}_agenda`,
+  });
 }

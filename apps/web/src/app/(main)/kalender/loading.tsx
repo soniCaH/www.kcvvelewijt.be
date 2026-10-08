@@ -1,8 +1,10 @@
 /**
  * Calendar Page — Loading Skeleton
- * Matches the PageHero + reskinned CalendarWidget layout (Phase 6.D):
- * by-type chips on top, then a paper/ink panel (toolbar = view toggle · shared
- * period nav · subscribe) over a month grid.
+ * Matches the page's three blocks: the PageHero, the upcoming-matches agenda
+ * band (`<UpcomingMatchesSkeleton>`, shared with the homepage, #3430), then
+ * the reskinned CalendarWidget (Phase 6.D): by-type chips on top, then a
+ * paper/ink panel (toolbar = view toggle · shared period nav · subscribe)
+ * over a month grid.
  *
  * The hero's kicker/headline/lead and its `/images/kalender-matchday.jpg` photo
  * are all fixed copy/bundled assets, not data, so per #2432 §2 this reuses
@@ -11,6 +13,7 @@
  */
 
 import { PageHero } from "@/components/layout/PageHero";
+import { UpcomingMatchesSkeleton } from "@/components/home/UpcomingMatches";
 import {
   PageContainer,
   FilterTabsSkeleton,
@@ -23,9 +26,7 @@ export default function CalendarLoading() {
     <div className="bg-cream min-h-screen">
       <LoadingAnnouncement label="Kalender laden…" />
 
-      {/* One merged container now, matching the real page (#2571) — the
-          opening and the listing are ONE padded section, not two stacked on
-          the same colour. */}
+      {/* Hero, agenda band, calendar — the real page's three blocks (#3430). */}
       <PageContainer width="index" className="py-12 sm:py-16">
         <PageHero
           kicker="Kalender"
@@ -33,9 +34,13 @@ export default function CalendarLoading() {
           lead="Bekijk alle wedstrijden en activiteiten van KCVV Elewijt."
           image="/images/kalender-matchday.jpg"
         />
+      </PageContainer>
 
+      <UpcomingMatchesSkeleton />
+
+      <PageContainer width="index" className="py-12 sm:py-16">
         {/* Matches CalendarWidget's root <div className="space-y-4"> */}
-        <div className="mt-10 space-y-4">
+        <div className="space-y-4">
           {/* Type filter chips (Alles · Wedstrijden · Clubevent ·
               Supportersactiviteit · Jeugdwerking · Andere) — the shared
               <FilterTabsSkeleton> (#2564 review item 4), so this can't drift

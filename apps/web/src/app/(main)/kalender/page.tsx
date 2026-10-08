@@ -24,6 +24,9 @@ import { buildItemListJsonLd } from "@/lib/seo/jsonld";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { SITE_CONFIG } from "@/lib/constants";
 import { CalendarWidget } from "@/components/calendar/CalendarWidget";
+import { UpcomingMatches } from "@/components/home/UpcomingMatches";
+import { mapMatchesToUpcomingMatches } from "@/lib/mappers";
+import { fetchUpcomingMatchesOrNull } from "@/lib/server/match-data";
 import {
   transformMatchToCalendar,
   buildCalendarFeed,
@@ -169,7 +172,14 @@ export default async function CalendarPage({
   // flipped after hydration; the widget narrows both, and the URL stays the
   // source of truth after mount.
   const { type, view } = await searchParams;
-  const data = await fetchCalendarData();
+  const [data, upcoming] = await Promise.all([
+    fetchCalendarData(),
+    // The homepage agenda on top of the calendar (#3430): a section, so a
+    // failed read shows the band's "unavailable" state, never a failed page.
+    fetchUpcomingMatchesOrNull(
+      "[Calendar] upcoming-matches read failed; agenda unavailable.",
+    ),
+  ]);
   const itemListEntries = buildKalenderItemListEntries(
     data.feed,
     SITE_CONFIG.siteUrl,
@@ -182,11 +192,13 @@ export default async function CalendarPage({
       {itemListEntries.length > 0 && (
         <JsonLd data={buildItemListJsonLd(itemListEntries)} />
       )}
-      {/* The opening and the listing are ONE padded section, not two stacked
-          on the same colour (#2479 rule 3, this ticket's own merge —
-          /kalender was not in #2426's minimal list, so its pt-10 opening +
-          py-10 listing was never merged the way /evenementen and /galerij
-          were by #2555). */}
+      {/* Hero, then the agenda band (its own full-bleed section, #3430), then
+          the calendar — two containers again, split around the band, each on
+          the one section step (#2571). #2479 rule 3 merged them because two
+          containers on the same colour read as a seam; the cream-soft band now
+          sits between them. With no upcoming matches at all (the summer
+          break) the band renders nothing and the two steps stack — accepted
+          for that one gap rather than mirror the band's render rule here. */}
       <PageContainer width="index" className="py-12 sm:py-16">
         <PageHero
           kicker="Kalender"
@@ -194,18 +206,19 @@ export default async function CalendarPage({
           lead="Bekijk alle wedstrijden en activiteiten van KCVV Elewijt."
           image="/images/kalender-matchday.jpg"
         />
-        {/* The taped-card hero owns no bottom margin of its own (unlike
-            `register="minimal"`'s baked-in `mb-10`) — matches that same
-            value so the gap below the card reads the same as every other
-            hero-to-content transition on the site. */}
-        <div className="mt-10">
-          <CalendarWidget
-            feed={data.feed}
-            teams={data.teams}
-            initialType={typeof type === "string" ? type : undefined}
-            initialView={typeof view === "string" ? view : undefined}
-          />
-        </div>
+      </PageContainer>
+      <UpcomingMatches
+        matches={mapMatchesToUpcomingMatches(upcoming ?? [])}
+        unavailable={upcoming === null}
+        surface="kalender"
+      />
+      <PageContainer width="index" className="py-12 sm:py-16">
+        <CalendarWidget
+          feed={data.feed}
+          teams={data.teams}
+          initialType={typeof type === "string" ? type : undefined}
+          initialView={typeof view === "string" ? view : undefined}
+        />
       </PageContainer>
     </div>
   );

@@ -67,10 +67,18 @@ describe("upcoming-matches-analytics", () => {
   });
 
   it("fires match_card_click tagged to the agenda surface", () => {
-    trackAgendaRowClick(501);
+    trackAgendaRowClick(501, "home");
     expect(trackEvent).toHaveBeenCalledWith("match_card_click", {
       match_id: 501,
       source: "home_agenda",
+    });
+  });
+
+  it("tags a /kalender row click apart from the homepage (#3430)", () => {
+    trackAgendaRowClick(501, "kalender");
+    expect(trackEvent).toHaveBeenCalledWith("match_card_click", {
+      match_id: 501,
+      source: "kalender_agenda",
     });
   });
 
@@ -78,7 +86,7 @@ describe("upcoming-matches-analytics", () => {
   // slug <FirstTeamsBlock> sends, and pushing one into the other poisons the
   // dimension for both surfaces.
   it("omits team_slug rather than sending a squad label in a slug dimension", () => {
-    trackAgendaRowClick(501);
+    trackAgendaRowClick(501, "home");
     const payload = vi.mocked(trackEvent).mock.calls[0]![1];
     expect(payload).not.toHaveProperty("team_slug");
   });

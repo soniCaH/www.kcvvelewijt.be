@@ -7,6 +7,7 @@ import {
 } from "@/components/design-system";
 import type { UpcomingRow } from "@/components/match/types";
 import { UpcomingMatchesClient } from "./UpcomingMatchesClient";
+import type { AgendaSurface } from "./upcoming-matches-analytics";
 
 const KCVV_TEAM_ID = 1235;
 const DEFAULT_VISIBLE = 5;
@@ -26,12 +27,21 @@ export interface UpcomingMatchesProps {
    * @default false
    */
   unavailable?: boolean;
+  /**
+   * Where the band renders (#3430). `"kalender"` drops the "Volledige
+   * kalender" link revealed on expand — the band sits above that calendar —
+   * and tags row clicks `kalender_agenda` instead of `home_agenda`.
+   *
+   * @default "home"
+   */
+  surface?: AgendaSurface;
 }
 
 export const UpcomingMatches = ({
   matches,
   initialExpanded = false,
   unavailable = false,
+  surface = "home",
 }: UpcomingMatchesProps) => {
   // No rows and the read didn't fail → genuinely nothing to show, so the
   // whole section drops (matches the NewsGrid E.1 convention). A failed read
@@ -73,6 +83,7 @@ export const UpcomingMatches = ({
               initialVisible={DEFAULT_VISIBLE}
               kcvvTeamId={KCVV_TEAM_ID}
               initialExpanded={initialExpanded}
+              surface={surface}
             />
           )}
         </TapedCard>

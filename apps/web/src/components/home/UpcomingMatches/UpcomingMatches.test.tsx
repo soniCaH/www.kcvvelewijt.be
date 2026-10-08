@@ -283,6 +283,18 @@ describe("UpcomingMatches", () => {
     ).toHaveAttribute("href", "/kalender");
   });
 
+  it("drops the /kalender link when the block sits on /kalender (#3430)", () => {
+    render(
+      <UpcomingMatches
+        matches={mockUpcomingTwelve}
+        initialExpanded
+        surface="kalender"
+      />,
+    );
+    expect(rowLinks()).toHaveLength(12);
+    expect(screen.queryByText(/volledige kalender/i)).not.toBeInTheDocument();
+  });
+
   it("collapses back to 5 rows via Toon minder", async () => {
     const user = userEvent.setup();
     render(<UpcomingMatches matches={mockUpcomingTwelve} />);

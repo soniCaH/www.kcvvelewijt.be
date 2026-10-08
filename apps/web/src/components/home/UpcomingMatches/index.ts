@@ -1,4 +1,5 @@
 export { UpcomingMatches } from "./UpcomingMatches";
+export { UpcomingMatchesSkeleton } from "./UpcomingMatchesSkeleton";
 export type { UpcomingMatchesProps } from "./UpcomingMatches";
 // `UpcomingMatchesClient` is deliberately NOT re-exported here: its
 // consumers (UpcomingMatches.tsx, reservation-never-links.test.tsx) both
