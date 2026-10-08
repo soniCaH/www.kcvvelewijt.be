@@ -288,7 +288,7 @@ describe("UpcomingMatches", () => {
       <UpcomingMatches
         matches={mockUpcomingTwelve}
         initialExpanded
-        showCalendarLink={false}
+        surface="kalender"
       />,
     );
     expect(rowLinks()).toHaveLength(12);

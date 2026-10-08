@@ -26,6 +26,7 @@ import { SITE_CONFIG } from "@/lib/constants";
 import { CalendarWidget } from "@/components/calendar/CalendarWidget";
 import { UpcomingMatches } from "@/components/home/UpcomingMatches";
 import { mapMatchesToUpcomingMatches } from "@/lib/mappers";
+import { fetchUpcomingMatchesOrNull } from "@/lib/server/match-data";
 import {
   transformMatchToCalendar,
   buildCalendarFeed,
@@ -161,26 +162,6 @@ async function fetchCalendarData(): Promise<CalendarData> {
   );
 }
 
-/**
- * The homepage agenda, on top of the calendar (#3430): the club found the
- * calendar hard to scan for "what's next". A section, so its failure is caught
- * — `null` makes the block show its own "unavailable" state while the calendar
- * below still renders. Same read and mapper as the homepage.
- */
-async function fetchUpcomingMatches(): Promise<readonly Match[] | null> {
-  return runPromise(
-    Effect.gen(function* () {
-      const bff = yield* BffService;
-      return yield* bff.getNextMatches();
-    }).pipe(
-      Effect.catchAll((error) => {
-        console.error("[Calendar] Failed to fetch upcoming matches:", error);
-        return Effect.succeed(null);
-      }),
-    ),
-  );
-}
-
 export default async function CalendarPage({
   searchParams,
 }: {
@@ -193,7 +174,11 @@ export default async function CalendarPage({
   const { type, view } = await searchParams;
   const [data, upcoming] = await Promise.all([
     fetchCalendarData(),
-    fetchUpcomingMatches(),
+    // The homepage agenda on top of the calendar (#3430): a section, so a
+    // failed read shows the band's "unavailable" state, never a failed page.
+    fetchUpcomingMatchesOrNull(
+      "[Calendar] upcoming-matches read failed; agenda unavailable.",
+    ),
   ]);
   const itemListEntries = buildKalenderItemListEntries(
     data.feed,
@@ -225,7 +210,7 @@ export default async function CalendarPage({
       <UpcomingMatches
         matches={mapMatchesToUpcomingMatches(upcoming ?? [])}
         unavailable={upcoming === null}
-        showCalendarLink={false}
+        surface="kalender"
       />
       <PageContainer width="index" className="py-12 sm:py-16">
         <CalendarWidget

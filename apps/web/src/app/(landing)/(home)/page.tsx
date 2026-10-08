@@ -45,7 +45,6 @@ import {
   EventRepository,
   type EventVM,
 } from "@/lib/repositories/event.repository";
-import { BffService } from "@/lib/effect/services/BffService";
 import {
   TeamRepository,
   type TeamNavVM,
@@ -80,7 +79,10 @@ import {
 } from "@/components/design-system";
 import type { SectionConfig } from "@/components/design-system";
 import { mapMatchesToUpcomingMatches } from "@/lib/mappers";
-import { getTeamMatches } from "@/lib/server/match-data";
+import {
+  fetchUpcomingMatchesOrNull,
+  getTeamMatches,
+} from "@/lib/server/match-data";
 import { DEFAULT_OG_IMAGE, SITE_CONFIG } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildSportsClubJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
@@ -170,17 +172,9 @@ export default async function HomePage() {
         "[HomePage] articles read failed; falling back to an empty list.",
       ),
     ),
-    runPromise(
-      Effect.gen(function* () {
-        const bff = yield* BffService;
-        return yield* bff.getNextMatches();
-      }).pipe(
-        Effect.catchAll((error) => {
-          console.error("[HomePage] Failed to fetch matches:", error);
-          // `null`, not `[]` — see `firstTeamsReadFailed` & `upcomingMatchesReadFailed` below (#2399).
-          return Effect.succeed(null);
-        }),
-      ),
+    // `null`, not `[]` — see `firstTeamsReadFailed` & `upcomingMatchesReadFailed` below (#2399).
+    fetchUpcomingMatchesOrNull(
+      "[HomePage] matches read failed; agenda unavailable.",
     ),
     runPromise(
       // Banners + the off-season placeholder share one `homePage` document

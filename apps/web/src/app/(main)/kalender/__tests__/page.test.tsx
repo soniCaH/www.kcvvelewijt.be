@@ -85,7 +85,7 @@ const nextMatch = {
 
 describe("/kalender — upcoming matches on top (#3430)", () => {
   beforeEach(() => {
-    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "warn").mockImplementation(() => {});
   });
   afterEach(() => {
     vi.restoreAllMocks();
@@ -116,6 +116,15 @@ describe("/kalender — upcoming matches on top (#3430)", () => {
     mockGetNextMatches.mockReturnValue(
       Effect.fail(new HttpBadGateway({ error: "upstream is down" })),
     );
+
+    await renderPage();
+
+    expect(screen.getByText(/even niet beschikbaar/i)).toBeInTheDocument();
+    expect(screen.getByTestId("calendar-widget")).toBeInTheDocument();
+  });
+
+  it("keeps the calendar when the agenda read dies (a defect, not a typed failure)", async () => {
+    mockGetNextMatches.mockReturnValue(Effect.die(new Error("boom")));
 
     await renderPage();
 

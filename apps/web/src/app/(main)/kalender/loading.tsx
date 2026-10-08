@@ -1,8 +1,10 @@
 /**
  * Calendar Page — Loading Skeleton
- * Matches the PageHero + reskinned CalendarWidget layout (Phase 6.D):
- * by-type chips on top, then a paper/ink panel (toolbar = view toggle · shared
- * period nav · subscribe) over a month grid.
+ * Matches the page's three blocks: the PageHero, the upcoming-matches agenda
+ * band (`<UpcomingMatchesSkeleton>`, shared with the homepage, #3430), then
+ * the reskinned CalendarWidget (Phase 6.D): by-type chips on top, then a
+ * paper/ink panel (toolbar = view toggle · shared period nav · subscribe)
+ * over a month grid.
  *
  * The hero's kicker/headline/lead and its `/images/kalender-matchday.jpg` photo
  * are all fixed copy/bundled assets, not data, so per #2432 §2 this reuses
