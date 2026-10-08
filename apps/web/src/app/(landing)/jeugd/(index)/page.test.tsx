@@ -134,6 +134,35 @@ describe("/jeugd page — cream tracer composition", () => {
     ).toBeInTheDocument();
   });
 
+  describe("section nav (#3435)", () => {
+    const chipHrefs = () =>
+      within(screen.getByTestId("team-section-nav"))
+        .getAllByRole("link")
+        .map((link) => link.getAttribute("href"));
+
+    it("jumps to the visie block, the hub and the team directory", async () => {
+      vi.mocked(runPromise).mockResolvedValueOnce([youthTeam("U13")]);
+
+      const { container } = render(await JeugdPage());
+
+      expect(chipHrefs()).toEqual(["#visie", "#ontdek", "#ploegen"]);
+      // No dead anchors: every chip lands on a rendered section, and the
+      // section takes focus on chip click like the team pages (#2478 rule 8).
+      for (const href of chipHrefs()) {
+        expect(container.querySelector(href as string)).toHaveAttribute(
+          "tabindex",
+          "-1",
+        );
+      }
+    });
+
+    it("drops the Ploegen chip when the directory does not render", async () => {
+      render(await JeugdPage());
+
+      expect(chipHrefs()).toEqual(["#visie", "#ontdek"]);
+    });
+  });
+
   it("empty data: drops the divisions section, keeps a nav-only hub + the CTA", async () => {
     const { container } = render(await JeugdPage());
 

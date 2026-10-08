@@ -59,6 +59,8 @@ export interface YouthDirectoryProps {
    */
   heading: string;
   divisions: readonly YouthDivisionGroup[];
+  /** Anchor id, for a page whose section nav targets this block (#3435). */
+  id?: string;
   className?: string;
 }
 
@@ -70,6 +72,14 @@ export interface YouthDirectoryProps {
 // Neighbours alternate in sign, except where the cycle wraps. The tape's angle
 // is the team's own: see `tape.seed`.
 const CARD_ROTATIONS = ["a", "c", "b", "d", "b"] as const;
+
+/** The groups `<YouthDirectory>` draws — none means it renders nothing, so a
+ *  page's section-nav chip for it must check the same thing (#3435). */
+export function groupsWithTeams(
+  divisions: readonly YouthDivisionGroup[],
+): YouthDivisionGroup[] {
+  return divisions.filter((d) => d.teams.length > 0);
+}
 
 /**
  * Team directory (`/jeugd` + `/ploegen`). Grouped Reserven / Onderbouw /
@@ -84,16 +94,20 @@ const CARD_ROTATIONS = ["a", "c", "b", "d", "b"] as const;
 export function YouthDirectory({
   heading,
   divisions,
+  id,
   className,
 }: YouthDirectoryProps) {
-  const groups = divisions.filter((d) => d.teams.length > 0);
+  const groups = groupsWithTeams(divisions);
   if (groups.length === 0) return null;
 
   return (
     <section
+      id={id}
+      // A section-nav target takes focus on chip click (#2478 rule 8).
+      tabIndex={id ? -1 : undefined}
       data-testid="youth-directory"
       aria-label={heading}
-      className={cn("flex flex-col gap-10", className)}
+      className={cn("flex flex-col gap-10 focus:outline-none", className)}
     >
       <EditorialHeading level={2} size="display-md" emphasis={{ text: "." }}>
         {heading}

@@ -10,17 +10,11 @@ const VISIE_TAGS = [
 
 /**
  * <JeugdVisie> — the `/jeugd` filosofie/visie block (Phase 7 / Phase 2, design
- * contract 7j0b + 7j-final-page). Carries the `#visie` anchor — the repointed
- * "jeugdvisie" nav card (Phase 3) lands here. No section nav of its own, so
- * the anchor offset it lands at is `globals.css`'s header-only
- * `scroll-padding-top` base rule rather than a hand-written `scroll-mt-*`.
- * A cold `/jeugd#visie` load's own correction (a late webfont swap can
- * reflow content above it after the browser's pre-hydration jump already
- * landed) is a sibling client component, `<VisieHashLandingCorrection>`,
- * mounted alongside this one from `page.tsx` — not inside it, so this stays
- * a server component and the hook doesn't drag `<PullQuote>` and its own
- * six descendants across the client boundary for a no-op on every visit
- * that isn't a `#visie` deep link.
+ * contract 7j0b + 7j-final-page). Carries the `#visie` anchor, the target of
+ * `/jeugd`'s section nav (`page.tsx`, #3435; the "jeugdvisie" nav card is a
+ * document download since #2960). The nav owns its landing offset and a cold
+ * `/jeugd#visie` load's webfont-swap correction through `useSectionNav` —
+ * so this stays a server component with no `scroll-mt-*` of its own.
  *
  * Folded into `<PullQuote>` (#2566, decision #2515 rule 4): the visie
  * statement and a mono tag row (the `labels` slot — a nameless quote with
@@ -34,7 +28,7 @@ const VISIE_TAGS = [
  */
 export function JeugdVisie() {
   return (
-    <section id="visie">
+    <section id="visie" tabIndex={-1} className="focus:outline-none">
       <SectionKicker className="mb-4">Onze jeugdvisie</SectionKicker>
 
       <PullQuote labels={VISIE_TAGS}>{YOUTH_MISSION}</PullQuote>

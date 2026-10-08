@@ -23,11 +23,18 @@ import { PageContainer, StripedSeam } from "@/components/design-system";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import { PageHero } from "@/components/layout/PageHero";
 import { JeugdVisie } from "@/components/jeugd/JeugdVisie/JeugdVisie";
-import { VisieHashLandingCorrection } from "@/components/jeugd/JeugdVisie/VisieHashLandingCorrection";
 import { JeugdEditorialGrid } from "@/components/jeugd/JeugdEditorialGrid/JeugdEditorialGrid";
 import { EditorialHubAnalytics } from "@/components/editorial/EditorialHubAnalytics/EditorialHubAnalytics";
 import { JeugdCtaBand } from "@/components/jeugd/JeugdCtaBand/JeugdCtaBand";
-import { YouthDirectory } from "@/components/team/YouthDirectory";
+import {
+  YouthDirectory,
+  groupsWithTeams,
+} from "@/components/team/YouthDirectory";
+// The team pages' section nav, reused as-is (#3435: no new component).
+import {
+  TeamSectionNav,
+  type TeamSectionNavItem,
+} from "@/app/(main)/ploegen/[slug]/(detail)/TeamSectionNav";
 import { YOUTH_PHOTO, JEUGD_KICKER, JEUGD_HEADLINE, JEUGD_LEAD } from "./copy";
 
 export const metadata = buildPageMetadata({
@@ -127,8 +134,8 @@ async function fetchEditorialConfig(): Promise<EditorialCardConfig[] | null> {
  * `/jeugd` — Phase 7 redesign (PRD redesign-phase-7-jeugd). The route opens on
  * the shared opening's dark register — a page whose subject is a group of
  * people opens with their photograph (#2426) — then returns to the cream
- * vocabulary: `<PageHero register="band" tone="dark">` → `<StripedSeam>` →
- * `<JeugdVisie>` (the `#visie` filosofie block) → the `<JeugdEditorialGrid>`
+ * vocabulary: `<PageHero register="band" tone="dark">` → `<StripedSeam>` → the
+ * `<TeamSectionNav>` jump bar (#3435) → `<JeugdVisie>` (the `#visie` filosofie block) → the `<JeugdEditorialGrid>`
  * nav hub → the 6.C `<YouthDirectory>` division grid → the full-bleed
  * `<JeugdCtaBand>`. Empty states: no youth teams → `<YouthDirectory>` drops the
  * section (returns null); no Jeugd articles → the nav hub collapses to its
@@ -143,6 +150,17 @@ export default async function JeugdPage() {
   ]);
 
   const { youthByDivision } = groupTeamsForLanding(teams);
+
+  // A chip only for a section that renders: `<YouthDirectory>` drops itself
+  // when `groupsWithTeams` is empty, so its chip reads the same check. The nav
+  // also carries the `#visie` webfont-swap landing correction
+  // (`useSectionNav` composes `useHashLandingCorrection`).
+  const showDirectory = groupsWithTeams(youthByDivision).length > 0;
+  const navItems: TeamSectionNavItem[] = [
+    { id: "visie", label: "Visie" },
+    { id: "ontdek", label: "Nieuws & info" },
+    ...(showDirectory ? [{ id: "ploegen", label: "Ploegen" }] : []),
+  ];
 
   return (
     <>
@@ -169,9 +187,10 @@ export default async function JeugdPage() {
           its own field down to the seam, so the seam carries no margin here. */}
       <StripedSeam colorPair="ink-cream" height="md" />
 
+      <TeamSectionNav items={navItems} width="index" />
+
       <PageContainer width="index" className="py-12 sm:py-16">
         <JeugdVisie />
-        <VisieHashLandingCorrection />
 
         <EditorialHubAnalytics eventName="jeugd_card_click" className="mt-16">
           <JeugdEditorialGrid
@@ -181,6 +200,7 @@ export default async function JeugdPage() {
         </EditorialHubAnalytics>
 
         <YouthDirectory
+          id="ploegen"
           heading="Jeugdwerking"
           divisions={youthByDivision}
           className="mt-16"

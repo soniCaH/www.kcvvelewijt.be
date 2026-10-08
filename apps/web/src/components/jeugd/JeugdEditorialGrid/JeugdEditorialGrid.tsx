@@ -287,7 +287,8 @@ export function JeugdEditorialGrid({
       : buildItemsFromHardcoded(articles);
 
   return (
-    <div>
+    // `#ontdek` is the `/jeugd` section nav's target (#3435).
+    <div id="ontdek" tabIndex={-1} className="focus:outline-none">
       <SectionKicker className="mb-8">Ontdek onze jeugd</SectionKicker>
       <TapedCardGrid columns={3} gap="sm">
         {items}

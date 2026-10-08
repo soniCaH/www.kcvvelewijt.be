@@ -23,6 +23,8 @@ import {
   SkeletonBars,
   LoadingAnnouncement,
   TapedCardGrid,
+  SECTION_NAV_BAR_CLASSES,
+  SectionNavChip,
 } from "@/components/design-system";
 import { PageHero } from "@/components/layout/PageHero";
 import { YOUTH_PHOTO, JEUGD_KICKER, JEUGD_HEADLINE, JEUGD_LEAD } from "./copy";
@@ -46,6 +48,18 @@ export default function JeugdLoading() {
       <LoadingAnnouncement label="Jeugdwerking laden…" />
 
       <StripedSeam colorPair="ink-cream" height="md" />
+
+      {/* The section nav (#3435) always renders here (at least two chips), so
+          its height is reserved: the real bar classes around one real chip,
+          `invisible` (not drawn, not focusable), so the reserved height is the
+          chip's own and can never drift from it. */}
+      <div aria-hidden="true" className={SECTION_NAV_BAR_CLASSES}>
+        <PageContainer width="index">
+          <ul className="invisible flex items-center py-2">
+            <SectionNavChip id="visie" label="Visie" isActive={false} />
+          </ul>
+        </PageContainer>
+      </div>
 
       <PageContainer width="index" className="py-12 sm:py-16">
         {/* Filosofie / visie block */}

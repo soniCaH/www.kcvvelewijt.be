@@ -15,8 +15,7 @@
  * docs page — which renders every story's decorator/loaders on one shared
  * page without running `play` — never reaches this at all. `play` resets
  * the hash itself, in a `finally`, once its assertions are done (see
- * `OrganigramSectionNav.stories.tsx`'s `ColdLoadHashLandsBelowTheBar` and
- * `JeugdVisie.stories.tsx`'s `ColdLoadHashLandsBelowTheHeaderAlone`).
+ * `OrganigramSectionNav.stories.tsx`'s `ColdLoadHashLandsBelowTheBar`).
  */
 export function armColdLoadHash(hash: string) {
   return async () => {
