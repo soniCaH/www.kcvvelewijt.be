@@ -50,6 +50,14 @@ export const KCVV_CLUB_ID = 1235;
 export const LISTING_INITIAL_TOTAL = 24;
 export const LISTING_BATCH_SIZE = 12;
 
+/**
+ * The youth mission line, word for word from club feedback v2 (#3427). One
+ * copy for both surfaces that carry it — the homepage `<YouthSection>` lead
+ * and the `/jeugd` `<JeugdVisie>` quote — so they cannot drift apart.
+ */
+export const YOUTH_MISSION =
+  "Met onze club willen we dat lokale kinderen met “goesting” naar de training en wedstrijd komen en met “tegengoesting” terug naar huis gaan.";
+
 // External Links
 export const EXTERNAL_LINKS = {
   /** Brandsfit-hosted club kledij shop. Renamed from `webshop` in

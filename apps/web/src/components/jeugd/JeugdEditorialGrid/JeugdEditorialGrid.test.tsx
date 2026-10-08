@@ -112,20 +112,23 @@ describe("JeugdEditorialGrid", () => {
   it.each([
     "opleidingsvisie-jeugd-2024.pdf",
     "intern-reglement-jeugd-2026.pdf",
-  ])("renders the %s tile as a document link, not a route (#2960)", (file) => {
-    render(<JeugdEditorialGrid articles={[]} />);
+  ])(
+    "renders the %s tile as a document link, not a route (#2960, #3427)",
+    (file) => {
+      render(<JeugdEditorialGrid articles={[]} />);
 
-    const pdf = screen
-      .getAllByRole("link")
-      .find((l) => l.getAttribute("href")?.endsWith(file));
-    expect(pdf, `${file} tile missing`).toBeDefined();
+      const pdf = screen
+        .getAllByRole("link")
+        .find((l) => l.getAttribute("href")?.endsWith(file));
+      expect(pdf, `${file} tile missing`).toBeDefined();
 
-    // `next/link` has no file-extension guard: it would prefetch ~400 KB on
-    // viewport entry for every visitor, and open the PDF in the same tab over
-    // the site. A plain anchor opts out of both.
-    expect(pdf!).toHaveAttribute("target", "_blank");
-    expect(pdf!).toHaveAttribute("rel", "noopener noreferrer");
-  });
+      // `next/link` has no file-extension guard: it would prefetch ~400 KB on
+      // viewport entry for every visitor, and open the PDF in the same tab over
+      // the site. A plain anchor opts out of both.
+      expect(pdf!).toHaveAttribute("target", "_blank");
+      expect(pdf!).toHaveAttribute("rel", "noopener noreferrer");
+    },
+  );
 
   it("keeps the #hulp hash on the deep-linked hub tiles (#2960)", () => {
     render(<JeugdEditorialGrid articles={[]} />);

@@ -40,8 +40,9 @@ interface NavCardConfig {
  *
  * Three of the eight carry an `image` (#2965): "Word lid van KCVV",
  * "Onze opleidingsvisie" and "Trainingen & ProSoccerData" — club photos from the
- * 2026-09-05 Jeugdwedstrijddag, owner-approved (#3072). The other three
- * ("Organigram", "Wie contacteer ik?", "Blessure of medisch attest?") have
+ * 2026-09-05 Jeugdwedstrijddag, owner-approved (#3072). The other five
+ * ("Organigram", "Wie contacteer ik?", "Blessure of medisch attest?",
+ * "Intern reglement jeugd", "Mutualiteit: terugbetaling lidgeld") have
  * none: no photo exists that actually depicts those, and a generic stand-in
  * reads worse than the flat green + glyph they keep.
  */

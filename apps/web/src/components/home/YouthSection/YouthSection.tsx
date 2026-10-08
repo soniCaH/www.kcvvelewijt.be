@@ -1,3 +1,4 @@
+import { YOUTH_MISSION } from "@/lib/constants";
 import { cn } from "@/lib/utils/cn";
 import {
   LinkButton,
@@ -54,11 +55,9 @@ export const YouthSection = ({ className, stats }: YouthSectionProps) => (
         className="max-w-3xl"
       />
 
-      {/* Full cream — DESIGN.md "The Whole-Cream Rule". The youth mission
-          line, word for word from club feedback v2 (#3427). */}
+      {/* Full cream — DESIGN.md "The Whole-Cream Rule". */}
       <p className="text-cream mb-6 max-w-xl text-base leading-relaxed">
-        Met onze club willen we dat lokale kinderen met “goesting” naar de
-        training en wedstrijd komen en met “tegengoesting” terug naar huis gaan.
+        {YOUTH_MISSION}
       </p>
 
       {stats ? (

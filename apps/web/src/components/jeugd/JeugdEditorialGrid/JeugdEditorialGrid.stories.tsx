@@ -42,7 +42,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "The /jeugd nav hub (7j3): a uniform grid of 16:9 image-top `<EditorialHubCard>`s. News slots bubble the latest Jeugd articles (newsprint-colour photo, jersey-deep tag); six nav cards stay pinned (jersey-deep glyph panel, cream tag). With no articles the hub collapses to the pinned nav cards — three of which carry a club photo (#3072) behind a jersey-deep-dark scrim (#2965); the other three keep the flat green + glyph, no filler photo.",
+          "The /jeugd nav hub (7j3): a uniform grid of 16:9 image-top `<EditorialHubCard>`s. News slots bubble the latest Jeugd articles (newsprint-colour photo, jersey-deep tag); eight nav cards stay pinned (jersey-deep glyph panel, cream tag). With no articles the hub collapses to the pinned nav cards — three of which carry a club photo (#3072) behind a jersey-deep-dark scrim (#2965); the other five keep the flat green + glyph, no filler photo.",
       },
     },
   },
@@ -66,11 +66,12 @@ export const WithArticles: Story = {
 };
 
 /**
- * No Jeugd articles — the hub collapses to the six pinned nav cards. This is
+ * No Jeugd articles — the hub collapses to the eight pinned nav cards. This is
  * also the mixed tile-treatment story (#2965): 3 with a club photo (#3072) behind
  * a jersey-deep-dark scrim ("Word lid van KCVV", "Onze opleidingsvisie", "Trainingen
- * & ProSoccerData") and 3 on the flat bg-jersey-deep + glyph fallback
- * ("Organigram", "Wie contacteer ik?", "Blessure of medisch attest?") — the
+ * & ProSoccerData") and 5 on the flat bg-jersey-deep + glyph fallback
+ * ("Organigram", "Wie contacteer ik?", "Blessure of medisch attest?",
+ * "Intern reglement jeugd", "Mutualiteit: terugbetaling lidgeld") — the
  * VR baseline for the mixed grid.
  */
 export const NoArticles: Story = {
