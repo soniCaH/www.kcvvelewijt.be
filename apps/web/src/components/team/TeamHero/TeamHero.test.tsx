@@ -13,7 +13,7 @@
  */
 
 import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { LightboxProps } from "yet-another-react-lightbox";
 import { TeamHero } from "./TeamHero";
@@ -209,6 +209,19 @@ describe("TeamHero", () => {
       expect(viewer().controller?.closeOnBackdropClick).toBe(true);
       expect(viewer().render?.buttonPrev?.()).toBeNull();
       expect(viewer().render?.buttonNext?.()).toBeNull();
+    });
+
+    it("closes when the viewer asks, and opens again on the next click", async () => {
+      render(<TeamHero {...BASE_SENIOR} {...PHOTO} />);
+      await userEvent.click(screen.getByRole("button"));
+      await waitFor(() => expect(viewer()?.open).toBe(true));
+
+      act(() => viewer().close?.());
+      expect(viewer().open).toBe(false);
+
+      await userEvent.click(screen.getByRole("button"));
+      expect(viewer().open).toBe(true);
+      expect(trackEvent).toHaveBeenCalledTimes(2);
     });
 
     it("fires team_photo_open once per open, even on a double-click", async () => {

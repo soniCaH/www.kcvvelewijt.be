@@ -589,6 +589,12 @@ describe("MembershipForm", () => {
       expect(window.sessionStorage.getItem(DRAFT_STORAGE_KEY)).toBeNull();
     });
 
+    it("ignores a stored draft that is not an object", () => {
+      window.sessionStorage.setItem(DRAFT_STORAGE_KEY, "42");
+      render(<MembershipForm />);
+      expect(screen.queryByText(RESTORED_NOTE)).not.toBeInTheDocument();
+    });
+
     it("ignores a stored draft that holds no answer", () => {
       seedDraft({ role: "", firstName: "", lastName: "" });
       render(<MembershipForm />);
