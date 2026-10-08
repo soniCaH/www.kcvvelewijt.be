@@ -434,6 +434,15 @@ export function hidesScores(age: string | null | undefined): boolean {
   return n >= HIDDEN_SCORE_BANDS.min && n <= HIDDEN_SCORE_BANDS.max;
 }
 
+/** Goal events dropped; none left → `undefined`, the transform's own "no
+ *  events" (see `transformFootbalistoMatchDetail`). */
+function withoutGoals(
+  events: NonNullable<MatchDetail["events"]>,
+): MatchDetail["events"] {
+  const kept = events.filter((e) => e.type !== "goal");
+  return kept.length > 0 ? kept : undefined;
+}
+
 /**
  * A match with no score: both `score` keys removed (absent, not `undefined`,
  * so no cached payload carries them) and, on a match detail, the goal events
@@ -451,9 +460,7 @@ export function withoutScores<
     ...match,
     home_team,
     away_team,
-    ...(match.events
-      ? { events: match.events.filter((e) => e.type !== "goal") }
-      : {}),
+    ...(match.events ? { events: withoutGoals(match.events) } : {}),
   };
 }
 

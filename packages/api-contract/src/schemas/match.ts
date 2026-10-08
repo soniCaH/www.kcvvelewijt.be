@@ -7,10 +7,11 @@ export class MatchTeam extends S.Class<MatchTeam>("MatchTeam")({
   name: S.String,
   logo: S.optional(S.String),
   /**
-   * Absent before kickoff, and **always** absent for a KCVV U6–U13 team's
-   * match, whatever its status: the BFF withholds youth scores (#3428,
-   * `hidesScores`). A finished match with no score is valid — read `status` for
-   * "played", never the presence of a score.
+   * Absent before kickoff, and absent for a KCVV U6–U13 team's match whatever
+   * its status: the BFF withholds youth scores (#3428, `hidesScores`) wherever
+   * it can resolve the team's band — not on a match detail missing from its
+   * current-season index. A finished match with no score is valid: read
+   * `status` for "played", never the presence of a score.
    */
   score: S.optional(S.Finite),
   /**
