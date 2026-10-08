@@ -1,9 +1,15 @@
 import type { PlayerVM } from "@/lib/repositories/player.repository";
+import type { TeamDetailVM } from "@/lib/repositories/team.repository";
 import { PlayerCard } from "./PlayerCard";
 import { PersonCardRun } from "./PersonCardRun";
 
 export interface SquadGridProps {
   players: readonly PlayerVM[];
+  /**
+   * Youth squads split only in keepers and field players (#3431, club
+   * feedback v2); senior squads keep the four PSD position groups.
+   */
+  teamType?: TeamDetailVM["teamType"];
 }
 
 /**
@@ -58,8 +64,14 @@ interface PositionGroup {
 // Ordered front-to-back: keepers → defenders → midfielders → attackers, with
 // a trailing catch-all so no player is dropped — unmapped and unauthored
 // (#2567) positions both land there.
-const GROUPS: PositionGroup[] = [
-  { id: "keeper", label: "Doelmannen", match: (p) => p === "Keeper" },
+const KEEPERS: PositionGroup = {
+  id: "keeper",
+  label: "Doelmannen",
+  match: (p) => p === "Keeper",
+};
+
+const SENIOR_GROUPS: PositionGroup[] = [
+  KEEPERS,
   { id: "defender", label: "Verdedigers", match: (p) => p === "Verdediger" },
   {
     id: "midfielder",
@@ -69,7 +81,15 @@ const GROUPS: PositionGroup[] = [
   { id: "attacker", label: "Aanvallers", match: (p) => p === "Aanvaller" },
 ];
 
-function partition(players: readonly PlayerVM[]): {
+// Youth (#3431): keepers, then everyone else — the catch-all relabelled
+// "Veldspelers", so it keeps the catch-all id and the #2638 heading gate.
+const YOUTH_GROUPS: PositionGroup[] = [KEEPERS];
+
+function partition(
+  players: readonly PlayerVM[],
+  groups: readonly PositionGroup[],
+  catchAllLabel: string,
+): {
   id: string;
   label: string;
   players: PlayerVM[];
@@ -77,7 +97,7 @@ function partition(players: readonly PlayerVM[]): {
   const assigned = new Set<string>();
   const result: { id: string; label: string; players: PlayerVM[] }[] = [];
 
-  for (const group of GROUPS) {
+  for (const group of groups) {
     const members = players.filter((p) => group.match(p.position));
     if (members.length > 0) {
       members.forEach((m) => assigned.add(m.id));
@@ -85,10 +105,10 @@ function partition(players: readonly PlayerVM[]): {
     }
   }
 
-  // Trailing catch-all for any position not in the four canonical groups.
+  // Trailing catch-all for any position not in the groups above.
   const rest = players.filter((p) => !assigned.has(p.id));
   if (rest.length > 0) {
-    result.push({ id: CATCH_ALL_ID, label: "Spelers", players: rest });
+    result.push({ id: CATCH_ALL_ID, label: catchAllLabel, players: rest });
   }
 
   // Applied once, over every group including the catch-all, rather than
@@ -100,10 +120,13 @@ function partition(players: readonly PlayerVM[]): {
   return result;
 }
 
-export function SquadGrid({ players }: SquadGridProps) {
+export function SquadGrid({ players, teamType }: SquadGridProps) {
   if (players.length === 0) return null;
 
-  const groups = partition(players);
+  const groups =
+    teamType === "youth"
+      ? partition(players, YOUTH_GROUPS, "Veldspelers")
+      : partition(players, SENIOR_GROUPS, "Spelers");
   // The catch-all separates nobody from a neighbour when it is the ONLY
   // group — the heading gains a gate for exactly the same reason the
   // position label itself did (#2638): rendering "Spelers" over the only

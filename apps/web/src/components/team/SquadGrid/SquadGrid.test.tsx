@@ -12,6 +12,7 @@
  *  - Within-group order (#2894): jerseyNumber ascending, falling back to a
  *    locale-aware lastName collation; numbered before unnumbered; applies to
  *    the catch-all "Spelers" group too
+ *  - Youth squads (#3431): two groups only, Doelmannen + Veldspelers
  */
 
 import { describe, it, expect } from "vitest";
@@ -307,6 +308,52 @@ describe("SquadGrid", () => {
           ]}
         />,
       );
+      const headings = screen
+        .getAllByRole("heading", { level: 3 })
+        .map((h) => h.textContent);
+      expect(headings).toEqual([
+        "Doelmannen",
+        "Verdedigers",
+        "Middenvelders",
+        "Aanvallers",
+        "Spelers",
+      ]);
+    });
+  });
+
+  describe("youth squads (#3431)", () => {
+    it("splits a youth squad into Doelmannen and Veldspelers only", () => {
+      render(<SquadGrid players={SQUAD} teamType="youth" />);
+      const headings = screen
+        .getAllByRole("heading", { level: 3 })
+        .map((h) => h.textContent);
+      expect(headings).toEqual(["Doelmannen", "Veldspelers"]);
+    });
+
+    it("puts every non-keeper in Veldspelers, catch-all included", () => {
+      render(<SquadGrid players={SQUAD} teamType="youth" />);
+      const veld = screen.getByRole("region", { name: "Veldspelers" });
+      for (const name of ["Bram", "Senne", "Yanni", "Maxim", "Jeugd"]) {
+        expect(veld.textContent).toContain(name);
+      }
+      expect(veld.textContent).not.toContain("Jonas");
+    });
+
+    it("hides the heading when no youth player is a known keeper (#2638)", () => {
+      render(
+        <SquadGrid
+          players={[
+            player("1", "Onbekend Een", undefined, 1),
+            player("2", "Bram", "Verdediger", 2),
+          ]}
+          teamType="youth"
+        />,
+      );
+      expect(screen.queryByRole("heading", { level: 3 })).toBeNull();
+    });
+
+    it("keeps the four position groups for a senior squad", () => {
+      render(<SquadGrid players={SQUAD} teamType="senior" />);
       const headings = screen
         .getAllByRole("heading", { level: 3 })
         .map((h) => h.textContent);
