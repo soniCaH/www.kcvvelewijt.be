@@ -199,7 +199,7 @@ export const article = defineType({
       type: "datetime",
       group: "publicatie",
       description:
-        "Publicatiedatum en -tijd. Bepaalt de volgorde in nieuwsoverzichten (nieuwste eerst) en de datum in de byline. Laat leeg tot je effectief wil publiceren.",
+        "Publicatiedatum en -tijd. Bepaalt de volgorde in nieuwsoverzichten (nieuwste eerst) en de datum in de byline. Leeg bij publiceren? Dan vult de Studio automatisch het huidige tijdstip in. Zet een datum in de toekomst om het artikel pas dan te tonen.",
     }),
     defineField({
       name: "unpublishAt",

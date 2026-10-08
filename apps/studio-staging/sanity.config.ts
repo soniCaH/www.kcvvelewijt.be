@@ -3,6 +3,7 @@ import {structureTool} from 'sanity/structure'
 import {visionTool} from '@sanity/vision'
 import {
   LinkToPsdAction,
+  withPublishedAtDefault,
   launcherTool,
   launcherTemplates,
   curatedNewDocumentOptions,
@@ -32,7 +33,12 @@ export default defineConfig({
   },
 
   document: {
-    actions: (prev) => [...prev, LinkToPsdAction],
+    actions: (prev, {schemaType}) => [
+      ...prev.map((action) =>
+        schemaType === 'article' && action.action === 'publish' ? withPublishedAtDefault(action) : action,
+      ),
+      LinkToPsdAction,
+    ],
     newDocumentOptions: curatedNewDocumentOptions,
   },
 
