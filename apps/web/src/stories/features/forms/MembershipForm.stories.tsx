@@ -153,6 +153,7 @@ export const RestoredDraft: Story = {
         gender: "m",
         municipality: "Elewijt",
         email: "jan@example.com",
+        remark: "Ik speelde vroeger als keeper.",
         medicalCertAcknowledged: true,
       }),
     );

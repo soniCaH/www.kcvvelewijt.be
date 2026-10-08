@@ -67,6 +67,7 @@ function adminHtml(payload: MembershipRequest, isMinor: boolean): string {
        ${row("E-mail", esc(payload.email))}
        ${payload.priorClub ? row("Vorige club", esc(payload.priorClub)) : ""}
        ${isMinor && payload.parentEmail ? row("Ouder/voogd e-mail", esc(payload.parentEmail)) : ""}
+       ${payload.remark ? `<tr><td style="padding:4px 12px 4px 0;color:#666;vertical-align:top">Opmerking</td><td style="padding:4px 0;word-break:break-word">${esc(payload.remark).replace(/\n/g, "<br>")}</td></tr>` : ""}
      </table>
      <p style="font-size:13px;color:#888">Beheer deze inschrijving in Sanity Studio (Inschrijvingen).</p>`,
   );

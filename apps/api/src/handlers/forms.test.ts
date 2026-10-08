@@ -97,6 +97,15 @@ describe("handleMembership", () => {
     expect(dispatch).toHaveBeenCalledTimes(2);
   });
 
+  it("persists the remark", async () => {
+    const write = vi.fn<SanityMutationInterface["writeMembershipApplication"]>(
+      () => Effect.succeed(undefined),
+    );
+    await run({ ...validPayload, remark: "Mijn zoon is keeper." }, { write });
+
+    expect(write.mock.calls[0]![0].remark).toBe("Mijn zoon is keeper.");
+  });
+
   it("drops a honeypot submission without persisting", async () => {
     const write = vi.fn(() => Effect.succeed(undefined as void));
     const exit = await run(
