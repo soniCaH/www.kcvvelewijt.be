@@ -87,3 +87,11 @@ export const TwoGroups: Story = {
     ],
   },
 };
+
+/**
+ * Youth squad (#3431) — the same players as `FullSquad`, split only in
+ * Doelmannen and Veldspelers. Senior squads keep the four position groups.
+ */
+export const YouthSquad: Story = {
+  args: { players: fullSquad, teamType: "youth" },
+};

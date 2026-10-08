@@ -695,7 +695,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
               className="py-10 focus:outline-none sm:py-14"
             >
               <SectionHeader title={sectionLabels.spelers} size="display-md" />
-              <SquadGrid players={team.players} />
+              <SquadGrid players={team.players} teamType={team.teamType} />
             </PageContainer>
           </TrackInView>
         </>
