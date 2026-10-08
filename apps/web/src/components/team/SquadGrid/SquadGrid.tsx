@@ -61,34 +61,48 @@ interface PositionGroup {
   match: (position: string | undefined) => boolean;
 }
 
-// Ordered front-to-back: keepers → defenders → midfielders → attackers, with
-// a trailing catch-all so no player is dropped — unmapped and unauthored
-// (#2567) positions both land there.
 const KEEPERS: PositionGroup = {
   id: "keeper",
   label: "Doelmannen",
   match: (p) => p === "Keeper",
 };
 
-const SENIOR_GROUPS: PositionGroup[] = [
-  KEEPERS,
-  { id: "defender", label: "Verdedigers", match: (p) => p === "Verdediger" },
-  {
-    id: "midfielder",
-    label: "Middenvelders",
-    match: (p) => p === "Middenvelder",
-  },
-  { id: "attacker", label: "Aanvallers", match: (p) => p === "Aanvaller" },
-];
+interface SquadShape {
+  groups: readonly PositionGroup[];
+  /** Heading of the trailing catch-all, so no player is dropped. */
+  catchAllLabel: string;
+}
 
-// Youth (#3431): keepers, then everyone else — the catch-all relabelled
-// "Veldspelers", so it keeps the catch-all id and the #2638 heading gate.
-const YOUTH_GROUPS: PositionGroup[] = [KEEPERS];
+const SHAPES: Record<NonNullable<SquadGridProps["teamType"]>, SquadShape> = {
+  // Ordered front-to-back: keepers → defenders → midfielders → attackers,
+  // then the catch-all — unmapped and unauthored (#2567) positions both
+  // land there.
+  senior: {
+    groups: [
+      KEEPERS,
+      {
+        id: "defender",
+        label: "Verdedigers",
+        match: (p) => p === "Verdediger",
+      },
+      {
+        id: "midfielder",
+        label: "Middenvelders",
+        match: (p) => p === "Middenvelder",
+      },
+      { id: "attacker", label: "Aanvallers", match: (p) => p === "Aanvaller" },
+    ],
+    catchAllLabel: "Spelers",
+  },
+  // Youth (#3431): keepers, then everyone else, unknown positions included —
+  // the owner's call. "Veldspelers" is the catch-all relabelled, so it keeps
+  // the catch-all id and the #2638 heading gate below.
+  youth: { groups: [KEEPERS], catchAllLabel: "Veldspelers" },
+};
 
 function partition(
   players: readonly PlayerVM[],
-  groups: readonly PositionGroup[],
-  catchAllLabel: string,
+  { groups, catchAllLabel }: SquadShape,
 ): {
   id: string;
   label: string;
@@ -123,21 +137,18 @@ function partition(
 export function SquadGrid({ players, teamType }: SquadGridProps) {
   if (players.length === 0) return null;
 
-  const groups =
-    teamType === "youth"
-      ? partition(players, YOUTH_GROUPS, "Veldspelers")
-      : partition(players, SENIOR_GROUPS, "Spelers");
+  const groups = partition(players, SHAPES[teamType ?? "senior"]);
   // The catch-all separates nobody from a neighbour when it is the ONLY
   // group — the heading gains a gate for exactly the same reason the
-  // position label itself did (#2638): rendering "Spelers" over the only
-  // group on a U9 page (nobody's position is known) claims a distinction
-  // the data doesn't support. This is deliberately narrower than "any
+  // position label itself did (#2638): rendering "Spelers" (or, on a youth
+  // page with no known keeper, "Veldspelers" — #3431) over the only group
+  // claims a distinction the data doesn't support. This is deliberately narrower than "any
   // single group": a lone REAL position bucket (e.g. a squad that is,
   // today, entirely keepers) is still a true classification and keeps its
   // heading — it only looks unearned by accident of today's data, and
   // hiding it would be latent breakage waiting for a squad shape that
   // exposes it. Keyed off the group's stable `id`, never its display
-  // label, so a rewording of "Spelers" can't silently break the gate.
+  // label, so a rewording of either catch-all label can't break the gate.
   const hideHeading = groups.length === 1 && groups[0]!.id === CATCH_ALL_ID;
 
   return (
