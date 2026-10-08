@@ -5,6 +5,7 @@ import { MonoLabel } from "@/components/design-system/MonoLabel";
 import { EditorialHeading } from "@/components/design-system/EditorialHeading";
 import { JerseyShirt } from "@/components/design-system/JerseyShirt";
 import { getYouthDivision } from "@/lib/utils/group-teams";
+import { TeamPhotoLightbox } from "./TeamPhotoLightbox";
 
 export interface TeamHeroProps {
   /**
@@ -27,6 +28,12 @@ export interface TeamHeroProps {
   tagline?: string | null;
   /** Squad photo URL (landscape newsprint photo). No photo → JerseyShirt fallback. */
   teamImageUrl?: string | null;
+  /**
+   * Opens the photo full screen on click (#3447). `fullUrl` is the uncropped
+   * asset — `teamImageUrl` is a 3:2 hotspot crop that cuts off the players at
+   * the edges. Absent, or no photo → the photo is not clickable.
+   */
+  photoViewer?: { fullUrl: string; teamSlug: string } | null;
   className?: string;
 }
 
@@ -38,6 +45,7 @@ export function TeamHero({
   divisionFull,
   tagline,
   teamImageUrl,
+  photoViewer,
   className,
 }: TeamHeroProps) {
   const hasPhoto =
@@ -64,6 +72,17 @@ export function TeamHero({
     displayName.length <= 4
       ? displayName.toUpperCase()
       : displayName.charAt(0).toUpperCase();
+
+  const photo = teamImageUrl ? (
+    <Image
+      src={teamImageUrl}
+      alt=""
+      width={420}
+      height={280}
+      unoptimized
+      className="block h-full w-full object-cover"
+    />
+  ) : null;
 
   return (
     <section
@@ -116,22 +135,23 @@ export function TeamHero({
           tint={hasPhoto ? "newsprint" : "none"}
           padding="none"
         >
-          {hasPhoto ? (
-            <Image
-              src={teamImageUrl!}
-              alt=""
-              width={420}
-              height={280}
-              unoptimized
-              className="block h-full w-full object-cover"
-            />
+          {photo && photoViewer ? (
+            <TeamPhotoLightbox
+              displayName={displayName}
+              teamSlug={photoViewer.teamSlug}
+              fullUrl={photoViewer.fullUrl}
+            >
+              {photo}
+            </TeamPhotoLightbox>
           ) : (
-            <div className="flex h-full w-full items-center justify-center">
-              <JerseyShirt
-                letterOverlay={jerseyLetter}
-                className="h-full max-h-[160px] w-full max-w-[160px]"
-              />
-            </div>
+            (photo ?? (
+              <div className="flex h-full w-full items-center justify-center">
+                <JerseyShirt
+                  letterOverlay={jerseyLetter}
+                  className="h-full max-h-[160px] w-full max-w-[160px]"
+                />
+              </div>
+            ))
           )}
         </TapedFigure>
       </div>
