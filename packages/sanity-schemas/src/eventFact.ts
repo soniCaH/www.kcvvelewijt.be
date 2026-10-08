@@ -16,6 +16,8 @@ export const eventFact = defineType({
   name: 'eventFact',
   title: 'Event fact',
   type: 'object',
+  description:
+    'Dit is geen apart Event-document. De eerste Event-fact zet dit artikel zelf in /evenementen en /kalender — maak er geen Event-document naast aan.',
   fields: [
     defineField({
       name: 'title',

@@ -42,7 +42,7 @@ export const article = defineType({
       type: "string",
       group: "type",
       description:
-        "Bepaalt de vorm van het artikel: welke velden verschijnen en hoe de pagina rendert. Interview toont portretten + Q&A; Transfer en Event vragen een fact-blok in de inhoud; Match preview/recap koppelt aan een wedstrijd. Kies dit eerst — de rest van het formulier past zich erop aan.",
+        "Bepaalt de vorm van het artikel: welke velden verschijnen en hoe de pagina rendert. Interview toont portretten + Q&A; Transfer en Event vragen een fact-blok in de inhoud; een Event-artikel verschijnt met zijn eerste Event-fact vanzelf in /evenementen en /kalender, dus maak er geen apart Event-document bij aan; Match preview/recap koppelt aan een wedstrijd. Kies dit eerst — de rest van het formulier past zich erop aan.",
       options: {
         list: [
           { title: "Interview", value: "interview" },
