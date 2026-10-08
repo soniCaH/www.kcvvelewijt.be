@@ -34,7 +34,7 @@ export function HeritageHero() {
         // routes where a kicker and the up-link repeated the parent name.
         kicker="Sinds 1909"
         headline="Meer dan een eeuw"
-        lead="Van de Jonge Footbalclub in 1909 tot het nationale voetbal vandaag — de rijke geschiedenis van één plezante compagnie."
+        lead="Van de Jonge Footbalclub in 1909 tot het nationale voetbal vandaag — de rijke geschiedenis van 1 plezante compagnie."
         upLink={{ href: "/club", label: "De club" }}
       />
     </PageContainer>

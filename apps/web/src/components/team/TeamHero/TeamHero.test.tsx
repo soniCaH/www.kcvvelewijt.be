@@ -8,11 +8,28 @@
  *  - Meta auto-hide when the pill is absent.
  *  - Tagline renders and auto-hides.
  *  - Artefact state: "photo" when teamImageUrl present, "jersey" fallback when absent.
+ *  - Photo viewer (#3447): the photo opens full screen, uncropped; the jersey
+ *    fallback has nothing to open.
  */
 
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest";
+import { act, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import type { LightboxProps } from "yet-another-react-lightbox";
 import { TeamHero } from "./TeamHero";
+
+// The library draws on a portal and measures layout; what TeamHero owns is
+// the props it hands over, so capture those at the module boundary.
+const lightboxProps = vi.hoisted(() => ({ current: null as unknown }));
+vi.mock("yet-another-react-lightbox", () => ({
+  default: (props: unknown) => {
+    lightboxProps.current = props;
+    return null;
+  },
+}));
+
+const { trackEvent } = vi.hoisted(() => ({ trackEvent: vi.fn() }));
+vi.mock("@/lib/analytics/track-event", () => ({ trackEvent }));
 
 const BASE_SENIOR = {
   displayName: "A-ploeg",
@@ -134,6 +151,88 @@ describe("TeamHero", () => {
       expect(
         screen.getByTestId("team-hero-artefact").getAttribute("data-state"),
       ).toBe("jersey");
+    });
+  });
+
+  describe("Photo viewer (#3447)", () => {
+    const PHOTO = {
+      teamImageUrl: "/fixtures/ploeg-a-crop.jpg",
+      photoViewer: {
+        fullUrl: "/fixtures/ploeg-a-full.jpg",
+        teamSlug: "a-ploeg",
+      },
+    };
+    const viewer = () => lightboxProps.current as LightboxProps;
+
+    // The viewer is lazy-loaded on the first click. Import it once up front so
+    // no test spends its budget on the cold module load.
+    beforeAll(async () => {
+      await import("./TeamPhotoViewer");
+    });
+
+    beforeEach(() => {
+      lightboxProps.current = null;
+      trackEvent.mockClear();
+    });
+
+    it("makes the photo a button named after the team", () => {
+      render(<TeamHero {...BASE_SENIOR} {...PHOTO} />);
+      expect(
+        screen.getByRole("button", { name: "Teamfoto van A-ploeg vergroten" }),
+      ).toBeInTheDocument();
+    });
+
+    it("has nothing to open on the jersey fallback", () => {
+      render(<TeamHero {...BASE_SENIOR} photoViewer={PHOTO.photoViewer} />);
+      expect(screen.queryByRole("button")).toBeNull();
+      expect(lightboxProps.current).toBeNull();
+    });
+
+    it("opens the uncropped photo, alt naming the team, on click", async () => {
+      render(<TeamHero {...BASE_SENIOR} {...PHOTO} />);
+      // The viewer loads on the first click, not with the page.
+      expect(lightboxProps.current).toBeNull();
+
+      await userEvent.click(screen.getByRole("button"));
+
+      await waitFor(() => expect(viewer()?.open).toBe(true));
+      expect(viewer().slides).toEqual([
+        { src: "/fixtures/ploeg-a-full.jpg", alt: "A-ploeg teamfoto" },
+      ]);
+    });
+
+    it("closes on a backdrop click and shows no navigation for one photo", async () => {
+      render(<TeamHero {...BASE_SENIOR} {...PHOTO} />);
+      await userEvent.click(screen.getByRole("button"));
+      await waitFor(() => expect(viewer()?.open).toBe(true));
+
+      expect(viewer().controller?.closeOnBackdropClick).toBe(true);
+      expect(viewer().render?.buttonPrev?.()).toBeNull();
+      expect(viewer().render?.buttonNext?.()).toBeNull();
+    });
+
+    it("closes when the viewer asks, and opens again on the next click", async () => {
+      render(<TeamHero {...BASE_SENIOR} {...PHOTO} />);
+      await userEvent.click(screen.getByRole("button"));
+      await waitFor(() => expect(viewer()?.open).toBe(true));
+
+      act(() => viewer().close?.());
+      expect(viewer().open).toBe(false);
+
+      await userEvent.click(screen.getByRole("button"));
+      expect(viewer().open).toBe(true);
+      expect(trackEvent).toHaveBeenCalledTimes(2);
+    });
+
+    it("fires team_photo_open once per open, even on a double-click", async () => {
+      render(<TeamHero {...BASE_SENIOR} {...PHOTO} />);
+
+      await userEvent.dblClick(screen.getByRole("button"));
+
+      expect(trackEvent).toHaveBeenCalledTimes(1);
+      expect(trackEvent).toHaveBeenCalledWith("team_photo_open", {
+        team_slug: "a-ploeg",
+      });
     });
   });
 });

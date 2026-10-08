@@ -102,6 +102,7 @@ export const handleMembership = (payload: MembershipRequest) =>
         municipality: payload.municipality,
         email: payload.email,
         priorClub: payload.priorClub,
+        remark: payload.remark,
         isMinor,
         parentEmail: payload.parentEmail,
         parentalConsent: payload.parentalConsent ?? false,

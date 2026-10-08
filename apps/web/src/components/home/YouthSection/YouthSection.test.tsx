@@ -23,11 +23,16 @@ describe("YouthSection", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders the lead copy", () => {
+  it("renders the youth mission line as the lead (#3427)", () => {
     render(<YouthSection />);
     expect(
-      screen.getByText(/onze jeugdwerking groeit elk jaar/i),
+      screen.getByText(
+        "Met onze club willen we dat lokale kinderen met “goesting” naar de training en wedstrijd komen en met “tegengoesting” terug naar huis gaan.",
+      ),
     ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/onze jeugdwerking groeit elk jaar/i),
+    ).not.toBeInTheDocument();
   });
 
   it("renders the stats line from CMS-sourced props (#2401 item 4)", () => {

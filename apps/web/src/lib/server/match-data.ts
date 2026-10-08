@@ -167,3 +167,23 @@ export const getFirstTeamStripData = cache(
     }
   },
 );
+
+/**
+ * Every visible team's next fixture (`getNextMatches`): the agenda band's read,
+ * on the homepage and on `/kalender` (#3430). A section read: any failure,
+ * typed or a defect, gives `null`, which the band shows as "unavailable"
+ * (#2399), while `[]` stays a genuinely empty agenda.
+ */
+export const fetchUpcomingMatchesOrNull = (
+  note: string,
+): Promise<readonly Match[] | null> =>
+  runPromise(
+    degradeSection(
+      Effect.gen(function* () {
+        const bff = yield* BffService;
+        return yield* bff.getNextMatches();
+      }),
+      null as readonly Match[] | null,
+      note,
+    ),
+  );

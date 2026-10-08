@@ -7,7 +7,7 @@
  * practical-info hub. The page is static; the form POSTs to `/api/membership`.
  */
 
-import { SITE_CONFIG } from "@/lib/constants";
+import { SITE_CONFIG, INTERN_REGLEMENT_JEUGD_PDF } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
@@ -60,10 +60,7 @@ export default function WordLidPage() {
             </EditorialLink>
           </p>
           <p className="text-body-md mt-2">
-            <a
-              href="/downloads/intern-reglement-jeugd-2026.pdf"
-              className="prose-link"
-            >
+            <a href={INTERN_REGLEMENT_JEUGD_PDF} className="prose-link">
               Intern reglement jeugd (pdf)
             </a>
           </p>

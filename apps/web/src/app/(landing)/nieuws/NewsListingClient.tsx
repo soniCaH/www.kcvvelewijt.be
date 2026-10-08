@@ -31,7 +31,14 @@ interface Category {
 
 interface NewsListingClientProps {
   initialArticles: ArticleVM[];
+  /** The filter chips. */
   categories: Category[];
+  /**
+   * Every `?categorie=` value that filters — a superset of the chips, since
+   * a tag with too few articles gets no chip but still filters (#3432).
+   * Defaults to the chips' slugs.
+   */
+  filterSlugs?: string[];
   hasMore: boolean;
   initialCategory?: string;
   fetchArticles: (params: {
@@ -44,6 +51,7 @@ interface NewsListingClientProps {
 export function NewsListingClient({
   initialArticles,
   categories,
+  filterSlugs,
   hasMore: initialHasMore,
   initialCategory,
   fetchArticles,
@@ -54,8 +62,8 @@ export function NewsListingClient({
   // desync this component's own `activeCategory` from what a
   // `useHistoryFilterParam`-style read would derive (#2783 review finding 4).
   const categorySlugs = useMemo(
-    () => categories.map((c) => c.attributes.slug),
-    [categories],
+    () => filterSlugs ?? categories.map((c) => c.attributes.slug),
+    [filterSlugs, categories],
   );
   const [activeCategory, setActiveCategory] = useState(() =>
     narrowParam(initialCategory ?? null, categorySlugs, "all"),

@@ -34,11 +34,10 @@ export interface UseHashLandingCorrectionResult {
  *   `fonts.ready` floor (a guaranteed extra call even when nothing is
  *   loading). An extra/early `correct()` call from that floor is harmless
  *   here: it no-ops outside the armed window below, and a repeat
- *   `scrollIntoView()` to an already-reached target is a no-op too. Matters
- *   even on a route with no bar at all (`/jeugd#visie`).
+ *   `scrollIntoView()` to an already-reached target is a no-op too.
  *
- * `<useSectionNav>` composes this for its own bar-resize case;
- * `<JeugdVisie>` (no bar, no nav) uses it directly for the webfont case.
+ * `<useSectionNav>` composes this for both cases (`/jeugd#visie`, the one
+ * route that once called it directly, carries a section nav since #3435).
  */
 export function useHashLandingCorrection(
   ids: readonly string[],

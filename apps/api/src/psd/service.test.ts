@@ -33,12 +33,14 @@ function makeEnvLayer() {
 }
 
 const cacheMock: KvCacheInterface = {
-  // Seed empty maps so getCompetitionLabels() and the getMatchDetail match-team
-  // index both cache-hit, keeping the order-based fetch mocks free of extra
+  // Seed empty maps so getCompetitionLabels(), getTeamAges() and the
+  // getMatchDetail match-team index all cache-hit, keeping the order-based fetch mocks free of extra
   // /competitions, /teams and season-games requests.
   get: (key: string) =>
     Effect.succeed(
-      key === "psd:competition-labels" || key === "psd:match-team-index:v4"
+      key === "psd:competition-labels" ||
+        key === "psd:match-team-index:v5" ||
+        key === "psd:teams-by-id"
         ? "{}"
         : null,
     ),
@@ -1509,11 +1511,13 @@ describe("PsdService.getMatchDetail — status/score backfill from season list",
   const indexKvMock = (entry: Record<string, unknown>): KvCacheInterface => ({
     get: (key: string) =>
       Effect.succeed(
-        key === "psd:match-team-index:v4"
-          ? JSON.stringify({ "99": entry })
-          : key === "psd:competition-labels"
-            ? "{}"
-            : null,
+        key === "psd:teams-by-id"
+          ? "{}"
+          : key === "psd:match-team-index:v5"
+            ? JSON.stringify({ "99": entry })
+            : key === "psd:competition-labels"
+              ? "{}"
+              : null,
       ),
     set: () => Effect.succeed(undefined),
     delete: () => Effect.succeed(undefined),
@@ -2208,7 +2212,11 @@ describe("PsdService.getMatchDetail - competition/team enrichment", () => {
     const kvMock: KvCacheInterface = {
       get: (key: string) =>
         Effect.succeed(
-          key === "psd:match-team-index:v4" ? JSON.stringify(idx) : null,
+          key === "psd:teams-by-id"
+            ? "{}"
+            : key === "psd:match-team-index:v5"
+              ? JSON.stringify(idx)
+              : null,
         ),
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
@@ -2267,11 +2275,13 @@ describe("PsdService.getMatchDetail - competition/team enrichment", () => {
     const kvMock: KvCacheInterface = {
       get: (key: string) =>
         Effect.succeed(
-          key === "psd:current-season-id"
-            ? JSON.stringify(seasons[0])
-            : key === "psd:competition-labels"
-              ? "{}"
-              : null, // psd:match-team-index → null → force a build
+          key === "psd:teams-by-id"
+            ? "{}"
+            : key === "psd:current-season-id"
+              ? JSON.stringify(seasons[0])
+              : key === "psd:competition-labels"
+                ? "{}"
+                : null, // psd:match-team-index → null → force a build
         ),
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
@@ -2320,9 +2330,11 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
   const kvMockFor = (isHome: boolean | undefined): KvCacheInterface => ({
     get: (key: string) =>
       Effect.succeed(
-        key === "psd:match-team-index:v4"
-          ? JSON.stringify(indexEntry(isHome))
-          : null,
+        key === "psd:teams-by-id"
+          ? "{}"
+          : key === "psd:match-team-index:v5"
+            ? JSON.stringify(indexEntry(isHome))
+            : null,
       ),
     set: () => Effect.succeed(undefined),
     delete: () => Effect.succeed(undefined),
@@ -2465,11 +2477,13 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
     const kvMock: KvCacheInterface = {
       get: (key: string) =>
         Effect.succeed(
-          key === "psd:current-season-id"
-            ? JSON.stringify(seasons[0])
-            : key === "psd:competition-labels"
-              ? "{}"
-              : null, // psd:match-team-index → null → force a build
+          key === "psd:teams-by-id"
+            ? "{}"
+            : key === "psd:current-season-id"
+              ? JSON.stringify(seasons[0])
+              : key === "psd:competition-labels"
+                ? "{}"
+                : null, // psd:match-team-index → null → force a build
         ),
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
@@ -2531,11 +2545,13 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
     const kvMock: KvCacheInterface = {
       get: (key: string) =>
         Effect.succeed(
-          key === "psd:current-season-id"
-            ? JSON.stringify(seasons[0])
-            : key === "psd:competition-labels"
-              ? "{}"
-              : null, // psd:match-team-index → null → force a build
+          key === "psd:teams-by-id"
+            ? "{}"
+            : key === "psd:current-season-id"
+              ? JSON.stringify(seasons[0])
+              : key === "psd:competition-labels"
+                ? "{}"
+                : null, // psd:match-team-index → null → force a build
         ),
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
@@ -2568,5 +2584,200 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
     if (result._tag === "Right") {
       expect(result.right.venue).toBe(CLUB_VENUE);
     }
+  });
+});
+
+// ─── Youth score gate (#3428) ────────────────────────────────────────────────
+// U6–U13 matches carry no score on any endpoint; U14 and up keep theirs. The
+// band comes from `/teams` (`getTeamAges`, cached) or the team in hand.
+describe("PsdService — youth score gate (#3428)", () => {
+  const kvWithAges = (
+    ages: Record<string, string>,
+    extra: Record<string, string> = {},
+  ): KvCacheInterface => ({
+    get: (key: string) =>
+      Effect.succeed(
+        key === "psd:teams-by-id"
+          ? JSON.stringify(
+              Object.fromEntries(
+                Object.entries(ages).map(([id, age]) => [
+                  id,
+                  { name: `KCVV ${age}`, age },
+                ]),
+              ),
+            )
+          : key === "psd:competition-labels" ||
+              key === "psd:match-team-index:v5"
+            ? (extra[key] ?? "{}")
+            : null,
+      ),
+    set: () => Effect.succeed(undefined),
+    delete: () => Effect.succeed(undefined),
+    increment: () => Effect.succeed(undefined),
+    durable: noopDurableKv,
+  });
+
+  const teamMatches = async (age: string) => {
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ ok: true, json: async () => seasons })
+      .mockResolvedValueOnce({ ok: true, json: async () => rawMatchList });
+    const result = await runService((svc) => svc.getTeamMatches(1), {
+      kvMock: kvWithAges({ "1": age }),
+    });
+    if (result._tag !== "Right") throw new Error("expected Right");
+    return result.right;
+  };
+
+  it("team matches: a U13 team's finished match has no score and stays finished", async () => {
+    const [match] = await teamMatches("U13");
+    expect(match?.status).toBe("finished");
+    expect(match && "score" in match.home_team).toBe(false);
+    expect(match && "score" in match.away_team).toBe(false);
+    expect(() => S.decodeUnknownSync(Match)(match)).not.toThrow();
+  });
+
+  it("team matches: a U14 team keeps its score", async () => {
+    const [match] = await teamMatches("U14");
+    expect(match?.home_team.score).toBe(3);
+    expect(match?.away_team.score).toBe(1);
+  });
+
+  it("matches window: gates on the team's own band", async () => {
+    const today = new Date().toLocaleDateString("en-CA", {
+      timeZone: "Europe/Brussels",
+    });
+    const playedToday = {
+      content: [
+        { ...rawMatchList.content[0], date: `${today} 00:00`, time: "00:01" },
+      ],
+    };
+    const teams = [{ ...rawTeams[0], age: "U10" }];
+    (global.fetch as ReturnType<typeof vi.fn>).mockImplementation(
+      (url: string) =>
+        Promise.resolve({
+          ok: true,
+          json: async () =>
+            url.includes("/games/team/")
+              ? playedToday
+              : url.includes("/seasons")
+                ? seasons
+                : teams,
+        }),
+    );
+
+    const result = await runService((svc) => svc.getMatchesWindow());
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right).toHaveLength(1);
+      expect(result.right[0]?.status).toBe("finished");
+      expect(result.right[0]?.home_team.score).toBeUndefined();
+    }
+  });
+
+  it("match detail: strips a U10 match's score and goal events, keeps the rest", async () => {
+    // Sanity check: the fixture really carries a goal before the gate.
+    expect(rawDetailWithGoal.events[0]?.action.type).toBe("GOAL");
+    const detail = rawDetailWithGoal;
+    const index = JSON.stringify({
+      "123": {
+        teamId: 1,
+        competitionType: "league",
+        status: "finished",
+        hideScores: true,
+      },
+    });
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => detail,
+      text: async () => JSON.stringify(detail),
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(123), {
+      kvMock: kvWithAges({ "1": "U10" }, { "psd:match-team-index:v5": index }),
+    });
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.status).toBe("finished");
+      expect(result.right.kcvv_team_id).toBe(1);
+      expect("score" in result.right.home_team).toBe(false);
+      expect("score" in result.right.away_team).toBe(false);
+      expect(result.right.events?.some((e) => e.type === "goal")).toBeFalsy();
+      expect(() =>
+        S.decodeUnknownSync(MatchDetail)(result.right),
+      ).not.toThrow();
+    }
+  });
+
+  it("match detail: shows the score when the match is missing from the index", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => rawDetailResponse,
+      text: async () => JSON.stringify(rawDetailResponse),
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(99), {
+      kvMock: kvWithAges({ "1": "U10" }),
+    });
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") expect(result.right.home_team.score).toBe(2);
+  });
+
+  it("match detail: fails closed while the match-team index is unknown", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => rawDetailWithGoal,
+      text: async () => JSON.stringify(rawDetailWithGoal),
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(123), {
+      kvMock: kvWithAges({}, { "psd:match-team-index:v5": "null" }),
+    });
+
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left._tag).toBe("UpstreamUnavailable");
+    }
+  });
+
+  it("match detail: one failed team fetch leaves the index unknown, never partial", async () => {
+    const sets: Array<[string, string]> = [];
+    const kv = kvWithAges({});
+    (global.fetch as ReturnType<typeof vi.fn>).mockImplementation(
+      (url: string) =>
+        Promise.resolve(
+          url.includes("/games/team/")
+            ? { ok: false, status: 503, json: async () => ({}) }
+            : {
+                ok: true,
+                json: async () =>
+                  url.includes("/seasons")
+                    ? seasons
+                    : url.includes("/teams")
+                      ? rawTeams
+                      : rawDetailWithGoal,
+                text: async () => JSON.stringify(rawDetailWithGoal),
+              },
+        ),
+    );
+
+    const result = await runService((svc) => svc.getMatchDetail(123), {
+      kvMock: {
+        ...kv,
+        get: (key: string) =>
+          key === "psd:match-team-index:v5"
+            ? Effect.succeed(null)
+            : kv.get(key),
+        set: (key: string, value: string) =>
+          Effect.sync(() => {
+            sets.push([key, value]);
+          }),
+      },
+    });
+
+    expect(result._tag).toBe("Left");
+    expect(sets).toContainEqual(["psd:match-team-index:v5", "null"]);
   });
 });

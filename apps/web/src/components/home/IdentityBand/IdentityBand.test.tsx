@@ -21,7 +21,7 @@ describe("IdentityBand", () => {
     render(<IdentityBand />);
     expect(
       screen.getByRole("region", {
-        name: /er is maar één plezante compagnie/i,
+        name: /er is maar 1 plezante compagnie/i,
       }),
     ).toBeInTheDocument();
   });
@@ -31,7 +31,7 @@ describe("IdentityBand", () => {
     expect(
       screen.getByRole("heading", {
         level: 2,
-        name: /er is maar één plezante compagnie/i,
+        name: /er is maar 1 plezante compagnie/i,
       }),
     ).toBeInTheDocument();
     expect(container.querySelector("h1")).toBeNull();

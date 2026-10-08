@@ -54,7 +54,7 @@ A fixture where both sides are the same club (`home_team.id === away_team.id`). 
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Match.is_placeholder`  | Contract field (optional boolean), computed by the BFF from club-id equality                                                                             |
 | `ScheduleReservation`   | Web view-model — the `kind: "reservation"` member of `ScheduleRow`, carrying one `team` (never `homeTeam`/`awayTeam`) and no score (#2688)               |
-| `UpcomingReservation`   | Web view-model — the `UpcomingRow` reservation member, used by the homepage's other-teams agenda (#2688)                                                 |
+| `UpcomingReservation`   | Web view-model — the `UpcomingRow` reservation member, used by the homepage's match agenda (#2688)                                                       |
 | `CalendarReservation`   | Web view-model — the `CalendarMatch` reservation member on `/kalender`, carrying one `club` (#2802). Replaced the flat `isPlaceholder: boolean` route VM |
 | `reservationView()`     | `apps/web/src/lib/utils/match-display.ts` — the shared subject/status derivation every renderer of a reservation uses                                    |
 | `reservationRowLabel()` | `apps/web/src/lib/utils/match-display.ts` — the shared accessible-name sentence every reservation row's `aria-label` builds from (#2688)                 |
@@ -75,7 +75,7 @@ The **register** a row/page renders in when it has no confirmed two-sided fixtur
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `matchRowKind()`       | `apps/web/src/lib/utils/match-display.ts` — the one function deciding `kind`, including the register. The reduced half is gated on a scoreline existing, not on `isPlayedMatch` (#2696) |
 | `ScheduleReducedMatch` | The `kind: "reduced"` member of `ScheduleRow` — one `team` (the other club, by club id), no `homeTeam`/`awayTeam`/scores (#2802)                                                        |
-| `UpcomingReducedMatch` | The same member on the homepage other-teams agenda ([#2802])                                                                                                                            |
+| `UpcomingReducedMatch` | The same member on the homepage match agenda ([#2802])                                                                                                                                  |
 | `CalendarReducedMatch` | The same member on `/kalender`, carrying one `club` ([#2802])                                                                                                                           |
 
 **A reduced row is not a permanent classification.** The four adapters re-ask `matchRowKind()` on every call, so the moment PSD publishes a scoreline the same fixture id transforms into the `"match"` member and the row reverts to the full scoreboard — the club really was the opponent after all. That transition is asserted in all four adapters' tests ([#2802]).
@@ -240,11 +240,11 @@ The three-tier grouping of youth teams used by the club internally and by parent
 
 | Code / Label   | Dutch      | Age range | Teams                    |
 | -------------- | ---------- | --------- | ------------------------ |
-| `"Bovenbouw"`  | Bovenbouw  | U17–U21   | U21, U19, U17            |
-| `"Middenbouw"` | Middenbouw | U12–U16   | U16, U15, U14, U13, U12  |
-| `"Onderbouw"`  | Onderbouw  | U6–U11    | U11, U10, U9, U8, U7, U6 |
+| `"Onderbouw"`  | Onderbouw  | U6–U11    | U6, U7, U8, U9, U10, U11 |
+| `"Middenbouw"` | Middenbouw | U12–U16   | U12, U13, U14, U15, U16  |
+| `"Bovenbouw"`  | Bovenbouw  | U17–U21   | U17, U19, U21            |
 
-**Implementation:** `getYouthDivision()` in `apps/web/src/lib/utils/group-teams.ts`. Used for section headers on `/ploegen` and `/jeugd`, and as a badge on individual team detail pages.
+**Implementation:** `getYouthDivision()` in `apps/web/src/lib/utils/group-teams.ts`. Used for section headers on `/ploegen` and `/jeugd`, and as a badge on individual team detail pages. Both pages list the divisions and their teams small → large (#3427).
 
 **Vocabulary rule:** Always use Bovenbouw/Middenbouw/Onderbouw — never the older terms "scholieren" or "duiveltjes."
 
@@ -280,7 +280,7 @@ A player's playing position. Determined by fallback hierarchy:
    step 4 (#2638)
 4. Neither set, or step 3 misses → **absent**, not defaulted
 
-Code no longer fills an unset position with a generic literal — see **The Writer Rule** in `apps/web/CLAUDE.md`. `PlayerHero`'s meta row and `PlayerCard`'s label both render an unset position as absent, distinguishable from an authored one (#2567). `SquadGrid`'s trailing group is different: its `"Spelers"` heading is a **UI label for "unmapped or unauthored"**, not a rendering of the datum itself, so a player who was deliberately authored `Speler` and a player with no position at all land under the identical heading — measured 2026-09-09, that catch-all holds 228 of 277 active players (82%). The rule's "distinguishable from an authored one" guarantee holds at the field and at the two labelled surfaces above; it does not extend to this grouping heading. `SquadGrid` itself gains a companion gate the same day (#2638): when the position partition yields a single group, the grid renders that group without a heading — a heading that separates nobody is the same lie as a label that classifies nobody.
+Code no longer fills an unset position with a generic literal — see **The Writer Rule** in `apps/web/CLAUDE.md`. `PlayerHero`'s meta row and `PlayerCard`'s label both render an unset position as absent, distinguishable from an authored one (#2567). `SquadGrid`'s trailing group is different: its `"Spelers"` heading is a **UI label for "unmapped or unauthored"**, not a rendering of the datum itself, so a player who was deliberately authored `Speler` and a player with no position at all land under the identical heading — measured 2026-09-09, that catch-all holds 228 of 277 active players (82%). The rule's "distinguishable from an authored one" guarantee holds at the field and at the two labelled surfaces above; it does not extend to this grouping heading. On youth team pages (#3431) the same catch-all is headed `"Veldspelers"` instead, beside `"Doelmannen"` as the only other group — the owner's call, so a youth player with no known position is listed as a field player. `SquadGrid` itself gains a companion gate the same day (#2638): when the position partition yields a single group, the grid renders that group without a heading — a heading that separates nobody is the same lie as a label that classifies nobody.
 
 `Speler` itself is **not removed from the dropdown** — it stays a deliberate, authored choice (`packages/sanity-schemas/src/player.ts`'s `position` enum), distinct from an unset field. It is the honest answer for U6–U9, where no finer position exists yet (#2535): an editor picking `Speler` for a young player and an editor never opening the field are now distinguishable, which is the whole point of removing the code-level default.
 

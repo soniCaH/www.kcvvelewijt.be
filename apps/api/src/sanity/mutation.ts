@@ -97,6 +97,7 @@ export interface SanityMembershipApplicationDoc {
   municipality: string;
   email: string;
   priorClub?: string;
+  remark?: string;
   isMinor: boolean;
   parentEmail?: string;
   parentalConsent: boolean;
@@ -612,6 +613,7 @@ export const SanityMutationLive = Layer.effect(
               municipality: doc.municipality,
               email: doc.email,
               ...(doc.priorClub ? { priorClub: doc.priorClub } : {}),
+              ...(doc.remark ? { remark: doc.remark } : {}),
               isMinor: doc.isMinor,
               ...(doc.parentEmail ? { parentEmail: doc.parentEmail } : {}),
               parentalConsent: doc.parentalConsent,

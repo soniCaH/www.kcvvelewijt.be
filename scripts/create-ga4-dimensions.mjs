@@ -22,8 +22,12 @@ import { params as dimensions } from "./analytics-taxonomy.mjs";
 
 const PROPERTY_ID = process.env.PROPERTY_ID ?? process.argv[2];
 if (!PROPERTY_ID) {
-  console.error("Error: PROPERTY_ID is required. Provide it as an env var or CLI argument:");
-  console.error("  PROPERTY_ID=530024143 node scripts/create-ga4-dimensions.mjs");
+  console.error(
+    "Error: PROPERTY_ID is required. Provide it as an env var or CLI argument:",
+  );
+  console.error(
+    "  PROPERTY_ID=530024143 node scripts/create-ga4-dimensions.mjs",
+  );
   console.error("  node scripts/create-ga4-dimensions.mjs 530024143");
   process.exit(1);
 }
@@ -31,12 +35,16 @@ const BASE_URL = `https://analyticsadmin.googleapis.com/v1beta/properties/${PROP
 
 let token;
 try {
-  token = execSync("gcloud auth application-default print-access-token", { stdio: ["pipe", "pipe", "pipe"] })
+  token = execSync("gcloud auth application-default print-access-token", {
+    stdio: ["pipe", "pipe", "pipe"],
+  })
     .toString()
     .trim();
 } catch {
   console.error("Could not get gcloud access token. Run:");
-  console.error("  gcloud auth application-default login --scopes=https://www.googleapis.com/auth/analytics.edit,https://www.googleapis.com/auth/cloud-platform");
+  console.error(
+    "  gcloud auth application-default login --scopes=https://www.googleapis.com/auth/analytics.edit,https://www.googleapis.com/auth/cloud-platform",
+  );
   process.exit(1);
 }
 
@@ -52,24 +60,41 @@ try {
       existingParams.add(d.parameterName);
     }
     if (existingParams.size > 0) {
-      console.log(`Found ${existingParams.size} existing custom dimension(s). Skipping duplicates.\n`);
+      console.log(
+        `Found ${existingParams.size} existing custom dimension(s). Skipping duplicates.\n`,
+      );
     }
   } else {
-    console.warn("Could not list existing dimensions; proceeding without dedup check.\n");
+    console.warn(
+      "Could not list existing dimensions; proceeding without dedup check.\n",
+    );
   }
 } catch {
-  console.warn("Could not list existing dimensions; proceeding without dedup check.\n");
+  console.warn(
+    "Could not list existing dimensions; proceeding without dedup check.\n",
+  );
 }
 
-console.log(`Creating ${dimensions.length} custom dimensions for property ${PROPERTY_ID}...\n`);
+console.log(
+  `Creating ${dimensions.length} custom dimensions for property ${PROPERTY_ID}...\n`,
+);
 
 let ok = 0;
 let failed = 0;
 let skipped = 0;
 
 for (const dim of dimensions) {
+  if (dim.registered === false) {
+    console.log(
+      `  –  ${dim.displayName} (${dim.parameterName}) — event-only, not registered`,
+    );
+    skipped++;
+    continue;
+  }
   if (existingParams.has(dim.parameterName)) {
-    console.log(`  –  ${dim.displayName} (${dim.parameterName}) — already exists, skipped`);
+    console.log(
+      `  –  ${dim.displayName} (${dim.parameterName}) — already exists, skipped`,
+    );
     skipped++;
     continue;
   }
@@ -99,11 +124,15 @@ for (const dim of dimensions) {
       } catch {
         msg = (await res.text()) || res.statusText;
       }
-      console.log(`  ✗  ${dim.displayName} (${dim.parameterName}) — ${res.status}: ${msg}`);
+      console.log(
+        `  ✗  ${dim.displayName} (${dim.parameterName}) — ${res.status}: ${msg}`,
+      );
       failed++;
     }
   } catch (e) {
-    console.log(`  ✗  ${dim.displayName} (${dim.parameterName}) — network error: ${e.message}`);
+    console.log(
+      `  ✗  ${dim.displayName} (${dim.parameterName}) — network error: ${e.message}`,
+    );
     failed++;
   }
 }

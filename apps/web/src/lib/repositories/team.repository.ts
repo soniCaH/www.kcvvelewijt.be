@@ -25,6 +25,9 @@ export const TEAM_BY_SLUG_QUERY =
   _id, psdId, name, displayName, "slug": slug.current, age, gender, footbelId, division, divisionFull,
   tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,
   "teamImageUrl": teamImage.asset->url + "?w=1200&h=800&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(teamImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(teamImage.hotspot.y, 0.5)),
+  // Uncropped, for the full-screen viewer (#3447): the crop above cuts off
+  // the players at the edges of a wide team photo.
+  "teamImageFullUrl": teamImage.asset->url + "?w=2400&q=80&fm=webp&fit=max",
   players[]-> {
     _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,
     "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
@@ -145,6 +148,8 @@ export interface TeamDetailVM {
   teamType: "youth" | "senior";
   ageGroup: string | undefined;
   teamImageUrl: string | null;
+  /** Uncropped team photo for the full-screen viewer (#3447). */
+  teamImageFullUrl: string | null;
   body: TEAM_BY_SLUG_DETAIL["body"];
   contactInfo: TEAM_BY_SLUG_DETAIL["contactInfo"];
   players: PlayerVM[];
@@ -245,6 +250,7 @@ function toTeamDetailVM(row: TEAM_BY_SLUG_DETAIL): TeamDetailVM {
     teamType: computeTeamType(row.age),
     ageGroup: computeAgeGroup(row.age),
     teamImageUrl: row.teamImageUrl,
+    teamImageFullUrl: row.teamImageFullUrl,
     body: row.body,
     contactInfo: row.contactInfo,
     players: (row.players ?? []).map(toPlayerVM),

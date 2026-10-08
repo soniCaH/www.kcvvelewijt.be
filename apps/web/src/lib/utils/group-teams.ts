@@ -29,10 +29,6 @@ export type GroupedTeams = {
   youthByDivision: YouthDivisionGroup[];
 };
 
-const BOVENBOUW = ["U21", "U20", "U19", "U18", "U17"];
-const MIDDENBOUW = ["U16", "U15", "U14", "U13", "U12"];
-const ONDERBOUW = ["U11", "U10", "U9", "U8", "U7", "U6"];
-
 export type YouthDivisionName = "Bovenbouw" | "Middenbouw" | "Onderbouw";
 
 /**
@@ -99,15 +95,12 @@ export function getYouthDivisionTone(
   return division ? YOUTH_DIVISION_TONES[division] : "ink";
 }
 
-function sortByAgeDesc(ageOrder: string[]) {
-  return (a: TeamLandingItem, b: TeamLandingItem) => {
-    const idxA = ageOrder.indexOf(a.age);
-    const idxB = ageOrder.indexOf(b.age);
-    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-    if (idxA !== -1) return -1;
-    if (idxB !== -1) return 1;
-    return (parseAge(b.age) ?? 0) - (parseAge(a.age) ?? 0);
-  };
+/**
+ * Youngest first (club feedback v2, #3427). Only teams `getYouthDivision`
+ * placed reach this, so every age parses.
+ */
+function byAgeAsc(a: TeamLandingItem, b: TeamLandingItem): number {
+  return (parseAge(a.age) ?? 0) - (parseAge(b.age) ?? 0);
 }
 
 /**
@@ -130,8 +123,9 @@ export function groupTeamsForLanding(teams: TeamLandingItem[]): GroupedTeams {
     aTeam: seniors.find((t) => nameSuffix(t.name) === "A"),
     bTeam: seniors.find((t) => nameSuffix(t.name) === "B"),
     youthByDivision: [
-      // Above U21 and below the B-ploeg — so it leads the directory, ahead of
-      // Bovenbouw. `<YouthDirectory>` drops it when the roster has no Reserven.
+      // Above U21 and below the B-ploeg, a side of its own — so it leads the
+      // directory, ahead of the three bouw groups, which then run small → large
+      // (#3427). `<YouthDirectory>` drops it when the roster has no Reserven.
       //
       // Deliberately rangeless. #2641 proposed a label saying where the side
       // sits — A/B squad players never play here, so it is a side of its own
@@ -143,25 +137,25 @@ export function groupTeamsForLanding(teams: TeamLandingItem[]): GroupedTeams {
         teams: teams.filter((t) => t.psdId === RESERVEN_PSD_ID),
       },
       {
-        label: "Bovenbouw",
-        range: "U17–U21",
+        label: "Onderbouw",
+        range: "U6–U11",
         teams: teams
-          .filter((t) => getYouthDivision(t.age) === "Bovenbouw")
-          .sort(sortByAgeDesc(BOVENBOUW)),
+          .filter((t) => getYouthDivision(t.age) === "Onderbouw")
+          .sort(byAgeAsc),
       },
       {
         label: "Middenbouw",
         range: "U12–U16",
         teams: teams
           .filter((t) => getYouthDivision(t.age) === "Middenbouw")
-          .sort(sortByAgeDesc(MIDDENBOUW)),
+          .sort(byAgeAsc),
       },
       {
-        label: "Onderbouw",
-        range: "U6–U11",
+        label: "Bovenbouw",
+        range: "U17–U21",
         teams: teams
-          .filter((t) => getYouthDivision(t.age) === "Onderbouw")
-          .sort(sortByAgeDesc(ONDERBOUW)),
+          .filter((t) => getYouthDivision(t.age) === "Bovenbouw")
+          .sort(byAgeAsc),
       },
     ],
   };

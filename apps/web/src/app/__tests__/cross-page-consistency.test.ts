@@ -2469,6 +2469,9 @@ describe("rule 15 catches what it claims to (#3023)", () => {
  *   (#2433), the homepage + `SiteFooter` + `SectionStack` (#2402 — including
  *   every homepage-only component: `FeaturedEventBand`, `UpcomingMatches`,
  *   `BannerSlot`, `ClubshopBanner`), and `/share` + `/scheurkalender`.
+ *   `UpcomingMatches` also renders on `/kalender` since #3430, reused as-is
+ *   with its homepage band padding; that page's own two containers are pinned
+ *   below.
  * - **Excluded, re-verified against today's render, not the issue's filing-
  *   time chart:** `/darts` and `/tegenstander/[clubId]` — both compose their
  *   whole body inside one hero-owned container using `mt-*`/`my-*` margins
@@ -2579,7 +2582,9 @@ const SECTION_SPACING_SITES: Record<string, number> = {
   // seam to `SEAM_SPACING_SITES` below: `hulp`, `ContactPage`, `BestuurPage`,
   // the `/club` index, `SponsorsPage` and the team page no longer carry the
   // plain pair.)
-  "app/(main)/kalender/page.tsx": 1, // merged from two containers
+  // Merged from two containers by #2571, split again around the agenda band
+  // by #3430: hero container + calendar container.
+  "app/(main)/kalender/page.tsx": 2,
   "components/match/MatchStandingsSection/MatchStandingsSection.tsx": 1,
   "components/match/MatchEventsSection/MatchEventsSection.tsx": 1,
   "components/match/MatchLineupSection/MatchLineupSection.tsx": 1,
@@ -2921,7 +2926,7 @@ describe("rule 16's retired-pair exemptions are pinned to their exact pair (#257
  * convention every other rule in this file carries.
  */
 describe("rule 16 catches what it claims to (#2571)", () => {
-  it("covers 27 files and 41 sites in total (plain and seam, one file counted once)", () => {
+  it("covers 27 files and 42 sites in total (plain and seam, one file counted once)", () => {
     // A section site is a plain `py-12 sm:py-16` or a seam shape (#3335); a
     // `bottom` override sits on top of a component's own plain site, so it
     // adds neither a file nor a site.
@@ -2937,7 +2942,7 @@ describe("rule 16 catches what it claims to (#2571)", () => {
       Object.values(SECTION_SPACING_SITES).reduce((a, b) => a + b, 0) +
       seamSites.reduce((a, [, n]) => a + n, 0);
     expect(files.size).toBe(27);
-    expect(sites).toBe(41);
+    expect(sites).toBe(42);
   });
 
   it("counts a contiguous pair on one line", () => {

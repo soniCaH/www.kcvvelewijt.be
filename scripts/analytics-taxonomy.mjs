@@ -116,7 +116,10 @@ export const params = [
   { parameterName: "subject_kind", displayName: "Subject kind" },
   { parameterName: "subject_count", displayName: "Subject count" },
   { parameterName: "channel", displayName: "Share channel" },
-  { parameterName: "related_article_id_hashed", displayName: "Related article ID hashed" },
+  {
+    parameterName: "related_article_id_hashed",
+    displayName: "Related article ID hashed",
+  },
   // ── Article video ───────────────────────────────────────────────────────
   { parameterName: "video_source", displayName: "Video source" },
   { parameterName: "video_provider", displayName: "Video provider" },
@@ -175,4 +178,8 @@ export const params = [
   // ── Membership form (conversion — added #1974) ──────────────────────────
   { parameterName: "is_minor", displayName: "Is minor" },
   { parameterName: "has_prior_club", displayName: "Has prior club" },
+  // #3433 — collected on the event (GTM forwards it); `registered: false`
+  // keeps `create-ga4-dimensions.mjs` from minting a dimension while the
+  // 50-dimension cap is already exceeded.
+  { parameterName: "has_remark", displayName: "Has remark", registered: false },
 ];

@@ -27,7 +27,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** A-team with squad photo — canonical senior hero composition. */
+/**
+ * A-team with squad photo — canonical senior hero composition. The photo is a
+ * button that opens the uncropped photo full screen (#3447).
+ */
 export const ATeamWithPhoto: Story = {
   args: {
     displayName: "A-ploeg",
@@ -36,6 +39,10 @@ export const ATeamWithPhoto: Story = {
     division: "3NA",
     tagline: "Sterk, gedreven, één ploeg.",
     teamImageUrl: "/player-fixtures/player-mendes-mouro.jpg",
+    photoViewer: {
+      fullUrl: "/player-fixtures/player-mendes-mouro.jpg",
+      teamSlug: "a-ploeg",
+    },
   },
 };
 

@@ -23,6 +23,7 @@ import {
   trackAgendaExpand,
   trackAgendaFilter,
   trackAgendaRowClick,
+  type AgendaSurface,
 } from "./upcoming-matches-analytics";
 import { PRESS_DOWN_TRANSITION } from "@/components/design-system/press-down";
 
@@ -37,6 +38,8 @@ export interface UpcomingMatchesClientProps {
   initialVisible: number;
   kcvvTeamId: number;
   initialExpanded?: boolean;
+  /** See `UpcomingMatchesProps.surface` (which owns the default). */
+  surface: AgendaSurface;
 }
 
 const matchTimestamp = (m: UpcomingRow): number => {
@@ -63,6 +66,7 @@ export const UpcomingMatchesClient = ({
   initialVisible,
   kcvvTeamId,
   initialExpanded = false,
+  surface,
 }: UpcomingMatchesClientProps) => {
   const [expanded, setExpanded] = useState(initialExpanded);
   const [selectedTeam, setSelectedTeam] = useState<string>(ALL_TEAMS);
@@ -106,10 +110,10 @@ export const UpcomingMatchesClient = ({
   // The list cannot run away: `getNextMatches` returns exactly ONE fixture per
   // visible team — never a team's season — so its length is the club's team
   // count, not the calendar's. Today that is 21 teams past the BFF's
-  // `showInNavigation != false` gate, of which the homepage routes the 3 senior
-  // sides to `<FirstTeamsBlock>`, leaving at most 18 rows here. A cap would be
-  // an arbitrary number sitting in front of a bound the data already enforces,
-  // and virtualising 18 rows costs more than it saves.
+  // `showInNavigation != false` gate, so at most 21 rows here — the senior sides
+  // included since #3429. A cap would be an arbitrary number sitting in front
+  // of a bound the data already enforces, and virtualising 21 rows costs more
+  // than it saves.
   //
   // `apps/api/src/psd/service.test.ts` locks the one-row-per-team invariant. If
   // that test ever goes red, this line is what needs a real cap.
@@ -151,7 +155,7 @@ export const UpcomingMatchesClient = ({
       <ul className="flex flex-col gap-3">
         {visible.map((match) => (
           <li key={match.id}>
-            <MatchRow match={match} kcvvTeamId={kcvvTeamId} />
+            <MatchRow match={match} kcvvTeamId={kcvvTeamId} surface={surface} />
           </li>
         ))}
       </ul>
@@ -172,7 +176,8 @@ export const UpcomingMatchesClient = ({
         </button>
       )}
 
-      {expanded && (
+      {/* Not on `/kalender`, the page it would link to (#3430). */}
+      {expanded && surface === "home" && (
         <div className="mt-6">
           <Link
             href="/kalender"
@@ -259,10 +264,11 @@ const HomeAwayBadge = ({ side }: { side: KcvvSide }) => {
 interface MatchRowProps {
   match: UpcomingRow;
   kcvvTeamId: number;
+  surface: AgendaSurface;
 }
 
 /**
- * The other-teams agenda's reduced row for a pitch-reservation placeholder
+ * The match agenda's reduced row for a pitch-reservation placeholder
  * (#2606) or a tournament fixture with a hidden result (#2696/#2802) — no
  * opponent slot (a self-match has none, and a not-yet-played tournament
  * fixture's opponent is deliberately unnamed as one), no `<Link>` (mirrors
@@ -337,7 +343,7 @@ const ReservationMatchRow = ({
   );
 };
 
-const MatchRow = ({ match, kcvvTeamId }: MatchRowProps) => {
+const MatchRow = ({ match, kcvvTeamId, surface }: MatchRowProps) => {
   // Enumerated positively (#2802 review) — a negated
   // `kind !== "match"` catch-all would silently route any future fourth
   // `kind` into the reduced row too, with no compile error.
@@ -372,7 +378,7 @@ const MatchRow = ({ match, kcvvTeamId }: MatchRowProps) => {
   return (
     <MatchTravelLink
       matchId={match.id}
-      onClick={() => trackAgendaRowClick(match.id)}
+      onClick={() => trackAgendaRowClick(match.id, surface)}
       className={cn(
         "border-ink bg-cream group relative grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1 border-2 px-4 py-3",
         "shadow-paper-sm",

@@ -28,7 +28,18 @@ const playerStatsCache = TypedKvCache(PlayerSeasonStats);
 // `match:detail`/`opponent:team`) after this deploys. Every cache key these
 // handlers write is versioned here so a stale pre-#2491 entry is never read
 // as current — see the review that caught this on the first pass.
-const CACHE_VERSION = "v2";
+//
+// v3 (#3428): U6–U13 matches lost their score. A v2 entry still carries it, and
+// on staging (`CACHE_LONG_TTL`) a v2 key lives 365 days, so a hidden youth
+// score would keep serving after deploy.
+//
+// v4 (#3428 review): match detail fails closed while the match-team index is
+// unknown. A v3 detail written during an index failure could carry a youth
+// score (staging only; production never saw v3).
+//
+// One constant for every match-shaped cache key, `opponent.ts` included, so a
+// shape change can never bump one and forget the other.
+export const CACHE_VERSION = "v4";
 
 export const getMatchesByTeamHandler = (
   teamId: number,

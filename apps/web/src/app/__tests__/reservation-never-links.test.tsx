@@ -285,6 +285,7 @@ const RESERVATION_RENDERERS: ReducedRenderer[] = [
     render: () =>
       render(
         <UpcomingMatchesClient
+          surface="home"
           matches={[upcomingReservation]}
           initialVisible={5}
           kcvvTeamId={KCVV_CLUB_ID}
@@ -376,6 +377,7 @@ const RESERVATION_RENDERERS: ReducedRenderer[] = [
     render: () =>
       render(
         <UpcomingMatchesClient
+          surface="home"
           matches={[upcomingReduced]}
           initialVisible={5}
           kcvvTeamId={KCVV_CLUB_ID}

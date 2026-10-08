@@ -567,6 +567,11 @@ export default async function TeamPage({ params }: TeamPageProps) {
           divisionFull={team.divisionFull}
           tagline={team.tagline}
           teamImageUrl={team.teamImageUrl}
+          photoViewer={
+            team.teamImageFullUrl
+              ? { fullUrl: team.teamImageFullUrl, teamSlug: slug }
+              : null
+          }
           className="py-8 sm:py-12"
         />
       </PageContainer>
@@ -695,7 +700,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
               className="py-10 focus:outline-none sm:py-14"
             >
               <SectionHeader title={sectionLabels.spelers} size="display-md" />
-              <SquadGrid players={team.players} />
+              <SquadGrid players={team.players} teamType={team.teamType} />
             </PageContainer>
           </TrackInView>
         </>

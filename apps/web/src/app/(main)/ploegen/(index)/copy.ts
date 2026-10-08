@@ -7,4 +7,4 @@
 export const PLOEGEN_TITLE = "Onze ploegen";
 export const PLOEGEN_KICKER = "KCVV Elewijt";
 export const PLOEGEN_LEAD =
-  "Van de eerste ploeg tot de allerkleinsten — één plezante compagnie.";
+  "Van de eerste ploeg tot de allerkleinsten — 1 plezante compagnie.";

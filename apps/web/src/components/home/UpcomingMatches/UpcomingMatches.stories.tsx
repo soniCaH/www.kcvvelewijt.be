@@ -96,7 +96,30 @@ export const Expanded: Story = {
     docs: {
       description: {
         story:
-          "Expanded state — all upcoming matches visible in one chronological list, `/kalender` link revealed, and the control now reads 'Toon minder ↑' so the expansion is reversible (#2398).",
+          "Expanded state — all upcoming matches visible in one chronological list, `/kalender` link revealed (homepage surface only; see `ExpandedOnKalender`), and the control now reads 'Toon minder ↑' so the expansion is reversible (#2398).",
+      },
+    },
+  },
+};
+
+/**
+ * On `/kalender` (#3430): the same band, expanded, with no "Volledige
+ * kalender" link — it sits above that calendar. `vr-skip`: it differs from
+ * `Expanded` only by that link, so the a11y check is what this story adds,
+ * not a second near-identical baseline.
+ */
+export const ExpandedOnKalender: Story = {
+  args: {
+    matches: mockUpcomingTwelve,
+    initialExpanded: true,
+    surface: "kalender",
+  },
+  tags: ["vr-skip"],
+  parameters: {
+    docs: {
+      description: {
+        story:
+          '`surface="kalender"` — expanded, without the `/kalender` link, since the band sits on that page. Row clicks report `source: kalender_agenda` (#3430).',
       },
     },
   },
@@ -115,7 +138,7 @@ export const SingleTeamNoFilter: Story = {
 };
 
 /**
- * A youth tournament placeholder (#2606) among the other-teams agenda — no
+ * A youth tournament placeholder (#2606) in the match agenda — no
  * opponent, no link, the club crest and the competition subject instead of
  * "KCVV Elewijt — KCVV Elewijt" (#2688).
  */

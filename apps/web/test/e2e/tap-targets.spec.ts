@@ -161,12 +161,17 @@ const VIEWPORTS = [
  * Waits until the answer's grow (`<HeightGrow>`, 500ms, #3398) has finished:
  * its height reads the same on two consecutive polls, so a hit-area
  * measurement never lands on a half-open panel.
+ *
+ * Polls the region's parent, `<HeightGrow>`'s `overflow-hidden` clip. The
+ * region itself always has its full height inside that clip, so polling it
+ * "settled" at once and let the measurement land mid-grow (hit width 1).
  */
 async function waitForHeightSettled(region: Locator): Promise<void> {
+  const clip = region.locator("xpath=..");
   let previous: number | null = null;
   await expect
     .poll(async () => {
-      const height = (await region.boundingBox())?.height ?? 0;
+      const height = (await clip.boundingBox())?.height ?? 0;
       const settled = height > 0 && height === previous;
       previous = height;
       return settled;

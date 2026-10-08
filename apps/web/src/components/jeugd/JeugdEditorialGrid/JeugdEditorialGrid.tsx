@@ -7,6 +7,7 @@ import { SectionKicker, TapedCardGrid } from "@/components/design-system";
 import { hashMemberId } from "@/lib/analytics/hash-member-id";
 import type { ArticleVM } from "@/lib/repositories/article.repository";
 import type { EditorialCardConfig } from "@/lib/repositories/jeugd-landing-page.repository";
+import { INTERN_REGLEMENT_JEUGD_PDF } from "@/lib/constants";
 
 interface NavCardConfig {
   tag: string;
@@ -28,7 +29,7 @@ interface NavCardConfig {
 }
 
 /**
- * The six pinned nav cards (7j0b targets). Each carries its own Phosphor-fill
+ * The eight pinned nav cards (7j0b targets; the last two added by #3427). Each carries its own Phosphor-fill
  * glyph for the nav-variant panel.
  *
  * Targets as of #2960: `word lid` → `/club/word-lid` (membership form is
@@ -38,10 +39,11 @@ interface NavCardConfig {
  * still points at `/hulp`, because the search box is its whole job; a second
  * one is the duplicate #2965 was filed for, and a test asserts the count.
  *
- * Three of the six carry an `image` (#2965): "Word lid van KCVV",
+ * Three of the eight carry an `image` (#2965): "Word lid van KCVV",
  * "Onze opleidingsvisie" and "Trainingen & ProSoccerData" — club photos from the
- * 2026-09-05 Jeugdwedstrijddag, owner-approved (#3072). The other three
- * ("Organigram", "Wie contacteer ik?", "Blessure of medisch attest?") have
+ * 2026-09-05 Jeugdwedstrijddag, owner-approved (#3072). The other five
+ * ("Organigram", "Wie contacteer ik?", "Blessure of medisch attest?",
+ * "Intern reglement jeugd", "Mutualiteit: terugbetaling lidgeld") have
  * none: no photo exists that actually depicts those, and a generic stand-in
  * reads worse than the flat green + glyph they keep.
  */
@@ -121,6 +123,23 @@ const NAV_CARDS: NavCardConfig[] = [
     // change removes. Measured on production: y=0 without it, y=493 with.
     href: "/hulp?categorie=medisch#hulp",
     iconName: "FirstAid",
+  },
+  {
+    tag: "Reglement",
+    // #3427: the same PDF `/club/word-lid` links.
+    title: "Intern reglement jeugd",
+    arrowText: "Download",
+    href: INTERN_REGLEMENT_JEUGD_PDF,
+    iconName: "DownloadSimple",
+    external: true,
+  },
+  {
+    tag: "Lidgeld",
+    // #3427: the mutualiteit refund info lives on this Sanity page.
+    title: "Mutualiteit: terugbetaling lidgeld",
+    arrowText: "Lees meer",
+    href: "/club/praktische-informatie",
+    iconName: "Info",
   },
 ];
 
@@ -249,7 +268,7 @@ interface JeugdEditorialGridProps {
 
 /**
  * The `/jeugd` nav hub (Phase 7 / 7j3): a uniform grid of 16:9 image-top
- * `<EditorialHubCard>`s — `news` slots bubble the latest Jeugd articles, six
+ * `<EditorialHubCard>`s — `news` slots bubble the latest Jeugd articles, eight
  * `nav` cards stay pinned. `editorialCards.position` no longer drives size (all
  * cards are equal 16:9); card order = source order. `cardType` selects
  * variant + bubbling.
@@ -269,7 +288,8 @@ export function JeugdEditorialGrid({
       : buildItemsFromHardcoded(articles);
 
   return (
-    <div>
+    // `#ontdek` is the `/jeugd` section nav's target (#3435).
+    <div id="ontdek" tabIndex={-1} className="focus:outline-none">
       <SectionKicker className="mb-8">Ontdek onze jeugd</SectionKicker>
       <TapedCardGrid columns={3} gap="sm">
         {items}

@@ -8,7 +8,7 @@ describe("llms.txt", () => {
   it("contains club identity block", () => {
     expect(llmsTxt).toContain("KCVV Elewijt");
     expect(llmsTxt).toContain("stamnummer 55");
-    expect(llmsTxt).toContain("Er is maar één plezante compagnie");
+    expect(llmsTxt).toContain("Er is maar 1 plezante compagnie");
   });
 
   // This file is repeated verbatim by systems that will never read

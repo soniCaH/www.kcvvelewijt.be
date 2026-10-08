@@ -1,3 +1,4 @@
+import { YOUTH_MISSION } from "@/lib/constants";
 import { cn } from "@/lib/utils/cn";
 import {
   LinkButton,
@@ -56,9 +57,7 @@ export const YouthSection = ({ className, stats }: YouthSectionProps) => (
 
       {/* Full cream — DESIGN.md "The Whole-Cream Rule". */}
       <p className="text-cream mb-6 max-w-xl text-base leading-relaxed">
-        Onze jeugdwerking groeit elk jaar. Bovenbouw, Middenbouw en Onderbouw
-        delen één doel: voetbal als zelfontplooiing — nooit als prestatie
-        alleen.
+        {YOUTH_MISSION}
       </p>
 
       {stats ? (

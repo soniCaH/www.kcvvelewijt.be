@@ -45,7 +45,6 @@ import {
   EventRepository,
   type EventVM,
 } from "@/lib/repositories/event.repository";
-import { BffService } from "@/lib/effect/services/BffService";
 import {
   TeamRepository,
   type TeamNavVM,
@@ -80,14 +79,17 @@ import {
 } from "@/components/design-system";
 import type { SectionConfig } from "@/components/design-system";
 import { mapMatchesToUpcomingMatches } from "@/lib/mappers";
-import { getTeamMatches } from "@/lib/server/match-data";
-import { DEFAULT_OG_IMAGE, SITE_CONFIG } from "@/lib/constants";
+import {
+  fetchUpcomingMatchesOrNull,
+  getTeamMatches,
+} from "@/lib/server/match-data";
+import { DEFAULT_OG_IMAGE, SITE_CONFIG, MOTTO } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildSportsClubJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title = "Er is maar één plezante compagnie";
+  const title = MOTTO;
   const description = "Startpagina van stamnummer 00055: KCVV Elewijt.";
   return {
     title,
@@ -170,17 +172,9 @@ export default async function HomePage() {
         "[HomePage] articles read failed; falling back to an empty list.",
       ),
     ),
-    runPromise(
-      Effect.gen(function* () {
-        const bff = yield* BffService;
-        return yield* bff.getNextMatches();
-      }).pipe(
-        Effect.catchAll((error) => {
-          console.error("[HomePage] Failed to fetch matches:", error);
-          // `null`, not `[]` — see `firstTeamsReadFailed` & `upcomingMatchesReadFailed` below (#2399).
-          return Effect.succeed(null);
-        }),
-      ),
+    // `null`, not `[]` — see `firstTeamsReadFailed` & `upcomingMatchesReadFailed` below (#2399).
+    fetchUpcomingMatchesOrNull(
+      "[HomePage] matches read failed; agenda unavailable.",
     ),
     runPromise(
       // Banners + the off-season placeholder share one `homePage` document
@@ -246,8 +240,8 @@ export default async function HomePage() {
   const featuredEvent: EventVM | null =
     featuredEventResult === READ_FAILED ? null : featuredEventResult;
 
-  // Senior teams (A/B) — drive the "Eerste ploegen" block and are de-duplicated
-  // out of the generic "Komende wedstrijden" agenda below (#2211). The senior
+  // Senior teams (A/B) — drive the "Eerste ploegen" block (#2211). The
+  // "Komende wedstrijden" agenda below lists them too (#3429). The senior
   // nav set = non-youth teams (age not "U*"); a psdId is required to fetch their
   // matches feed. Sorted by slug so a-ploeg renders before b-ploeg.
   const seniorTeams = selectSeniorTeams(teamsResult);
@@ -273,7 +267,6 @@ export default async function HomePage() {
       now,
     );
   });
-  const seniorPsdIds = new Set(seniorTeams.map((t) => Number(t.psdId)));
   // #2399: "no matches" has two causes — a failed read and a genuinely empty
   // feed — and the page used to render both by dropping the match sections and
   // looking finished. Both BFF reads therefore fall back to `null` rather than
@@ -290,13 +283,9 @@ export default async function HomePage() {
   const heroProps = heroArticle ? toEditorialHeroProps(heroArticle) : null;
   const uitgelichtArticles = articles.slice(1, 4).map(toUitgelichtArticle);
   const newsGridArticles = toHomepageArticles(articles.slice(4, 10));
-  // A/B now live in the "Eerste ploegen" block, so the agenda becomes the
-  // other-teams agenda (#2211). Matches with no team id stay (can't classify).
-  const upcomingMatches = mapMatchesToUpcomingMatches(
-    matches.filter(
-      (m) => m.kcvv_team_id == null || !seniorPsdIds.has(m.kcvv_team_id),
-    ),
-  );
+  // The agenda lists every team, A and B included, even though they also have
+  // the "Eerste ploegen" block above (#3429 — the club wants it complete).
+  const upcomingMatches = mapMatchesToUpcomingMatches(matches);
   const featuredEventBandEvent = toFeaturedEventBandEvent(featuredEvent);
 
   if (articles.length === 0 && matches.length === 0) {
@@ -381,7 +370,7 @@ export default async function HomePage() {
     paddingBottom: "pb-0",
   };
 
-  // "Er is maar één plezante compagnie." over the youth huddle (#3417).
+  // "Er is maar 1 plezante compagnie." over the youth huddle (#3417).
   // Self-contained dark band with no seam of its own — `firstTeamsSection`
   // already closes with one — so the SectionStack wrapper stays flush.
   const identityBandSection: SectionConfig = {

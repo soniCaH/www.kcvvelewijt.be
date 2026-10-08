@@ -34,6 +34,8 @@ import {
   derivePsdTeamLabel,
   deriveOwnClubId,
   transformPsdGame,
+  hidesScores,
+  withoutDetailScores,
   buildCompetitionLabelMap,
   type CompetitionLabelMap,
   resolveCompetitionType,
@@ -320,6 +322,50 @@ export const PsdServiceLive = Layer.effect(
         return map;
       });
 
+    // The club's PSD teams by id — name and competition band (`age`) — for
+    // the youth score gate (#3428) on the paths that know only a team id
+    // (`getTeamMatches`, `getOpponentHistory`; match detail reads the band
+    // from the match-team index entry instead). Bands change
+    // once a season, so a day is plenty.
+    //
+    // NOT best-effort, unlike the labels above: a failed `/teams` fails the
+    // read. Failing open here would let a one-off 429 ship a U10 team's scores
+    // into a payload the handler then caches for a day (365 on staging); a
+    // failed read serves the previous, gated entry stale instead. The gate
+    // fails open only for a team PSD gives no band.
+    const TEAMS_BY_ID_CACHE_KEY = "psd:teams-by-id";
+    const TEAMS_BY_ID_TTL = 60 * 60 * 24; // 1 day
+
+    type TeamsById = Record<string, { name: string; age: string }>;
+
+    const getTeamsById = (): Effect.Effect<TeamsById, BffError> =>
+      Effect.gen(function* () {
+        const cached = yield* cache.get(TEAMS_BY_ID_CACHE_KEY);
+        if (cached) {
+          const parsed = yield* Effect.try({
+            try: () => JSON.parse(cached) as TeamsById,
+            catch: () => null,
+          }).pipe(Effect.option);
+          if (
+            Option.isSome(parsed) &&
+            parsed.value !== null &&
+            typeof parsed.value === "object"
+          ) {
+            return parsed.value;
+          }
+        }
+        const teams = yield* countedFetch(`${base}/teams`, PsdTeamsSchema);
+        const byId: TeamsById = Object.fromEntries(
+          teams.map((t) => [String(t.id), { name: t.name, age: t.age }]),
+        );
+        yield* cache.set(
+          TEAMS_BY_ID_CACHE_KEY,
+          JSON.stringify(byId),
+          TEAMS_BY_ID_TTL,
+        );
+        return byId;
+      });
+
     const VISIBLE_TEAM_IDS_CACHE_KEY = "sanity:visible-team-ids";
     const VISIBLE_TEAM_IDS_TTL = 60 * 60; // 1 hour
 
@@ -390,12 +436,17 @@ export const PsdServiceLive = Layer.effect(
     // teamId`/`team.id`) — a review caught the resulting home/away parity
     // gap between `/kalender` and `/wedstrijd/{id}` before it shipped. Bump
     // again so a v3 entry computed with the bug is never read as correct.
-    const MATCH_TEAM_INDEX_CACHE_KEY = "psd:match-team-index:v4";
+    // v5: entries carry `hideScores` (#3428), so the youth score gate on match
+    // detail reads the same index that names the team.
+    const MATCH_TEAM_INDEX_CACHE_KEY = "psd:match-team-index:v5";
     const MATCH_TEAM_INDEX_TTL = 60 * 60 * 12; // 12h
-    // Negative-cache an empty index briefly so a partial upstream outage (e.g.
+    // Negative-cache a failed build briefly so a partial upstream outage (e.g.
     // /info ok but the per-team fetches fail) can't trigger a ~20-fetch rebuild
     // on every request, while still recovering within minutes once PSD heals.
     const MATCH_TEAM_INDEX_EMPTY_TTL = 120; // 2m
+    // The negative-cache value: "index unknown", distinct from an index that
+    // was built and holds no matches.
+    const MATCH_TEAM_INDEX_UNKNOWN = "null";
 
     interface MatchTeamIndexEntry {
       teamId: number;
@@ -419,6 +470,9 @@ export const PsdServiceLive = Layer.effect(
       // `MatchDetail` this index enriches; see the `is_home` comment above
       // `getMatchDetail`'s `Effect.flatMap`.
       isHome?: boolean;
+      // The team's band withholds scores (#3428). Stored with the team id, so
+      // the detail gate can never see a team without its band.
+      hideScores: boolean;
     }
     type MatchTeamIndex = Record<string, MatchTeamIndexEntry>;
 
@@ -428,20 +482,15 @@ export const PsdServiceLive = Layer.effect(
         const season = yield* getCurrentSeason();
 
         const perTeam = yield* Effect.all(
-          teams.map((team) =>
-            countedFetch(
-              `${base}/games/team/${team.id}/seasons/${season.id}`,
-              PsdMatchListSchema,
-            ).pipe(
-              Effect.map((data) => ({ team, content: data.content })),
-              // A single failed team must not sink the whole index (mirrors
-              // getNextMatches' per-team resilience).
-              Effect.catchAll((e) =>
-                Effect.log(
-                  `buildMatchTeamIndex: team ${team.id} failed: ${String(e)}`,
-                ).pipe(Effect.as({ team, content: [] as readonly unknown[] })),
-              ),
-            ),
+          teams.map(
+            (team) =>
+              countedFetch(
+                `${base}/games/team/${team.id}/seasons/${season.id}`,
+                PsdMatchListSchema,
+              ).pipe(Effect.map((data) => ({ team, content: data.content }))),
+            // No per-team fallback: one failed team fails the build. A partial
+            // index would read that team's matches as "not ours" and show a
+            // U6–U13 score on match detail (#3428).
           ),
           { concurrency: 5 },
         );
@@ -487,15 +536,22 @@ export const PsdServiceLive = Layer.effect(
               homeScore: game.goalsHomeTeam ?? undefined,
               awayScore: game.goalsAwayTeam ?? undefined,
               isHome,
+              hideScores: hidesScores(team.age),
             };
           }
         }
         return index;
       });
 
-    const getMatchTeamIndex = (): Effect.Effect<MatchTeamIndex, never> =>
+    // `undefined` = index unknown (the build failed): `getMatchDetail` then
+    // fails closed rather than guess whether a match is a youth match.
+    const getMatchTeamIndex = (): Effect.Effect<
+      MatchTeamIndex | undefined,
+      never
+    > =>
       Effect.gen(function* () {
         const cached = yield* cache.get(MATCH_TEAM_INDEX_CACHE_KEY);
+        if (cached === MATCH_TEAM_INDEX_UNKNOWN) return undefined;
         if (cached) {
           const parsed = yield* Effect.try({
             try: () => JSON.parse(cached) as MatchTeamIndex,
@@ -510,25 +566,23 @@ export const PsdServiceLive = Layer.effect(
           }
         }
 
-        // Best-effort: any build failure (typed error OR defect) yields an empty
-        // index, so enrichment becomes a no-op and `getMatchDetail` behaves
-        // exactly as before — the match page must never degrade on index trouble.
+        // Any build failure (typed error OR defect) yields "unknown", never an
+        // empty index: an empty index would read every match as not ours and
+        // show youth scores (#3428).
         const built = yield* buildMatchTeamIndex().pipe(
           Effect.catchAllCause((cause) =>
             Effect.log(
               `getMatchTeamIndex: build failed: ${String(cause)}`,
-            ).pipe(Effect.as({} as MatchTeamIndex)),
+            ).pipe(Effect.as(undefined)),
           ),
         );
-        // Always cache — a non-empty index for 12h, an empty one (build failure)
-        // only briefly, so we never re-fan-out the full build on every request
-        // during an incident yet recover quickly afterwards.
+        // Always cache — a built index for 12h, an unknown one only briefly,
+        // so we never re-fan-out the full build on every request during an
+        // incident yet recover quickly afterwards.
         yield* cache.set(
           MATCH_TEAM_INDEX_CACHE_KEY,
-          JSON.stringify(built),
-          Object.keys(built).length > 0
-            ? MATCH_TEAM_INDEX_TTL
-            : MATCH_TEAM_INDEX_EMPTY_TTL,
+          built ? JSON.stringify(built) : MATCH_TEAM_INDEX_UNKNOWN,
+          built ? MATCH_TEAM_INDEX_TTL : MATCH_TEAM_INDEX_EMPTY_TTL,
         );
         return built;
       });
@@ -581,11 +635,15 @@ export const PsdServiceLive = Layer.effect(
           }
 
           const ownClubId = deriveOwnClubId(games);
-          const competitionLabels = yield* getCompetitionLabels();
+          const [competitionLabels, teams] = yield* Effect.all(
+            [getCompetitionLabels(), getTeamsById()],
+            { concurrency: "unbounded" },
+          );
+          const hideScores = hidesScores(teams[String(teamId)]?.age);
           return games.map((game) =>
             transformPsdGame(
               { ...game, teamId: game.teamId ?? teamId },
-              { ownClubId, competitionLabels },
+              { ownClubId, competitionLabels, hideScores },
             ),
           );
         }),
@@ -638,7 +696,11 @@ export const PsdServiceLive = Layer.effect(
                     return next
                       ? transformPsdGame(
                           { ...next, teamId: team.id },
-                          { ownClubId, competitionLabels },
+                          {
+                            ownClubId,
+                            competitionLabels,
+                            hideScores: hidesScores(team.age),
+                          },
                         )
                       : null;
                   }),
@@ -744,7 +806,11 @@ export const PsdServiceLive = Layer.effect(
                       .map((game) =>
                         transformPsdGame(
                           { ...game, teamId: team.id },
-                          { ownClubId, competitionLabels },
+                          {
+                            ownClubId,
+                            competitionLabels,
+                            hideScores: hidesScores(team.age),
+                          },
                         ),
                       );
                   }),
@@ -823,8 +889,26 @@ export const PsdServiceLive = Layer.effect(
           // MatchDetail` set it (always absent).
           Effect.flatMap((detail) =>
             getMatchTeamIndex().pipe(
+              Effect.flatMap((index) =>
+                // Index unknown: fail closed, so the handler serves the
+                // previous (gated) entry stale instead of caching a youth
+                // score for days (#3428).
+                index
+                  ? Effect.succeed(index)
+                  : Effect.fail(
+                      new UpstreamUnavailableError({
+                        message: "match-team index unavailable",
+                      }),
+                    ),
+              ),
               Effect.map((index) => {
                 const entry = index[String(matchId)];
+                // No index entry → no team → no band: the score shows. The
+                // index holds this season only, so a U6–U13 match from an
+                // earlier season, or one added since the last 12h build, still
+                // shows its score here. Known gap (#3428): `/info` names no
+                // KCVV team, and the side ids it carries share no id space we
+                // can trust against ours.
                 if (!entry) return detail;
                 // The season-games list is authoritative for status + score and
                 // reflects the outcome before `/info` catches up (PSD fills
@@ -881,7 +965,7 @@ export const PsdServiceLive = Layer.effect(
                 // the same request it gets its scoreline. `entry.isHome`
                 // feeds only this call, never `enriched.is_home` — see the
                 // comment above `Effect.flatMap`.
-                return {
+                const withVenue = {
                   ...enriched,
                   venue: resolveVenue(entry.isHome, {
                     isPlaceholder: enriched.is_placeholder,
@@ -891,6 +975,11 @@ export const PsdServiceLive = Layer.effect(
                     awayScore: enriched.away_team.score,
                   }),
                 };
+                // Last, after the backfill and the venue have read the real
+                // score (#3428).
+                return entry.hideScores
+                  ? withoutDetailScores(withVenue)
+                  : withVenue;
               }),
             ),
           ),
@@ -956,12 +1045,20 @@ export const PsdServiceLive = Layer.effect(
 
       getOpponentHistory: (teamId: number, clubId: number) =>
         Effect.gen(function* () {
-          // Fetch all available seasons (not just current)
-          const allSeasons = yield* countedFetch(
-            `${base}/seasons`,
-            PsdSeasonsSchema,
+          // All available seasons (not just current), plus the labels and the
+          // team's band, read together.
+          const [allSeasons, competitionLabels, teams] = yield* Effect.all(
+            [
+              countedFetch(`${base}/seasons`, PsdSeasonsSchema),
+              getCompetitionLabels(),
+              getTeamsById(),
+            ],
+            { concurrency: "unbounded" },
           );
-          const competitionLabels = yield* getCompetitionLabels();
+          // One team, every season: its current band gates every season's
+          // scores (PSD keeps a team id on one band across seasons).
+          const team = teams[String(teamId)];
+          const hideScores = hidesScores(team?.age);
 
           // Fetch matches for every season in parallel, skipping failed seasons
           const seasonResults = yield* Effect.all(
@@ -1009,7 +1106,11 @@ export const PsdServiceLive = Layer.effect(
                           : g.homeClub.id);
                       return transformPsdGame(
                         { ...g, teamId },
-                        { ownClubId: perGameOwnClubId, competitionLabels },
+                        {
+                          ownClubId: perGameOwnClubId,
+                          competitionLabels,
+                          hideScores,
+                        },
                       );
                     });
                   }),
@@ -1056,18 +1157,9 @@ export const PsdServiceLive = Layer.effect(
             );
           }
 
-          // Best-effort: fetch team metadata to derive the KCVV team label.
-          // Errors are swallowed so a /teams failure never discards a valid history.
-          const kcvvTeamLabel = yield* countedFetch(
-            `${base}/teams`,
-            PsdTeamsSchema,
-          ).pipe(
-            Effect.map((teams) => {
-              const team = teams.find((t) => t.id === teamId);
-              return team ? derivePsdTeamLabel(team.name, team.age) : undefined;
-            }),
-            Effect.catchAll(() => Effect.succeed(undefined)),
-          );
+          const kcvvTeamLabel = team
+            ? derivePsdTeamLabel(team.name, team.age)
+            : undefined;
 
           // Enrich matches: kcvv_team_label from team metadata (mirrors
           // getNextMatches). `is_home`'s clubId-based safety net now runs
