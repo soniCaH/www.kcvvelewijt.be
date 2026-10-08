@@ -413,11 +413,60 @@ export function isSelfMatch(
   return homeClubId != null && awayClubId != null && homeClubId === awayClubId;
 }
 
+// ─── Youth score gate (#3428) ─────────────────────────────────────────────────
+
+/** The youngest and oldest band whose matches show no score. */
+const HIDDEN_SCORE_BANDS = { min: 6, max: 13 } as const;
+
+/**
+ * Whether a KCVV team's matches show no score: U6 to U13 hide it, U14 and up
+ * (and the senior sides) show it — owner decision 2026-10-07 (#3428). A missing
+ * or unreadable age shows the score.
+ *
+ * `age` is PSD's **competition band**, not the players' birth year: the U16
+ * squad plays in the U17 band (`kcvve-u16` carries `age: "U17"`). The
+ * federation rule follows the competition, so the band is the right input.
+ */
+export function hidesScores(age: string | null | undefined): boolean {
+  const band = /^U(\d+)$/i.exec(age?.trim() ?? "")?.[1];
+  if (band === undefined) return false;
+  const n = Number(band);
+  return n >= HIDDEN_SCORE_BANDS.min && n <= HIDDEN_SCORE_BANDS.max;
+}
+
+/**
+ * A match with no score: both `score` keys removed (absent, not `undefined`,
+ * so no cached payload carries them) and, on a match detail, the goal events
+ * too — a goal list reveals the score. Status is untouched: a finished U10
+ * match is still `finished`.
+ */
+export function withoutScores<
+  M extends Pick<Match, "home_team" | "away_team"> & {
+    readonly events?: MatchDetail["events"];
+  },
+>(match: M): M {
+  const { score: _home, ...home_team } = match.home_team;
+  const { score: _away, ...away_team } = match.away_team;
+  return {
+    ...match,
+    home_team,
+    away_team,
+    ...(match.events
+      ? { events: match.events.filter((e) => e.type !== "goal") }
+      : {}),
+  };
+}
+
 // ─── PSD Game → Match ─────────────────────────────────────────────────────────
 
 export function transformPsdGame(
   game: PsdGame,
-  options?: { ownClubId?: number; competitionLabels?: CompetitionLabelMap },
+  options?: {
+    ownClubId?: number;
+    competitionLabels?: CompetitionLabelMap;
+    /** Drop the score — the KCVV team is in a hidden band (`hidesScores`). */
+    hideScores?: boolean;
+  },
 ): Match {
   const datePart = game.date.split(" ")[0]!;
   const timeStr = game.time ?? game.date.split(" ")[1] ?? "00:00";
@@ -444,7 +493,7 @@ export function transformPsdGame(
   const competitionType = resolveCompetitionType(game.competitionType);
   const isPlaceholder = isSelfMatch(game.homeClub.id, game.awayClub.id);
 
-  return {
+  const match: Match = {
     id: game.id,
     date: matchDate,
     time: timePart,
@@ -491,6 +540,8 @@ export function transformPsdGame(
     // `false` are indistinguishable downstream.
     is_placeholder: isPlaceholder || undefined,
   };
+  // After `venue` and `status`: both still read the real score.
+  return options?.hideScores ? withoutScores(match) : match;
 }
 
 // ─── Lineup transforms ───────────────────────────────────────────────────────

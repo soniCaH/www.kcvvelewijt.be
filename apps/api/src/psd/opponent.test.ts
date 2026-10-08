@@ -26,7 +26,9 @@ const cacheMock: KvCacheInterface = {
   // Seed an empty competition-label map so getCompetitionLabels() cache-hits and
   // does not insert a /competitions fetch into these order-based fetch mocks.
   get: (key: string) =>
-    Effect.succeed(key === "psd:competition-labels" ? "{}" : null),
+    Effect.succeed(
+      key === "psd:competition-labels" || key === "psd:team-ages" ? "{}" : null,
+    ),
   set: () => Effect.succeed(undefined),
   delete: () => Effect.succeed(undefined),
   increment: () => Effect.succeed(undefined),

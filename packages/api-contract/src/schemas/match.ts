@@ -6,6 +6,12 @@ export class MatchTeam extends S.Class<MatchTeam>("MatchTeam")({
   id: S.Finite,
   name: S.String,
   logo: S.optional(S.String),
+  /**
+   * Absent before kickoff, and **always** absent for a KCVV U6–U13 team's
+   * match, whatever its status: the BFF withholds youth scores (#3428,
+   * `hidesScores`). A finished match with no score is valid — read `status` for
+   * "played", never the presence of a score.
+   */
   score: S.optional(S.Finite),
   /**
    * Team designation within the club (e.g. "A", "B", "U23") derived from PSD's

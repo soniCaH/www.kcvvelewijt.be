@@ -15,6 +15,8 @@ import {
   stripPsdName,
   normaliseClubName,
   psdGameToMs,
+  hidesScores,
+  withoutScores,
 } from "./transforms";
 import type { PsdGame, PsdCompetition } from "./schemas";
 import { CLUB_VENUE } from "./venue";
@@ -877,5 +879,85 @@ describe("stripPsdName", () => {
     expect(stripPsdName("Voetbal : Voetbal Vlaanderen - ")).toBe(
       "Voetbal : Voetbal Vlaanderen - ",
     );
+  });
+});
+
+describe("hidesScores (#3428)", () => {
+  // Owner decision 2026-10-07: U6 to U13 show no score; U14 and up do.
+  it("hides U6 through U13", () => {
+    for (const age of ["U6", "U7", "U9", "U10", "U13"]) {
+      expect(hidesScores(age), age).toBe(true);
+    }
+  });
+
+  it("shows U14 and up, and the senior sides", () => {
+    for (const age of ["U14", "U15", "U17", "U21", "A", "B"]) {
+      expect(hidesScores(age), age).toBe(false);
+    }
+  });
+
+  it("shows when the age is missing — no band, no gate", () => {
+    expect(hidesScores(undefined)).toBe(false);
+    expect(hidesScores(null)).toBe(false);
+    expect(hidesScores("")).toBe(false);
+  });
+
+  it("reads the band whatever its case or padding", () => {
+    expect(hidesScores(" u10 ")).toBe(true);
+  });
+});
+
+describe("withoutScores (#3428)", () => {
+  const played = transformPsdGame(
+    makePsdGame({ goalsHomeTeam: 4, goalsAwayTeam: 2 }),
+  );
+
+  it("drops both scores and keeps the status", () => {
+    const hidden = withoutScores(played);
+    expect(played.status).toBe("finished");
+    expect(hidden.status).toBe("finished");
+    expect("score" in hidden.home_team).toBe(false);
+    expect("score" in hidden.away_team).toBe(false);
+    expect(hidden.home_team.name).toBe(played.home_team.name);
+  });
+
+  it("drops goal events — a goal list reveals the score — and keeps the rest", () => {
+    const hidden = withoutScores({
+      ...played,
+      hasReport: true,
+      events: [
+        { id: 1, type: "goal" as const, minute: 10, team: "home" as const },
+        {
+          id: 2,
+          type: "yellow_card" as const,
+          minute: 20,
+          team: "away" as const,
+        },
+      ],
+    });
+    expect(hidden.events?.map((e) => e.type)).toEqual(["yellow_card"]);
+  });
+
+  it("adds no events key to a match that had none", () => {
+    expect("events" in withoutScores(played)).toBe(false);
+  });
+});
+
+describe("transformPsdGame — hideScores (#3428)", () => {
+  it("strips the score and keeps the finished status when asked", () => {
+    const match = transformPsdGame(
+      makePsdGame({ goalsHomeTeam: 4, goalsAwayTeam: 2 }),
+      { hideScores: true },
+    );
+    expect(match.status).toBe("finished");
+    expect(match.home_team.score).toBeUndefined();
+    expect(match.away_team.score).toBeUndefined();
+  });
+
+  it("keeps the score by default", () => {
+    const match = transformPsdGame(
+      makePsdGame({ goalsHomeTeam: 4, goalsAwayTeam: 2 }),
+    );
+    expect(match.home_team.score).toBe(4);
   });
 });

@@ -34,6 +34,8 @@ import {
   derivePsdTeamLabel,
   deriveOwnClubId,
   transformPsdGame,
+  hidesScores,
+  withoutScores,
   buildCompetitionLabelMap,
   type CompetitionLabelMap,
   resolveCompetitionType,
@@ -320,6 +322,50 @@ export const PsdServiceLive = Layer.effect(
         return map;
       });
 
+    // PSD team id → competition band (`age`), for the youth score gate
+    // (#3428) on the paths that know only a team id (`getTeamMatches`,
+    // `getMatchDetail`, `getOpponentHistory`). Bands change once a season, so a
+    // day is plenty. Best-effort, like the labels above: on failure the map is
+    // empty, uncached, and every score shows — the gate fails open.
+    const TEAM_AGES_CACHE_KEY = "psd:team-ages";
+    const TEAM_AGES_TTL = 60 * 60 * 24; // 1 day
+
+    const getTeamAges = (): Effect.Effect<Record<string, string>, never> =>
+      Effect.gen(function* () {
+        const cached = yield* cache.get(TEAM_AGES_CACHE_KEY);
+        if (cached) {
+          const parsed = yield* Effect.try({
+            try: () => JSON.parse(cached) as Record<string, string>,
+            catch: () => null,
+          }).pipe(Effect.option);
+          if (
+            Option.isSome(parsed) &&
+            parsed.value !== null &&
+            typeof parsed.value === "object"
+          ) {
+            return parsed.value;
+          }
+        }
+        const ages = yield* countedFetch(`${base}/teams`, PsdTeamsSchema).pipe(
+          Effect.map((teams) =>
+            Object.fromEntries(teams.map((t) => [String(t.id), t.age])),
+          ),
+          Effect.catchAll((e) =>
+            Effect.log(
+              `getTeamAges: /teams unavailable, showing every score: ${String(e)}`,
+            ).pipe(Effect.as({} as Record<string, string>)),
+          ),
+        );
+        if (Object.keys(ages).length > 0) {
+          yield* cache.set(
+            TEAM_AGES_CACHE_KEY,
+            JSON.stringify(ages),
+            TEAM_AGES_TTL,
+          );
+        }
+        return ages;
+      });
+
     const VISIBLE_TEAM_IDS_CACHE_KEY = "sanity:visible-team-ids";
     const VISIBLE_TEAM_IDS_TTL = 60 * 60; // 1 hour
 
@@ -582,10 +628,13 @@ export const PsdServiceLive = Layer.effect(
 
           const ownClubId = deriveOwnClubId(games);
           const competitionLabels = yield* getCompetitionLabels();
+          const hideScores = hidesScores(
+            (yield* getTeamAges())[String(teamId)],
+          );
           return games.map((game) =>
             transformPsdGame(
               { ...game, teamId: game.teamId ?? teamId },
-              { ownClubId, competitionLabels },
+              { ownClubId, competitionLabels, hideScores },
             ),
           );
         }),
@@ -638,7 +687,11 @@ export const PsdServiceLive = Layer.effect(
                     return next
                       ? transformPsdGame(
                           { ...next, teamId: team.id },
-                          { ownClubId, competitionLabels },
+                          {
+                            ownClubId,
+                            competitionLabels,
+                            hideScores: hidesScores(team.age),
+                          },
                         )
                       : null;
                   }),
@@ -744,7 +797,11 @@ export const PsdServiceLive = Layer.effect(
                       .map((game) =>
                         transformPsdGame(
                           { ...game, teamId: team.id },
-                          { ownClubId, competitionLabels },
+                          {
+                            ownClubId,
+                            competitionLabels,
+                            hideScores: hidesScores(team.age),
+                          },
                         ),
                       );
                   }),
@@ -822,9 +879,10 @@ export const PsdServiceLive = Layer.effect(
           // this app-facing field is left exactly as `transformFootbalisto-
           // MatchDetail` set it (always absent).
           Effect.flatMap((detail) =>
-            getMatchTeamIndex().pipe(
-              Effect.map((index) => {
+            Effect.all([getMatchTeamIndex(), getTeamAges()]).pipe(
+              Effect.map(([index, ages]) => {
                 const entry = index[String(matchId)];
+                // No index entry → no team → no band: the score shows.
                 if (!entry) return detail;
                 // The season-games list is authoritative for status + score and
                 // reflects the outcome before `/info` catches up (PSD fills
@@ -881,7 +939,7 @@ export const PsdServiceLive = Layer.effect(
                 // the same request it gets its scoreline. `entry.isHome`
                 // feeds only this call, never `enriched.is_home` — see the
                 // comment above `Effect.flatMap`.
-                return {
+                const withVenue = {
                   ...enriched,
                   venue: resolveVenue(entry.isHome, {
                     isPlaceholder: enriched.is_placeholder,
@@ -891,6 +949,11 @@ export const PsdServiceLive = Layer.effect(
                     awayScore: enriched.away_team.score,
                   }),
                 };
+                // Last, after the backfill and the venue have read the real
+                // score (#3428).
+                return hidesScores(ages[String(entry.teamId)])
+                  ? withoutScores(withVenue)
+                  : withVenue;
               }),
             ),
           ),
@@ -962,6 +1025,11 @@ export const PsdServiceLive = Layer.effect(
             PsdSeasonsSchema,
           );
           const competitionLabels = yield* getCompetitionLabels();
+          // One team, every season: its current band gates every season's
+          // scores (PSD keeps a team id on one band across seasons).
+          const hideScores = hidesScores(
+            (yield* getTeamAges())[String(teamId)],
+          );
 
           // Fetch matches for every season in parallel, skipping failed seasons
           const seasonResults = yield* Effect.all(
@@ -1009,7 +1077,11 @@ export const PsdServiceLive = Layer.effect(
                           : g.homeClub.id);
                       return transformPsdGame(
                         { ...g, teamId },
-                        { ownClubId: perGameOwnClubId, competitionLabels },
+                        {
+                          ownClubId: perGameOwnClubId,
+                          competitionLabels,
+                          hideScores,
+                        },
                       );
                     });
                   }),

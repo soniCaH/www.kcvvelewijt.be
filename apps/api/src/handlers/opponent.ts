@@ -14,8 +14,8 @@ const opponentHistoryCache = TypedKvCache(OpponentHistory);
 // `CACHE_VERSION` comment in `handlers/matches.ts`. A cached pre-#2491
 // entry under the old key would keep every opponent-history match venue-
 // less for up to `TTL.OPPONENT_HISTORY * 2` (the stale-serve window) after
-// this deploys.
-const CACHE_VERSION = "v2";
+// this deploys. v3 (#3428): youth scores hidden — see `handlers/matches.ts`.
+const CACHE_VERSION = "v3";
 
 const getOpponentHistoryHandler = (
   teamId: number,
