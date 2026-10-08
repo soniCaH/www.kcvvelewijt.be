@@ -48,9 +48,6 @@ export function TeamHero({
   photoViewer,
   className,
 }: TeamHeroProps) {
-  const hasPhoto =
-    teamImageUrl !== undefined && teamImageUrl !== null && teamImageUrl !== "";
-
   const kicker = teamType === "youth" ? "KCVV Elewijt · Jeugd" : "KCVV Elewijt";
 
   // Meta pill: senior = division; youth = youth band.
@@ -83,6 +80,7 @@ export function TeamHero({
       className="block h-full w-full object-cover"
     />
   ) : null;
+  const hasPhoto = photo !== null;
 
   return (
     <section

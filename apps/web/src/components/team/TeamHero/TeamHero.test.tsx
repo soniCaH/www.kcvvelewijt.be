@@ -12,8 +12,8 @@
  *    fallback has nothing to open.
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { LightboxProps } from "yet-another-react-lightbox";
 import { TeamHero } from "./TeamHero";
@@ -164,6 +164,12 @@ describe("TeamHero", () => {
     };
     const viewer = () => lightboxProps.current as LightboxProps;
 
+    // The viewer is lazy-loaded on the first click. Import it once up front so
+    // no test spends its budget on the cold module load.
+    beforeAll(async () => {
+      await import("./TeamPhotoViewer");
+    });
+
     beforeEach(() => {
       lightboxProps.current = null;
       trackEvent.mockClear();
@@ -184,27 +190,31 @@ describe("TeamHero", () => {
 
     it("opens the uncropped photo, alt naming the team, on click", async () => {
       render(<TeamHero {...BASE_SENIOR} {...PHOTO} />);
-      expect(viewer().open).toBe(false);
+      // The viewer loads on the first click, not with the page.
+      expect(lightboxProps.current).toBeNull();
 
       await userEvent.click(screen.getByRole("button"));
 
-      expect(viewer().open).toBe(true);
+      await waitFor(() => expect(viewer()?.open).toBe(true));
       expect(viewer().slides).toEqual([
         { src: "/fixtures/ploeg-a-full.jpg", alt: "A-ploeg teamfoto" },
       ]);
     });
 
-    it("closes on a backdrop click and shows no navigation for one photo", () => {
+    it("closes on a backdrop click and shows no navigation for one photo", async () => {
       render(<TeamHero {...BASE_SENIOR} {...PHOTO} />);
+      await userEvent.click(screen.getByRole("button"));
+      await waitFor(() => expect(viewer()?.open).toBe(true));
+
       expect(viewer().controller?.closeOnBackdropClick).toBe(true);
       expect(viewer().render?.buttonPrev?.()).toBeNull();
       expect(viewer().render?.buttonNext?.()).toBeNull();
     });
 
-    it("fires team_photo_open once per open", async () => {
+    it("fires team_photo_open once per open, even on a double-click", async () => {
       render(<TeamHero {...BASE_SENIOR} {...PHOTO} />);
 
-      await userEvent.click(screen.getByRole("button"));
+      await userEvent.dblClick(screen.getByRole("button"));
 
       expect(trackEvent).toHaveBeenCalledTimes(1);
       expect(trackEvent).toHaveBeenCalledWith("team_photo_open", {

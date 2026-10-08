@@ -337,6 +337,7 @@ function TeamDetailAssembly({ competitive = "live" }: TeamDetailAssemblyProps) {
           division="3NA"
           tagline="Sterk, gedreven, één ploeg."
           teamImageUrl={PHOTOS.a}
+          photoViewer={{ fullUrl: PHOTOS.a, teamSlug: "a-ploeg" }}
           className="py-8 sm:py-12"
         />
       </PageContainer>

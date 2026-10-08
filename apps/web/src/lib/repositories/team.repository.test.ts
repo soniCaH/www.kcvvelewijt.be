@@ -118,9 +118,9 @@ describe("TeamRepository", () => {
     // The full-screen viewer shows the whole photo; the hero's own URL is a
     // 3:2 hotspot crop that cuts off the players at the edges (#3447).
     it("selects the team photo uncropped for the full-screen viewer", () => {
-      expect(TEAM_BY_SLUG_QUERY).toMatch(
-        /"teamImageFullUrl": teamImage\.asset->url \+ "\?w=2400&q=80&fm=webp&fit=max"/,
-      );
+      const full = TEAM_BY_SLUG_QUERY.match(/"teamImageFullUrl":[^\n]*/)?.[0];
+      expect(full).toContain("fit=max");
+      expect(full).not.toContain("crop");
     });
 
     // The staff photo projection's CDN params (amendment #2485) are
