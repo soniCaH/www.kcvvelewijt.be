@@ -28,7 +28,11 @@ const playerStatsCache = TypedKvCache(PlayerSeasonStats);
 // `match:detail`/`opponent:team`) after this deploys. Every cache key these
 // handlers write is versioned here so a stale pre-#2491 entry is never read
 // as current — see the review that caught this on the first pass.
-const CACHE_VERSION = "v2";
+//
+// v3 (#3428): U6–U13 matches lost their score. A v2 entry still carries it, and
+// on staging (`CACHE_LONG_TTL`) a v2 key lives 365 days, so a hidden youth
+// score would keep serving after deploy. Bumped with `opponent.ts`.
+const CACHE_VERSION = "v3";
 
 export const getMatchesByTeamHandler = (
   teamId: number,

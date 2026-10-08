@@ -26,7 +26,16 @@ const cacheMock: KvCacheInterface = {
   // Seed an empty competition-label map so getCompetitionLabels() cache-hits and
   // does not insert a /competitions fetch into these order-based fetch mocks.
   get: (key: string) =>
-    Effect.succeed(key === "psd:competition-labels" ? "{}" : null),
+    Effect.succeed(
+      key === "psd:competition-labels"
+        ? "{}"
+        : key === "psd:teams-by-id"
+          ? JSON.stringify({
+              "1": { name: "Eerste Elftallen A", age: "A" },
+              "9": { name: "KCVVE U10", age: "U10" },
+            })
+          : null,
+    ),
   set: () => Effect.succeed(undefined),
   delete: () => Effect.succeed(undefined),
   increment: () => Effect.succeed(undefined),
@@ -282,26 +291,38 @@ describe("PsdService.getOpponentHistory", () => {
     }
   });
 
-  it("still returns opponent history when /teams fetch fails (best-effort fallback)", async () => {
+  it("labels nothing when the team is unknown to /teams", async () => {
     (global.fetch as ReturnType<typeof vi.fn>)
       .mockResolvedValueOnce({ ok: true, json: async () => [allSeasons[0]] })
-      .mockResolvedValueOnce({ ok: true, json: async () => season1Matches })
-      // /teams fails
-      .mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-        statusText: "Internal Server Error",
-      });
+      .mockResolvedValueOnce({ ok: true, json: async () => season1Matches });
 
-    const result = await runService((svc) => svc.getOpponentHistory(1, 456));
+    const result = await runService((svc) => svc.getOpponentHistory(2, 456));
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
-      // History is returned despite the /teams failure
       expect(result.right.matches).toHaveLength(1);
-      expect(result.right.matches[0]!.id).toBe(101);
-      // kcvv_team_label is undefined — best-effort failed gracefully
       expect(result.right.matches[0]!.kcvv_team_label).toBeUndefined();
+    }
+  });
+
+  it("hides a U10 team's scores and so counts no result (#3428)", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>)
+      .mockResolvedValueOnce({ ok: true, json: async () => [allSeasons[0]] })
+      .mockResolvedValueOnce({ ok: true, json: async () => season1Matches });
+
+    const result = await runService((svc) => svc.getOpponentHistory(9, 456));
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.matches[0]!.home_team.score).toBeUndefined();
+      expect(result.right.matches[0]!.away_team.score).toBeUndefined();
+      expect(result.right.summary).toEqual({
+        wins: 0,
+        draws: 0,
+        losses: 0,
+        goalsFor: 0,
+        goalsAgainst: 0,
+      });
     }
   });
 
