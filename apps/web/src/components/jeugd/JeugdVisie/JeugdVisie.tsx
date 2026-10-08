@@ -1,4 +1,5 @@
 import { PullQuote, SectionKicker } from "@/components/design-system";
+import { YOUTH_MISSION } from "@/lib/constants";
 
 const VISIE_TAGS = [
   { label: "de jeugdvisie" },
@@ -36,10 +37,7 @@ export function JeugdVisie() {
     <section id="visie">
       <SectionKicker className="mb-4">Onze jeugdvisie</SectionKicker>
 
-      <PullQuote labels={VISIE_TAGS}>
-        Bij KCVV Elewijt staat plezier op één. Wie graag speelt, leert vanzelf —
-        techniek, teamspirit en respect groeien mee.
-      </PullQuote>
+      <PullQuote labels={VISIE_TAGS}>{YOUTH_MISSION}</PullQuote>
     </section>
   );
 }

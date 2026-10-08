@@ -12,9 +12,15 @@ describe("JeugdVisie", () => {
   it("renders the section kicker and the visie statement", () => {
     render(<JeugdVisie />);
     expect(screen.getByText("Onze jeugdvisie")).toBeInTheDocument();
+    // The youth mission line from club feedback v2 (#3427).
     expect(
-      screen.getByText(/Bij KCVV Elewijt staat plezier op één/i),
+      screen.getByText(
+        /Met onze club willen we dat lokale kinderen met “goesting” naar de training en wedstrijd komen en met “tegengoesting” terug naar huis gaan\./,
+      ),
     ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/Bij KCVV Elewijt staat plezier op één/i),
+    ).not.toBeInTheDocument();
   });
 
   it("renders the mono tag row", () => {

@@ -20,25 +20,25 @@ const reserven: YouthDivisionGroup = {
 const divisions: YouthDivisionGroup[] = [
   reserven,
   {
-    label: "Bovenbouw",
-    range: "U17–U21",
-    teams: [team("U21", PHOTO), team("U19"), team("U17", PHOTO)],
+    label: "Onderbouw",
+    range: "U6–U11",
+    teams: [
+      team("U6", PHOTO),
+      team("U7"),
+      team("U8"),
+      team("U9"),
+      team("U11", PHOTO),
+    ],
   },
   {
     label: "Middenbouw",
     range: "U12–U16",
-    teams: [team("U15", PHOTO), team("U13", PHOTO)],
+    teams: [team("U13", PHOTO), team("U15", PHOTO)],
   },
   {
-    label: "Onderbouw",
-    range: "U6–U11",
-    teams: [
-      team("U11", PHOTO),
-      team("U9"),
-      team("U8"),
-      team("U7"),
-      team("U6", PHOTO),
-    ],
+    label: "Bovenbouw",
+    range: "U17–U21",
+    teams: [team("U17", PHOTO), team("U19"), team("U21", PHOTO)],
   },
 ];
 
@@ -53,8 +53,8 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 /**
- * `/jeugd` — the reserves lead, then the three age divisions, under the youth
- * heading that route passes.
+ * `/jeugd` — the reserves lead, then the three age divisions small → large
+ * (#3427), under the youth heading that route passes.
  */
 export const FullDirectory: Story = {
   args: { heading: "Jeugdwerking", divisions },
@@ -74,30 +74,31 @@ export const SparseDirectory: Story = {
     heading: "Andere",
     divisions: [
       { label: "Reserven", teams: [] },
-      { label: "Bovenbouw", range: "U17–U21", teams: [] },
-      { label: "Middenbouw", range: "U12–U16", teams: [team("U13")] },
       { label: "Onderbouw", range: "U6–U11", teams: [] },
+      { label: "Middenbouw", range: "U12–U16", teams: [team("U13")] },
+      { label: "Bovenbouw", range: "U17–U21", teams: [] },
     ],
   },
 };
 
 /**
- * Onderbouw in frame, on its own.
+ * Bovenbouw in frame, on its own.
  *
- * `FullDirectory` puts Onderbouw fourth, below the fold on every VR viewport
- * (1440×900 / 768×1024 / 375×667 — none scroll), and `SparseDirectory` only
- * ever populates Middenbouw — so the `warning` tone (Onderbouw's, and the
- * exact division #2615's problem statement names) shipped with zero VR
- * coverage until this story (#2615 code review).
+ * `FullDirectory` puts Bovenbouw fourth since the small → large order
+ * (#3427), below the fold on every VR viewport (1440×900 / 768×1024 /
+ * 375×667 — none scroll), and `SparseDirectory` only ever populates
+ * Middenbouw — so without this story the `jersey-deep` tone (Bovenbouw's)
+ * would have zero VR coverage. Before #3427 the same gap sat on Onderbouw's
+ * `warning` tone (#2615 code review); that one is now in `FullDirectory`.
  */
-export const OnderbouwFocus: Story = {
+export const BovenbouwFocus: Story = {
   args: {
     heading: "Andere",
     divisions: [
       { label: "Reserven", teams: [] },
-      { label: "Bovenbouw", range: "U17–U21", teams: [] },
+      { label: "Onderbouw", range: "U6–U11", teams: [] },
       { label: "Middenbouw", range: "U12–U16", teams: [] },
-      { label: "Onderbouw", range: "U6–U11", teams: [team("U9")] },
+      { label: "Bovenbouw", range: "U17–U21", teams: [team("U19")] },
     ],
   },
 };

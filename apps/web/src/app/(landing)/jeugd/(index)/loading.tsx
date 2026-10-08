@@ -8,7 +8,7 @@
  * the youth directory below them, not a re-certification of the rest of
  * the file.
  *
- * The youth directory is (#2642): its division and team counts (1/4/4/7 in
+ * The youth directory is (#2642): its division and team counts (1/7/4/4 in
  * production) are read from the same Sanity fetch this fallback covers, so
  * the fixed "3 groups of cards" shape it used to draw is gone. `<SkeletonBars>`
  * replaces it — the content-field vocabulary #2642 introduced, the same one
@@ -59,7 +59,7 @@ export default function JeugdLoading() {
             lands before the swap. Without it the rotation snaps in on
             arrival: 3 skeleton cards sit flat, then EditorialHubCard reads
             the grid's per-slot CSS var and tilts −1°…−6° (the real grid's
-            own minimum is `NAV_CARDS.length`, 6 — this skeleton has always
+            own minimum is `NAV_CARDS.length`, 8 — this skeleton has always
             undershot that count; unrelated to #2642, not touched here). */}
         <div className="mt-16">
           <TapedCardGrid columns={3} gap="sm">

@@ -240,11 +240,11 @@ The three-tier grouping of youth teams used by the club internally and by parent
 
 | Code / Label   | Dutch      | Age range | Teams                    |
 | -------------- | ---------- | --------- | ------------------------ |
-| `"Bovenbouw"`  | Bovenbouw  | U17–U21   | U21, U19, U17            |
-| `"Middenbouw"` | Middenbouw | U12–U16   | U16, U15, U14, U13, U12  |
-| `"Onderbouw"`  | Onderbouw  | U6–U11    | U11, U10, U9, U8, U7, U6 |
+| `"Onderbouw"`  | Onderbouw  | U6–U11    | U6, U7, U8, U9, U10, U11 |
+| `"Middenbouw"` | Middenbouw | U12–U16   | U12, U13, U14, U15, U16  |
+| `"Bovenbouw"`  | Bovenbouw  | U17–U21   | U17, U19, U21            |
 
-**Implementation:** `getYouthDivision()` in `apps/web/src/lib/utils/group-teams.ts`. Used for section headers on `/ploegen` and `/jeugd`, and as a badge on individual team detail pages.
+**Implementation:** `getYouthDivision()` in `apps/web/src/lib/utils/group-teams.ts`. Used for section headers on `/ploegen` and `/jeugd`, and as a badge on individual team detail pages. Both pages list the divisions and their teams small → large (#3427).
 
 **Vocabulary rule:** Always use Bovenbouw/Middenbouw/Onderbouw — never the older terms "scholieren" or "duiveltjes."
 

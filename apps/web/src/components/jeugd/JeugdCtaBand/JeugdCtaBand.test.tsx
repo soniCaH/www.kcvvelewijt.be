@@ -30,6 +30,15 @@ describe("JeugdCtaBand", () => {
     expect(link).toHaveAttribute("href", "/club/word-lid");
   });
 
+  it("carries the club motto and no trial-training invitation (#3427)", () => {
+    render(<JeugdCtaBand />);
+    expect(
+      screen.getByText(/Er is maar 1 plezante compagnie/),
+    ).toBeInTheDocument();
+    // Club feedback v2: no "kom meetrainen" invitation for now.
+    expect(screen.queryByText(/langs op training/i)).not.toBeInTheDocument();
+  });
+
   it("honours a custom href", () => {
     render(<JeugdCtaBand href="mailto:jeugd@kcvvelewijt.be" />);
     const link = screen.getByRole("link", { name: /schrijf je in/i });

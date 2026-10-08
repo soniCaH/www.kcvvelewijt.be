@@ -72,8 +72,8 @@ export interface YouthDirectoryProps {
 const CARD_ROTATIONS = ["a", "c", "b", "d", "b"] as const;
 
 /**
- * Team directory (`/jeugd` + `/ploegen`). Grouped Reserven / Bovenbouw /
- * Middenbouw / Onderbouw (per [[project_youth_divisions]]); each team is a taped
+ * Team directory (`/jeugd` + `/ploegen`). Grouped Reserven / Onderbouw /
+ * Middenbouw / Bovenbouw (per [[project_youth_divisions]]); each team is a taped
  * polaroid of its squad photo (`team.teamImageUrl`, backfilled in #2070)
  * captioned with the team's display name — design locks 7j4 (variant C) + 7j5
  * (age-code-only · subtle rotation · newsprint colour). Teams without a photo

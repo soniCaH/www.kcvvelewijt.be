@@ -56,18 +56,18 @@ describe("groupTeamsForLanding", () => {
 
     const result = groupTeamsForLanding(teams);
 
-    // Reserven leads, then the three bouw groups.
+    // Reserven leads, then the three bouw groups small → large.
     expect(result.youthByDivision.map((d) => d.label)).toEqual([
       "Reserven",
-      "Bovenbouw",
-      "Middenbouw",
       "Onderbouw",
+      "Middenbouw",
+      "Bovenbouw",
     ]);
 
     expect(divisionGroup(teams, "Bovenbouw").range).toBe("U17–U21");
     expect(divisionGroup(teams, "Bovenbouw").teams.map((t) => t.age)).toEqual([
-      "U21",
       "U17",
+      "U21",
     ]);
 
     expect(divisionGroup(teams, "Middenbouw").range).toBe("U12–U16");
@@ -77,9 +77,9 @@ describe("groupTeamsForLanding", () => {
 
     expect(divisionGroup(teams, "Onderbouw").range).toBe("U6–U11");
     expect(divisionGroup(teams, "Onderbouw").teams.map((t) => t.age)).toEqual([
-      "U10",
-      "U9",
       "U6",
+      "U9",
+      "U10",
     ]);
   });
 
@@ -120,7 +120,7 @@ describe("groupTeamsForLanding", () => {
     expect(result.bTeam).toBeUndefined();
   });
 
-  it("should sort youth teams by descending age even when input is name-sorted", () => {
+  it("should sort youth teams by ascending age even when input is name-sorted", () => {
     const teams = [
       makeTeam({ _id: "u14", age: "U14", name: "KCVV Elewijt U14" }),
       makeTeam({ _id: "u15a", age: "U15", name: "KCVV Elewijt U15A" }),
@@ -130,13 +130,13 @@ describe("groupTeamsForLanding", () => {
     ];
 
     expect(divisionGroup(teams, "Bovenbouw").teams.map((t) => t.age)).toEqual([
-      "U21",
       "U17",
+      "U21",
     ]);
     expect(divisionGroup(teams, "Middenbouw").teams.map((t) => t.age)).toEqual([
-      "U15",
-      "U15",
       "U14",
+      "U15",
+      "U15",
     ]);
   });
 
