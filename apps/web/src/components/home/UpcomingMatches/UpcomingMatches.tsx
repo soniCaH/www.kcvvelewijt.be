@@ -26,12 +26,20 @@ export interface UpcomingMatchesProps {
    * @default false
    */
   unavailable?: boolean;
+  /**
+   * The "Volledige kalender" link revealed on expand. Off on `/kalender`
+   * itself, where the block sits above the calendar it would link to (#3430).
+   *
+   * @default true
+   */
+  showCalendarLink?: boolean;
 }
 
 export const UpcomingMatches = ({
   matches,
   initialExpanded = false,
   unavailable = false,
+  showCalendarLink = true,
 }: UpcomingMatchesProps) => {
   // No rows and the read didn't fail → genuinely nothing to show, so the
   // whole section drops (matches the NewsGrid E.1 convention). A failed read
@@ -73,6 +81,7 @@ export const UpcomingMatches = ({
               initialVisible={DEFAULT_VISIBLE}
               kcvvTeamId={KCVV_TEAM_ID}
               initialExpanded={initialExpanded}
+              showCalendarLink={showCalendarLink}
             />
           )}
         </TapedCard>

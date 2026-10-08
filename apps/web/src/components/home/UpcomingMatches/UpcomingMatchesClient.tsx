@@ -37,6 +37,8 @@ export interface UpcomingMatchesClientProps {
   initialVisible: number;
   kcvvTeamId: number;
   initialExpanded?: boolean;
+  /** See `UpcomingMatchesProps.showCalendarLink`. @default true */
+  showCalendarLink?: boolean;
 }
 
 const matchTimestamp = (m: UpcomingRow): number => {
@@ -63,6 +65,7 @@ export const UpcomingMatchesClient = ({
   initialVisible,
   kcvvTeamId,
   initialExpanded = false,
+  showCalendarLink = true,
 }: UpcomingMatchesClientProps) => {
   const [expanded, setExpanded] = useState(initialExpanded);
   const [selectedTeam, setSelectedTeam] = useState<string>(ALL_TEAMS);
@@ -172,7 +175,7 @@ export const UpcomingMatchesClient = ({
         </button>
       )}
 
-      {expanded && (
+      {expanded && showCalendarLink && (
         <div className="mt-6">
           <Link
             href="/kalender"
