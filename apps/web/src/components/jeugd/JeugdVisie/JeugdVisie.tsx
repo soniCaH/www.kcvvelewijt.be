@@ -36,9 +36,10 @@ export function JeugdVisie() {
     <section id="visie">
       <SectionKicker className="mb-4">Onze jeugdvisie</SectionKicker>
 
+      {/* The youth mission line, word for word from club feedback v2 (#3427). */}
       <PullQuote labels={VISIE_TAGS}>
-        Bij KCVV Elewijt staat plezier op één. Wie graag speelt, leert vanzelf —
-        techniek, teamspirit en respect groeien mee.
+        Met onze club willen we dat lokale kinderen met “goesting” naar de
+        training en wedstrijd komen en met “tegengoesting” terug naar huis gaan.
       </PullQuote>
     </section>
   );

@@ -54,11 +54,11 @@ export const YouthSection = ({ className, stats }: YouthSectionProps) => (
         className="max-w-3xl"
       />
 
-      {/* Full cream — DESIGN.md "The Whole-Cream Rule". */}
+      {/* Full cream — DESIGN.md "The Whole-Cream Rule". The youth mission
+          line, word for word from club feedback v2 (#3427). */}
       <p className="text-cream mb-6 max-w-xl text-base leading-relaxed">
-        Onze jeugdwerking groeit elk jaar. Bovenbouw, Middenbouw en Onderbouw
-        delen één doel: voetbal als zelfontplooiing — nooit als prestatie
-        alleen.
+        Met onze club willen we dat lokale kinderen met “goesting” naar de
+        training en wedstrijd komen en met “tegengoesting” terug naar huis gaan.
       </p>
 
       {stats ? (

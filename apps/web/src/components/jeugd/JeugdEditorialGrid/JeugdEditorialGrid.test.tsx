@@ -48,7 +48,7 @@ describe("JeugdEditorialGrid", () => {
     expect(screen.getByText("Ontdek onze jeugd")).toBeInTheDocument();
   });
 
-  it("renders all 6 nav cards with correct titles", () => {
+  it("renders all 8 nav cards with correct titles", () => {
     render(<JeugdEditorialGrid articles={[]} />);
 
     expect(screen.getByText("Word lid van KCVV")).toBeInTheDocument();
@@ -57,6 +57,10 @@ describe("JeugdEditorialGrid", () => {
     expect(screen.getByText("Organigram")).toBeInTheDocument();
     expect(screen.getByText("Wie contacteer ik?")).toBeInTheDocument();
     expect(screen.getByText("Blessure of medisch attest?")).toBeInTheDocument();
+    expect(screen.getByText("Intern reglement jeugd")).toBeInTheDocument();
+    expect(
+      screen.getByText("Mutualiteit: terugbetaling lidgeld"),
+    ).toBeInTheDocument();
   });
 
   it("repoints nav cards to live routes (no more dead routes)", () => {
@@ -84,6 +88,11 @@ describe("JeugdEditorialGrid", () => {
     expect(hrefs).not.toContain("/downloads/leerplan-jeugdopleiding-2019.pdf");
     expect(hrefs).not.toContain("/jeugd#visie");
 
+    // #3427: the youth rules (same PDF `/club/word-lid` links) and the
+    // mutualiteit refund info on the praktische-informatie page.
+    expect(hrefs).toContain("/downloads/intern-reglement-jeugd-2026.pdf");
+    expect(hrefs).toContain("/club/praktische-informatie");
+
     // Exactly one card may still point at the bare hub — "Wie contacteer ik?",
     // whose whole job IS the search box. Any second one is the duplicate this
     // block was flagged for (#2965).
@@ -100,15 +109,16 @@ describe("JeugdEditorialGrid", () => {
     expect(hrefs).not.toContain("/jeugd/medisch");
   });
 
-  it("renders the opleidingsvisie tile as a document link, not a route (#2960)", () => {
+  it.each([
+    "opleidingsvisie-jeugd-2024.pdf",
+    "intern-reglement-jeugd-2026.pdf",
+  ])("renders the %s tile as a document link, not a route (#2960)", (file) => {
     render(<JeugdEditorialGrid articles={[]} />);
 
     const pdf = screen
       .getAllByRole("link")
-      .find((l) =>
-        l.getAttribute("href")?.endsWith("opleidingsvisie-jeugd-2024.pdf"),
-      );
-    expect(pdf, "opleidingsvisie tile missing").toBeDefined();
+      .find((l) => l.getAttribute("href")?.endsWith(file));
+    expect(pdf, `${file} tile missing`).toBeDefined();
 
     // `next/link` has no file-extension guard: it would prefetch ~400 KB on
     // viewport entry for every visitor, and open the PDF in the same tab over
@@ -149,7 +159,7 @@ describe("JeugdEditorialGrid", () => {
     expect(hrefs).toContain("/nieuws/article-three");
   });
 
-  it("renders 9 total cards when 3 articles provided", () => {
+  it("renders 11 total cards when 3 articles provided", () => {
     const articles = [
       makeArticle({ id: "a1", title: "A1", slug: "a1" }),
       makeArticle({ id: "a2", title: "A2", slug: "a2" }),
@@ -157,21 +167,21 @@ describe("JeugdEditorialGrid", () => {
     ];
 
     render(<JeugdEditorialGrid articles={articles} />);
-    expect(screen.getAllByRole("link")).toHaveLength(9);
+    expect(screen.getAllByRole("link")).toHaveLength(11);
   });
 
-  it("collapses to 6 nav cards when no articles provided", () => {
+  it("collapses to 8 nav cards when no articles provided", () => {
     render(<JeugdEditorialGrid articles={[]} />);
-    expect(screen.getAllByRole("link")).toHaveLength(6);
+    expect(screen.getAllByRole("link")).toHaveLength(8);
   });
 
-  it("renders 7 cards when 1 article provided (1 article + 6 nav)", () => {
+  it("renders 9 cards when 1 article provided (1 article + 8 nav)", () => {
     const articles = [
       makeArticle({ id: "a1", title: "Only One", slug: "only-one" }),
     ];
 
     render(<JeugdEditorialGrid articles={articles} />);
-    expect(screen.getAllByRole("link")).toHaveLength(7);
+    expect(screen.getAllByRole("link")).toHaveLength(9);
     expect(screen.getByText("Only One")).toBeInTheDocument();
   });
 

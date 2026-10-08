@@ -3,7 +3,7 @@
  *
  * Editorial page-header → A-ploeg flagship (jersey-deep) → B-ploeg flagship
  * (cream, mirrored) → the directory of everything those two leave out
- * (Reserven / Bovenbouw / Middenbouw / Onderbouw) → footer. Replaces the legacy
+ * (Reserven / Onderbouw / Middenbouw / Bovenbouw) → footer. Replaces the legacy
  * InteriorPageHero + TeamFeaturedCard + YouthTeamsDirectory composition (those
  * components retire in #1947).
  */
