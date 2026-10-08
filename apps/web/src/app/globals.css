@@ -1525,7 +1525,7 @@
    overrides this at runtime with `calc(var(--sticky-header-h) + <bar
    height>px)`, derived from the bar's own measured height rather than a
    hand-written value; this rule is what a route with NO section nav
-   (`/jeugd#visie`) falls back to, and what any nav-bearing route falls back
+   falls back to, and what any nav-bearing route falls back
    to once its nav unmounts (`<html>` persists across client-side
    navigations — #2478 rule 7 / #2584). Not gated behind
    `prefers-reduced-motion`: it changes *where* a jump lands, not whether it

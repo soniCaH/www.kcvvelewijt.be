@@ -59,6 +59,8 @@ export interface YouthDirectoryProps {
    */
   heading: string;
   divisions: readonly YouthDivisionGroup[];
+  /** Anchor id, for a page whose section nav targets this block (#3435). */
+  id?: string;
   className?: string;
 }
 
@@ -84,6 +86,7 @@ const CARD_ROTATIONS = ["a", "c", "b", "d", "b"] as const;
 export function YouthDirectory({
   heading,
   divisions,
+  id,
   className,
 }: YouthDirectoryProps) {
   const groups = divisions.filter((d) => d.teams.length > 0);
@@ -91,6 +94,7 @@ export function YouthDirectory({
 
   return (
     <section
+      id={id}
       data-testid="youth-directory"
       aria-label={heading}
       className={cn("flex flex-col gap-10", className)}

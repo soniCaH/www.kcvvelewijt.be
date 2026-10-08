@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import {
   PageContainer,
+  type PageContainerWidth,
   SectionNavChip,
   SECTION_NAV_BAR_CLASSES,
 } from "@/components/design-system";
@@ -19,6 +20,9 @@ export interface TeamSectionNavItem {
 export interface TeamSectionNavProps {
   /** Only the sections that actually render — auto-hide aware. */
   items: readonly TeamSectionNavItem[];
+  /** Matches the page body's container, so the chips line up with the
+   *  content below (`/jeugd` is an `index`-width page, #3435). */
+  width?: PageContainerWidth;
 }
 
 /**
@@ -96,16 +100,12 @@ export interface TeamSectionNavProps {
  * clears the arrow rather than landing half under it, and the document's
  * own scroll position is never touched.
  */
-export function TeamSectionNav({ items }: TeamSectionNavProps) {
+export function TeamSectionNav({ items, width }: TeamSectionNavProps) {
   if (items.length <= 1) return null;
-  return <TeamSectionNavBar items={items} />;
+  return <TeamSectionNavBar items={items} width={width} />;
 }
 
-function TeamSectionNavBar({
-  items,
-}: {
-  items: readonly TeamSectionNavItem[];
-}) {
+function TeamSectionNavBar({ items, width }: TeamSectionNavProps) {
   const ids = items.map((item) => item.id);
   const { navRef, activeId } = useSectionNav(ids);
 
@@ -158,7 +158,7 @@ function TeamSectionNavBar({
       // the nav from the hero, so a top border doubled the line.
       className={SECTION_NAV_BAR_CLASSES}
     >
-      <PageContainer>
+      <PageContainer width={width}>
         <ScrollRail
           as="ul"
           ariaLabel="Sectienavigatie"
