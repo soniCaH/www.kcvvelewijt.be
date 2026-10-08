@@ -83,13 +83,13 @@ import {
   fetchUpcomingMatchesOrNull,
   getTeamMatches,
 } from "@/lib/server/match-data";
-import { DEFAULT_OG_IMAGE, SITE_CONFIG } from "@/lib/constants";
+import { DEFAULT_OG_IMAGE, SITE_CONFIG, MOTTO } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildSportsClubJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title = "Er is maar 1 plezante compagnie";
+  const title = MOTTO;
   const description = "Startpagina van stamnummer 00055: KCVV Elewijt.";
   return {
     title,

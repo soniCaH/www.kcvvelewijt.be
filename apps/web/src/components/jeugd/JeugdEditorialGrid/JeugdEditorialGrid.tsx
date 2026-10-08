@@ -7,6 +7,7 @@ import { SectionKicker, TapedCardGrid } from "@/components/design-system";
 import { hashMemberId } from "@/lib/analytics/hash-member-id";
 import type { ArticleVM } from "@/lib/repositories/article.repository";
 import type { EditorialCardConfig } from "@/lib/repositories/jeugd-landing-page.repository";
+import { INTERN_REGLEMENT_JEUGD_PDF } from "@/lib/constants";
 
 interface NavCardConfig {
   tag: string;
@@ -128,7 +129,7 @@ const NAV_CARDS: NavCardConfig[] = [
     // #3427: the same PDF `/club/word-lid` links.
     title: "Intern reglement jeugd",
     arrowText: "Download",
-    href: "/downloads/intern-reglement-jeugd-2026.pdf",
+    href: INTERN_REGLEMENT_JEUGD_PDF,
     iconName: "DownloadSimple",
     external: true,
   },

@@ -1,4 +1,5 @@
 import { CtaBand } from "@/components/design-system";
+import { MOTTO } from "@/lib/constants";
 
 export interface JeugdCtaBandProps {
   /**
@@ -24,7 +25,7 @@ export function JeugdCtaBand({ href = "/club/word-lid" }: JeugdCtaBandProps) {
       ariaLabel="Schrijf je in"
       heading="Interesse in onze jeugd?"
       emphasis={{ text: "onze jeugd", tone: "warm" }}
-      lead="Nieuwe spelers zijn altijd welkom — van U6 tot U21. Er is maar 1 plezante compagnie."
+      lead={`Nieuwe spelers zijn altijd welkom — van U6 tot U21. ${MOTTO}.`}
       buttonLabel={
         <>
           Schrijf je in <span aria-hidden="true">+</span>

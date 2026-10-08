@@ -178,7 +178,8 @@ export const params = [
   // ── Membership form (conversion — added #1974) ──────────────────────────
   { parameterName: "is_minor", displayName: "Is minor" },
   { parameterName: "has_prior_club", displayName: "Has prior club" },
-  // #3433 — collected on the event; not registered as a GA4 dimension
-  // while the 50-dimension cap is already exceeded.
-  { parameterName: "has_remark", displayName: "Has remark" },
+  // #3433 — collected on the event (GTM forwards it); `registered: false`
+  // keeps `create-ga4-dimensions.mjs` from minting a dimension while the
+  // 50-dimension cap is already exceeded.
+  { parameterName: "has_remark", displayName: "Has remark", registered: false },
 ];

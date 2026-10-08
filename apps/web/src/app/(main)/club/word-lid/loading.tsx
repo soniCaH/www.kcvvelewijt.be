@@ -21,6 +21,7 @@ import {
 } from "@/components/design-system";
 import { PageHero } from "@/components/layout/PageHero";
 import { MembershipForm } from "@/components/club/MembershipForm/MembershipForm";
+import { INTERN_REGLEMENT_JEUGD_PDF } from "@/lib/constants";
 
 export default function WordLidLoading() {
   return (
@@ -42,10 +43,7 @@ export default function WordLidLoading() {
             </EditorialLink>
           </p>
           <p className="text-body-md mt-2">
-            <a
-              href="/downloads/intern-reglement-jeugd-2026.pdf"
-              className="prose-link"
-            >
+            <a href={INTERN_REGLEMENT_JEUGD_PDF} className="prose-link">
               Intern reglement jeugd (pdf)
             </a>
           </p>

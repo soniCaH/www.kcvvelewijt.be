@@ -54,8 +54,8 @@ function parentHtml(payload: MembershipRequest): string {
 }
 
 function adminHtml(payload: MembershipRequest, isMinor: boolean): string {
-  const row = (label: string, value: string) =>
-    `<tr><td style="padding:4px 12px 4px 0;color:#666">${label}</td><td style="padding:4px 0"><strong>${value}</strong></td></tr>`;
+  const row = (label: string, value: string, bold = true) =>
+    `<tr><td style="padding:4px 12px 4px 0;color:#666;vertical-align:top">${label}</td><td style="padding:4px 0;word-break:break-word">${bold ? `<strong>${value}</strong>` : value}</td></tr>`;
   return shell(
     "Nieuwe inschrijving via de website",
     `<table style="border-collapse:collapse;font-size:14px">
@@ -67,7 +67,7 @@ function adminHtml(payload: MembershipRequest, isMinor: boolean): string {
        ${row("E-mail", esc(payload.email))}
        ${payload.priorClub ? row("Vorige club", esc(payload.priorClub)) : ""}
        ${isMinor && payload.parentEmail ? row("Ouder/voogd e-mail", esc(payload.parentEmail)) : ""}
-       ${payload.remark ? `<tr><td style="padding:4px 12px 4px 0;color:#666;vertical-align:top">Opmerking</td><td style="padding:4px 0;word-break:break-word">${esc(payload.remark).replace(/\n/g, "<br>")}</td></tr>` : ""}
+       ${payload.remark ? row("Opmerking", esc(payload.remark).replace(/\n/g, "<br>"), false) : ""}
      </table>
      <p style="font-size:13px;color:#888">Beheer deze inschrijving in Sanity Studio (Inschrijvingen).</p>`,
   );

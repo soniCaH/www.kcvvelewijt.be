@@ -38,8 +38,8 @@ export interface UpcomingMatchesClientProps {
   initialVisible: number;
   kcvvTeamId: number;
   initialExpanded?: boolean;
-  /** See `UpcomingMatchesProps.surface`. @default "home" */
-  surface?: AgendaSurface;
+  /** See `UpcomingMatchesProps.surface` (which owns the default). */
+  surface: AgendaSurface;
 }
 
 const matchTimestamp = (m: UpcomingRow): number => {
@@ -66,7 +66,7 @@ export const UpcomingMatchesClient = ({
   initialVisible,
   kcvvTeamId,
   initialExpanded = false,
-  surface = "home",
+  surface,
 }: UpcomingMatchesClientProps) => {
   const [expanded, setExpanded] = useState(initialExpanded);
   const [selectedTeam, setSelectedTeam] = useState<string>(ALL_TEAMS);

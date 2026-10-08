@@ -39,7 +39,7 @@ const cacheMock: KvCacheInterface = {
   get: (key: string) =>
     Effect.succeed(
       key === "psd:competition-labels" ||
-        key === "psd:match-team-index:v4" ||
+        key === "psd:match-team-index:v5" ||
         key === "psd:teams-by-id"
         ? "{}"
         : null,
@@ -1513,7 +1513,7 @@ describe("PsdService.getMatchDetail — status/score backfill from season list",
       Effect.succeed(
         key === "psd:teams-by-id"
           ? "{}"
-          : key === "psd:match-team-index:v4"
+          : key === "psd:match-team-index:v5"
             ? JSON.stringify({ "99": entry })
             : key === "psd:competition-labels"
               ? "{}"
@@ -2214,7 +2214,7 @@ describe("PsdService.getMatchDetail - competition/team enrichment", () => {
         Effect.succeed(
           key === "psd:teams-by-id"
             ? "{}"
-            : key === "psd:match-team-index:v4"
+            : key === "psd:match-team-index:v5"
               ? JSON.stringify(idx)
               : null,
         ),
@@ -2332,7 +2332,7 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
       Effect.succeed(
         key === "psd:teams-by-id"
           ? "{}"
-          : key === "psd:match-team-index:v4"
+          : key === "psd:match-team-index:v5"
             ? JSON.stringify(indexEntry(isHome))
             : null,
       ),
@@ -2607,7 +2607,7 @@ describe("PsdService — youth score gate (#3428)", () => {
               ),
             )
           : key === "psd:competition-labels" ||
-              key === "psd:match-team-index:v4"
+              key === "psd:match-team-index:v5"
             ? (extra[key] ?? "{}")
             : null,
       ),
@@ -2680,7 +2680,12 @@ describe("PsdService — youth score gate (#3428)", () => {
     expect(rawDetailWithGoal.events[0]?.action.type).toBe("GOAL");
     const detail = rawDetailWithGoal;
     const index = JSON.stringify({
-      "123": { teamId: 1, competitionType: "league", status: "finished" },
+      "123": {
+        teamId: 1,
+        competitionType: "league",
+        status: "finished",
+        hideScores: true,
+      },
     });
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
       ok: true,
@@ -2689,7 +2694,7 @@ describe("PsdService — youth score gate (#3428)", () => {
     });
 
     const result = await runService((svc) => svc.getMatchDetail(123), {
-      kvMock: kvWithAges({ "1": "U10" }, { "psd:match-team-index:v4": index }),
+      kvMock: kvWithAges({ "1": "U10" }, { "psd:match-team-index:v5": index }),
     });
 
     expect(result._tag).toBe("Right");
@@ -2718,5 +2723,61 @@ describe("PsdService — youth score gate (#3428)", () => {
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") expect(result.right.home_team.score).toBe(2);
+  });
+
+  it("match detail: fails closed while the match-team index is unknown", async () => {
+    (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      ok: true,
+      json: async () => rawDetailWithGoal,
+      text: async () => JSON.stringify(rawDetailWithGoal),
+    });
+
+    const result = await runService((svc) => svc.getMatchDetail(123), {
+      kvMock: kvWithAges({}, { "psd:match-team-index:v5": "null" }),
+    });
+
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left._tag).toBe("UpstreamUnavailable");
+    }
+  });
+
+  it("match detail: one failed team fetch leaves the index unknown, never partial", async () => {
+    const sets: Array<[string, string]> = [];
+    const kv = kvWithAges({});
+    (global.fetch as ReturnType<typeof vi.fn>).mockImplementation(
+      (url: string) =>
+        Promise.resolve(
+          url.includes("/games/team/")
+            ? { ok: false, status: 503, json: async () => ({}) }
+            : {
+                ok: true,
+                json: async () =>
+                  url.includes("/seasons")
+                    ? seasons
+                    : url.includes("/teams")
+                      ? rawTeams
+                      : rawDetailWithGoal,
+                text: async () => JSON.stringify(rawDetailWithGoal),
+              },
+        ),
+    );
+
+    const result = await runService((svc) => svc.getMatchDetail(123), {
+      kvMock: {
+        ...kv,
+        get: (key: string) =>
+          key === "psd:match-team-index:v5"
+            ? Effect.succeed(null)
+            : kv.get(key),
+        set: (key: string, value: string) =>
+          Effect.sync(() => {
+            sets.push([key, value]);
+          }),
+      },
+    });
+
+    expect(result._tag).toBe("Left");
+    expect(sets).toContainEqual(["psd:match-team-index:v5", "null"]);
   });
 });

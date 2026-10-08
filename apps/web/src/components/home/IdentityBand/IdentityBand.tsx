@@ -5,6 +5,7 @@ import {
   PageContainer,
   SectionHeader,
 } from "@/components/design-system";
+import { MOTTO } from "@/lib/constants";
 
 /**
  * Homepage identity band (#3417) — says who the club is, once, between
@@ -49,7 +50,7 @@ export const IdentityBand = () => {
             <SectionHeader
               id={headingId}
               kicker={[{ label: "KCVV Elewijt · Stamnummer 55", size: "md" }]}
-              title="Er is maar 1 plezante compagnie."
+              title={`${MOTTO}.`}
               variant="dark"
               emphasis={{ text: "plezante", tone: "warm" }}
               className="max-w-3xl"

@@ -11,11 +11,18 @@ export const BRAND = {
   backgroundColor: "#f5f1e6", // cream
 } as const;
 
+// The club motto (#3426: the digit, never "één"). Read it here; never retype it.
+export const MOTTO = "Er is maar 1 plezante compagnie";
+
+// The club's internal youth rules. The filename carries the season, so a new
+// edition is a one-line change here.
+export const INTERN_REGLEMENT_JEUGD_PDF =
+  "/downloads/intern-reglement-jeugd-2026.pdf";
+
 // Site Configuration
 export const SITE_CONFIG = {
   title: "KCVV Elewijt",
-  description:
-    "KCVV Elewijt voetbalclub met stamnummer 55 - Er is maar 1 plezante compagnie",
+  description: `KCVV Elewijt voetbalclub met stamnummer 55 - ${MOTTO}`,
   siteUrl: "https://www.kcvvelewijt.be",
   fbAppId: "679332239478086",
   stamnummer: 55,

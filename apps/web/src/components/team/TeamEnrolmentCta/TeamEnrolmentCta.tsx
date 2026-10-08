@@ -9,6 +9,7 @@ import {
 } from "@/components/design-system";
 import { trackEvent } from "@/lib/analytics/track-event";
 import { cn } from "@/lib/utils/cn";
+import { MOTTO } from "@/lib/constants";
 
 /**
  * <TeamEnrolmentCta> — youth "Word lid" recruitment ad for `/ploegen/[slug]`.
@@ -102,7 +103,7 @@ export const TeamEnrolmentCta = ({
       </div>
 
       <p className="text-cream relative z-10 mt-4 mb-6 text-base leading-relaxed">
-        Er is maar 1 plezante compagnie — en die begint op het veld.
+        {MOTTO} — en die begint op het veld.
       </p>
 
       <LinkButton
