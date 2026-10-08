@@ -464,6 +464,19 @@ export function withoutScores<
   };
 }
 
+/**
+ * `withoutScores` for a match detail. A report that was only goals has nothing
+ * left to show once they go, so it also stops claiming a report — or
+ * `matchDetailTtl`'s report-pending override re-fetches the match every 5
+ * minutes for good.
+ */
+export function withoutDetailScores(detail: MatchDetail): MatchDetail {
+  const hidden = withoutScores(detail);
+  const hasLineup =
+    (hidden.lineup?.home.length ?? 0) + (hidden.lineup?.away.length ?? 0) > 0;
+  return hidden.events || hasLineup ? hidden : { ...hidden, hasReport: false };
+}
+
 // ─── PSD Game → Match ─────────────────────────────────────────────────────────
 
 export function transformPsdGame(

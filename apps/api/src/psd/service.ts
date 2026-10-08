@@ -35,7 +35,7 @@ import {
   deriveOwnClubId,
   transformPsdGame,
   hidesScores,
-  withoutScores,
+  withoutDetailScores,
   buildCompetitionLabelMap,
   type CompetitionLabelMap,
   resolveCompetitionType,
@@ -960,17 +960,7 @@ export const PsdServiceLive = Layer.effect(
                 if (!hidesScores(teams[String(entry.teamId)]?.age)) {
                   return withVenue;
                 }
-                const hidden = withoutScores(withVenue);
-                const hasLineup =
-                  (hidden.lineup?.home.length ?? 0) +
-                    (hidden.lineup?.away.length ?? 0) >
-                  0;
-                // A report that was only goals has nothing left to show once
-                // they go. Say so, or `matchDetailTtl`'s report-pending override
-                // re-fetches this match every 5 minutes for good.
-                return hidden.events || hasLineup
-                  ? hidden
-                  : { ...hidden, hasReport: false };
+                return withoutDetailScores(withVenue);
               }),
             ),
           ),
