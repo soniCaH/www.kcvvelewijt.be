@@ -146,9 +146,13 @@ describe("/jeugd page — cream tracer composition", () => {
       const { container } = render(await JeugdPage());
 
       expect(chipHrefs()).toEqual(["#visie", "#ontdek", "#ploegen"]);
-      // No dead anchors: every chip lands on a rendered section.
+      // No dead anchors: every chip lands on a rendered section, and the
+      // section takes focus on chip click like the team pages (#2478 rule 8).
       for (const href of chipHrefs()) {
-        expect(container.querySelector(href as string)).toBeInTheDocument();
+        expect(container.querySelector(href as string)).toHaveAttribute(
+          "tabindex",
+          "-1",
+        );
       }
     });
 

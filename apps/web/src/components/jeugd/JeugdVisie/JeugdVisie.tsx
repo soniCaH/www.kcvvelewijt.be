@@ -10,9 +10,9 @@ const VISIE_TAGS = [
 
 /**
  * <JeugdVisie> — the `/jeugd` filosofie/visie block (Phase 7 / Phase 2, design
- * contract 7j0b + 7j-final-page). Carries the `#visie` anchor — the repointed
- * "jeugdvisie" nav card (Phase 3) lands here. `/jeugd`'s section nav
- * (`page.tsx`, #3435) targets it too, and owns its landing offset and a cold
+ * contract 7j0b + 7j-final-page). Carries the `#visie` anchor, the target of
+ * `/jeugd`'s section nav (`page.tsx`, #3435; the "jeugdvisie" nav card is a
+ * document download since #2960). The nav owns its landing offset and a cold
  * `/jeugd#visie` load's webfont-swap correction through `useSectionNav` —
  * so this stays a server component with no `scroll-mt-*` of its own.
  *
@@ -28,7 +28,7 @@ const VISIE_TAGS = [
  */
 export function JeugdVisie() {
   return (
-    <section id="visie">
+    <section id="visie" tabIndex={-1} className="focus:outline-none">
       <SectionKicker className="mb-4">Onze jeugdvisie</SectionKicker>
 
       <PullQuote labels={VISIE_TAGS}>{YOUTH_MISSION}</PullQuote>

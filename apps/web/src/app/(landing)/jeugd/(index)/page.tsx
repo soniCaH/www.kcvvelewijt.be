@@ -26,7 +26,10 @@ import { JeugdVisie } from "@/components/jeugd/JeugdVisie/JeugdVisie";
 import { JeugdEditorialGrid } from "@/components/jeugd/JeugdEditorialGrid/JeugdEditorialGrid";
 import { EditorialHubAnalytics } from "@/components/editorial/EditorialHubAnalytics/EditorialHubAnalytics";
 import { JeugdCtaBand } from "@/components/jeugd/JeugdCtaBand/JeugdCtaBand";
-import { YouthDirectory } from "@/components/team/YouthDirectory";
+import {
+  YouthDirectory,
+  groupsWithTeams,
+} from "@/components/team/YouthDirectory";
 // The team pages' section nav, reused as-is (#3435: no new component).
 import {
   TeamSectionNav,
@@ -149,10 +152,10 @@ export default async function JeugdPage() {
   const { youthByDivision } = groupTeamsForLanding(teams);
 
   // A chip only for a section that renders: `<YouthDirectory>` drops itself
-  // when no division has teams, so its chip follows the same check. The nav
+  // when `groupsWithTeams` is empty, so its chip reads the same check. The nav
   // also carries the `#visie` webfont-swap landing correction
   // (`useSectionNav` composes `useHashLandingCorrection`).
-  const showDirectory = youthByDivision.some((d) => d.teams.length > 0);
+  const showDirectory = groupsWithTeams(youthByDivision).length > 0;
   const navItems: TeamSectionNavItem[] = [
     { id: "visie", label: "Visie" },
     { id: "ontdek", label: "Nieuws & info" },
