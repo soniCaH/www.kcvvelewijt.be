@@ -13,7 +13,7 @@
  */
 
 import { PageHero } from "@/components/layout/PageHero";
-import { UpcomingMatchesSkeleton } from "@/components/home/UpcomingMatches/UpcomingMatchesSkeleton";
+import { UpcomingMatchesSkeleton } from "@/components/home/UpcomingMatches";
 import {
   PageContainer,
   FilterTabsSkeleton,

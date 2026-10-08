@@ -178,12 +178,12 @@ export const fetchUpcomingMatchesOrNull = (
   note: string,
 ): Promise<readonly Match[] | null> =>
   runPromise(
-    degradeSection<readonly Match[] | null, unknown, BffService>(
+    degradeSection(
       Effect.gen(function* () {
         const bff = yield* BffService;
         return yield* bff.getNextMatches();
       }),
-      null,
+      null as readonly Match[] | null,
       note,
     ),
   );

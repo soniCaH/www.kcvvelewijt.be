@@ -29,7 +29,7 @@
  * it. Do not move this file back up a level.
  */
 
-import { UpcomingMatchesSkeleton } from "@/components/home/UpcomingMatches/UpcomingMatchesSkeleton";
+import { UpcomingMatchesSkeleton } from "@/components/home/UpcomingMatches";
 import {
   PageContainer,
   StripedSeam,
