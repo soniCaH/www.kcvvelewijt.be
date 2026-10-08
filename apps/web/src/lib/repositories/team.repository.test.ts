@@ -115,6 +115,14 @@ describe("TeamRepository", () => {
       expect(TEAM_BY_SLUG_QUERY).toContain("archived != true");
     });
 
+    // The full-screen viewer shows the whole photo; the hero's own URL is a
+    // 3:2 hotspot crop that cuts off the players at the edges (#3447).
+    it("selects the team photo uncropped for the full-screen viewer", () => {
+      const full = TEAM_BY_SLUG_QUERY.match(/"teamImageFullUrl":[^\n]*/)?.[0];
+      expect(full).toContain("fit=max");
+      expect(full).not.toContain("crop");
+    });
+
     // The staff photo projection's CDN params (amendment #2485) are
     // asserted in image-cdn-params.test.ts, derived from PLAYERS_QUERY's
     // own width rather than restated as a literal here.
@@ -138,6 +146,7 @@ describe("TeamRepository", () => {
         divisionFull: "3de Afdeling VFV A",
         tagline: "Er is maar 1 plezante compagnie",
         teamImageUrl: "https://cdn.sanity.io/team.webp",
+        teamImageFullUrl: "https://cdn.sanity.io/team-full.webp",
         body: null,
         contactInfo: null,
         players: [
@@ -193,6 +202,7 @@ describe("TeamRepository", () => {
       expect(t.slug).toBe("eerste-elftallen-a");
       expect(t.psdId).toBe("100");
       expect(t.teamImageUrl).toBe("https://cdn.sanity.io/team.webp");
+      expect(t.teamImageFullUrl).toBe("https://cdn.sanity.io/team-full.webp");
 
       // Computed fields (absorbed from utils.ts)
       expect(t.tagline).toBe("Er is maar 1 plezante compagnie");

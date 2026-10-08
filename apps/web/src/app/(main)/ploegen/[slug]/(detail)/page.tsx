@@ -567,6 +567,11 @@ export default async function TeamPage({ params }: TeamPageProps) {
           divisionFull={team.divisionFull}
           tagline={team.tagline}
           teamImageUrl={team.teamImageUrl}
+          photoViewer={
+            team.teamImageFullUrl
+              ? { fullUrl: team.teamImageFullUrl, teamSlug: slug }
+              : null
+          }
           className="py-8 sm:py-12"
         />
       </PageContainer>

@@ -97,6 +97,7 @@ function teamFixture(psdId: string): TeamDetailVM {
     teamType: "youth",
     ageGroup: "U13",
     teamImageUrl: null,
+    teamImageFullUrl: null,
     body: null,
     contactInfo: null,
     players: [],
