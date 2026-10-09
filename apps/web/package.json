@@ -58,7 +58,7 @@
     "html-to-image": "1.11.13",
     "ical-generator": "11.1.1",
     "luxon": "3.7.2",
-    "next": "16.3.6",
+    "next": "16.3.8",
     "qrcode.react": "4.2.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
