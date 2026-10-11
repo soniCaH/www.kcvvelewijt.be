@@ -59,4 +59,14 @@ describe("KickoffTemplate", () => {
     const img = document.querySelector('img[src="blob:kickoff"]');
     expect(img).toHaveAttribute("crossorigin", "anonymous");
   });
+
+  it("paints the photo as a full-canvas backdrop with the text centred", () => {
+    render(<KickoffTemplate {...defaultProps} imageUrl="blob:kickoff" />);
+    const img = document.querySelector('img[src="blob:kickoff"]');
+    expect(img).toHaveStyle({ height: "100%" });
+    expect(img?.getAttribute("style")).not.toMatch(/mask/i);
+    expect(
+      screen.getByText("Aftrap · 2e Provinciale").parentElement,
+    ).toHaveStyle({ justifyContent: "center" });
+  });
 });
