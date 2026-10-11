@@ -31,8 +31,8 @@ export interface KickoffTemplateProps {
 
 /**
  * Aftrap (kickoff) template — 1080×1920 Instagram Story.
- * Register A cream sheet with a club-crest matchup hero, or a fullscreen
- * newsprint photo when an image is given.
+ * Register A cream sheet with a club-crest matchup hero, or a full-canvas
+ * newsprint backdrop with the text centred when an image is given.
  */
 export function KickoffTemplate({
   matchName,
@@ -53,6 +53,7 @@ export function KickoffTemplate({
         height={CAPTURE_HEIGHT}
         register="image"
         imageUrl={imageUrl}
+        photoLayout="backdrop"
         overlay="calm"
       >
         <ShareTop />

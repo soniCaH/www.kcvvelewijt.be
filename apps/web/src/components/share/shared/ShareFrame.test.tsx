@@ -5,6 +5,7 @@ import {
   ShareFrame,
   ShareTop,
   ShareFoot,
+  ShareMid,
 } from "./ShareFrame";
 import { Headline, Kicker, Scoreline, ShareName } from "./ShareElements";
 
@@ -225,6 +226,55 @@ describe("ShareFrame", () => {
     );
     const img = document.querySelector('img[src="blob:abc"]');
     expect(img).toHaveAttribute("crossorigin", "anonymous");
+  });
+
+  it("paints a portrait photo in the top square and drops the text below it", () => {
+    render(
+      <ShareFrame width={1080} height={1920} register="image" imageUrl="blob:p">
+        <ShareMid center>
+          <span>content</span>
+        </ShareMid>
+      </ShareFrame>,
+    );
+    expect(document.querySelector('img[src="blob:p"]')).toHaveStyle({
+      height: "1080px",
+    });
+    expect(screen.getByText("content").parentElement).toHaveStyle({
+      justifyContent: "flex-end",
+    });
+  });
+
+  it("paints a portrait photo in the top 62% of a square frame", () => {
+    render(
+      <ShareFrame width={1080} height={1080} register="image" imageUrl="blob:s">
+        <span>content</span>
+      </ShareFrame>,
+    );
+    expect(document.querySelector('img[src="blob:s"]')).toHaveStyle({
+      height: "62%",
+    });
+  });
+
+  it("paints a backdrop photo over the whole canvas and centres the text", () => {
+    render(
+      <ShareFrame
+        width={1080}
+        height={1920}
+        register="image"
+        imageUrl="blob:b"
+        photoLayout="backdrop"
+      >
+        <ShareMid center>
+          <span>content</span>
+        </ShareMid>
+      </ShareFrame>,
+    );
+    expect(document.querySelector('img[src="blob:b"]')).toHaveStyle({
+      height: "100%",
+    });
+    expect(screen.getByText("content").parentElement).toHaveStyle({
+      justifyContent: "center",
+    });
   });
 
   it("exposes the palette to descendant elements via context", () => {

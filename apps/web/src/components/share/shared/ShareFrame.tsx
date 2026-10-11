@@ -22,9 +22,16 @@ const SharePaletteContext = createContext<SharePalette>(
   resolvePalette("cream", "neutral"),
 );
 
-// True inside a frame that paints a player photo: ShareMid then drops its
-// content into the bottom band so the text never crosses the face.
-const SharePhotoContext = createContext(false);
+/**
+ * How the image register paints its photo. `"portrait"` — a player photo in
+ * the top square, text dropped below it so it never crosses the face.
+ * `"backdrop"` — a mood background over the whole canvas, text centred.
+ */
+export type SharePhotoLayout = "portrait" | "backdrop";
+
+// The layout of the photo the enclosing frame paints, or null without one:
+// ShareMid reads it to place its content.
+const SharePhotoContext = createContext<SharePhotoLayout | null>(null);
 
 /** Read the resolved palette of the enclosing {@link ShareFrame}. */
 export function useSharePalette(): SharePalette {
@@ -50,6 +57,8 @@ export interface ShareFrameProps {
   sentiment?: ShareSentiment;
   /** Fullscreen photo URL — required when `register === "image"`. */
   imageUrl?: string;
+  /** How the image register paints its photo (default `"portrait"`). */
+  photoLayout?: SharePhotoLayout;
   /** Overlay strength for the image register. */
   overlay?: ShareOverlay;
   /** Absolutely-positioned decoration layers rendered behind the content. */
@@ -74,6 +83,7 @@ export function ShareFrame({
   register,
   sentiment = "neutral",
   imageUrl,
+  photoLayout = "portrait",
   overlay = "calm",
   decor,
   padding = "64px 80px 56px",
@@ -94,7 +104,9 @@ export function ShareFrame({
 
   return (
     <SharePaletteContext.Provider value={palette}>
-      <SharePhotoContext.Provider value={register === "image" && !!photoUrl}>
+      <SharePhotoContext.Provider
+        value={register === "image" && photoUrl ? photoLayout : null}
+      >
         <div
           style={{
             width: `${width}px`,
@@ -118,24 +130,30 @@ export function ShareFrame({
                 alt=""
                 aria-hidden="true"
                 crossOrigin="anonymous"
-                // The photo owns the TOP of the frame and fades into the dark
+                // A portrait owns the TOP of the frame and fades into the dark
                 // ground; the text sits below it (ShareMid). Full-bleed, a
                 // square player portrait put the eyes at ~40% height — right
                 // where the score and headline land. A story frame gets a square
                 // box (eyes at ~20%), a square frame the top 62%.
+                // A backdrop holds no face: it covers the whole canvas, unmasked.
                 style={{
                   position: "absolute",
                   top: 0,
                   left: 0,
                   width: "100%",
-                  height: height > width ? `${width}px` : "62%",
                   objectFit: "cover",
-                  objectPosition: "50% 15%",
-                  maskImage: "linear-gradient(180deg, #000 70%, transparent)",
-                  WebkitMaskImage:
-                    "linear-gradient(180deg, #000 70%, transparent)",
                   filter: "sepia(0.32) saturate(0.85) contrast(1.05)",
                   zIndex: 0,
+                  ...(photoLayout === "backdrop"
+                    ? { height: "100%", objectPosition: "50% 50%" }
+                    : {
+                        height: height > width ? `${width}px` : "62%",
+                        objectPosition: "50% 15%",
+                        maskImage:
+                          "linear-gradient(180deg, #000 70%, transparent)",
+                        WebkitMaskImage:
+                          "linear-gradient(180deg, #000 70%, transparent)",
+                      }),
                 }}
               />
               {/* paper-grain over the photo */}
@@ -268,7 +286,7 @@ export function ShareMid({
   children: React.ReactNode;
   style?: React.CSSProperties;
 }) {
-  const overPhoto = useContext(SharePhotoContext);
+  const photoLayout = useContext(SharePhotoContext);
   return (
     <div
       style={{
@@ -285,9 +303,12 @@ export function ShareMid({
             }
           : {}),
         ...style,
-        // Over a photo the face owns the upper half: the content sits at the
-        // bottom, on the darkest part of the gradient (overlayGradient).
-        ...(overPhoto ? { justifyContent: "flex-end", gap: "40px" } : {}),
+        // Over a portrait the face owns the upper half: the content sits at
+        // the bottom, on the darkest part of the gradient (overlayGradient).
+        // A backdrop keeps the template's own placement.
+        ...(photoLayout === "portrait"
+          ? { justifyContent: "flex-end", gap: "40px" }
+          : {}),
       }}
     >
       {children}
