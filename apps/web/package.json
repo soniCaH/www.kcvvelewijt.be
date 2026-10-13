@@ -83,7 +83,7 @@
     "@testing-library/user-event": "14.6.7",
     "@types/jest-image-snapshot": "6.4.2",
     "@types/luxon": "3.7.6",
-    "@types/node": "24.19.1",
+    "@types/node": "24.19.2",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.7",
     "@types/sanitize-html": "2.16.2",
