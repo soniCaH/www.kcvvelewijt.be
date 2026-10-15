@@ -2418,7 +2418,7 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
 
       expect(result._tag).toBe("Right");
       if (result._tag === "Right") {
-        expect(result.right.is_home).toBeUndefined();
+        expect(result.right).not.toHaveProperty("is_home");
       }
     }
   });
@@ -2519,7 +2519,7 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
       expect(result.right.venue).toBe(CLUB_VENUE);
-      expect(result.right.is_home).toBeUndefined();
+      expect(result.right).not.toHaveProperty("is_home");
     }
   });
 
