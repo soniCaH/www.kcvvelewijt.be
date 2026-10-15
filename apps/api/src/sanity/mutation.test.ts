@@ -825,6 +825,7 @@ describe("unsetPlayerImage / unsetStaffImage (#3469)", () => {
     expect(mockClientFetch).toHaveBeenCalledWith(
       "count(*[references($assetId)])",
       { assetId: "image-old" },
+      { perspective: "raw" },
     );
     expect(mockClientDelete).toHaveBeenCalledWith("image-old");
   });
@@ -841,6 +842,29 @@ describe("unsetPlayerImage / unsetStaffImage (#3469)", () => {
     );
 
     expect(lastPatchObject().unset).toHaveBeenCalled();
+    expect(mockClientDelete).not.toHaveBeenCalled();
+  });
+
+  it("keeps the asset a draft-only document still references (#3469 x #3477)", async () => {
+    mockGetDocument.mockResolvedValueOnce(storedImage("image-old"));
+    // The client defaults to the `published` perspective (#3477): a reference
+    // that lives only in a `drafts.*` document is invisible unless the count
+    // asks for `raw`.
+    mockClientFetch.mockImplementationOnce(
+      async (
+        _query: string,
+        _params: unknown,
+        options?: { perspective?: string },
+      ) => (options?.perspective === "raw" ? 1 : 0),
+    );
+
+    await run(
+      Effect.gen(function* () {
+        const mutation = yield* SanityMutation;
+        yield* mutation.unsetPlayerImage("42");
+      }),
+    );
+
     expect(mockClientDelete).not.toHaveBeenCalled();
   });
 
@@ -924,6 +948,7 @@ describe("superseded portrait assets (#3469)", () => {
     expect(mockClientFetch).toHaveBeenCalledWith(
       "count(*[references($assetId)])",
       { assetId: "image-old" },
+      { perspective: "raw" },
     );
     expect(mockClientDelete).toHaveBeenCalledExactlyOnceWith("image-old");
     fetchSpy.mockRestore();

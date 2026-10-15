@@ -267,9 +267,12 @@ export const SanityMutationLive = Layer.effect(
     const deleteAssetIfUnreferenced = (assetId: string) =>
       Effect.tryPromise({
         try: async () => {
+          // `raw`: the client's `published` perspective (#3477) would not count
+          // a reference held only by an open draft.
           const refs = await client.fetch<number>(
             "count(*[references($assetId)])",
             { assetId },
+            { perspective: "raw" },
           );
           if (refs === 0) await client.delete(assetId);
         },
