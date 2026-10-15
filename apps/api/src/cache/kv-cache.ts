@@ -66,14 +66,21 @@ const DRIFT_NUDGE_THRESHOLD = 60 * 60 * 24; // 24 h (#2329)
  * `waitUntil` work ~30 s after the invocation ends, but `GateLogic.leaseMs`
  * (15 s, `psd/gate-logic.ts`) reclaims the single-flight lease first. Outrunning
  * the lease is the worse failure: the next reader becomes leader and forks a
- * SECOND full fan-out under exactly the load that made the first one slow, and
- * the original's `endFlight` then releases the new leader's flight. So this must
+ * SECOND full fan-out under exactly the load that made the first one slow (the
+ * original's `endFlight` no longer releases the new leader's flight: it carries
+ * an owner token, #3467). So this must
  * stay strictly under `leaseMs`, not merely under the `waitUntil` budget.
  *
  * 12 s leaves 3 s of lease headroom for the failure-path KV write. The gate
  * paces 5 PSD calls/s globally, so a 19-call fan-out is ~3.8 s uncontended —
  * 12 s tolerates roughly 3 concurrent fan-outs before it starts tripping. */
 export const BG_REFRESH_TIMEOUT_MS = 12_000;
+
+/** Whole-fetch cap for the cold-miss leader (#3467). Same reasoning and same
+ * 12 s as {@link BG_REFRESH_TIMEOUT_MS}: the leader holds a 15 s lease, and
+ * queue waits at the 5/s gate alone can push a fan-out past it. A per-call
+ * abort does not help — only a cap on the fetch as a whole does. */
+export const MISS_FETCH_TIMEOUT_MS = 12_000;
 
 /** Dedup window for the slow-drift nudge: at most one Slack ping per day per key. */
 const NUDGE_MARKER_TTL = 60 * 60 * 24; // 24 h
@@ -348,13 +355,12 @@ export const TypedKvCache = <A, I>(
       hardTtl: number = HARD_TTL_DEFAULT,
       options?: {
         shouldServeStale?: (error: E) => boolean;
-        /** Correctness guard: when the STALE value fails this predicate (e.g. a
-         * "next" list whose kickoff has already passed), refresh blocking rather
-         * than serving stale. */
-        mustBlockOnStale?: (value: A) => boolean;
         /** Ceiling on the background (SWR) refresh fetch. Defaults to
          * {@link BG_REFRESH_TIMEOUT_MS}; tests drive it with a small value. */
         backgroundTimeoutMs?: number;
+        /** Whole-fetch cap for the cold-miss leader. Defaults to
+         * {@link MISS_FETCH_TIMEOUT_MS}; tests drive it with a small value. */
+        fetchTimeoutMs?: number;
       },
     ): Effect.Effect<
       A,
@@ -371,6 +377,7 @@ export const TypedKvCache = <A, I>(
         const shouldServeStale = options?.shouldServeStale ?? (() => true);
         const backgroundTimeoutMs =
           options?.backgroundTimeoutMs ?? BG_REFRESH_TIMEOUT_MS;
+        const fetchTimeoutMs = options?.fetchTimeoutMs ?? MISS_FETCH_TIMEOUT_MS;
 
         /** Time (ms) a value has spent PAST its soft TTL — the drift measure.
          * The single place this arithmetic lives. See DRIFT_NUDGE_THRESHOLD. */
@@ -481,42 +488,13 @@ export const TypedKvCache = <A, I>(
             persist(value),
           );
 
-        // Foreground refresh: fetch, store on success, serve stale on a
-        // serve-stale error (setting the negative marker so we stop re-fanning),
-        // propagate otherwise. Used by the correctness guard and, when no
-        // background runner is wired, as the stale fallback.
-        const blockingRefresh = (
-          staleValue: A,
-          fetchedAt: number,
-          softTtlSec: number,
-        ) =>
-          Effect.gen(function* () {
-            const result = yield* fetch.pipe(Effect.either);
-            if (Either.isRight(result)) {
-              yield* report({ ok: true, key });
-              yield* storeFresh(result.right);
-              return result.right;
-            }
-            if (!shouldServeStale(result.left)) {
-              // Not a transient PSD outage (404 / decode) → don't touch incident.
-              return yield* Effect.fail(result.left);
-            }
-            yield* failAndKeepStale(
-              result.left,
-              fetchedAt,
-              softTtlSec,
-              "refresh failed, serving stale",
-            );
-            return staleValue;
-          });
-
         // Background (SWR) refresh: single-flight leader fetches and updates KV;
         // any failure (or schema-invalid data) keeps stale + marks. Never throws
         // — it runs detached via the background runner.
         const backgroundRefresh = (fetchedAt: number, softTtlSec: number) =>
           Effect.gen(function* () {
-            const leader = yield* gate.beginFlight(key);
-            if (!leader) return; // another isolate/fiber is already refreshing
+            const token = yield* gate.beginFlight(key);
+            if (token === null) return; // another isolate/fiber is already refreshing
             yield* Effect.gen(function* () {
               // Bounded (#2335): a refresh that outruns the `waitUntil` budget
               // gets killed mid-flight, so NONE of the handlers below run — no
@@ -563,7 +541,7 @@ export const TypedKvCache = <A, I>(
                     softTtlSec,
                     incidentOpen: false,
                   });
-            }).pipe(Effect.ensuring(gate.endFlight(key)));
+            }).pipe(Effect.ensuring(gate.endFlight(key, token)));
           });
 
         // A not-found marker stands in for the value: fail exactly as the
@@ -656,25 +634,18 @@ export const TypedKvCache = <A, I>(
             const marker = yield* cache.get(negKey(key));
             if (marker !== null) return value;
 
-            // Correctness guard: a stale value that is now wrong (past-kickoff
-            // "next") must not be served — refresh blocking.
-            if (options?.mustBlockOnStale?.(value)) {
-              return yield* blockingRefresh(value, fetchedAt, resolvedSoftTtl);
-            }
-
-            if (Option.isSome(runnerOpt)) {
-              // Stale-while-revalidate: serve stale NOW, refresh in the
-              // background (single-flight) via the runner — see background-live.ts.
-              // `R extends PsdRefreshEnv` on `getOrFetch` makes this safe by
-              // construction: `fetch`'s own requirements are already within
-              // what the runner's layer provides.
-              const refresh = backgroundRefresh(fetchedAt, resolvedSoftTtl);
-              yield* runnerOpt.value.fork(`refresh:${key}`, refresh);
-              return value;
-            }
-
-            // No background runner wired → fall back to a blocking refresh.
-            return yield* blockingRefresh(value, fetchedAt, resolvedSoftTtl);
+            // Stale-while-revalidate: serve stale NOW, refresh in the
+            // background (single-flight) via the runner — see background-live.ts.
+            // `R extends PsdRefreshEnv` on `getOrFetch` makes this safe by
+            // construction: `fetch`'s own requirements are already within
+            // what the runner's layer provides. No runner (tests only) → the
+            // same single-flight, bounded refresh runs inline. Either way there
+            // is no unguarded foreground fan-out (#3467).
+            const refresh = backgroundRefresh(fetchedAt, resolvedSoftTtl);
+            yield* Option.isSome(runnerOpt)
+              ? runnerOpt.value.fork(`refresh:${key}`, refresh)
+              : refresh;
+            return value;
           }
         }
 
@@ -689,11 +660,24 @@ export const TypedKvCache = <A, I>(
         // fiber makes progress; the gate's lease reclaims a dead leader, so this
         // can't spin forever.
         for (;;) {
-          const isLeader = yield* gate.beginFlight(key);
-          if (isLeader) {
+          const token = yield* gate.beginFlight(key);
+          if (token !== null) {
             return yield* Effect.gen(function* () {
               yield* checkBudget;
-              const result = yield* fetch.pipe(Effect.either);
+              // Capped as a whole, under the lease (#3467). A timeout reports
+              // nothing: a slow fan-out is not proof PSD is down.
+              const timed = yield* fetch.pipe(
+                Effect.either,
+                Effect.timeoutOption(fetchTimeoutMs),
+              );
+              if (Option.isNone(timed)) {
+                return yield* Effect.fail(
+                  new UpstreamUnavailableError({
+                    message: `TypedKvCache "${key}": fetch timed out after ${fetchTimeoutMs}ms`,
+                  }) as unknown as E,
+                );
+              }
+              const result = timed.value;
               if (Either.isRight(result)) {
                 yield* report({ ok: true, key });
                 yield* storeFresh(result.right);
@@ -720,7 +704,7 @@ export const TypedKvCache = <A, I>(
                 });
               }
               return yield* Effect.fail(result.left);
-            }).pipe(Effect.ensuring(gate.endFlight(key)));
+            }).pipe(Effect.ensuring(gate.endFlight(key, token)));
           }
 
           yield* gate.awaitFlight(key);

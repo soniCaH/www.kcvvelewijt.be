@@ -47,7 +47,7 @@ function makeCountingGate(trace: string[]) {
     acquireToken: Effect.sync(() => {
       trace.push("token");
     }),
-    beginFlight: () => Effect.succeed(true),
+    beginFlight: () => Effect.succeed(1),
     endFlight: () => Effect.succeed(undefined),
     awaitFlight: () => Effect.succeed(undefined),
     reportOutcome: () => Effect.succeed({ incidentOpen: false }),

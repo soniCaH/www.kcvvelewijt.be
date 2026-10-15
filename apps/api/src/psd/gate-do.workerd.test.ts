@@ -37,18 +37,19 @@ describe("PsdGate Durable Object — real single-flight coordination (workerd)",
     const results = await Promise.all(
       Array.from({ length: 20 }, () => gate.beginFlight("key")),
     );
-    expect(results.filter(Boolean)).toHaveLength(1);
+    expect(results.filter((t) => t !== null)).toHaveLength(1);
   });
 
   it("a second beginFlight for a DIFFERENT key is independently a leader", async () => {
     const gate = freshGateStub(`independent-keys-${Math.random()}`);
-    expect(await gate.beginFlight("a")).toBe(true);
-    expect(await gate.beginFlight("b")).toBe(true);
+    expect(await gate.beginFlight("a")).not.toBeNull();
+    expect(await gate.beginFlight("b")).not.toBeNull();
   });
 
   it("awaitFlight blocks until the leader calls endFlight, then resolves", async () => {
     const gate = freshGateStub(`await-${Math.random()}`);
-    expect(await gate.beginFlight("key")).toBe(true);
+    const token = await gate.beginFlight("key");
+    expect(token).not.toBeNull();
 
     let resolved = false;
     const waiter = gate.awaitFlight("key").then(() => {
@@ -60,7 +61,7 @@ describe("PsdGate Durable Object — real single-flight coordination (workerd)",
     await new Promise((r) => setTimeout(r, 20));
     expect(resolved).toBe(false);
 
-    await gate.endFlight("key");
+    await gate.endFlight("key", token!);
     await waiter;
     expect(resolved).toBe(true);
   });

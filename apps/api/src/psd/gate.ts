@@ -28,10 +28,12 @@ export interface PsdOutcome extends IncidentContext {
 export interface PsdGate {
   /** Await a global PSD-call token (≤5/s worldwide). Best-effort: proceeds on gate failure. */
   readonly acquireToken: Effect.Effect<void>;
-  /** Become the single-flight leader for `key`? `true` = you run the work. */
-  readonly beginFlight: (key: string) => Effect.Effect<boolean>;
-  /** Release the flight for `key` (leader only). */
-  readonly endFlight: (key: string) => Effect.Effect<void>;
+  /** Become the single-flight leader for `key`? An owner token = you run the
+   * work; `null` = someone else already is. */
+  readonly beginFlight: (key: string) => Effect.Effect<number | null>;
+  /** Release the flight for `key`. A no-op unless `token` is the current
+   * leader's (#3467). */
+  readonly endFlight: (key: string, token: number) => Effect.Effect<void>;
   /** Resolve when the current leader for `key` finishes (bounded wait). */
   readonly awaitFlight: (key: string) => Effect.Effect<void>;
   /**
@@ -52,8 +54,8 @@ export class PsdGateService extends Context.Tag("PsdGateService")<
 /** Structural view of the DO stub's RPC surface (see PsdGate in gate-do.ts). */
 interface PsdGateStub {
   acquireToken(): Promise<void>;
-  beginFlight(key: string): Promise<boolean>;
-  endFlight(key: string): Promise<void>;
+  beginFlight(key: string): Promise<number | null>;
+  endFlight(key: string, token: number): Promise<void>;
   awaitFlight(key: string): Promise<void>;
   reportOutcome(outcome: PsdOutcome): Promise<{ incidentOpen: boolean }>;
 }
@@ -78,11 +80,12 @@ export const PsdGateLive = Layer.effect(
       beginFlight: (key) =>
         Effect.tryPromise(() => stub().beginFlight(key)).pipe(
           // On gate failure, act as leader: the caller does the work rather than
-          // waiting on coordination that isn't available.
-          Effect.orElseSucceed(() => true),
+          // waiting on coordination that isn't available. Token 0 is never
+          // issued by GateLogic, so a late endFlight with it is a no-op there.
+          Effect.orElseSucceed(() => 0),
         ),
-      endFlight: (key) =>
-        Effect.tryPromise(() => stub().endFlight(key)).pipe(
+      endFlight: (key, token) =>
+        Effect.tryPromise(() => stub().endFlight(key, token)).pipe(
           Effect.orElseSucceed(() => undefined),
         ),
       awaitFlight: (key) =>
@@ -111,7 +114,7 @@ export const makePsdGateLayer = (
   Layer.succeed(PsdGateService, {
     acquireToken: Effect.promise(() => logic.acquireToken()),
     beginFlight: (key) => Effect.sync(() => logic.beginFlight(key)),
-    endFlight: (key) => Effect.sync(() => logic.endFlight(key)),
+    endFlight: (key, token) => Effect.sync(() => logic.endFlight(key, token)),
     awaitFlight: (key) => Effect.promise(() => logic.awaitFlight(key)),
     // No Slack post here (no env) — the in-memory layer only tracks state so
     // tests can observe incident-driven log escalation. The DO does the POST.

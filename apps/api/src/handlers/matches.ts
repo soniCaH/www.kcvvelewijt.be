@@ -74,20 +74,26 @@ export const getNextMatchesHandler = (): Effect.Effect<
     return yield* service.getNextMatches();
   });
 
-  return matchesCache.getOrFetch(
-    cacheKey,
-    fetchMatches,
-    (matches) => nextMatchesTtl(matches),
-    undefined,
-    {
-      shouldServeStale,
-      // Correctness guard: "next" is computed at fetch time, so a stale copy can
-      // advertise a match that has already kicked off. Never serve that — refresh
-      // blocking so the list recomputes to future-only.
-      mustBlockOnStale: (matches) =>
-        matches.some((m) => new Date(m.date).getTime() < Date.now()),
-    },
-  );
+  return matchesCache
+    .getOrFetch(
+      cacheKey,
+      fetchMatches,
+      (matches) => nextMatchesTtl(matches),
+      undefined,
+      { shouldServeStale },
+    )
+    .pipe(
+      // Serve-time filter (#3467): "next" is computed at fetch time, so a
+      // cached copy can list a match that has since kicked off. Drop it on
+      // every serve rather than blocking on a refresh. The stored value stays
+      // unfiltered, so `nextMatchesTtl` still sees the started match and
+      // refreshes at matchday cadence. Same comparison as `getNextMatches` in
+      // `psd/service.ts` (`psdGameToMs(m) >= now`): when #3491 fixes the
+      // wall-clock-as-UTC offset, both sites move together.
+      Effect.map((matches) =>
+        matches.filter((m) => new Date(m.date).getTime() >= Date.now()),
+      ),
+    );
 };
 
 export const getMatchesWindowHandler = (): Effect.Effect<
@@ -123,7 +129,7 @@ const HOUR_MS = 60 * 60 * 1000;
  * proximity-aware TTL, already showed the final score.
  *
  * Evaluated against the CACHED list on read: while any match is past kickoff
- * but still "scheduled" — result pending — refresh at matchday cadence (5 min)
+ * but still "scheduled" — result pending — refresh at matchday cadence (15 min)
  * so the score lands minutes after PSD publishes it. The 48h grace window
  * bounds the churn for matches that never settle (e.g. silently dropped
  * fixtures). Statuses that already changed (postponed/cancelled/stopped) need
@@ -194,8 +200,8 @@ interface MatchReportState {
  * matters (live / matchday) and rarely for distant or settled matches.
  *
  *   finished ≥48h ago (with report) → 7d   (immutable)
- *   |kickoff − now| < 3h → 60s   (live)
- *                   < 24h → 300s  (matchday)
+ *   |kickoff − now| < 3h → 900s  (live)
+ *                   < 24h → 900s  (matchday)
  *                   < 7d  → 3600s (this week)
  *   else              → 24h  (distant)
  *

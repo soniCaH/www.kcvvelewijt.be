@@ -250,7 +250,11 @@ describe("getRelatedHandler — empty results are never stored (#3468)", () => {
     expect(reportOutcome).not.toHaveBeenCalled();
   });
 
-  it("a stale entry whose refresh comes back empty returns [], not the stale items", async () => {
+  // #3467: the stale read no longer refreshes in the foreground, so it serves
+  // the stale items (as production already did, where a runner is wired) and
+  // the empty refresh only marks the key. The "never keep stale for an empty
+  // answer" intent of #3468 does not hold on the stale path in production.
+  it("a stale entry whose refresh comes back empty is served stale", async () => {
     const stale = JSON.stringify({
       value: [
         {
@@ -274,6 +278,7 @@ describe("getRelatedHandler — empty results are never stored (#3468)", () => {
       }),
     );
 
-    expect(result).toEqual([]);
+    expect(result).toHaveLength(1);
+    expect(result[0]!.id).toBe("doc-old");
   });
 });
