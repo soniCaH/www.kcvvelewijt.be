@@ -12,6 +12,7 @@ import type {
 
 import type { MatchStatus } from "@kcvv/api-contract";
 import { SITE_CONFIG, EXTERNAL_LINKS } from "@/lib/constants";
+import { toMatchDisplayZone } from "@/lib/utils/dates";
 
 /** Loose JSON-LD document type — allows arbitrary Schema.org properties */
 interface JsonLdDocument {
@@ -252,7 +253,8 @@ export function buildSportsTeamJsonLd(input: SportsTeamInput): JsonLdDocument {
 
 export interface SportsEventInput {
   name: string;
-  startDate: string;
+  /** BFF match date (Brussels wall-clock in UTC fields) — pass it unchanged. */
+  kickoff: Date;
   homeTeamName: string;
   awayTeamName: string;
   status: MatchStatus;
@@ -367,7 +369,7 @@ export function buildSportsEventJsonLd(
     "@context": "https://schema.org",
     "@type": "SportsEvent",
     name: input.name,
-    startDate: input.startDate,
+    startDate: toMatchDisplayZone(input.kickoff).toISO()!,
     url: input.url,
     eventStatus: mapEventStatus(input.status),
     homeTeam: {

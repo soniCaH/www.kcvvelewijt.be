@@ -45,12 +45,12 @@ export class PsdGate extends DurableObject<WorkerEnv> {
     return { incidentOpen: this.incident.isOpen };
   }
 
-  beginFlight(key: string): boolean {
+  beginFlight(key: string): number | null {
     return this.logic.beginFlight(key);
   }
 
-  endFlight(key: string): void {
-    this.logic.endFlight(key);
+  endFlight(key: string, token: number): void {
+    this.logic.endFlight(key, token);
   }
 
   awaitFlight(key: string): Promise<void> {

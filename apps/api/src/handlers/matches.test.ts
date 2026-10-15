@@ -9,6 +9,7 @@ import {
   matchDetailTtl,
   teamMatchesTtl,
   nextMatchesTtl,
+  CACHE_VERSION,
 } from "./matches";
 import { HARD_TTL_DEFAULT, TTL } from "../cache/kv-cache";
 import { PsdService, type PsdServiceInterface } from "../psd/service";
@@ -138,11 +139,72 @@ describe("getMatchesByTeamHandler", () => {
 });
 
 describe("getNextMatchesHandler", () => {
+  const HOUR = 60 * 60 * 1000;
+  const at = (offsetMs: number, id: number): MatchType => ({
+    ...baseMatch,
+    id,
+    date: new Date(Date.now() + offsetMs),
+  });
+  const past = () => at(-HOUR, 10);
+  const future = () => at(HOUR, 11);
+
+  /** KV mock backed by a map, so a test can seed `matches:next` fresh or stale. */
+  function provideSeeded(
+    seed: { matches: MatchType[]; ageMs: number } | null,
+    fetched: MatchType[],
+  ) {
+    const store = new Map<string, string>();
+    if (seed) {
+      store.set(
+        `matches:next:${CACHE_VERSION}`,
+        JSON.stringify({
+          value: S.encodeSync(MatchesArray)(seed.matches),
+          fetchedAt: Date.now() - seed.ageMs,
+        }),
+      );
+    }
+    const cache: KvCacheInterface = {
+      ...makeCacheMock(),
+      get: (k) => Effect.succeed(store.get(k) ?? null),
+      set: (k, v) => Effect.sync(() => void store.set(k, v)),
+    };
+    return getNextMatchesHandler().pipe(
+      Effect.provide(
+        Layer.succeed(
+          PsdService,
+          makeServiceMock({ getNextMatches: () => Effect.succeed(fetched) }),
+        ),
+      ),
+      Effect.provide(Layer.succeed(KvCacheService, cache)),
+      Effect.provide(PsdGateTest),
+      Effect.provide(testEnvLayer),
+    );
+  }
+
   it("returns next matches from PsdService (team 23 filter is internal to service)", async () => {
-    const result = await Effect.runPromise(provide(getNextMatchesHandler()));
+    const result = await Effect.runPromise(
+      provide(getNextMatchesHandler(), {
+        getNextMatches: () => Effect.succeed([future()]),
+      }),
+    );
     expect(result).toHaveLength(1);
-    expect(result[0]?.id).toBe(1);
+    expect(result[0]?.id).toBe(11);
     expect(() => S.decodeUnknownSync(MatchesArray)(result)).not.toThrow();
+  });
+
+  // #3467: serve-time filter — a "next" list never shows a kicked-off match.
+  it.each([
+    ["just fetched", null],
+    ["fresh", { ageMs: 0 }],
+    ["stale", { ageMs: 2 * HOUR }],
+  ])("never serves a match whose kickoff has passed: %s", async (_l, seed) => {
+    const result = await Effect.runPromise(
+      provideSeeded(seed ? { matches: [past(), future()], ...seed } : null, [
+        past(),
+        future(),
+      ]),
+    );
+    expect(result.map((m) => m.id)).toEqual([11]);
   });
 
   it("propagates UpstreamUnavailableError from service", async () => {
@@ -304,7 +366,7 @@ describe("matchDetailTtl", () => {
     );
   });
 
-  it("within 3h of kickoff → live (60s), even when just finished", () => {
+  it("within 3h of kickoff → live (900s), even when just finished", () => {
     expect(matchDetailTtl(at(0), "in_progress", settled, now)).toBe(
       TTL.MATCH_DETAIL_LIVE,
     );
@@ -313,7 +375,7 @@ describe("matchDetailTtl", () => {
     );
   });
 
-  it("3h–24h from kickoff → matchday (300s)", () => {
+  it("3h–24h from kickoff → matchday (900s)", () => {
     expect(matchDetailTtl(at(10 * H), "scheduled", settled, now)).toBe(
       TTL.MATCH_DETAIL_MATCHDAY,
     );
@@ -399,8 +461,8 @@ describe("matchDetailTtl", () => {
       ).toBe(TTL.MATCH_DETAIL_MATCHDAY);
     });
 
-    it("does not over-shorten a live match already under matchday (keeps 60s)", () => {
-      // 1h after kickoff, no report yet → still LIVE (min(60s, 300s) = 60s).
+    it("does not over-shorten a live match already under matchday (keeps 900s)", () => {
+      // 1h after kickoff, no report yet → still LIVE (min(900s, 900s) = 900s).
       expect(
         matchDetailTtl(at(-1 * H), "finished", previewReportless, now),
       ).toBe(TTL.MATCH_DETAIL_LIVE);
