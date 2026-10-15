@@ -18,7 +18,7 @@ const opponentHistoryCache = TypedKvCache(OpponentHistory);
 // this deploys. Versioned with every match cache key — see
 // `CACHE_VERSION` in `handlers/matches.ts`.
 
-const getOpponentHistoryHandler = (
+export const getOpponentHistoryHandler = (
   teamId: number,
   clubId: number,
 ): Effect.Effect<

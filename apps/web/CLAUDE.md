@@ -127,6 +127,21 @@ Established in #2535/#2567 against three fields across two heroes: `team.season`
 - **The adapter decides `kind` once; a renderer reads the discriminant and never re-derives it.** A match-domain view-model's `kind` (`"match"`/`"reservation"`/`"reduced"`) is computed exactly once, at the `Match`/`MatchDetail` → view-model boundary (`transformMatchToSchedule`, `transformMatchToCalendar`, `mapMatchToUpcomingMatch`, `matchDetailToHeroRow` — see `matchRowKind()` in `lib/utils/match-display.ts`). A renderer downstream narrows on `match.kind`; it must never re-run `isReducedMatchRow`-style logic against raw fields to reach the same answer a second time (#2802). Two independent derivations of the same fact drift silently, exactly like the paired-flags rule above — the fix here is narrower still: there is supposed to be only one call site per union, not two kept in sync.
 - **Derive paired flags from the same source expression.** `hasX` + `xKind`, `enabled` + `mode`, etc. must flow from the same computed value: `const x = computeX(); const hasX = !!x; const xKind = x?.kind;` — not two independent `??` chains read from different places. Two sources drift silently while passing type checks, then lie to downstream consumers (analytics, JSON-LD, logs). Seen in #1333: `hasSubject` read from `about`, `subjectKind` read from raw `article.subject?.kind`.
 - **Before adding a page-level runtime guard, trace the repository GROQ filter.** A page component gating on `article.publishedAt && …` is dead code if the repository's `findBySlug` already has `publishedAt <= now()` in its GROQ. Duplicate guards mislead reviewers into flagging legitimate emission paths and hide the real filter if it ever changes. Read the repo method first; gate only at the layer that owns the concern.
+- **A PSD id from a URL goes through `parsePsdId`** (`lib/utils/psd-id.ts`, #3486): 1–9 plain digits, else `null` → `notFound()` before any BFF call. Never `parseInt` — it reads `123abc` as `123`, so every junk suffix is a fresh ISR entry and a fresh round of PSD calls. `/tegenstander/[clubId]` and `/wedstrijd/[matchId]` apply it in the layout, the page and `generateMetadata`; `/api/calendar.ics` builds its cache key and its fan-out from one parsed, deduped, sorted, known-team-only, capped `teamIds` list.
+
+## Vercel firewall rule (dashboard, Hobby = 1 rule)
+
+The project is on Vercel **Hobby**, which allows exactly **one** WAF rate-limit rule. The rule lives **in the Vercel dashboard only** (Project → Firewall → Configure). `vercel.json` cannot hold it, so nothing in this repo creates, changes or checks it — a fresh project or a deleted rule has none until a human sets it again (#3484).
+
+| Setting | Value                                                                                    |
+| ------- | ---------------------------------------------------------------------------------------- |
+| Name    | `psd-pages-per-ip`                                                                       |
+| If      | Request Path → matches regex → `^/(tegenstander\|wedstrijd)/`                            |
+| Then    | Rate Limit → Fixed window, **60 s**, **30 requests**, key **IP** → action **Deny** (429) |
+
+Save, then **Publish**. Check it by requesting the **same** real match page 31 times within a minute (same URL = cached, no PSD cost); the last responses are `429`.
+
+**Why these two paths.** `/tegenstander/[clubId]` and `/wedstrijd/[matchId]` are the only pages whose `generateStaticParams` is `[]` over a PSD id: every new valid id renders on demand and costs PSD calls (`/tegenstander` about 4 × (1 + seasons) per club). `parsePsdId` stops junk ids, but a bot walking real-looking integers still mints a fresh render each time — that drains the shared PSD quota and, on Hobby's hard usage limits, can get the whole site paused. Traffic the rule blocks is not billed. Search is not on this rule: the worker limits it (#3468).
 
 ## Analytics Checklist for New Features
 

@@ -56,7 +56,6 @@ function makeSanityMocks() {
   const archivePlayers = vi.fn(() => Effect.succeed(undefined as void));
   const archiveStaff = vi.fn(() => Effect.succeed(undefined as void));
   const archiveTeams = vi.fn(() => Effect.succeed(undefined as void));
-  const writeFeedback = vi.fn(() => Effect.succeed(undefined as void));
   const writeMembershipApplication = vi.fn(() =>
     Effect.succeed(undefined as void),
   );
@@ -88,7 +87,6 @@ function makeSanityMocks() {
     archivePlayers,
     archiveStaff,
     archiveTeams,
-    writeFeedback,
     writeMembershipApplication,
   };
 
@@ -457,7 +455,6 @@ describe("runSync", () => {
       archivePlayers: vi.fn(() => Effect.succeed(undefined as void)),
       archiveStaff: vi.fn(() => Effect.succeed(undefined as void)),
       archiveTeams: vi.fn(() => Effect.succeed(undefined as void)),
-      writeFeedback: vi.fn(() => Effect.succeed(undefined as void)),
       writeMembershipApplication: vi.fn(() =>
         Effect.succeed(undefined as void),
       ),

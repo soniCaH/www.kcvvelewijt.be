@@ -3,6 +3,15 @@ import { Schema as S } from "effect";
 import { RelatedItem } from "@kcvv/api-contract";
 import { VectorizeService } from "./vectorize";
 
+/** No related items for an id. Raised by `handlers/related.ts` so an empty
+ * result stays out of KV (#3468). */
+export class NoRelatedItems extends Error {
+  readonly _tag = "NoRelatedItems" as const;
+  constructor() {
+    super("No related items");
+  }
+}
+
 /**
  * The Cloudflare Vectorize `query` binding only returns *indexed* metadata
  * fields on matches, even when `returnMetadata: "all"` is set. Non-indexed

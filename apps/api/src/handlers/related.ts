@@ -2,7 +2,7 @@ import { Effect } from "effect";
 import { HttpApiBuilder } from "@effect/platform";
 import { PsdApi, RelatedItem } from "@kcvv/api-contract";
 import { Schema as S } from "effect";
-import { handleRelated } from "../search/related-handler";
+import { handleRelated, NoRelatedItems } from "../search/related-handler";
 import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
 import { VectorizeService } from "../search/vectorize";
 import { WorkerEnvTag } from "../env";
@@ -24,13 +24,27 @@ export const getRelatedHandler = (request: {
   VectorizeService | KvCacheService | WorkerEnvTag | PsdGateService
 > => {
   const cacheKey = `related:${request.id}:max`;
+  // An empty result is returned but never stored (#3468): storing it let any
+  // made-up id buy a KV write, and hid a just-published article's related
+  // items for the whole TTL. Failing the fetch keeps it out of KV.
+  const fetchNonEmpty = handleRelated({
+    id: request.id,
+    limit: MAX_LIMIT,
+  }).pipe(
+    Effect.filterOrFail(
+      (items) => items.length > 0,
+      () => new NoRelatedItems(),
+    ),
+  );
   return relatedCache
-    .getOrFetch(
-      cacheKey,
-      handleRelated({ id: request.id, limit: MAX_LIMIT }),
-      TTL.RELATED,
-    )
-    .pipe(Effect.map((items) => items.slice(0, request.limit)));
+    .getOrFetch(cacheKey, fetchNonEmpty, TTL.RELATED, undefined, {
+      // "No related items" is an answer, not an outage: never keep stale for it.
+      shouldServeStale: (error) => !(error instanceof NoRelatedItems),
+    })
+    .pipe(
+      Effect.catchTag("NoRelatedItems", () => Effect.succeed([])),
+      Effect.map((items) => items.slice(0, request.limit)),
+    );
 };
 
 export const RelatedApiLive = HttpApiBuilder.group(

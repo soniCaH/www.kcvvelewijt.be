@@ -59,7 +59,6 @@ export {photoGallery} from './photoGallery'
 export {page} from './page'
 export {fileAttachment} from './fileAttachment'
 export {htmlTable} from './htmlTable'
-export {searchFeedback} from './searchFeedback'
 export {banner} from './banner'
 export {homePage} from './homePage'
 export {jeugdLandingPage} from './jeugdLandingPage'
@@ -87,7 +86,6 @@ import {photoGallery} from './photoGallery'
 import {page} from './page'
 import {fileAttachment} from './fileAttachment'
 import {htmlTable} from './htmlTable'
-import {searchFeedback} from './searchFeedback'
 import {banner} from './banner'
 import {homePage} from './homePage'
 import {jeugdLandingPage} from './jeugdLandingPage'
@@ -118,7 +116,6 @@ export const schemaTypes = [
   page,
   fileAttachment,
   htmlTable,
-  searchFeedback,
   banner,
   homePage,
   jeugdLandingPage,

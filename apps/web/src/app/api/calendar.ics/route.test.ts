@@ -5,16 +5,16 @@
  * recording each call's key AND raw wrapped function — the latter lets a test
  * invoke the club-activity cache's callback directly to assert it rejects
  * rather than swallowing a failure), `BffService` (the PSD match fan-out),
- * and `EventRepository` (the club activities feed). `teamIds` is always
- * passed explicitly in these requests so `fetchMatches` never falls through
- * to `TeamRepository.findAll()` — that repository, and the rest of
- * `AppLayer`'s repositories, stay real but unused.
+ * `EventRepository` (the club activities feed) and `TeamRepository` (the
+ * known teams whose `psdId`s are the only ids the feed accepts, #3486). The
+ * rest of `AppLayer`'s repositories stay real but unused.
  */
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 import { Effect, Layer } from "effect";
 import type { Match } from "@kcvv/api-contract";
 import type { EventListItemVM } from "@/lib/repositories/event.repository";
+import type { TeamNavVM } from "@/lib/repositories/team.repository";
 
 interface UnstableCacheCall {
   keyParts: string[];
@@ -22,12 +22,17 @@ interface UnstableCacheCall {
   fn: (...args: any[]) => any;
 }
 
-const { mockGetMatches, mockFindUpcomingForList, unstableCacheCalls } =
-  vi.hoisted(() => ({
-    mockGetMatches: vi.fn(),
-    mockFindUpcomingForList: vi.fn(),
-    unstableCacheCalls: [] as UnstableCacheCall[],
-  }));
+const {
+  mockGetMatches,
+  mockFindUpcomingForList,
+  mockFindAllTeams,
+  unstableCacheCalls,
+} = vi.hoisted(() => ({
+  mockGetMatches: vi.fn(),
+  mockFindUpcomingForList: vi.fn(),
+  mockFindAllTeams: vi.fn(),
+  unstableCacheCalls: [] as UnstableCacheCall[],
+}));
 
 vi.mock("next/cache", () => ({
   unstable_cache: (
@@ -70,6 +75,20 @@ vi.mock("@/lib/repositories/event.repository", async (importOriginal) => {
       findUpcomingForList: mockFindUpcomingForList,
       findNextFeatured: () => Effect.succeed(null),
       findBySlug: () => Effect.succeed(null),
+    }),
+  };
+});
+
+vi.mock("@/lib/repositories/team.repository", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@/lib/repositories/team.repository")>();
+  return {
+    ...actual,
+    TeamRepositoryLive: Layer.succeed(actual.TeamRepository, {
+      findAll: mockFindAllTeams,
+      findBySlug: () => Effect.die("not used by this route"),
+      findAllForLanding: () => Effect.die("not used by this route"),
+      findByMemberId: () => Effect.die("not used by this route"),
     }),
   };
 });
@@ -123,6 +142,20 @@ function makeEventItem(
   };
 }
 
+function makeTeam(psdId: number | null): TeamNavVM {
+  return {
+    id: `team-${psdId}`,
+    name: `Team ${psdId}`,
+    displayName: `Team ${psdId}`,
+    slug: `team-${psdId}`,
+    age: null,
+    psdId: psdId === null ? null : String(psdId),
+    division: null,
+    divisionFull: null,
+    teamImageUrl: null,
+  };
+}
+
 function makeRequest(query: string): NextRequest {
   return new NextRequest(
     new URL(`/api/calendar.ics?${query}`, "http://localhost:3000"),
@@ -137,6 +170,9 @@ describe("GET /api/calendar.ics", () => {
     unstableCacheCalls.length = 0;
     mockGetMatches.mockReset().mockReturnValue(Effect.succeed([makeMatch()]));
     mockFindUpcomingForList.mockReset().mockReturnValue(Effect.succeed([]));
+    mockFindAllTeams
+      .mockReset()
+      .mockReturnValue(Effect.succeed([1, 1235, 9999].map(makeTeam)));
   });
 
   it("without the events flag, returns exactly today's matches-only feed — a pinned test proves an existing subscription is unaffected", async () => {
@@ -252,5 +288,92 @@ describe("GET /api/calendar.ics", () => {
     mockFindUpcomingForList.mockReturnValue(Effect.succeed(events));
 
     await expect(eventsCacheCallAtImport!.fn()).resolves.toEqual(events);
+  });
+});
+
+/**
+ * #3486: the matches cache key and the PSD fan-out are built from ONE parsed
+ * list — strict ids, deduped, sorted, known-team `psdId`s only, capped — so
+ * no query-string variation mints a fresh cache entry or an extra PSD call.
+ */
+describe("GET /api/calendar.ics team-id parsing (#3486)", () => {
+  beforeEach(() => {
+    unstableCacheCalls.length = 0;
+    mockGetMatches.mockReset().mockReturnValue(Effect.succeed([]));
+    mockFindUpcomingForList.mockReset().mockReturnValue(Effect.succeed([]));
+    mockFindAllTeams
+      .mockReset()
+      .mockReturnValue(Effect.succeed([1, 2, 1235, null].map(makeTeam)));
+  });
+
+  async function keyFor(query: string): Promise<string[]> {
+    unstableCacheCalls.length = 0;
+    await GET(makeRequest(query));
+    return unstableCacheCalls[0]!.keyParts;
+  }
+
+  function fannedOutIds(): number[] {
+    return mockGetMatches.mock.calls.map(([id]) => id as number);
+  }
+
+  it("gives ?teamIds=1,1,01 and ?teamIds=1 the same cache key", async () => {
+    expect(await keyFor("teamIds=1,1,01")).toEqual(await keyFor("teamIds=1"));
+  });
+
+  it("gives ?teamIds=1,x1 and ?teamIds=1,x2 the same cache key", async () => {
+    expect(await keyFor("teamIds=1,x1")).toEqual(await keyFor("teamIds=1,x2"));
+  });
+
+  it("orders the key, so ?teamIds=2,1 and ?teamIds=1,2 share it", async () => {
+    expect(await keyFor("teamIds=2,1")).toEqual(await keyFor("teamIds=1,2"));
+  });
+
+  it("never calls getMatches for an id that is not a known team psdId", async () => {
+    await GET(makeRequest("teamIds=1,424242,x7"));
+    expect(fannedOutIds()).toEqual([1]);
+  });
+
+  it("caps at MAX_TEAM_IDS (20) after dedupe", async () => {
+    const ids = Array.from({ length: 25 }, (_, i) => i + 1);
+    mockFindAllTeams.mockReturnValue(Effect.succeed(ids.map(makeTeam)));
+    // 1 repeated 10 times up front: a cap before dedupe would keep only 11 ids.
+    const query = [...Array(10).fill(1), ...ids].join(",");
+
+    const key = await keyFor(`teamIds=${query}`);
+
+    expect(fannedOutIds()).toEqual(ids.slice(0, 20));
+    expect(key).toEqual([`ical:${ids.slice(0, 20).join(",")}:all`]);
+  });
+
+  it("falls back to the all-teams feed when no valid id remains, same as an empty teamIds", async () => {
+    const junkKey = await keyFor("teamIds=x1,424242");
+    const junkCalls = fannedOutIds();
+    mockGetMatches.mockClear();
+
+    expect(junkKey).toEqual(await keyFor("teamIds="));
+    expect(junkKey).toEqual(["ical:all:all"]);
+    expect(junkCalls).toEqual([1, 2, 1235]);
+    expect(fannedOutIds()).toEqual([1, 2, 1235]);
+  });
+
+  it("keeps serving a selected-team feed when the team read fails, under the key a healthy read would use", async () => {
+    const healthyKey = await keyFor("teamIds=1,1,01");
+    mockGetMatches.mockClear();
+    mockFindAllTeams.mockReturnValue(Effect.die(new Error("Sanity down")));
+
+    unstableCacheCalls.length = 0;
+    const response = await GET(makeRequest("teamIds=1,1,01"));
+
+    expect(response.status).toBe(200);
+    expect(unstableCacheCalls[0]!.keyParts).toEqual(healthyKey);
+    expect(fannedOutIds()).toEqual([1]);
+  });
+
+  it("looks up the all-teams entry before reading the teams, so a warm entry survives a failed team read", async () => {
+    mockFindAllTeams.mockReturnValue(Effect.die(new Error("Sanity down")));
+
+    // Pass-through cache = always cold, so the miss still needs the list.
+    expect(await keyFor("teamIds=")).toEqual(["ical:all:all"]);
+    expect(mockGetMatches).not.toHaveBeenCalled();
   });
 });

@@ -64,7 +64,15 @@ vi.mock("@/lib/effect/services/BffService", async (importOriginal) => {
   };
 });
 
-import OpponentPage from "./page";
+vi.mock("next/navigation", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/navigation")>()),
+  notFound: () => {
+    throw new Error("NEXT_NOT_FOUND");
+  },
+}));
+
+import OpponentPage, { generateMetadata } from "./page";
+import OpponentLayout from "./layout";
 
 const CLUB_ID = 11001;
 
@@ -241,5 +249,38 @@ describe("/tegenstander/[clubId] renders one section per senior squad (#2463)", 
 
     expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(1);
     expect(screen.getByTestId("opponent-summary-1")).toBeInTheDocument();
+  });
+});
+
+describe("/tegenstander/[clubId] rejects a non-strict id before any read (#3486)", () => {
+  beforeEach(() => {
+    mockFindAll.mockReset().mockReturnValue(Effect.succeed([A_TEAM]));
+    mockGetOpponentHistory.mockReset();
+  });
+
+  const params = (clubId: string) => Promise.resolve({ clubId });
+
+  it.each(["123abc", "-1", "1234567890"])(
+    "404s %j in the layout, the page and the metadata, with no BFF call",
+    async (clubId) => {
+      await expect(
+        OpponentLayout({ children: null, params: params(clubId) }),
+      ).rejects.toThrow("NEXT_NOT_FOUND");
+      await expect(OpponentPage({ params: params(clubId) })).rejects.toThrow(
+        "NEXT_NOT_FOUND",
+      );
+      const metadata = await generateMetadata({ params: params(clubId) });
+      expect(metadata.robots).toEqual({ index: false, follow: false });
+      expect(metadata.openGraph).toBeUndefined();
+      expect(mockGetOpponentHistory).not.toHaveBeenCalled();
+    },
+  );
+
+  it("still reads a strict id", async () => {
+    mockGetOpponentHistory.mockReturnValue(
+      Effect.succeed(history(1, [match(1, "2025-09-01")])),
+    );
+    await OpponentPage({ params: params("123") });
+    expect(mockGetOpponentHistory).toHaveBeenCalledWith(1, 123);
   });
 });

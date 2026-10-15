@@ -8,7 +8,7 @@ import {
   type VectorizeServiceInterface,
 } from "../search/vectorize";
 import { testEnvLayer } from "../test-helpers/env-layer";
-import { PsdGateTest } from "../psd/gate";
+import { PsdGateService, PsdGateTest } from "../psd/gate";
 
 function makeCacheMock(
   overrides: Partial<KvCacheInterface> = {},
@@ -40,12 +40,13 @@ function runWithProviders(
   effect: Effect.Effect<any, any, any>,
   cacheMock: KvCacheInterface = makeCacheMock(),
   vectorizeMock: VectorizeServiceInterface = makeVectorizeMock(),
+  gateLayer: Layer.Layer<PsdGateService> = PsdGateTest,
 ) {
   return Effect.runPromise(
     effect.pipe(
       Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
       Effect.provide(Layer.succeed(VectorizeService, vectorizeMock)),
-      Effect.provide(PsdGateTest),
+      Effect.provide(gateLayer),
       Effect.provide(testEnvLayer),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) as Effect.Effect<any, never, never>,
@@ -212,5 +213,67 @@ describe("getRelatedHandler", () => {
       expect.stringContaining("doc-2"),
       expect.any(Number),
     );
+  });
+});
+
+describe("getRelatedHandler — empty results are never stored (#3468)", () => {
+  it("returns [] for an id with no related items without writing it to KV", async () => {
+    const set = vi.fn(() => Effect.succeed(undefined));
+
+    const result = await runWithProviders(
+      getRelatedHandler({ id: "doc-new", limit: 3 }),
+      makeCacheMock({ set }),
+    );
+
+    expect(result).toEqual([]);
+    expect(set).not.toHaveBeenCalledWith(
+      "related:doc-new:max",
+      expect.anything(),
+      expect.anything(),
+    );
+  });
+
+  it("an empty result reports no PSD outage to the gate", async () => {
+    const reportOutcome = vi.fn(() => Effect.succeed({ incidentOpen: false }));
+    const spyGate = Layer.effect(
+      PsdGateService,
+      Effect.map(PsdGateService, (real) => ({ ...real, reportOutcome })),
+    ).pipe(Layer.provide(PsdGateTest));
+
+    await runWithProviders(
+      getRelatedHandler({ id: "doc-new", limit: 3 }),
+      makeCacheMock(),
+      makeVectorizeMock(),
+      spyGate,
+    );
+
+    expect(reportOutcome).not.toHaveBeenCalled();
+  });
+
+  it("a stale entry whose refresh comes back empty returns [], not the stale items", async () => {
+    const stale = JSON.stringify({
+      value: [
+        {
+          id: "doc-old",
+          slug: "old",
+          type: "article",
+          score: 0.9,
+          title: "Old",
+          excerpt: "Old",
+          imageUrl: null,
+        },
+      ],
+      fetchedAt: Date.now() - 7 * 60 * 60 * 1000, // past TTL.RELATED (6 h)
+    });
+
+    const result = await runWithProviders(
+      getRelatedHandler({ id: "doc-1", limit: 3 }),
+      makeCacheMock({
+        get: (key) =>
+          Effect.succeed(key === "related:doc-1:max" ? stale : null),
+      }),
+    );
+
+    expect(result).toEqual([]);
   });
 });

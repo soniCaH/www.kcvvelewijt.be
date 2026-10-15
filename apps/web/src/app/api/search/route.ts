@@ -6,6 +6,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Effect } from "effect";
 import { unstable_cache } from "next/cache";
+import { CLIENT_IP_HEADER } from "@kcvv/api-contract";
+import { bffKeyHeader } from "@/lib/server/bff-key";
 import { runPromise } from "@/lib/effect/runtime";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
 import { PlayerRepository } from "@/lib/repositories/player.repository";
@@ -241,7 +243,8 @@ const searchTeams = (query: string) =>
  */
 export async function POST(request: NextRequest) {
   const bffUrl = process.env.KCVV_API_URL;
-  if (!bffUrl) {
+  const bffKey = bffKeyHeader();
+  if (!bffUrl || !bffKey) {
     return NextResponse.json(
       { error: "Search service not configured" },
       { status: 503 },
@@ -250,9 +253,19 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = (await request.json()) as unknown;
+    // The worker rate-limits per visitor (#3468) but only sees Vercel's IP.
+    // Vercel overwrites x-vercel-forwarded-for, so a client cannot spoof it.
+    const clientIp =
+      request.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() ||
+      request.headers.get("x-real-ip") ||
+      undefined;
     const res = await fetch(`${bffUrl}/search`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...bffKey,
+        ...(clientIp ? { [CLIENT_IP_HEADER]: clientIp } : {}),
+      },
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(15_000),
     });

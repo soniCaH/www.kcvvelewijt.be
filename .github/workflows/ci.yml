@@ -257,6 +257,7 @@ jobs:
         run: npx turbo build --filter=@kcvv/web
         env:
           KCVV_API_URL: ${{ vars.KCVV_API_URL }}
+          BFF_SHARED_SECRET: ${{ secrets.BFF_SHARED_SECRET }}
           NEXT_PUBLIC_SANITY_PROJECT_ID: ${{ vars.NEXT_PUBLIC_SANITY_PROJECT_ID }}
           NEXT_PUBLIC_SANITY_DATASET: ${{ vars.NEXT_PUBLIC_SANITY_DATASET }}
           SANITY_API_READ_TOKEN: ${{ secrets.SANITY_API_READ_TOKEN }}

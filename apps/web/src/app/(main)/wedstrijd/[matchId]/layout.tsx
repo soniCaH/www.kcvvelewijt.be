@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { parsePsdId } from "@/lib/utils/psd-id";
 import { MatchStripSlot } from "@/components/layout/MatchStrip";
 import { fetchMatchOrNotFound } from "./page";
 
@@ -17,7 +18,8 @@ interface MatchLayoutProps {
  * survive `ManagedRuntime.runPromise` with `notFound()`'s own digest intact
  * — so awaiting it here, in the shell, is what actually gets the 404 onto
  * the wire; the page's later `await` of the same `cache()`-memoized promise
- * only re-observes it. A non-numeric `matchId` never reaches the BFF at all.
+ * only re-observes it. A `matchId` that is not a strict PSD id
+ * (`parsePsdId`, #3486) never reaches the BFF at all.
  *
  * It also mounts `<MatchStripSlot />` above the page, for the same reason
  * the check lives here: this layout sits outside the sibling `loading.tsx`,
@@ -29,8 +31,8 @@ export default async function MatchLayout({
   params,
 }: MatchLayoutProps) {
   const { matchId } = await params;
-  const numericId = parseInt(matchId, 10);
-  if (isNaN(numericId)) notFound();
+  const numericId = parsePsdId(matchId);
+  if (numericId === null) notFound();
 
   await fetchMatchOrNotFound(numericId);
   return (

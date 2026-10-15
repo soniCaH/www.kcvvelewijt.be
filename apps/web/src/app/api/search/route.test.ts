@@ -47,10 +47,12 @@ describe("POST /api/search", () => {
     vi.stubGlobal("fetch", vi.fn());
     savedApiUrl = process.env.KCVV_API_URL;
     process.env.KCVV_API_URL = TEST_BFF_URL;
+    vi.stubEnv("BFF_SHARED_SECRET", "test-bff-secret");
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
     if (savedApiUrl !== undefined) {
       process.env.KCVV_API_URL = savedApiUrl;
     } else {
@@ -84,9 +86,61 @@ describe("POST /api/search", () => {
       `${TEST_BFF_URL}/search`,
       expect.objectContaining({
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-kcvv-bff-key": "test-bff-secret",
+        },
         body: JSON.stringify(requestBody),
       }),
     );
+  });
+
+  const forwardedIp = async (headers: Record<string, string>) => {
+    vi.mocked(fetch).mockResolvedValueOnce(Response.json({ results: [] }));
+    await POST(
+      new NextRequest(new URL("/api/search", "http://localhost:3000"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...headers },
+        body: JSON.stringify({ query: "kantine" }),
+      }),
+    );
+    const init = vi.mocked(fetch).mock.calls[0]![1] as RequestInit;
+    return (init.headers as Record<string, string>)["x-kcvv-client-ip"];
+  };
+
+  it("forwards the visitor IP as x-kcvv-client-ip: the first x-vercel-forwarded-for value (#3468)", async () => {
+    expect(
+      await forwardedIp({
+        "x-vercel-forwarded-for": "203.0.113.7, 10.0.0.1",
+        "x-real-ip": "198.51.100.1",
+      }),
+    ).toBe("203.0.113.7");
+  });
+
+  it("falls back to x-real-ip, else sends no client IP (#3468)", async () => {
+    expect(await forwardedIp({ "x-real-ip": "198.51.100.1" })).toBe(
+      "198.51.100.1",
+    );
+    vi.mocked(fetch).mockClear();
+    expect(await forwardedIp({})).toBeUndefined();
+  });
+
+  it("passes a 429 from the BFF through with its status (#3468)", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(
+      Response.json(
+        { error: "Too many searches, try again in a minute" },
+        { status: 429 },
+      ),
+    );
+    const response = await POST(makePostRequest({ query: "kantine" }));
+    expect(response.status).toBe(429);
+  });
+
+  it("returns 503 without calling the BFF when BFF_SHARED_SECRET is unset", async () => {
+    vi.stubEnv("BFF_SHARED_SECRET", undefined);
+    const response = await POST(makePostRequest({ query: "test" }));
+    expect(response.status).toBe(503);
+    expect(fetch).not.toHaveBeenCalled();
   });
 
   it("returns 503 when KCVV_API_URL is not set", async () => {

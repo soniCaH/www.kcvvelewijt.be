@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { parsePsdId } from "@/lib/utils/psd-id";
 import { fetchOpponentData } from "./page";
 
 interface OpponentLayoutProps {
@@ -10,8 +11,8 @@ interface OpponentLayoutProps {
  * Same-segment layout — the existence check that gets a real `404` instead
  * of a soft one (#2968). See `(main)/spelers/[slug]/layout.tsx` for the full
  * mechanism doc. Mirrors `page.tsx`'s own two-part not-found condition: a
- * non-numeric `clubId` never reaches `fetchOpponentData` at all, and a
- * numeric one that resolves no data (no senior squad, or the squad fan-out
+ * `clubId` that is not a strict PSD id (`parsePsdId`, #3486) never reaches
+ * `fetchOpponentData` at all, and a valid one that resolves no data (no senior squad, or the squad fan-out
  * came back empty) 404s the same way the page does.
  *
  * **Skeleton trade-off (recorded decision, PR #3057 body):**
@@ -30,8 +31,8 @@ export default async function OpponentLayout({
   params,
 }: OpponentLayoutProps) {
   const { clubId: clubIdStr } = await params;
-  const clubId = parseInt(clubIdStr, 10);
-  if (isNaN(clubId)) notFound();
+  const clubId = parsePsdId(clubIdStr);
+  if (clubId === null) notFound();
 
   const data = await fetchOpponentData(clubId);
   if (!data) notFound();

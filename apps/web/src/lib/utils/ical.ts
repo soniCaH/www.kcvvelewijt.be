@@ -211,18 +211,16 @@ function buildStartDateTime(match: Match): DateTime {
  * depends on whether activities are included. An `events=1` and an
  * `events=0` request for the same `teamIds`/`side` therefore share this same
  * key, instead of each duplicating the PSD fan-out.
+ *
+ * Takes the route's parsed team-id list, never the raw query string (#3486):
+ * a raw-string key gave `?teamIds=1,1`, `01` and `1,x1` each a fresh entry.
  */
 export function normalizeCacheKey(
-  teamIds: string | null,
+  teamIds: readonly number[] | null,
   side: string,
 ): string {
   const sortedIds = teamIds
-    ? teamIds
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean)
-        .sort()
-        .join(",")
+    ? [...teamIds].sort((a, b) => a - b).join(",")
     : "all";
   return `ical:${sortedIds}:${side}`;
 }

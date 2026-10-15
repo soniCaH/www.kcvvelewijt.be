@@ -343,8 +343,8 @@ describe("a pitch-reservation placeholder", () => {
 
 describe("normalizeCacheKey", () => {
   it("sorts teamIds so order does not matter", () => {
-    expect(normalizeCacheKey("2456,1235", "all")).toBe(
-      normalizeCacheKey("1235,2456", "all"),
+    expect(normalizeCacheKey([2456, 1235], "all")).toBe(
+      normalizeCacheKey([1235, 2456], "all"),
     );
   });
 
@@ -353,12 +353,12 @@ describe("normalizeCacheKey", () => {
   });
 
   it("includes side in cache key", () => {
-    expect(normalizeCacheKey("1235", "home")).toBe("ical:1235:home");
-    expect(normalizeCacheKey("1235", "away")).toBe("ical:1235:away");
+    expect(normalizeCacheKey([1235], "home")).toBe("ical:1235:home");
+    expect(normalizeCacheKey([1235], "away")).toBe("ical:1235:away");
   });
 
   it("has no events dimension — #2711 round 2 moved club activities to their own separately-cached key, so the fixture key is unaffected by the flag and stable at its pre-#2704 form", () => {
-    expect(normalizeCacheKey("1235", "all")).toBe("ical:1235:all");
+    expect(normalizeCacheKey([1235], "all")).toBe("ical:1235:all");
   });
 });
 

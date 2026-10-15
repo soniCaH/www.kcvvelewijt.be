@@ -6,6 +6,20 @@ import { RelatedApi } from "./related";
 import { SearchApi } from "./search";
 import { FormsApi } from "./forms";
 
+/**
+ * Request header that carries the BFF shared secret (`BFF_SHARED_SECRET`)
+ * from the website's Next server to the worker. The worker refuses every
+ * request without it except the Sanity webhook (#3485).
+ */
+export const BFF_KEY_HEADER = "x-kcvv-bff-key";
+
+/**
+ * Request header that carries the visitor's IP from the website's Next
+ * server to the worker, for the per-visitor search rate limit (#3468). The
+ * worker trusts it only because the BFF key proves the caller.
+ */
+export const CLIENT_IP_HEADER = "x-kcvv-client-ip";
+
 export { MatchesApi, OpponentApi, RankingApi, RelatedApi, SearchApi, FormsApi };
 
 /** Root API definition — implemented by apps/api (Cloudflare Worker), consumed by apps/web */

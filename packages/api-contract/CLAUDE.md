@@ -8,13 +8,13 @@ Shared Effect Schema types and HttpApi definition consumed by both `apps/web` an
 src/
 ├── schemas/
 │   ├── common.ts       ← DateFromStringOrDate
-│   ├── http-errors.ts  ← HttpServiceUnavailable, HttpBadGateway, HttpNotFound, HttpBadRequest
+│   ├── http-errors.ts  ← HttpServiceUnavailable, HttpBadGateway, HttpNotFound, HttpBadRequest, HttpTooManyRequests (429, #3468)
 │   ├── match.ts        ← Match, MatchDetail, MatchTeam, MatchStatus, MatchLineup, MatchLineupPlayer, MatchEvent, CardType
 │   ├── opponent.ts     ← OpponentHistory, OpponentInfo, OpponentSummary
 │   ├── ranking.ts      ← RankingEntry, RankingArray, RankingTable, RankingTableArray
 │   ├── related.ts      ← RelatedItem
 │   ├── player-stats.ts ← PlayerSeasonStats, PlayerTeamStats
-│   ├── search.ts       ← SearchRequest, SearchResponse, FeedbackRequest, FeedbackResponse
+│   ├── search.ts       ← SearchRequest, SearchResponse
 │   ├── forms.ts        ← MembershipRequest, MembershipResponse
 │   └── index.ts        ← barrel
 ├── api/
@@ -24,7 +24,7 @@ src/
 │   ├── related.ts      ← RelatedApi HttpApiGroup
 │   ├── search.ts       ← SearchApi HttpApiGroup
 │   ├── forms.ts        ← FormsApi HttpApiGroup
-│   └── index.ts        ← PsdApi root export
+│   └── index.ts        ← PsdApi root export + BFF_KEY_HEADER (`x-kcvv-bff-key`, #3485) + CLIENT_IP_HEADER (`x-kcvv-client-ip`, #3468)
 ├── wire.test.ts        ← the BFF seam: every schema round-trips encode → JSON → decode
 └── index.ts            ← re-exports everything
 ```

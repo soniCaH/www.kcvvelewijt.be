@@ -11,7 +11,6 @@ import {
   Etag,
   FileSystem,
   HttpApiBuilder,
-  HttpMiddleware,
   HttpPlatform,
   Path,
 } from "@effect/platform";
@@ -43,6 +42,7 @@ import { SanityProjectionLive } from "./sanity/projection";
 import { runSync } from "./sync/psd-sanity-sync";
 import { handleIndexWebhook } from "./webhooks/index-handler";
 import { reportScheduledJobOutcome } from "./psd/job-alert";
+import { refuseUnlessBffKey } from "./auth/bff-key";
 
 // The PSD gate Durable Object must be exported from the worker entry (the
 // `main` module) for Cloudflare to bind it — see wrangler.toml [[durable_objects]].
@@ -114,9 +114,14 @@ export default {
       }
     }
 
+    // Everything else: only the website's Next server, holding the shared
+    // secret, gets past here — before any KV/DO/PSD/Sanity/AI work (#3485).
+    // No CORS middleware: no browser ever calls this worker.
+    const refused = refuseUnlessBffKey(request, env);
+    if (refused) return refused;
+
     const { handler, dispose } = HttpApiBuilder.toWebHandler(
       buildAppLayer(env, ctx),
-      { middleware: HttpMiddleware.cors() },
     );
     try {
       return await handler(request);

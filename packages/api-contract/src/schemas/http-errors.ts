@@ -19,6 +19,12 @@ export class HttpNotFound extends S.TaggedError<HttpNotFound>()(
   HttpApiSchema.annotations({ status: 404 }),
 ) {}
 
+export class HttpTooManyRequests extends S.TaggedError<HttpTooManyRequests>()(
+  "HttpTooManyRequests",
+  { error: S.String },
+  HttpApiSchema.annotations({ status: 429 }),
+) {}
+
 export class HttpBadRequest extends S.TaggedError<HttpBadRequest>()(
   "HttpBadRequest",
   {

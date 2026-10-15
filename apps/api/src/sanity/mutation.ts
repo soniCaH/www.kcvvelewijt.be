@@ -161,12 +161,6 @@ export interface SanityMutationInterface {
     fetchUrl: string,
     stableUrl: string,
   ) => Effect.Effect<void, SanityMutationError>;
-  /** Create a searchFeedback document in Sanity. */
-  readonly writeFeedback: (doc: {
-    pathSlug: string;
-    pathTitle: string;
-    vote: "up" | "down";
-  }) => Effect.Effect<void, SanityMutationError>;
   /** Create a membershipApplication document (status defaults to "new"). */
   readonly writeMembershipApplication: (
     doc: SanityMembershipApplicationDoc,
@@ -585,19 +579,6 @@ export const SanityMutationLive = Layer.effect(
       archiveStaff: (psdIds) => archiveByPsdIds("staffMember", psdIds),
 
       archiveTeams: (psdIds) => archiveByPsdIds("team", psdIds),
-
-      writeFeedback: (doc) =>
-        Effect.tryPromise({
-          try: () =>
-            client.create({
-              _type: "searchFeedback",
-              pathSlug: doc.pathSlug,
-              pathTitle: doc.pathTitle,
-              vote: doc.vote,
-            }),
-          catch: (cause) =>
-            new SanityMutationError("Failed to write search feedback", cause),
-        }).pipe(Effect.asVoid),
 
       writeMembershipApplication: (doc) =>
         Effect.tryPromise({

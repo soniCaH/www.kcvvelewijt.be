@@ -1,6 +1,6 @@
 import { Context, Effect, Layer, Option, Schema as S } from "effect";
 import { WorkerEnvTag } from "../env";
-import { KvCacheService } from "../cache/kv-cache";
+import { KvCacheService, TTL } from "../cache/kv-cache";
 import { PsdGateService } from "./gate";
 import { SanityProjection } from "../sanity/projection";
 import {
@@ -243,22 +243,40 @@ export const PsdServiceLive = Layer.effect(
         Effect.ensuring(cache.increment()),
       );
 
-    const getCurrentSeason = (): Effect.Effect<PsdSeason, BffError> =>
-      Effect.gen(function* () {
-        const cacheKey = "psd:current-season-id";
-        const cached = yield* cache.get(cacheKey);
-        if (cached) {
-          const decoded = yield* Effect.try({
-            try: () => JSON.parse(cached),
-            catch: () => null,
-          }).pipe(Effect.flatMap(S.decodeUnknown(PsdSeason)), Effect.option);
-          if (Option.isSome(decoded)) return decoded.value;
-        }
+    // A KV value decoded against `schema`; None when absent or undecodable.
+    const readCached = <A, I>(key: string, schema: S.Schema<A, I>) =>
+      Effect.map(cache.get(key), (raw) =>
+        raw === null
+          ? Option.none()
+          : S.decodeUnknownOption(S.parseJson(schema))(raw),
+      );
 
+    // Every season PSD knows. Cached for a day (#3468): every opponent
+    // lookup reads the whole list, so uncached it cost one PSD call each.
+    const SEASONS_CACHE_KEY = "psd:seasons";
+    const getAllSeasons = (): Effect.Effect<readonly PsdSeason[], BffError> =>
+      Effect.gen(function* () {
+        const cached = yield* readCached(SEASONS_CACHE_KEY, PsdSeasonsSchema);
+        if (Option.isSome(cached)) return cached.value;
         const seasons = yield* countedFetch(
           `${base}/seasons`,
           PsdSeasonsSchema,
         );
+        yield* cache.set(
+          SEASONS_CACHE_KEY,
+          JSON.stringify(seasons),
+          TTL.SEASONS,
+        );
+        return seasons;
+      });
+
+    const getCurrentSeason = (): Effect.Effect<PsdSeason, BffError> =>
+      Effect.gen(function* () {
+        const cacheKey = "psd:current-season-id";
+        const cached = yield* readCached(cacheKey, PsdSeason);
+        if (Option.isSome(cached)) return cached.value;
+
+        const seasons = yield* getAllSeasons();
         const now = Date.now();
         const current = seasons.find(
           (s) =>
@@ -1048,11 +1066,7 @@ export const PsdServiceLive = Layer.effect(
           // All available seasons (not just current), plus the labels and the
           // team's band, read together.
           const [allSeasons, competitionLabels, teams] = yield* Effect.all(
-            [
-              countedFetch(`${base}/seasons`, PsdSeasonsSchema),
-              getCompetitionLabels(),
-              getTeamsById(),
-            ],
+            [getAllSeasons(), getCompetitionLabels(), getTeamsById()],
             { concurrency: "unbounded" },
           );
           // One team, every season: its current band gates every season's
@@ -1212,6 +1226,13 @@ export const PsdServiceLive = Layer.effect(
           const response = yield* countedFetch(
             `${base}/statistics/player/${memberId}/from/${dateFrom}/to/${dateTo}`,
             PsdPlayerGameStatisticsResponse,
+            // An unknown member id must end cached, not refetched (#3468).
+            {
+              emptyBodyIsNotFound: {
+                resourceType: "player-stats",
+                resourceId: memberId,
+              },
+            },
           );
 
           return {

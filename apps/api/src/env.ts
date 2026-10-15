@@ -14,11 +14,16 @@ export interface WorkerEnv {
   readonly AI: Ai; // Workers AI binding
   readonly SEARCH_INDEX: VectorizeIndex; // Vectorize vector store
   readonly SEARCH_INDEX_NAME?: string; // per-environment name of the index SEARCH_INDEX is bound to (mirrors wrangler.toml's [[vectorize]].index_name — Wrangler doesn't expose it at runtime). Read by the webhook's dataset/index guard (webhooks/index-handler.ts, #2833); absent → guard refuses, fail closed
+  readonly SEARCH_IP_LIMITER: RateLimit; // [[ratelimits]] 10/60 s per visitor, key `ip:{x-kcvv-client-ip}` — runs before the search cache (#3468)
+  readonly SEARCH_GLOBAL_LIMITER: RateLimit; // [[ratelimits]] 120/60 s, key `global` — runs on a search cache miss only (#3468)
+  readonly AI_ANSWER_DAILY_CAP?: string; // [vars] — AI answers per UTC day; at or over it /search returns results without `answer` (#3468). Unset → no cap
   readonly PSD_GATE: DurableObjectNamespace; // global PSD rate-limit + single-flight gate (see psd/gate.ts)
+  readonly BFF_SHARED_SECRET?: string; // wrangler secret; required — every route except `/webhooks/index` refuses without it (#3485). Same value as the web app's server-only BFF_SHARED_SECRET, sent as the `x-kcvv-bff-key` header
   readonly SANITY_WEBHOOK_SECRET: string; // Sanity webhook signing secret (same value as on the Sanity hook) — wrangler secret
   readonly RESEND_API_KEY?: string; // Resend transactional email — wrangler secret (absent locally → email dispatch is a no-op)
   readonly TURNSTILE_SECRET?: string; // Cloudflare Turnstile secret — wrangler secret (absent locally → verification is skipped)
   readonly SLACK_ALERT_WEBHOOK_URL?: string; // Slack incoming-webhook for PSD incident/drift alerts — wrangler secret (absent locally → alerting is a no-op)
+  readonly PSD_ONDEMAND_DAILY_BUDGET?: string; // [vars] — once today's psd:calls counter reaches it, a cold cache miss fails fast with no PSD call (#3468). Unset → no budget
   readonly CACHE_LONG_TTL?: string; // "true" on staging — overrides hardTtl to 365 days
   readonly SEARCH_INDEX_PRUNE_DRY_RUN?: string; // "false" since the sweep's prune step was checked against the live index (#2857); set it back to "true" to re-arm dry-run, where sanity-index-sync.ts logs the delete set instead of calling deleteByIds. Fails safe: anything other than the literal "false" is treated as dry-run (#2831)
 }
