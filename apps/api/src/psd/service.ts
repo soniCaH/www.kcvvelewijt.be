@@ -49,7 +49,7 @@ import {
   psdGameToMs,
 } from "./transforms";
 import { resolveVenue } from "./venue";
-import { kickoffMs, wallClockToInstantMs } from "./wall-clock";
+import { kickoffMs, startOfBrusselsDayMs } from "./wall-clock";
 
 // ─── Service definition ────────────────────────────────────────────────────────
 
@@ -836,13 +836,7 @@ export const PsdServiceLive = Layer.effect(
           // psdGameToMs(m) < now. The 7-day upper bound covers pre-game posts.
           const now = Date.now();
           const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
-          const brusselsToday = new Date(now).toLocaleDateString("en-CA", {
-            timeZone: "Europe/Brussels",
-          });
-          const [ty, tm, td] = brusselsToday.split("-").map(Number);
-          const startOfTodayMs = wallClockToInstantMs(
-            Date.UTC(ty!, tm! - 1, td!, 0, 0, 0),
-          );
+          const startOfTodayMs = startOfBrusselsDayMs(now);
           const windowEndMs = now + SEVEN_DAYS_MS;
 
           const visibleTeams = visiblePsdIds

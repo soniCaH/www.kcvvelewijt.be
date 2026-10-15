@@ -41,3 +41,11 @@ export function wallClockToInstantMs(wallMs: number): number {
 export function kickoffMs(date: Date | string): number {
   return wallClockToInstantMs(new Date(date).getTime());
 }
+
+/** Real instant of 00:00 Brussels on the Brussels calendar day of `nowMs`. */
+export function startOfBrusselsDayMs(nowMs: number): number {
+  const wallMs = nowMs + brusselsOffsetMs(nowMs);
+  return wallClockToInstantMs(
+    wallMs - (((wallMs % 86_400_000) + 86_400_000) % 86_400_000),
+  );
+}
