@@ -16,6 +16,7 @@ interface TurnstileApi {
     },
   ) => string;
   remove: (id: string) => void;
+  reset: (id: string) => void;
 }
 
 declare global {
@@ -26,16 +27,30 @@ declare global {
 
 /**
  * Cloudflare Turnstile widget. With no site key configured (local/dev) it
- * renders nothing and reports an empty token — the BFF skips verification when
- * its secret is likewise absent. ponytail: global `window.turnstile` lock; the
- * widget is the only consumer.
+ * renders nothing and reports an empty token — the BFF only accepts that when
+ * its own dev flag `ALLOW_MISSING_FORM_SECRETS` is on, and otherwise fails
+ * closed. A token is single-use: bump `resetKey` after any submit the server
+ * did not accept and the widget re-runs the challenge for a fresh one.
+ * ponytail: global `window.turnstile` lock; the widget is the only consumer.
  */
 export function TurnstileWidget({
   onToken,
+  resetKey,
 }: {
   onToken: (token: string) => void;
+  resetKey: number;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<string | null>(null);
+  const lastResetKey = useRef(resetKey);
+
+  useEffect(() => {
+    if (resetKey === lastResetKey.current) return;
+    lastResetKey.current = resetKey;
+    if (widgetIdRef.current && window.turnstile) {
+      window.turnstile.reset(widgetIdRef.current);
+    }
+  }, [resetKey]);
 
   useEffect(() => {
     if (!SITE_KEY) {
@@ -49,7 +64,7 @@ export function TurnstileWidget({
 
     const render = () => {
       if (cancelled || !ref.current || !window.turnstile) return;
-      widgetId = window.turnstile.render(ref.current, {
+      widgetId = widgetIdRef.current = window.turnstile.render(ref.current, {
         sitekey: SITE_KEY,
         callback: (token) => onToken(token),
         "expired-callback": () => onToken(""),
@@ -75,6 +90,7 @@ export function TurnstileWidget({
 
     return () => {
       cancelled = true;
+      widgetIdRef.current = null;
       if (scriptEl) scriptEl.removeEventListener("load", render);
       if (widgetId && window.turnstile) window.turnstile.remove(widgetId);
     };

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { Cause, Effect, Exit, Layer, Option } from "effect";
+import { Cause, Effect, Exit, Layer, Logger, Option } from "effect";
 import type { MembershipRequest } from "@kcvv/api-contract";
 import {
   SanityMutation,
@@ -12,7 +12,12 @@ import {
 } from "../sanity/projection";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import { noopDurableKv } from "../test-helpers/kv-cache-mock";
-import { EmailTransport, type EmailTransportInterface } from "../email/resend";
+import {
+  EmailDeliveryError,
+  EmailTransport,
+  type EmailTransportInterface,
+} from "../email/resend";
+import type { WorkerEnv } from "../env";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
 import { handleMembership } from "./forms";
 
@@ -70,6 +75,8 @@ function run(
     write?: SanityMutationInterface["writeMembershipApplication"];
     dispatch?: EmailTransportInterface["dispatchEmail"];
     routing?: FormRoutingConfig;
+    env?: Partial<WorkerEnv>;
+    errors?: string[];
   } = {},
 ) {
   const emailMock: EmailTransportInterface = {
@@ -83,10 +90,20 @@ function run(
     }),
     Layer.succeed(KvCacheService, cacheMock),
     Layer.succeed(EmailTransport, emailMock),
-    makeTestEnvLayer(), // no TURNSTILE_SECRET → verification skipped
+    // no TURNSTILE_SECRET → verification skipped by the dev flag
+    makeTestEnvLayer({ ALLOW_MISSING_FORM_SECRETS: "true", ...opts.env }),
+  );
+  const logger = Logger.replace(
+    Logger.defaultLogger,
+    Logger.make(({ logLevel, message }) => {
+      if (logLevel._tag === "Error") opts.errors?.push(String(message));
+    }),
   );
   return Effect.runPromiseExit(
-    Effect.provide(handleMembership(payload), layer),
+    handleMembership(payload).pipe(
+      Effect.provide(layer),
+      Effect.provide(logger),
+    ),
   );
 }
 
@@ -100,6 +117,33 @@ describe("handleMembership", () => {
     expect(write).toHaveBeenCalledTimes(1);
     // applicant ack + admin notification (no parent for an adult)
     expect(dispatch).toHaveBeenCalledTimes(2);
+  });
+
+  it("still persists and returns ok when email dispatch fails, logging an error", async () => {
+    const write = vi.fn(() => Effect.succeed(undefined as void));
+    const errors: string[] = [];
+    const exit = await run(validPayload, {
+      write,
+      errors,
+      dispatch: () => Effect.fail(new EmailDeliveryError("Resend down")),
+    });
+
+    expect(Exit.isSuccess(exit)).toBe(true);
+    expect(write).toHaveBeenCalledTimes(1);
+    // applicant ack + admin notification both failed → two error logs
+    expect(errors).toHaveLength(2);
+    expect(errors[0]).toContain("email dispatch failed");
+  });
+
+  it("rejects the submission without persisting when no Turnstile secret is set and the dev flag is off", async () => {
+    const write = vi.fn(() => Effect.succeed(undefined as void));
+    const exit = await run(validPayload, {
+      write,
+      env: { ALLOW_MISSING_FORM_SECRETS: undefined },
+    });
+
+    expect(Exit.isFailure(exit)).toBe(true);
+    expect(write).not.toHaveBeenCalled();
   });
 
   it("persists the remark", async () => {
