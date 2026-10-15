@@ -39,8 +39,13 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+    # The PR head the maintainer approved: read here, seconds after the
+    # comment, before the (slower) baseline job starts.
+    outputs:
+      head_sha: ${{ steps.head.outputs.sha }}
     steps:
       - name: Verify PR is from the same repo (no forks)
+        id: head
         env:
           GH_TOKEN: ${{ github.token }}
           PR_URL: ${{ github.event.issue.pull_request.url }}
@@ -51,6 +56,7 @@ jobs:
             echo "::error::Baseline updates are not supported for fork PRs (PR head: $PR_REPO)."
             exit 1
           fi
+          echo "sha=$(gh api "$PR_URL" --jq '.head.sha')" >> "$GITHUB_OUTPUT"
 
       - name: Verify commenter is a maintainer
         env:
@@ -102,6 +108,8 @@ jobs:
       - name: Resolve PR head
         id: pr
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          APPROVED_SHA: ${{ needs.trigger-check.outputs.head_sha }}
         with:
           script: |
             const pr = await github.rest.pulls.get({
@@ -110,37 +118,15 @@ jobs:
               pull_number: context.issue.number,
             });
             const headSha = pr.data.head.sha;
-            const commentedAt = new Date(context.payload.comment.created_at);
 
-            // The maintainer approved the head they saw when they commented.
-            // Refuse if the branch moved after that: a later push or
-            // force-push would run code nobody reviewed, in a job that holds
-            // a write token. Commit dates alone miss a force-push of an old
-            // commit, so the timeline's force-push events are checked too.
-            const { data: head } = await github.rest.repos.getCommit({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: headSha,
-            });
-            const timeline = await github.paginate(
-              github.rest.issues.listEventsForTimeline,
-              {
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                per_page: 100,
-              },
-            );
-            const forcePushedAfter = timeline.some(
-              (e) =>
-                e.event === 'head_ref_force_pushed' &&
-                new Date(e.created_at) > commentedAt,
-            );
-            const committedAfter =
-              new Date(head.commit.committer.date) > commentedAt;
-            if (forcePushedAfter || committedAfter) {
+            // The maintainer approved the head that trigger-check recorded
+            // when their comment arrived. Refuse if the head differs now: a
+            // later push or force-push would run code nobody reviewed, in a
+            // job that holds a write token.
+            const approvedSha = process.env.APPROVED_SHA;
+            if (headSha !== approvedSha) {
               core.setFailed(
-                `The PR head (${headSha}) moved after the triggering comment. Comment again to update baselines for the current head.`,
+                `The PR head moved from ${approvedSha} to ${headSha} after the triggering comment. Comment again to update baselines for the current head.`,
               );
               return;
             }
