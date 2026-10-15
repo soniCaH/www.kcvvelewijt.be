@@ -43,6 +43,8 @@ interface Flight {
   readonly promise: Promise<void>;
   readonly resolve: () => void;
   readonly startedAt: number;
+  /** Owner token handed to the leader; only it may end this flight (#3467). */
+  readonly token: number;
 }
 
 const realSleep = (ms: number): Promise<void> =>
@@ -72,6 +74,8 @@ export class GateLogic {
   /** key → the in-flight leadership record. */
   private readonly inFlight = new Map<string, Flight>();
 
+  private nextToken = 1;
+
   constructor(opts: GateLogicOptions = {}) {
     this.rate = opts.ratePerSecond ?? 5;
     this.now = opts.now ?? (() => Date.now());
@@ -96,29 +100,39 @@ export class GateLogic {
   }
 
   /**
-   * Single-flight leadership. Returns `true` to the first caller for `key`
-   * (the leader — it must run the work, then call `endFlight(key)`), `false`
-   * to every concurrent caller (they should `awaitFlight(key)` or serve stale).
-   * A caller also becomes leader if the previous leader's lease has expired
-   * (dead-leader reclaim), waking anyone waiting on the abandoned flight.
+   * Single-flight leadership. Returns an owner token to the first caller for
+   * `key` (the leader — it must run the work, then call `endFlight(key, token)`),
+   * `null` to every concurrent caller (they should `awaitFlight(key)` or serve
+   * stale). A caller also becomes leader if the previous leader's lease has
+   * expired (dead-leader reclaim), waking anyone waiting on the abandoned flight.
    */
-  beginFlight(key: string): boolean {
+  beginFlight(key: string): number | null {
     const existing = this.inFlight.get(key);
-    if (this.isLive(existing)) return false;
+    if (this.isLive(existing)) return null;
     // No live leader (never claimed, or the previous lease expired) → take it.
     existing?.resolve(); // wake waiters stuck on the abandoned flight
     let resolve!: () => void;
     const promise = new Promise<void>((r) => {
       resolve = r;
     });
-    this.inFlight.set(key, { promise, resolve, startedAt: this.now() });
-    return true;
+    const token = this.nextToken++;
+    this.inFlight.set(key, {
+      promise,
+      resolve,
+      startedAt: this.now(),
+      token,
+    });
+    return token;
   }
 
-  /** Release the flight for `key`, waking every `awaitFlight` waiter. */
-  endFlight(key: string): void {
+  /**
+   * Release the flight for `key`, waking every `awaitFlight` waiter. A no-op
+   * unless `token` is the current flight's: a leader whose lease lapsed must
+   * not end the newer leader's flight (#3467).
+   */
+  endFlight(key: string, token: number): void {
     const flight = this.inFlight.get(key);
-    if (flight) {
+    if (flight?.token === token) {
       flight.resolve();
       this.inFlight.delete(key);
     }

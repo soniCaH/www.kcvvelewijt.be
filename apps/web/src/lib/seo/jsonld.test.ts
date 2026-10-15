@@ -177,7 +177,7 @@ describe("buildNewsArticleJsonLd", () => {
 
   const SPORTS_EVENT_DATA = {
     name: "KCVV Elewijt vs Racing Mechelen",
-    startDate: "2026-09-13T15:00:00Z",
+    kickoff: new Date(Date.UTC(2026, 8, 13, 15, 0)),
     homeTeamName: "KCVV Elewijt",
     awayTeamName: "Racing Mechelen",
     status: "finished" as const,
@@ -427,7 +427,7 @@ describe("buildSportsTeamJsonLd", () => {
 describe("buildSportsEventJsonLd", () => {
   const matchInput: SportsEventInput = {
     name: "KCVV Elewijt vs FC Opponent",
-    startDate: "2026-03-15T15:00:00+01:00",
+    kickoff: new Date(Date.UTC(2026, 2, 15, 15, 0)),
     homeTeamName: "KCVV Elewijt",
     awayTeamName: "FC Opponent",
     status: "scheduled",
@@ -440,9 +440,42 @@ describe("buildSportsEventJsonLd", () => {
     expect(result["@context"]).toBe("https://schema.org");
     expect(result["@type"]).toBe("SportsEvent");
     expect(result.name).toBe("KCVV Elewijt vs FC Opponent");
-    expect(result.startDate).toBe("2026-03-15T15:00:00+01:00");
+    expect(result.startDate).toBe("2026-03-15T15:00:00.000+01:00");
     expect(result.url).toBe("https://www.kcvvelewijt.be/wedstrijd/12345");
   });
+
+  it.each([
+    [
+      "summer",
+      new Date(Date.UTC(2026, 9, 17, 9, 15)),
+      "2026-10-17T09:15:00.000+02:00",
+    ],
+    [
+      "winter",
+      new Date(Date.UTC(2026, 0, 17, 15, 0)),
+      "2026-01-17T15:00:00.000+01:00",
+    ],
+    [
+      "DST-end Sunday",
+      new Date(Date.UTC(2026, 9, 25, 15, 0)),
+      "2026-10-25T15:00:00.000+01:00",
+    ],
+    [
+      "DST-start Sunday",
+      new Date(Date.UTC(2026, 2, 29, 15, 0)),
+      "2026-03-29T15:00:00.000+02:00",
+    ],
+  ])(
+    "emits the %s wall-clock kickoff with its Brussels offset, never Z",
+    (_label, kickoff, expected) => {
+      const result = buildSportsEventJsonLd({
+        ...matchInput,
+        kickoff,
+      }) as AnyJsonLd;
+      expect(result.startDate).toBe(expected);
+      expect(result.startDate).not.toMatch(/Z$/);
+    },
+  );
 
   it("includes homeTeam and awayTeam as SportsTeam stubs", () => {
     const result = buildSportsEventJsonLd(matchInput) as AnyJsonLd;
