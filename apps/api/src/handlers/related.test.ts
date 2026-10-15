@@ -1,10 +1,11 @@
 import { describe, it, expect, vi } from "vitest";
-import { Effect, Layer } from "effect";
+import { Effect, Exit, Layer } from "effect";
 import { getRelatedHandler } from "./related";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import { noopDurableKv } from "../test-helpers/kv-cache-mock";
 import {
   VectorizeService,
+  VectorizeError,
   type VectorizeServiceInterface,
 } from "../search/vectorize";
 import { testEnvLayer } from "../test-helpers/env-layer";
@@ -281,4 +282,29 @@ describe("getRelatedHandler — empty results are never stored (#3468)", () => {
     expect(result).toHaveLength(1);
     expect(result[0]!.id).toBe("doc-old");
   });
+});
+
+describe("getRelatedHandler — Vectorize failure is a 503 (#3493)", () => {
+  it.each(["getByIds", "query"] as const)(
+    "fails with HttpServiceUnavailable when Vectorize %s fails",
+    async (failing) => {
+      const FAKE_VECTOR = Array(1024).fill(0.1);
+      const exit = await runWithProviders(
+        getRelatedHandler({ id: "doc-1", limit: 3 }).pipe(Effect.exit),
+        makeCacheMock(),
+        makeVectorizeMock({
+          getByIds: () =>
+            failing === "getByIds"
+              ? Effect.fail(new VectorizeError("down"))
+              : Effect.succeed([
+                  { id: "doc-1", values: FAKE_VECTOR, metadata: {} },
+                ]),
+          query: () => Effect.fail(new VectorizeError("down")),
+        }),
+      );
+
+      expect(Exit.isFailure(exit)).toBe(true);
+      expect(JSON.stringify(exit)).toContain("HttpServiceUnavailable");
+    },
+  );
 });
