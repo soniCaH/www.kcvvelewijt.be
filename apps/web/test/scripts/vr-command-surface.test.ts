@@ -247,9 +247,11 @@ describe("vr-baseline-update.yml", () => {
   });
 
   it("commits and pushes once, after the last shard", () => {
-    const pushes = workflow.match(/git push origin/g) ?? [];
+    // The push goes to a token URL, not `origin`: the App token reaches this
+    // step only, through `env:` (#3471). Match command lines, not comments.
+    const pushes = [...workflow.matchAll(/^\s*git push "/gm)];
     expect(pushes).toHaveLength(1);
-    expect(workflow.indexOf("git push origin")).toBeGreaterThan(
+    expect(pushes[0].index).toBeGreaterThan(
       workflow.lastIndexOf("vr:ci:update"),
     );
   });

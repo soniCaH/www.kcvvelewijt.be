@@ -8,8 +8,26 @@ import {
 } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { hydrateRoot } from "react-dom/client";
+import { useEffect } from "react";
 import { MembershipForm } from "./MembershipForm";
 import { DRAFT_STORAGE_KEY, EMPTY_DRAFT } from "./membership-draft";
+
+// Stands in for Cloudflare's widget: a token on mount, and a fresh single-use
+// one each time `resetKey` changes — what `turnstile.reset()` does for real.
+vi.mock("./TurnstileWidget", () => ({
+  TurnstileWidget: ({
+    onToken,
+    resetKey,
+  }: {
+    onToken: (token: string) => void;
+    resetKey: number;
+  }) => {
+    useEffect(() => {
+      onToken(`token-${resetKey}`);
+    }, [onToken, resetKey]);
+    return null;
+  },
+}));
 
 function fillRequiredFields() {
   fireEvent.change(screen.getByLabelText(/Voornaam/), {
@@ -306,6 +324,67 @@ describe("MembershipForm", () => {
         expect.stringContaining("submit"),
         networkError,
       );
+    });
+  });
+
+  describe("single-use Turnstile token", () => {
+    const submittedTokens = (fetchMock: ReturnType<typeof vi.fn>) =>
+      fetchMock.mock.calls.map(
+        (call) =>
+          JSON.parse((call[1] as RequestInit).body as string).turnstileToken,
+      );
+
+    const submit = () =>
+      fireEvent.submit(screen.getByText(/Verstuur aanvraag/).closest("form")!);
+
+    it("sends a fresh token on the retry after a server rejection", async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 400,
+          json: () => Promise.resolve({ error: "Verificatie mislukt." }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve({ ok: true }),
+        });
+      vi.stubGlobal("fetch", fetchMock);
+
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      submit();
+      await screen.findByText("Verificatie mislukt.");
+      // Wait for the widget's fresh token to land before retrying.
+      await act(async () => {});
+      submit();
+      await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+
+      expect(submittedTokens(fetchMock)).toEqual(["token-0", "token-1"]);
+    });
+
+    it("sends a fresh token on the retry after a transport error", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      const fetchMock = vi
+        .fn()
+        .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve({ ok: true }),
+        });
+      vi.stubGlobal("fetch", fetchMock);
+
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      submit();
+      await screen.findByRole("alert");
+      await act(async () => {});
+      submit();
+      await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+
+      expect(submittedTokens(fetchMock)).toEqual(["token-0", "token-1"]);
     });
   });
 

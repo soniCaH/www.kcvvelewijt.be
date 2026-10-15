@@ -5,12 +5,15 @@ const SITEVERIFY_URL =
   "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
 /**
- * Verify a Cloudflare Turnstile token server-side.
+ * Verify a Cloudflare Turnstile token server-side. Fails closed (#3464).
  *
- * - No secret configured (local/dev) → skip, treat as passed.
- * - Explicit `success: false` from Cloudflare → fail (reject the submission).
- * - Network/parse error → fail-open (log + pass) so a Turnstile outage never
- *   loses a legit applicant; the honeypot still guards against trivial bots.
+ * - No secret configured → reject and log an error. Only the local dev flag
+ *   `ALLOW_MISSING_FORM_SECRETS === "true"` skips verification (warning).
+ * - `success: true` from Cloudflare → pass; `success: false` → reject.
+ * - Non-2xx, non-JSON body, network error or timeout → reject and log an error.
+ *   The form keeps a local draft (#3299), so a visitor loses nothing by
+ *   retrying; failing open let spam through (and made Resend mail made-up
+ *   addresses) during a Cloudflare outage. The honeypot is checked first.
  */
 export const verifyTurnstile = (
   token: string,
@@ -18,13 +21,19 @@ export const verifyTurnstile = (
   Effect.gen(function* () {
     const env = yield* WorkerEnvTag;
     if (!env.TURNSTILE_SECRET) {
-      yield* Effect.logWarning(
-        "[turnstile] TURNSTILE_SECRET not set — skipping verification",
+      if (env.ALLOW_MISSING_FORM_SECRETS === "true") {
+        yield* Effect.logWarning(
+          "[turnstile] TURNSTILE_SECRET not set — skipping verification (ALLOW_MISSING_FORM_SECRETS)",
+        );
+        return true;
+      }
+      yield* Effect.logError(
+        "[turnstile] TURNSTILE_SECRET not set — rejecting submission",
       );
-      return true;
+      return false;
     }
 
-    const result = yield* Effect.tryPromise({
+    return yield* Effect.tryPromise({
       try: async () => {
         const response = await fetch(SITEVERIFY_URL, {
           method: "POST",
@@ -35,6 +44,9 @@ export const verifyTurnstile = (
             response: token,
           }),
         });
+        if (!response.ok) {
+          throw new Error(`siteverify responded ${response.status}`);
+        }
         const data = (await response.json()) as { success?: boolean };
         return data.success === true;
       },
@@ -42,13 +54,11 @@ export const verifyTurnstile = (
     }).pipe(
       Effect.catchAll((cause) =>
         Effect.as(
-          Effect.logWarning(
-            `[turnstile] verification call failed, allowing through: ${String(cause)}`,
+          Effect.logError(
+            `[turnstile] verification call failed, rejecting: ${String(cause)}`,
           ),
-          true,
+          false,
         ),
       ),
     );
-
-    return result;
   });

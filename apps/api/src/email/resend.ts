@@ -13,7 +13,7 @@ import { WorkerEnvTag } from "../env";
 /** Verified sender — apex `kcvvelewijt.be` (see docs/prd/email-delivery.md). */
 const DEFAULT_FROM = "KCVV Elewijt <noreply@kcvvelewijt.be>";
 
-class EmailDeliveryError extends Error {
+export class EmailDeliveryError extends Error {
   readonly _tag = "EmailDeliveryError" as const;
   constructor(
     message: string,
@@ -53,12 +53,20 @@ export const EmailTransportLive = Layer.effect(
       dispatchEmail: (msg) =>
         Effect.gen(function* () {
           if (!env.RESEND_API_KEY) {
-            // Local/dev without the secret: no-op so persist-then-send still
-            // completes. The application is already captured in Sanity.
-            yield* Effect.logWarning(
-              "[email] RESEND_API_KEY not set — skipping dispatch",
+            // Fail closed: a missing key in a deployed worker must be loud,
+            // not a silent "success". Only the local dev flag may skip (#3464).
+            if (env.ALLOW_MISSING_FORM_SECRETS === "true") {
+              yield* Effect.logWarning(
+                "[email] RESEND_API_KEY not set — skipping dispatch (ALLOW_MISSING_FORM_SECRETS)",
+              );
+              return;
+            }
+            yield* Effect.logError(
+              "[email] RESEND_API_KEY not set — cannot dispatch",
             );
-            return;
+            return yield* Effect.fail(
+              new EmailDeliveryError("RESEND_API_KEY not set"),
+            );
           }
 
           const response = yield* Effect.tryPromise({

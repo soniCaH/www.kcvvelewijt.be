@@ -451,27 +451,20 @@ export default async function MatchPage({ params }: MatchPageProps) {
   const heroRow = matchDetailToHeroRow(match);
   const isReduced = heroRow.kind !== "match";
 
-  // Resolve which side is KCVV from the BFF-supplied `is_home` flag. If
-  // unset (legacy rows), enrichment falls back to the universal jersey-#1
-  // heuristic for both sides.
-  const kcvvSide: "home" | "away" | undefined =
-    match.is_home === true
-      ? "home"
-      : match.is_home === false
-        ? "away"
-        : undefined;
-
+  // `MatchDetail` carries no `is_home` (the BFF leaves it off on purpose), so
+  // the side is never known here: keeper enrichment uses the universal
+  // jersey-#1 heuristic for both sides.
   const homeLineup =
     match.lineup?.home
       .map(transformLineupPlayer)
       .map((p) =>
-        enrichLineupWithKeeperFlag(p, "home", kcvvSide, keeperPsdIds),
+        enrichLineupWithKeeperFlag(p, "home", undefined, keeperPsdIds),
       ) ?? [];
   const awayLineup =
     match.lineup?.away
       .map(transformLineupPlayer)
       .map((p) =>
-        enrichLineupWithKeeperFlag(p, "away", kcvvSide, keeperPsdIds),
+        enrichLineupWithKeeperFlag(p, "away", undefined, keeperPsdIds),
       ) ?? [];
 
   const events: readonly MatchEvent[] = match.events ?? [];

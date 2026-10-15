@@ -26,3 +26,8 @@ RESEND_API_KEY=
 
 # Cloudflare Turnstile — membership-form spam check (server-side siteverify secret).
 TURNSTILE_SECRET=
+
+# Local dev only (#3464): without this, a missing TURNSTILE_SECRET / RESEND_API_KEY
+# fails closed (spam check rejects, email dispatch errors). Only the exact value
+# "true" counts. Never put it in wrangler.toml or set it as a secret.
+ALLOW_MISSING_FORM_SECRETS=true
