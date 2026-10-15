@@ -107,12 +107,26 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     needs: [changes]
+    # `!cancelled()`, not `always()`: on cancel-in-progress GitHub re-evaluates
+    # `if` for running jobs and keeps any whose condition is true — `always()`
+    # would let a superseded 25-min run finish. (docs: "Workflow cancellation")
+    # A plain `if:` gets an implicit `success()`, so a failed `changes` would
+    # SKIP this job — and a skipped required check counts as passing (#3473).
     if: |
-      needs.changes.outputs.code == 'true' &&
-      (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
+      !cancelled() &&
+      (github.event_name != 'pull_request' || github.event.pull_request.draft == false) &&
+      (needs.changes.result != 'success' || needs.changes.outputs.code == 'true')
     environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Preview' }}
 
     steps:
+      - name: Fail when change detection did not succeed
+        if: needs.changes.result != 'success'
+        env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+        run: |
+          echo "::error::changes job result was '${CHANGES_RESULT}'; refusing to skip a required check"
+          exit 1
+
       - name: Checkout code
         uses: actions/checkout@v7.0.1
         with:
@@ -444,6 +458,15 @@ jobs:
               - 'apps/web/test/**'
               - 'apps/web/public/**'
               - 'apps/web/package.json'
+              # Read by @storybook/nextjs-vite (vite-plugin-storybook-nextjs
+              # loadConfig / loadJsConfig, Vite PostCSS): a change here can
+              # move every baseline.
+              - 'apps/web/next.config.ts'
+              - 'apps/web/postcss.config.mjs'
+              - 'apps/web/tsconfig.json'
+              # vr:run runs scripts/prefetch-typekit.mjs; the gate runs
+              # scripts/vr-coverage.mjs.
+              - 'apps/web/scripts/**'
               # The local Docker parity pin — see the `visual-regression`
               # job's container comment. A bump here is a signal the image
               # tag is about to move too.

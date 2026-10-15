@@ -88,22 +88,22 @@ jobs:
     timeout-minutes: 30
     needs: [changes]
     # This workflow only ever triggers on `pull_request` now (see `on:`
-    # above), so `github.event_name != 'pull_request'` can never be true —
-    # simplified to the draft guard plus the `changes` output.
+    # above), so there is no `event_name` branch — just the draft guard plus
+    # the `changes` output.
     #
-    # Known gap, same shape as `ci.yml`'s `quality-checks`: if `changes`
-    # itself fails (a `paths-filter` 403/5xx), its output is unset, this `if:`
-    # evaluates false, the job is skipped, and GitHub counts a skipped
-    # required check as passing — a web PR could merge with E2E never having
-    # run. `ci.yml`'s `visual-regression-gate` closes the equivalent hole with
-    # a dedicated `if: always()` aggregator job that fails on `changes`'
-    # failure; `quality-checks` (E2E's actual peer — one job, not a matrix)
-    # has no such aggregator and carries the same gap today. Mirroring
-    # `quality-checks` here keeps E2E consistent with the required check it
-    # actually resembles, not `visual-regression-gate`'s different shape.
+    # If `changes` itself fails (a `paths-filter` 403/5xx), the first step
+    # below fails this job, so the required check reports failure instead of
+    # being skipped (GitHub counts a skipped required check as passing; #3473).
+    # `quality-checks` in `ci.yml` has the same shape.
+    # `!cancelled()`, not `always()`: on cancel-in-progress GitHub re-evaluates
+    # `if` for running jobs and keeps any whose condition is true — `always()`
+    # would let a superseded 25-min run finish. (docs: "Workflow cancellation")
+    # A plain `if:` gets an implicit `success()`, so a failed `changes` would
+    # SKIP this job — and a skipped required check counts as passing (#3473).
     if: |
-      needs.changes.outputs.web == 'true' &&
-      github.event.pull_request.draft == false
+      !cancelled() &&
+      github.event.pull_request.draft == false &&
+      (needs.changes.result != 'success' || needs.changes.outputs.web == 'true')
     environment: Preview
     # Pinned to match @playwright/test in apps/web/package.json (1.60.0) and the
     # local Docker image used by the visual-regression suite. Bump all of these
@@ -122,6 +122,14 @@ jobs:
       NEXT_PUBLIC_SANITY_DATASET: staging
 
     steps:
+      - name: Fail when change detection did not succeed
+        if: needs.changes.result != 'success'
+        env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+        run: |
+          echo "::error::changes job result was '${CHANGES_RESULT}'; refusing to skip a required check"
+          exit 1
+
       - name: Checkout code
         uses: actions/checkout@v7.0.1
 
