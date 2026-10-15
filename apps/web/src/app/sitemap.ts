@@ -1,6 +1,11 @@
 import type { MetadataRoute } from "next";
 
 import { SITE_CONFIG } from "@/lib/constants";
+
+// Without this the sitemap is built once and frozen: new and expired content
+// would only show after the next deploy (#3472).
+export const revalidate = 3600;
+
 const staticRoutes: Array<{
   path: string;
   priority: number;

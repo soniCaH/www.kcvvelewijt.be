@@ -4,6 +4,7 @@ import {UserIcon} from '@sanity/icons/User'
 import {accentTitleOf} from './blocks/editorial-marks'
 import {articlePreviewSelect, prepareArticlePreview} from './preview/article-preview'
 import {validateSubjectsCount} from './validation/subjects-count'
+import {validateUnpublishAt} from './validation/unpublish-at'
 import {
   type CallToActionValue,
   validateCallToActionRequiredField,
@@ -208,6 +209,12 @@ export const article = defineType({
       group: "publicatie",
       description:
         "Optioneel: datum waarop het artikel automatisch van de site verdwijnt. Handig voor tijdelijke aankondigingen. Laat leeg om het artikel online te houden.",
+      validation: (r) =>
+        r.custom((unpublishAt, ctx) =>
+          validateUnpublishAt(unpublishAt, {
+            document: ctx.document as { publishedAt?: string } | undefined,
+          }),
+        ),
     }),
     defineField({
       name: "featured",

@@ -20,3 +20,10 @@ export const SANITY_TAGS = {
  * mechanism; this only bounds staleness if a webhook is ever missed.
  */
 export const SANITY_LIST_REVALIDATE = 60 * 60 * 24; // 24h
+
+/**
+ * Fetch lifetime (seconds) for reads that filter on `publishedAt` /
+ * `unpublishAt` in GROQ. A scheduled window opens or closes without a document
+ * save, so no webhook fires and only this bound makes the change appear.
+ */
+export const SANITY_PUBLISH_WINDOW_REVALIDATE = 60 * 15; // 15min
