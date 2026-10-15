@@ -290,6 +290,7 @@ describe("partial fan-outs are stored flagged (#3489)", () => {
       PsdService | KvCacheService | WorkerEnvTag | PsdGateService
     >,
     service: Partial<PsdServiceInterface>,
+    keyPrefix = "matches:window",
   ) => {
     const store = new Map<string, string>();
     const cache: KvCacheInterface = {
@@ -304,7 +305,7 @@ describe("partial fan-outs are stored flagged (#3489)", () => {
         Effect.provide(testEnvLayer),
       ),
     );
-    const raw = store.get(`matches:window:${CACHE_VERSION}`);
+    const raw = store.get(`${keyPrefix}:${CACHE_VERSION}`);
     return raw ? (JSON.parse(raw) as { partial?: boolean }) : undefined;
   };
 
@@ -312,6 +313,19 @@ describe("partial fan-outs are stored flagged (#3489)", () => {
     const stored = await storedFor(getMatchesWindowHandler, {
       getMatchesWindow: () => Effect.succeed(markPartial([baseMatch], true)),
     });
+    expect(stored?.partial).toBe(true);
+  });
+
+  // The tag lives on the array's identity (`markPartial`), so a transform that
+  // copies the array before `getOrFetch` reads it would silently drop the flag.
+  it("matches:next with a failed team is flagged partial", async () => {
+    const stored = await storedFor(
+      getNextMatchesHandler,
+      {
+        getNextMatches: () => Effect.succeed(markPartial([baseMatch], true)),
+      },
+      "matches:next",
+    );
     expect(stored?.partial).toBe(true);
   });
 
