@@ -222,6 +222,34 @@ describe("getActiveStaffPsdIds", () => {
   });
 });
 
+// ─── getTeamPlayerPsdIds ─────────────────────────────────────────────────────
+
+describe("getTeamPlayerPsdIds", () => {
+  const read = (teamPsdId: string) =>
+    run(
+      Effect.gen(function* () {
+        const projection = yield* SanityProjection;
+        return yield* projection.getTeamPlayerPsdIds(teamPsdId);
+      }),
+    );
+
+  it("returns the PSD IDs of the players the team references, scoped by a GROQ param", async () => {
+    mockFetch.mockResolvedValueOnce(["501", null, "502"]);
+
+    expect(await read("42")).toEqual(["501", "502"]);
+    expect(mockFetch).toHaveBeenCalledWith(
+      `*[_type == "team" && psdId == $teamPsdId][0].players[]->psdId`,
+      { teamPsdId: "42" },
+    );
+  });
+
+  it("returns an empty array when the team doc is missing (GROQ yields null)", async () => {
+    mockFetch.mockResolvedValueOnce(null);
+
+    expect(await read("42")).toEqual([]);
+  });
+});
+
 // ─── getActiveTeamPsdIds ─────────────────────────────────────────────────────
 
 describe("getActiveTeamPsdIds", () => {

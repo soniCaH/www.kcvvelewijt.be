@@ -8,6 +8,8 @@ import {
 } from "./mutation";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
 import { KvCacheLive } from "../cache/kv-cache";
+import { makePsdGateLayer, PsdGateService, PsdGateTest } from "../psd/gate";
+import { GateLogic } from "../psd/gate-logic";
 
 // ─── Mock Sanity client ──────────────────────────────────────────────────────
 
@@ -37,9 +39,15 @@ const mockClientPatch = vi.fn((_id: string) => ({
   set: vi.fn((_fields: Record<string, unknown>) => ({
     commit: mockCommit,
   })),
+  unset: vi.fn((_fields: string[]) => ({
+    commit: mockCommit,
+  })),
 }));
 
 const mockGetDocument = vi.fn().mockResolvedValue(null);
+// Reference count of an asset (`count(*[references($assetId)])`).
+const mockClientFetch = vi.fn().mockResolvedValue(0);
+const mockClientDelete = vi.fn().mockResolvedValue(undefined);
 
 vi.mock("@sanity/client", () => ({
   createClient: () => ({
@@ -47,12 +55,14 @@ vi.mock("@sanity/client", () => ({
     patch: mockClientPatch,
     create: mockCreate,
     getDocument: mockGetDocument,
+    fetch: mockClientFetch,
+    delete: mockClientDelete,
   }),
 }));
 
 // ─── Test layer ──────────────────────────────────────────────────────────────
 
-function makeTestLayer() {
+function makeTestLayer(gate: Layer.Layer<PsdGateService> = PsdGateTest) {
   const envLayer = makeTestEnvLayer({
     PSD_CACHE: {
       get: vi.fn().mockResolvedValue(null),
@@ -62,6 +72,7 @@ function makeTestLayer() {
     SANITY_WEBHOOK_SECRET: "",
   });
   return SanityMutationLive.pipe(
+    Layer.provide(gate),
     Layer.provide(KvCacheLive),
     Layer.provide(envLayer),
   );
@@ -73,6 +84,10 @@ function run<A>(effect: Effect.Effect<A, SanityMutationError, SanityMutation>) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  // clearAllMocks keeps implementations — reset the ones tests override.
+  mockGetDocument.mockResolvedValue(null);
+  mockClientFetch.mockResolvedValue(0);
+  mockClientDelete.mockResolvedValue(undefined);
 });
 
 // ─── upsertPlayer ───────────────────────────────────────────────────────────
@@ -717,6 +732,311 @@ describe("uploadPlayerImage", () => {
       expect(result.left).toBeInstanceOf(SanityMutationError);
       expect(result.left.message).toContain("Invalid image URL");
     }
+  });
+});
+
+// ─── Portrait lifecycle (#3469) ─────────────────────────────────────────────
+
+const PSD_URL =
+  "https://kcvv.prosoccerdata.com/img/player.jpg?profileAccessKey=abc";
+const STABLE_URL = "https://kcvv.prosoccerdata.com/img/player.jpg?v=2";
+
+const storedImage = (assetRef: string) => ({
+  _id: "player-psd-42",
+  psdImageUrl: "https://kcvv.prosoccerdata.com/img/player.jpg?v=1",
+  psdImage: { _type: "image", asset: { _type: "reference", _ref: assetRef } },
+});
+
+const mockUploadResponses = (newAssetId: string) => {
+  const fetchSpy = vi.spyOn(globalThis, "fetch");
+  fetchSpy.mockResolvedValueOnce(
+    new Response(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]), {
+      status: 200,
+      headers: { "content-type": "image/jpeg" },
+    }),
+  );
+  fetchSpy.mockResolvedValueOnce(
+    new Response(JSON.stringify({ document: { _id: newAssetId } }), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    }),
+  );
+  return fetchSpy;
+};
+
+const lastPatchObject = () =>
+  mockClientPatch.mock.results[mockClientPatch.mock.results.length - 1]!.value;
+
+describe("portrait download takes a gate token (#3469)", () => {
+  it("calls acquireToken before the PSD fetch", async () => {
+    const order: string[] = [];
+    const logic = new GateLogic({ ratePerSecond: 1e9 });
+    vi.spyOn(logic, "acquireToken").mockImplementation(async () => {
+      order.push("acquireToken");
+    });
+    const gate = makePsdGateLayer(logic);
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    fetchSpy.mockImplementationOnce((async (url: string) => {
+      order.push(`fetch:${url.split("?")[0]}`);
+      return new Response(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]), {
+        status: 200,
+        headers: { "content-type": "image/jpeg" },
+      });
+    }) as unknown as typeof fetch);
+    fetchSpy.mockResolvedValueOnce(
+      new Response(JSON.stringify({ document: { _id: "image-new" } }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+
+    await Effect.runPromise(
+      Effect.gen(function* () {
+        const mutation = yield* SanityMutation;
+        yield* mutation.uploadPlayerImage("42", PSD_URL, STABLE_URL);
+      }).pipe(Effect.provide(makeTestLayer(gate))),
+    );
+
+    expect(order[0]).toBe("acquireToken");
+    expect(order[1]).toBe(
+      "fetch:https://kcvv.prosoccerdata.com/img/player.jpg",
+    );
+    fetchSpy.mockRestore();
+  });
+});
+
+describe("unsetPlayerImage / unsetStaffImage (#3469)", () => {
+  it("unsets psdImage + psdImageUrl and deletes the asset nothing references", async () => {
+    mockGetDocument.mockResolvedValueOnce(storedImage("image-old"));
+    mockClientFetch.mockResolvedValueOnce(0);
+
+    await run(
+      Effect.gen(function* () {
+        const mutation = yield* SanityMutation;
+        yield* mutation.unsetPlayerImage("42");
+      }),
+    );
+
+    expect(mockClientPatch).toHaveBeenCalledWith("player-psd-42");
+    expect(lastPatchObject().unset).toHaveBeenCalledWith([
+      "psdImage",
+      "psdImageUrl",
+    ]);
+    expect(mockClientFetch).toHaveBeenCalledWith(
+      "count(*[references($assetId)])",
+      { assetId: "image-old" },
+      { perspective: "raw" },
+    );
+    expect(mockClientDelete).toHaveBeenCalledWith("image-old");
+  });
+
+  it("keeps the asset when another document still references it", async () => {
+    mockGetDocument.mockResolvedValueOnce(storedImage("image-old"));
+    mockClientFetch.mockResolvedValueOnce(1);
+
+    await run(
+      Effect.gen(function* () {
+        const mutation = yield* SanityMutation;
+        yield* mutation.unsetPlayerImage("42");
+      }),
+    );
+
+    expect(lastPatchObject().unset).toHaveBeenCalled();
+    expect(mockClientDelete).not.toHaveBeenCalled();
+  });
+
+  it("keeps the asset a draft-only document still references (#3469 x #3477)", async () => {
+    mockGetDocument.mockResolvedValueOnce(storedImage("image-old"));
+    // The client defaults to the `published` perspective (#3477): a reference
+    // that lives only in a `drafts.*` document is invisible unless the count
+    // asks for `raw`.
+    mockClientFetch.mockImplementationOnce(
+      async (
+        _query: string,
+        _params: unknown,
+        options?: { perspective?: string },
+      ) => (options?.perspective === "raw" ? 1 : 0),
+    );
+
+    await run(
+      Effect.gen(function* () {
+        const mutation = yield* SanityMutation;
+        yield* mutation.unsetPlayerImage("42");
+      }),
+    );
+
+    expect(mockClientDelete).not.toHaveBeenCalled();
+  });
+
+  it("makes no patch when psdImageUrl is already unset", async () => {
+    mockGetDocument.mockResolvedValueOnce({ _id: "player-psd-42" });
+
+    await run(
+      Effect.gen(function* () {
+        const mutation = yield* SanityMutation;
+        yield* mutation.unsetPlayerImage("42");
+      }),
+    );
+
+    expect(mockClientPatch).not.toHaveBeenCalled();
+    expect(mockClientDelete).not.toHaveBeenCalled();
+  });
+
+  it("succeeds when the asset delete fails", async () => {
+    mockGetDocument.mockResolvedValueOnce(storedImage("image-old"));
+    mockClientDelete.mockRejectedValueOnce(new Error("409 still referenced"));
+
+    await expect(
+      run(
+        Effect.gen(function* () {
+          const mutation = yield* SanityMutation;
+          yield* mutation.unsetPlayerImage("42");
+        }),
+      ),
+    ).resolves.toBeUndefined();
+    expect(mockClientDelete).toHaveBeenCalled();
+  });
+
+  it("fails with SanityMutationError when the unset patch fails", async () => {
+    mockGetDocument.mockResolvedValueOnce(storedImage("image-old"));
+    mockCommit.mockRejectedValueOnce(new Error("Network error"));
+
+    const result = await Effect.runPromise(
+      Effect.either(
+        Effect.gen(function* () {
+          const mutation = yield* SanityMutation;
+          yield* mutation.unsetPlayerImage("42");
+        }).pipe(Effect.provide(makeTestLayer())),
+      ),
+    );
+
+    expect(result._tag).toBe("Left");
+    expect(mockClientDelete).not.toHaveBeenCalled();
+  });
+
+  it("targets the staffMember document for staff", async () => {
+    mockGetDocument.mockResolvedValueOnce({
+      ...storedImage("image-old"),
+      _id: "staffMember-psd-8",
+    });
+
+    await run(
+      Effect.gen(function* () {
+        const mutation = yield* SanityMutation;
+        yield* mutation.unsetStaffImage("8");
+      }),
+    );
+
+    expect(mockGetDocument).toHaveBeenCalledWith("staffMember-psd-8");
+    expect(mockClientPatch).toHaveBeenCalledWith("staffMember-psd-8");
+  });
+});
+
+describe("superseded portrait assets (#3469)", () => {
+  it("deletes the previous asset after a re-upload when nothing references it", async () => {
+    mockGetDocument.mockResolvedValueOnce(storedImage("image-old"));
+    mockClientFetch.mockResolvedValueOnce(0);
+    const fetchSpy = mockUploadResponses("image-new");
+
+    await run(
+      Effect.gen(function* () {
+        const mutation = yield* SanityMutation;
+        yield* mutation.uploadPlayerImage("42", PSD_URL, STABLE_URL);
+      }),
+    );
+
+    expect(mockClientFetch).toHaveBeenCalledWith(
+      "count(*[references($assetId)])",
+      { assetId: "image-old" },
+      { perspective: "raw" },
+    );
+    expect(mockClientDelete).toHaveBeenCalledExactlyOnceWith("image-old");
+    fetchSpy.mockRestore();
+  });
+
+  it("keeps the previous asset when it is still referenced", async () => {
+    mockGetDocument.mockResolvedValueOnce(storedImage("image-old"));
+    mockClientFetch.mockResolvedValueOnce(2);
+    const fetchSpy = mockUploadResponses("image-new");
+
+    await run(
+      Effect.gen(function* () {
+        const mutation = yield* SanityMutation;
+        yield* mutation.uploadPlayerImage("42", PSD_URL, STABLE_URL);
+      }),
+    );
+
+    expect(mockClientDelete).not.toHaveBeenCalled();
+    fetchSpy.mockRestore();
+  });
+
+  it("never deletes the asset it just uploaded (Sanity dedups identical bytes)", async () => {
+    mockGetDocument.mockResolvedValueOnce(storedImage("image-same"));
+    const fetchSpy = mockUploadResponses("image-same");
+
+    await run(
+      Effect.gen(function* () {
+        const mutation = yield* SanityMutation;
+        yield* mutation.uploadPlayerImage("42", PSD_URL, STABLE_URL);
+      }),
+    );
+
+    expect(mockClientFetch).not.toHaveBeenCalled();
+    expect(mockClientDelete).not.toHaveBeenCalled();
+    fetchSpy.mockRestore();
+  });
+
+  it("still succeeds when deleting the previous asset fails", async () => {
+    mockGetDocument.mockResolvedValueOnce(storedImage("image-old"));
+    mockClientDelete.mockRejectedValueOnce(new Error("boom"));
+    const fetchSpy = mockUploadResponses("image-new");
+
+    await expect(
+      run(
+        Effect.gen(function* () {
+          const mutation = yield* SanityMutation;
+          yield* mutation.uploadPlayerImage("42", PSD_URL, STABLE_URL);
+        }),
+      ),
+    ).resolves.toBeUndefined();
+    fetchSpy.mockRestore();
+  });
+
+  it("treats the PSD placeholder as no portrait: unsets a stored image", async () => {
+    mockGetDocument.mockResolvedValueOnce(storedImage("image-old"));
+    const placeholderHashBytes = new Uint8Array(20);
+    for (let i = 0; i < 20; i++) {
+      placeholderHashBytes[i] = parseInt(
+        PSD_PLACEHOLDER_IMAGE_SHA1.slice(i * 2, i * 2 + 2),
+        16,
+      );
+    }
+    const digestSpy = vi
+      .spyOn(crypto.subtle, "digest")
+      .mockResolvedValueOnce(placeholderHashBytes.buffer);
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    fetchSpy.mockResolvedValueOnce(
+      new Response(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]), {
+        status: 200,
+        headers: { "content-type": "image/jpeg" },
+      }),
+    );
+
+    await run(
+      Effect.gen(function* () {
+        const mutation = yield* SanityMutation;
+        yield* mutation.uploadPlayerImage("42", PSD_URL, STABLE_URL);
+      }),
+    );
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(lastPatchObject().unset).toHaveBeenCalledWith([
+      "psdImage",
+      "psdImageUrl",
+    ]);
+    expect(mockClientDelete).toHaveBeenCalledWith("image-old");
+    digestSpy.mockRestore();
+    fetchSpy.mockRestore();
   });
 });
 

@@ -1,4 +1,5 @@
 import type { ScheduleRow } from "@/components/match/types";
+import { kickoffMs } from "@/lib/utils/dates";
 
 /**
  * Pure match-selection logic behind `<TeamMatchesSection>`, split out of that
@@ -23,7 +24,7 @@ export function findNextMatch(
   now: Date,
 ): ScheduleRow | undefined {
   return matches
-    .filter((m) => m.status === "scheduled" && m.date >= now)
+    .filter((m) => m.status === "scheduled" && kickoffMs(m) >= now.getTime())
     .sort((a, b) => a.date.getTime() - b.date.getTime())[0];
 }
 
@@ -34,7 +35,10 @@ export function recentResults(
 ): ScheduleRow[] {
   return matches
     .filter(
-      (m) => m.status === "finished" && m.date < now && m.id !== excludeId,
+      (m) =>
+        m.status === "finished" &&
+        kickoffMs(m) < now.getTime() &&
+        m.id !== excludeId,
     )
     .sort((a, b) => b.date.getTime() - a.date.getTime())
     .slice(0, RECENT_COUNT);
@@ -75,7 +79,7 @@ export function hasVisibleMatches(
 ): boolean {
   return matches.some(
     (m) =>
-      (m.status === "scheduled" && m.date >= now) ||
-      (m.status === "finished" && m.date < now),
+      (m.status === "scheduled" && kickoffMs(m) >= now.getTime()) ||
+      (m.status === "finished" && kickoffMs(m) < now.getTime()),
   );
 }

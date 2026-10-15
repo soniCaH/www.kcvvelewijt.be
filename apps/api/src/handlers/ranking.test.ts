@@ -54,7 +54,6 @@ const cacheMock: KvCacheInterface = {
   get: () => Effect.succeed(null),
   set: () => Effect.succeed(undefined),
   delete: () => Effect.succeed(undefined),
-  increment: () => Effect.succeed(undefined),
   durable: noopDurableKv,
 };
 
@@ -64,7 +63,6 @@ function makeMemoryCache(store = new Map<string, string>()): KvCacheInterface {
     get: (key) => Effect.succeed(store.get(key) ?? null),
     set: (key, value) => Effect.sync(() => void store.set(key, value)),
     delete: (key) => Effect.sync(() => void store.delete(key)),
-    increment: () => Effect.succeed(undefined),
     durable: noopDurableKv,
   };
 }

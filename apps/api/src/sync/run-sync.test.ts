@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { Effect, Layer } from "effect";
+import { Effect, Either, Layer, Logger } from "effect";
 import { runSync } from "./psd-sanity-sync";
 import type { SanityMutationInterface } from "../sanity/mutation";
 import { SanityMutation, SanityMutationError } from "../sanity/mutation";
@@ -8,6 +8,7 @@ import { SanityProjection } from "../sanity/projection";
 import type { PsdTeamClientInterface } from "./psd-team-client";
 import { PsdTeamClient, PsdTeamClientError } from "./psd-team-client";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
+import type { WorkerEnv } from "../env";
 import {
   KvCacheService,
   KvError,
@@ -53,6 +54,12 @@ function makeSanityMocks() {
   const upsertStaff = vi.fn(() => Effect.succeed(undefined as void));
   const uploadPlayerImage = vi.fn(() => Effect.succeed(undefined as void));
   const uploadStaffImage = vi.fn(() => Effect.succeed(undefined as void));
+  const unsetPlayerImage = vi.fn((_psdId: string) =>
+    Effect.succeed(undefined as void),
+  );
+  const unsetStaffImage = vi.fn((_psdId: string) =>
+    Effect.succeed(undefined as void),
+  );
   const archivePlayers = vi.fn(() => Effect.succeed(undefined as void));
   const archiveStaff = vi.fn(() => Effect.succeed(undefined as void));
   const archiveTeams = vi.fn(() => Effect.succeed(undefined as void));
@@ -75,6 +82,9 @@ function makeSanityMocks() {
   const getActiveStaffPsdIds = vi.fn(() => Effect.succeed([] as string[]));
   const getActiveTeamPsdIds = vi.fn(() => Effect.succeed([] as string[]));
   const getVisibleTeamPsdIds = vi.fn(() => Effect.succeed([] as string[]));
+  const getTeamPlayerPsdIds = vi.fn((_teamPsdId: string) =>
+    Effect.succeed([] as string[]),
+  );
   const getProtectedStaffPsdIds = vi.fn(() => Effect.succeed([] as string[]));
   const getFormRoutingConfig = vi.fn(() => Effect.succeed(null));
 
@@ -84,6 +94,8 @@ function makeSanityMocks() {
     upsertStaff,
     uploadPlayerImage,
     uploadStaffImage,
+    unsetPlayerImage,
+    unsetStaffImage,
     archivePlayers,
     archiveStaff,
     archiveTeams,
@@ -97,6 +109,7 @@ function makeSanityMocks() {
     getActiveStaffPsdIds,
     getActiveTeamPsdIds,
     getVisibleTeamPsdIds,
+    getTeamPlayerPsdIds,
     getProtectedStaffPsdIds,
     getFormRoutingConfig,
   };
@@ -107,6 +120,8 @@ function makeSanityMocks() {
     upsertStaff,
     uploadPlayerImage,
     uploadStaffImage,
+    unsetPlayerImage,
+    unsetStaffImage,
     archivePlayers,
     archiveStaff,
     archiveTeams,
@@ -115,6 +130,7 @@ function makeSanityMocks() {
     getActivePlayerPsdIds,
     getActiveStaffPsdIds,
     getActiveTeamPsdIds,
+    getTeamPlayerPsdIds,
     getProtectedStaffPsdIds,
     writerMock,
     readerMock,
@@ -202,7 +218,6 @@ function makeKvStub() {
     get: () => Effect.succeed(null),
     set: () => Effect.succeed(undefined),
     delete: () => Effect.succeed(undefined),
-    increment: () => Effect.succeed(undefined),
     durable: {
       ...durable,
       forDataset: (dataset: string) => ({ ...durable, dataset }),
@@ -324,6 +339,34 @@ function buildTestLayer(
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
 describe("runSync", () => {
+  it("unsets the stored portrait of a player PSD no longer has a portrait for (#3469)", async () => {
+    const kvStub = makeKvStub();
+    const { unsetPlayerImage, getPlayersImageState, writerMock, readerMock } =
+      makeSanityMocks();
+    getPlayersImageState.mockReturnValue(
+      Effect.succeed(
+        new Map([
+          [
+            "6453",
+            {
+              psdImageUrl: "https://kcvv.prosoccerdata.com/old.jpg?v=1",
+              hasPsdImage: true,
+            },
+          ],
+        ]),
+      ),
+    );
+    const psdMock = makePsdTeamClientMock([ONE_TEAM], [ONE_PLAYER]);
+
+    await Effect.runPromise(
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
+      ),
+    );
+
+    expect(unsetPlayerImage).toHaveBeenCalledExactlyOnceWith("6453");
+  });
+
   it("upserts 1 player and 1 team, skips staff, when given 1 team with 1 player", async () => {
     const kvStub = makeKvStub();
     const {
@@ -452,6 +495,8 @@ describe("runSync", () => {
       }),
       uploadPlayerImage: vi.fn(() => Effect.succeed(undefined as void)),
       uploadStaffImage: vi.fn(() => Effect.succeed(undefined as void)),
+      unsetPlayerImage: vi.fn(() => Effect.succeed(undefined as void)),
+      unsetStaffImage: vi.fn(() => Effect.succeed(undefined as void)),
       archivePlayers: vi.fn(() => Effect.succeed(undefined as void)),
       archiveStaff: vi.fn(() => Effect.succeed(undefined as void)),
       archiveTeams: vi.fn(() => Effect.succeed(undefined as void)),
@@ -480,6 +525,7 @@ describe("runSync", () => {
       getActiveStaffPsdIds: vi.fn(() => Effect.succeed([] as string[])),
       getActiveTeamPsdIds: vi.fn(() => Effect.succeed([] as string[])),
       getVisibleTeamPsdIds: vi.fn(() => Effect.succeed([] as string[])),
+      getTeamPlayerPsdIds: vi.fn(() => Effect.succeed([] as string[])),
       getProtectedStaffPsdIds: vi.fn(() => Effect.succeed([] as string[])),
       getFormRoutingConfig: vi.fn(() => Effect.succeed(null)),
     };
@@ -1485,7 +1531,7 @@ describe("runSync", () => {
       expect(archivePlayers).not.toHaveBeenCalled();
     });
 
-    it("does not fail the sync when the rotation-cursor write fails — it logs and lets the next run re-read the stored value", async () => {
+    it("does not fail a mid-cycle run when the rotation-cursor write fails — it logs and lets the next run re-read the stored value", async () => {
       const kvStub = makeKvStub();
       const originalPut = kvStub.put.getMockImplementation()!;
       kvStub.put.mockImplementation(
@@ -1499,7 +1545,8 @@ describe("runSync", () => {
 
       const { upsertPlayer, upsertTeam, writerMock, readerMock } =
         makeSanityMocks();
-      const psdMock = makePsdTeamClientMock([ONE_TEAM], [ONE_PLAYER]);
+      // 3 teams, cursor 0 → team index 0 of 3 is mid-cycle.
+      const psdMock = makePsdTeamClientMock(THREE_TEAMS, [ONE_PLAYER]);
 
       await expect(
         Effect.runPromise(
@@ -1511,12 +1558,39 @@ describe("runSync", () => {
         ),
       ).resolves.toBeUndefined();
 
-      // The rest of the sync still completed — the cursor write's failure
-      // was logged and swallowed, matching its pre-#2873 catchAll.
       expect(upsertPlayer).toHaveBeenCalledOnce();
       expect(upsertTeam).toHaveBeenCalledOnce();
-      // The write was attempted (and failed) — this is what proves the
-      // failure path was actually exercised, not skipped.
+      // The write was attempted (and failed) — proves the failure path ran.
+      expect(kvStub.put).toHaveBeenCalledWith("sync:team-cursor", "1");
+    });
+
+    it("fails the run when the cursor write fails at cycle end (#3465) — a swallowed failure there re-runs the last team with cleared accumulators", async () => {
+      const kvStub = makeKvStub();
+      const originalPut = kvStub.put.getMockImplementation()!;
+      kvStub.put.mockImplementation(
+        (key: string, value: string, options?: { expirationTtl: number }) => {
+          if (key === "sync:team-cursor") {
+            return Promise.reject(new Error("KV outage"));
+          }
+          return originalPut(key, value, options);
+        },
+      );
+
+      const { upsertTeam, writerMock, readerMock } = makeSanityMocks();
+      const psdMock = makePsdTeamClientMock([ONE_TEAM], [ONE_PLAYER]);
+
+      const result = await Effect.runPromise(
+        Effect.either(
+          runSync.pipe(
+            Effect.provide(
+              buildTestLayer(kvStub, writerMock, readerMock, psdMock),
+            ),
+          ),
+        ),
+      );
+
+      expect(Either.isLeft(result)).toBe(true);
+      expect(upsertTeam).toHaveBeenCalledOnce();
       expect(kvStub.put).toHaveBeenCalledWith("sync:team-cursor", "0");
     });
   });
@@ -1608,53 +1682,38 @@ describe("runSync", () => {
       );
     });
 
-    it("checkpoints incrementally: a mid-team failure leaves only the completed member marked done, and the cursor unadvanced", async () => {
+    it("a mid-team member failure no longer strands the team (#3465): the other members commit, the team is written, the cursor advances, the checkpoint is cleared and the run fails", async () => {
       const kvStub = makeKvStub();
-      const { upsertPlayer, writerMock, readerMock } = makeSanityMocks();
-      upsertPlayer
-        .mockImplementationOnce(() => Effect.succeed(undefined as void)) // player A (501) commits
-        .mockImplementationOnce(
-          () =>
-            Effect.fail(
-              new SanityMutationError("boom"),
-            ) as unknown as Effect.Effect<void>,
-        ); // player B (502) fails mid-team
+      const { upsertPlayer, upsertTeam, writerMock, readerMock } =
+        makeSanityMocks();
+      upsertPlayer.mockImplementation(((doc: { psdId: string }) =>
+        doc.psdId === "502"
+          ? Effect.fail(new SanityMutationError("boom"))
+          : Effect.succeed(undefined as void)) as never);
 
       const psdMock = makePsdTeamClientMock(
         [ONE_TEAM],
         [PLAYER_A, PLAYER_B, PLAYER_C],
       );
 
-      await expect(
-        Effect.runPromise(
+      const result = await Effect.runPromise(
+        Effect.either(
           runSync.pipe(
             Effect.provide(
               buildTestLayer(kvStub, writerMock, readerMock, psdMock),
             ),
           ),
         ),
-      ).rejects.toBeDefined();
-
-      // Only player A — fully committed before the failure — is checkpointed.
-      const checkpointRaw = await kvStub.get("sync:team-checkpoint");
-      expect(checkpointRaw).not.toBeNull();
-      expect(JSON.parse(checkpointRaw!)).toEqual({
-        teamId: ONE_TEAM.id,
-        donePlayerIds: ["501"],
-        doneStaffIds: [],
-      });
-
-      // Player B (the one that failed) was still attempted. Whether player C
-      // is reached at all depends on fiber scheduling under `concurrency: 2`
-      // — a freed slot can start it before B's failure interrupts the loop —
-      // so it is deliberately not asserted. The checkpoint above is what
-      // proves bounded re-work: nothing past the failure point is marked done.
-      expect(upsertPlayer).toHaveBeenCalledWith(
-        expect.objectContaining({ psdId: "502" }),
       );
 
-      // The cursor never advances on a failed run.
-      expect(await kvStub.get("sync:team-cursor")).toBeNull();
+      expect(Either.isLeft(result)).toBe(true);
+      // 1 team → cursor wraps to 0, written even though the run fails.
+      expect(await kvStub.get("sync:team-cursor")).toBe("0");
+      // The cursor moved on, so a checkpoint naming this team would be read
+      // as "already done" a whole rotation later — it must not survive.
+      expect(await kvStub.get("sync:team-checkpoint")).toBeNull();
+      expect(upsertPlayer).toHaveBeenCalledTimes(3);
+      expect(upsertTeam).toHaveBeenCalledOnce();
     });
 
     it("a resumed run after that failure completes the team, clears the checkpoint, and advances the cursor", async () => {
@@ -1827,6 +1886,411 @@ describe("runSync", () => {
       ).mock.calls.filter(([key]) => key === "sync:team-checkpoint");
       expect(checkpointWrites.length).toBeLessThan(4);
       expect(checkpointWrites.length).toBeGreaterThan(0);
+    });
+  });
+
+  // ─── #3465: reordered / shrunk PSD team list ────────────────────────────
+  describe("stable team order, cycle-end guard, zero rosters, member isolation, manual runs (#3465)", () => {
+    const team = (id: number): PsdTeam => ({
+      ...ONE_TEAM,
+      id,
+      name: `Team ${id}`,
+    });
+    const player = (id: number): PsdMember => ({ ...ONE_PLAYER, id });
+    const staffer = (id: number): PsdMember => ({ ...ONE_STAFF, id });
+
+    /** PSD double whose roster depends on the team asked for. */
+    function perTeamPsd(
+      teams: readonly PsdTeam[],
+      players: Record<number, readonly PsdMember[]>,
+      staff: Record<number, readonly PsdMember[]> = {},
+    ): PsdTeamClientInterface {
+      return {
+        getRawTeams: () => Effect.succeed(teams),
+        getRawMembers: (id: number) => Effect.succeed(players[id] ?? []),
+        getRawStaff: (id: number) => Effect.succeed(staff[id] ?? []),
+        getRawClubStaff: () => Effect.succeed([]),
+      };
+    }
+
+    /** One `runSync` with captured logs; resolves to the Either so failures are assertable. */
+    async function once(
+      kvStub: ReturnType<typeof makeKvStub>,
+      mocks: ReturnType<typeof makeSanityMocks>,
+      psdMock: PsdTeamClientInterface,
+      env: Partial<WorkerEnv> = {},
+    ) {
+      const logs: Array<{ level: string; text: string }> = [];
+      const capture = Logger.replace(
+        Logger.defaultLogger,
+        Logger.make(({ logLevel, message }) => {
+          const parts: unknown[] = Array.isArray(message) ? message : [message];
+          logs.push({ level: logLevel.label, text: parts.join(" ") });
+        }),
+      );
+      const result = await Effect.runPromise(
+        Effect.either(
+          runSync.pipe(
+            Effect.provide(
+              Layer.mergeAll(
+                Layer.succeed(SanityMutation, mocks.writerMock),
+                Layer.succeed(SanityProjection, mocks.readerMock),
+                Layer.succeed(PsdTeamClient, psdMock),
+                Layer.succeed(KvCacheService, kvStub.cache),
+                makeTestEnvLayer({ SANITY_WEBHOOK_SECRET: "", ...env }),
+                capture,
+              ),
+            ),
+          ),
+        ),
+      );
+      return { result, logs };
+    }
+
+    const idsIn = async (kvStub: ReturnType<typeof makeKvStub>, key: string) =>
+      JSON.parse((await kvStub.get(key)) ?? "[]") as string[];
+
+    it("walks teams in numeric id order, whatever order PSD returns them in", async () => {
+      const kvStub = makeKvStub();
+      const mocks = makeSanityMocks();
+      const psd = perTeamPsd([team(30), team(10), team(20)], {});
+      await kvStub.put("sync:team-cursor", "1");
+
+      await once(kvStub, mocks, psd);
+
+      expect(mocks.upsertTeam).toHaveBeenCalledOnce();
+      expect(mocks.upsertTeam).toHaveBeenCalledWith(
+        expect.objectContaining({ psdId: "20" }),
+      );
+    });
+
+    it("archives no team and no player when PSD removes a team before the cursor mid-cycle", async () => {
+      const kvStub = makeKvStub();
+      const ids = [1, 2, 3, 4, 5];
+      const full = perTeamPsd(
+        ids.map(team),
+        Object.fromEntries(ids.map((i) => [i, [player(100 + i)]])),
+      );
+      const shrunk = perTeamPsd(
+        ids.slice(1).map(team), // team 1 disappears after it was visited
+        Object.fromEntries(ids.map((i) => [i, [player(100 + i)]])),
+      );
+      const activeTeams = ids.map(String);
+      const activePlayers = ids.map((i) => String(100 + i));
+
+      // two nights on the full list (teams 1, 2) ...
+      for (const _ of [0, 1]) {
+        await once(kvStub, makeSanityMocks(), full);
+      }
+      // ... then team 1 is removed: the stored cursor 2 now points at team 4
+      // (index 2 of [2,3,4,5]) and team 3 is skipped this cycle.
+      const last = makeSanityMocks();
+      last.getActiveTeamPsdIds.mockReturnValue(Effect.succeed(activeTeams));
+      last.getActivePlayerPsdIds.mockReturnValue(Effect.succeed(activePlayers));
+      await once(kvStub, last, shrunk); // team 4 (index 2)
+      await once(kvStub, last, shrunk); // team 5 (index 3) → cycle end
+
+      expect(last.archiveTeams).not.toHaveBeenCalled();
+      expect(last.archivePlayers).not.toHaveBeenCalled();
+      expect(last.archiveStaff).not.toHaveBeenCalled();
+    });
+
+    it("does not archive a team that is absent from the live list on the cycle-end run but present in the accumulator", async () => {
+      const kvStub = makeKvStub();
+      await kvStub.put("sync:team-cursor", "2");
+      await kvStub.put("sync:cycle-team-ids", JSON.stringify(["1", "2", "3"]));
+      const mocks = makeSanityMocks();
+      mocks.getActiveTeamPsdIds.mockReturnValue(
+        Effect.succeed(["1", "2", "3", "4"]),
+      );
+
+      // Live list [2,3,4]: team 1 is gone, cursor 2 is the last index (team 4).
+      await once(kvStub, mocks, perTeamPsd([team(2), team(3), team(4)], {}));
+
+      expect(mocks.archiveTeams).not.toHaveBeenCalled();
+    });
+
+    it("skips player and staff reconciliation, logs a WARN and still clears the accumulators when a live team is missing from the accumulator", async () => {
+      const kvStub = makeKvStub();
+      await kvStub.put("sync:team-cursor", "2");
+      // Team 2 is live but was never visited this cycle.
+      await kvStub.put("sync:cycle-team-ids", JSON.stringify(["1"]));
+      await kvStub.put("sync:cycle-player-ids", JSON.stringify(["101"]));
+      await kvStub.put("sync:cycle-staff-ids", JSON.stringify([]));
+      const mocks = makeSanityMocks();
+      mocks.getActivePlayerPsdIds.mockReturnValue(
+        Effect.succeed(["101", "102", "103", "104", "105"]),
+      );
+      mocks.getActiveStaffPsdIds.mockReturnValue(
+        Effect.succeed(["601", "602", "603", "604", "605"]),
+      );
+
+      const { result, logs } = await once(
+        kvStub,
+        mocks,
+        perTeamPsd([team(1), team(2), team(3)], { 3: [player(103)] }),
+      );
+
+      expect(Either.isRight(result)).toBe(true);
+      expect(mocks.archivePlayers).not.toHaveBeenCalled();
+      expect(mocks.archiveStaff).not.toHaveBeenCalled();
+      expect(
+        logs.some((l) => l.level === "WARN" && /incomplete/i.test(l.text)),
+      ).toBe(true);
+      expect(await kvStub.get("sync:cycle-team-ids")).toBeNull();
+      expect(await kvStub.get("sync:cycle-player-ids")).toBeNull();
+      expect(await kvStub.get("sync:cycle-staff-ids")).toBeNull();
+      expect(await kvStub.get("sync:team-cursor")).toBe("0");
+    });
+
+    describe("zero roster", () => {
+      const MARKER = "sync:empty-roster:1";
+
+      it("holds the team back on the first empty roster: no upsertTeam, ids accumulated, marker written", async () => {
+        const kvStub = makeKvStub();
+        const mocks = makeSanityMocks();
+        mocks.getTeamPlayerPsdIds.mockReturnValue(
+          Effect.succeed(["501", "502"]),
+        );
+
+        const { result } = await once(
+          kvStub,
+          mocks,
+          perTeamPsd([team(1), team(2)], { 1: [] }),
+        );
+
+        expect(Either.isRight(result)).toBe(true);
+        expect(mocks.upsertTeam).not.toHaveBeenCalled();
+        expect(await idsIn(kvStub, "sync:cycle-player-ids")).toEqual([
+          "501",
+          "502",
+        ]);
+        expect(await idsIn(kvStub, "sync:cycle-team-ids")).toEqual(["1"]);
+        expect(await kvStub.get(MARKER)).not.toBeNull();
+        expect(mocks.getTeamPlayerPsdIds).toHaveBeenCalledWith("1");
+      });
+
+      it("trusts a second consecutive empty roster: writes players [] and deletes the marker", async () => {
+        const kvStub = makeKvStub();
+        await kvStub.put(MARKER, "1");
+        const mocks = makeSanityMocks();
+        mocks.getTeamPlayerPsdIds.mockReturnValue(Effect.succeed(["501"]));
+
+        await once(kvStub, mocks, perTeamPsd([team(1), team(2)], { 1: [] }));
+
+        expect(mocks.upsertTeam).toHaveBeenCalledWith(
+          expect.objectContaining({ psdId: "1", playerPsdIds: [] }),
+        );
+        expect(await kvStub.get(MARKER)).toBeNull();
+        // trusted: the old player is NOT protected from the cycle-end archive
+        expect(await idsIn(kvStub, "sync:cycle-player-ids")).toEqual([]);
+      });
+
+      it("clears the marker when the roster is non-empty again", async () => {
+        const kvStub = makeKvStub();
+        await kvStub.put(MARKER, "1");
+        const mocks = makeSanityMocks();
+
+        await once(
+          kvStub,
+          mocks,
+          perTeamPsd([team(1), team(2)], { 1: [player(501)] }),
+        );
+
+        expect(mocks.upsertTeam).toHaveBeenCalledWith(
+          expect.objectContaining({ playerPsdIds: ["501"] }),
+        );
+        expect(await kvStub.get(MARKER)).toBeNull();
+      });
+
+      it("writes an empty team normally when Sanity holds no player for it either", async () => {
+        const kvStub = makeKvStub();
+        const mocks = makeSanityMocks(); // getTeamPlayerPsdIds → []
+
+        await once(kvStub, mocks, perTeamPsd([team(1), team(2)], { 1: [] }));
+
+        expect(mocks.upsertTeam).toHaveBeenCalledOnce();
+        expect(await kvStub.get(MARKER)).toBeNull();
+      });
+    });
+
+    describe("member isolation", () => {
+      const failOn =
+        (...failing: string[]) =>
+        (doc: { psdId: string }) =>
+          failing.includes(doc.psdId)
+            ? Effect.fail(new SanityMutationError("boom"))
+            : Effect.succeed(undefined as void);
+
+      it("finishes the team around a failed NEW player: left out of upsertTeam, kept in the accumulator, cursor advances, run fails naming the psd id", async () => {
+        const kvStub = makeKvStub();
+        const mocks = makeSanityMocks();
+        mocks.upsertPlayer.mockImplementation(failOn("502") as never);
+
+        const { result } = await once(
+          kvStub,
+          mocks,
+          perTeamPsd([team(1), team(2)], {
+            1: [player(501), player(502), player(503)],
+          }),
+        );
+
+        expect(mocks.upsertPlayer).toHaveBeenCalledTimes(3);
+        expect(mocks.upsertTeam).toHaveBeenCalledWith(
+          expect.objectContaining({ playerPsdIds: ["501", "503"] }),
+        );
+        expect(await idsIn(kvStub, "sync:cycle-player-ids")).toEqual([
+          "501",
+          "502",
+          "503",
+        ]);
+        expect(await kvStub.get("sync:team-cursor")).toBe("1");
+        expect(Either.isLeft(result)).toBe(true);
+        if (Either.isLeft(result)) expect(String(result.left)).toContain("502");
+      });
+
+      it("keeps a failed EXISTING player in the team (its doc is there for the strong reference)", async () => {
+        const kvStub = makeKvStub();
+        const mocks = makeSanityMocks();
+        mocks.getPlayersImageState.mockReturnValue(
+          Effect.succeed(
+            new Map([["502", { psdImageUrl: null, hasPsdImage: false }]]),
+          ),
+        );
+        mocks.upsertPlayer.mockImplementation(failOn("502") as never);
+
+        const { result } = await once(
+          kvStub,
+          mocks,
+          perTeamPsd([team(1), team(2)], { 1: [player(501), player(502)] }),
+        );
+
+        expect(mocks.upsertTeam).toHaveBeenCalledWith(
+          expect.objectContaining({ playerPsdIds: ["501", "502"] }),
+        );
+        expect(Either.isLeft(result)).toBe(true);
+      });
+
+      it("isolates staff the same way", async () => {
+        const kvStub = makeKvStub();
+        const mocks = makeSanityMocks();
+        mocks.upsertStaff.mockImplementation(failOn("601") as never);
+
+        const { result } = await once(
+          kvStub,
+          mocks,
+          perTeamPsd(
+            [team(1), team(2)],
+            { 1: [player(501)] },
+            { 1: [staffer(601), staffer(602)] },
+          ),
+        );
+
+        expect(mocks.upsertStaff).toHaveBeenCalledTimes(2);
+        expect(mocks.upsertTeam).toHaveBeenCalledWith(
+          expect.objectContaining({ staffPsdIds: ["602"] }),
+        );
+        expect(await idsIn(kvStub, "sync:cycle-staff-ids")).toEqual([
+          "601",
+          "602",
+        ]);
+        expect(await kvStub.get("sync:team-cursor")).toBe("1");
+        expect(Either.isLeft(result)).toBe(true);
+        if (Either.isLeft(result)) expect(String(result.left)).toContain("601");
+      });
+    });
+
+    it("advances the cursor without accumulating the team, then fails, when the member fetch fails", async () => {
+      const kvStub = makeKvStub();
+      const mocks = makeSanityMocks();
+      const psd: PsdTeamClientInterface = {
+        ...perTeamPsd([team(1), team(2)], {}),
+        getRawMembers: () =>
+          Effect.fail(new PsdTeamClientError("PSD down")) as never,
+      };
+
+      const { result } = await once(kvStub, mocks, psd);
+
+      expect(Either.isLeft(result)).toBe(true);
+      expect(await kvStub.get("sync:team-cursor")).toBe("1");
+      expect(mocks.upsertTeam).not.toHaveBeenCalled();
+      expect(await idsIn(kvStub, "sync:cycle-team-ids")).toEqual([]);
+    });
+
+    describe("manual runs (SYNC_MANUAL_RUN)", () => {
+      it("on the last index: no reconciliation, no accumulator write, no accumulator clear, cursor still advances", async () => {
+        const kvStub = makeKvStub();
+        await kvStub.put("sync:team-cursor", "1");
+        await kvStub.put("sync:cycle-team-ids", JSON.stringify(["1"]));
+        await kvStub.put("sync:cycle-player-ids", JSON.stringify(["101"]));
+        kvStub.put.mockClear();
+        const mocks = makeSanityMocks();
+        mocks.getActivePlayerPsdIds.mockReturnValue(
+          Effect.succeed(["101", "999"]),
+        );
+
+        const { result } = await once(
+          kvStub,
+          mocks,
+          perTeamPsd([team(1), team(2)], { 2: [player(102)] }),
+          { SYNC_MANUAL_RUN: "1" },
+        );
+
+        expect(Either.isRight(result)).toBe(true);
+        expect(mocks.upsertTeam).toHaveBeenCalledOnce();
+        expect(mocks.archivePlayers).not.toHaveBeenCalled();
+        expect(mocks.archiveTeams).not.toHaveBeenCalled();
+        // The per-team checkpoint is not cycle state; only these are.
+        const written = kvStub.put.mock.calls.map((c) => c[0]);
+        expect(written).toContain("sync:team-cursor");
+        expect(
+          written.filter(
+            (k) => k.startsWith("sync:cycle-") || k.startsWith("sync:empty-"),
+          ),
+        ).toEqual([]);
+        expect(kvStub.delete).not.toHaveBeenCalledWith("sync:cycle-team-ids");
+        expect(await kvStub.get("sync:cycle-team-ids")).toBe('["1"]');
+        expect(await kvStub.get("sync:team-cursor")).toBe("0");
+      });
+
+      it("a manual run on a zero roster neither accumulates nor writes the marker, but still holds the team back", async () => {
+        const kvStub = makeKvStub();
+        const mocks = makeSanityMocks();
+        mocks.getTeamPlayerPsdIds.mockReturnValue(Effect.succeed(["501"]));
+
+        await once(kvStub, mocks, perTeamPsd([team(1), team(2)], { 1: [] }), {
+          SYNC_MANUAL_RUN: "1",
+        });
+
+        expect(mocks.upsertTeam).not.toHaveBeenCalled();
+        // The per-team checkpoint is not cycle state; only these are.
+        const written = kvStub.put.mock.calls.map((c) => c[0]);
+        expect(written).toContain("sync:team-cursor");
+        expect(
+          written.filter(
+            (k) => k.startsWith("sync:cycle-") || k.startsWith("sync:empty-"),
+          ),
+        ).toEqual([]);
+      });
+
+      it('only the literal "1" counts', async () => {
+        const kvStub = makeKvStub();
+        await kvStub.put("sync:team-cursor", "1");
+        const mocks = makeSanityMocks();
+        mocks.getActivePlayerPsdIds.mockReturnValue(
+          Effect.succeed(["102", "a", "b", "c", "d", "e", "f", "g", "h", "i"]),
+        );
+
+        await once(
+          kvStub,
+          mocks,
+          perTeamPsd([team(1), team(2)], { 2: [player(102)] }),
+          { SYNC_MANUAL_RUN: "true" },
+        );
+
+        // reconciliation ran (cycle-end keys cleared)
+        expect(kvStub.delete).toHaveBeenCalledWith("sync:cycle-team-ids");
+      });
     });
   });
 });

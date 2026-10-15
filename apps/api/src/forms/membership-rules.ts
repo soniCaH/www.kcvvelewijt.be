@@ -1,27 +1,10 @@
-import { MEDICAL_CERT_ROLES, type MembershipRequest } from "@kcvv/api-contract";
-
-/**
- * Age in whole years on `on` for a `YYYY-MM-DD` birth date.
- *
- * ponytail: UTC date arithmetic, no tz library. A one-day timezone edge is
- * immaterial to an 18-year membership threshold.
- */
-export function ageOn(birthDate: string, on: Date): number {
-  const parts = birthDate.split("-");
-  const year = Number(parts[0]);
-  const month = Number(parts[1]);
-  const day = Number(parts[2]);
-  let age = on.getUTCFullYear() - year;
-  const monthDiff = on.getUTCMonth() + 1 - month;
-  if (monthDiff < 0 || (monthDiff === 0 && on.getUTCDate() < day)) {
-    age -= 1;
-  }
-  return age;
-}
-
-export function isMinorOn(birthDate: string, on: Date): boolean {
-  return ageOn(birthDate, on) < 18;
-}
+import {
+  INVALID_BIRTH_DATE_MESSAGE,
+  isMinorOn,
+  isPlausibleBirthDate,
+  MEDICAL_CERT_ROLES,
+  type MembershipRequest,
+} from "@kcvv/api-contract";
 
 /**
  * Cross-field business rules that depend on the submit date (the Effect Schema
@@ -32,9 +15,12 @@ export function validateMembershipRules(
   now: Date,
 ): Record<string, string> {
   const errors: Record<string, string> = {};
-  const minor = isMinorOn(payload.birthDate, now);
+  const plausible = isPlausibleBirthDate(payload.birthDate, now);
 
-  if (minor) {
+  if (!plausible) {
+    // Skip the minor rules: an implausible date says nothing about age.
+    errors.birthDate = INVALID_BIRTH_DATE_MESSAGE;
+  } else if (isMinorOn(payload.birthDate, now)) {
     if (!payload.parentEmail) {
       errors.parentEmail =
         "Verplicht voor minderjarigen: vul het e-mailadres van een ouder of voogd in.";

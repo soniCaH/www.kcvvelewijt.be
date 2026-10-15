@@ -63,13 +63,13 @@ jobs:
       web: ${{ steps.filter.outputs.web }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Detect e2e-relevant paths
         id: filter
-        uses: dorny/paths-filter@v4.0.3
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         with:
           filters: |
             web:
@@ -88,22 +88,22 @@ jobs:
     timeout-minutes: 30
     needs: [changes]
     # This workflow only ever triggers on `pull_request` now (see `on:`
-    # above), so `github.event_name != 'pull_request'` can never be true —
-    # simplified to the draft guard plus the `changes` output.
+    # above), so there is no `event_name` branch — just the draft guard plus
+    # the `changes` output.
     #
-    # Known gap, same shape as `ci.yml`'s `quality-checks`: if `changes`
-    # itself fails (a `paths-filter` 403/5xx), its output is unset, this `if:`
-    # evaluates false, the job is skipped, and GitHub counts a skipped
-    # required check as passing — a web PR could merge with E2E never having
-    # run. `ci.yml`'s `visual-regression-gate` closes the equivalent hole with
-    # a dedicated `if: always()` aggregator job that fails on `changes`'
-    # failure; `quality-checks` (E2E's actual peer — one job, not a matrix)
-    # has no such aggregator and carries the same gap today. Mirroring
-    # `quality-checks` here keeps E2E consistent with the required check it
-    # actually resembles, not `visual-regression-gate`'s different shape.
+    # If `changes` itself fails (a `paths-filter` 403/5xx), the first step
+    # below fails this job, so the required check reports failure instead of
+    # being skipped (GitHub counts a skipped required check as passing; #3473).
+    # `quality-checks` in `ci.yml` has the same shape.
+    # `!cancelled()`, not `always()`: on cancel-in-progress GitHub re-evaluates
+    # `if` for running jobs and keeps any whose condition is true — `always()`
+    # would let a superseded 25-min run finish. (docs: "Workflow cancellation")
+    # A plain `if:` gets an implicit `success()`, so a failed `changes` would
+    # SKIP this job — and a skipped required check counts as passing (#3473).
     if: |
-      needs.changes.outputs.web == 'true' &&
-      github.event.pull_request.draft == false
+      !cancelled() &&
+      github.event.pull_request.draft == false &&
+      (needs.changes.result != 'success' || needs.changes.outputs.web == 'true')
     environment: Preview
     # Pinned to match @playwright/test in apps/web/package.json (1.60.0) and the
     # local Docker image used by the visual-regression suite. Bump all of these
@@ -122,16 +122,24 @@ jobs:
       NEXT_PUBLIC_SANITY_DATASET: staging
 
     steps:
+      - name: Fail when change detection did not succeed
+        if: needs.changes.result != 'success'
+        env:
+          CHANGES_RESULT: ${{ needs.changes.result }}
+        run: |
+          echo "::error::changes job result was '${CHANGES_RESULT}'; refusing to skip a required check"
+          exit 1
+
       - name: Checkout code
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v6.0.10
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           run_install: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v7.1.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
@@ -167,7 +175,7 @@ jobs:
       # produced on every CI run, so it uploads every time, not only on red.
       - name: Upload Playwright report
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v7.0.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: playwright-report
           path: apps/web/playwright-report/
@@ -176,7 +184,7 @@ jobs:
 
       - name: Upload trace + screenshots
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v7.0.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: playwright-test-results
           path: apps/web/test-results/

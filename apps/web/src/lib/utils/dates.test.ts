@@ -5,6 +5,7 @@ import {
   formatMatchDayMonth,
   formatMatchWidgetDate,
   isMatchDay,
+  kickoffMs,
   toDisplayZone,
   toMatchDisplayZone,
 } from "./dates";
@@ -194,5 +195,12 @@ describe("isMatchDay", () => {
 
   it("is false for an invalid date rather than throwing", () => {
     expect(isMatchDay("not-a-date", "2026-08-08")).toBe(false);
+  });
+});
+
+describe("kickoffMs", () => {
+  it("is the real instant of a Belgian 20:00 CEST kickoff, two hours after its raw UTC fields", () => {
+    const date = new Date(Date.UTC(2026, 7, 3, 20, 0));
+    expect(kickoffMs({ date })).toBe(Date.UTC(2026, 7, 3, 18, 0));
   });
 });

@@ -39,17 +39,24 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+    # The PR head the maintainer approved: read here, seconds after the
+    # comment, before the (slower) baseline job starts.
+    outputs:
+      head_sha: ${{ steps.head.outputs.sha }}
     steps:
       - name: Verify PR is from the same repo (no forks)
+        id: head
         env:
           GH_TOKEN: ${{ github.token }}
           PR_URL: ${{ github.event.issue.pull_request.url }}
+          THIS_REPO: ${{ github.repository }}
         run: |
           PR_REPO=$(gh api "$PR_URL" --jq '.head.repo.full_name')
-          if [ "$PR_REPO" != "${{ github.repository }}" ]; then
+          if [ "$PR_REPO" != "$THIS_REPO" ]; then
             echo "::error::Baseline updates are not supported for fork PRs (PR head: $PR_REPO)."
             exit 1
           fi
+          echo "sha=$(gh api "$PR_URL" --jq '.head.sha')" >> "$GITHUB_OUTPUT"
 
       - name: Verify commenter is a maintainer
         env:
@@ -61,7 +68,7 @@ jobs:
           esac
 
       - name: React to comment
-        uses: actions/github-script@v9.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             await github.rest.reactions.createForIssueComment({
@@ -100,7 +107,9 @@ jobs:
     steps:
       - name: Resolve PR head
         id: pr
-        uses: actions/github-script@v9.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          APPROVED_SHA: ${{ needs.trigger-check.outputs.head_sha }}
         with:
           script: |
             const pr = await github.rest.pulls.get({
@@ -108,23 +117,38 @@ jobs:
               repo: context.repo.repo,
               pull_number: context.issue.number,
             });
+            const headSha = pr.data.head.sha;
+
+            // The maintainer approved the head that trigger-check recorded
+            // when their comment arrived. Refuse if the head differs now: a
+            // later push or force-push would run code nobody reviewed, in a
+            // job that holds a write token.
+            const approvedSha = process.env.APPROVED_SHA;
+            if (headSha !== approvedSha) {
+              core.setFailed(
+                `The PR head moved from ${approvedSha} to ${headSha} after the triggering comment. Comment again to update baselines for the current head.`,
+              );
+              return;
+            }
+
             core.setOutput('ref', pr.data.head.ref);
             core.setOutput('repo', pr.data.head.repo.full_name);
-            core.setOutput('sha', pr.data.head.sha);
+            core.setOutput('sha', headSha);
 
       - name: Mint an installation token
         id: app-token
-        uses: actions/create-github-app-token@v3.2.0
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
           client-id: ${{ vars.KCVV_APP_CLIENT_ID }}
           private-key: ${{ secrets.KCVV_APP_PRIVATE_KEY }}
           # This job only commits baseline PNGs to the PR branch. The comment
           # reactions below run on `github.token`, not this one, so `contents`
-          # is the whole requirement.
+          # is the whole requirement. The token reaches only the push step,
+          # through `env:`; it is never written to .git/config.
           permission-contents: write
 
       - name: Checkout PR branch (pinned to resolved SHA)
-        uses: actions/checkout@v7.0.1
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ steps.pr.outputs.repo }}
           # Pin to the SHA we resolved above instead of the mutable branch ref —
@@ -134,16 +158,19 @@ jobs:
           # push time (git push will fail non-fast-forward if the branch raced
           # ahead, which is the safe outcome).
           ref: ${{ steps.pr.outputs.sha }}
-          token: ${{ steps.app-token.outputs.token }}
+          # Same-repo PR (trigger-check refuses forks), so the default token
+          # can read it. The App token stays out of .git/config while the
+          # PR's install, build and test code runs.
+          persist-credentials: false
           fetch-depth: 0
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v6.0.10
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           run_install: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v7.1.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: ".nvmrc"
           cache: "pnpm"
@@ -201,6 +228,11 @@ jobs:
         env:
           BOT_USER: kcvv-elewijt-ci-bot[bot]
           BOT_EMAIL: 321706059+kcvv-elewijt-ci-bot[bot]@users.noreply.github.com
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          PR_REF: ${{ steps.pr.outputs.ref }}
+          COMMENTER: ${{ github.event.comment.user.login }}
+          COMMENT_URL: ${{ github.event.comment.html_url }}
+          THIS_REPO: ${{ github.repository }}
         run: |
           # actions/checkout writes safe.directory under a temp HOME that is
           # discarded after the step — re-register so git accepts the workspace.
@@ -215,12 +247,12 @@ jobs:
           # No [skip ci] — visual-regression must re-run to verify.
           git commit -m "chore(vr): update baselines
 
-          Triggered by @${{ github.event.comment.user.login }} via comment ${{ github.event.comment.html_url }}."
-          git push origin "HEAD:${{ steps.pr.outputs.ref }}"
+          Triggered by @${COMMENTER} via comment ${COMMENT_URL}."
+          git push "https://x-access-token:${APP_TOKEN}@github.com/${THIS_REPO}.git" "HEAD:refs/heads/${PR_REF}"
 
       - name: React success
         if: success()
-        uses: actions/github-script@v9.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             await github.rest.reactions.createForIssueComment({
@@ -232,7 +264,7 @@ jobs:
 
       - name: React failure
         if: failure()
-        uses: actions/github-script@v9.0.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             await github.rest.reactions.createForIssueComment({

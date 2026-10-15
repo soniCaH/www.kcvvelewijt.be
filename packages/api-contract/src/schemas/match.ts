@@ -62,7 +62,7 @@ export type MatchStatus = S.Schema.Type<typeof MatchStatus>;
 export const CompetitionType = S.Literal("league", "cup", "friendly", "tournament", "other");
 export type CompetitionType = S.Schema.Type<typeof CompetitionType>;
 
-/** Shared fields between Match and MatchDetail */
+/** Shared fields between Match and MatchDetail (`is_home` is Match-only) */
 const BaseMatchFields = {
   id: S.Finite,
   date: DateFromStringOrDate,
@@ -78,8 +78,6 @@ const BaseMatchFields = {
   kcvv_team_id: S.optional(S.Finite),
   /** Human-readable label for the KCVV team, derived from its own PSD name — age decides the two senior sides' "A-Ploeg"/"B-Ploeg" suffix, and is the fallback label when the name is blank or just "KCVVE" (e.g. "A-Ploeg", "U8 Wit", "U21") */
   kcvv_team_label: S.optional(S.String),
-  /** Whether the KCVV team is playing at home. Computed by BFF from homeTeamId === teamId. */
-  is_home: S.optional(S.Boolean),
   /**
    * Whether this fixture is a pitch-reservation placeholder — both sides are
    * the same club (#2606). The club enters these deliberately, meaning "this
@@ -102,14 +100,13 @@ const BaseMatchFields = {
 };
 
 /** Normalized match for UI consumption */
-export class Match extends S.Class<Match>("Match")(BaseMatchFields) {}
+export class Match extends S.Class<Match>("Match")({
+  ...BaseMatchFields,
+  /** Whether the KCVV team is playing at home. Computed by BFF from homeTeamId === teamId. Never set on a MatchDetail — the BFF leaves it off on purpose. */
+  is_home: S.optional(S.Boolean),
+}) {}
 
 export const MatchesArray = S.Array(Match);
-
-export class MatchesResponse extends S.Class<MatchesResponse>("MatchesResponse")({
-  matches: MatchesArray,
-  total: S.optional(S.Finite),
-}) {}
 
 /** Card type for match events */
 export const CardType = S.Literal("yellow", "red", "double_yellow");

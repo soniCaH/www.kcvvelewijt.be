@@ -1,7 +1,7 @@
 import { Effect } from "effect";
 import { HttpApiBuilder } from "@effect/platform";
 import { PsdApi, OpponentHistory } from "@kcvv/api-contract";
-import { PsdService } from "../psd/service";
+import { PsdService, isPartialFanout } from "../psd/service";
 import { shouldServeStale, type BffError } from "../psd/errors";
 import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
 import { WorkerEnvTag } from "../env";
@@ -37,7 +37,7 @@ export const getOpponentHistoryHandler = (
     fetchHistory,
     TTL.OPPONENT_HISTORY,
     TTL.OPPONENT_HISTORY * 2,
-    { shouldServeStale },
+    { shouldServeStale, isPartial: isPartialFanout },
   );
 };
 

@@ -12,6 +12,10 @@ import {
 } from "../test/vr/viewport-scoping.ts";
 import { animationsNotOnFinalFrame } from "../test/vr/animation-end-frame.ts";
 import { STRUCTURAL_ASSERTIONS } from "../test/vr/structural-assertions.ts";
+import {
+  type ImageSample,
+  unpaintedImages,
+} from "../test/vr/unpainted-images.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -119,9 +123,23 @@ const FIXED_NOW_MS = Date.parse(VR_FROZEN_NOW_ISO);
 // Seed for the mulberry32 PRNG below — any positive 32-bit integer works;
 // changing it would invalidate every baseline that exercises Math.random.
 const PRNG_SEED = 0x1234abcd;
-// Cap on the per-viewport image-load wait. A broken image must not hang the
-// runner, but we still need long enough for a real srcset swap to settle.
+// Two-stage image budget (#3466). `freshImageDecodes` refetches every photo at
+// each capture viewport, so on a loaded CI runner a 190-270 KB JPG regularly
+// misses a tight cap. Stage 1: `IMAGE_LOAD_TIMEOUT_MS` caps each wait (load,
+// then decode) of the first `waitForImagesSettled` — long enough for a real
+// srcset swap to settle on a quiet machine. Then `collectImageSamples` checks
+// every visible image; any still unpainted gets stage 2,
+// `IMAGE_PAINT_RETRY_TIMEOUT_MS`, per wait, for those images only. A visible
+// image still unpainted after both stages FAILS the story before
+// `page.screenshot()` — a capped wait never falls through to a half-loaded
+// capture. Far under the story's `--testTimeout 120000`. Every wait that ends
+// on its timer warns the URLs still pending.
 const IMAGE_LOAD_TIMEOUT_MS = 1500;
+const IMAGE_PAINT_RETRY_TIMEOUT_MS = 10000;
+// How long `collectImageSamples` waits for an already-loaded image's
+// `decode()` to confirm "ready to paint". A decoded image answers at once; a
+// miss here only sends the image to stage 2, which waits properly.
+const IMAGE_DECODE_PROBE_MS = 500;
 // Cap on each animation-frame wait in `postVisit`. A frame normally lands in
 // ~16 ms, but `requestAnimationFrame` never fires while Chromium is not
 // painting. Past the cap we take the screenshot anyway: a missed frame is a
@@ -403,36 +421,54 @@ function waitTwoFrames(frameTimeoutMs: number) {
 }
 
 // Runs in the page context (self-contained, like `waitForFontsSettled`):
-// flips lazy images to eager, then waits — capped at `loadTimeoutMs` per
-// stage — for every image to load and decode. Called once at the load
-// viewport, before the capture loop resizes anything, and again per viewport.
-async function waitForImagesSettled(loadTimeoutMs: number) {
+// flips lazy images to eager, then waits for every image to load and decode.
+// `budgetMs` caps each wait (load, then decode) on its own. Never silent
+// (#3466): a wait that ends on its timer warns the URLs still pending. Called
+// once per capture viewport, then again with the retry budget for whatever
+// `collectImageSamples` finds unpainted — already-decoded images settle
+// instantly, so the second call effectively waits on the pending ones only.
+async function waitForImagesSettled(budgetMs: number) {
+  // Resolves true when `work` finished, false when the cap won.
+  const finishedInTime = async (work: Promise<unknown>) => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timedOut = new Promise<false>((resolve) => {
+      timer = setTimeout(() => resolve(false), budgetMs);
+    });
+    const done = await Promise.race([work.then(() => true as const), timedOut]);
+    clearTimeout(timer);
+    return done;
+  };
+
   for (const img of Array.from(document.images)) {
     if (img.loading === "lazy") img.loading = "eager";
   }
-  const imageWaits = Array.from(document.images)
-    .filter((img) => !img.complete)
-    .map(
-      (img) =>
-        new Promise<void>((resolve) => {
-          img.addEventListener("load", () => resolve(), {
-            once: true,
-          });
-          img.addEventListener(
-            "error",
-            () => {
-              console.warn(`[VR] image failed to load: ${img.src}`);
-              resolve();
-            },
-            { once: true },
-          );
-        }),
+  const unloaded = Array.from(document.images).filter((img) => !img.complete);
+  const loadsInTime = await finishedInTime(
+    Promise.all(
+      unloaded.map(
+        (img) =>
+          new Promise<void>((resolve) => {
+            img.addEventListener("load", () => resolve(), { once: true });
+            img.addEventListener(
+              "error",
+              () => {
+                console.warn(`[VR] image failed to load: ${img.src}`);
+                resolve();
+              },
+              { once: true },
+            );
+          }),
+      ),
+    ),
+  );
+  if (!loadsInTime) {
+    console.warn(
+      `[VR] image load wait gave up after ${budgetMs} ms, still pending: ` +
+        unloaded
+          .filter((img) => !img.complete)
+          .map((img) => img.currentSrc || img.src)
+          .join(", "),
     );
-  if (imageWaits.length > 0) {
-    await Promise.race([
-      Promise.all(imageWaits),
-      new Promise((resolve) => setTimeout(resolve, loadTimeoutMs)),
-    ]);
   }
   // `img.complete === true` (and the `load` event having fired) only
   // means bytes arrived — the bitmap may still be undecoded and not
@@ -446,16 +482,68 @@ async function waitForImagesSettled(loadTimeoutMs: number) {
   // tiles inherits the same guarantee.
   // Capped like the load wait above: `decode()` can stay pending,
   // and `allSettled` alone waits for every one of them.
-  await Promise.race([
+  const undecoded = new Set(Array.from(document.images));
+  const decodesInTime = await finishedInTime(
     Promise.allSettled(
       Array.from(document.images).map((img) =>
-        img.decode().catch(() => {
-          console.warn(`[VR] image failed to decode: ${img.src}`);
-        }),
+        img
+          .decode()
+          .catch(() => {
+            console.warn(`[VR] image failed to decode: ${img.src}`);
+          })
+          .finally(() => undecoded.delete(img)),
       ),
     ),
-    new Promise((resolve) => setTimeout(resolve, loadTimeoutMs)),
-  ]);
+  );
+  if (!decodesInTime) {
+    console.warn(
+      `[VR] image decode wait gave up after ${budgetMs} ms, still pending: ` +
+        Array.from(undecoded)
+          .map((img) => img.currentSrc || img.src)
+          .join(", "),
+    );
+  }
+}
+
+// Runs in the page context, so it is self-contained and returns plain data;
+// `unpaintedImages` (test/vr/unpainted-images.ts) decides which of these are
+// visible and not painted. `decoded` is a short probe: a decoded bitmap answers
+// `decode()` at once, anything slower goes to the retry wait.
+function collectImageSamples(decodeProbeMs: number): Promise<ImageSample[]> {
+  return Promise.all(
+    Array.from(document.images).map(async (img) => {
+      const rect = img.getBoundingClientRect();
+      const style = getComputedStyle(img);
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const outcome = await Promise.race([
+        img.decode().then(
+          () => true as const,
+          () => false as const,
+        ),
+        new Promise<"timeout">((resolve) => {
+          timer = setTimeout(() => resolve("timeout"), decodeProbeMs);
+        }),
+      ]);
+      clearTimeout(timer);
+      if (outcome === "timeout") {
+        console.warn(
+          `[VR] image decode probe gave up after ${decodeProbeMs} ms: ` +
+            (img.currentSrc || img.src),
+        );
+      }
+      const decoded = outcome === true;
+      return {
+        currentSrc: img.currentSrc || img.src,
+        width: rect.width,
+        height: rect.height,
+        display: style.display,
+        visibility: style.visibility,
+        complete: img.complete,
+        naturalWidth: img.naturalWidth,
+        decoded,
+      };
+    }),
+  );
 }
 
 // Replaces `@storybook/test-runner`'s vendored `waitForPageReady` (#3137,
@@ -855,10 +943,10 @@ const config: TestRunnerConfig = {
         await page.evaluate(waitForFontsSettled, FONT_LOAD_TIMEOUT_MS);
         // Viewport changes can re-trigger Next/Image's responsive `srcset`,
         // swapping in a different file. Without this wait the screenshot races
-        // the swap and the same story flickers between runs. Capped at
-        // IMAGE_LOAD_TIMEOUT_MS so a story with a broken image doesn't hang
-        // the whole runner — failures emit a console.warn so the cause is
-        // discoverable from CI logs without re-running locally.
+        // the swap and the same story flickers between runs. Two capped
+        // stages (see IMAGE_LOAD_TIMEOUT_MS) so a broken image can't hang the
+        // runner — each give-up emits a console.warn naming the pending URLs,
+        // and a visible image still unpainted fails the story below.
         // `next/image` lazy-loads via the `loading="lazy"` attribute AND an
         // intersection observer. Flipping the attribute alone does not
         // retrigger the IO; CI screenshots showed below-fold images still
@@ -878,6 +966,30 @@ const config: TestRunnerConfig = {
             // per-image waits, which are what actually gate the screenshot.
           });
         await page.evaluate(waitForImagesSettled, IMAGE_LOAD_TIMEOUT_MS);
+        // The wait above is capped and only warns when it gives up, so check
+        // what is actually on screen before capturing (#3466). Stage 2 for any
+        // visible image still unpainted; still unpainted after that fails the
+        // story — a half-loaded page is never screenshotted, and never retried
+        // (a capture retry could hide a real slowdown).
+        let unpainted = unpaintedImages(
+          await page.evaluate(collectImageSamples, IMAGE_DECODE_PROBE_MS),
+        );
+        if (unpainted.length > 0) {
+          await page.evaluate(
+            waitForImagesSettled,
+            IMAGE_PAINT_RETRY_TIMEOUT_MS,
+          );
+          unpainted = unpaintedImages(
+            await page.evaluate(collectImageSamples, IMAGE_DECODE_PROBE_MS),
+          );
+        }
+        if (unpainted.length > 0) {
+          throw new Error(
+            `[VR] Story "${context.id}": ${unpainted.length} image(s) not ` +
+              `painted at ${name} after ${IMAGE_LOAD_TIMEOUT_MS} + ` +
+              `${IMAGE_PAINT_RETRY_TIMEOUT_MS} ms: ${unpainted.join(", ")}`,
+          );
+        }
         // Wait for two animation frames so that ResizeObserver callbacks
         // (e.g. useScrollHint in FilterTabs) and the React re-renders they
         // trigger have been painted before the screenshot is taken.

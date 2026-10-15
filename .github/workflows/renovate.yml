@@ -16,8 +16,10 @@ on:
   # Daily, even though renovate.json gates normal updates to Monday: vulnerability
   # alerts bypass that schedule, so a daily tick keeps security fixes at <24h
   # instead of <7d. Runs with nothing to do finish in about a minute.
+  # 05:00 UTC is 06:00 CET / 07:00 CEST: the Monday run starts inside the Monday
+  # Brussels window even when GitHub starts it up to 6 h late.
   schedule:
-    - cron: "0 20 * * *" # 21:00 CET / 22:00 CEST — inside the Monday window
+    - cron: "0 5 * * *" # 06:00 CET / 07:00 CEST — inside the Monday window
   workflow_dispatch:
     inputs:
       logLevel:
@@ -58,7 +60,7 @@ jobs:
       # suspended the way the old `kcvv-vr-bot` user was on 2026-08-27.
       - name: Mint an installation token
         id: app-token
-        uses: actions/create-github-app-token@v3.2.0
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
           client-id: ${{ vars.KCVV_APP_CLIENT_ID }}
           private-key: ${{ secrets.KCVV_APP_PRIVATE_KEY }}

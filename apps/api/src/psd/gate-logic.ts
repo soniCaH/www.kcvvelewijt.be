@@ -37,12 +37,22 @@ export interface GateLogicOptions {
    * lease the next `beginFlight` reclaims leadership. Default 15 s — well above a
    * throttled ~19-call fan-out (~4 s at 5/s), well below permanent. */
   readonly leaseMs?: number;
+  /** Called after every change to the daily count — the DO persists it (#3490). */
+  readonly onCount?: (count: DailyCount) => void;
+}
+
+/** PSD calls granted on one UTC day (`YYYY-MM-DD`). */
+export interface DailyCount {
+  readonly day: string;
+  readonly count: number;
 }
 
 interface Flight {
   readonly promise: Promise<void>;
   readonly resolve: () => void;
   readonly startedAt: number;
+  /** Owner token handed to the leader; only it may end this flight (#3467). */
+  readonly token: number;
 }
 
 const realSleep = (ms: number): Promise<void> =>
@@ -72,11 +82,34 @@ export class GateLogic {
   /** key → the in-flight leadership record. */
   private readonly inFlight = new Map<string, Flight>();
 
+  private nextToken = 1;
+
+  private daily: DailyCount = { day: "", count: 0 };
+  private readonly onCount?: (count: DailyCount) => void;
+
   constructor(opts: GateLogicOptions = {}) {
     this.rate = opts.ratePerSecond ?? 5;
     this.now = opts.now ?? (() => Date.now());
     this.sleep = opts.sleep ?? realSleep;
     this.leaseMs = opts.leaseMs ?? 15_000;
+    this.onCount = opts.onCount;
+  }
+
+  // Inline UTC day: this file is bundled into the DO, which must not import
+  // Effect or the daily-ceiling helper.
+  private today(): string {
+    return new Date(this.now()).toISOString().slice(0, 10);
+  }
+
+  /** Today's PSD-call count (grants of `acquireToken`). Takes no token and
+   * counts nothing — the on-demand budget reads it (#3468, #3490). */
+  getDailyCount(): number {
+    return this.daily.day === this.today() ? this.daily.count : 0;
+  }
+
+  /** Resume a persisted count after a DO restart; another day's is dropped. */
+  restoreCount(saved: DailyCount): void {
+    if (saved.day === this.today()) this.daily = saved;
   }
 
   /** A flight whose lease has expired is treated as abandoned (dead leader). */
@@ -87,38 +120,59 @@ export class GateLogic {
   /**
    * Resolve when a PSD-call slot is available, consuming it. Global ≤rate/s.
    * Callers `await` this immediately before every PSD fetch. An idle gate grants
-   * immediately; sustained demand is spaced 1/rate seconds apart.
+   * immediately; sustained demand is spaced 1/rate seconds apart. Each grant
+   * is one PSD call and bumps the daily count (#3490); counting at the grant,
+   * not the request, keeps a queued waiter that never gets a slot uncounted.
    */
   acquireToken(): Promise<void> {
     const mine = this.slot;
     this.slot = mine.then(() => this.sleep(1000 / this.rate));
+    // A side-effect handler, not the returned promise: chaining the return
+    // would delay every caller by a tick. It runs before the caller resumes.
+    void mine.then(() => {
+      this.daily = {
+        day: this.today(),
+        count: this.getDailyCount() + 1,
+      };
+      this.onCount?.(this.daily);
+    });
     return mine;
   }
 
   /**
-   * Single-flight leadership. Returns `true` to the first caller for `key`
-   * (the leader — it must run the work, then call `endFlight(key)`), `false`
-   * to every concurrent caller (they should `awaitFlight(key)` or serve stale).
-   * A caller also becomes leader if the previous leader's lease has expired
-   * (dead-leader reclaim), waking anyone waiting on the abandoned flight.
+   * Single-flight leadership. Returns an owner token to the first caller for
+   * `key` (the leader — it must run the work, then call `endFlight(key, token)`),
+   * `null` to every concurrent caller (they should `awaitFlight(key)` or serve
+   * stale). A caller also becomes leader if the previous leader's lease has
+   * expired (dead-leader reclaim), waking anyone waiting on the abandoned flight.
    */
-  beginFlight(key: string): boolean {
+  beginFlight(key: string): number | null {
     const existing = this.inFlight.get(key);
-    if (this.isLive(existing)) return false;
+    if (this.isLive(existing)) return null;
     // No live leader (never claimed, or the previous lease expired) → take it.
     existing?.resolve(); // wake waiters stuck on the abandoned flight
     let resolve!: () => void;
     const promise = new Promise<void>((r) => {
       resolve = r;
     });
-    this.inFlight.set(key, { promise, resolve, startedAt: this.now() });
-    return true;
+    const token = this.nextToken++;
+    this.inFlight.set(key, {
+      promise,
+      resolve,
+      startedAt: this.now(),
+      token,
+    });
+    return token;
   }
 
-  /** Release the flight for `key`, waking every `awaitFlight` waiter. */
-  endFlight(key: string): void {
+  /**
+   * Release the flight for `key`, waking every `awaitFlight` waiter. A no-op
+   * unless `token` is the current flight's: a leader whose lease lapsed must
+   * not end the newer leader's flight (#3467).
+   */
+  endFlight(key: string, token: number): void {
     const flight = this.inFlight.get(key);
-    if (flight) {
+    if (flight?.token === token) {
       flight.resolve();
       this.inFlight.delete(key);
     }

@@ -13,7 +13,11 @@ vi.mock("../sanity/client", () => ({
 }));
 
 import { sanityClient } from "../sanity/client";
-import { ArticleRepository, ArticleRepositoryLive } from "./article.repository";
+import {
+  ArticleRepository,
+  ArticleRepositoryLive,
+  type ArticleRepositoryInterface,
+} from "./article.repository";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
@@ -41,7 +45,6 @@ function makeArticleListRow(
     subjects: null,
     firstTransferFact: null,
     firstEventFact: null,
-    body: [],
     ...overrides,
   };
 }
@@ -1191,5 +1194,59 @@ describe("ArticleRepository", () => {
         documentId: "player-1",
       });
     });
+  });
+
+  // Scheduled publish/unpublish is not a document save, so the
+  // `/api/revalidate` webhook never fires for it: the fetch entry's own
+  // lifetime is the only thing that bounds how long a scheduled change hides.
+  describe("publish-window cache", () => {
+    const person = { firstName: "Jan", lastName: "Peeters" };
+    const cases = [
+      [
+        "findAll",
+        (r: ArticleRepositoryInterface) => r.findAll(),
+        ["articles", "players", "staff"],
+      ],
+      [
+        "findBySlug",
+        (r: ArticleRepositoryInterface) => r.findBySlug("slug"),
+        ["articles", "players", "staff"],
+      ],
+      [
+        "findRelated",
+        (r: ArticleRepositoryInterface) => r.findRelated("doc-1"),
+        ["articles"],
+      ],
+      [
+        "findRelatedByPerson",
+        (r: ArticleRepositoryInterface) =>
+          r.findRelatedByPerson("doc-1", person),
+        ["articles"],
+      ],
+      [
+        "findByLinkedMatch",
+        (r: ArticleRepositoryInterface) => r.findByLinkedMatch("123"),
+        ["articles"],
+      ],
+    ] as const;
+
+    it.each(cases)(
+      "%s revalidates every 15 min with %j",
+      async (_n, read, tags) => {
+        mockFetch.mockResolvedValueOnce(_n === "findBySlug" ? null : []);
+
+        await runWithRepo(
+          Effect.gen(function* () {
+            return yield* read(yield* ArticleRepository);
+          }),
+        );
+
+        expect(mockFetch).toHaveBeenLastCalledWith(
+          expect.any(String),
+          expect.any(Object),
+          { next: { revalidate: 900, tags } },
+        );
+      },
+    );
   });
 });

@@ -336,7 +336,7 @@ describe("buildEventJsonLdInput", () => {
     });
   });
 
-  it("combines date + startTime into a local-floating ISO", () => {
+  it("stamps a summer startTime with the +02:00 Brussels offset", () => {
     const result = buildEventJsonLdInput(
       {
         ...baseArticle,
@@ -345,7 +345,43 @@ describe("buildEventJsonLdInput", () => {
       },
       SHARE_URL,
     );
-    expect(result?.startDate).toBe("2026-04-27T10:00:00");
+    expect(result?.startDate).toBe("2026-04-27T10:00:00.000+02:00");
+  });
+
+  it("stamps a winter startTime with the +01:00 Brussels offset", () => {
+    const result = buildEventJsonLdInput(
+      {
+        ...baseArticle,
+        articleType: "event",
+        body: [eventFact({ date: "2026-01-17", startTime: "10:00" })],
+      },
+      SHARE_URL,
+    );
+    expect(result?.startDate).toBe("2026-01-17T10:00:00.000+01:00");
+  });
+
+  it("falls back to the date-only value when startTime is malformed", () => {
+    const result = buildEventJsonLdInput(
+      {
+        ...baseArticle,
+        articleType: "event",
+        body: [eventFact({ date: "2026-04-27", startTime: "25:99" })],
+      },
+      SHARE_URL,
+    );
+    expect(result?.startDate).toBe("2026-04-27");
+  });
+
+  it("keeps the raw date when the date itself is unparseable", () => {
+    const result = buildEventJsonLdInput(
+      {
+        ...baseArticle,
+        articleType: "event",
+        body: [eventFact({ date: "not-a-date", startTime: "10:00" })],
+      },
+      SHARE_URL,
+    );
+    expect(result?.startDate).toBe("not-a-date");
   });
 
   it("omits endDate when neither endDate nor endTime is set", () => {
@@ -376,7 +412,7 @@ describe("buildEventJsonLdInput", () => {
       },
       SHARE_URL,
     );
-    expect(result?.endDate).toBe("2026-04-29T17:00:00");
+    expect(result?.endDate).toBe("2026-04-29T17:00:00.000+02:00");
   });
 
   it("uses ev.date when only endTime is set (same-day timed event)", () => {
@@ -394,7 +430,7 @@ describe("buildEventJsonLdInput", () => {
       },
       SHARE_URL,
     );
-    expect(result?.endDate).toBe("2026-04-27T17:00:00");
+    expect(result?.endDate).toBe("2026-04-27T17:00:00.000+02:00");
   });
 
   it("falls back to article.title when eventFact title is empty", () => {

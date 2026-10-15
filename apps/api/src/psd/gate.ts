@@ -13,7 +13,7 @@
  * gate hiccup never breaks the read path — the KV negative marker + SWR still
  * bound the storm.
  */
-import { Context, Effect, Layer } from "effect";
+import { Context, Effect, Layer, Option } from "effect";
 import { WorkerEnvTag } from "../env";
 import { GateLogic } from "./gate-logic";
 import { IncidentTracker } from "./incident";
@@ -28,10 +28,15 @@ export interface PsdOutcome extends IncidentContext {
 export interface PsdGate {
   /** Await a global PSD-call token (≤5/s worldwide). Best-effort: proceeds on gate failure. */
   readonly acquireToken: Effect.Effect<void>;
-  /** Become the single-flight leader for `key`? `true` = you run the work. */
-  readonly beginFlight: (key: string) => Effect.Effect<boolean>;
-  /** Release the flight for `key` (leader only). */
-  readonly endFlight: (key: string) => Effect.Effect<void>;
+  /** Today's PSD-call count (UTC day), persisted in the DO. Takes no token.
+   * Best-effort: reads `0` on gate failure, so the on-demand budget fails open. */
+  readonly getDailyCount: Effect.Effect<number>;
+  /** Become the single-flight leader for `key`? An owner token = you run the
+   * work; `null` = someone else already is. */
+  readonly beginFlight: (key: string) => Effect.Effect<number | null>;
+  /** Release the flight for `key`. A no-op unless `token` is the current
+   * leader's (#3467). */
+  readonly endFlight: (key: string, token: number) => Effect.Effect<void>;
   /** Resolve when the current leader for `key` finishes (bounded wait). */
   readonly awaitFlight: (key: string) => Effect.Effect<void>;
   /**
@@ -44,6 +49,31 @@ export interface PsdGate {
   ) => Effect.Effect<{ incidentOpen: boolean }>;
 }
 
+/**
+ * Single-flight: the leader of `key` runs `work`; every other caller awaits it,
+ * then `reread`s the shared result. An empty `reread` (the leader left nothing,
+ * so it failed) sends the follower round again, so one becomes the next leader
+ * and failed runs serialize instead of duplicating. The gate's lease reclaims a
+ * dead leader, so the loop cannot spin forever.
+ */
+export const withFlight = <A, E, R, E2, R2>(
+  gate: Pick<PsdGate, "beginFlight" | "endFlight" | "awaitFlight">,
+  key: string,
+  work: Effect.Effect<A, E, R>,
+  reread: Effect.Effect<Option.Option<A>, E2, R2>,
+): Effect.Effect<A, E | E2, R | R2> =>
+  Effect.gen(function* () {
+    for (;;) {
+      const token = yield* gate.beginFlight(key);
+      if (token !== null) {
+        return yield* work.pipe(Effect.ensuring(gate.endFlight(key, token)));
+      }
+      yield* gate.awaitFlight(key);
+      const shared = yield* reread;
+      if (Option.isSome(shared)) return shared.value;
+    }
+  });
+
 export class PsdGateService extends Context.Tag("PsdGateService")<
   PsdGateService,
   PsdGate
@@ -52,8 +82,9 @@ export class PsdGateService extends Context.Tag("PsdGateService")<
 /** Structural view of the DO stub's RPC surface (see PsdGate in gate-do.ts). */
 interface PsdGateStub {
   acquireToken(): Promise<void>;
-  beginFlight(key: string): Promise<boolean>;
-  endFlight(key: string): Promise<void>;
+  getDailyCount(): Promise<number>;
+  beginFlight(key: string): Promise<number | null>;
+  endFlight(key: string, token: number): Promise<void>;
   awaitFlight(key: string): Promise<void>;
   reportOutcome(outcome: PsdOutcome): Promise<{ incidentOpen: boolean }>;
 }
@@ -75,14 +106,18 @@ export const PsdGateLive = Layer.effect(
       acquireToken: Effect.tryPromise(() => stub().acquireToken()).pipe(
         Effect.orElseSucceed(() => undefined),
       ),
+      getDailyCount: Effect.tryPromise(() => stub().getDailyCount()).pipe(
+        Effect.orElseSucceed(() => 0),
+      ),
       beginFlight: (key) =>
         Effect.tryPromise(() => stub().beginFlight(key)).pipe(
           // On gate failure, act as leader: the caller does the work rather than
-          // waiting on coordination that isn't available.
-          Effect.orElseSucceed(() => true),
+          // waiting on coordination that isn't available. Token 0 is never
+          // issued by GateLogic, so a late endFlight with it is a no-op there.
+          Effect.orElseSucceed(() => 0),
         ),
-      endFlight: (key) =>
-        Effect.tryPromise(() => stub().endFlight(key)).pipe(
+      endFlight: (key, token) =>
+        Effect.tryPromise(() => stub().endFlight(key, token)).pipe(
           Effect.orElseSucceed(() => undefined),
         ),
       awaitFlight: (key) =>
@@ -110,8 +145,9 @@ export const makePsdGateLayer = (
 ): Layer.Layer<PsdGateService> =>
   Layer.succeed(PsdGateService, {
     acquireToken: Effect.promise(() => logic.acquireToken()),
+    getDailyCount: Effect.sync(() => logic.getDailyCount()),
     beginFlight: (key) => Effect.sync(() => logic.beginFlight(key)),
-    endFlight: (key) => Effect.sync(() => logic.endFlight(key)),
+    endFlight: (key, token) => Effect.sync(() => logic.endFlight(key, token)),
     awaitFlight: (key) => Effect.promise(() => logic.awaitFlight(key)),
     // No Slack post here (no env) — the in-memory layer only tracks state so
     // tests can observe incident-driven log escalation. The DO does the POST.

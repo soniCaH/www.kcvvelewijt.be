@@ -28,6 +28,7 @@
 import type { Match } from "@/lib/effect/schemas";
 import type { ScheduleRow } from "@/components/match/types";
 import { transformMatchToSchedule } from "@/components/match/transform";
+import { kickoffMs } from "@/lib/utils/dates";
 import {
   hasScore,
   isSettledMatch,
@@ -169,7 +170,7 @@ function matchSlot(match: Match, now: Date): "result" | "fixture" | null {
       // a polling cost while nothing here expires: a played match keeps the
       // slot until a newer one displaces it, which beats falling back to a
       // fortnight-old result as though last Saturday never happened.
-      return match.date.getTime() < now.getTime() ? "result" : "fixture";
+      return kickoffMs(match) < now.getTime() ? "result" : "fixture";
     case "postponed":
     case "cancelled":
     case "stopped":
@@ -202,7 +203,7 @@ export function pickLastResult(
   return matches
     .filter((m) => {
       if (matchSlot(m, now) !== "result") return false;
-      const untilKickoff = m.date.getTime() - now.getTime();
+      const untilKickoff = kickoffMs(m) - now.getTime();
       if (untilKickoff < 0) return true;
       return untilKickoff <= SETTLED_LOOKAHEAD_MS && hasScore(m);
     })

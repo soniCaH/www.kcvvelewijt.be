@@ -1,18 +1,21 @@
 import { describe, it, expect, vi } from "vitest";
-import { Effect, Layer, Exit } from "effect";
+import { Cause, Effect, Exit, Layer, Logger, Option } from "effect";
 import type { MembershipRequest } from "@kcvv/api-contract";
 import {
   SanityMutation,
   type SanityMutationInterface,
 } from "../sanity/mutation";
-import {
-  SanityProjection,
-  type SanityProjectionInterface,
-} from "../sanity/projection";
+import { SanityProjection, type FormRoutingConfig } from "../sanity/projection";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import { noopDurableKv } from "../test-helpers/kv-cache-mock";
-import { EmailTransport, type EmailTransportInterface } from "../email/resend";
+import {
+  EmailDeliveryError,
+  EmailTransport,
+  type EmailTransportInterface,
+} from "../email/resend";
+import type { WorkerEnv } from "../env";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
+import { makeSanityProjectionStub } from "../test-helpers/sanity-projection-stub";
 import { handleMembership } from "./forms";
 
 const validPayload: MembershipRequest = {
@@ -36,6 +39,8 @@ function makeMutationMock(
     upsertStaff: () => Effect.succeed(undefined),
     uploadPlayerImage: () => Effect.succeed(undefined),
     uploadStaffImage: () => Effect.succeed(undefined),
+    unsetPlayerImage: () => Effect.succeed(undefined),
+    unsetStaffImage: () => Effect.succeed(undefined),
     archivePlayers: () => Effect.succeed(undefined),
     archiveStaff: () => Effect.succeed(undefined),
     archiveTeams: () => Effect.succeed(undefined),
@@ -43,22 +48,12 @@ function makeMutationMock(
   };
 }
 
-const projectionMock: SanityProjectionInterface = {
-  getPlayersImageState: () => Effect.succeed(new Map()),
-  getStaffImageState: () => Effect.succeed(new Map()),
-  getActivePlayerPsdIds: () => Effect.succeed([]),
-  getActiveStaffPsdIds: () => Effect.succeed([]),
-  getActiveTeamPsdIds: () => Effect.succeed([]),
-  getVisibleTeamPsdIds: () => Effect.succeed([]),
-  getProtectedStaffPsdIds: () => Effect.succeed([]),
-  getFormRoutingConfig: () => Effect.succeed(null),
-};
+const projectionMock = makeSanityProjectionStub();
 
 const cacheMock: KvCacheInterface = {
   get: () => Effect.succeed(null),
   set: () => Effect.succeed(undefined),
   delete: () => Effect.succeed(undefined),
-  increment: () => Effect.succeed(undefined),
   durable: noopDurableKv,
 };
 
@@ -67,6 +62,9 @@ function run(
   opts: {
     write?: SanityMutationInterface["writeMembershipApplication"];
     dispatch?: EmailTransportInterface["dispatchEmail"];
+    routing?: FormRoutingConfig;
+    env?: Partial<WorkerEnv>;
+    errors?: string[];
   } = {},
 ) {
   const emailMock: EmailTransportInterface = {
@@ -74,13 +72,26 @@ function run(
   };
   const layer = Layer.mergeAll(
     Layer.succeed(SanityMutation, makeMutationMock(opts.write)),
-    Layer.succeed(SanityProjection, projectionMock),
+    Layer.succeed(SanityProjection, {
+      ...projectionMock,
+      getFormRoutingConfig: () => Effect.succeed(opts.routing ?? null),
+    }),
     Layer.succeed(KvCacheService, cacheMock),
     Layer.succeed(EmailTransport, emailMock),
-    makeTestEnvLayer(), // no TURNSTILE_SECRET → verification skipped
+    // no TURNSTILE_SECRET → verification skipped by the dev flag
+    makeTestEnvLayer({ ALLOW_MISSING_FORM_SECRETS: "true", ...opts.env }),
+  );
+  const logger = Logger.replace(
+    Logger.defaultLogger,
+    Logger.make(({ logLevel, message }) => {
+      if (logLevel._tag === "Error") opts.errors?.push(String(message));
+    }),
   );
   return Effect.runPromiseExit(
-    Effect.provide(handleMembership(payload), layer),
+    handleMembership(payload).pipe(
+      Effect.provide(layer),
+      Effect.provide(logger),
+    ),
   );
 }
 
@@ -94,6 +105,33 @@ describe("handleMembership", () => {
     expect(write).toHaveBeenCalledTimes(1);
     // applicant ack + admin notification (no parent for an adult)
     expect(dispatch).toHaveBeenCalledTimes(2);
+  });
+
+  it("still persists and returns ok when email dispatch fails, logging an error", async () => {
+    const write = vi.fn(() => Effect.succeed(undefined as void));
+    const errors: string[] = [];
+    const exit = await run(validPayload, {
+      write,
+      errors,
+      dispatch: () => Effect.fail(new EmailDeliveryError("Resend down")),
+    });
+
+    expect(Exit.isSuccess(exit)).toBe(true);
+    expect(write).toHaveBeenCalledTimes(1);
+    // applicant ack + admin notification both failed → two error logs
+    expect(errors).toHaveLength(2);
+    expect(errors[0]).toContain("email dispatch failed");
+  });
+
+  it("rejects the submission without persisting when no Turnstile secret is set and the dev flag is off", async () => {
+    const write = vi.fn(() => Effect.succeed(undefined as void));
+    const exit = await run(validPayload, {
+      write,
+      env: { ALLOW_MISSING_FORM_SECRETS: undefined },
+    });
+
+    expect(Exit.isFailure(exit)).toBe(true);
+    expect(write).not.toHaveBeenCalled();
   });
 
   it("persists the remark", async () => {
@@ -146,5 +184,56 @@ describe("handleMembership", () => {
     expect(Exit.isSuccess(exit)).toBe(true);
     // applicant + parent + admin
     expect(dispatch).toHaveBeenCalledTimes(3);
+  });
+
+  it("rejects an implausible birth year with a birthDate field error", async () => {
+    const write = vi.fn(() => Effect.succeed(undefined as void));
+    const exit = await run(
+      { ...validPayload, birthDate: "0010-05-01" } as MembershipRequest,
+      { write },
+    );
+
+    expect(Exit.isFailure(exit)).toBe(true);
+    expect(write).not.toHaveBeenCalled();
+    if (Exit.isFailure(exit)) {
+      const failure = Cause.failureOption(exit.cause);
+      expect(Option.isSome(failure)).toBe(true);
+      expect(Option.getOrThrow(failure)).toMatchObject({
+        _tag: "HttpBadRequest",
+        fields: { birthDate: "Vul een geldige geboortedatum in." },
+      });
+    }
+  });
+
+  describe("admin recipient", () => {
+    const adminTo = async (configured: string | null) => {
+      const dispatch = vi.fn<EmailTransportInterface["dispatchEmail"]>(() =>
+        Effect.succeed(undefined),
+      );
+      await run(validPayload, {
+        dispatch,
+        routing: {
+          speler: null,
+          jeugdspeler: null,
+          vrijwilliger: configured,
+          trainer: null,
+          scheidsrechter: null,
+        },
+      });
+      return dispatch.mock.calls.at(-1)![0].to;
+    };
+
+    it.each(["", "   ", "not-an-email", null])(
+      "falls back to info@ for %j",
+      async (configured) => {
+        expect(await adminTo(configured)).toBe("info@kcvvelewijt.be");
+      },
+    );
+
+    it("uses the trimmed configured address", async () => {
+      expect(await adminTo(" bestuur@kcvvelewijt.be ")).toBe(
+        "bestuur@kcvvelewijt.be",
+      );
+    });
   });
 });

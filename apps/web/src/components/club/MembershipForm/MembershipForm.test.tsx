@@ -8,8 +8,26 @@ import {
 } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { hydrateRoot } from "react-dom/client";
+import { useEffect } from "react";
 import { MembershipForm } from "./MembershipForm";
 import { DRAFT_STORAGE_KEY, EMPTY_DRAFT } from "./membership-draft";
+
+// Stands in for Cloudflare's widget: a token on mount, and a fresh single-use
+// one each time `resetKey` changes — what `turnstile.reset()` does for real.
+vi.mock("./TurnstileWidget", () => ({
+  TurnstileWidget: ({
+    onToken,
+    resetKey,
+  }: {
+    onToken: (token: string) => void;
+    resetKey: number;
+  }) => {
+    useEffect(() => {
+      onToken(`token-${resetKey}`);
+    }, [onToken, resetKey]);
+    return null;
+  },
+}));
 
 function fillRequiredFields() {
   fireEvent.change(screen.getByLabelText(/Voornaam/), {
@@ -82,6 +100,43 @@ describe("MembershipForm", () => {
     });
     expect(screen.getByLabelText(/E-mail ouder\/voogd/i)).toBeInTheDocument();
     expect(screen.getByText(/geef toestemming/i)).toBeInTheDocument();
+  });
+
+  it("blocks an implausible birth year before any request", () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<MembershipForm defaultRole="vrijwilliger" />);
+    fillRequiredFields();
+    fireEvent.change(screen.getByLabelText(/Geboortedatum/), {
+      target: { value: "0010-05-01" },
+    });
+    // An implausible date is no reason to show the minor fields.
+    expect(screen.queryByText(/Minderjarig/i)).not.toBeInTheDocument();
+    fireEvent.submit(screen.getByText(/Verstuur aanvraag/).closest("form")!);
+
+    expect(screen.getByLabelText(/Geboortedatum/)).toHaveAccessibleDescription(
+      /Vul een geldige geboortedatum in\./,
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  // 00:30 Brussels is still the previous UTC day: a local-time check would
+  // call this applicant 18, the BFF (UTC) calls them 17 and wants the parent
+  // fields. apps/api's membership-rules.test.ts pins the same instant.
+  it("shows the minor fields on the UTC day, like the BFF, around Brussels midnight", () => {
+    const tz = process.env.TZ;
+    process.env.TZ = "Europe/Brussels";
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-14T22:30:00Z"));
+    try {
+      render(<MembershipForm defaultBirthDate="2008-10-15" />);
+      expect(screen.getByLabelText(/E-mail ouder\/voogd/i)).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+      if (tz === undefined) delete process.env.TZ;
+      else process.env.TZ = tz;
+    }
   });
 
   it("posts to /api/membership and shows a success message", async () => {
@@ -269,6 +324,67 @@ describe("MembershipForm", () => {
         expect.stringContaining("submit"),
         networkError,
       );
+    });
+  });
+
+  describe("single-use Turnstile token", () => {
+    const submittedTokens = (fetchMock: ReturnType<typeof vi.fn>) =>
+      fetchMock.mock.calls.map(
+        (call) =>
+          JSON.parse((call[1] as RequestInit).body as string).turnstileToken,
+      );
+
+    const submit = () =>
+      fireEvent.submit(screen.getByText(/Verstuur aanvraag/).closest("form")!);
+
+    it("sends a fresh token on the retry after a server rejection", async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 400,
+          json: () => Promise.resolve({ error: "Verificatie mislukt." }),
+        })
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve({ ok: true }),
+        });
+      vi.stubGlobal("fetch", fetchMock);
+
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      submit();
+      await screen.findByText("Verificatie mislukt.");
+      // Wait for the widget's fresh token to land before retrying.
+      await act(async () => {});
+      submit();
+      await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+
+      expect(submittedTokens(fetchMock)).toEqual(["token-0", "token-1"]);
+    });
+
+    it("sends a fresh token on the retry after a transport error", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      const fetchMock = vi
+        .fn()
+        .mockRejectedValueOnce(new TypeError("Failed to fetch"))
+        .mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve({ ok: true }),
+        });
+      vi.stubGlobal("fetch", fetchMock);
+
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      submit();
+      await screen.findByRole("alert");
+      await act(async () => {});
+      submit();
+      await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+
+      expect(submittedTokens(fetchMock)).toEqual(["token-0", "token-1"]);
     });
   });
 

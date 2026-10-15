@@ -1,6 +1,10 @@
 import { Effect } from "effect";
 import { HttpApiBuilder } from "@effect/platform";
-import { PsdApi, RelatedItem } from "@kcvv/api-contract";
+import {
+  HttpServiceUnavailable,
+  PsdApi,
+  RelatedItem,
+} from "@kcvv/api-contract";
 import { Schema as S } from "effect";
 import { handleRelated, NoRelatedItems } from "../search/related-handler";
 import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
@@ -20,7 +24,7 @@ export const getRelatedHandler = (request: {
   limit: number;
 }): Effect.Effect<
   readonly (typeof RelatedItem.Type)[],
-  never,
+  HttpServiceUnavailable,
   VectorizeService | KvCacheService | WorkerEnvTag | PsdGateService
 > => {
   const cacheKey = `related:${request.id}:max`;
@@ -43,6 +47,15 @@ export const getRelatedHandler = (request: {
     })
     .pipe(
       Effect.catchTag("NoRelatedItems", () => Effect.succeed([])),
+      // Vectorize failing, a timed-out fetch or a spent budget: the declared
+      // 503 (api-contract `related.ts`), not an `orDie` 500.
+      Effect.tapError((error) =>
+        Effect.logError(`[related] failed: ${error.message}`),
+      ),
+      Effect.mapError(
+        () =>
+          new HttpServiceUnavailable({ error: "Related service unavailable" }),
+      ),
       Effect.map((items) => items.slice(0, request.limit)),
     );
 };
@@ -55,6 +68,6 @@ export const RelatedApiLive = HttpApiBuilder.group(
       getRelatedHandler({
         id: urlParams.id,
         limit: urlParams.limit ?? DEFAULT_LIMIT,
-      }).pipe(Effect.orDie),
+      }),
     ),
 );

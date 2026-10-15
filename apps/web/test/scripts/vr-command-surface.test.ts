@@ -246,10 +246,22 @@ describe("vr-baseline-update.yml", () => {
     expect(workflow).toMatch(/VR_LEFTOVERS: "[^"]*jest-image-snapshot/);
   });
 
+  // The head the maintainer approved is recorded by trigger-check and compared
+  // by SHA in the job that runs PR code (#3471).
+  it("refuses to run when the PR head moved after the comment", () => {
+    expect(workflow).toContain("head_sha: ${{ steps.head.outputs.sha }}");
+    expect(workflow).toContain(
+      "APPROVED_SHA: ${{ needs.trigger-check.outputs.head_sha }}",
+    );
+    expect(workflow).toContain("headSha !== approvedSha");
+  });
+
   it("commits and pushes once, after the last shard", () => {
-    const pushes = workflow.match(/git push origin/g) ?? [];
+    // The push goes to a token URL, not `origin`: the App token reaches this
+    // step only, through `env:` (#3471). Match command lines, not comments.
+    const pushes = [...workflow.matchAll(/^\s*git push "/gm)];
     expect(pushes).toHaveLength(1);
-    expect(workflow.indexOf("git push origin")).toBeGreaterThan(
+    expect(pushes[0].index).toBeGreaterThan(
       workflow.lastIndexOf("vr:ci:update"),
     );
   });

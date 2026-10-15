@@ -8,17 +8,24 @@
 # Usage: ./scripts/trigger-psd-sync.sh <team-index>
 #        ./scripts/trigger-psd-sync.sh 0      # 0 = Eerste Elftallen A (PSD id 1)
 #
-# The index is a POSITION in PSD's getRawTeams() response, not a stable team id.
-# PSD does not document that ordering, so adding or reordering a team silently
-# shifts every index after it. The run prints `processing team N/21: <id> (<name>)`
-# — read it, and stop the run if it names a team you did not mean. Verified on
-# 2026-09-09: index 0 = id 1 Eerste Elftallen A, index 1 = id 2 Eerste Elftallen B.
+# The index is a POSITION in the team list sorted by numeric PSD id (the sync
+# sorts getRawTeams() before indexing, #3465), not a team id. Adding or removing
+# a team still shifts every index after it. The run prints
+# `processing team N/21: <id> (<name>)` — read it, and stop the run if it names
+# a team you did not mean. Index 0 = the lowest id (id 1, Eerste Elftallen A).
+#
+# A manual run never touches nightly-cycle state: it passes SYNC_MANUAL_RUN=1
+# to the worker, which then skips cycle-end reconciliation and every accumulator
+# write and clear (#3465). It still moves the cursor — in the preview KV only.
 #
 # IT WRITES TO PRODUCTION SANITY. The cursor lives in the *preview* KV namespace
 # because `wrangler dev --remote` reads preview, but the Sanity credentials come
 # from apps/api/.dev.vars, which points at the production dataset. Preview KV,
 # production data. The script prints the target before it writes so you can see
-# this rather than remember it.
+# this rather than remember it. Careful: `--preview` KV is not a sandbox — its
+# `preview_id` equals the STAGING `id` in apps/api/wrangler.toml, so this writes
+# staging's real namespace (cursor and, for a zero roster, nothing else: manual
+# runs write no markers or accumulators).
 #
 # A 429 on a portrait upload is NOT fatal — that player retries on the nightly
 # cron, or on your next run of this script.
@@ -124,7 +131,7 @@ if [ -n "${SERVER_CMD}" ]; then
   ( eval "${SERVER_CMD}" ) >>"${LOG}" 2>&1 &
 else
   (cd "${API_DIR}" && pnpm exec wrangler dev --remote --test-scheduled \
-    --port "${PORT}") >>"${LOG}" 2>&1 &
+    --var SYNC_MANUAL_RUN:1 --port "${PORT}") >>"${LOG}" 2>&1 &
 fi
 SERVER_PID=$!
 # Set once curl is actually backgrounded below. Declared here (empty, not
@@ -190,16 +197,20 @@ echo "waiting for the sync to finish (up to ${SYNC_TIMEOUT_S}s)…"
 finished=0
 failed=0
 for _ in $(seq 1 "${SYNC_TIMEOUT_S}"); do
-  if grep -q "cursor advanced to" "${LOG}"; then
-    finished=1
-    break
-  fi
-  # Same liveness guard the readiness loop has: a crashed worker or a failed
-  # sync should report now, not after the full timeout.
+  # Failure first (#3465): a run that finished its team but failed (a member
+  # that would not upsert) must report as failed, never as finished. The
+  # sync's own failing path never logs `cursor advanced to`, but the order
+  # makes that independent of the wording.
   if grep -q "Sync failed:" "${LOG}"; then
     failed=1
     break
   fi
+  if grep -q "cursor advanced to" "${LOG}"; then
+    finished=1
+    break
+  fi
+  # Same liveness guard the readiness loop has: a crashed worker should
+  # report now, not after the full timeout.
   if ! kill -0 "${SERVER_PID}" 2>/dev/null; then
     echo "the worker exited before the sync finished — see ${LOG}" >&2
     break

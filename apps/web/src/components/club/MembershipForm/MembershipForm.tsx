@@ -13,6 +13,9 @@ import {
 } from "react";
 import {
   EMAIL_PATTERN,
+  isMinorOn,
+  INVALID_BIRTH_DATE_MESSAGE,
+  isPlausibleBirthDate,
   MEDICAL_CERT_ROLES,
   type MembershipRole,
 } from "@kcvv/api-contract";
@@ -48,17 +51,6 @@ const ROLE_OPTIONS: { value: MembershipRole; label: string }[] = [
 ];
 
 const REQUIRED_MSG = "Verplicht.";
-
-/** Minor preview for conditional fields — the BFF recomputes authoritatively. */
-function isMinor(birthDate: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) return false;
-  const today = new Date();
-  const [y, m, d] = birthDate.split("-").map(Number);
-  let age = today.getFullYear() - y;
-  const monthDiff = today.getMonth() + 1 - m;
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < d)) age -= 1;
-  return age < 18;
-}
 
 const SUBMIT_URL = "/api/membership";
 
@@ -192,6 +184,13 @@ function MembershipFormFields({
 
   const [honeypot, setHoneypot] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
+  // A Turnstile token is single-use: after a submit the server did not accept,
+  // drop it and bump this so the widget fetches a fresh one for the retry.
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
+  const resetTurnstile = () => {
+    setTurnstileToken("");
+    setTurnstileResetKey((key) => key + 1);
+  };
 
   const [state, setState] = useState<SubmitState>("idle");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -219,7 +218,12 @@ function MembershipFormFields({
     roleRef.current?.focus();
   };
 
-  const minor = useMemo(() => isMinor(birthDate), [birthDate]);
+  // Same UTC arithmetic as the BFF, which recomputes it authoritatively. An
+  // implausible date counts as an adult here; `validate()` rejects it anyway.
+  const minor = useMemo(() => {
+    const now = new Date();
+    return isPlausibleBirthDate(birthDate, now) && isMinorOn(birthDate, now);
+  }, [birthDate]);
   const isPlayer = role !== "" && MEDICAL_CERT_ROLES.includes(role);
 
   const validate = (): Record<string, string> => {
@@ -228,6 +232,8 @@ function MembershipFormFields({
     if (!firstName.trim()) errors.firstName = REQUIRED_MSG;
     if (!lastName.trim()) errors.lastName = REQUIRED_MSG;
     if (!birthDate) errors.birthDate = REQUIRED_MSG;
+    else if (!isPlausibleBirthDate(birthDate, new Date()))
+      errors.birthDate = INVALID_BIRTH_DATE_MESSAGE;
     if (!gender) errors.gender = REQUIRED_MSG;
     if (!municipality.trim()) errors.municipality = REQUIRED_MSG;
     if (!EMAIL_PATTERN.test(email))
@@ -320,6 +326,7 @@ function MembershipFormFields({
         data.error ??
           "Er ging iets mis. Controleer je gegevens en probeer opnieuw.",
       );
+      resetTurnstile();
       setState("invalid");
     } catch (err) {
       // The caught error goes to the console only — the visitor sees the
@@ -327,6 +334,7 @@ function MembershipFormFields({
       // (#2580 rule 6). The submit button survives this failure (it's still
       // on screen, re-enabled), so no retry action is added (#2580 rule 4).
       console.error("[MembershipForm] Failed to submit:", err);
+      resetTurnstile();
       setState("transport-error");
     }
   };
@@ -598,7 +606,10 @@ function MembershipFormFields({
           </CheckboxField>
         </div>
 
-        <TurnstileWidget onToken={setTurnstileToken} />
+        <TurnstileWidget
+          onToken={setTurnstileToken}
+          resetKey={turnstileResetKey}
+        />
 
         {/* The wait is announced from here: a button's children are
             presentational, so the spinner inside it is never spoken. Always

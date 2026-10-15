@@ -227,8 +227,8 @@ Pre-commit hooks run automatically: lint-staged, type-check, commitlint.
 
 - **Web (apps/web):** Vercel — auto-deploys from `main`
 - **BFF (apps/api):** Cloudflare Workers — `pnpm --filter @kcvv/api run deploy` (or `wrangler deploy`)
-- **Studio production:** sanity.io — `cd apps/studio && npx sanity deploy` (manual; no CI auto-deploy)
-- **Studio staging:** sanity.io — `cd apps/studio-staging && SANITY_STUDIO_DATASET=staging npx sanity deploy`
+- **Studio production:** sanity.io — deployed by CI on merge to `main` (`pnpm --filter @kcvv/studio run deploy`)
+- **Studio staging:** sanity.io — `pnpm --filter @kcvv/studio-staging run deploy` (manual)
 
 ---
 

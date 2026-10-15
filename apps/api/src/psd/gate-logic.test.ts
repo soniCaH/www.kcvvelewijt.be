@@ -80,27 +80,53 @@ describe("GateLogic — single-flight", () => {
     const results = Array.from({ length: 50 }, () =>
       gate.beginFlight("matches:next"),
     );
-    expect(results.filter(Boolean)).toHaveLength(1);
+    expect(results.filter((t) => t !== null)).toHaveLength(1);
   });
 
   it("a different key gets its own leader", () => {
     const gate = new GateLogic();
-    expect(gate.beginFlight("a")).toBe(true);
-    expect(gate.beginFlight("b")).toBe(true);
-    expect(gate.beginFlight("a")).toBe(false);
+    expect(gate.beginFlight("a")).not.toBeNull();
+    expect(gate.beginFlight("b")).not.toBeNull();
+    expect(gate.beginFlight("a")).toBeNull();
   });
 
   it("endFlight releases the key so a later caller can lead again", () => {
     const gate = new GateLogic();
-    expect(gate.beginFlight("k")).toBe(true);
-    expect(gate.beginFlight("k")).toBe(false);
-    gate.endFlight("k");
-    expect(gate.beginFlight("k")).toBe(true);
+    const token = gate.beginFlight("k")!;
+    expect(gate.beginFlight("k")).toBeNull();
+    gate.endFlight("k", token);
+    expect(gate.beginFlight("k")).not.toBeNull();
+  });
+
+  it("an old leader's endFlight cannot release a newer leader's flight (#3467)", async () => {
+    let clock = 0;
+    const gate = new GateLogic({ now: () => clock, leaseMs: 1000 });
+    const oldToken = gate.beginFlight("k")!;
+
+    clock += 1500; // old leader outruns its lease; a new leader reclaims
+    const newToken = gate.beginFlight("k")!;
+    expect(newToken).not.toBe(oldToken);
+
+    let released = false;
+    const waiter = gate.awaitFlight("k").then(() => {
+      released = true;
+    });
+
+    gate.endFlight("k", oldToken); // stale owner: must be a no-op
+    await Promise.resolve();
+    expect(released).toBe(false);
+    expect(gate.isInFlight("k")).toBe(true);
+    expect(gate.beginFlight("k")).toBeNull(); // new leader still holds it
+
+    gate.endFlight("k", newToken);
+    await waiter;
+    expect(released).toBe(true);
+    expect(gate.isInFlight("k")).toBe(false);
   });
 
   it("awaitFlight resolves when the leader ends its flight", async () => {
     const gate = new GateLogic();
-    gate.beginFlight("k");
+    const token = gate.beginFlight("k")!;
 
     let resolved = false;
     const waiter = gate.awaitFlight("k").then(() => {
@@ -110,7 +136,7 @@ describe("GateLogic — single-flight", () => {
     await Promise.resolve();
     expect(resolved).toBe(false); // still in flight
 
-    gate.endFlight("k");
+    gate.endFlight("k", token);
     await waiter;
     expect(resolved).toBe(true);
   });
@@ -131,14 +157,14 @@ describe("GateLogic — single-flight", () => {
     let clock = 0;
     const gate = new GateLogic({ now: () => clock, leaseMs: 1000 });
 
-    expect(gate.beginFlight("k")).toBe(true);
-    expect(gate.beginFlight("k")).toBe(false); // live leader holds it
+    expect(gate.beginFlight("k")).not.toBeNull();
+    expect(gate.beginFlight("k")).toBeNull(); // live leader holds it
     expect(gate.isInFlight("k")).toBe(true);
 
     clock += 1500; // leader died without endFlight; lease lapses
 
     expect(gate.isInFlight("k")).toBe(false);
-    expect(gate.beginFlight("k")).toBe(true); // reclaimed by the next caller
+    expect(gate.beginFlight("k")).not.toBeNull(); // reclaimed by the next caller
   });
 
   it("reclaiming a lapsed flight wakes anyone still awaiting it", async () => {
@@ -165,10 +191,11 @@ describe("GateLogic — single-flight", () => {
 
     // Each caller: if leader → run the (single) fan-out; else await + reuse.
     const caller = async () => {
-      if (gate.beginFlight("matches:next")) {
+      const token = gate.beginFlight("matches:next");
+      if (token !== null) {
         fanOuts++;
         await Promise.resolve(); // simulate async fan-out
-        gate.endFlight("matches:next");
+        gate.endFlight("matches:next", token);
       } else {
         await gate.awaitFlight("matches:next");
       }
@@ -176,5 +203,65 @@ describe("GateLogic — single-flight", () => {
 
     await Promise.all(Array.from({ length: 30 }, caller));
     expect(fanOuts).toBe(1);
+  });
+});
+
+describe("GateLogic — daily PSD call count (#3490)", () => {
+  const DAY1 = Date.UTC(2026, 9, 15, 23, 59, 59);
+  const DAY2 = Date.UTC(2026, 9, 16, 0, 0, 1);
+
+  it("counts one call per acquireToken grant", async () => {
+    const gate = new GateLogic({ ratePerSecond: 1e9 });
+    await Promise.all(Array.from({ length: 12 }, () => gate.acquireToken()));
+    expect(gate.getDailyCount()).toBe(12);
+  });
+
+  it("reading the count takes no token and counts nothing", async () => {
+    const s = fakeScheduler();
+    const gate = new GateLogic({
+      ratePerSecond: 5,
+      now: s.now,
+      sleep: s.sleep,
+    });
+    expect(gate.getDailyCount()).toBe(0);
+    expect(gate.getDailyCount()).toBe(0);
+    expect(s.clock).toBe(0);
+    await gate.acquireToken();
+    expect(gate.getDailyCount()).toBe(1);
+  });
+
+  it("rolls over at the UTC date boundary", async () => {
+    let clock = DAY1;
+    const gate = new GateLogic({ ratePerSecond: 1e9, now: () => clock });
+    await gate.acquireToken();
+    await gate.acquireToken();
+    expect(gate.getDailyCount()).toBe(2);
+    clock = DAY2;
+    expect(gate.getDailyCount()).toBe(0);
+    await gate.acquireToken();
+    expect(gate.getDailyCount()).toBe(1);
+  });
+
+  it("reports every change to onCount, and restoreCount resumes today's count", async () => {
+    const seen: unknown[] = [];
+    const gate = new GateLogic({
+      ratePerSecond: 1e9,
+      now: () => DAY1,
+      onCount: (c) => seen.push(c),
+    });
+    await gate.acquireToken();
+    expect(seen).toEqual([{ day: "2026-10-15", count: 1 }]);
+
+    const restored = new GateLogic({ ratePerSecond: 1e9, now: () => DAY1 });
+    restored.restoreCount({ day: "2026-10-15", count: 40 });
+    expect(restored.getDailyCount()).toBe(40);
+    await restored.acquireToken();
+    expect(restored.getDailyCount()).toBe(41);
+  });
+
+  it("ignores a restored count from another day", () => {
+    const gate = new GateLogic({ now: () => DAY1 });
+    gate.restoreCount({ day: "2026-10-14", count: 99 });
+    expect(gate.getDailyCount()).toBe(0);
   });
 });

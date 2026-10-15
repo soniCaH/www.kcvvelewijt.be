@@ -1,10 +1,11 @@
 import { describe, it, expect, vi } from "vitest";
-import { Effect, Layer } from "effect";
+import { Effect, Exit, Layer } from "effect";
 import { getRelatedHandler } from "./related";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import { noopDurableKv } from "../test-helpers/kv-cache-mock";
 import {
   VectorizeService,
+  VectorizeError,
   type VectorizeServiceInterface,
 } from "../search/vectorize";
 import { testEnvLayer } from "../test-helpers/env-layer";
@@ -17,7 +18,6 @@ function makeCacheMock(
     get: () => Effect.succeed(null),
     set: () => Effect.succeed(undefined),
     delete: () => Effect.succeed(undefined),
-    increment: () => Effect.succeed(undefined),
     durable: noopDurableKv,
     ...overrides,
   };
@@ -250,7 +250,11 @@ describe("getRelatedHandler — empty results are never stored (#3468)", () => {
     expect(reportOutcome).not.toHaveBeenCalled();
   });
 
-  it("a stale entry whose refresh comes back empty returns [], not the stale items", async () => {
+  // #3467: the stale read no longer refreshes in the foreground, so it serves
+  // the stale items (as production already did, where a runner is wired) and
+  // the empty refresh only marks the key. The "never keep stale for an empty
+  // answer" intent of #3468 does not hold on the stale path in production.
+  it("a stale entry whose refresh comes back empty is served stale", async () => {
     const stale = JSON.stringify({
       value: [
         {
@@ -274,6 +278,32 @@ describe("getRelatedHandler — empty results are never stored (#3468)", () => {
       }),
     );
 
-    expect(result).toEqual([]);
+    expect(result).toHaveLength(1);
+    expect(result[0]!.id).toBe("doc-old");
   });
+});
+
+describe("getRelatedHandler — Vectorize failure is a 503 (#3493)", () => {
+  it.each(["getByIds", "query"] as const)(
+    "fails with HttpServiceUnavailable when Vectorize %s fails",
+    async (failing) => {
+      const FAKE_VECTOR = Array(1024).fill(0.1);
+      const exit = await runWithProviders(
+        getRelatedHandler({ id: "doc-1", limit: 3 }).pipe(Effect.exit),
+        makeCacheMock(),
+        makeVectorizeMock({
+          getByIds: () =>
+            failing === "getByIds"
+              ? Effect.fail(new VectorizeError("down"))
+              : Effect.succeed([
+                  { id: "doc-1", values: FAKE_VECTOR, metadata: {} },
+                ]),
+          query: () => Effect.fail(new VectorizeError("down")),
+        }),
+      );
+
+      expect(Exit.isFailure(exit)).toBe(true);
+      expect(JSON.stringify(exit)).toContain("HttpServiceUnavailable");
+    },
+  );
 });

@@ -4,6 +4,8 @@ import { asNonPlaceholder } from "@/components/match/test-narrowing";
 
 import {
   deriveFirstTeamVM,
+  pickLastResult,
+  pickNextFixture,
   selectSeniorTeams,
   SETTLED_LOOKAHEAD_MS,
 } from "./first-teams";
@@ -59,6 +61,26 @@ function match(p: {
 }
 
 const team = { label: "A-ploeg", slug: "a-ploeg", division: "3de Nationale" };
+
+describe("first-team slots, real kickoff instant", () => {
+  // The BFF date "…T15:00:00Z" is 15:00 Brussels: 13:00Z in summer, 14:00Z in winter.
+  it.each([
+    ["summer", "2026-07-19T15:00:00Z", "2026-07-19T13:00:00Z"],
+    ["winter", "2026-01-17T15:00:00Z", "2026-01-17T14:00:00Z"],
+  ])(
+    "%s: a scheduled kickoff is a fixture a minute before, a result a minute after (#3491)",
+    (_l, wire, instant) => {
+      const k = Date.parse(instant);
+      const m = match({ id: 1, date: wire, status: "scheduled" });
+      const before = new Date(k - 60_000);
+      const after = new Date(k + 60_000);
+      expect(pickNextFixture([m], before)?.id).toBe(1);
+      expect(pickLastResult([m], before)).toBeUndefined();
+      expect(pickNextFixture([m], after)).toBeUndefined();
+      expect(pickLastResult([m], after)?.id).toBe(1);
+    },
+  );
+});
 
 describe("deriveFirstTeamVM", () => {
   it("picks the most recent played match as the result", () => {

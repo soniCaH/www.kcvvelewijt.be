@@ -77,7 +77,7 @@ real:
 
 - `cache/kv-cache-live.workerd.test.ts` — `KvCacheLive` and `makeDurableKv`
   against the real `PSD_CACHE` binding: read/write round-trips, delete, a
-  real `expirationTtl` visible on the key's `list()` metadata, `increment`,
+  real `expirationTtl` visible on the key's `list()` metadata,
   and a durable `list()` round-trip into the port's page shape. (Not
   multi-page cursor-following — `makeDurableKv`'s `list` forwards no
   `limit`, so it can't force a real second page; that loop is covered on
@@ -112,7 +112,8 @@ the invocation returns (`src/index.ts`).
 | `0 2 * * *`  | `psd-sanity-sync` — players, teams, staff, portraits |
 | `30 2 * * *` | `sanity-index-sync` — search embeddings              |
 
-`psd-sanity-sync` walks **one team per night**, advancing a cursor in KV. Staging
+`psd-sanity-sync` walks **one team per night**, advancing a cursor in KV over the
+teams **sorted by PSD id** (#3465). Staging
 runs no scheduled sync at all — it shares the PSD API quota with production.
 
 ### Syncing one team now
@@ -124,10 +125,16 @@ does not want to wait for tonight:
 ./scripts/trigger-psd-sync.sh 0   # 0 = Eerste Elftallen A, 1 = Eerste Elftallen B, …
 ```
 
+The index is a position in the **id-sorted** team list. A manual run passes
+`SYNC_MANUAL_RUN=1` to the worker: it never runs cycle-end reconciliation or
+touches the cycle accumulators (and so cannot archive anything), but it still
+moves the cursor.
+
 Three things that are easy to get wrong, and that the script handles:
 
 - **It writes to production Sanity.** The cursor lives in the _preview_ KV
-  namespace, because `wrangler dev --remote` reads preview — but the Sanity
+  namespace (whose `preview_id` is staging's real namespace id in
+  `wrangler.toml`), because `wrangler dev --remote` reads preview — but the Sanity
   credentials come from `.dev.vars`, which points at the production dataset.
   Preview KV, production data. The script prints the target before it writes.
 - **`/__scheduled` is the trigger, not a health check.** Polling it to see
@@ -135,7 +142,9 @@ Three things that are easy to get wrong, and that the script handles:
   for its `Ready on …` line instead, so the cron fires exactly once.
 - **Do not stop it on a timer.** Stopping the worker early cancels whatever
   upload is still in flight. The script waits for the sync's own terminal line,
-  `sync completed — cursor advanced to N`.
+  `sync completed — cursor advanced to N`. A failed run (for instance one
+  member that would not upsert) logs `Sync failed:` instead and the script
+  exits 1; the cursor has still moved on.
 
 A `429` on a portrait upload is **not** fatal — that player retries on the next
 run, or on the nightly cron. Re-running is safe and cheap: images already

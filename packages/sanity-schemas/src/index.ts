@@ -19,6 +19,8 @@ export {
 } from './preview/photoGallery-preview'
 export {validateOrganigramMember} from './validation/organigram-members'
 export {validateSubjectsCount} from './validation/subjects-count'
+export {validateUnpublishAt} from './validation/unpublish-at'
+export type {UnpublishAtContext} from './validation/unpublish-at'
 export type {SubjectsCountContext} from './validation/subjects-count'
 export {validateRespondentKey, ALL_RESPONDENTS_KEY} from './validation/respondent-key'
 export type {RespondentKeyContext} from './validation/respondent-key'

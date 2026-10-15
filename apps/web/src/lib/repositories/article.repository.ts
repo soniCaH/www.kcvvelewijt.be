@@ -1,7 +1,10 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
 import { fetchGroq, type SanityReadError } from "../sanity/fetch-groq";
-import { SANITY_LIST_REVALIDATE, SANITY_TAGS } from "../sanity/cache-tags";
+import {
+  SANITY_PUBLISH_WINDOW_REVALIDATE,
+  SANITY_TAGS,
+} from "../sanity/cache-tags";
 import type {
   ARTICLES_QUERY_RESULT,
   ARTICLES_PAGINATED_QUERY_RESULT,
@@ -20,10 +23,9 @@ import { formatArticleDate } from "../utils/dates";
 // GROQ-side coalesce (the web-side `resolvePullQuoteSpeaker` applies the
 // photo fallback order), discriminated at render time by the dereferenced
 // `_type`. `ARTICLE_BY_SLUG_QUERY` only (#2517 review) — `ARTICLES_QUERY`
-// powers `findAll()`, whose `ArticleVM` doesn't even carry `body` (its
-// `Pick<...>` list omits it entirely; nothing renders `<ArticleBody>` or
-// computes reading time off a `findAll()` row), so dereferencing a speaker
-// there is pure unread payload on every homepage/listing fetch.
+// powers `findAll()`, whose `ArticleVM` carries no `body` and whose query
+// selects none (#3472: only the first transfer/event fact), so dereferencing a
+// speaker there is pure unread payload on every homepage/listing fetch.
 const PULL_QUOTE_SPEAKER_PROJECTION = `"speaker": select(_type == "pullQuote" => speaker->{ _type, firstName, lastName, position, "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max", "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max", "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max", functionTitle }, null)`;
 
 // Phase 4.C.2 — Round 2 S.2 lock: featured articles surface first in the
@@ -60,8 +62,7 @@ export const ARTICLES_QUERY =
     title, date, endDate, startTime, endTime,
     location, address, ageGroup, competitionTag,
     ticketUrl, ticketLabel
-  },
-  body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId, archived } } } }
+  }
 }`);
 
 // One entry per (published article, tag) pair — `findTags` counts them.
@@ -509,26 +510,32 @@ const findRelated = (documentId: string) =>
   fetchGroq<RELATED_ARTICLES_QUERY_RESULT>(
     RELATED_ARTICLES_QUERY,
     { documentId },
-    { revalidate: SANITY_LIST_REVALIDATE, tags: [SANITY_TAGS.articles] },
+    {
+      revalidate: SANITY_PUBLISH_WINDOW_REVALIDATE,
+      tags: [SANITY_TAGS.articles],
+    },
   ).pipe(Effect.map((rows) => rows.map(widenToArticleVM)));
 
 export const ArticleRepositoryLive = Layer.succeed(ArticleRepository, {
   findAll: () =>
     fetchGroq<ARTICLES_QUERY_RESULT>(ARTICLES_QUERY, undefined, {
-      revalidate: SANITY_LIST_REVALIDATE,
-      tags: [SANITY_TAGS.articles],
+      revalidate: SANITY_PUBLISH_WINDOW_REVALIDATE,
+      tags: [SANITY_TAGS.articles, SANITY_TAGS.players, SANITY_TAGS.staff],
     }),
   // Tagged like `findAll` above rather than left to inherit the route segment's
-  // window (#2563): `/nieuws/[slug]` dropped from 86400 to 900 under #2433 rule
-  // 5, and an inherited Data-Cache entry would have taken every Sanity read on
-  // the prebuilt news corpus down with it — 96× the read volume to bound a
-  // failure the article body never had. Publishes still bust it on demand,
-  // `/api/revalidate` already fires `revalidateTag('articles')`.
+  // window (#2563): an inherited Data-Cache entry would have taken every Sanity
+  // read on the prebuilt news corpus down with the segment's 900 s window. The
+  // 900 s here is the publish-window bound (#3472), the same figure by design.
+  // Saves still bust it on demand, `/api/revalidate` already fires
+  // `revalidateTag('articles')`.
   findBySlug: (slug) =>
     fetchGroq<ARTICLE_BY_SLUG_QUERY_RESULT>(
       ARTICLE_BY_SLUG_QUERY,
       { slug },
-      { revalidate: SANITY_LIST_REVALIDATE, tags: [SANITY_TAGS.articles] },
+      {
+        revalidate: SANITY_PUBLISH_WINDOW_REVALIDATE,
+        tags: [SANITY_TAGS.articles, SANITY_TAGS.players, SANITY_TAGS.staff],
+      },
     ).pipe(
       Effect.map((row) => (row ? filterPublishedRelatedArticles(row) : null)),
     ),
@@ -553,7 +560,10 @@ export const ArticleRepositoryLive = Layer.succeed(ArticleRepository, {
     return fetchGroq<RELATED_ARTICLES_BY_PERSON_QUERY_RESULT>(
       RELATED_ARTICLES_BY_PERSON_QUERY,
       { documentId, phrase: fullName },
-      { revalidate: SANITY_LIST_REVALIDATE, tags: [SANITY_TAGS.articles] },
+      {
+        revalidate: SANITY_PUBLISH_WINDOW_REVALIDATE,
+        tags: [SANITY_TAGS.articles],
+      },
     ).pipe(
       Effect.map((rows) => {
         const kept = rows.filter(
@@ -578,7 +588,10 @@ export const ArticleRepositoryLive = Layer.succeed(ArticleRepository, {
     fetchGroq<MATCH_ARTICLES_QUERY_RESULT>(
       MATCH_ARTICLES_QUERY,
       { matchId },
-      { revalidate: SANITY_LIST_REVALIDATE, tags: [SANITY_TAGS.articles] },
+      {
+        revalidate: SANITY_PUBLISH_WINDOW_REVALIDATE,
+        tags: [SANITY_TAGS.articles],
+      },
     ).pipe(
       Effect.map((rows) =>
         rows.filter(

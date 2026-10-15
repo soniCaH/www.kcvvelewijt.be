@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { makeSanityProjectionStub } from "../test-helpers/sanity-projection-stub";
 import { Effect, Layer, Logger, Schema as S } from "effect";
-import { PsdService, PsdServiceLive } from "./service";
+import { PsdService, PsdServiceLive, isPartialFanout } from "./service";
 import { PsdGateTest } from "./gate";
 import {
   Match,
@@ -46,23 +47,15 @@ const cacheMock: KvCacheInterface = {
     ),
   set: () => Effect.succeed(undefined),
   delete: () => Effect.succeed(undefined),
-  increment: () => Effect.succeed(undefined),
   durable: noopDurableKv,
 };
 
 function makeSanityMock(
   visiblePsdIds: string[] = ["1"],
 ): SanityProjectionInterface {
-  return {
-    getPlayersImageState: () => Effect.succeed(new Map()),
-    getStaffImageState: () => Effect.succeed(new Map()),
-    getActivePlayerPsdIds: () => Effect.succeed([]),
-    getActiveStaffPsdIds: () => Effect.succeed([]),
-    getActiveTeamPsdIds: () => Effect.succeed([]),
+  return makeSanityProjectionStub({
     getVisibleTeamPsdIds: () => Effect.succeed(visiblePsdIds),
-    getProtectedStaffPsdIds: () => Effect.succeed([]),
-    getFormRoutingConfig: () => Effect.succeed(null),
-  };
+  });
 }
 
 const seasons = [
@@ -647,6 +640,50 @@ describe("PsdService.getNextMatches", () => {
     }
   });
 
+  it("flags the list as a partial fan-out when one team fails, and not when all succeed (#3489)", async () => {
+    const teamB = { ...rawTeams[0], id: 2, name: "KCVV Elewijt B" };
+    const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
+    const mockPsd = (team2Ok: boolean) =>
+      fetchMock.mockImplementation((url: string) => {
+        if (url.includes("/games/team/2/") && !team2Ok) {
+          return Promise.resolve({
+            ok: false,
+            status: 503,
+            statusText: "Service Unavailable",
+          });
+        }
+        if (url.includes("/games/team/")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => rawFutureMatchList,
+          });
+        }
+        if (url.includes("/seasons")) {
+          return Promise.resolve({ ok: true, json: async () => seasons });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: async () => [rawTeams[0], teamB],
+        });
+      });
+    const opts = { sanityMock: makeSanityMock(["1", "2"]) };
+
+    mockPsd(false);
+    const partial = await runService((svc) => svc.getNextMatches(), opts);
+    expect(partial._tag).toBe("Right");
+    if (partial._tag === "Right") {
+      expect(partial.right).toHaveLength(1);
+      expect(isPartialFanout(partial.right)).toBe(true);
+    }
+
+    mockPsd(true);
+    const complete = await runService((svc) => svc.getNextMatches(), opts);
+    expect(complete._tag).toBe("Right");
+    if (complete._tag === "Right") {
+      expect(isPartialFanout(complete.right)).toBe(false);
+    }
+  });
+
   it("excludes teams with no future matches", async () => {
     const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
     fetchMock.mockImplementation((url: string) => {
@@ -738,7 +775,6 @@ describe("PsdService.getNextMatches", () => {
         return Effect.succeed(undefined);
       },
       delete: () => Effect.succeed(undefined),
-      increment: () => Effect.succeed(undefined),
       durable: noopDurableKv,
     };
 
@@ -777,7 +813,6 @@ describe("PsdService.getNextMatches", () => {
           : Effect.succeed(null),
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
-      increment: () => Effect.succeed(undefined),
       durable: noopDurableKv,
     };
 
@@ -930,6 +965,39 @@ describe("PsdService.getMatchesWindow", () => {
     }
   });
 
+  it("treats a 15:00 Brussels kickoff as started at 13:00Z, not 15:00Z (#3491)", async () => {
+    const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
+    const afternoon = game({
+      id: 210,
+      date: "2026-06-17 15:00",
+      time: "15:00",
+    });
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("/games/team/")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ content: [afternoon] }),
+        });
+      }
+      if (url.includes("/seasons")) {
+        return Promise.resolve({ ok: true, json: async () => windowSeasons });
+      }
+      return Promise.resolve({ ok: true, json: async () => [rawTeams[0]] });
+    });
+    const ids = async (op: "getNextMatches" | "getMatchesWindow") => {
+      const r = await runService((svc) => svc[op]());
+      return r._tag === "Right" ? r.right.map((m) => m.id) : "failed";
+    };
+
+    vi.setSystemTime(new Date("2026-06-17T12:59:00.000Z"));
+    expect(await ids("getNextMatches")).toEqual([210]);
+    vi.setSystemTime(new Date("2026-06-17T13:01:00.000Z"));
+    expect(await ids("getNextMatches")).toEqual([]);
+    // The window's lower bound is the real start of the Brussels day, so the
+    // started match is still in it.
+    expect(await ids("getMatchesWindow")).toEqual([210]);
+  });
+
   it("flattens in-window games across teams and sorts by kickoff (incl. same-day time)", async () => {
     const teamB = {
       id: 2,
@@ -1022,6 +1090,8 @@ describe("PsdService.getMatchesWindow", () => {
     if (result._tag === "Right") {
       // Team 2 failed, team 1's in-window matches still returned.
       expect(result.right.map((m) => m.id)).toEqual([201, 202]);
+      // …and the result says it is incomplete, so it is cached briefly (#3489).
+      expect(isPartialFanout(result.right)).toBe(true);
     }
   });
 
@@ -1521,7 +1591,6 @@ describe("PsdService.getMatchDetail — status/score backfill from season list",
       ),
     set: () => Effect.succeed(undefined),
     delete: () => Effect.succeed(undefined),
-    increment: () => Effect.succeed(undefined),
     durable: noopDurableKv,
   });
 
@@ -2223,7 +2292,6 @@ describe("PsdService.getMatchDetail - competition/team enrichment", () => {
         ),
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
-      increment: () => Effect.succeed(undefined),
       durable: noopDurableKv,
     };
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
@@ -2288,7 +2356,6 @@ describe("PsdService.getMatchDetail - competition/team enrichment", () => {
         ),
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
-      increment: () => Effect.succeed(undefined),
       durable: noopDurableKv,
     };
     (global.fetch as ReturnType<typeof vi.fn>)
@@ -2341,7 +2408,6 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
       ),
     set: () => Effect.succeed(undefined),
     delete: () => Effect.succeed(undefined),
-    increment: () => Effect.succeed(undefined),
     durable: noopDurableKv,
   });
 
@@ -2417,7 +2483,7 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
 
       expect(result._tag).toBe("Right");
       if (result._tag === "Right") {
-        expect(result.right.is_home).toBeUndefined();
+        expect(result.right).not.toHaveProperty("is_home");
       }
     }
   });
@@ -2490,7 +2556,6 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
         ),
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
-      increment: () => Effect.succeed(undefined),
       durable: noopDurableKv,
     };
     (global.fetch as ReturnType<typeof vi.fn>)
@@ -2518,7 +2583,7 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
       expect(result.right.venue).toBe(CLUB_VENUE);
-      expect(result.right.is_home).toBeUndefined();
+      expect(result.right).not.toHaveProperty("is_home");
     }
   });
 
@@ -2558,7 +2623,6 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
         ),
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
-      increment: () => Effect.succeed(undefined),
       durable: noopDurableKv,
     };
     (global.fetch as ReturnType<typeof vi.fn>)
@@ -2616,7 +2680,6 @@ describe("PsdService — youth score gate (#3428)", () => {
       ),
     set: () => Effect.succeed(undefined),
     delete: () => Effect.succeed(undefined),
-    increment: () => Effect.succeed(undefined),
     durable: noopDurableKv,
   });
 

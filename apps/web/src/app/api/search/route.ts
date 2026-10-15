@@ -33,7 +33,7 @@ const debugLog = (...args: unknown[]) => {
 };
 
 /**
- * Search across articles by title, tags, and body
+ * Search across articles by title and tags
  */
 const searchArticles = (query: string) =>
   Effect.gen(function* () {
