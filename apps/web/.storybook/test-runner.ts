@@ -125,11 +125,11 @@ const FIXED_NOW_MS = Date.parse(VR_FROZEN_NOW_ISO);
 const PRNG_SEED = 0x1234abcd;
 // Two-stage image budget (#3466). `freshImageDecodes` refetches every photo at
 // each capture viewport, so on a loaded CI runner a 190-270 KB JPG regularly
-// misses a tight cap. Stage 1: `IMAGE_LOAD_TIMEOUT_MS` is the TOTAL budget
-// (load, then decode) of the first `waitForImagesSettled` — long enough for a
-// real srcset swap to settle on a quiet machine. Then `collectImageSamples`
-// checks every visible image; any still unpainted gets stage 2,
-// `IMAGE_PAINT_RETRY_TIMEOUT_MS`, in total, for those images only. A visible
+// misses a tight cap. Stage 1: `IMAGE_LOAD_TIMEOUT_MS` caps each wait (load,
+// then decode) of the first `waitForImagesSettled` — long enough for a real
+// srcset swap to settle on a quiet machine. Then `collectImageSamples` checks
+// every visible image; any still unpainted gets stage 2,
+// `IMAGE_PAINT_RETRY_TIMEOUT_MS`, per wait, for those images only. A visible
 // image still unpainted after both stages FAILS the story before
 // `page.screenshot()` — a capped wait never falls through to a half-loaded
 // capture. Far under the story's `--testTimeout 120000`. Every wait that ends
@@ -422,22 +422,17 @@ function waitTwoFrames(frameTimeoutMs: number) {
 
 // Runs in the page context (self-contained, like `waitForFontsSettled`):
 // flips lazy images to eager, then waits for every image to load and decode.
-// `budgetMs` is the TOTAL for both stages (one deadline), so the retry budget
-// in `postVisit` is a real ceiling. Never silent (#3466): a stage that ends on
-// its timer warns the URLs still pending. Called once per capture viewport,
+// `budgetMs` caps each wait (load, then decode) on its own. Never silent
+// (#3466): a wait that ends on its timer warns the URLs still pending. Called once per capture viewport,
 // then again with the retry budget for whatever `collectImageSamples` finds
 // unpainted — already-decoded images settle instantly, so the second call
 // effectively waits on the pending ones only.
 async function waitForImagesSettled(budgetMs: number) {
-  const deadline = Date.now() + budgetMs;
-  // Resolves true when `work` finished, false when the deadline won.
+  // Resolves true when `work` finished, false when the cap won.
   const finishedInTime = async (work: Promise<unknown>) => {
     let timer: ReturnType<typeof setTimeout> | undefined;
     const timedOut = new Promise<false>((resolve) => {
-      timer = setTimeout(
-        () => resolve(false),
-        Math.max(0, deadline - Date.now()),
-      );
+      timer = setTimeout(() => resolve(false), budgetMs);
     });
     const done = await Promise.race([work.then(() => true as const), timedOut]);
     clearTimeout(timer);
@@ -520,16 +515,23 @@ function collectImageSamples(decodeProbeMs: number): Promise<ImageSample[]> {
       const rect = img.getBoundingClientRect();
       const style = getComputedStyle(img);
       let timer: ReturnType<typeof setTimeout> | undefined;
-      const decoded = await Promise.race([
+      const outcome = await Promise.race([
         img.decode().then(
-          () => true,
-          () => false,
+          () => true as const,
+          () => false as const,
         ),
-        new Promise<false>((resolve) => {
-          timer = setTimeout(() => resolve(false), decodeProbeMs);
+        new Promise<"timeout">((resolve) => {
+          timer = setTimeout(() => resolve("timeout"), decodeProbeMs);
         }),
       ]);
       clearTimeout(timer);
+      if (outcome === "timeout") {
+        console.warn(
+          `[VR] image decode probe gave up after ${decodeProbeMs} ms: ` +
+            (img.currentSrc || img.src),
+        );
+      }
+      const decoded = outcome === true;
       return {
         currentSrc: img.currentSrc || img.src,
         width: rect.width,
