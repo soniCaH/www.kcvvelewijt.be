@@ -9,6 +9,7 @@ import {
   HARD_TTL_DEFAULT,
   HARD_TTL_LONG,
   BG_REFRESH_TIMEOUT_MS,
+  MISS_FETCH_TIMEOUT_MS,
   NOT_FOUND_TTL,
   psdCallsKey,
   KvError,
@@ -206,6 +207,12 @@ describe("TTL constants", () => {
     // headroom for the failure-path KV write.
     expect(BG_REFRESH_TIMEOUT_MS).toBeLessThan(15_000);
   });
+
+  it("MISS_FETCH_TIMEOUT_MS stays under the gate's flight lease (#3467)", () => {
+    // The miss-path leader holds the same 15 s lease. A fan-out that outruns it
+    // lets a second reader reclaim leadership and fork a duplicate fan-out.
+    expect(MISS_FETCH_TIMEOUT_MS).toBeLessThan(15_000);
+  });
 });
 
 describe("TypedKvCache", () => {
@@ -268,7 +275,7 @@ describe("TypedKvCache", () => {
     expect(stored.value).toEqual({ name: "test", value: 42 });
   });
 
-  it("stale + successful refresh: updates cache with fresh value", async () => {
+  it("stale + successful refresh: serves stale, updates cache with fresh value", async () => {
     const mockKv = makeMockKv();
     // Cached 2 hours ago, softTtl is 60 seconds → stale
     mockKv.store.set(
@@ -289,7 +296,9 @@ describe("TypedKvCache", () => {
         ),
     );
 
-    expect(result).toEqual({ name: "fresh", value: 42 });
+    // No runner wired: the single-flight refresh runs inline, the caller still
+    // gets the stale value (#3467).
+    expect(result).toEqual({ name: "old", value: 1 });
     // Cache should be updated with new wrapper
     const stored = JSON.parse(mockKv.put.mock.calls[0]![1]);
     expect(stored.value).toEqual({ name: "fresh", value: 42 });
@@ -354,7 +363,7 @@ describe("TypedKvCache", () => {
     expect(fetchCalled).toBe(true);
   });
 
-  it("cache hit with old format (no wrapper): logs warning, falls through to fetch", async () => {
+  it("cache hit with old format (no wrapper): serves it as stale and rewrites it via refresh", async () => {
     const mockKv = makeMockKv();
     // Pre-Phase 3 format: raw value without wrapper
     mockKv.store.set(
@@ -379,7 +388,7 @@ describe("TypedKvCache", () => {
         ),
     );
 
-    expect(result).toEqual({ name: "fresh", value: 42 });
+    expect(result).toEqual({ name: "old-format", value: 5 });
     expect(fetchCalled).toBe(true);
 
     // Verify old-format entry was rewritten to new wrapper shape
@@ -472,7 +481,7 @@ describe("TypedKvCache", () => {
     });
   });
 
-  it("stale-on-error: propagates error when shouldServeStale returns false", async () => {
+  it("stale-on-error: a non-outage failure keeps stale and marks, never failing the read", async () => {
     const mockKv = makeMockKv();
     // Cached 2 hours ago, softTtl is 60 seconds → stale
     mockKv.store.set(
@@ -487,7 +496,7 @@ describe("TypedKvCache", () => {
     const fetchEffect = Effect.fail(notFoundError);
 
     const typedCache = TypedKvCache(TestSchema);
-    const result = await Effect.runPromiseExit(
+    const result = await Effect.runPromise(
       typedCache
         .getOrFetch("test-key", fetchEffect, 60, undefined, {
           shouldServeStale: (err) =>
@@ -500,7 +509,8 @@ describe("TypedKvCache", () => {
         ),
     );
 
-    expect(result._tag).toBe("Failure");
+    expect(result).toEqual({ name: "stale", value: 99 });
+    expect(mockKv.store.get("neg:test-key")).toBe("1");
   });
 
   it("stale-on-error: serves stale when shouldServeStale returns true", async () => {
@@ -557,7 +567,7 @@ describe("TypedKvCache", () => {
     expect(mockKv.put).not.toHaveBeenCalled();
   });
 
-  it("stale + refresh: dies when refresh returns schema-invalid data", async () => {
+  it("stale + refresh: schema-invalid refresh data is never cached; stale is kept", async () => {
     const mockKv = makeMockKv();
     // Cached 2 hours ago → stale
     mockKv.store.set(
@@ -569,7 +579,7 @@ describe("TypedKvCache", () => {
     const fetchEffect = Effect.succeed({ name: 123, value: "bad" } as never);
 
     const typedCache = TypedKvCache(TestSchema);
-    const result = await Effect.runPromiseExit(
+    const result = await Effect.runPromise(
       typedCache
         .getOrFetch("test-key", fetchEffect, 60)
         .pipe(
@@ -579,9 +589,12 @@ describe("TypedKvCache", () => {
         ),
     );
 
-    expect(result._tag).toBe("Failure");
+    expect(result).toEqual({ name: "old", value: 1 });
     // Should NOT cache invalid data
-    expect(mockKv.put).not.toHaveBeenCalled();
+    expect(JSON.parse(mockKv.store.get("test-key")!).value).toEqual({
+      name: "old",
+      value: 1,
+    });
   });
 });
 
@@ -676,30 +689,37 @@ describe("TypedKvCache — stale-while-revalidate + storm gate (#2328)", () => {
     expect(mockKv.store.get("neg:test-key")).toBe("1");
   });
 
-  it("correctness guard: past-kickoff stale forces a BLOCKING refresh", async () => {
+  it("no background runner: 50 concurrent stale reads run ONE refresh and all serve stale (#3467)", async () => {
     const mockKv = makeMockKv();
     mockKv.store.set("test-key", staleWrapper({ name: "old", value: 1 }));
-    const gate = PsdGateTest;
-    const { runnerLayer } = withRunner(mockKv, gate);
+    const gate = makePsdGateLayer(new GateLogic({ ratePerSecond: 1e9 }));
 
-    const fetchEffect = Effect.succeed({ name: "fresh", value: 2 });
+    let fanOuts = 0;
+    const fetchEffect = Effect.gen(function* () {
+      fanOuts++;
+      yield* Effect.sleep("20 millis");
+      return { name: "fresh", value: 2 };
+    });
 
-    const result = await Effect.runPromise(
-      TypedKvCache(TestSchema)
-        .getOrFetch("test-key", fetchEffect, 60, undefined, {
-          // Treat the stale value as "must not serve" → blocking refresh.
-          mustBlockOnStale: (v) => v.value === 1,
-        })
-        .pipe(
-          Effect.provide(runnerLayer),
-          Effect.provide(KvCacheLive),
-          Effect.provide(gate),
-          Effect.provide(makeEnvLayer(mockKv)),
-        ),
-    );
+    const run = () =>
+      Effect.runPromise(
+        TypedKvCache(TestSchema)
+          .getOrFetch("test-key", fetchEffect, 60)
+          .pipe(
+            Effect.provide(KvCacheLive),
+            Effect.provide(gate),
+            Effect.provide(makeEnvLayer(mockKv)),
+          ),
+      );
 
-    // Fresh value returned synchronously (blocking), not the stale one.
-    expect(result).toEqual({ name: "fresh", value: 2 });
+    const results = await Promise.all(Array.from({ length: 50 }, run));
+
+    for (const r of results) expect(r).toEqual({ name: "old", value: 1 });
+    expect(fanOuts).toBe(1);
+    expect(JSON.parse(mockKv.store.get("test-key")!).value).toEqual({
+      name: "fresh",
+      value: 2,
+    });
   });
 
   it("N concurrent misses collapse to ONE fan-out (single-flight)", async () => {
@@ -1748,5 +1768,49 @@ describe("TypedKvCache — PSD on-demand daily budget (#3468)", () => {
     );
 
     expect(fetch).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("TypedKvCache — whole-fetch cap on the cold-miss leader (#3467)", () => {
+  const hangingFetch = Effect.never as Effect.Effect<{
+    name: string;
+    value: number;
+  }>;
+
+  it("a cold-miss fetch that outruns the cap fails UpstreamUnavailable, releases the flight and reports nothing", async () => {
+    const mockKv = makeMockKv();
+    const logic = new GateLogic({ ratePerSecond: 1e9 });
+    const { layer: gate, reportOutcome } = (() => {
+      const reportOutcome = vi.fn(() =>
+        Effect.succeed({ incidentOpen: false }),
+      );
+      const layer = Layer.effect(
+        PsdGateService,
+        Effect.map(PsdGateService, (real) => ({ ...real, reportOutcome })),
+      ).pipe(Layer.provide(makePsdGateLayer(logic)));
+      return { layer, reportOutcome };
+    })();
+
+    const result = await Effect.runPromise(
+      TypedKvCache(TestSchema)
+        .getOrFetch("test-key", hangingFetch, 60, HARD_TTL_DEFAULT, {
+          fetchTimeoutMs: 20,
+        })
+        .pipe(
+          Effect.either,
+          Effect.provide(KvCacheLive),
+          Effect.provide(gate),
+          Effect.provide(makeEnvLayer(mockKv)),
+        ),
+    );
+
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left).toBeInstanceOf(UpstreamUnavailableError);
+    }
+    // The flight ended with the failure, so the next reader can lead.
+    expect(logic.isInFlight("test-key")).toBe(false);
+    // A slow fan-out is not proof PSD is down.
+    expect(reportOutcome).not.toHaveBeenCalled();
   });
 });
