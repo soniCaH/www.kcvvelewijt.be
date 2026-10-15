@@ -13,16 +13,14 @@ pnpm --filter @kcvv/studio-staging dev   # starts Studio at http://localhost:333
 ## Deploy
 
 ```bash
-cd apps/studio-staging && SANITY_STUDIO_DATASET=staging npx sanity deploy
+pnpm --filter @kcvv/studio-staging run deploy
 ```
 
 Deploys to [kcvv-elewijt-staging.sanity.studio](https://kcvv-elewijt-staging.sanity.studio).
 
-> `SANITY_STUDIO_DATASET=staging` is **required**. The staging `sanity.config.ts` derives its
-> dataset from this env var and throws if it is unset, so the deploy fails fast at config-eval.
-> Use `npx sanity deploy` (or `pnpm --filter @kcvv/studio-staging run deploy`) — **not** bare
-> `pnpm --filter @kcvv/studio-staging deploy` (pnpm's built-in `deploy`, which errors). There
-> is no CI auto-deploy; schema changes only go live after a manual redeploy.
+> Use `pnpm --filter @kcvv/studio-staging run deploy` — **not** bare
+> `pnpm --filter @kcvv/studio-staging deploy` (pnpm's built-in `deploy`, which errors).
+> There is no CI auto-deploy; schema changes only go live after a manual redeploy.
 
 ## Editing schemas
 

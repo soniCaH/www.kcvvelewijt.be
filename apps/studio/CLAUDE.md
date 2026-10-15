@@ -7,7 +7,7 @@ Production Sanity Studio deployed to sanity.io. See the root `.claude/CLAUDE.md`
 | Field               | Value                      |
 | ------------------- | -------------------------- |
 | Project ID          | `vhb33jaz`                 |
-| Dataset             | `production` (default)     |
+| Dataset             | `production` (hardcoded)   |
 | Deployment app ID   | `spu38xebdj9gax6q21ibckzf` |
 | Staging counterpart | `apps/studio-staging`      |
 
@@ -22,7 +22,8 @@ Production Sanity Studio deployed to sanity.io. See the root `.claude/CLAUDE.md`
 - Import `schemaTypes` from `./schemaTypes` (which re-exports from `@kcvv/sanity-studio`)
 - Import the `structure` resolver from `./structure`
 - Register Document Actions via `document.actions` — always spread `prev` first: `(prev) => [...prev, MyAction]`
-- Dataset is read from `SANITY_STUDIO_DATASET` env var with `'production'` as fallback — do not hardcode it
+- Dataset is hardcoded to `'production'`. Never read it from env: an untracked `.env.local` must not be able to bind this studio to staging.
+- **`dev` edits PRODUCTION data.** Try unreleased studio code in `@kcvv/studio-staging`.
 
 ## structure.ts Conventions
 
@@ -30,16 +31,6 @@ Production Sanity Studio deployed to sanity.io. See the root `.claude/CLAUDE.md`
 - Use `S.divider()` to group related document types visually
 - Singleton documents (e.g. `homePage`, `jeugdLandingPage`) use `.document().schemaType().documentId()` — the `documentId` must match the singleton `_id` in the dataset
 - Keep the sidebar order stable — reordering changes the editor UX for content editors
-
-## .env.local
-
-Required variables:
-
-```env
-SANITY_STUDIO_DATASET=production
-```
-
-`.env.local` is gitignored. Never commit secrets or dataset overrides. Copy `.env.example` (if present) as a starting point.
 
 ## Typegen
 
@@ -74,11 +65,11 @@ Then apply with `--no-dry-run` (add `--no-confirm` when non-interactive). Run ag
 # Local dev server (hot-reload)
 pnpm --filter @kcvv/studio dev
 
-# Deploy to sanity.io (production)
-pnpm --filter @kcvv/studio deploy
+# Deploy to sanity.io (production) — CI does this on merge to main
+pnpm --filter @kcvv/studio run deploy
 ```
 
-`deploy` pushes to the hosted Studio at sanity.io — it does **not** deploy schemas or datasets.
+`deploy` pushes to the hosted Studio at sanity.io and uploads the schema and manifest. Never use bare `pnpm --filter @kcvv/studio deploy` (pnpm's built-in).
 
 ## Sync With Staging
 

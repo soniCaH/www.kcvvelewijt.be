@@ -17,11 +17,7 @@ export default defineConfig({
   title: 'kcvv-elewijt',
 
   projectId: 'vhb33jaz',
-  dataset: (() => {
-    const ds = process.env.SANITY_STUDIO_DATASET as string | undefined
-    if (!ds) throw new Error('SANITY_STUDIO_DATASET env var is required for the staging studio')
-    return ds
-  })(),
+  dataset: 'staging',
 
   plugins: [structureTool({structure}), visionTool()],
 
