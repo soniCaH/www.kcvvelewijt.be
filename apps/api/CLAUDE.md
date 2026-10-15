@@ -189,12 +189,15 @@ In request order:
    `x-real-ip`. The worker trusts it only because the BFF key proves the
    caller is the Next server.
 2. **Response cache** — the whole `SearchResponse`, `answer` included, for
-   `TTL.SEARCH` (1 h) under `search:v1:{type ?? "all"}:{limit}:{q}`, where `q`
-   is the query trimmed, lowercased, whitespace collapsed. A hit makes no
-   Embedding, Vectorize or AI call. Plain `KvCacheService` get/set, no SWR: an
-   entry expires, it is never refreshed in the background. A query long enough
-   to push the key past KV's 512-byte limit is not cached (the put fails
-   silently); the limits still bound it.
+   `TTL.SEARCH` (1 h) under `search:v1:{type ?? "all"}:{limit}:{sha256(q)}`,
+   where `q` is the query trimmed, lowercased, whitespace collapsed, and the
+   SHA-256 is hex — so a query of any length fits KV's 512-byte key limit. A
+   hit makes no Embedding, Vectorize or AI call. Plain `KvCacheService`
+   get/set, no SWR: an entry expires, it is never refreshed in the
+   background. A response is stored only when no answer was asked for (top
+   score under `LLM_SCORE_THRESHOLD`) or an answer came back; one whose answer
+   was dropped (daily cap, LLM failure or timeout) is not, so the next search
+   can still get one.
 3. **`SEARCH_GLOBAL_LIMITER`** — `[[ratelimits]]`, 120 / 60 s, key `global`.
    Runs on a cache miss only.
 4. **AI daily cap** — `AiAnswerServiceLive` reads KV counter

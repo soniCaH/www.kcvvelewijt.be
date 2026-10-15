@@ -30,6 +30,9 @@ function makeKv() {
   return {
     get: async (key: string) => store.get(key) ?? null,
     put: async (key: string, value: string) => {
+      // Real KV rejects a key over 512 bytes.
+      if (new TextEncoder().encode(key).length > 512)
+        throw new Error("KV key too long");
       store.set(key, value);
     },
     delete: async (key: string) => {
@@ -43,6 +46,10 @@ function setup(
     ipLimit?: number;
     globalLimit?: number;
     embedFails?: boolean;
+    /** Top hit score; at or over LLM_SCORE_THRESHOLD an answer is asked for. */
+    score?: number;
+    /** What generateAnswer yields — undefined is a dropped answer. */
+    answer?: string | undefined;
   } = {},
 ) {
   const ipLimiter = stubLimiter(opts.ipLimit ?? 10);
@@ -56,7 +63,7 @@ function setup(
     Effect.succeed([
       {
         id: "doc-1",
-        score: 0.9,
+        score: opts.score ?? 0.9,
         metadata: {
           slug: "kantine",
           type: "responsibility",
@@ -66,7 +73,8 @@ function setup(
       },
     ]),
   );
-  const generateAnswer = vi.fn(() => Effect.succeed("Een antwoord."));
+  const answer = "answer" in opts ? opts.answer : "Een antwoord.";
+  const generateAnswer = vi.fn(() => Effect.succeed(answer));
   const kv = makeKv();
   const layer = Layer.mergeAll(
     KvCacheLive,
@@ -101,13 +109,22 @@ function setup(
 }
 
 describe("searchCacheKey", () => {
-  it("normalises the query: trimmed, lowercased, whitespace collapsed", () => {
-    expect(
-      searchCacheKey({ query: "  Waar   is de\tKANTINE ", limit: 5 }),
-    ).toBe("search:v1:all:5:waar is de kantine");
-    expect(
-      searchCacheKey({ query: "kantine", type: "article", limit: 3 }),
-    ).toBe("search:v1:article:3:kantine");
+  const key = (request: typeof SearchRequest.Type) =>
+    Effect.runPromise(searchCacheKey(request));
+
+  it("normalises the query: trimmed, lowercased, whitespace collapsed", async () => {
+    expect(await key({ query: "  Waar   is de\tKANTINE ", limit: 5 })).toBe(
+      await key({ query: "waar is de kantine", limit: 5 }),
+    );
+  });
+
+  it("keeps the prefix readable and hashes the query to SHA-256 hex", async () => {
+    expect(await key({ query: "kantine", type: "article", limit: 3 })).toMatch(
+      /^search:v1:article:3:[0-9a-f]{64}$/,
+    );
+    expect(await key({ query: "kantine", limit: 5 })).toMatch(
+      /^search:v1:all:5:[0-9a-f]{64}$/,
+    );
   });
 });
 
@@ -123,6 +140,29 @@ describe("searchWithCeilings — response cache (#3468)", () => {
     expect(embed).toHaveBeenCalledTimes(1);
     expect(query).toHaveBeenCalledTimes(1);
     expect(generateAnswer).toHaveBeenCalledTimes(1);
+  });
+
+  it("a 1 024-character query is cached too", async () => {
+    const { search, embed } = setup();
+    const query = "a".repeat(1024);
+    await search({ query });
+    await search({ query });
+    expect(embed).toHaveBeenCalledTimes(1);
+  });
+
+  it("a response whose answer was dropped (cap, failure, timeout) is not stored", async () => {
+    const { search, embed } = setup({ answer: undefined });
+    await search({});
+    await search({});
+    expect(embed).toHaveBeenCalledTimes(2);
+  });
+
+  it("a response that never asked for an answer is stored", async () => {
+    const { search, embed, generateAnswer } = setup({ score: 0.4 });
+    await search({});
+    await search({});
+    expect(generateAnswer).not.toHaveBeenCalled();
+    expect(embed).toHaveBeenCalledTimes(1);
   });
 
   it("a different limit or type is a different entry", async () => {

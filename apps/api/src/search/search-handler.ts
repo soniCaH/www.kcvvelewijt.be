@@ -10,6 +10,12 @@ export const LLM_SCORE_THRESHOLD = 0.5;
 
 export type SearchError = EmbeddingError | VectorizeError;
 
+/** Whether a search asks the LLM for an answer: only when its best result
+ * scores at least LLM_SCORE_THRESHOLD. Results come best-first. */
+export const asksForAnswer = (
+  results: (typeof SearchResponse.Type)["results"],
+): boolean => (results[0]?.score ?? 0) >= LLM_SCORE_THRESHOLD;
+
 /**
  * The types the response contract admits. Vectorize outlives the schema: a
  * retired type's vectors stay until something names them, and one of those
@@ -77,10 +83,9 @@ export const handleSearch = (
       })
       .slice(0, request.limit);
 
-    const topScore = results[0]?.score ?? 0;
     let answer: string | undefined;
 
-    if (topScore >= LLM_SCORE_THRESHOLD) {
+    if (asksForAnswer(results)) {
       const context = results
         .slice(0, 3)
         .map((r, i) => `${i + 1}. ${r.title}: ${r.excerpt}`)
