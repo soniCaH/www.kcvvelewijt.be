@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { Effect, Layer, Exit } from "effect";
+import { Cause, Effect, Exit, Layer, Option } from "effect";
 import type { MembershipRequest } from "@kcvv/api-contract";
 import {
   SanityMutation,
@@ -7,6 +7,7 @@ import {
 } from "../sanity/mutation";
 import {
   SanityProjection,
+  type FormRoutingConfig,
   type SanityProjectionInterface,
 } from "../sanity/projection";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
@@ -67,6 +68,7 @@ function run(
   opts: {
     write?: SanityMutationInterface["writeMembershipApplication"];
     dispatch?: EmailTransportInterface["dispatchEmail"];
+    routing?: FormRoutingConfig;
   } = {},
 ) {
   const emailMock: EmailTransportInterface = {
@@ -74,7 +76,10 @@ function run(
   };
   const layer = Layer.mergeAll(
     Layer.succeed(SanityMutation, makeMutationMock(opts.write)),
-    Layer.succeed(SanityProjection, projectionMock),
+    Layer.succeed(SanityProjection, {
+      ...projectionMock,
+      getFormRoutingConfig: () => Effect.succeed(opts.routing ?? null),
+    }),
     Layer.succeed(KvCacheService, cacheMock),
     Layer.succeed(EmailTransport, emailMock),
     makeTestEnvLayer(), // no TURNSTILE_SECRET → verification skipped
@@ -146,5 +151,56 @@ describe("handleMembership", () => {
     expect(Exit.isSuccess(exit)).toBe(true);
     // applicant + parent + admin
     expect(dispatch).toHaveBeenCalledTimes(3);
+  });
+
+  it("rejects an implausible birth year with a birthDate field error", async () => {
+    const write = vi.fn(() => Effect.succeed(undefined as void));
+    const exit = await run(
+      { ...validPayload, birthDate: "0010-05-01" } as MembershipRequest,
+      { write },
+    );
+
+    expect(Exit.isFailure(exit)).toBe(true);
+    expect(write).not.toHaveBeenCalled();
+    if (Exit.isFailure(exit)) {
+      const failure = Cause.failureOption(exit.cause);
+      expect(Option.isSome(failure)).toBe(true);
+      expect(Option.getOrThrow(failure)).toMatchObject({
+        _tag: "HttpBadRequest",
+        fields: { birthDate: "Vul een geldige geboortedatum in." },
+      });
+    }
+  });
+
+  describe("admin recipient", () => {
+    const adminTo = async (configured: string | null) => {
+      const dispatch = vi.fn<EmailTransportInterface["dispatchEmail"]>(() =>
+        Effect.succeed(undefined),
+      );
+      await run(validPayload, {
+        dispatch,
+        routing: {
+          speler: null,
+          jeugdspeler: null,
+          vrijwilliger: configured,
+          trainer: null,
+          scheidsrechter: null,
+        },
+      });
+      return dispatch.mock.calls.at(-1)![0].to;
+    };
+
+    it.each(["", "   ", "not-an-email", null])(
+      "falls back to info@ for %j",
+      async (configured) => {
+        expect(await adminTo(configured)).toBe("info@kcvvelewijt.be");
+      },
+    );
+
+    it("uses the trimmed configured address", async () => {
+      expect(await adminTo(" bestuur@kcvvelewijt.be ")).toBe(
+        "bestuur@kcvvelewijt.be",
+      );
+    });
   });
 });

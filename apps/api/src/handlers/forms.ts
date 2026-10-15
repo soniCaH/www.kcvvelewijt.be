@@ -1,6 +1,8 @@
 import { Effect } from "effect";
 import { HttpApiBuilder } from "@effect/platform";
 import {
+  EMAIL_PATTERN,
+  isMinorOn,
   PsdApi,
   HttpBadRequest,
   HttpServiceUnavailable,
@@ -12,7 +14,7 @@ import { SanityProjection, type FormRoutingConfig } from "../sanity/projection";
 import { KvCacheService } from "../cache/kv-cache";
 import { EmailTransport } from "../email/resend";
 import { verifyTurnstile } from "../forms/turnstile";
-import { isMinorOn, validateMembershipRules } from "../forms/membership-rules";
+import { validateMembershipRules } from "../forms/membership-rules";
 import { buildMembershipEmails } from "../forms/membership-emails";
 
 const DEFAULT_ADMIN_RECIPIENT = "info@kcvvelewijt.be";
@@ -46,7 +48,11 @@ const resolveAdminRecipient = (role: MembershipRole) =>
       }
     }
 
-    return config?.[role] ?? DEFAULT_ADMIN_RECIPIENT;
+    // A blank or malformed Studio value would send the admin mail nowhere.
+    const configured = config?.[role]?.trim();
+    return configured && EMAIL_PATTERN.test(configured)
+      ? configured
+      : DEFAULT_ADMIN_RECIPIENT;
   });
 
 /**

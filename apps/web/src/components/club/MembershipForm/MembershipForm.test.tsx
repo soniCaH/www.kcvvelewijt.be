@@ -84,6 +84,43 @@ describe("MembershipForm", () => {
     expect(screen.getByText(/geef toestemming/i)).toBeInTheDocument();
   });
 
+  it("blocks an implausible birth year before any request", () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<MembershipForm defaultRole="vrijwilliger" />);
+    fillRequiredFields();
+    fireEvent.change(screen.getByLabelText(/Geboortedatum/), {
+      target: { value: "0010-05-01" },
+    });
+    // An implausible date is no reason to show the minor fields.
+    expect(screen.queryByText(/Minderjarig/i)).not.toBeInTheDocument();
+    fireEvent.submit(screen.getByText(/Verstuur aanvraag/).closest("form")!);
+
+    expect(screen.getByLabelText(/Geboortedatum/)).toHaveAccessibleDescription(
+      /Vul een geldige geboortedatum in\./,
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  // 00:30 Brussels is still the previous UTC day: a local-time check would
+  // call this applicant 18, the BFF (UTC) calls them 17 and wants the parent
+  // fields. apps/api's membership-rules.test.ts pins the same instant.
+  it("shows the minor fields on the UTC day, like the BFF, around Brussels midnight", () => {
+    const tz = process.env.TZ;
+    process.env.TZ = "Europe/Brussels";
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-14T22:30:00Z"));
+    try {
+      render(<MembershipForm defaultBirthDate="2008-10-15" />);
+      expect(screen.getByLabelText(/E-mail ouder\/voogd/i)).toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+      if (tz === undefined) delete process.env.TZ;
+      else process.env.TZ = tz;
+    }
+  });
+
   it("posts to /api/membership and shows a success message", async () => {
     const fetchMock = vi.fn(() =>
       Promise.resolve({
