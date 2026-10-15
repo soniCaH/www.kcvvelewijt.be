@@ -1,5 +1,7 @@
 import type { PortableTextBlock } from "@portabletext/react";
+import { DateTime } from "luxon";
 import { SITE_CONFIG } from "@/lib/constants";
+import { CLUB_TIMEZONE } from "@/lib/utils/dates";
 import type { EventJsonLdInput, PersonAboutInput } from "./jsonld";
 
 interface ArticleSubjectPlayerRef {
@@ -98,15 +100,18 @@ export function buildAboutFromSubject(
 }
 
 /**
- * Combine a date string with an optional time into a local-floating ISO.
- * Europe/Brussels is +01:00 in winter, +02:00 in summer — we don't know
- * which applies at render time, so we emit without a TZ suffix and let
- * Google render in the viewer's locale.
+ * Combine a Brussels wall-clock date with an optional `HH:mm` time into an
+ * offset-aware ISO (`+01:00` winter / `+02:00` summer), mirroring
+ * `articleFactToIso` in `event.repository.ts`. No time — or a malformed one —
+ * keeps the date-only value, so a typo never drops the date.
  */
 function withTime(date: string, time?: string | null): string {
   const cleanTime = typeof time === "string" ? time.trim() : "";
-  if (!cleanTime) return date;
-  return `${date}T${cleanTime}:00`;
+  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(cleanTime)) return date;
+  return (
+    DateTime.fromISO(`${date}T${cleanTime}`, { zone: CLUB_TIMEZONE }).toISO() ??
+    date
+  );
 }
 
 type EventFactBlock = PortableTextBlock & {

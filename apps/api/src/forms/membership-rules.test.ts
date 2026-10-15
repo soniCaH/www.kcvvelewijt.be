@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { MembershipRequest } from "@kcvv/api-contract";
-import { ageOn, isMinorOn, validateMembershipRules } from "./membership-rules";
+import { validateMembershipRules } from "./membership-rules";
 
 const base: MembershipRequest = {
   role: "vrijwilliger",
@@ -15,27 +15,6 @@ const base: MembershipRequest = {
 } as MembershipRequest;
 
 const SUBMIT = new Date("2026-06-21T10:00:00Z");
-
-describe("ageOn", () => {
-  it("counts a birthday that already passed this year", () => {
-    expect(ageOn("1990-06-15", SUBMIT)).toBe(36);
-  });
-  it("does not count a birthday later this year", () => {
-    expect(ageOn("1990-12-15", SUBMIT)).toBe(35);
-  });
-  it("treats the birthday itself as the new age", () => {
-    expect(ageOn("2008-06-21", SUBMIT)).toBe(18);
-  });
-});
-
-describe("isMinorOn", () => {
-  it("is true the day before the 18th birthday", () => {
-    expect(isMinorOn("2008-06-22", SUBMIT)).toBe(true);
-  });
-  it("is false on the 18th birthday", () => {
-    expect(isMinorOn("2008-06-21", SUBMIT)).toBe(false);
-  });
-});
 
 describe("validateMembershipRules", () => {
   it("passes a clean adult volunteer", () => {
@@ -62,6 +41,34 @@ describe("validateMembershipRules", () => {
       SUBMIT,
     );
     expect(errors).toEqual({});
+  });
+
+  it("rejects an implausible birth year without asking for parent fields", () => {
+    expect(
+      validateMembershipRules({ ...base, birthDate: "0010-05-01" }, SUBMIT),
+    ).toEqual({ birthDate: "Vul een geldige geboortedatum in." });
+  });
+
+  it("still checks the medical cert next to an implausible birth date", () => {
+    const errors = validateMembershipRules(
+      { ...base, role: "speler", birthDate: "0010-05-01" },
+      SUBMIT,
+    );
+    expect(errors.birthDate).toBeDefined();
+    expect(errors.medicalCertAcknowledged).toBeDefined();
+    expect(errors.parentEmail).toBeUndefined();
+  });
+
+  it("wants the parent fields until the 18th birthday has begun in UTC", () => {
+    // 2026-10-15T00:30 Brussels = 2026-10-14T22:30Z; the web form pins the same instant.
+    const errors = validateMembershipRules(
+      { ...base, birthDate: "2008-10-15" },
+      new Date("2026-10-14T22:30:00Z"),
+    );
+    expect(Object.keys(errors).sort()).toEqual([
+      "parentEmail",
+      "parentalConsent",
+    ]);
   });
 
   it("requires medical-cert acknowledgment for speler", () => {

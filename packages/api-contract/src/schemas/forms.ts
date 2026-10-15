@@ -16,6 +16,53 @@ export const MEDICAL_CERT_ROLES: ReadonlyArray<MembershipRole> = [
   "jeugdspeler",
 ];
 
+/**
+ * Age in whole years on `on` for a `YYYY-MM-DD` birth date.
+ *
+ * UTC getters only: the browser and the BFF must agree on the day, whatever
+ * the visitor's timezone is. Shared so there is one copy of the arithmetic.
+ */
+export function ageOn(birthDate: string, on: Date): number {
+  const parts = birthDate.split("-");
+  const year = Number(parts[0]);
+  const month = Number(parts[1]);
+  const day = Number(parts[2]);
+  let age = on.getUTCFullYear() - year;
+  const monthDiff = on.getUTCMonth() + 1 - month;
+  if (monthDiff < 0 || (monthDiff === 0 && on.getUTCDate() < day)) {
+    age -= 1;
+  }
+  return age;
+}
+
+export function isMinorOn(birthDate: string, on: Date): boolean {
+  return ageOn(birthDate, on) < 18;
+}
+
+/** Oldest plausible applicant, in whole years. */
+const MAX_APPLICANT_AGE = 100;
+
+/**
+ * A real calendar date, not in the future, at most 100 years old. Catches a
+ * mistyped year (`0010-05-01` would otherwise read as an adult).
+ */
+export function isPlausibleBirthDate(birthDate: string, now: Date): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) return false;
+  const [y = NaN, m = NaN, d = NaN] = birthDate.split("-").map(Number);
+  // Not `Date.UTC(y, …)`: it maps years 0-99 to 1900-1999.
+  const date = new Date(0);
+  date.setUTCFullYear(y, m - 1, d);
+  if (
+    date.getUTCFullYear() !== y ||
+    date.getUTCMonth() + 1 !== m ||
+    date.getUTCDate() !== d
+  ) {
+    return false;
+  }
+  const age = ageOn(birthDate, now);
+  return age >= 0 && age <= MAX_APPLICANT_AGE;
+}
+
 export const MembershipGender = S.Literal("m", "f", "x");
 export type MembershipGender = S.Schema.Type<typeof MembershipGender>;
 

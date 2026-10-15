@@ -497,7 +497,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               : ("mentions" as const),
           data: {
             name: `${matchDetail.home_team.name} vs ${matchDetail.away_team.name}`,
-            startDate: matchDetail.date.toISOString(),
+            kickoff: matchDetail.date,
             homeTeamName: matchDetail.home_team.name,
             awayTeamName: matchDetail.away_team.name,
             status: matchDetail.status,

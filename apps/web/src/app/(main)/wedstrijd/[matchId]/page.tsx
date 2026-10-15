@@ -613,7 +613,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
         <JsonLd
           data={buildSportsEventJsonLd({
             name: `${match.home_team.name} vs ${match.away_team.name}`,
-            startDate: match.date.toISOString(),
+            kickoff: match.date,
             homeTeamName: match.home_team.name,
             awayTeamName: match.away_team.name,
             status: match.status,
