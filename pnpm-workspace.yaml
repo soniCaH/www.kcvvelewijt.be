@@ -6,3 +6,7 @@ packages:
 # 3 days. A security fix younger than that needs its package listed in
 # `minimumReleaseAgeExclude` (same PR), or pnpm refuses to resolve it.
 minimumReleaseAge: 4320
+
+overrides:
+  # Remove once lockfile maintenance resolves joi >= 17.13.8 on its own, or @storybook/test-runner drops wait-on@7 (#3475).
+  "joi@<17.13.8": "17.13.8"
