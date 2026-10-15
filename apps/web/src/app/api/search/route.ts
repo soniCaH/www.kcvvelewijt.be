@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Effect } from "effect";
 import { unstable_cache } from "next/cache";
+import { BFF_KEY_HEADER } from "@kcvv/api-contract";
 import { runPromise } from "@/lib/effect/runtime";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
 import { PlayerRepository } from "@/lib/repositories/player.repository";
@@ -241,7 +242,8 @@ const searchTeams = (query: string) =>
  */
 export async function POST(request: NextRequest) {
   const bffUrl = process.env.KCVV_API_URL;
-  if (!bffUrl) {
+  const bffKey = process.env.BFF_SHARED_SECRET;
+  if (!bffUrl || !bffKey) {
     return NextResponse.json(
       { error: "Search service not configured" },
       { status: 503 },
@@ -252,7 +254,7 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as unknown;
     const res = await fetch(`${bffUrl}/search`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", [BFF_KEY_HEADER]: bffKey },
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(15_000),
     });

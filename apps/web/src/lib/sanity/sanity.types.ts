@@ -161,17 +161,6 @@ export type Banner = {
   href?: string;
 };
 
-export type SearchFeedback = {
-  _id: string;
-  _type: "searchFeedback";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  pathSlug?: string;
-  pathTitle?: string;
-  vote?: "up" | "down";
-};
-
 export type HtmlTable = {
   _type: "htmlTable";
   html?: string;
@@ -1123,7 +1112,6 @@ export type AllSanitySchemaTypes =
   | BannerReference
   | HomePage
   | Banner
-  | SearchFeedback
   | HtmlTable
   | SanityFileAssetReference
   | FileAttachment

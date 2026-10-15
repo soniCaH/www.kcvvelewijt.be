@@ -11,6 +11,11 @@ PSD_API_KEY=
 PSD_API_AUTH=
 PSD_API_CLUB=
 
+# BFF shared secret (#3485) — the worker refuses every request except
+# /webhooks/index without header `x-kcvv-bff-key` equal to this value.
+# Must match BFF_SHARED_SECRET in apps/web/.env.local.
+BFF_SHARED_SECRET=local-dev-secret
+
 # Sanity — CMS read/write + webhook verification
 SANITY_API_TOKEN=
 SANITY_WEBHOOK_SECRET=

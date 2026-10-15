@@ -25,6 +25,7 @@ describe("POST /api/membership", () => {
   beforeEach(() => {
     vi.stubGlobal("fetch", vi.fn());
     vi.stubEnv("KCVV_API_URL", TEST_BFF_URL);
+    vi.stubEnv("BFF_SHARED_SECRET", "test-bff-secret");
     vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
@@ -44,6 +45,15 @@ describe("POST /api/membership", () => {
       ok: false,
       error: "Inschrijvingen zijn momenteel niet beschikbaar.",
     });
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("returns 503 without calling the BFF when BFF_SHARED_SECRET is unset", async () => {
+    vi.stubEnv("BFF_SHARED_SECRET", undefined);
+
+    const response = await POST(makeRequest(JSON.stringify({ name: "Jan" })));
+
+    expect(response.status).toBe(503);
     expect(fetch).not.toHaveBeenCalled();
   });
 
@@ -72,7 +82,10 @@ describe("POST /api/membership", () => {
       `${TEST_BFF_URL}/forms/membership`,
       expect.objectContaining({
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-kcvv-bff-key": "test-bff-secret",
+        },
         body: JSON.stringify(payload),
       }),
     );

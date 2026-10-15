@@ -6,6 +6,7 @@
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
       "env": [
         "KCVV_API_URL",
+        "BFF_SHARED_SECRET",
         "NEXT_PUBLIC_SANITY_PROJECT_ID",
         "NEXT_PUBLIC_SANITY_DATASET",
         "SANITY_API_READ_TOKEN"
@@ -64,6 +65,7 @@
       "inputs": ["$TURBO_DEFAULT$", "!test/vr/__snapshots__/**"],
       "env": [
         "KCVV_API_URL",
+        "BFF_SHARED_SECRET",
         "NEXT_PUBLIC_SANITY_PROJECT_ID",
         "NEXT_PUBLIC_SANITY_DATASET",
         "SANITY_API_READ_TOKEN"

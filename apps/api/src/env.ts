@@ -15,6 +15,7 @@ export interface WorkerEnv {
   readonly SEARCH_INDEX: VectorizeIndex; // Vectorize vector store
   readonly SEARCH_INDEX_NAME?: string; // per-environment name of the index SEARCH_INDEX is bound to (mirrors wrangler.toml's [[vectorize]].index_name — Wrangler doesn't expose it at runtime). Read by the webhook's dataset/index guard (webhooks/index-handler.ts, #2833); absent → guard refuses, fail closed
   readonly PSD_GATE: DurableObjectNamespace; // global PSD rate-limit + single-flight gate (see psd/gate.ts)
+  readonly BFF_SHARED_SECRET?: string; // wrangler secret; required — every route except `/webhooks/index` refuses without it (#3485). Same value as the web app's server-only BFF_SHARED_SECRET, sent as the `x-kcvv-bff-key` header
   readonly SANITY_WEBHOOK_SECRET: string; // Sanity webhook signing secret (same value as on the Sanity hook) — wrangler secret
   readonly RESEND_API_KEY?: string; // Resend transactional email — wrangler secret (absent locally → email dispatch is a no-op)
   readonly TURNSTILE_SECRET?: string; // Cloudflare Turnstile secret — wrangler secret (absent locally → verification is skipped)

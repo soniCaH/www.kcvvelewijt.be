@@ -9,6 +9,8 @@ implementing `PsdApi` from `@kcvv/api-contract`.
 src/
 ├── index.ts                  ← Worker entry point (HttpApiBuilder.toWebHandler)
 ├── env.ts                    ← WorkerEnv type + WorkerEnvTag (Effect Context)
+├── auth/
+│   └── bff-key.ts            ← refuseUnlessBffKey — shared-secret front door (#3485)
 ├── reconciliation.ts         ← reconcileOrphans — shared orphan-reconciliation guard (#2854), used by sync/psd-sanity-sync.ts and search/sanity-index-sync.ts
 ├── cache/
 │   └── kv-cache.ts           ← KvCacheService + TypedKvCache (SWR read path, TTLs, drift alerting) + `durable` ops (TTL-less write, list, dataset scoping) for non-SWR callers (#2873)
@@ -57,6 +59,7 @@ pnpm --filter @kcvv/api dev                        # wrangler dev on :8787
 | `PSD_API_BASE_URL`           | `wrangler.toml [vars]`                        | Public, safe to commit                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `FOOTBALISTO_LOGO_CDN_URL`   | `wrangler.toml [vars]`                        | Public, safe to commit                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `PSD_API_KEY`                | `wrangler secret put` / CF dashboard          | Never in toml                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `BFF_SHARED_SECRET`          | `wrangler secret put` / CF dashboard          | Never in toml — required; see "Only the website may call the worker" below (#3485)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `PSD_API_AUTH`               | `wrangler secret put` / CF dashboard          | Never in toml                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `CACHE_LONG_TTL`             | `wrangler.toml [env.staging.vars]`            | Overrides hardTtl to 365d                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `PSD_API_CLUB`               | `wrangler secret put` / CF dashboard          | Never in toml                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
@@ -134,6 +137,38 @@ wrangler kv key put "sync:orphan-cap-override" "all" --binding=PSD_CACHE --env s
 
 Only set this after confirming the refusal is a false positive (a genuine mass roster change, not a truncated/regressed PSD fetch) — see the WARN log `reconciliation: SKIPPED — …` for the counts that tripped it, and `reconciliation: orphan-cap override consumed — …` for confirmation of what the key actually bypassed.
 
+## Only the website may call the worker (#3485)
+
+The worker is public on `workers.dev` with no zone or WAF in front of it, and
+no browser ever calls it — every caller is Next.js server code. So `fetch()` in
+`src/index.ts` refuses every request that does not carry header
+`x-kcvv-bff-key` (`BFF_KEY_HEADER`, exported by `@kcvv/api-contract`) equal to
+the `BFF_SHARED_SECRET` wrangler secret, with `401 Unauthorized`, before any
+KV, DO, PSD, Sanity or AI work. The comparison is constant-time
+(`crypto.subtle.timingSafeEqual`, `src/auth/bff-key.ts`).
+
+- **Fail closed.** Secret unset → every request gets `401` and an
+  `[auth] BFF_SHARED_SECRET not set` error log. No dev bypass: local dev puts
+  the same value in `apps/api/.dev.vars` and `apps/web/.env.local` (both
+  `.example` files carry `local-dev-secret`).
+- **Webhook exemption.** `POST /webhooks/index` is routed before the check and
+  keeps its own Sanity HMAC (`SANITY_WEBHOOK_SECRET`). The `scheduled()` crons
+  are not requests and are unaffected.
+- **No CORS.** `HttpMiddleware.cors()` is gone on purpose — do not add it back.
+- **The web side.** `BffService` (every `HttpApiClient` request) and the
+  `api/search` / `api/membership` route handlers send the header from the
+  server-only `BFF_SHARED_SECRET` env var — never `NEXT_PUBLIC_`, never in a
+  `"use client"` file. CI passes `secrets.BFF_SHARED_SECRET` (GitHub
+  environment secret in `Production` and `Preview`) to the Next build and E2E.
+- **Rollout order.** Set the secret everywhere first — production and staging
+  worker (`wrangler secret put BFF_SHARED_SECRET [--env staging]`), Vercel
+  (Production + Preview) and the GitHub `Production`/`Preview` environments —
+  then merge. Old code ignores the secret, so setting it early is harmless.
+  Until the Vercel deploy finishes after a merge, cold cache misses get `401`
+  for a few minutes; ISR pages serve their cached copy. A PR built from older
+  code gets `401` from the staging worker until it is rebased. Rotating the
+  secret follows the same order: worker and Vercel together, then redeploy.
+
 ## Deployment
 
 - **Staging** (on pull requests from this repository): `wrangler deploy --env staging` → `kcvv-api-staging`
@@ -146,6 +181,7 @@ wrangler secret put PSD_API_KEY --env staging
 wrangler secret put PSD_API_AUTH --env staging
 wrangler secret put PSD_API_CLUB --env staging
 wrangler secret put RESEND_API_KEY --env staging
+wrangler secret put BFF_SHARED_SECRET --env staging
 ```
 
 `SLACK_ALERT_WEBHOOK_URL` is intentionally **not** in that list. Staging runs with

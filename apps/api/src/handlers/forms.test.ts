@@ -39,7 +39,6 @@ function makeMutationMock(
     archivePlayers: () => Effect.succeed(undefined),
     archiveStaff: () => Effect.succeed(undefined),
     archiveTeams: () => Effect.succeed(undefined),
-    writeFeedback: () => Effect.succeed(undefined),
     writeMembershipApplication: writeImpl ?? (() => Effect.succeed(undefined)),
   };
 }

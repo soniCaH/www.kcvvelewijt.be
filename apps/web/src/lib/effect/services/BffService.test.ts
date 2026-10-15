@@ -97,7 +97,10 @@ async function runRankingAndClassify(): Promise<{
 }
 
 describe("BffService", () => {
-  beforeEach(() => vi.stubEnv("KCVV_API_URL", "http://localhost:3001"));
+  beforeEach(() => {
+    vi.stubEnv("KCVV_API_URL", "http://localhost:3001");
+    vi.stubEnv("BFF_SHARED_SECRET", "test-bff-secret");
+  });
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.unstubAllEnvs();
@@ -412,6 +415,35 @@ describe("BffService", () => {
     expect(result.memberId).toBe(42);
     expect(result.teams).toHaveLength(1);
     expect(result.teams[0]?.goals).toBe(4);
+  });
+
+  it("sends the BFF shared secret as x-kcvv-bff-key on every request (#3485)", async () => {
+    mockFetchWith([sampleMatch]);
+
+    await Effect.runPromise(
+      Effect.gen(function* () {
+        const bff = yield* BffService;
+        return yield* bff.getMatches(1);
+      }).pipe(Effect.provide(BffServiceLive)),
+    );
+
+    const init = vi.mocked(fetch).mock.calls[0]?.[1];
+    expect(new Headers(init?.headers).get("x-kcvv-bff-key")).toBe(
+      "test-bff-secret",
+    );
+  });
+
+  it("throws when BFF_SHARED_SECRET is missing", async () => {
+    vi.stubEnv("BFF_SHARED_SECRET", "");
+
+    await expect(
+      Effect.runPromise(
+        Effect.gen(function* () {
+          const bff = yield* BffService;
+          return yield* bff.getMatches(1);
+        }).pipe(Effect.provide(BffServiceLive)),
+      ),
+    ).rejects.toThrow(/BFF_SHARED_SECRET is not set/);
   });
 
   it("throws when KCVV_API_URL is missing", async () => {

@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
+import { BFF_KEY_HEADER } from "@kcvv/api-contract";
 
 export async function POST(request: Request) {
   const bffUrl = process.env.KCVV_API_URL;
-  if (!bffUrl) {
+  const bffKey = process.env.BFF_SHARED_SECRET;
+  if (!bffUrl || !bffKey) {
     return NextResponse.json(
       { ok: false, error: "Inschrijvingen zijn momenteel niet beschikbaar." },
       { status: 503 },
@@ -22,7 +24,7 @@ export async function POST(request: Request) {
   try {
     const res = await fetch(`${bffUrl}/forms/membership`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", [BFF_KEY_HEADER]: bffKey },
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(10_000),
     });

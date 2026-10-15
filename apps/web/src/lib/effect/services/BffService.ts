@@ -1,8 +1,14 @@
 import { Context, Effect, Layer, type Cause } from "effect";
-import { HttpApiClient, FetchHttpClient } from "@effect/platform";
+import {
+  HttpApiClient,
+  FetchHttpClient,
+  HttpClient,
+  HttpClientRequest,
+} from "@effect/platform";
 import type { HttpApiError, HttpClientError } from "@effect/platform";
 import type { ParseError } from "effect/ParseResult";
 import {
+  BFF_KEY_HEADER,
   PsdApi,
   type Match,
   type MatchDetail,
@@ -86,13 +92,24 @@ export const BffServiceLive = Layer.effect(
       throw new Error(
         "KCVV_API_URL is not set — add it to .env.local before starting the app",
       );
+    // #3485: the worker refuses every caller without this shared secret.
+    const bffKey = process.env.BFF_SHARED_SECRET?.trim();
+    if (!bffKey)
+      throw new Error(
+        "BFF_SHARED_SECRET is not set — add it to .env.local before starting the app",
+      );
     const client = yield* HttpApiClient.make(PsdApi, {
       baseUrl: bffUrl,
       // #2924: a declared-error-status response whose body isn't this BFF's
       // own error shape (a stale/misconfigured worker) must classify as
       // transient, not decode-fail into a permanent ParseError. See
       // guard-declared-error-body.ts for the full reasoning.
-      transformClient: guardDeclaredErrorBody,
+      transformClient: (client) =>
+        guardDeclaredErrorBody(client).pipe(
+          HttpClient.mapRequest(
+            HttpClientRequest.setHeader(BFF_KEY_HEADER, bffKey),
+          ),
+        ),
     });
     return {
       getMatches: (teamId: number) =>
