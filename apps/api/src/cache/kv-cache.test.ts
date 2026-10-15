@@ -1045,6 +1045,30 @@ describe("TypedKvCache — non-PSD-backed caches never speak for PSD incident st
     // blanket disable — a normal (default) cache must keep reporting.
     expect(reportOutcome).toHaveBeenCalledWith({ ok: true, key: "test-key" });
   });
+
+  it.each([
+    ["SUCCESS", Effect.succeed({ name: "fresh", value: 2 })],
+    ["FAILURE", Effect.fail(new Error("vectorize down") as never)],
+  ])(
+    "a psdBacked: false cache's cold-miss %s never reaches gate.reportOutcome",
+    async (_label, fetchEffect) => {
+      const mockKv = makeMockKv();
+      const { layer: gate, reportOutcome } = spyGate();
+
+      await Effect.runPromise(
+        TypedKvCache(TestSchema, { psdBacked: false })
+          .getOrFetch("vec:1:max", fetchEffect, 60)
+          .pipe(
+            Effect.either,
+            Effect.provide(KvCacheLive),
+            Effect.provide(gate),
+            Effect.provide(makeEnvLayer(mockKv)),
+          ),
+      );
+
+      expect(reportOutcome).not.toHaveBeenCalled();
+    },
+  );
 });
 
 describe("Scheduled-job failure signal stays decoupled from PSD incident state (#2870)", () => {

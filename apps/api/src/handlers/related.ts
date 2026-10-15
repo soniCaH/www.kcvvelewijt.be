@@ -1,8 +1,8 @@
-import { Data, Effect } from "effect";
+import { Effect } from "effect";
 import { HttpApiBuilder } from "@effect/platform";
 import { PsdApi, RelatedItem } from "@kcvv/api-contract";
 import { Schema as S } from "effect";
-import { handleRelated } from "../search/related-handler";
+import { handleRelated, NoRelatedItems } from "../search/related-handler";
 import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
 import { VectorizeService } from "../search/vectorize";
 import { WorkerEnvTag } from "../env";
@@ -14,8 +14,6 @@ const MAX_LIMIT = 5; // upper bound from S.between(1, 5) in api-contract
 // `fetch` needs VectorizeService, not PsdService — its outcome must never
 // speak for PSD health (`TypedKvCache`'s `psdBacked` option, #2868 review).
 const relatedCache = TypedKvCache(S.Array(RelatedItem), { psdBacked: false });
-
-class NoRelatedItems extends Data.TaggedError("NoRelatedItems") {}
 
 export const getRelatedHandler = (request: {
   id: string;
@@ -38,10 +36,15 @@ export const getRelatedHandler = (request: {
       () => new NoRelatedItems(),
     ),
   );
-  return relatedCache.getOrFetch(cacheKey, fetchNonEmpty, TTL.RELATED).pipe(
-    Effect.catchTag("NoRelatedItems", () => Effect.succeed([])),
-    Effect.map((items) => items.slice(0, request.limit)),
-  );
+  return relatedCache
+    .getOrFetch(cacheKey, fetchNonEmpty, TTL.RELATED, undefined, {
+      // "No related items" is an answer, not an outage: never keep stale for it.
+      shouldServeStale: (error) => !(error instanceof NoRelatedItems),
+    })
+    .pipe(
+      Effect.catchTag("NoRelatedItems", () => Effect.succeed([])),
+      Effect.map((items) => items.slice(0, request.limit)),
+    );
 };
 
 export const RelatedApiLive = HttpApiBuilder.group(

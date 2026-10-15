@@ -390,6 +390,14 @@ export const TypedKvCache = <A, I>(
         const isDrifting = (staleForMs: number) =>
           staleForMs > DRIFT_NUDGE_THRESHOLD * 1000;
 
+        // The ONLY way this cache reports to the gate: a non-PSD cache
+        // instance never does (see the `psdBacked` option doc above), on
+        // every path — cold miss, blocking and background refresh.
+        const report = (outcome: Parameters<typeof gate.reportOutcome>[0]) =>
+          psdBacked
+            ? gate.reportOutcome(outcome)
+            : Effect.succeed({ incidentOpen: false });
+
         // Persist a fresh value and clear any negative marker.
         const persist = (value: A) =>
           Effect.zipRight(
@@ -459,19 +467,15 @@ export const TypedKvCache = <A, I>(
           Effect.gen(function* () {
             const status = statusOf(err);
             const staleAgeMs = Date.now() - fetchedAt;
-            // Non-PSD cache instance → skip the report (see the `psdBacked`
-            // option doc above): no incidentOpen state applies to it
-            // either, so escalation below falls back to the plain
-            // (non-alert) WARN.
-            const { incidentOpen } = yield* psdBacked
-              ? gate.reportOutcome({
-                  ok: false,
-                  key,
-                  status,
-                  error: String(err),
-                  staleAgeMs,
-                })
-              : Effect.succeed({ incidentOpen: false });
+            // Non-PSD cache → incidentOpen false, so escalation below falls
+            // back to the plain (non-alert) WARN.
+            const { incidentOpen } = yield* report({
+              ok: false,
+              key,
+              status,
+              error: String(err),
+              staleAgeMs,
+            });
             yield* keepStale(`${label} (${String(err)})`, {
               fetchedAt,
               softTtlSec,
@@ -499,7 +503,7 @@ export const TypedKvCache = <A, I>(
           Effect.gen(function* () {
             const result = yield* fetch.pipe(Effect.either);
             if (Either.isRight(result)) {
-              yield* gate.reportOutcome({ ok: true, key });
+              yield* report({ ok: true, key });
               yield* storeFresh(result.right);
               return result.right;
             }
@@ -558,12 +562,7 @@ export const TypedKvCache = <A, I>(
                   "background refresh failed",
                 );
               }
-              // Non-PSD cache instance → skip the report (see the
-              // `psdBacked` option doc above) so a Vectorize-only success
-              // can't be misread as "PSD recovered".
-              yield* psdBacked
-                ? gate.reportOutcome({ ok: true, key })
-                : Effect.void;
+              yield* report({ ok: true, key });
               const valid = S.decodeUnknownOption(schema)(result.right);
               yield* Option.isSome(valid)
                 ? persist(result.right)
@@ -708,7 +707,7 @@ export const TypedKvCache = <A, I>(
               yield* checkBudget;
               const result = yield* fetch.pipe(Effect.either);
               if (Either.isRight(result)) {
-                yield* gate.reportOutcome({ ok: true, key });
+                yield* report({ ok: true, key });
                 yield* storeFresh(result.right);
                 return result.right;
               }
@@ -725,7 +724,7 @@ export const TypedKvCache = <A, I>(
               // Never-cached miss failure: report a transient PSD outage so the
               // incident alert still fires on a cold start, then surface it.
               if (shouldServeStale(result.left)) {
-                yield* gate.reportOutcome({
+                yield* report({
                   ok: false,
                   key,
                   status: statusOf(result.left),
