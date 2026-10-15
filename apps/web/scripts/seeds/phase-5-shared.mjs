@@ -54,7 +54,7 @@ export function assertProductionGuard() {
   }
 }
 
-function resolveToken() {
+export function resolveToken() {
   if (process.env.SANITY_API_TOKEN) return process.env.SANITY_API_TOKEN;
   try {
     const configPath = join(homedir(), ".config", "sanity", "config.json");

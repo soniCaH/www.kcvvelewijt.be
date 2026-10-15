@@ -36,10 +36,10 @@ interface TeamDoc {
 
 async function main() {
   // 1. Fetch all remaining board docs. Draft-aware: referencedBy must see draft
-  // referrers, because migrate-board-docs.ts step 6c's premise ("should be
-  // unreferenced after relinking") is checked by this audit (#2839).
+  // referrers: this audit checks that the board docs are unreferenced after
+  // relinking (#2839).
   const boardDocs = await draftAwareClient.fetch<BoardDoc[]>(`
-    *[_type == "staffMember" && _id match "staff-board-*"] {
+    *[_type == "staffMember" && string::startsWith(_id, "staff-board-")] {
       _id,
       firstName,
       lastName,
@@ -51,7 +51,7 @@ async function main() {
 
   // 2. Fetch all PSD docs (active)
   const psdDocs = await client.fetch<PsdDoc[]>(`
-    *[_type == "staffMember" && _id match "staffMember-psd-*"] {
+    *[_type == "staffMember" && string::startsWith(_id, "staffMember-psd-")] {
       _id,
       psdId,
       firstName,
@@ -63,7 +63,7 @@ async function main() {
 
   // 3. Fetch all manual docs
   const manualDocs = await client.fetch<ManualDoc[]>(`
-    *[_type == "staffMember" && _id match "staffMember-manual-*"] {
+    *[_type == "staffMember" && string::startsWith(_id, "staffMember-manual-")] {
       _id,
       firstName,
       lastName,

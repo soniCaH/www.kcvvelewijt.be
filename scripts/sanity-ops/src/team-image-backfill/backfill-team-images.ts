@@ -15,21 +15,26 @@
  *   4. For each matched team WITHOUT an existing photo: download the JPEG,
  *      upload it as a Sanity asset, patch `team.teamImage`.
  *
- * Idempotent: teams that already have a `teamImage` are skipped (re-running is
- * a no-op). Pass `--force` to overwrite existing photos.
+ * Dry run by default: writes only with `--execute`. Idempotent: teams that
+ * already have a `teamImage` are skipped (re-running is a no-op). `--force`
+ * overwrites existing photos — on production it also needs
+ * `CONFIRM_FORCE_OVERWRITE=yes`, because editors have added photos since the
+ * production backfill ran (PR #2071).
  *
  * Usage:
- *   # Dry-run (default dataset = staging) — prints the match plan, no writes.
- *   SANITY_DATASET=staging pnpm --filter @kcvv/sanity-ops team-image:backfill --dry-run
- *   # Apply to staging.
+ *   # Dry run (default dataset = staging) — prints the match plan, no writes.
  *   SANITY_DATASET=staging pnpm --filter @kcvv/sanity-ops team-image:backfill
+ *   # Apply to staging.
+ *   SANITY_DATASET=staging pnpm --filter @kcvv/sanity-ops team-image:backfill --execute
  *   # Apply to production (guarded).
- *   SANITY_DATASET=production SANITY_ALLOW_PRODUCTION=1 pnpm --filter @kcvv/sanity-ops team-image:backfill
+ *   SANITY_DATASET=production SANITY_ALLOW_PRODUCTION=1 pnpm --filter @kcvv/sanity-ops team-image:backfill --execute
+ *   # Overwrite existing photos on production (strict confirm).
+ *   SANITY_DATASET=production SANITY_ALLOW_PRODUCTION=1 CONFIRM_FORCE_OVERWRITE=yes pnpm --filter @kcvv/sanity-ops team-image:backfill --execute --force
  */
 import { client, dataset } from "../shared/sanity-client";
 
 const DRUPAL_BASE_URL = "https://api.kcvvelewijt.be";
-const DRY_RUN = process.argv.includes("--dry-run");
+const EXECUTE = process.argv.includes("--execute");
 const FORCE = process.argv.includes("--force");
 
 /**
@@ -195,15 +200,29 @@ async function uploadImage(imageUrl: string): Promise<string> {
 }
 
 async function main(): Promise<void> {
-  if (dataset === "production" && process.env.SANITY_ALLOW_PRODUCTION !== "1") {
+  if (
+    EXECUTE &&
+    dataset === "production" &&
+    process.env.SANITY_ALLOW_PRODUCTION !== "1"
+  ) {
     console.error(
       "Refusing to write to production. Set SANITY_ALLOW_PRODUCTION=1 to proceed.",
     );
     process.exit(1);
   }
+  if (
+    FORCE &&
+    dataset === "production" &&
+    process.env.CONFIRM_FORCE_OVERWRITE !== "yes"
+  ) {
+    console.error(
+      "Refusing --force on production: it overwrites photos editors added after the backfill. Set CONFIRM_FORCE_OVERWRITE=yes to proceed.",
+    );
+    process.exit(1);
+  }
 
   console.log(
-    `\nTeam-image backfill — dataset=${dataset} ${DRY_RUN ? "(DRY RUN)" : ""}${
+    `\nTeam-image backfill — dataset=${dataset} ${EXECUTE ? "" : "(DRY RUN)"}${
       FORCE ? " (FORCE)" : ""
     }\n`,
   );
@@ -249,8 +268,8 @@ async function main(): Promise<void> {
     console.log("");
   }
 
-  if (DRY_RUN) {
-    console.log("Dry run — no writes performed.");
+  if (!EXECUTE) {
+    console.log("Dry run — no writes performed. Add --execute to write.");
     return;
   }
 
