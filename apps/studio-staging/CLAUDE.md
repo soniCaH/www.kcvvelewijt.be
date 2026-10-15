@@ -4,11 +4,11 @@ Staging Sanity Studio deployed to sanity.io. Near-mirror of `apps/studio` (produ
 
 ## Identity
 
-| Field                  | Value                                                     |
-| ---------------------- | --------------------------------------------------------- |
-| Project ID             | `vhb33jaz` (shared with production)                       |
-| Dataset                | Set via `SANITY_STUDIO_DATASET` env var — **no fallback** |
-| Production counterpart | `apps/studio`                                             |
+| Field                  | Value                               |
+| ---------------------- | ----------------------------------- |
+| Project ID             | `vhb33jaz` (shared with production) |
+| Dataset                | `staging` (hardcoded)               |
+| Production counterpart | `apps/studio`                       |
 
 ## Where Things Live
 
@@ -16,33 +16,13 @@ Staging Sanity Studio deployed to sanity.io. Near-mirror of `apps/studio` (produ
 - **Studio UI customizations** (Document Actions, custom inputs, structure fragments) — defined in `packages/sanity-studio`. Never add React components here.
 - **App-level wiring** — `sanity.config.ts` and `structure.ts` assemble the above into a runnable Studio. This is the only place those packages are composed together.
 
-## sanity.config.ts — Strict Env Handling
+## sanity.config.ts — Hardcoded Dataset
 
-The staging config intentionally throws if `SANITY_STUDIO_DATASET` is not set:
-
-```typescript
-dataset: (() => {
-  const ds = process.env.SANITY_STUDIO_DATASET as string | undefined
-  if (!ds) throw new Error('SANITY_STUDIO_DATASET env var is required for the staging studio')
-  return ds
-})(),
-```
-
-Production uses a lenient fallback (`|| 'production'`). **Do not add a fallback here.** The strict guard prevents accidentally pointing the staging Studio at the production dataset when `.env.local` is missing.
+The dataset is hardcoded to `'staging'`, so no env var or `.env` file can repoint it.
 
 ## structure.ts — Must Mirror Production
 
 `structure.ts` must stay identical to `apps/studio/structure.ts`. When editing either file, apply the equivalent change to the other in the same PR. Drift between the two is tracked in issue #1462.
-
-## .env.local
-
-Required variables:
-
-```env
-SANITY_STUDIO_DATASET=staging
-```
-
-`.env.local` is gitignored. The Studio will throw on startup if this is absent (see strict env handling above). Never commit secrets or dataset values.
 
 ## Deploy Workflow
 
@@ -51,12 +31,10 @@ SANITY_STUDIO_DATASET=staging
 pnpm --filter @kcvv/studio-staging dev
 
 # Deploy to sanity.io (staging)
-pnpm --filter @kcvv/studio-staging deploy
+pnpm --filter @kcvv/studio-staging run deploy
 ```
 
-`deploy` pushes to the hosted Studio at sanity.io — it does **not** deploy schemas or datasets.
-
-Note: when `sanity.cli.ts` does not declare an `appId`, `pnpm deploy` will prompt to create or supply one (a new hosted Studio deployment). Once an `appId` is set in `sanity.cli.ts`, subsequent deploys reuse that existing deployment. Align the staging `appId` with production once a stable staging deployment ID is established.
+`deploy` pushes to the hosted Studio at sanity.io and uploads the schema and manifest. Never use bare `pnpm --filter @kcvv/studio-staging deploy` (pnpm's built-in).
 
 ## Migrations
 

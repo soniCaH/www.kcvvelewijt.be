@@ -10,17 +10,19 @@ Schemas are not defined here — they are imported from the shared [`@kcvv/sanit
 pnpm --filter @kcvv/studio dev   # starts Studio at http://localhost:3333
 ```
 
+> `dev` edits **production** data: the dataset is hardcoded to `production`, and no environment
+> variable or `.env*` file can change it. Try unreleased studio code in `@kcvv/studio-staging`.
+
 ## Deploy
 
 ```bash
-cd apps/studio && npx sanity deploy
+pnpm --filter @kcvv/studio run deploy
 ```
 
-Deploys to [kcvvelewijt.sanity.studio](https://kcvvelewijt.sanity.studio).
+CI runs this on every merge to `main`; a manual deploy is the exception. Deploys to [kcvvelewijt.sanity.studio](https://kcvvelewijt.sanity.studio).
 
-> Use `npx sanity deploy` (or `pnpm --filter @kcvv/studio run deploy`) — **not** bare
+> Use `pnpm --filter @kcvv/studio run deploy` — **not** bare
 > `pnpm --filter @kcvv/studio deploy`, which invokes pnpm's built-in `deploy` and errors.
-> There is no CI auto-deploy; schema changes only go live after a manual redeploy.
 
 ## Editing schemas
 
