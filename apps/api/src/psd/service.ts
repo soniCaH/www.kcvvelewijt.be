@@ -243,22 +243,21 @@ export const PsdServiceLive = Layer.effect(
         Effect.ensuring(cache.increment()),
       );
 
+    // A KV value decoded against `schema`; None when absent or undecodable.
+    const readCached = <A, I>(key: string, schema: S.Schema<A, I>) =>
+      Effect.map(cache.get(key), (raw) =>
+        raw === null
+          ? Option.none()
+          : S.decodeUnknownOption(S.parseJson(schema))(raw),
+      );
+
     // Every season PSD knows. Cached for a day (#3468): every opponent
     // lookup reads the whole list, so uncached it cost one PSD call each.
     const SEASONS_CACHE_KEY = "psd:seasons";
     const getAllSeasons = (): Effect.Effect<readonly PsdSeason[], BffError> =>
       Effect.gen(function* () {
-        const cached = yield* cache.get(SEASONS_CACHE_KEY);
-        if (cached) {
-          const decoded = yield* Effect.try({
-            try: () => JSON.parse(cached),
-            catch: () => null,
-          }).pipe(
-            Effect.flatMap(S.decodeUnknown(PsdSeasonsSchema)),
-            Effect.option,
-          );
-          if (Option.isSome(decoded)) return decoded.value;
-        }
+        const cached = yield* readCached(SEASONS_CACHE_KEY, PsdSeasonsSchema);
+        if (Option.isSome(cached)) return cached.value;
         const seasons = yield* countedFetch(
           `${base}/seasons`,
           PsdSeasonsSchema,
@@ -274,14 +273,8 @@ export const PsdServiceLive = Layer.effect(
     const getCurrentSeason = (): Effect.Effect<PsdSeason, BffError> =>
       Effect.gen(function* () {
         const cacheKey = "psd:current-season-id";
-        const cached = yield* cache.get(cacheKey);
-        if (cached) {
-          const decoded = yield* Effect.try({
-            try: () => JSON.parse(cached),
-            catch: () => null,
-          }).pipe(Effect.flatMap(S.decodeUnknown(PsdSeason)), Effect.option);
-          if (Option.isSome(decoded)) return decoded.value;
-        }
+        const cached = yield* readCached(cacheKey, PsdSeason);
+        if (Option.isSome(cached)) return cached.value;
 
         const seasons = yield* getAllSeasons();
         const now = Date.now();
