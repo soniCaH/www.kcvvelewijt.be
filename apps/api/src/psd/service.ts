@@ -131,6 +131,10 @@ interface EmptyBodyNotFoundOptions {
   readonly resourceId: string | number;
 }
 
+// A PSD call that has not answered by now is hung, not slow (#3489). Without
+// it a hung socket holds its caller until the runtime gives up.
+const PSD_FETCH_TIMEOUT_MS = 8_000;
+
 function fetchJson<A, I>(
   url: string,
   schema: S.Schema<A, I>,
@@ -138,11 +142,25 @@ function fetchJson<A, I>(
   options?: { readonly emptyBodyIsNotFound: EmptyBodyNotFoundOptions },
 ): Effect.Effect<A, BffError> {
   return Effect.gen(function* () {
+    // One signal for the request AND its body read: the timeout also aborts a
+    // body that stalls mid-stream, which must surface as a transient upstream
+    // failure (stale-servable), not as a decode error.
+    const signal = AbortSignal.timeout(PSD_FETCH_TIMEOUT_MS);
+    const bodyError = (message: string, cause: unknown) =>
+      signal.aborted
+        ? new UpstreamUnavailableError({
+            message: `PSD fetch timed out after ${PSD_FETCH_TIMEOUT_MS}ms: ${url}`,
+            cause,
+          })
+        : new UpstreamDecodeError({ message, cause });
+
     const response = yield* Effect.tryPromise({
-      try: () => fetch(url, { headers }),
+      try: () => fetch(url, { headers, signal }),
       catch: (cause) =>
         new UpstreamUnavailableError({
-          message: `Failed to fetch ${url}`,
+          message: signal.aborted
+            ? `PSD fetch timed out after ${PSD_FETCH_TIMEOUT_MS}ms: ${url}`
+            : `Failed to fetch ${url}`,
           cause,
         }),
     });
@@ -160,11 +178,7 @@ function fetchJson<A, I>(
       // two stay distinguishable.
       const text = yield* Effect.tryPromise({
         try: () => response.text(),
-        catch: (cause) =>
-          new UpstreamDecodeError({
-            message: "Failed to read response body",
-            cause,
-          }),
+        catch: (cause) => bodyError("Failed to read response body", cause),
       });
 
       if (text.trim().length === 0) {
@@ -189,8 +203,7 @@ function fetchJson<A, I>(
 
     const json = yield* Effect.tryPromise({
       try: () => response.json(),
-      catch: (cause) =>
-        new UpstreamDecodeError({ message: "Failed to parse JSON", cause }),
+      catch: (cause) => bodyError("Failed to parse JSON", cause),
     });
 
     return yield* decodeAgainstSchema(json, schema);
@@ -212,6 +225,21 @@ const NO_ACTIVE_SEASON_RESOURCE = {
 const isNoActiveSeasonError = (error: ResourceNotFoundError): boolean =>
   error.resourceType === NO_ACTIVE_SEASON_RESOURCE.resourceType &&
   error.resourceId === NO_ACTIVE_SEASON_RESOURCE.resourceId;
+
+// A fan-out result built while one of its team/season fetches failed (#3489).
+// Tagged by identity, not by a field: the value must stay a plain
+// `Match[]` / `OpponentHistory` for the contract and the service's callers, and
+// the handler reads the tag right after the fetch, before the value is stored.
+const partialFanouts = new WeakSet<object>();
+export const isPartialFanout = (result: object): boolean =>
+  partialFanouts.has(result);
+export const markPartial = <T extends object>(
+  result: T,
+  partial: boolean,
+): T => {
+  if (partial) partialFanouts.add(result);
+  return result;
+};
 
 export const PsdServiceLive = Layer.effect(
   PsdService,
@@ -561,32 +589,35 @@ export const PsdServiceLive = Layer.effect(
         return index;
       });
 
-    // `undefined` = index unknown (the build failed): `getMatchDetail` then
-    // fails closed rather than guess whether a match is a youth match.
-    const getMatchTeamIndex = (): Effect.Effect<
-      MatchTeamIndex | undefined,
-      never
+    // The cached index: `Some(undefined)` = known-unknown (a recent build
+    // failed), `None` = nothing usable cached.
+    const readCachedIndex = (): Effect.Effect<
+      Option.Option<MatchTeamIndex | undefined>
     > =>
       Effect.gen(function* () {
         const cached = yield* cache.get(MATCH_TEAM_INDEX_CACHE_KEY);
-        if (cached === MATCH_TEAM_INDEX_UNKNOWN) return undefined;
-        if (cached) {
-          const parsed = yield* Effect.try({
-            try: () => JSON.parse(cached) as MatchTeamIndex,
-            catch: () => null,
-          }).pipe(Effect.option);
-          if (
-            Option.isSome(parsed) &&
-            parsed.value !== null &&
-            typeof parsed.value === "object"
-          ) {
-            return parsed.value;
-          }
-        }
+        if (cached === MATCH_TEAM_INDEX_UNKNOWN) return Option.some(undefined);
+        if (!cached) return Option.none();
+        const parsed = yield* Effect.try({
+          try: () => JSON.parse(cached) as MatchTeamIndex,
+          catch: () => null,
+        }).pipe(Effect.option);
+        return Option.isSome(parsed) &&
+          parsed.value !== null &&
+          typeof parsed.value === "object"
+          ? Option.some<MatchTeamIndex | undefined>(parsed.value)
+          : Option.none();
+      });
 
-        // Any build failure (typed error OR defect) yields "unknown", never an
-        // empty index: an empty index would read every match as not ours and
-        // show youth scores (#3428).
+    // Any build failure (typed error OR defect) yields "unknown", never an
+    // empty index: an empty index would read every match as not ours and
+    // show youth scores (#3428). Always cached — a built index for 12h, an
+    // unknown one only briefly, so we never re-fan-out the full build on every
+    // request during an incident yet recover quickly afterwards.
+    const buildAndCacheMatchTeamIndex = (): Effect.Effect<
+      MatchTeamIndex | undefined
+    > =>
+      Effect.gen(function* () {
         const built = yield* buildMatchTeamIndex().pipe(
           Effect.catchAllCause((cause) =>
             Effect.log(
@@ -594,15 +625,42 @@ export const PsdServiceLive = Layer.effect(
             ).pipe(Effect.as(undefined)),
           ),
         );
-        // Always cache — a built index for 12h, an unknown one only briefly,
-        // so we never re-fan-out the full build on every request during an
-        // incident yet recover quickly afterwards.
         yield* cache.set(
           MATCH_TEAM_INDEX_CACHE_KEY,
           built ? JSON.stringify(built) : MATCH_TEAM_INDEX_UNKNOWN,
           built ? MATCH_TEAM_INDEX_TTL : MATCH_TEAM_INDEX_EMPTY_TTL,
         );
         return built;
+      });
+
+    // `undefined` = index unknown (the build failed): `getMatchDetail` then
+    // fails closed rather than guess whether a match is a youth match.
+    //
+    // Single-flight (#3489), the same loop `getOrFetch`'s miss path runs: one
+    // caller builds (~21 PSD calls) while the rest wait and re-read the cache,
+    // instead of every concurrent caller on an expired index rebuilding it. A
+    // leader that leaves nothing cached (KV write lost, lease reclaimed) hands
+    // the next waiter the lead, so the builds serialize and nobody waits forever.
+    const MATCH_TEAM_INDEX_FLIGHT_KEY = "flight:match-team-index";
+    const getMatchTeamIndex = (): Effect.Effect<
+      MatchTeamIndex | undefined,
+      never
+    > =>
+      Effect.gen(function* () {
+        for (;;) {
+          const cached = yield* readCachedIndex();
+          if (Option.isSome(cached)) return cached.value;
+
+          const token = yield* gate.beginFlight(MATCH_TEAM_INDEX_FLIGHT_KEY);
+          if (token !== null) {
+            return yield* buildAndCacheMatchTeamIndex().pipe(
+              Effect.ensuring(
+                gate.endFlight(MATCH_TEAM_INDEX_FLIGHT_KEY, token),
+              ),
+            );
+          }
+          yield* gate.awaitFlight(MATCH_TEAM_INDEX_FLIGHT_KEY);
+        }
       });
 
     return {
@@ -758,7 +816,10 @@ export const PsdServiceLive = Layer.effect(
               });
             }
           }
-          return matches;
+          return markPartial(
+            matches,
+            teamNextMatches.some((r) => r._tag === "failed"),
+          );
         }),
 
       getMatchesWindow: () =>
@@ -880,7 +941,10 @@ export const PsdServiceLive = Layer.effect(
           matches.sort(
             (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
           );
-          return matches;
+          return markPartial(
+            matches,
+            teamWindowMatches.some((r) => r._tag === "failed"),
+          );
         }),
 
       getMatchDetail: (matchId: number) =>
@@ -1199,15 +1263,18 @@ export const PsdServiceLive = Layer.effect(
               ? mostRecentMatch.home_team
               : mostRecentMatch.away_team;
 
-          return {
-            opponent: {
-              id: opponentClub.id,
-              name: opponentClub.name,
-              logo: opponentClub.logo,
+          return markPartial(
+            {
+              opponent: {
+                id: opponentClub.id,
+                name: opponentClub.name,
+                logo: opponentClub.logo,
+              },
+              summary,
+              matches: sortedMatches,
             },
-            summary,
-            matches: sortedMatches,
-          };
+            hasFailed,
+          );
         }),
 
       getPlayerStats: (memberId: number) =>

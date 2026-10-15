@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Effect, Layer, Logger, Schema as S } from "effect";
-import { PsdService, PsdServiceLive } from "./service";
+import { PsdService, PsdServiceLive, isPartialFanout } from "./service";
 import { PsdGateTest } from "./gate";
 import {
   Match,
@@ -648,6 +648,50 @@ describe("PsdService.getNextMatches", () => {
     }
   });
 
+  it("flags the list as a partial fan-out when one team fails, and not when all succeed (#3489)", async () => {
+    const teamB = { ...rawTeams[0], id: 2, name: "KCVV Elewijt B" };
+    const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
+    const mockPsd = (team2Ok: boolean) =>
+      fetchMock.mockImplementation((url: string) => {
+        if (url.includes("/games/team/2/") && !team2Ok) {
+          return Promise.resolve({
+            ok: false,
+            status: 503,
+            statusText: "Service Unavailable",
+          });
+        }
+        if (url.includes("/games/team/")) {
+          return Promise.resolve({
+            ok: true,
+            json: async () => rawFutureMatchList,
+          });
+        }
+        if (url.includes("/seasons")) {
+          return Promise.resolve({ ok: true, json: async () => seasons });
+        }
+        return Promise.resolve({
+          ok: true,
+          json: async () => [rawTeams[0], teamB],
+        });
+      });
+    const opts = { sanityMock: makeSanityMock(["1", "2"]) };
+
+    mockPsd(false);
+    const partial = await runService((svc) => svc.getNextMatches(), opts);
+    expect(partial._tag).toBe("Right");
+    if (partial._tag === "Right") {
+      expect(partial.right).toHaveLength(1);
+      expect(isPartialFanout(partial.right)).toBe(true);
+    }
+
+    mockPsd(true);
+    const complete = await runService((svc) => svc.getNextMatches(), opts);
+    expect(complete._tag).toBe("Right");
+    if (complete._tag === "Right") {
+      expect(isPartialFanout(complete.right)).toBe(false);
+    }
+  });
+
   it("excludes teams with no future matches", async () => {
     const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
     fetchMock.mockImplementation((url: string) => {
@@ -1023,6 +1067,8 @@ describe("PsdService.getMatchesWindow", () => {
     if (result._tag === "Right") {
       // Team 2 failed, team 1's in-window matches still returned.
       expect(result.right.map((m) => m.id)).toEqual([201, 202]);
+      // …and the result says it is incomplete, so it is cached briefly (#3489).
+      expect(isPartialFanout(result.right)).toBe(true);
     }
   });
 

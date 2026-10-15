@@ -1814,3 +1814,104 @@ describe("TypedKvCache — whole-fetch cap on the cold-miss leader (#3467)", () 
     expect(reportOutcome).not.toHaveBeenCalled();
   });
 });
+
+describe("TypedKvCache — partial fan-out is cached briefly (#3489)", () => {
+  const FRESH = { name: "fresh", value: 2 };
+  const run = (
+    mockKv: ReturnType<typeof makeMockKv>,
+    fetch: Effect.Effect<{ name: string; value: number }>,
+    isPartial: (v: { name: string; value: number }) => boolean,
+  ) =>
+    Effect.runPromise(
+      TypedKvCache(TestSchema)
+        .getOrFetch("test-key", fetch, TTL.NEXT_MATCHES, HARD_TTL_DEFAULT, {
+          isPartial,
+        })
+        .pipe(
+          Effect.provide(KvCacheLive),
+          Effect.provide(PsdGateTest),
+          Effect.provide(makeEnvLayer(mockKv)),
+        ),
+    );
+
+  it("PARTIAL_FANOUT is 5 minutes", () => {
+    expect(TTL.PARTIAL_FANOUT).toBe(60 * 5);
+  });
+
+  it("stores a partial result flagged, and a complete one unflagged", async () => {
+    const partialKv = makeMockKv();
+    await run(partialKv, Effect.succeed(FRESH), () => true);
+    expect(JSON.parse(partialKv.store.get("test-key")!).partial).toBe(true);
+
+    const completeKv = makeMockKv();
+    await run(completeKv, Effect.succeed(FRESH), () => false);
+    expect(JSON.parse(completeKv.store.get("test-key")!)).not.toHaveProperty(
+      "partial",
+    );
+  });
+
+  it("a partial entry 10 min old is stale (refetched) though the soft TTL is 4 h", async () => {
+    const mockKv = makeMockKv();
+    mockKv.store.set(
+      "test-key",
+      JSON.stringify({
+        value: { name: "old", value: 1 },
+        fetchedAt: Date.now() - 10 * 60_000,
+        partial: true,
+      }),
+    );
+    let fetched = 0;
+    const result = await run(
+      mockKv,
+      Effect.sync(() => {
+        fetched++;
+        return FRESH;
+      }),
+      () => false,
+    );
+    // Stale-while-revalidate: the old value is served, a refresh ran.
+    expect(result).toEqual({ name: "old", value: 1 });
+    expect(fetched).toBe(1);
+    expect(JSON.parse(mockKv.store.get("test-key")!).value).toEqual(FRESH);
+  });
+
+  it("a complete entry of the same age keeps its full TTL (no refetch)", async () => {
+    const mockKv = makeMockKv();
+    mockKv.store.set(
+      "test-key",
+      makeWrapper({ name: "old", value: 1 }, 10 * 60_000),
+    );
+    let fetched = 0;
+    await run(
+      mockKv,
+      Effect.sync(() => {
+        fetched++;
+        return FRESH;
+      }),
+      () => false,
+    );
+    expect(fetched).toBe(0);
+  });
+
+  it("a partial entry younger than 5 min is fresh", async () => {
+    const mockKv = makeMockKv();
+    mockKv.store.set(
+      "test-key",
+      JSON.stringify({
+        value: { name: "old", value: 1 },
+        fetchedAt: Date.now() - 60_000,
+        partial: true,
+      }),
+    );
+    let fetched = 0;
+    await run(
+      mockKv,
+      Effect.sync(() => {
+        fetched++;
+        return FRESH;
+      }),
+      () => false,
+    );
+    expect(fetched).toBe(0);
+  });
+});
