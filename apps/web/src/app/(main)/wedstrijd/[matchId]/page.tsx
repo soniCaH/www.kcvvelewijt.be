@@ -37,6 +37,7 @@
 import { Fragment, cache } from "react";
 import { Effect } from "effect";
 import { notFound } from "next/navigation";
+import { parsePsdId } from "@/lib/utils/psd-id";
 import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
 import { SITE_CONFIG, DEFAULT_OG_IMAGE, KCVV_CLUB_ID } from "@/lib/constants";
@@ -110,9 +111,9 @@ export async function generateMetadata({
   params,
 }: MatchPageProps): Promise<Metadata> {
   const { matchId } = await params;
-  const numericId = parseInt(matchId, 10);
+  const numericId = parsePsdId(matchId);
 
-  if (isNaN(numericId)) {
+  if (numericId === null) {
     return {
       title: "Wedstrijd niet gevonden",
       // #2963/#2968: belt-and-braces. The same-segment `layout.tsx` now
@@ -150,7 +151,7 @@ export async function generateMetadata({
     // match from a BFF read failure — an unknown PSD id returns 200 with an
     // empty body and dies at `response.json()`, exactly like a transient
     // outage. Emitting noindex here would ask Google to drop live match
-    // pages during an outage. Only the `isNaN` branch above, which can never
+    // pages during an outage. Only the `parsePsdId` branch above, which can never
     // be a real match, carries it.
     return {
       title: "Wedstrijd niet gevonden",
@@ -346,9 +347,9 @@ function warnAndDegradeRankingRead(
 
 export default async function MatchPage({ params }: MatchPageProps) {
   const { matchId } = await params;
-  const numericId = parseInt(matchId, 10);
+  const numericId = parsePsdId(matchId);
 
-  if (isNaN(numericId)) {
+  if (numericId === null) {
     notFound();
   }
 

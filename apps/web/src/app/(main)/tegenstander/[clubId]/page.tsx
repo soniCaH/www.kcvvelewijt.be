@@ -16,6 +16,7 @@
 import { cache } from "react";
 import { Effect } from "effect";
 import { notFound } from "next/navigation";
+import { parsePsdId } from "@/lib/utils/psd-id";
 import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
 import { BffService } from "@/lib/effect/services/BffService";
@@ -85,9 +86,9 @@ export async function generateMetadata({
   params,
 }: OpponentPageProps): Promise<Metadata> {
   const { clubId: clubIdStr } = await params;
-  const clubId = parseInt(clubIdStr, 10);
+  const clubId = parsePsdId(clubIdStr);
 
-  if (isNaN(clubId)) {
+  if (clubId === null) {
     return NOT_FOUND_METADATA;
   }
 
@@ -364,9 +365,9 @@ function SquadHistorySection({
 
 export default async function OpponentPage({ params }: OpponentPageProps) {
   const { clubId: clubIdStr } = await params;
-  const clubId = parseInt(clubIdStr, 10);
+  const clubId = parsePsdId(clubIdStr);
 
-  if (isNaN(clubId)) notFound();
+  if (clubId === null) notFound();
 
   const data = await fetchOpponentData(clubId);
   if (!data) notFound();

@@ -21,6 +21,7 @@ import {
   resolveFeedVariant,
   type MatchSide,
 } from "@/lib/utils/ical";
+import { parsePsdId } from "@/lib/utils/psd-id";
 
 export const runtime = "nodejs";
 
@@ -35,23 +36,47 @@ function parseSide(raw: string | null): MatchSide {
   return "all";
 }
 
-async function fetchMatchesUncached(
-  teamIdParams: number[] | null,
-): Promise<readonly Match[]> {
-  const program = Effect.gen(function* () {
-    let teamIds: number[];
-
-    if (teamIdParams && teamIdParams.length > 0) {
-      teamIds = teamIdParams;
-    } else {
+/** Every known team's `psdId`, in Sanity order — the all-teams feed and the only ids `teamIds` may select. */
+function fetchKnownTeamIds(): Promise<number[]> {
+  return runPromise(
+    Effect.gen(function* () {
       const repo = yield* TeamRepository;
       const teams = yield* repo.findAll();
-      teamIds = teams
+      return teams
         .filter((t) => t.psdId != null)
         .map((t) => Number(t.psdId))
         .filter((id) => !isNaN(id) && id > 0);
-    }
+    }).pipe(Effect.orDie),
+  );
+}
 
+/**
+ * `teamIds` → the one list both the cache key and the fan-out use (#3486):
+ * strict ids only (`parsePsdId`), deduped, sorted, known-team `psdId`s only,
+ * capped at `MAX_TEAM_IDS` after dedupe. `?teamIds=1,1,01`, `?teamIds=1,x1`
+ * and `?teamIds=1` therefore share one cache entry and one PSD call. Empty
+ * when nothing valid remains — the caller falls back to the all-teams feed,
+ * as for an absent `teamIds`.
+ */
+function selectTeamIds(
+  raw: string | null,
+  knownIds: readonly number[],
+): number[] {
+  if (!raw) return [];
+  const known = new Set(knownIds);
+  const ids = new Set(
+    raw
+      .split(",")
+      .map((s) => parsePsdId(s.trim()))
+      .filter((id): id is number => id !== null && known.has(id)),
+  );
+  return [...ids].sort((a, b) => a - b).slice(0, MAX_TEAM_IDS);
+}
+
+async function fetchMatchesUncached(
+  teamIds: readonly number[],
+): Promise<readonly Match[]> {
+  const program = Effect.gen(function* () {
     const bff = yield* BffService;
     const results = yield* Effect.all(
       teamIds.map((id) => bff.getMatches(id)),
@@ -79,10 +104,10 @@ async function fetchMatchesUncached(
  * requests that land on the same key, same as pre-#2704.
  */
 function fetchMatches(
-  teamIdParams: number[] | null,
+  teamIds: readonly number[],
   cacheKey: string,
 ): Promise<readonly Match[]> {
-  return unstable_cache(() => fetchMatchesUncached(teamIdParams), [cacheKey], {
+  return unstable_cache(() => fetchMatchesUncached(teamIds), [cacheKey], {
     revalidate: CACHE_MAX_AGE,
   })();
 }
@@ -147,17 +172,17 @@ export async function GET(request: NextRequest) {
   const variant = resolveFeedVariant(
     searchParams.get(CALENDAR_EVENTS_PARAM) === CALENDAR_EVENTS_PARAM_VALUE,
   );
-  const matchesCacheKey = normalizeCacheKey(rawTeamIds, side);
-
-  const teamIdNums = rawTeamIds
-    ? rawTeamIds
-        .split(",")
-        .map((s) => Number(s.trim()))
-        .filter((n) => !isNaN(n) && n > 0)
-        .slice(0, MAX_TEAM_IDS)
-    : null;
 
   try {
+    // Outside the matches cache on purpose (#3486): the key is built from
+    // this list, so it must be resolved before the cache is looked up.
+    // `findAll` is itself a revalidating Sanity fetch, not a fresh read.
+    const knownTeamIds = await fetchKnownTeamIds();
+    const selected = selectTeamIds(rawTeamIds, knownTeamIds);
+    const matchesCacheKey = normalizeCacheKey(
+      selected.length > 0 ? selected : null,
+      side,
+    );
     // Neither read's own cache can ever hold a degraded body: the matches
     // cache never sees a failure caught inside it (a Sanity/PSD blip on the
     // *events* side never reaches this fetch at all), and the events read's
@@ -166,7 +191,10 @@ export async function GET(request: NextRequest) {
     // string building over a few hundred matches, next to the I/O it
     // replaces (#2711 round 2).
     const [matches, events] = await Promise.all([
-      fetchMatches(teamIdNums, matchesCacheKey),
+      fetchMatches(
+        selected.length > 0 ? selected : knownTeamIds,
+        matchesCacheKey,
+      ),
       variant === "matches-and-events"
         ? fetchEvents()
         : Promise.resolve<EventListItemVM[]>([]),
