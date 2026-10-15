@@ -95,6 +95,8 @@ export class GateLogic {
     this.onCount = opts.onCount;
   }
 
+  // Inline UTC day: this file is bundled into the DO, which must not import
+  // Effect or the daily-ceiling helper.
   private today(): string {
     return new Date(this.now()).toISOString().slice(0, 10);
   }

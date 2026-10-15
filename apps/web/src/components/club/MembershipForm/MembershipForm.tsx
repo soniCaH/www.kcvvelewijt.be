@@ -14,6 +14,7 @@ import {
 import {
   EMAIL_PATTERN,
   isMinorOn,
+  INVALID_BIRTH_DATE_MESSAGE,
   isPlausibleBirthDate,
   MEDICAL_CERT_ROLES,
   type MembershipRole,
@@ -232,7 +233,7 @@ function MembershipFormFields({
     if (!lastName.trim()) errors.lastName = REQUIRED_MSG;
     if (!birthDate) errors.birthDate = REQUIRED_MSG;
     else if (!isPlausibleBirthDate(birthDate, new Date()))
-      errors.birthDate = "Vul een geldige geboortedatum in.";
+      errors.birthDate = INVALID_BIRTH_DATE_MESSAGE;
     if (!gender) errors.gender = REQUIRED_MSG;
     if (!municipality.trim()) errors.municipality = REQUIRED_MSG;
     if (!EMAIL_PATTERN.test(email))

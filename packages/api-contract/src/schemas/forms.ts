@@ -42,6 +42,9 @@ export function isMinorOn(birthDate: string, on: Date): boolean {
 /** Oldest plausible applicant, in whole years. */
 const MAX_APPLICANT_AGE = 100;
 
+/** Shown by both the form and the BFF when the birth date is not plausible. */
+export const INVALID_BIRTH_DATE_MESSAGE = "Vul een geldige geboortedatum in.";
+
 /**
  * A real calendar date, not in the future, at most 100 years old. Catches a
  * mistyped year (`0010-05-01` would otherwise read as an adult).

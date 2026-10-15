@@ -1,4 +1,5 @@
 import {
+  INVALID_BIRTH_DATE_MESSAGE,
   isMinorOn,
   isPlausibleBirthDate,
   MEDICAL_CERT_ROLES,
@@ -18,7 +19,7 @@ export function validateMembershipRules(
 
   if (!plausible) {
     // Skip the minor rules: an implausible date says nothing about age.
-    errors.birthDate = "Vul een geldige geboortedatum in.";
+    errors.birthDate = INVALID_BIRTH_DATE_MESSAGE;
   } else if (isMinorOn(payload.birthDate, now)) {
     if (!payload.parentEmail) {
       errors.parentEmail =
