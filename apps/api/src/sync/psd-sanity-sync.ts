@@ -298,6 +298,28 @@ const CYCLE_STAFF_IDS_KEY = "sync:cycle-staff-ids";
 const CYCLE_TEAM_IDS_KEY = "sync:cycle-team-ids";
 
 /**
+ * Marker for a team whose PSD roster came back empty while Sanity still
+ * lists players for it (#3465). One empty reading is not trusted — PSD
+ * returning `[]` for a populated team has happened; a second consecutive
+ * empty visit is. Cleared ONLY on a non-empty roster or once the empty
+ * roster has been trusted.
+ */
+const emptyRosterKey = (teamId: number) => `sync:empty-roster:${teamId}`;
+
+/**
+ * Raised AFTER a team pass finished and the cursor moved on, so the job
+ * alert fires (`reportScheduledJobOutcome` only sees ok/fail) without the
+ * failing member or team fetch blocking the rotation forever (#3465).
+ */
+export class SyncIncompleteError extends Error {
+  readonly _tag = "SyncIncompleteError" as const;
+  constructor(readonly failures: readonly string[]) {
+    super(`sync finished with failures: ${failures.join("; ")}`);
+    this.name = "SyncIncompleteError";
+  }
+}
+
+/**
  * PSD staff the sync must never write to Sanity. For people who must leave
  * the site but stay in PSD (they keep their login, or the removal is temporary).
  * Deleting or archiving their Sanity doc alone does not hold: the next run
@@ -501,8 +523,15 @@ export const runSync = Effect.gen(function* () {
   );
 
   yield* Effect.log("fetching teams from PSD");
-  const teams = yield* psd.getRawTeams();
-  yield* Effect.log(`teams fetched: ${teams.length} total`);
+  const liveTeams = yield* psd.getRawTeams();
+  yield* Effect.log(`teams fetched: ${liveTeams.length} total`);
+  // The cursor is a position, so it needs an order that survives PSD
+  // removing or reordering teams between nights: numeric id, not response
+  // order (#3465). `scripts/trigger-psd-sync.sh`'s index is a position in
+  // THIS order.
+  const teams = [...liveTeams].sort((a, b) => a.id - b.id);
+  // Hand-run (`scripts/trigger-psd-sync.sh`): never touch cycle-end state.
+  const manualRun = env.SYNC_MANUAL_RUN === "1";
 
   if (teams.length === 0) {
     yield* Effect.log("no teams found — skipping sync");
@@ -578,10 +607,23 @@ export const runSync = Effect.gen(function* () {
       }),
     );
 
-  const [members, rawStaff] = yield* Effect.all(
-    [psd.getRawMembers(team.id), psd.getRawStaff(team.id)],
-    { concurrency: 2 },
+  // A team-level fetch failure must not pin the cursor on this team forever:
+  // move on without accumulating it, fail at the end. The cycle-end guard
+  // (a live team missing from the accumulator) keeps that safe (#3465).
+  const fetched = yield* Effect.either(
+    Effect.all([psd.getRawMembers(team.id), psd.getRawStaff(team.id)], {
+      concurrency: 2,
+    }),
   );
+  const fetchError = Either.isLeft(fetched) ? fetched.left : null;
+  if (fetchError !== null) {
+    yield* Effect.logError(
+      `team ${team.id}: PSD member/staff fetch failed — skipping the team this pass: ${String(fetchError)}`,
+    );
+  }
+  const [members, rawStaff] = Either.isRight(fetched)
+    ? fetched.right
+    : [[] as readonly PsdMember[], [] as readonly PsdMember[]];
   const staffMembers = rawStaff.filter((m) => !isSyncExcludedStaff(m));
   const { players, unknown } = partitionMembers(members);
   yield* Effect.log(
@@ -590,6 +632,26 @@ export const runSync = Effect.gen(function* () {
   if (unknown.length > 0) {
     yield* Effect.log(
       `team ${team.id}: ${unknown.length} members with unknown status skipped: ${unknown.map((m) => `${m.id}(${m.status})`).join(", ")}`,
+    );
+  }
+
+  // Zero roster (#3465): PSD says no players, Sanity says there are some.
+  // First sighting → hold the team back (no upsertTeam), protect its players
+  // from the cycle-end archive and leave a marker; second consecutive
+  // sighting → trust it. A manual run holds back too but writes nothing.
+  const sanityTeamPlayerIds =
+    fetchError === null && players.length === 0
+      ? yield* sanityReader.getTeamPlayerPsdIds(String(team.id))
+      : [];
+  const rosterEmptyKey = emptyRosterKey(team.id);
+  const emptyRosterSeenBefore =
+    sanityTeamPlayerIds.length > 0 && !manualRun
+      ? (yield* cache.durable.get(rosterEmptyKey)) !== null
+      : false;
+  const holdTeam = sanityTeamPlayerIds.length > 0 && !emptyRosterSeenBefore;
+  if (holdTeam) {
+    yield* Effect.logWarning(
+      `team ${team.id}: PSD returned 0 players but Sanity lists ${sanityTeamPlayerIds.length} — holding the team back this pass${manualRun ? "" : " (marker set; a second empty roster is trusted)"}`,
     );
   }
 
@@ -606,6 +668,13 @@ export const runSync = Effect.gen(function* () {
       `team ${team.id}: skipping ${players.length - playersToProcess.length} already-committed players (resumed run)`,
     );
   }
+
+  // Member isolation (#3465): one member's failed upsert must not strand the
+  // team (the cursor would stay on it forever). Collected, then the run
+  // fails after the team and the cursor are done. Mutated synchronously, like
+  // the done-id sets above.
+  const failedPlayerIds = new Set<string>();
+  const failedStaffIds = new Set<string>();
 
   yield* Effect.forEach(
     playersToProcess,
@@ -628,7 +697,12 @@ export const runSync = Effect.gen(function* () {
         // must not be marked done (#2900 review).
         if (imageOk) donePlayerIds.add(doc.psdId);
         yield* flushCheckpoint(false);
-      }),
+      }).pipe(
+        Effect.catchAll((e) => {
+          failedPlayerIds.add(String(m.id));
+          return Effect.logError(`player ${m.id}: sync failed — ${String(e)}`);
+        }),
+      ),
     { concurrency: 2 }, // low to avoid Sanity asset upload rate limit
   );
 
@@ -659,7 +733,12 @@ export const runSync = Effect.gen(function* () {
 
         if (imageOk) doneStaffIds.add(doc.psdId);
         yield* flushCheckpoint(false);
-      }),
+      }).pipe(
+        Effect.catchAll((e) => {
+          failedStaffIds.add(String(m.id));
+          return Effect.logError(`staff ${m.id}: sync failed — ${String(e)}`);
+        }),
+      ),
     { concurrency: 2 }, // low to avoid Sanity asset upload rate limit
   );
 
@@ -669,9 +748,37 @@ export const runSync = Effect.gen(function* () {
 
   const playerPsdIds = players.map((m) => String(m.id));
   const staffPsdIds = staffMembers.map((m) => String(m.id));
-  yield* sanityWriter.upsertTeam(
-    transformTeam(team, playerPsdIds, staffPsdIds),
-  );
+  // team.players / team.staff are strong references: a member that failed
+  // and has no doc yet cannot be referenced. A failed member that already
+  // has a doc stays (its doc is there, and dropping it would unlink it).
+  const referencable = (
+    ids: readonly string[],
+    failed: ReadonlySet<string>,
+    existing: ReadonlyMap<string, unknown>,
+  ) => ids.filter((id) => !failed.has(id) || existing.has(id));
+  if (fetchError === null && !holdTeam) {
+    yield* sanityWriter.upsertTeam(
+      transformTeam(
+        team,
+        referencable(playerPsdIds, failedPlayerIds, imageState),
+        referencable(staffPsdIds, failedStaffIds, staffImageState),
+      ),
+    );
+    // A trusted empty roster and a non-empty one both retire the marker.
+    if (!manualRun && (players.length > 0 || emptyRosterSeenBefore)) {
+      yield* cache.durable
+        .delete(rosterEmptyKey)
+        .pipe(
+          Effect.catchAll((e) =>
+            Effect.log(
+              `team ${team.id}: failed to clear the empty-roster marker — harmless, it only makes the next empty roster trusted sooner: ${String(e)}`,
+            ),
+          ),
+        );
+    }
+  } else if (holdTeam && !manualRun) {
+    yield* cache.durable.setForever(rosterEmptyKey, "1");
+  }
   yield* Effect.log(`team ${team.id} (${team.name}): done`);
 
   // Reads a JSON-array accumulation key, parsing on top of the durable get —
@@ -713,45 +820,75 @@ export const runSync = Effect.gen(function* () {
       ),
     );
 
+  // A manual run reads and writes no cycle state at all; a team whose
+  // fetch failed adds nothing (and so stays "missing" for the cycle-end guard).
+  const readCycleIds = (key: string) =>
+    manualRun ? Effect.succeed([] as string[]) : readAccumulatedIds(key);
+  const accumulate = (
+    key: string,
+    existing: readonly string[],
+    toAdd: readonly string[],
+  ) =>
+    Effect.gen(function* () {
+      const ids = new Set<string>(existing);
+      if (fetchError === null) {
+        for (const id of toAdd) ids.add(id);
+        if (!manualRun) {
+          yield* cache.durable.setForever(key, JSON.stringify([...ids]));
+        }
+      }
+      return ids;
+    });
+
   // ─── Accumulate player PSD IDs in KV ─────────────────────────────────
-  const existingIds = yield* readAccumulatedIds(CYCLE_PLAYER_IDS_KEY);
-
-  const accumulatedIds = new Set<string>(existingIds);
-  for (const id of playerPsdIds) accumulatedIds.add(id);
-
-  yield* cache.durable.setForever(
+  // A held-back team contributes the players Sanity already lists for it.
+  const accumulatedIds = yield* accumulate(
     CYCLE_PLAYER_IDS_KEY,
-    JSON.stringify([...accumulatedIds]),
+    yield* readCycleIds(CYCLE_PLAYER_IDS_KEY),
+    holdTeam ? sanityTeamPlayerIds : playerPsdIds,
   );
 
   // ─── Accumulate staff PSD IDs in KV ─────────────────────────────────
-  const existingStaffIds = yield* readAccumulatedIds(CYCLE_STAFF_IDS_KEY);
-
-  const accumulatedStaffIds = new Set<string>(existingStaffIds);
-  for (const id of staffPsdIds) accumulatedStaffIds.add(id);
-
-  yield* cache.durable.setForever(
+  const accumulatedStaffIds = yield* accumulate(
     CYCLE_STAFF_IDS_KEY,
-    JSON.stringify([...accumulatedStaffIds]),
+    yield* readCycleIds(CYCLE_STAFF_IDS_KEY),
+    staffPsdIds,
   );
 
   // ─── Accumulate team PSD IDs in KV ──────────────────────────────────
-  const existingTeamIds = yield* readAccumulatedIds(CYCLE_TEAM_IDS_KEY);
-
-  const accumulatedTeamIds = new Set<string>(existingTeamIds);
-  accumulatedTeamIds.add(String(team.id));
-
-  yield* cache.durable.setForever(
+  const accumulatedTeamIds = yield* accumulate(
     CYCLE_TEAM_IDS_KEY,
-    JSON.stringify([...accumulatedTeamIds]),
+    yield* readCycleIds(CYCLE_TEAM_IDS_KEY),
+    [String(team.id)],
   );
 
   // Compute next cursor (wraps at end of team list)
   const nextCursor = (teamIndex + 1) % teams.length;
 
   // ─── Reconciliation at cycle end ─────────────────────────────────────
-  if (nextCursor === 0) {
+  if (nextCursor === 0 && manualRun) {
+    yield* Effect.log(
+      "cycle end reached by a manual run — skipping reconciliation and leaving the accumulators alone",
+    );
+  }
+  if (nextCursor === 0 && !manualRun) {
     yield* Effect.log("cycle complete — running reconciliation");
+
+    // Cycle-end guard (#3465): archival is only as good as the accumulators.
+    // A live team that was never accumulated this cycle (skipped by a
+    // removal/reorder, a failed fetch, a failed cursor write) means the
+    // player and staff sets are partial, so skip those two legs. Teams are
+    // checked against accumulator ∪ live list, below.
+    const liveTeamIds = teams.map((t) => String(t.id));
+    const missingTeamIds = liveTeamIds.filter(
+      (id) => !accumulatedTeamIds.has(id),
+    );
+    const cycleComplete = missingTeamIds.length === 0;
+    if (!cycleComplete) {
+      yield* Effect.logWarning(
+        `reconciliation: cycle INCOMPLETE — live team(s) ${missingTeamIds.join(", ")} never accumulated this cycle; skipping player and staff archival (accumulators are cleared, the next cycle starts fresh)`,
+      );
+    }
 
     // See ORPHAN_CAP_OVERRIDE_KEY above. Read AND delete upfront — this is
     // the one-shot consumption point, unconditional on whether any leg
@@ -784,14 +921,16 @@ export const runSync = Effect.gen(function* () {
     const ratioThresholdFor = (scope: OrphanCapOverrideScope) =>
       orphanCapOverrideScopes.has(scope) ? Number.POSITIVE_INFINITY : undefined;
 
-    const activeInSanity = yield* sanityReader.getActivePlayerPsdIds();
-    yield* reconcileEntity(
-      "players",
-      activeInSanity,
-      accumulatedIds,
-      (ids) => sanityWriter.archivePlayers(ids),
-      ratioThresholdFor("players"),
-    );
+    if (cycleComplete) {
+      const activeInSanity = yield* sanityReader.getActivePlayerPsdIds();
+      yield* reconcileEntity(
+        "players",
+        activeInSanity,
+        accumulatedIds,
+        (ids) => sanityWriter.archivePlayers(ids),
+        ratioThresholdFor("players"),
+      );
+    }
 
     // Club-wide staff (team-less club functions: board members, general roles)
     // are never returned by /teams/{id}/staff, so without this fetch their IDs
@@ -853,8 +992,12 @@ export const runSync = Effect.gen(function* () {
         );
       });
 
-    const clubStaffResult = yield* Effect.either(psd.getRawClubStaff());
-    if (Either.isLeft(clubStaffResult)) {
+    const clubStaffResult = cycleComplete
+      ? yield* Effect.either(psd.getRawClubStaff())
+      : null;
+    if (clubStaffResult === null) {
+      // incomplete cycle — staff archival skipped above
+    } else if (Either.isLeft(clubStaffResult)) {
       yield* Effect.log(
         `reconciliation: SKIPPED staff archival — club-wide staff fetch failed: ${String(clubStaffResult.left)}`,
       );
@@ -870,11 +1013,13 @@ export const runSync = Effect.gen(function* () {
       );
     }
 
+    // A team still in PSD's live list is never an orphan, even when this
+    // cycle did not reach it (#3465).
     const activeTeamsInSanity = yield* sanityReader.getActiveTeamPsdIds();
     yield* reconcileEntity(
       "teams",
       activeTeamsInSanity,
-      accumulatedTeamIds,
+      new Set([...accumulatedTeamIds, ...liveTeamIds]),
       (ids) => sanityWriter.archiveTeams(ids),
       ratioThresholdFor("teams"),
     );
@@ -894,13 +1039,18 @@ export const runSync = Effect.gen(function* () {
   // `setForever` — NOT `set` — is load-bearing here: a TTL on this key would
   // silently restart the team rotation once it expired, re-syncing team 1
   // forever (see this key's original finding, #2873).
+  // At cycle end the accumulators are already cleared, so a swallowed failure
+  // here would re-run the last team against empty accumulators: fail instead
+  // (#3465). Mid-cycle a stale cursor only repeats a team.
   yield* cache.durable
     .setForever(CURSOR_KEY, String(nextCursor))
     .pipe(
       Effect.catchAll((e) =>
-        Effect.log(
-          `cursor write failed — next run will re-read the stored value (or 0 if missing): ${String(e)}`,
-        ),
+        nextCursor === 0
+          ? Effect.fail(e)
+          : Effect.log(
+              `cursor write failed — next run will re-read the stored value (or 0 if missing): ${String(e)}`,
+            ),
       ),
     );
 
@@ -925,6 +1075,22 @@ export const runSync = Effect.gen(function* () {
         ),
       ),
     );
+
+  const failures = [
+    ...(fetchError === null
+      ? []
+      : [`team ${team.id}: member/staff fetch failed (${String(fetchError)})`]),
+    ...[...failedPlayerIds].map((id) => `player ${id}`),
+    ...[...failedStaffIds].map((id) => `staff ${id}`),
+  ];
+  if (failures.length > 0) {
+    // Deliberately NOT the "cursor advanced to" wording below:
+    // scripts/trigger-psd-sync.sh treats that line as success.
+    yield* Effect.log(
+      `sync finished with failures — cursor moved on to ${nextCursor}`,
+    );
+    return yield* Effect.fail(new SyncIncompleteError(failures));
+  }
 
   yield* Effect.log(
     `sync completed — cursor advanced to ${nextCursor} (next: team index ${nextCursor})`,
