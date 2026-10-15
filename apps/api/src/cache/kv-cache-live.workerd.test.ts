@@ -85,24 +85,6 @@ describe("KvCacheLive — real KV binding (workerd)", () => {
     // milliseconds-since-epoch or some other unit mismatch.
     expect(entry?.expiration).toBeLessThan(before + ttlSeconds + 60);
   });
-
-  it("increment starts today's counter at 1, then adds on top", async () => {
-    // Captured BEFORE the increments: reading `new Date()` afterwards would
-    // flake the rare run that straddles a UTC midnight rollover, since
-    // `increment`'s own key is built from the date at write time.
-    const d = new Date();
-    const dayKey = `psd:calls:${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
-
-    await Effect.runPromise(
-      Effect.gen(function* () {
-        const cache = yield* KvCacheService;
-        yield* cache.increment();
-        yield* cache.increment(4);
-      }).pipe(Effect.provide(KvCacheLive), Effect.provide(realKvEnvLayer)),
-    );
-
-    expect(await env.PSD_CACHE.get(dayKey)).toBe("5");
-  });
 });
 
 describe("makeDurableKv — real KV binding (workerd)", () => {

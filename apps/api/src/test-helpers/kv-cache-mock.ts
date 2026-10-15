@@ -3,7 +3,7 @@ import type { DurableKv } from "../cache/kv-cache";
 
 /**
  * A no-op `DurableKv` for the many `KvCacheInterface` mocks scattered across
- * this test tree that only ever exercise get/set/delete/increment (the SWR
+ * this test tree that only ever exercise get/set/delete (the SWR
  * path) and have no interest in the durable operations added by #2873. Every
  * one of those mocks now needs a `durable` field to satisfy the widened
  * interface — spreading this in keeps each of them a one-line change instead

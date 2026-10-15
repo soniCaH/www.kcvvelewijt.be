@@ -15,8 +15,8 @@
   "durable_objects": {
     "bindings": [{ "name": "PSD_GATE", "class_name": "PsdGate" }]
   },
-  // Mirrors wrangler.toml's own migration tag — PsdGate keeps no durable
-  // storage (pure in-memory GateLogic), so the SQLite backing is moot here
-  // too, but the class still needs a migration to be bindable at all.
+  // Mirrors wrangler.toml's own migration tag — PsdGate persists only its
+  // daily call count (#3490) in ctx.storage; the class needs a migration to be
+  // bindable at all.
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["PsdGate"] }]
 }

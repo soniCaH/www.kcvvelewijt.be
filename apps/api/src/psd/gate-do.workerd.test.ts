@@ -14,11 +14,11 @@
  * (exactly how `psd/gate.ts`'s `PsdGateLive` calls it in production), a real
  * `durable_objects` migration.
  */
-import { env } from "cloudflare:test";
+import { abortAllDurableObjects, env } from "cloudflare:test";
 import { describe, it, expect } from "vitest";
 import { Effect, Schema as S } from "effect";
 import { KvCacheLive, TypedKvCache } from "../cache/kv-cache";
-import { PsdGateLive } from "./gate";
+import { PsdGateLive, PsdGateService } from "./gate";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
 
 /** A fresh DO instance per test (unique `idFromName`) — isolates single-flight
@@ -69,6 +69,48 @@ describe("PsdGate Durable Object — real single-flight coordination (workerd)",
   it("acquireToken resolves — the RPC + constructor path works end-to-end", async () => {
     const gate = freshGateStub(`token-${Math.random()}`);
     await expect(gate.acquireToken()).resolves.toBeUndefined();
+  });
+});
+
+describe("PsdGate Durable Object — daily PSD call count (workerd, #3490)", () => {
+  it("equals the number of acquireToken grants under concurrent load", async () => {
+    const gate = freshGateStub(`count-load-${Math.random()}`);
+    await Promise.all(Array.from({ length: 8 }, () => gate.acquireToken()));
+    expect(await gate.getDailyCount()).toBe(8);
+  });
+
+  it("reading the count takes no token and counts nothing", async () => {
+    const gate = freshGateStub(`count-read-${Math.random()}`);
+    await gate.acquireToken();
+    expect(await gate.getDailyCount()).toBe(1);
+    expect(await gate.getDailyCount()).toBe(1);
+  });
+
+  it("survives a DO restart (read back from ctx.storage)", async () => {
+    const name = `count-restart-${Math.random()}`;
+    const before = freshGateStub(name);
+    await Promise.all(Array.from({ length: 6 }, () => before.acquireToken()));
+    await abortAllDurableObjects();
+    expect(await freshGateStub(name).getDailyCount()).toBe(6);
+    await freshGateStub(name).acquireToken();
+    expect(await freshGateStub(name).getDailyCount()).toBe(7);
+  });
+
+  it("PsdGateLive.getDailyCount reads the same count through the Effect service", async () => {
+    const stub = freshGateStub("global");
+    await stub.acquireToken();
+    const layer = makeTestEnvLayer({
+      PSD_CACHE: env.PSD_CACHE,
+      PSD_GATE: env.PSD_GATE,
+    });
+    const count = await Effect.runPromise(
+      Effect.gen(function* () {
+        const gate = yield* PsdGateService;
+        return yield* gate.getDailyCount;
+      }).pipe(Effect.provide(PsdGateLive), Effect.provide(layer)),
+    );
+    expect(count).toBe(await stub.getDailyCount());
+    expect(count).toBeGreaterThanOrEqual(1);
   });
 });
 

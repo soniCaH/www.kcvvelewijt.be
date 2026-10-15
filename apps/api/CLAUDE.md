@@ -22,7 +22,7 @@ src/
 │   ├── service.ts            ← PsdService (fetch + transform + business logic)
 │   ├── transforms.ts         ← Pure transform functions (PSD → domain types)
 │   ├── gate.ts               ← PsdGateService (Effect facade over the gate)
-│   ├── gate-do.ts            ← PsdGate Durable Object (global pacer + single-flight)
+│   ├── gate-do.ts            ← PsdGate Durable Object (global pacer + single-flight + daily call count)
 │   ├── gate-logic.ts         ← GateLogic — token bucket + flight leases (DO-free, testable)
 │   ├── incident.ts           ← IncidentTracker (PSD outage open/close state)
 │   ├── job-alert.ts          ← Scheduled-job failure signal (KV-debounced, independent of IncidentTracker)
@@ -251,23 +251,35 @@ inherit `[[ratelimits]]`, so both blocks are declared twice
 - **`/seasons`** is cached for `TTL.SEASONS` (24 h) under `psd:seasons`
   (`getAllSeasons`). Opponent lookups and `getCurrentSeason` read it.
 - **On-demand daily budget.** Before a psdBacked cold miss fetches,
-  `getOrFetch` reads today's `psd:calls:{date}` counter (`psdCallsKey`). At or
+  `getOrFetch` reads today's PSD-call count from the `PsdGate` Durable Object
+  (`gate.getDailyCount`, #3490). At or
   over `PSD_ONDEMAND_DAILY_BUDGET` it fails fast with
   `UpstreamUnavailableError` and makes no PSD call. A key with a value — even
   a stale one — still serves it, and its background refresh still runs. The
   nightly sync never comes through `getOrFetch`, so it always runs. The
-  counter counts every PSD call (sync included), so the cron's calls count
-  toward the day. One Slack alert per UTC day (`psd:budget-alert:{day}`,
+  count is one per `gate.acquireToken` grant — every PSD call (sync and
+  portrait downloads included) takes a token first, so the cron's calls count
+  toward the day. A DO failure reads `0` (fail-open: the budget never refuses
+  on a gate hiccup). One Slack alert per UTC day (`psd:budget-alert:{day}`,
   `buildPsdBudgetMessage`) through `SLACK_ALERT_WEBHOOK_URL`, plus an
   `Effect.logError` per refusal.
+- **Where the daily count lives (#3490).** In the `PsdGate` Durable Object, in
+  `ctx.storage` under `daily-count` (`{ day: "YYYY-MM-DD" (UTC), count }`),
+  so it survives eviction and restart. `GateLogic.acquireToken` bumps it at
+  every grant, atomically (one DO, no await between read and write); a new UTC
+  day starts at 0. Read it with `gate.getDailyCount` (`PsdGate.getDailyCount()`
+  over RPC) — read-only, takes no token. The budget check is deliberately
+  **not** inside `acquireToken`: that would block the nightly sync and the
+  background refresh, which must always run. There is no `record(n)`: every PSD
+  call — read path, sync, portrait download — takes a token first, so the
+  grant is the count. Add a PSD call site without `acquireToken` and it goes
+  uncounted. The old KV key `psd:calls:YYYY-MM-DD` (a non-atomic
+  get/+1/put that lost increments) is gone; leftovers expire on their own.
 - **How the budget was chosen.** The rule: the peak of the last 14 days of
-  `psd:calls:*` × 1.5, rounded up to the next 50, never above 1 000 (half of
-  PSD's shared 2 000/day). The counter is written with a **48 h** expiry
-  (`KvCacheLive.increment`), so no 14-day history exists — the value is the
-  ticket's no-history default, **600**. To re-measure, raise that expiry
-  first, then read each day with
-  `pnpm exec wrangler kv key get "psd:calls:<YYYY-MM-DD>" --binding PSD_CACHE --remote`
-  from `apps/api`.
+  daily PSD calls × 1.5, rounded up to the next 50, never above 1 000 (half of
+  PSD's shared 2 000/day). The DO keeps **today only**, so no 14-day history
+  exists — the value is the ticket's no-history default, **600**. To
+  re-measure, persist one count per day first.
 
 ### `/related` (`handlers/related.ts`)
 
@@ -358,7 +370,7 @@ Every KV access in this worker goes through `KvCacheService` — there are no
 callers left that reach `env.PSD_CACHE` directly. The interface has two
 halves with deliberately different error contracts:
 
-- **The SWR read path** — `get`/`set`/`delete`/`increment` — swallows every
+- **The SWR read path** — `get`/`set`/`delete` — swallows every
   KV failure to `null`/`undefined`, on purpose: a cache blip must never
   break a read. This is what `TypedKvCache` (below) uses.
 - **`durable`** — `get`/`set`/`setForever`/`delete`/`list`/`forDataset` —
@@ -422,7 +434,6 @@ While drifting: `ERROR` on every stale serve (the `wrangler tail` trace), Slack 
 | `search:v1:{type}:{limit}:{q}`       | 1 h (`TTL.SEARCH`, plain KV get/set, expires — no SWR, #3468)                                                                                                                                                                                                                                                                                                                                                                                                                                          | —       |
 | any TypedKvCache key, not-found      | 1 h (`NOT_FOUND_TTL` marker in place of the value, #3468)                                                                                                                                                                                                                                                                                                                                                                                                                                              | 1 h     |
 | `ai:answers:YYYY-MM-DD`              | 48 h (daily AI-answer counter, #3468)                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | —       |
-| `psd:calls:YYYY-MM-DD`               | 48 h (daily PSD call counter, not via TypedKvCache)                                                                                                                                                                                                                                                                                                                                                                                                                                                    | —       |
 
 ## Cache invalidation
 
@@ -448,7 +459,7 @@ pnpm --filter @kcvv/api cache:clear:staging:key "ranking:team:23"
 - `Effect.orDie` in HttpApiGroup handlers — errors become 500s; keep errors typed at handler level
 - After changing `@kcvv/api-contract`, run `pnpm turbo build --filter=@kcvv/api-contract` first
 - **Every PSD call takes a gate token — the scheduled paths too, not just the request path.** Both PSD clients (`psd/service.ts` for reads, `sync/psd-team-client.ts` for the nightly sync) open `countedFetch` with `gate.acquireToken`, and every layer that provides either one must also provide `PsdGateLive`. The sync shipped without it (#2867): its fan-out runs members+staff at concurrency 2 over pages at concurrency 3, so ~6 calls sat outside the ≤5/s worldwide budget. This is now enforced by the type system — dropping `PsdGateLive` from a layer that builds `PsdTeamClientLive` fails `type-check` — so a new PSD client only needs the same `acquireToken` opening to inherit the guarantee.
-- **A gate token is pacing, not observability — PSD incident alerting still does not cover the scheduled paths, by design.** `gate.reportOutcome` (the call that opens/closes a PSD incident and fires the Slack ping from #2329) is invoked from the `TypedKvCache` refresh path in `cache/kv-cache.ts` and nowhere else. The nightly sync's PSD-fetch layer (`sync/psd-team-client.ts`) touches `KvCacheService` only for `increment()`; `sync/psd-sanity-sync.ts`'s `runSync` itself goes through `KvCacheService.durable` for its cursor/checkpoint/accumulation state (#2873). Neither touchpoint ever calls `reportOutcome`, so the nightly sync never reaches one, and this is intentional: the read path reads `incidentOpen` back to escalate its serve-stale logs `WARN→ERROR`, so routing a scheduled-job failure through `reportOutcome` would make request-path logs shout — and fire a "PSD outage started" Slack ping — while the site serves visitors from cache perfectly fine. A sync failing at 02:00 is not the same event as PSD being down for visitors, and `IncidentTracker` must never model it. **Decided in #2870 (Option B over Option A):** Option A (routing scheduled-job failures through `reportOutcome`) was rejected for exactly that read-path blast radius, and it could not have covered the `30 2 * * *` search-index cron anyway — its failures are Workers AI / Vectorize / Sanity, not PSD, so there is no PSD incident for it to open. Instead, `psd/job-alert.ts` runs a second, parallel state machine — `reportScheduledJobOutcome` — that never imports `psd/incident.ts` or `psd/gate.ts`. It persists a per-job state in KV (`job-alert:{job}`, shaped like the drift nudge's `nudge:{key}` marker) and debounces the same way `IncidentTracker` does: alert on the first failure after healthy and keep retrying on every subsequent failure until Slack actually confirms delivery (`postSlack` now returns whether the POST landed, not just whether it was attempted — a dropped webhook POST used to debounce a whole outage into announcing it zero times, not once), then stay silent for the rest of that streak; alert once on the first recovery after ≥1 failures (best-effort — a dropped recovery POST still resets the streak, since losing one "recovered" ping is far less costly than losing the outage ping). `psd/slack-alert.ts` gained a third message builder, `buildJobAlertMessage` (alongside `buildIncidentMessage` and `buildDriftMessage`), reusing the same `postSlack`. Both `scheduled()` branches in `index.ts` call `reportScheduledJobOutcome("psd-sanity-sync", …)` / `reportScheduledJobOutcome("sanity-index-sync", …)` strictly after their sync work settles (never inside its own `try`, so a reporting hiccup can't be mistaken for — or falsely alert — a sync failure, and never before the `0 2 * * *` branch's wall-clock log, so the report's own KV/Slack I/O doesn't inflate the number #2900 measures against the Cron Trigger ceiling) — additive to the existing `console.error`, not a replacement.
+- **A gate token is pacing, not observability — PSD incident alerting still does not cover the scheduled paths, by design.** `gate.reportOutcome` (the call that opens/closes a PSD incident and fires the Slack ping from #2329) is invoked from the `TypedKvCache` refresh path in `cache/kv-cache.ts` and nowhere else. The nightly sync's PSD-fetch layer (`sync/psd-team-client.ts`) no longer touches `KvCacheService` at all (its token grant is what counts the call, #3490); `sync/psd-sanity-sync.ts`'s `runSync` itself goes through `KvCacheService.durable` for its cursor/checkpoint/accumulation state (#2873). Neither touchpoint ever calls `reportOutcome`, so the nightly sync never reaches one, and this is intentional: the read path reads `incidentOpen` back to escalate its serve-stale logs `WARN→ERROR`, so routing a scheduled-job failure through `reportOutcome` would make request-path logs shout — and fire a "PSD outage started" Slack ping — while the site serves visitors from cache perfectly fine. A sync failing at 02:00 is not the same event as PSD being down for visitors, and `IncidentTracker` must never model it. **Decided in #2870 (Option B over Option A):** Option A (routing scheduled-job failures through `reportOutcome`) was rejected for exactly that read-path blast radius, and it could not have covered the `30 2 * * *` search-index cron anyway — its failures are Workers AI / Vectorize / Sanity, not PSD, so there is no PSD incident for it to open. Instead, `psd/job-alert.ts` runs a second, parallel state machine — `reportScheduledJobOutcome` — that never imports `psd/incident.ts` or `psd/gate.ts`. It persists a per-job state in KV (`job-alert:{job}`, shaped like the drift nudge's `nudge:{key}` marker) and debounces the same way `IncidentTracker` does: alert on the first failure after healthy and keep retrying on every subsequent failure until Slack actually confirms delivery (`postSlack` now returns whether the POST landed, not just whether it was attempted — a dropped webhook POST used to debounce a whole outage into announcing it zero times, not once), then stay silent for the rest of that streak; alert once on the first recovery after ≥1 failures (best-effort — a dropped recovery POST still resets the streak, since losing one "recovered" ping is far less costly than losing the outage ping). `psd/slack-alert.ts` gained a third message builder, `buildJobAlertMessage` (alongside `buildIncidentMessage` and `buildDriftMessage`), reusing the same `postSlack`. Both `scheduled()` branches in `index.ts` call `reportScheduledJobOutcome("psd-sanity-sync", …)` / `reportScheduledJobOutcome("sanity-index-sync", …)` strictly after their sync work settles (never inside its own `try`, so a reporting hiccup can't be mistaken for — or falsely alert — a sync failure, and never before the `0 2 * * *` branch's wall-clock log, so the report's own KV/Slack I/O doesn't inflate the number #2900 measures against the Cron Trigger ceiling) — additive to the existing `console.error`, not a replacement.
   - **`runSanityIndexSync` degrades every embedding/upsert failure internally** (`embedDoc`, `upsertBatched`, `deleteBatched` in `search/sanity-index-sync.ts` each `catchAll` and log-and-skip, so one bad document never aborts the sweep), which used to mean the whole function resolved successfully even when Workers AI or Vectorize rejected every single call — the job-alert signal would have called that run healthy. It now fails (and the job-alert signal sees it) only on the unambiguous bar: there was content to index and **none** of it landed across all four phases combined (responsibility paths + articles + pages + galleries). A partial failure — some documents land, others don't — still resolves successfully and stays a WARN/ERROR log, not a job failure; that's a deliberate, narrower bar than "any degradation", not an oversight.
   - **Known remaining gap, not built here:** if the `0 2 * * *` invocation is killed at the 15-minute Cron Trigger wall-clock ceiling (the #2900 failure mode this job is designed around), neither the `catch` nor the post-sync report ever runs — no alert fires, and a counter already at "failing" from an earlier night stays there silently forever. Catching that needs a heartbeat / dead-man's-switch (write "started" on entry, clear on success) — a different mechanism, out of scope for #2870.
 - **Never rate-limit off `Date.now()` inside the `PsdGate` Durable Object.** A DO advances its clock only on I/O, so while every caller is sleeping inside the gate no time passes: a wall-clock token bucket accrues nothing and starves forever (this pinned every fan-out — `matches:window`, `match:detail:*` — at its Jul 30 snapshot until the 7-day hard TTL). Pace with relative sleeps only (`GateLogic.acquireToken`). The failure is silent: a cancelled `waitUntil` sets no negative marker and reports no outcome, so SWR just keeps serving stale.

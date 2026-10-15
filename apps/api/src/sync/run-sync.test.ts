@@ -218,7 +218,6 @@ function makeKvStub() {
     get: () => Effect.succeed(null),
     set: () => Effect.succeed(undefined),
     delete: () => Effect.succeed(undefined),
-    increment: () => Effect.succeed(undefined),
     durable: {
       ...durable,
       forDataset: (dataset: string) => ({ ...durable, dataset }),

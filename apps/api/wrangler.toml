@@ -31,9 +31,9 @@ SEARCH_INDEX_PRUNE_DRY_RUN = "false"
 # AI answers per UTC day; at the cap /search returns results without an answer
 # (about $1.60/day at 2026-10 prices).
 AI_ANSWER_DAILY_CAP = "2000"
-# PSD calls per UTC day (the psd:calls counter) after which a cold cache miss
-# fails fast. 600 is the ticket's no-history default: the counter keeps 48 h,
-# so no 14-day history exists to measure. Never above 1000 (half of PSD's
+# PSD calls per UTC day (the PsdGate DO's daily count, #3490) after which a cold
+# cache miss fails fast. 600 is the ticket's no-history default: the DO keeps
+# today only, so no 14-day history exists to measure. Never above 1000 (half of PSD's
 # 2000/day, shared with the old AWS app).
 PSD_ONDEMAND_DAILY_BUDGET = "600"
 # SANITY_API_TOKEN is a secret — set via: wrangler secret put SANITY_API_TOKEN
@@ -63,7 +63,8 @@ name = "PSD_GATE"
 class_name = "PsdGate"
 
 # SQLite-backed: the only supported DO storage class for new namespaces. PsdGate
-# keeps no durable storage (pure in-memory GateLogic), so the backing is moot.
+# persists one key (`daily-count`, #3490) in ctx.storage; everything else is
+# in-memory GateLogic. No migration needed to start using storage.
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["PsdGate"]

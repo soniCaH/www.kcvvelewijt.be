@@ -46,7 +46,6 @@ const cacheMock: KvCacheInterface = {
     ),
   set: () => Effect.succeed(undefined),
   delete: () => Effect.succeed(undefined),
-  increment: () => Effect.succeed(undefined),
   durable: noopDurableKv,
 };
 
@@ -783,7 +782,6 @@ describe("PsdService.getNextMatches", () => {
         return Effect.succeed(undefined);
       },
       delete: () => Effect.succeed(undefined),
-      increment: () => Effect.succeed(undefined),
       durable: noopDurableKv,
     };
 
@@ -822,7 +820,6 @@ describe("PsdService.getNextMatches", () => {
           : Effect.succeed(null),
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
-      increment: () => Effect.succeed(undefined),
       durable: noopDurableKv,
     };
 
@@ -1568,7 +1565,6 @@ describe("PsdService.getMatchDetail — status/score backfill from season list",
       ),
     set: () => Effect.succeed(undefined),
     delete: () => Effect.succeed(undefined),
-    increment: () => Effect.succeed(undefined),
     durable: noopDurableKv,
   });
 
@@ -2270,7 +2266,6 @@ describe("PsdService.getMatchDetail - competition/team enrichment", () => {
         ),
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
-      increment: () => Effect.succeed(undefined),
       durable: noopDurableKv,
     };
     (global.fetch as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
@@ -2335,7 +2330,6 @@ describe("PsdService.getMatchDetail - competition/team enrichment", () => {
         ),
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
-      increment: () => Effect.succeed(undefined),
       durable: noopDurableKv,
     };
     (global.fetch as ReturnType<typeof vi.fn>)
@@ -2388,7 +2382,6 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
       ),
     set: () => Effect.succeed(undefined),
     delete: () => Effect.succeed(undefined),
-    increment: () => Effect.succeed(undefined),
     durable: noopDurableKv,
   });
 
@@ -2537,7 +2530,6 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
         ),
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
-      increment: () => Effect.succeed(undefined),
       durable: noopDurableKv,
     };
     (global.fetch as ReturnType<typeof vi.fn>)
@@ -2605,7 +2597,6 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
         ),
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
-      increment: () => Effect.succeed(undefined),
       durable: noopDurableKv,
     };
     (global.fetch as ReturnType<typeof vi.fn>)
@@ -2663,7 +2654,6 @@ describe("PsdService — youth score gate (#3428)", () => {
       ),
     set: () => Effect.succeed(undefined),
     delete: () => Effect.succeed(undefined),
-    increment: () => Effect.succeed(undefined),
     durable: noopDurableKv,
   });
 

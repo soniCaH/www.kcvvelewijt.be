@@ -9,7 +9,7 @@ import {
   postSlack,
 } from "../psd/slack-alert";
 import { ResourceNotFoundError, UpstreamUnavailableError } from "../psd/errors";
-import { oncePerDay, parseCeiling, parseCount, utcDay } from "./daily-ceiling";
+import { oncePerDay, parseCeiling, utcDay } from "./daily-ceiling";
 
 /**
  * Per-endpoint soft TTLs in seconds.
@@ -40,10 +40,6 @@ export const TTL = {
 /** How long a cold miss that PSD answered "not found" is remembered under the
  * same key, so a repeated unknown id costs no PSD call (#3468). */
 export const NOT_FOUND_TTL = 60 * 60; // 1 hour
-
-/** Today's PSD-call counter (`increment` writes it, the on-demand budget reads it). */
-export const psdCallsKey = (d: Date = new Date()): string =>
-  `psd:calls:${utcDay(d)}`;
 
 /** Persisted negative marker TTL (seconds). Suppresses re-storming after a failed
  * refresh: subsequent requests serve stale without re-fanning until it expires.
@@ -94,8 +90,6 @@ export interface KvCacheInterface {
     ttl: number,
   ) => Effect.Effect<void>;
   readonly delete: (key: string) => Effect.Effect<void>;
-  /** Increment today's PSD-call counter by n (default 1). Owns the daily key (psd:calls:YYYY-MM-DD). */
-  readonly increment: (by?: number) => Effect.Effect<void>;
   /**
    * KV operations for callers outside the SWR read path — see `DurableKv`'s
    * doc comment for why they surface `KvError` instead of swallowing it
@@ -105,7 +99,7 @@ export interface KvCacheInterface {
 }
 
 /**
- * A KV op failed. Unlike get/set/delete/increment above — whose whole point
+ * A KV op failed. Unlike get/set/delete above — whose whole point
  * is to be silently forgiving, because a cache miss must never break a read
  * path — every `DurableKv` operation surfaces this instead of swallowing it.
  * A caller reaching for `durable` has already decided a KV blip must not be
@@ -137,7 +131,7 @@ export interface KvListPage {
 }
 
 /**
- * KV operations for callers the SWR-cache shape (get/set/delete/increment
+ * KV operations for callers the SWR-cache shape (get/set/delete
  * above) never fit: a TTL-bearing write that FAILS on error rather than
  * swallowing it (`set`), a write with NO expiry at all (`setForever` — the
  * port's original gap: the SWR `set` requires a `ttl`, so "this must never
@@ -586,7 +580,7 @@ export const TypedKvCache = <A, I>(
         const budget = parseCeiling(env.PSD_ONDEMAND_DAILY_BUDGET);
         const checkBudget = Effect.gen(function* () {
           if (!psdBacked || budget === undefined) return;
-          const spent = parseCount(yield* cache.get(psdCallsKey()));
+          const spent = yield* gate.getDailyCount;
           if (spent < budget) return;
           const day = utcDay();
           yield* Effect.logError(
@@ -760,18 +754,6 @@ export const KvCacheLive = Layer.effect(
       delete: (key: string) =>
         Effect.tryPromise({
           try: () => env.PSD_CACHE.delete(key),
-          catch: () => undefined,
-        }).pipe(Effect.orElseSucceed(() => undefined)),
-      increment: (by = 1) =>
-        Effect.tryPromise({
-          try: async () => {
-            const key = psdCallsKey();
-            const next = parseCount(await env.PSD_CACHE.get(key)) + by;
-            // Keep counter for 48 h so yesterday's value stays visible
-            await env.PSD_CACHE.put(key, String(next), {
-              expirationTtl: 60 * 60 * 48,
-            });
-          },
           catch: () => undefined,
         }).pipe(Effect.orElseSucceed(() => undefined)),
       durable: makeDurableKv(env.PSD_CACHE),

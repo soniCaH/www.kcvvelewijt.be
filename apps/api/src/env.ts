@@ -24,7 +24,7 @@ export interface WorkerEnv {
   readonly TURNSTILE_SECRET?: string; // Cloudflare Turnstile secret — wrangler secret (absent without ALLOW_MISSING_FORM_SECRETS → verification fails closed)
   readonly ALLOW_MISSING_FORM_SECRETS?: string; // "true" only in .dev.vars — lets a missing TURNSTILE_SECRET / RESEND_API_KEY skip verification / dispatch with a warning (#3464). Never set in wrangler.toml, never a secret: anything else, or unset, fails closed
   readonly SLACK_ALERT_WEBHOOK_URL?: string; // Slack incoming-webhook for PSD incident/drift alerts — wrangler secret (absent locally → alerting is a no-op)
-  readonly PSD_ONDEMAND_DAILY_BUDGET?: string; // [vars] — once today's psd:calls counter reaches it, a cold cache miss fails fast with no PSD call (#3468). Unset → no budget
+  readonly PSD_ONDEMAND_DAILY_BUDGET?: string; // [vars] — once the PsdGate DO's daily call count reaches it, a cold cache miss fails fast with no PSD call (#3468). Unset → no budget
   readonly SYNC_MANUAL_RUN?: string; // "1" only via `scripts/trigger-psd-sync.sh` (`wrangler dev --var`) — the PSD sync then skips cycle-end reconciliation and every accumulator write/clear, so a hand-run team never touches nightly-cycle state (#3465). Never set in wrangler.toml
   readonly CACHE_LONG_TTL?: string; // "true" on staging — overrides hardTtl to 365 days
   readonly SEARCH_INDEX_PRUNE_DRY_RUN?: string; // "false" since the sweep's prune step was checked against the live index (#2857); set it back to "true" to re-arm dry-run, where sanity-index-sync.ts logs the delete set instead of calling deleteByIds. Fails safe: anything other than the literal "false" is treated as dry-run (#2831)

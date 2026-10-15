@@ -28,6 +28,9 @@ export interface PsdOutcome extends IncidentContext {
 export interface PsdGate {
   /** Await a global PSD-call token (≤5/s worldwide). Best-effort: proceeds on gate failure. */
   readonly acquireToken: Effect.Effect<void>;
+  /** Today's PSD-call count (UTC day), persisted in the DO. Takes no token.
+   * Best-effort: reads `0` on gate failure, so the on-demand budget fails open. */
+  readonly getDailyCount: Effect.Effect<number>;
   /** Become the single-flight leader for `key`? An owner token = you run the
    * work; `null` = someone else already is. */
   readonly beginFlight: (key: string) => Effect.Effect<number | null>;
@@ -54,6 +57,7 @@ export class PsdGateService extends Context.Tag("PsdGateService")<
 /** Structural view of the DO stub's RPC surface (see PsdGate in gate-do.ts). */
 interface PsdGateStub {
   acquireToken(): Promise<void>;
+  getDailyCount(): Promise<number>;
   beginFlight(key: string): Promise<number | null>;
   endFlight(key: string, token: number): Promise<void>;
   awaitFlight(key: string): Promise<void>;
@@ -76,6 +80,9 @@ export const PsdGateLive = Layer.effect(
     return {
       acquireToken: Effect.tryPromise(() => stub().acquireToken()).pipe(
         Effect.orElseSucceed(() => undefined),
+      ),
+      getDailyCount: Effect.tryPromise(() => stub().getDailyCount()).pipe(
+        Effect.orElseSucceed(() => 0),
       ),
       beginFlight: (key) =>
         Effect.tryPromise(() => stub().beginFlight(key)).pipe(
@@ -113,6 +120,7 @@ export const makePsdGateLayer = (
 ): Layer.Layer<PsdGateService> =>
   Layer.succeed(PsdGateService, {
     acquireToken: Effect.promise(() => logic.acquireToken()),
+    getDailyCount: Effect.sync(() => logic.getDailyCount()),
     beginFlight: (key) => Effect.sync(() => logic.beginFlight(key)),
     endFlight: (key, token) => Effect.sync(() => logic.endFlight(key, token)),
     awaitFlight: (key) => Effect.promise(() => logic.awaitFlight(key)),

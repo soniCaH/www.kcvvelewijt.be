@@ -91,7 +91,6 @@ function makeCacheMock(): KvCacheInterface {
     get: () => Effect.succeed(null),
     set: () => Effect.succeed(undefined),
     delete: () => Effect.succeed(undefined),
-    increment: () => Effect.succeed(undefined),
     durable: noopDurableKv,
   };
 }
@@ -328,7 +327,6 @@ describe("getMatchDetailHandler", () => {
           Layer.succeed(KvCacheService, {
             get: () => Effect.succeed(null),
             delete: () => Effect.succeed(undefined),
-            increment: () => Effect.succeed(undefined),
             set: vi.fn((key, value, ttl) => {
               setCalls.push([key, value, ttl]);
               return Effect.succeed(undefined);

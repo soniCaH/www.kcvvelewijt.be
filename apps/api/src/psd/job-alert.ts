@@ -72,7 +72,7 @@ export const jobAlertKey = (job: string): string => `job-alert:${job}`;
 export const JOB_ALERT_STATE_TTL = 60 * 60 * 24 * 3; // 3 days
 
 /** Parse the persisted state, guarding against a malformed value the same
- * way `KvCacheLive.increment` does — a bad value must never wedge the job
+ * way the daily counters in `cache/daily-ceiling.ts` do — a bad value must never wedge the job
  * into "permanently failing" or "permanently healthy". */
 function parseState(raw: string | null): JobAlertState {
   if (raw == null) return HEALTHY;
