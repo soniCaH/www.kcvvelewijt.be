@@ -37,7 +37,7 @@ src/
 │   ├── ranking.ts            ← RankingApi HttpApiGroup
 │   ├── opponent.ts           ← OpponentApi HttpApiGroup
 │   ├── related.ts            ← RelatedApi HttpApiGroup
-│   └── search.ts             ← SearchApi HttpApiGroup
+│   └── search.ts             ← SearchApi HttpApiGroup + searchWithCeilings (rate limits, response cache, #3468)
 └── sync/
     ├── psd-team-client.ts    ← PsdTeamClient (teams/members/staff fetch for sync)
     └── psd-sanity-sync.ts    ← PSD → Sanity player/team/staff sync
@@ -61,6 +61,8 @@ pnpm --filter @kcvv/api dev                        # wrangler dev on :8787
 | `PSD_API_KEY`                | `wrangler secret put` / CF dashboard          | Never in toml                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `BFF_SHARED_SECRET`          | `wrangler secret put` / CF dashboard          | Never in toml — required; see "Only the website may call the worker" below (#3485)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `PSD_API_AUTH`               | `wrangler secret put` / CF dashboard          | Never in toml                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `AI_ANSWER_DAILY_CAP`        | `wrangler.toml [vars]` / `[env.staging.vars]` | `"2000"` — AI answers per UTC day; see "Ceilings inside the worker" (#3468). Unset → no cap                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `PSD_ONDEMAND_DAILY_BUDGET`  | `wrangler.toml [vars]` / `[env.staging.vars]` | `"600"` — PSD calls per UTC day after which a cold miss fails fast; see "Ceilings inside the worker" (#3468). Unset → no budget                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | `CACHE_LONG_TTL`             | `wrangler.toml [env.staging.vars]`            | Overrides hardTtl to 365d                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `PSD_API_CLUB`               | `wrangler secret put` / CF dashboard          | Never in toml                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `RESEND_API_KEY`             | `wrangler secret put` / CF dashboard          | Never in toml — see `docs/prd/email-delivery.md`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
@@ -168,6 +170,88 @@ KV, DO, PSD, Sanity or AI work. The comparison is constant-time
   for a few minutes; ISR pages serve their cached copy. A PR built from older
   code gets `401` from the staging worker until it is rebased. Rotating the
   secret follows the same order: worker and Vercel together, then redeploy.
+
+## Ceilings inside the worker (#3468)
+
+Every request reaches the worker through the website, and the website is a
+door for every visitor. These ceilings bound what a script can spend.
+
+### `/search` (`handlers/search.ts`, `search/ai-answer.ts`)
+
+In request order:
+
+1. **`SEARCH_IP_LIMITER`** — `[[ratelimits]]`, 10 requests / 60 s, key
+   `ip:{x-kcvv-client-ip}` (`ip:unknown` without the header). Runs before
+   the cache, so a cached query still counts. The Next route
+   (`apps/web/src/app/api/search/route.ts`) sends `x-kcvv-client-ip`
+   (`CLIENT_IP_HEADER`) from the first `x-vercel-forwarded-for` value, else
+   `x-real-ip`. The worker trusts it only because the BFF key proves the
+   caller is the Next server.
+2. **Response cache** — the whole `SearchResponse`, `answer` included, for
+   `TTL.SEARCH` (1 h) under `search:v1:{type ?? "all"}:{limit}:{q}`, where `q`
+   is the query trimmed, lowercased, whitespace collapsed. A hit makes no
+   Embedding, Vectorize or AI call. Plain `KvCacheService` get/set, no SWR: an
+   entry expires, it is never refreshed in the background. A query long enough
+   to push the key past KV's 512-byte limit is not cached (the put fails
+   silently); the limits still bound it.
+3. **`SEARCH_GLOBAL_LIMITER`** — `[[ratelimits]]`, 120 / 60 s, key `global`.
+   Runs on a cache miss only.
+4. **AI daily cap** — `AiAnswerServiceLive` reads KV counter
+   `ai:answers:{YYYY-MM-DD UTC}` (2-day expiry) before `ai.run`, and adds one
+   after a successful answer. At or over `AI_ANSWER_DAILY_CAP` the answer is
+   skipped: `/search` returns `results` with no `answer`, and one
+   `Effect.logError` per day (`ai:answers:capped:{day}` marker). Approximate
+   — KV is not atomic — which is fine for a ceiling. The answer call also
+   passes `max_tokens: 256`.
+
+Either limit hit → `429` (`HttpTooManyRequests`), body error
+`Too many searches, try again in a minute`, no AI call. A limiter binding
+that throws fails **open** (logged): search stays up and the AI cap is the
+backstop. A search failure is `503` with the fixed text
+`Search service unavailable`; the real message goes to `Effect.logError` only.
+
+**Namespace ids are account-wide** and both workers share one account:
+production uses `1001`/`1002`, staging `2001`/`2002`. Named envs do not
+inherit `[[ratelimits]]`, so both blocks are declared twice
+(`webhooks/wrangler-config.test.ts` pins this).
+
+### PSD (`cache/kv-cache.ts`, `psd/service.ts`)
+
+- **Not-found cache.** In `TypedKvCache.getOrFetch`, a cold miss that fails
+  with `ResourceNotFoundError` stores a marker `{ notFound: {...} }` under the
+  same key for `NOT_FOUND_TTL` (1 h). A hit on the marker fails with the same
+  error and makes no PSD call. Every other error stays uncached. Each id-keyed
+  route ends cached on an unknown id (`psd/unknown-id-ceilings.test.ts`):
+  `/matches/:teamId` (PSD answers `200 []` → cached empty),
+  `/match/:matchId/detail` and `/statistics/player/:memberId` (empty `200`
+  body → `emptyBodyIsNotFound` → marker), `/ranking/:teamId` (PSD `404` →
+  marker) and `/matches/opponent/:teamId/:clubId` (no matches → marker).
+- **`/seasons`** is cached for `TTL.SEASONS` (24 h) under `psd:seasons`
+  (`getAllSeasons`). Opponent lookups and `getCurrentSeason` read it.
+- **On-demand daily budget.** Before a psdBacked cold miss fetches,
+  `getOrFetch` reads today's `psd:calls:{date}` counter (`psdCallsKey`). At or
+  over `PSD_ONDEMAND_DAILY_BUDGET` it fails fast with
+  `UpstreamUnavailableError` and makes no PSD call. A key with a value — even
+  a stale one — still serves it, and its background refresh still runs. The
+  nightly sync never comes through `getOrFetch`, so it always runs. The
+  counter counts every PSD call (sync included), so the cron's calls count
+  toward the day. One Slack alert per UTC day (`psd:budget-alert:{day}`,
+  `buildPsdBudgetMessage`) through `SLACK_ALERT_WEBHOOK_URL`, plus an
+  `Effect.logError` per refusal.
+- **How the budget was chosen.** The rule: the peak of the last 14 days of
+  `psd:calls:*` × 1.5, rounded up to the next 50, never above 1 000 (half of
+  PSD's shared 2 000/day). The counter is written with a **48 h** expiry
+  (`KvCacheLive.increment`), so no 14-day history exists — the value is the
+  ticket's no-history default, **600**. To re-measure, raise that expiry
+  first, then read each day with
+  `pnpm exec wrangler kv key get "psd:calls:<YYYY-MM-DD>" --binding PSD_CACHE --remote`
+  from `apps/api`.
+
+### `/related` (`handlers/related.ts`)
+
+The `id` must match `/^[A-Za-z0-9._-]{1,128}$/` (`packages/api-contract`,
+`api/related.ts`); anything else is a `400`. An empty `[]` result is returned
+but never stored; a non-empty result keeps `TTL.RELATED`.
 
 ## Deployment
 
@@ -310,6 +394,10 @@ While drifting: `ERROR` on every stale serve (the `wrangler tail` trace), Slack 
 | `ranking:team:{id}`                  | 24 h                                                                                                                                                                                                                                                                                                                                                      | 7 days  |
 | `stats:team:{id}`                    | 24 h                                                                                                                                                                                                                                                                                                                                                      | 7 days  |
 | `stats:player:{memberId}:{seasonId}` | 6 h                                                                                                                                                                                                                                                                                                                                                       | 7 days  |
+| `psd:seasons`                        | 24 h (`TTL.SEASONS`, plain KV get/set, #3468)                                                                                                                                                                                                                                                                                                             | —       |
+| `search:v1:{type}:{limit}:{q}`       | 1 h (`TTL.SEARCH`, plain KV get/set, expires — no SWR, #3468)                                                                                                                                                                                                                                                                                             | —       |
+| any TypedKvCache key, not-found      | 1 h (`NOT_FOUND_TTL` marker in place of the value, #3468)                                                                                                                                                                                                                                                                                                 | 1 h     |
+| `ai:answers:YYYY-MM-DD`              | 48 h (daily AI-answer counter, #3468)                                                                                                                                                                                                                                                                                                                     | —       |
 | `psd:calls:YYYY-MM-DD`               | 48 h (daily PSD call counter, not via TypedKvCache)                                                                                                                                                                                                                                                                                                       | —       |
 
 ## Cache invalidation

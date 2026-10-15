@@ -9,10 +9,14 @@ import {
   HARD_TTL_DEFAULT,
   HARD_TTL_LONG,
   BG_REFRESH_TIMEOUT_MS,
+  NOT_FOUND_TTL,
+  psdCallsKey,
   KvError,
   makeDurableKv,
 } from "./kv-cache";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
+import type { WorkerEnv } from "../env";
+import { ResourceNotFoundError, UpstreamUnavailableError } from "../psd/errors";
 import { PsdGateService, PsdGateTest, makePsdGateLayer } from "../psd/gate";
 import { GateLogic } from "../psd/gate-logic";
 import { BackgroundRunnerService } from "../psd/background";
@@ -62,7 +66,7 @@ function makeMockKv(options: { pageSize?: number } = {}) {
 
 function makeEnvLayer(
   mockKv: ReturnType<typeof makeMockKv>,
-  overrides: { CACHE_LONG_TTL?: string } = {},
+  overrides: Partial<WorkerEnv> = {},
 ) {
   return makeTestEnvLayer({
     PSD_CACHE: mockKv as unknown as KVNamespace,
@@ -1528,5 +1532,197 @@ describe("makeDurableKv (#2873)", () => {
       "search-index:manifest:staging",
       "[]",
     );
+  });
+});
+
+describe("TypedKvCache — not-found cache (#3468)", () => {
+  const notFound = new ResourceNotFoundError({
+    message: "HTTP 404: Not Found",
+    resourceType: "psd-resource",
+    resourceId: 999,
+  });
+
+  it("caches a cold-miss ResourceNotFound for 1 hour; the repeat makes no fetch", async () => {
+    const mockKv = makeMockKv();
+    const fetch = vi.fn(() => notFound);
+    const fetchEffect = Effect.suspend(() => Effect.fail(fetch()));
+    const run = () =>
+      Effect.runPromise(
+        TypedKvCache(TestSchema)
+          .getOrFetch("test-key", fetchEffect, 60)
+          .pipe(
+            Effect.flip,
+            Effect.provide(KvCacheLive),
+            Effect.provide(PsdGateTest),
+            Effect.provide(makeEnvLayer(mockKv)),
+          ),
+      );
+
+    const first = await run();
+    const second = await run();
+
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(first).toBe(notFound);
+    expect(second).toBeInstanceOf(ResourceNotFoundError);
+    expect(second).toMatchObject({
+      message: notFound.message,
+      resourceType: notFound.resourceType,
+      resourceId: notFound.resourceId,
+    });
+    expect(mockKv.put).toHaveBeenCalledWith("test-key", expect.any(String), {
+      expirationTtl: NOT_FOUND_TTL,
+    });
+    expect(NOT_FOUND_TTL).toBe(60 * 60);
+  });
+
+  it("keeps every other cold-miss error uncached", async () => {
+    const mockKv = makeMockKv();
+    const fetch = vi.fn(
+      () => new UpstreamUnavailableError({ message: "HTTP 503", status: 503 }),
+    );
+    const fetchEffect = Effect.suspend(() => Effect.fail(fetch()));
+    const run = () =>
+      Effect.runPromise(
+        TypedKvCache(TestSchema)
+          .getOrFetch("test-key", fetchEffect, 60)
+          .pipe(
+            Effect.flip,
+            Effect.provide(KvCacheLive),
+            Effect.provide(PsdGateTest),
+            Effect.provide(makeEnvLayer(mockKv)),
+          ),
+      );
+
+    await run();
+    await run();
+
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(mockKv.store.has("test-key")).toBe(false);
+  });
+});
+
+describe("TypedKvCache — PSD on-demand daily budget (#3468)", () => {
+  const budgetEnv = { PSD_ONDEMAND_DAILY_BUDGET: "100" };
+  const spentKv = () => {
+    const mockKv = makeMockKv();
+    mockKv.store.set(psdCallsKey(), "100");
+    return mockKv;
+  };
+
+  it("a cold miss past the budget fails fast with UpstreamUnavailable and makes no fetch", async () => {
+    const mockKv = spentKv();
+    const fetch = vi.fn(() => ({ name: "fresh", value: 1 }));
+
+    const error = await Effect.runPromise(
+      TypedKvCache(TestSchema)
+        .getOrFetch("test-key", Effect.sync(fetch), 60)
+        .pipe(
+          Effect.flip,
+          Effect.provide(KvCacheLive),
+          Effect.provide(PsdGateTest),
+          Effect.provide(makeEnvLayer(mockKv, budgetEnv)),
+        ),
+    );
+
+    expect(fetch).not.toHaveBeenCalled();
+    expect(error).toBeInstanceOf(UpstreamUnavailableError);
+  });
+
+  it("a cold miss under the budget still fetches", async () => {
+    const mockKv = makeMockKv();
+    mockKv.store.set(psdCallsKey(), "99");
+    const fetch = vi.fn(() => ({ name: "fresh", value: 1 }));
+
+    await Effect.runPromise(
+      TypedKvCache(TestSchema)
+        .getOrFetch("test-key", Effect.sync(fetch), 60)
+        .pipe(
+          Effect.provide(KvCacheLive),
+          Effect.provide(PsdGateTest),
+          Effect.provide(makeEnvLayer(mockKv, budgetEnv)),
+        ),
+    );
+
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("a stale key past the budget still serves stale, and its background refresh still runs", async () => {
+    const mockKv = spentKv();
+    mockKv.store.set(
+      "test-key",
+      makeWrapper({ name: "old", value: 1 }, 2 * 60 * 60 * 1000),
+    );
+    const pending: Promise<void>[] = [];
+    const layer = Layer.mergeAll(KvCacheLive, PsdGateTest).pipe(
+      Layer.provideMerge(makeEnvLayer(mockKv, budgetEnv)),
+    );
+    const runnerLayer = Layer.succeed(BackgroundRunnerService, {
+      fork: (_label, effect) =>
+        Effect.sync(() => {
+          pending.push(
+            Effect.runPromise(
+              Effect.provide(effect, layer) as unknown as Effect.Effect<void>,
+            ),
+          );
+        }),
+    });
+    const fetch = vi.fn(() => ({ name: "fresh", value: 2 }));
+
+    const result = await Effect.runPromise(
+      TypedKvCache(TestSchema)
+        .getOrFetch("test-key", Effect.sync(fetch), 60)
+        .pipe(Effect.provide(runnerLayer), Effect.provide(layer)),
+    );
+    await Promise.all(pending);
+
+    expect(result).toEqual({ name: "old", value: 1 });
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("sends one Slack alert per UTC day when the budget is hit", async () => {
+    const mockKv = spentKv();
+    const slack = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response("ok"));
+    const run = (key: string) =>
+      Effect.runPromise(
+        TypedKvCache(TestSchema)
+          .getOrFetch(key, Effect.succeed({ name: "x", value: 1 }), 60)
+          .pipe(
+            Effect.flip,
+            Effect.provide(KvCacheLive),
+            Effect.provide(PsdGateTest),
+            Effect.provide(
+              makeEnvLayer(mockKv, {
+                ...budgetEnv,
+                SLACK_ALERT_WEBHOOK_URL: "https://hooks.slack.test/x",
+              }),
+            ),
+          ),
+      );
+
+    await run("key-a");
+    await run("key-b");
+
+    expect(slack).toHaveBeenCalledTimes(1);
+    expect(slack.mock.calls[0]![0]).toBe("https://hooks.slack.test/x");
+    slack.mockRestore();
+  });
+
+  it("a non-PSD cache (psdBacked: false) ignores the budget", async () => {
+    const mockKv = spentKv();
+    const fetch = vi.fn(() => ({ name: "fresh", value: 1 }));
+
+    await Effect.runPromise(
+      TypedKvCache(TestSchema, { psdBacked: false })
+        .getOrFetch("test-key", Effect.sync(fetch), 60)
+        .pipe(
+          Effect.provide(KvCacheLive),
+          Effect.provide(PsdGateTest),
+          Effect.provide(makeEnvLayer(mockKv, budgetEnv)),
+        ),
+    );
+
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 });

@@ -2112,6 +2112,7 @@ describe("PsdService.getPlayerStats", () => {
       .mockResolvedValueOnce({
         ok: true,
         json: async () => psdPlayerStatsResponse,
+        text: async () => JSON.stringify(psdPlayerStatsResponse),
       });
 
     const result = await runService((svc) => svc.getPlayerStats(42));
@@ -2134,6 +2135,7 @@ describe("PsdService.getPlayerStats", () => {
       .mockResolvedValueOnce({
         ok: true,
         json: async () => psdPlayerStatsResponse,
+        text: async () => JSON.stringify(psdPlayerStatsResponse),
       });
 
     await runService((svc) => svc.getPlayerStats(42));
@@ -2151,7 +2153,7 @@ describe("PsdService.getPlayerStats", () => {
       .mockResolvedValueOnce({ ok: true, json: async () => seasons })
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ playerStatistics: [] }),
+        text: async () => JSON.stringify({ playerStatistics: [] }),
       });
 
     const result = await runService((svc) => svc.getPlayerStats(42));
@@ -2168,14 +2170,15 @@ describe("PsdService.getPlayerStats", () => {
       .mockResolvedValueOnce({ ok: true, json: async () => seasons })
       .mockResolvedValueOnce({
         ok: true,
-        json: async () => ({
-          playerStatistics: [
-            {
-              ...psdPlayerStatsResponse.playerStatistics[0],
-              team: null,
-            },
-          ],
-        }),
+        text: async () =>
+          JSON.stringify({
+            playerStatistics: [
+              {
+                ...psdPlayerStatsResponse.playerStatistics[0],
+                team: null,
+              },
+            ],
+          }),
       });
 
     const result = await runService((svc) => svc.getPlayerStats(42));

@@ -13,6 +13,7 @@ import {
 } from "../psd/errors";
 import {
   HARD_TTL_DEFAULT,
+  isNotFoundMarker,
   KvCacheService,
   TTL,
   TypedKvCache,
@@ -74,7 +75,8 @@ export const getRankingHandler = (
       .pipe(
         Effect.tapErrorTag("ResourceNotFound", () =>
           Effect.flatMap(kv.get(cacheKey), (table) =>
-            table === null
+            // The not-found marker (#3468) is not a table either.
+            table === null || isNotFoundMarker(table)
               ? kv.set(noTableKey, String(Date.now()), HARD_TTL_DEFAULT)
               : Effect.void,
           ),

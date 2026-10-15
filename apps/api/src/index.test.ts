@@ -5,7 +5,7 @@
  */
 import { timingSafeEqual } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { BFF_KEY_HEADER } from "@kcvv/api-contract";
+import { BFF_KEY_HEADER, CLIENT_IP_HEADER } from "@kcvv/api-contract";
 import type { WorkerEnv } from "./env";
 import { makeTestEnv } from "./test-helpers/env-layer";
 import { TEST_SECRET, signPayload } from "./test-helpers/webhook-signing";
@@ -157,5 +157,44 @@ describe("worker fetch — /webhooks/index is exempt and keeps its HMAC", () => 
       ctx,
     );
     expect(res.status).toBe(409);
+  });
+});
+
+describe("worker fetch — /related validates its id (#3468)", () => {
+  it.each([
+    ["a space", "doc%20one"],
+    ["a slash", "doc%2Fone"],
+    ["129 characters", "a".repeat(129)],
+  ])("answers 400 to an id with %s", async (_label, id) => {
+    const res = await worker.fetch(
+      get(`/related?id=${id}`, { [BFF_KEY_HEADER]: SECRET }),
+      env(),
+      ctx,
+    );
+    expect(res.status).toBe(400);
+  });
+});
+
+describe("worker fetch — /search per-visitor limit (#3468)", () => {
+  it("keys the limit on x-kcvv-client-ip and answers 429 with the fixed body", async () => {
+    const limit = vi.fn(async () => ({ success: false }));
+    const res = await worker.fetch(
+      new Request("https://kcvv-api.workers.dev/search", {
+        method: "POST",
+        headers: {
+          [BFF_KEY_HEADER]: SECRET,
+          [CLIENT_IP_HEADER]: "198.51.100.4",
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ query: "kantine" }),
+      }),
+      env({ SEARCH_IP_LIMITER: { limit } }),
+      ctx,
+    );
+    expect(res.status).toBe(429);
+    expect(await res.json()).toMatchObject({
+      error: "Too many searches, try again in a minute",
+    });
+    expect(limit).toHaveBeenCalledWith({ key: "ip:198.51.100.4" });
   });
 });

@@ -27,6 +27,15 @@ SEARCH_INDEX_NAME = "kcvv-search"
 # correctly never indexed. Anything other than the literal "false" is dry-run,
 # so putting "true" back here re-arms dry-run and fails safe.
 SEARCH_INDEX_PRUNE_DRY_RUN = "false"
+# Ceilings inside the worker (#3468) — see "Ceilings" in apps/api/CLAUDE.md.
+# AI answers per UTC day; at the cap /search returns results without an answer
+# (about $1.60/day at 2026-10 prices).
+AI_ANSWER_DAILY_CAP = "2000"
+# PSD calls per UTC day (the psd:calls counter) after which a cold cache miss
+# fails fast. 600 is the ticket's no-history default: the counter keeps 48 h,
+# so no 14-day history exists to measure. Never above 1000 (half of PSD's
+# 2000/day, shared with the old AWS app).
+PSD_ONDEMAND_DAILY_BUDGET = "600"
 # SANITY_API_TOKEN is a secret — set via: wrangler secret put SANITY_API_TOKEN
 # SANITY_WEBHOOK_SECRET is a secret — set via: wrangler secret put SANITY_WEBHOOK_SECRET
 # RESEND_API_KEY is a secret — set via: wrangler secret put RESEND_API_KEY (see docs/prd/email-delivery.md)
@@ -66,6 +75,18 @@ binding = "AI"
 binding = "SEARCH_INDEX"
 index_name = "kcvv-search"
 
+# /search rate limits (#3468). namespace_id is account-wide and both workers
+# share one account, so staging uses its own ids (2001/2002) below.
+[[ratelimits]]
+name = "SEARCH_IP_LIMITER"
+namespace_id = "1001"
+simple = { limit = 10, period = 60 }
+
+[[ratelimits]]
+name = "SEARCH_GLOBAL_LIMITER"
+namespace_id = "1002"
+simple = { limit = 120, period = 60 }
+
 [env.staging]
 name = "kcvv-api-staging"
 
@@ -85,6 +106,9 @@ SEARCH_INDEX_NAME = "kcvv-search-staging"
 # Mirrors the top-level SEARCH_INDEX_PRUNE_DRY_RUN — relevant here too since
 # the manual backfill documented above runs the same runSanityIndexSync (#2831).
 SEARCH_INDEX_PRUNE_DRY_RUN = "false"
+# Mirrors the top-level ceilings (#3468).
+AI_ANSWER_DAILY_CAP = "2000"
+PSD_ONDEMAND_DAILY_BUDGET = "600"
 # SANITY_API_TOKEN is a secret — set via: wrangler secret put SANITY_API_TOKEN --env staging
 # SANITY_WEBHOOK_SECRET is a secret — set via: wrangler secret put SANITY_WEBHOOK_SECRET --env staging
 # RESEND_API_KEY is a secret — set via: wrangler secret put RESEND_API_KEY --env staging (see docs/prd/email-delivery.md)
@@ -111,3 +135,14 @@ binding = "SEARCH_INDEX"
 # serves it — so a staging Sanity edit could silently overwrite (or add junk
 # to) the production vector for the same document id. See #2833.
 index_name = "kcvv-search-staging"
+
+# Named envs don't inherit [[ratelimits]] — redeclare with staging's own ids.
+[[env.staging.ratelimits]]
+name = "SEARCH_IP_LIMITER"
+namespace_id = "2001"
+simple = { limit = 10, period = 60 }
+
+[[env.staging.ratelimits]]
+name = "SEARCH_GLOBAL_LIMITER"
+namespace_id = "2002"
+simple = { limit = 120, period = 60 }

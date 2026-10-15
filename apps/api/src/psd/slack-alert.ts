@@ -71,6 +71,15 @@ export function buildDriftMessage(ctx: DriftContext): string {
   )} old${status}; ${formatDuration(timeToCliff)} until it drops off the hard-expiry cliff.`;
 }
 
+/** Message for the PSD on-demand daily budget being reached (#3468). */
+export function buildPsdBudgetMessage(ctx: {
+  readonly day: string;
+  readonly spent: number;
+  readonly budget: number;
+}): string {
+  return `:no_entry: *PSD on-demand budget reached* — ${ctx.spent}/${ctx.budget} PSD calls on ${ctx.day} (UTC). Cold cache misses fail until midnight UTC; cached pages keep serving, the nightly sync still runs.`;
+}
+
 export interface JobAlertContext {
   /** Name of the scheduled job (e.g. "psd-sanity-sync", "sanity-index-sync"). */
   readonly job: string;

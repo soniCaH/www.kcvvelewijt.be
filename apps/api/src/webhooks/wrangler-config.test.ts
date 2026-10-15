@@ -94,3 +94,52 @@ describe("wrangler.toml keeps each environment's vectorize binding, SEARCH_INDEX
     });
   }
 });
+
+// ─── #3468: the /search rate limits and ceilings exist in both envs ───────
+
+describe("wrangler.toml declares the #3468 ceilings in production and staging", () => {
+  const source = readFileSync(
+    join(__dirname, "..", "..", "wrangler.toml"),
+    "utf-8",
+  );
+  const sections = parseSections(source);
+
+  /** `[[ratelimits]]` blocks share one header, so their lines arrive in order. */
+  const limiters = (header: string) => {
+    const lines = sections[header] ?? [];
+    const names = lines.flatMap((l) => /^name = "(\w+)"/.exec(l)?.[1] ?? []);
+    const ids = lines.flatMap(
+      (l) => /^namespace_id = "(\d+)"/.exec(l)?.[1] ?? [],
+    );
+    const limits = lines.flatMap((l) =>
+      /^simple = \{ limit = (\d+), period = (\d+) \}/.exec(l)
+        ? [l.replace(/\s+/g, " ")]
+        : [],
+    );
+    return { names, ids, limits };
+  };
+
+  it("both limiters, with the 4 distinct namespace ids", () => {
+    const prod = limiters("[[ratelimits]]");
+    const staging = limiters("[[env.staging.ratelimits]]");
+    const both = ["SEARCH_IP_LIMITER", "SEARCH_GLOBAL_LIMITER"];
+    const limits = [
+      "simple = { limit = 10, period = 60 }",
+      "simple = { limit = 120, period = 60 }",
+    ];
+
+    expect(prod).toEqual({ names: both, ids: ["1001", "1002"], limits });
+    expect(staging).toEqual({ names: both, ids: ["2001", "2002"], limits });
+  });
+
+  it.each(["[vars]", "[env.staging.vars]"])(
+    "%s sets AI_ANSWER_DAILY_CAP and a PSD budget of at most 1000",
+    (header) => {
+      const lines = sections[header]!;
+      expect(readStringVar(lines, "AI_ANSWER_DAILY_CAP")).toBe("2000");
+      const budget = Number(readStringVar(lines, "PSD_ONDEMAND_DAILY_BUDGET"));
+      expect(budget).toBeGreaterThan(0);
+      expect(budget).toBeLessThanOrEqual(1000);
+    },
+  );
+});

@@ -214,3 +214,21 @@ describe("getRelatedHandler", () => {
     );
   });
 });
+
+describe("getRelatedHandler — empty results are never stored (#3468)", () => {
+  it("returns [] for an id with no related items without writing it to KV", async () => {
+    const set = vi.fn(() => Effect.succeed(undefined));
+
+    const result = await runWithProviders(
+      getRelatedHandler({ id: "doc-new", limit: 3 }),
+      makeCacheMock({ set }),
+    );
+
+    expect(result).toEqual([]);
+    expect(set).not.toHaveBeenCalledWith(
+      "related:doc-new:max",
+      expect.anything(),
+      expect.anything(),
+    );
+  });
+});

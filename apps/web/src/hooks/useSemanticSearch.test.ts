@@ -83,6 +83,28 @@ describe("useSemanticSearch", () => {
     expect(consoleError).not.toHaveBeenCalled();
   });
 
+  it("settles a 429 from the rate limit into its error state, without throwing (#3468)", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.mocked(fetch).mockResolvedValueOnce(
+      Response.json(
+        { error: "Too many searches, try again in a minute" },
+        { status: 429 },
+      ),
+    );
+
+    const { result } = renderHook(() =>
+      useSemanticSearch({ type: "responsibility", debounceMs: 0 }),
+    );
+
+    act(() => result.current.search("kantine"));
+
+    await waitFor(() => expect(result.current.error).toBe(true));
+    expect(result.current.results).toEqual([]);
+    expect(result.current.answer).toBeUndefined();
+    expect(result.current.loading).toBe(false);
+    expect(result.current.executedQuery).toBe("kantine");
+  });
+
   it("exposes answer from response", async () => {
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,

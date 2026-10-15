@@ -15,6 +15,9 @@ const defaultTestEnv: WorkerEnv = {
   SANITY_API_TOKEN: "test-token",
   AI: {} as Ai,
   SEARCH_INDEX: {} as VectorizeIndex,
+  // Rate limiters that always allow — a test of the limits passes its own.
+  SEARCH_IP_LIMITER: { limit: async () => ({ success: true }) },
+  SEARCH_GLOBAL_LIMITER: { limit: async () => ({ success: true }) },
   SANITY_WEBHOOK_SECRET: "test-webhook-secret",
 };
 

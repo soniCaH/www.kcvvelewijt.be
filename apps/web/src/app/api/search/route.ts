@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Effect } from "effect";
 import { unstable_cache } from "next/cache";
-import { BFF_KEY_HEADER } from "@kcvv/api-contract";
+import { BFF_KEY_HEADER, CLIENT_IP_HEADER } from "@kcvv/api-contract";
 import { runPromise } from "@/lib/effect/runtime";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
 import { PlayerRepository } from "@/lib/repositories/player.repository";
@@ -252,9 +252,19 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = (await request.json()) as unknown;
+    // The worker rate-limits per visitor (#3468) but only sees Vercel's IP.
+    // Vercel overwrites x-vercel-forwarded-for, so a client cannot spoof it.
+    const clientIp =
+      request.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() ||
+      request.headers.get("x-real-ip") ||
+      undefined;
     const res = await fetch(`${bffUrl}/search`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", [BFF_KEY_HEADER]: bffKey },
+      headers: {
+        "Content-Type": "application/json",
+        [BFF_KEY_HEADER]: bffKey,
+        ...(clientIp ? { [CLIENT_IP_HEADER]: clientIp } : {}),
+      },
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(15_000),
     });

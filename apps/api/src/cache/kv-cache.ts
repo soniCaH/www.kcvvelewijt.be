@@ -4,9 +4,11 @@ import { PsdGateService } from "../psd/gate";
 import { BackgroundRunnerService, type PsdRefreshEnv } from "../psd/background";
 import {
   buildDriftMessage,
+  buildPsdBudgetMessage,
   formatDuration,
   postSlack,
 } from "../psd/slack-alert";
+import { ResourceNotFoundError, UpstreamUnavailableError } from "../psd/errors";
 
 /**
  * Per-endpoint soft TTLs in seconds.
@@ -29,7 +31,28 @@ export const TTL = {
   RELATED: 60 * 60 * 6, // 6 hours — related content changes infrequently
   OPPONENT_HISTORY: 60 * 60 * 24 * 7, // 7 days — historical match data doesn't change
   PLAYER_STATS: 60 * 60 * 6, // 6 hours — player stats update after match days
+  SEASONS: 60 * 60 * 24, // 24 hours — the season list changes once a year
+  SEARCH: 60 * 60, // 1 hour — full SearchResponse, answer included (#3468)
 } as const;
+
+/** How long a cold miss that PSD answered "not found" is remembered under the
+ * same key, so a repeated unknown id costs no PSD call (#3468). */
+export const NOT_FOUND_TTL = 60 * 60; // 1 hour
+
+/** UTC date as `YYYY-MM-DD` — the day key of every daily counter. */
+export const utcDay = (d: Date = new Date()): string =>
+  d.toISOString().slice(0, 10);
+
+/** Today's PSD-call counter (`increment` writes it, the on-demand budget reads it). */
+export const psdCallsKey = (d: Date = new Date()): string =>
+  `psd:calls:${utcDay(d)}`;
+
+/** A positive integer `[vars]` ceiling, or `undefined` (no ceiling) when the
+ * var is unset or not a number. */
+export const parseCeiling = (raw: string | undefined): number | undefined => {
+  const n = Number.parseInt(raw ?? "", 10);
+  return Number.isFinite(n) && n >= 0 ? n : undefined;
+};
 
 /** Persisted negative marker TTL (seconds). Suppresses re-storming after a failed
  * refresh: subsequent requests serve stale without re-fanning until it expires.
@@ -239,6 +262,23 @@ export const HARD_TTL_DEFAULT = 60 * 60 * 24 * 7;
 export const HARD_TTL_LONG = 60 * 60 * 24 * 365;
 
 const negKey = (key: string): string => `neg:${key}`;
+const budgetAlertKey = (day: string): string => `psd:budget-alert:${day}`;
+
+/** What a not-found marker stores in place of a value (#3468). */
+const NotFoundMarker = S.parseJson(
+  S.Struct({
+    notFound: S.Struct({
+      message: S.String,
+      resourceType: S.String,
+      resourceId: S.Union(S.String, S.Number),
+    }),
+  }),
+);
+const decodeNotFound = S.decodeUnknownOption(NotFoundMarker);
+
+/** Whether a raw KV value is a not-found marker rather than a cached value. */
+export const isNotFoundMarker = (raw: string): boolean =>
+  Option.isSome(decodeNotFound(raw));
 const nudgeKey = (key: string): string => `nudge:${key}`;
 
 /** Best-effort HTTP status off an upstream error (UpstreamUnavailable carries one). */
@@ -537,7 +577,56 @@ export const TypedKvCache = <A, I>(
             }).pipe(Effect.ensuring(gate.endFlight(key)));
           });
 
+        // A not-found marker stands in for the value: fail exactly as the
+        // fetch did, with no PSD call (#3468). The cast is sound by
+        // construction — a marker is written only from this key's own
+        // `fetch` failing with ResourceNotFoundError, so E includes it.
+        const failIfNotFound = (raw: string | null) => {
+          const marker = raw === null ? Option.none() : decodeNotFound(raw);
+          return Option.isSome(marker)
+            ? Effect.fail(
+                new ResourceNotFoundError(
+                  marker.value.notFound,
+                ) as unknown as E,
+              )
+            : Effect.void;
+        };
+
+        // On-demand PSD budget (#3468): once today's PSD-call count reaches
+        // PSD_ONDEMAND_DAILY_BUDGET, a cold miss fails fast. Only the cold
+        // miss — a stale key still serves stale and refreshes in the
+        // background, and the cron sync never comes through here. Cast as
+        // above: every psdBacked cache fetches through PsdService (BffError).
+        const budget = parseCeiling(env.PSD_ONDEMAND_DAILY_BUDGET);
+        const checkBudget = Effect.gen(function* () {
+          if (!psdBacked || budget === undefined) return;
+          const spent = Number.parseInt(
+            (yield* cache.get(psdCallsKey())) ?? "0",
+            10,
+          );
+          if (!(spent >= budget)) return;
+          const day = utcDay();
+          yield* Effect.logError(
+            `TypedKvCache "${key}": PSD on-demand budget reached (${spent}/${budget} on ${day}) — cold miss refused`,
+          );
+          if ((yield* cache.get(budgetAlertKey(day))) === null) {
+            yield* cache.set(budgetAlertKey(day), "1", 60 * 60 * 48);
+            yield* Effect.promise(() =>
+              postSlack(
+                env.SLACK_ALERT_WEBHOOK_URL,
+                buildPsdBudgetMessage({ day, spent, budget }),
+              ),
+            );
+          }
+          return yield* Effect.fail(
+            new UpstreamUnavailableError({
+              message: `PSD on-demand daily budget reached (${spent}/${budget})`,
+            }) as unknown as E,
+          );
+        });
+
         const cached = yield* cache.get(key);
+        yield* failIfNotFound(cached);
 
         if (cached !== null) {
           const decoded = yield* decodeEntry(key, cached);
@@ -616,11 +705,22 @@ export const TypedKvCache = <A, I>(
           const isLeader = yield* gate.beginFlight(key);
           if (isLeader) {
             return yield* Effect.gen(function* () {
+              yield* checkBudget;
               const result = yield* fetch.pipe(Effect.either);
               if (Either.isRight(result)) {
                 yield* gate.reportOutcome({ ok: true, key });
                 yield* storeFresh(result.right);
                 return result.right;
+              }
+              if (result.left instanceof ResourceNotFoundError) {
+                const { message, resourceType, resourceId } = result.left;
+                yield* cache.set(
+                  key,
+                  JSON.stringify({
+                    notFound: { message, resourceType, resourceId },
+                  }),
+                  NOT_FOUND_TTL,
+                );
               }
               // Never-cached miss failure: report a transient PSD outage so the
               // incident alert still fires on a cold start, then surface it.
@@ -638,6 +738,7 @@ export const TypedKvCache = <A, I>(
 
           yield* gate.awaitFlight(key);
           const afterWait = yield* cache.get(key);
+          yield* failIfNotFound(afterWait);
           if (afterWait !== null) {
             const reread = yield* decodeEntry(key, afterWait);
             if (Option.isSome(reread)) return reread.value.value;
@@ -671,8 +772,7 @@ export const KvCacheLive = Layer.effect(
       increment: (by = 1) =>
         Effect.tryPromise({
           try: async () => {
-            const d = new Date();
-            const key = `psd:calls:${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+            const key = psdCallsKey();
             const current = await env.PSD_CACHE.get(key);
             // Guard against a malformed cached value: parseInt on a
             // non-numeric string yields NaN, which would persist as "NaN"

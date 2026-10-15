@@ -1,4 +1,4 @@
-import { Effect } from "effect";
+import { Data, Effect } from "effect";
 import { HttpApiBuilder } from "@effect/platform";
 import { PsdApi, RelatedItem } from "@kcvv/api-contract";
 import { Schema as S } from "effect";
@@ -15,6 +15,8 @@ const MAX_LIMIT = 5; // upper bound from S.between(1, 5) in api-contract
 // speak for PSD health (`TypedKvCache`'s `psdBacked` option, #2868 review).
 const relatedCache = TypedKvCache(S.Array(RelatedItem), { psdBacked: false });
 
+class NoRelatedItems extends Data.TaggedError("NoRelatedItems") {}
+
 export const getRelatedHandler = (request: {
   id: string;
   limit: number;
@@ -24,13 +26,22 @@ export const getRelatedHandler = (request: {
   VectorizeService | KvCacheService | WorkerEnvTag | PsdGateService
 > => {
   const cacheKey = `related:${request.id}:max`;
-  return relatedCache
-    .getOrFetch(
-      cacheKey,
-      handleRelated({ id: request.id, limit: MAX_LIMIT }),
-      TTL.RELATED,
-    )
-    .pipe(Effect.map((items) => items.slice(0, request.limit)));
+  // An empty result is returned but never stored (#3468): storing it let any
+  // made-up id buy a KV write, and hid a just-published article's related
+  // items for the whole TTL. Failing the fetch keeps it out of KV.
+  const fetchNonEmpty = handleRelated({
+    id: request.id,
+    limit: MAX_LIMIT,
+  }).pipe(
+    Effect.filterOrFail(
+      (items) => items.length > 0,
+      () => new NoRelatedItems(),
+    ),
+  );
+  return relatedCache.getOrFetch(cacheKey, fetchNonEmpty, TTL.RELATED).pipe(
+    Effect.catchTag("NoRelatedItems", () => Effect.succeed([])),
+    Effect.map((items) => items.slice(0, request.limit)),
+  );
 };
 
 export const RelatedApiLive = HttpApiBuilder.group(

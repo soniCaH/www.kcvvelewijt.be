@@ -5,6 +5,7 @@ import {
   HttpBadGateway,
   HttpNotFound,
   HttpBadRequest,
+  HttpTooManyRequests,
 } from "./http-errors";
 
 // `@effect/platform` reads the status @effect/platform actually serves from
@@ -28,5 +29,9 @@ describe("HTTP error classes declare their status for @effect/platform", () => {
 
   it("HttpBadRequest resolves to 400", () => {
     expect(HttpApiSchema.getStatusError(HttpBadRequest)).toBe(400);
+  });
+
+  it("HttpTooManyRequests resolves to 429", () => {
+    expect(HttpApiSchema.getStatusError(HttpTooManyRequests)).toBe(429);
   });
 });

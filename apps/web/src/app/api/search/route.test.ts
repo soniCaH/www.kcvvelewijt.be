@@ -95,6 +95,47 @@ describe("POST /api/search", () => {
     );
   });
 
+  const forwardedIp = async (headers: Record<string, string>) => {
+    vi.mocked(fetch).mockResolvedValueOnce(Response.json({ results: [] }));
+    await POST(
+      new NextRequest(new URL("/api/search", "http://localhost:3000"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...headers },
+        body: JSON.stringify({ query: "kantine" }),
+      }),
+    );
+    const init = vi.mocked(fetch).mock.calls[0]![1] as RequestInit;
+    return (init.headers as Record<string, string>)["x-kcvv-client-ip"];
+  };
+
+  it("forwards the visitor IP as x-kcvv-client-ip: the first x-vercel-forwarded-for value (#3468)", async () => {
+    expect(
+      await forwardedIp({
+        "x-vercel-forwarded-for": "203.0.113.7, 10.0.0.1",
+        "x-real-ip": "198.51.100.1",
+      }),
+    ).toBe("203.0.113.7");
+  });
+
+  it("falls back to x-real-ip, else sends no client IP (#3468)", async () => {
+    expect(await forwardedIp({ "x-real-ip": "198.51.100.1" })).toBe(
+      "198.51.100.1",
+    );
+    vi.mocked(fetch).mockClear();
+    expect(await forwardedIp({})).toBeUndefined();
+  });
+
+  it("passes a 429 from the BFF through with its status (#3468)", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(
+      Response.json(
+        { error: "Too many searches, try again in a minute" },
+        { status: 429 },
+      ),
+    );
+    const response = await POST(makePostRequest({ query: "kantine" }));
+    expect(response.status).toBe(429);
+  });
+
   it("returns 503 without calling the BFF when BFF_SHARED_SECRET is unset", async () => {
     vi.stubEnv("BFF_SHARED_SECRET", undefined);
     const response = await POST(makePostRequest({ query: "test" }));
