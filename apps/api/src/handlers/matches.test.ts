@@ -12,7 +12,11 @@ import {
   CACHE_VERSION,
 } from "./matches";
 import { HARD_TTL_DEFAULT, TTL } from "../cache/kv-cache";
-import { PsdService, type PsdServiceInterface } from "../psd/service";
+import {
+  PsdService,
+  markPartial,
+  type PsdServiceInterface,
+} from "../psd/service";
 import type { BffError } from "../psd/errors";
 import { UpstreamUnavailableError, ResourceNotFoundError } from "../psd/errors";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
@@ -254,6 +258,48 @@ describe("getMatchesWindowHandler", () => {
     if (result._tag === "Left") {
       expect(result.left._tag).toBe("UpstreamUnavailable");
     }
+  });
+});
+
+describe("partial fan-outs are stored flagged (#3489)", () => {
+  const storedFor = async (
+    handler: () => Effect.Effect<
+      unknown,
+      BffError,
+      PsdService | KvCacheService | WorkerEnvTag | PsdGateService
+    >,
+    service: Partial<PsdServiceInterface>,
+  ) => {
+    const store = new Map<string, string>();
+    const cache: KvCacheInterface = {
+      ...makeCacheMock(),
+      set: (k, v) => Effect.sync(() => void store.set(k, v)),
+    };
+    await Effect.runPromise(
+      handler().pipe(
+        Effect.provide(Layer.succeed(PsdService, makeServiceMock(service))),
+        Effect.provide(Layer.succeed(KvCacheService, cache)),
+        Effect.provide(PsdGateTest),
+        Effect.provide(testEnvLayer),
+      ),
+    );
+    const raw = store.get(`matches:window:${CACHE_VERSION}`);
+    return raw ? (JSON.parse(raw) as { partial?: boolean }) : undefined;
+  };
+
+  it("matches:window with a failed team is flagged partial", async () => {
+    const stored = await storedFor(getMatchesWindowHandler, {
+      getMatchesWindow: () => Effect.succeed(markPartial([baseMatch], true)),
+    });
+    expect(stored?.partial).toBe(true);
+  });
+
+  it("a complete matches:window keeps no partial flag", async () => {
+    const stored = await storedFor(getMatchesWindowHandler, {
+      getMatchesWindow: () => Effect.succeed([baseMatch]),
+    });
+    expect(stored).toBeDefined();
+    expect(stored).not.toHaveProperty("partial");
   });
 });
 

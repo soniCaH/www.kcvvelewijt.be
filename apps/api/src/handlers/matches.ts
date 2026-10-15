@@ -8,7 +8,7 @@ import {
   type Match,
   type PlayerSeasonStats as PlayerSeasonStatsType,
 } from "@kcvv/api-contract";
-import { PsdService } from "../psd/service";
+import { PsdService, isPartialFanout } from "../psd/service";
 import { isSettledMatchStatus } from "../psd/transforms";
 import { shouldServeStale, type BffError } from "../psd/errors";
 import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
@@ -80,7 +80,7 @@ export const getNextMatchesHandler = (): Effect.Effect<
       fetchMatches,
       (matches) => nextMatchesTtl(matches),
       undefined,
-      { shouldServeStale },
+      { shouldServeStale, isPartial: isPartialFanout },
     )
     .pipe(
       // Serve-time filter (#3467): "next" is computed at fetch time, so a
@@ -112,7 +112,7 @@ export const getMatchesWindowHandler = (): Effect.Effect<
     fetchMatches,
     TTL.MATCHES_WINDOW,
     undefined,
-    { shouldServeStale },
+    { shouldServeStale, isPartial: isPartialFanout },
   );
 };
 

@@ -33,6 +33,7 @@ export const TTL = {
   OPPONENT_HISTORY: 60 * 60 * 24 * 7, // 7 days — historical match data doesn't change
   PLAYER_STATS: 60 * 60 * 6, // 6 hours — player stats update after match days
   SEASONS: 60 * 60 * 24, // 24 hours — the season list changes once a year
+  PARTIAL_FANOUT: 60 * 5, // 5 min — a fan-out with a failed team (#3489): serve the teams that loaded, retry soon
   SEARCH: 60 * 60, // 1 hour — full SearchResponse, answer included (#3468)
 } as const;
 
@@ -312,6 +313,9 @@ export const TypedKvCache = <A, I>(
   const WrapperSchema = S.Struct({
     value: schema,
     fetchedAt: S.Finite,
+    // Set when the fetch reported its value as built from an incomplete
+    // fan-out (#3489). Optional, so every entry written before it still decodes.
+    partial: S.optional(S.Boolean),
   });
 
   /** Decode a raw KV string into {value, fetchedAt}, tolerating the legacy
@@ -319,7 +323,9 @@ export const TypedKvCache = <A, I>(
   const decodeEntry = (
     key: string,
     cached: string,
-  ): Effect.Effect<Option.Option<{ value: A; fetchedAt: number }>> =>
+  ): Effect.Effect<
+    Option.Option<{ value: A; fetchedAt: number; partial?: boolean }>
+  > =>
     Effect.try({
       try: () => JSON.parse(cached),
       catch: (e) => new Error(String(e)),
@@ -344,8 +350,12 @@ export const TypedKvCache = <A, I>(
       Effect.option,
     );
 
-  const wrap = (value: A): string =>
-    JSON.stringify({ value, fetchedAt: Date.now() });
+  const wrap = (value: A, partial: boolean): string =>
+    JSON.stringify({
+      value,
+      fetchedAt: Date.now(),
+      ...(partial ? { partial: true } : {}),
+    });
 
   return {
     getOrFetch: <E, R extends PsdRefreshEnv>(
@@ -361,6 +371,11 @@ export const TypedKvCache = <A, I>(
         /** Whole-fetch cap for the cold-miss leader. Defaults to
          * {@link MISS_FETCH_TIMEOUT_MS}; tests drive it with a small value. */
         fetchTimeoutMs?: number;
+        /** True when a freshly fetched value came from an incomplete fan-out
+         * (#3489). It is stored flagged and treated as stale after
+         * {@link TTL.PARTIAL_FANOUT}, so the missing part heals in minutes
+         * instead of waiting out the full soft TTL. */
+        isPartial?: (value: A) => boolean;
       },
     ): Effect.Effect<
       A,
@@ -398,7 +413,11 @@ export const TypedKvCache = <A, I>(
         // Persist a fresh value and clear any negative marker.
         const persist = (value: A) =>
           Effect.zipRight(
-            cache.set(key, wrap(value), effectiveHardTtl),
+            cache.set(
+              key,
+              wrap(value, options?.isPartial?.(value) ?? false),
+              effectiveHardTtl,
+            ),
             cache.delete(negKey(key)),
           );
 
@@ -597,9 +616,12 @@ export const TypedKvCache = <A, I>(
           const decoded = yield* decodeEntry(key, cached);
 
           if (Option.isSome(decoded)) {
-            const { value, fetchedAt } = decoded.value;
-            const resolvedSoftTtl =
+            const { value, fetchedAt, partial } = decoded.value;
+            const fullSoftTtl =
               typeof softTtl === "function" ? softTtl(value) : softTtl;
+            const resolvedSoftTtl = partial
+              ? Math.min(fullSoftTtl, TTL.PARTIAL_FANOUT)
+              : fullSoftTtl;
             const staleForMs = staleFor(fetchedAt, resolvedSoftTtl);
 
             if (staleForMs <= 0) return value; // fresh

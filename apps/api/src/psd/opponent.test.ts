@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Effect, Layer, Schema as S } from "effect";
-import { PsdService, PsdServiceLive } from "./service";
+import { PsdService, PsdServiceLive, isPartialFanout } from "./service";
 import { PsdGateTest } from "./gate";
 import { OpponentHistory } from "@kcvv/api-contract";
 import { UpstreamUnavailableError, type BffError } from "./errors";
@@ -171,6 +171,7 @@ describe("PsdService.getOpponentHistory", () => {
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
       const history = result.right;
+      expect(isPartialFanout(history)).toBe(false);
 
       // Opponent info
       expect(history.opponent.id).toBe(456);
@@ -396,6 +397,8 @@ describe("PsdService.getOpponentHistory", () => {
       expect(result.right.matches[0]!.id).toBe(201);
       expect(result.right.summary.wins).toBe(0);
       expect(result.right.summary.losses).toBe(1);
+      // A season failed: the history is incomplete and cached briefly (#3489).
+      expect(isPartialFanout(result.right)).toBe(true);
     }
   });
 
