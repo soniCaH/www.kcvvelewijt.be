@@ -6,7 +6,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Effect } from "effect";
 import { unstable_cache } from "next/cache";
-import { BFF_KEY_HEADER, CLIENT_IP_HEADER } from "@kcvv/api-contract";
+import { CLIENT_IP_HEADER } from "@kcvv/api-contract";
+import { bffKeyHeader } from "@/lib/server/bff-key";
 import { runPromise } from "@/lib/effect/runtime";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
 import { PlayerRepository } from "@/lib/repositories/player.repository";
@@ -242,7 +243,7 @@ const searchTeams = (query: string) =>
  */
 export async function POST(request: NextRequest) {
   const bffUrl = process.env.KCVV_API_URL;
-  const bffKey = process.env.BFF_SHARED_SECRET;
+  const bffKey = bffKeyHeader();
   if (!bffUrl || !bffKey) {
     return NextResponse.json(
       { error: "Search service not configured" },
@@ -262,7 +263,7 @@ export async function POST(request: NextRequest) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        [BFF_KEY_HEADER]: bffKey,
+        ...bffKey,
         ...(clientIp ? { [CLIENT_IP_HEADER]: clientIp } : {}),
       },
       body: JSON.stringify(body),

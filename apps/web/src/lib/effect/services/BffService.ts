@@ -8,7 +8,6 @@ import {
 import type { HttpApiError, HttpClientError } from "@effect/platform";
 import type { ParseError } from "effect/ParseResult";
 import {
-  BFF_KEY_HEADER,
   PsdApi,
   type Match,
   type MatchDetail,
@@ -21,6 +20,7 @@ import {
   type RelatedItem,
 } from "@kcvv/api-contract";
 import { guardDeclaredErrorBody } from "@/lib/effect/guard-declared-error-body";
+import { bffKeyHeader } from "@/lib/server/bff-key";
 
 export type BffError =
   | HttpClientError.HttpClientError
@@ -93,7 +93,7 @@ export const BffServiceLive = Layer.effect(
         "KCVV_API_URL is not set — add it to .env.local before starting the app",
       );
     // #3485: the worker refuses every caller without this shared secret.
-    const bffKey = process.env.BFF_SHARED_SECRET?.trim();
+    const bffKey = bffKeyHeader();
     if (!bffKey)
       throw new Error(
         "BFF_SHARED_SECRET is not set — add it to .env.local before starting the app",
@@ -106,9 +106,7 @@ export const BffServiceLive = Layer.effect(
       // guard-declared-error-body.ts for the full reasoning.
       transformClient: (client) =>
         guardDeclaredErrorBody(client).pipe(
-          HttpClient.mapRequest(
-            HttpClientRequest.setHeader(BFF_KEY_HEADER, bffKey),
-          ),
+          HttpClient.mapRequest(HttpClientRequest.setHeaders(bffKey)),
         ),
     });
     return {
