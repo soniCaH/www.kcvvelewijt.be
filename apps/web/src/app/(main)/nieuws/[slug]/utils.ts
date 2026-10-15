@@ -35,12 +35,10 @@ export function parsePsdMatchId(
 /**
  * Map the BFF `MatchDetail` onto the score-forward hero's `HeroMatchData`
  * (5.d-mat). KCVV side is id-driven, never name-based (see
- * `feedback_psd_match_identification`):
- *   1. prefer the team-scoped `is_home` flag when present, but
- *   2. `getMatchDetail` has no teamId context and leaves `is_home` null, so
- *      fall back to matching the KCVV club id against the two sides' ids.
- * Without (2) the KCVV crest ring + Doelpunten highlight would never render
- * on the real article page (the flag is only ever set by `/matches/*`).
+ * `feedback_psd_match_identification`): `MatchDetail` has no teamId context
+ * and no `is_home`, so match the KCVV club id against the two sides' ids.
+ * Without it the KCVV crest ring + Doelpunten highlight would never render
+ * on the real article page.
  *
  * `null` for a pitch-reservation placeholder or a tournament fixture with no
  * result yet (#2606/#2696/#2802 review) — a self-match has no opponent to
@@ -58,15 +56,11 @@ export function toHeroMatchData(match: MatchDetail): HeroMatchData | null {
     return null;
   }
   const kcvvSide =
-    match.is_home === true
+    match.home_team.id === KCVV_CLUB_ID
       ? "home"
-      : match.is_home === false
+      : match.away_team.id === KCVV_CLUB_ID
         ? "away"
-        : match.home_team.id === KCVV_CLUB_ID
-          ? "home"
-          : match.away_team.id === KCVV_CLUB_ID
-            ? "away"
-            : undefined;
+        : undefined;
   return {
     homeTeam: { name: match.home_team.name, logo: match.home_team.logo },
     awayTeam: { name: match.away_team.name, logo: match.away_team.logo },
