@@ -1,7 +1,7 @@
 import { Context, Effect, Layer, Option, Schema as S } from "effect";
 import { WorkerEnvTag } from "../env";
 import { KvCacheService, TTL } from "../cache/kv-cache";
-import { PsdGateService } from "./gate";
+import { PsdGateService, withFlight } from "./gate";
 import { SanityProjection } from "../sanity/projection";
 import {
   UpstreamUnavailableError,
@@ -636,7 +636,7 @@ export const PsdServiceLive = Layer.effect(
     // `undefined` = index unknown (the build failed): `getMatchDetail` then
     // fails closed rather than guess whether a match is a youth match.
     //
-    // Single-flight (#3489), the same loop `getOrFetch`'s miss path runs: one
+    // Single-flight (#3489), `withFlight`, as in `getOrFetch`'s miss path: one
     // caller builds (~21 PSD calls) while the rest wait and re-read the cache,
     // instead of every concurrent caller on an expired index rebuilding it. A
     // leader that leaves nothing cached (KV write lost, lease reclaimed) hands
@@ -647,20 +647,14 @@ export const PsdServiceLive = Layer.effect(
       never
     > =>
       Effect.gen(function* () {
-        for (;;) {
-          const cached = yield* readCachedIndex();
-          if (Option.isSome(cached)) return cached.value;
-
-          const token = yield* gate.beginFlight(MATCH_TEAM_INDEX_FLIGHT_KEY);
-          if (token !== null) {
-            return yield* buildAndCacheMatchTeamIndex().pipe(
-              Effect.ensuring(
-                gate.endFlight(MATCH_TEAM_INDEX_FLIGHT_KEY, token),
-              ),
-            );
-          }
-          yield* gate.awaitFlight(MATCH_TEAM_INDEX_FLIGHT_KEY);
-        }
+        const cached = yield* readCachedIndex();
+        if (Option.isSome(cached)) return cached.value;
+        return yield* withFlight(
+          gate,
+          MATCH_TEAM_INDEX_FLIGHT_KEY,
+          buildAndCacheMatchTeamIndex(),
+          readCachedIndex(),
+        );
       });
 
     return {

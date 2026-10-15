@@ -1,6 +1,6 @@
 import { Context, Effect, Either, Layer, Option, Schema as S } from "effect";
 import { WorkerEnvTag } from "../env";
-import { PsdGateService } from "../psd/gate";
+import { PsdGateService, withFlight } from "../psd/gate";
 import { BackgroundRunnerService, type PsdRefreshEnv } from "../psd/background";
 import {
   buildDriftMessage,
@@ -675,63 +675,60 @@ export const TypedKvCache = <A, I>(
         // real never-cached error (AC7). Leadership rotation guarantees every
         // fiber makes progress; the gate's lease reclaims a dead leader, so this
         // can't spin forever.
-        for (;;) {
-          const token = yield* gate.beginFlight(key);
-          if (token !== null) {
-            return yield* Effect.gen(function* () {
-              yield* checkBudget;
-              // Capped as a whole, under the lease (#3467). A timeout reports
-              // nothing: a slow fan-out is not proof PSD is down.
-              const timed = yield* fetch.pipe(
-                Effect.either,
-                Effect.timeoutOption(fetchTimeoutMs),
+        return yield* withFlight(
+          gate,
+          key,
+          Effect.gen(function* () {
+            yield* checkBudget;
+            // Capped as a whole, under the lease (#3467). A timeout reports
+            // nothing: a slow fan-out is not proof PSD is down.
+            const timed = yield* fetch.pipe(
+              Effect.either,
+              Effect.timeoutOption(fetchTimeoutMs),
+            );
+            if (Option.isNone(timed)) {
+              return yield* Effect.fail(
+                new UpstreamUnavailableError({
+                  message: `TypedKvCache "${key}": fetch timed out after ${fetchTimeoutMs}ms`,
+                }) as unknown as E,
               );
-              if (Option.isNone(timed)) {
-                return yield* Effect.fail(
-                  new UpstreamUnavailableError({
-                    message: `TypedKvCache "${key}": fetch timed out after ${fetchTimeoutMs}ms`,
-                  }) as unknown as E,
-                );
-              }
-              const result = timed.value;
-              if (Either.isRight(result)) {
-                yield* report({ ok: true, key });
-                yield* storeFresh(result.right);
-                return result.right;
-              }
-              if (result.left instanceof ResourceNotFoundError) {
-                const { message, resourceType, resourceId } = result.left;
-                yield* cache.set(
-                  key,
-                  JSON.stringify({
-                    notFound: { message, resourceType, resourceId },
-                  }),
-                  NOT_FOUND_TTL,
-                );
-              }
-              // Never-cached miss failure: report a transient PSD outage so the
-              // incident alert still fires on a cold start, then surface it.
-              if (shouldServeStale(result.left)) {
-                yield* report({
-                  ok: false,
-                  key,
-                  status: statusOf(result.left),
-                  error: String(result.left),
-                });
-              }
-              return yield* Effect.fail(result.left);
-            }).pipe(Effect.ensuring(gate.endFlight(key, token)));
-          }
-
-          yield* gate.awaitFlight(key);
-          const afterWait = yield* cache.get(key);
-          yield* failIfNotFound(afterWait);
-          if (afterWait !== null) {
+            }
+            const result = timed.value;
+            if (Either.isRight(result)) {
+              yield* report({ ok: true, key });
+              yield* storeFresh(result.right);
+              return result.right;
+            }
+            if (result.left instanceof ResourceNotFoundError) {
+              const { message, resourceType, resourceId } = result.left;
+              yield* cache.set(
+                key,
+                JSON.stringify({
+                  notFound: { message, resourceType, resourceId },
+                }),
+                NOT_FOUND_TTL,
+              );
+            }
+            // Never-cached miss failure: report a transient PSD outage so the
+            // incident alert still fires on a cold start, then surface it.
+            if (shouldServeStale(result.left)) {
+              yield* report({
+                ok: false,
+                key,
+                status: statusOf(result.left),
+                error: String(result.left),
+              });
+            }
+            return yield* Effect.fail(result.left);
+          }),
+          Effect.gen(function* () {
+            const afterWait = yield* cache.get(key);
+            yield* failIfNotFound(afterWait);
+            if (afterWait === null) return Option.none<A>();
             const reread = yield* decodeEntry(key, afterWait);
-            if (Option.isSome(reread)) return reread.value.value;
-          }
-          // Empty → the leader failed; loop to re-enter the flight.
-        }
+            return Option.map(reread, (entry) => entry.value);
+          }),
+        );
       }),
   };
 };

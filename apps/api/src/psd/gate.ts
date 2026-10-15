@@ -13,7 +13,7 @@
  * gate hiccup never breaks the read path — the KV negative marker + SWR still
  * bound the storm.
  */
-import { Context, Effect, Layer } from "effect";
+import { Context, Effect, Layer, Option } from "effect";
 import { WorkerEnvTag } from "../env";
 import { GateLogic } from "./gate-logic";
 import { IncidentTracker } from "./incident";
@@ -48,6 +48,31 @@ export interface PsdGate {
     outcome: PsdOutcome,
   ) => Effect.Effect<{ incidentOpen: boolean }>;
 }
+
+/**
+ * Single-flight: the leader of `key` runs `work`; every other caller awaits it,
+ * then `reread`s the shared result. An empty `reread` (the leader left nothing,
+ * so it failed) sends the follower round again, so one becomes the next leader
+ * and failed runs serialize instead of duplicating. The gate's lease reclaims a
+ * dead leader, so the loop cannot spin forever.
+ */
+export const withFlight = <A, E, R, E2, R2>(
+  gate: Pick<PsdGate, "beginFlight" | "endFlight" | "awaitFlight">,
+  key: string,
+  work: Effect.Effect<A, E, R>,
+  reread: Effect.Effect<Option.Option<A>, E2, R2>,
+): Effect.Effect<A, E | E2, R | R2> =>
+  Effect.gen(function* () {
+    for (;;) {
+      const token = yield* gate.beginFlight(key);
+      if (token !== null) {
+        return yield* work.pipe(Effect.ensuring(gate.endFlight(key, token)));
+      }
+      yield* gate.awaitFlight(key);
+      const shared = yield* reread;
+      if (Option.isSome(shared)) return shared.value;
+    }
+  });
 
 export class PsdGateService extends Context.Tag("PsdGateService")<
   PsdGateService,
