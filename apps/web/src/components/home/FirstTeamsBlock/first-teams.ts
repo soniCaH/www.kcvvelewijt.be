@@ -28,19 +28,13 @@
 import type { Match } from "@/lib/effect/schemas";
 import type { ScheduleRow } from "@/components/match/types";
 import { transformMatchToSchedule } from "@/components/match/transform";
-import { toMatchDisplayZone } from "@/lib/utils/dates";
+import { kickoffMs } from "@/lib/utils/dates";
 import {
   hasScore,
   isSettledMatch,
   matchRowKind,
 } from "@/lib/utils/match-display";
 import { RESERVEN_PSD_ID } from "@/lib/utils/group-teams";
-
-/**
- * Real kickoff instant. A BFF match date is Brussels wall-clock in UTC fields,
- * so its raw `getTime()` runs 1-2 h late against `now` (#3491).
- */
-const kickoffMs = (m: Match): number => toMatchDisplayZone(m.date).toMillis();
 
 export interface FirstTeamInput {
   /** Display label, e.g. "A-ploeg" — from `teamDisplayName`, never re-derived here. */

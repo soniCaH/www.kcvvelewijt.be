@@ -75,6 +75,13 @@ export function toMatchDisplayZone(date: Date | string): DateTime {
   return dt.setZone(CLUB_TIMEZONE, { keepLocalTime: true }).setLocale("nl");
 }
 
+/**
+ * Real kickoff instant of a BFF match. Its date is Brussels wall-clock in UTC
+ * fields, so a raw `getTime()` runs 1-2 h late against `now` (#3491).
+ */
+export const kickoffMs = (m: { date: Date | string }): number =>
+  toMatchDisplayZone(m.date).toMillis();
+
 /** Today's calendar date in the club's zone — `YYYY-MM-DD`. */
 export function clubToday(): string {
   return DateTime.now().setZone(CLUB_TIMEZONE).toISODate()!;

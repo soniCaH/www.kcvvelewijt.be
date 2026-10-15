@@ -1,5 +1,5 @@
 import type { ScheduleRow } from "@/components/match/types";
-import { toMatchDisplayZone } from "@/lib/utils/dates";
+import { kickoffMs } from "@/lib/utils/dates";
 
 /**
  * Pure match-selection logic behind `<TeamMatchesSection>`, split out of that
@@ -18,13 +18,6 @@ import { toMatchDisplayZone } from "@/lib/utils/dates";
  */
 
 const RECENT_COUNT = 3;
-
-/**
- * Real kickoff instant. A BFF match date is Brussels wall-clock in UTC fields,
- * so its raw `getTime()` runs 1-2 h late against `now` (#3491).
- */
-const kickoffMs = (m: ScheduleRow): number =>
-  toMatchDisplayZone(m.date).toMillis();
 
 export function findNextMatch(
   matches: readonly ScheduleRow[],
