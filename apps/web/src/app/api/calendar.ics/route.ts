@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Effect } from "effect";
 import { unstable_cache } from "next/cache";
+import { unstable_rethrow } from "next/navigation";
 import { runPromise } from "@/lib/effect/runtime";
 import {
   BffService,
@@ -37,17 +38,32 @@ function parseSide(raw: string | null): MatchSide {
 }
 
 /** Every known team's `psdId`, in Sanity order — the all-teams feed and the only ids `teamIds` may select. */
-function fetchKnownTeamIds(): Promise<number[]> {
-  return runPromise(
-    Effect.gen(function* () {
-      const repo = yield* TeamRepository;
-      const teams = yield* repo.findAll();
-      return teams
-        .filter((t) => t.psdId != null)
-        .map((t) => Number(t.psdId))
-        .filter((id) => !isNaN(id) && id > 0);
-    }).pipe(Effect.orDie),
-  );
+const knownTeamIds = Effect.gen(function* () {
+  const repo = yield* TeamRepository;
+  const teams = yield* repo.findAll();
+  return teams
+    .filter((t) => t.psdId != null)
+    .map((t) => Number(t.psdId))
+    .filter((id) => !isNaN(id) && id > 0);
+});
+
+/**
+ * `knownTeamIds`, or `null` when the Sanity read fails. A failed read must not
+ * take down a feed whose matches are already cached: the caller then keys on
+ * the strict ids alone, and the all-teams feed reads the list only on a miss.
+ */
+async function fetchKnownTeamIds(): Promise<number[] | null> {
+  try {
+    // Section read: the feed still works without the known-team filter.
+    return await runPromise(knownTeamIds.pipe(Effect.orDie));
+  } catch (error) {
+    unstable_rethrow(error);
+    console.warn(
+      "[Calendar API] team lookup failed; keying on strict ids only.",
+      error,
+    );
+    return null;
+  }
 }
 
 /**
@@ -56,30 +72,33 @@ function fetchKnownTeamIds(): Promise<number[]> {
  * capped at `MAX_TEAM_IDS` after dedupe. `?teamIds=1,1,01`, `?teamIds=1,x1`
  * and `?teamIds=1` therefore share one cache entry and one PSD call. Empty
  * when nothing valid remains — the caller falls back to the all-teams feed,
- * as for an absent `teamIds`.
+ * as for an absent `teamIds`. `knownIds` `null` (the team read failed) skips
+ * the known-team filter, so a known selection still lands on its usual key.
  */
 function selectTeamIds(
   raw: string | null,
-  knownIds: readonly number[],
+  knownIds: readonly number[] | null,
 ): number[] {
   if (!raw) return [];
-  const known = new Set(knownIds);
+  const known = knownIds && new Set(knownIds);
   const ids = new Set(
     raw
       .split(",")
       .map((s) => parsePsdId(s.trim()))
-      .filter((id): id is number => id !== null && known.has(id)),
+      .filter((id): id is number => id !== null && (!known || known.has(id))),
   );
   return [...ids].sort((a, b) => a - b).slice(0, MAX_TEAM_IDS);
 }
 
+/** `teamIds` `null` = the all-teams feed whose list could not be read up front; it is read here, on a cache miss only. */
 async function fetchMatchesUncached(
-  teamIds: readonly number[],
+  teamIds: readonly number[] | null,
 ): Promise<readonly Match[]> {
   const program = Effect.gen(function* () {
+    const ids = teamIds ?? (yield* knownTeamIds);
     const bff = yield* BffService;
     const results = yield* Effect.all(
-      teamIds.map((id) => bff.getMatches(id)),
+      ids.map((id) => bff.getMatches(id)),
       { concurrency: BFF_FAN_OUT_CONCURRENCY },
     );
 
@@ -104,7 +123,7 @@ async function fetchMatchesUncached(
  * requests that land on the same key, same as pre-#2704.
  */
 function fetchMatches(
-  teamIds: readonly number[],
+  teamIds: readonly number[] | null,
   cacheKey: string,
 ): Promise<readonly Match[]> {
   return unstable_cache(() => fetchMatchesUncached(teamIds), [cacheKey], {
@@ -176,9 +195,10 @@ export async function GET(request: NextRequest) {
   try {
     // Outside the matches cache on purpose (#3486): the key is built from
     // this list, so it must be resolved before the cache is looked up.
-    // `findAll` is itself a revalidating Sanity fetch, not a fresh read.
-    const knownTeamIds = await fetchKnownTeamIds();
-    const selected = selectTeamIds(rawTeamIds, knownTeamIds);
+    // `findAll` is itself a revalidating Sanity fetch, not a fresh read, and a
+    // failure only drops the known-team filter (see `fetchKnownTeamIds`).
+    const knownIds = await fetchKnownTeamIds();
+    const selected = selectTeamIds(rawTeamIds, knownIds);
     const matchesCacheKey = normalizeCacheKey(
       selected.length > 0 ? selected : null,
       side,
@@ -191,10 +211,7 @@ export async function GET(request: NextRequest) {
     // string building over a few hundred matches, next to the I/O it
     // replaces (#2711 round 2).
     const [matches, events] = await Promise.all([
-      fetchMatches(
-        selected.length > 0 ? selected : knownTeamIds,
-        matchesCacheKey,
-      ),
+      fetchMatches(selected.length > 0 ? selected : knownIds, matchesCacheKey),
       variant === "matches-and-events"
         ? fetchEvents()
         : Promise.resolve<EventListItemVM[]>([]),

@@ -355,4 +355,25 @@ describe("GET /api/calendar.ics team-id parsing (#3486)", () => {
     expect(junkCalls).toEqual([1, 2, 1235]);
     expect(fannedOutIds()).toEqual([1, 2, 1235]);
   });
+
+  it("keeps serving a selected-team feed when the team read fails, under the key a healthy read would use", async () => {
+    const healthyKey = await keyFor("teamIds=1,1,01");
+    mockGetMatches.mockClear();
+    mockFindAllTeams.mockReturnValue(Effect.die(new Error("Sanity down")));
+
+    unstableCacheCalls.length = 0;
+    const response = await GET(makeRequest("teamIds=1,1,01"));
+
+    expect(response.status).toBe(200);
+    expect(unstableCacheCalls[0]!.keyParts).toEqual(healthyKey);
+    expect(fannedOutIds()).toEqual([1]);
+  });
+
+  it("looks up the all-teams entry before reading the teams, so a warm entry survives a failed team read", async () => {
+    mockFindAllTeams.mockReturnValue(Effect.die(new Error("Sanity down")));
+
+    // Pass-through cache = always cold, so the miss still needs the list.
+    expect(await keyFor("teamIds=")).toEqual(["ical:all:all"]);
+    expect(mockGetMatches).not.toHaveBeenCalled();
+  });
 });
