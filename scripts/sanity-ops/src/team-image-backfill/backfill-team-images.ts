@@ -18,7 +18,7 @@
  * Dry run by default: writes only with `--execute`. Idempotent: teams that
  * already have a `teamImage` are skipped (re-running is a no-op). `--force`
  * overwrites existing photos — on production it also needs
- * `CONFIRM_FORCE_OVERWRITE=yes`, because editors have added photos since the
+ * `CONFIRM_PRODUCTION_TEAM_IMAGE_FORCE_OVERWRITE=yes`, because editors have added photos since the
  * production backfill ran (PR #2071).
  *
  * Usage:
@@ -27,9 +27,9 @@
  *   # Apply to staging.
  *   SANITY_DATASET=staging pnpm --filter @kcvv/sanity-ops team-image:backfill --execute
  *   # Apply to production (guarded).
- *   SANITY_DATASET=production SANITY_ALLOW_PRODUCTION=1 pnpm --filter @kcvv/sanity-ops team-image:backfill --execute
+ *   SANITY_DATASET=production CONFIRM_PRODUCTION_TEAM_IMAGE_BACKFILL=yes pnpm --filter @kcvv/sanity-ops team-image:backfill --execute
  *   # Overwrite existing photos on production (strict confirm).
- *   SANITY_DATASET=production SANITY_ALLOW_PRODUCTION=1 CONFIRM_FORCE_OVERWRITE=yes pnpm --filter @kcvv/sanity-ops team-image:backfill --execute --force
+ *   SANITY_DATASET=production CONFIRM_PRODUCTION_TEAM_IMAGE_BACKFILL=yes CONFIRM_PRODUCTION_TEAM_IMAGE_FORCE_OVERWRITE=yes pnpm --filter @kcvv/sanity-ops team-image:backfill --execute --force
  */
 import { client, dataset } from "../shared/sanity-client";
 
@@ -203,20 +203,20 @@ async function main(): Promise<void> {
   if (
     EXECUTE &&
     dataset === "production" &&
-    process.env.SANITY_ALLOW_PRODUCTION !== "1"
+    process.env.CONFIRM_PRODUCTION_TEAM_IMAGE_BACKFILL !== "yes"
   ) {
     console.error(
-      "Refusing to write to production. Set SANITY_ALLOW_PRODUCTION=1 to proceed.",
+      "Refusing to write to production. Set CONFIRM_PRODUCTION_TEAM_IMAGE_BACKFILL=yes to proceed.",
     );
     process.exit(1);
   }
   if (
     FORCE &&
     dataset === "production" &&
-    process.env.CONFIRM_FORCE_OVERWRITE !== "yes"
+    process.env.CONFIRM_PRODUCTION_TEAM_IMAGE_FORCE_OVERWRITE !== "yes"
   ) {
     console.error(
-      "Refusing --force on production: it overwrites photos editors added after the backfill. Set CONFIRM_FORCE_OVERWRITE=yes to proceed.",
+      "Refusing --force on production: it overwrites photos editors added after the backfill. Set CONFIRM_PRODUCTION_TEAM_IMAGE_FORCE_OVERWRITE=yes to proceed.",
     );
     process.exit(1);
   }

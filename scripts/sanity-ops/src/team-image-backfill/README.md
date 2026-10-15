@@ -17,7 +17,7 @@ photo. The photos still exist in Drupal (`node/team` →
   wit/groen/U9P) is reported as **unmatched** — never guessed. Add a
   `SLUG_OVERRIDES` line once the target team is decided, then re-run.
 - Teams that already have a `teamImage` are skipped (idempotent). `--force`
-  overwrites — on production it also needs `CONFIRM_FORCE_OVERWRITE=yes`.
+  overwrites — on production it also needs `CONFIRM_PRODUCTION_TEAM_IMAGE_FORCE_OVERWRITE=yes`.
 
 ## Run
 
@@ -29,11 +29,11 @@ SANITY_DATASET=staging pnpm --filter @kcvv/sanity-ops team-image:backfill
 SANITY_DATASET=staging pnpm --filter @kcvv/sanity-ops team-image:backfill --execute
 
 # 3. Apply to production (guarded).
-SANITY_DATASET=production SANITY_ALLOW_PRODUCTION=1 pnpm --filter @kcvv/sanity-ops team-image:backfill --execute
+SANITY_DATASET=production CONFIRM_PRODUCTION_TEAM_IMAGE_BACKFILL=yes pnpm --filter @kcvv/sanity-ops team-image:backfill --execute
 
 # 4. Overwrite existing photos on production (strict confirm; editors have
 #    added photos since the 2026 production backfill).
-SANITY_DATASET=production SANITY_ALLOW_PRODUCTION=1 CONFIRM_FORCE_OVERWRITE=yes pnpm --filter @kcvv/sanity-ops team-image:backfill --execute --force
+SANITY_DATASET=production CONFIRM_PRODUCTION_TEAM_IMAGE_BACKFILL=yes CONFIRM_PRODUCTION_TEAM_IMAGE_FORCE_OVERWRITE=yes pnpm --filter @kcvv/sanity-ops team-image:backfill --execute --force
 ```
 
 Auth: `SANITY_API_TOKEN` (write token) or a logged-in
