@@ -1,7 +1,6 @@
 import { createClient } from "@sanity/client";
 import { Context, Effect, Layer } from "effect";
 import { WorkerEnvTag } from "../env";
-import { KvCacheService } from "../cache/kv-cache";
 import { PsdGateService } from "../psd/gate";
 import { sanityClientConfig } from "./config";
 
@@ -200,7 +199,6 @@ export const SanityMutationLive = Layer.effect(
   SanityMutation,
   Effect.gen(function* () {
     const env = yield* WorkerEnvTag;
-    const cache = yield* KvCacheService;
     // Portrait downloads are PSD calls: they take a gate token like every
     // other one (#3469), or they run outside the ≤5/s worldwide budget.
     const gate = yield* PsdGateService;
@@ -349,10 +347,8 @@ export const SanityMutationLive = Layer.effect(
           }
 
           // Fetch image from PSD with timeout. Image downloads use fetch()
-          // directly so they bypass countedFetch — the daily PSD-call counter
-          // is incremented via Effect.ensuring below, so it ticks even on
-          // timeout/network error. The gate token comes first, as in every
-          // PSD client (#3469).
+          // directly, so they take the gate token themselves, as in every PSD
+          // client (#3469) — the grant is what counts the call (#3490).
           yield* gate.acquireToken;
           const response = yield* Effect.tryPromise({
             try: async () => {
@@ -378,7 +374,7 @@ export const SanityMutationLive = Layer.effect(
                 `Failed to upload image for ${entityLabel} ${psdId}`,
                 cause,
               ),
-          }).pipe(Effect.ensuring(cache.increment()));
+          });
 
           yield* Effect.log(
             `[${logName}] ${entityLabel}=${psdId} psd_status=${response.status} content-type=${response.headers.get("content-type") ?? "(none)"} url=${imageUrl.split("?")[0]}`,

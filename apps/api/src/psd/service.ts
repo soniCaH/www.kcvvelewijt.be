@@ -260,7 +260,7 @@ export const PsdServiceLive = Layer.effect(
 
     // Every PSD call passes the global gate first: `acquireToken` blocks until a
     // ≤5/s worldwide token is free (best-effort — proceeds if the gate is down),
-    // capping the fan-out below PSD's rate limit. `increment` records the call.
+    // capping the fan-out below PSD's rate limit. The grant also counts the call (#3490).
     const countedFetch = <A, I>(
       url: string,
       schema: S.Schema<A, I>,
@@ -268,7 +268,6 @@ export const PsdServiceLive = Layer.effect(
     ) =>
       gate.acquireToken.pipe(
         Effect.zipRight(fetchJson(url, schema, psdHeaders, options)),
-        Effect.ensuring(cache.increment()),
       );
 
     // A KV value decoded against `schema`; None when absent or undecodable.

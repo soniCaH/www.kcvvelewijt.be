@@ -28,7 +28,6 @@ const storedFor = async (result: OpponentHistory) => {
     get: () => Effect.succeed(null),
     set: (k, v) => Effect.sync(() => void store.set(k, v)),
     delete: () => Effect.succeed(undefined),
-    increment: () => Effect.succeed(undefined),
     durable: noopDurableKv,
   };
   const service = {

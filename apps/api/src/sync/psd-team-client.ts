@@ -1,6 +1,5 @@
 import { Context, Effect, Layer, Schema as S } from "effect";
 import { WorkerEnvTag } from "../env";
-import { KvCacheService } from "../cache/kv-cache";
 import { PsdGateService } from "../psd/gate";
 import {
   PsdClubStaffMember,
@@ -99,7 +98,6 @@ export const PsdTeamClientLive = Layer.effect(
   PsdTeamClient,
   Effect.gen(function* () {
     const env = yield* WorkerEnvTag;
-    const cache = yield* KvCacheService;
     const gate = yield* PsdGateService;
     const base = env.PSD_API_BASE_URL;
 
@@ -119,8 +117,8 @@ export const PsdTeamClientLive = Layer.effect(
     //
     // Pacing only. This does NOT put the sync inside PSD incident alerting:
     // `gate.reportOutcome` is called from the `TypedKvCache` refresh path
-    // (`cache/kv-cache.ts`) alone, and the sync never goes through one — it
-    // touches `KvCacheService` for `increment()` and nothing else. A sync that
+    // (`cache/kv-cache.ts`) alone, and the sync never goes through one — its
+    // only gate call is the token, which also counts the call (#3490). A sync that
     // fails against a 429-ing PSD still opens no PSD incident — deliberate,
     // see `psd/job-alert.ts`'s doc comment and apps/api/CLAUDE.md. It DOES
     // now ping Slack: `index.ts`'s `scheduled()` reports the outcome to the
@@ -129,7 +127,6 @@ export const PsdTeamClientLive = Layer.effect(
     const countedFetch = <A, I>(url: string, schema: S.Schema<A, I>) =>
       gate.acquireToken.pipe(
         Effect.zipRight(fetchJson(url, schema, psdHeaders)),
-        Effect.ensuring(cache.increment()),
       );
 
     // Fetch every page of a Spring-pageable endpoint: read page 0 to learn

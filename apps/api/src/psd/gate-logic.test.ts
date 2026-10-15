@@ -205,3 +205,63 @@ describe("GateLogic — single-flight", () => {
     expect(fanOuts).toBe(1);
   });
 });
+
+describe("GateLogic — daily PSD call count (#3490)", () => {
+  const DAY1 = Date.UTC(2026, 9, 15, 23, 59, 59);
+  const DAY2 = Date.UTC(2026, 9, 16, 0, 0, 1);
+
+  it("counts one call per acquireToken grant", async () => {
+    const gate = new GateLogic({ ratePerSecond: 1e9 });
+    await Promise.all(Array.from({ length: 12 }, () => gate.acquireToken()));
+    expect(gate.getDailyCount()).toBe(12);
+  });
+
+  it("reading the count takes no token and counts nothing", async () => {
+    const s = fakeScheduler();
+    const gate = new GateLogic({
+      ratePerSecond: 5,
+      now: s.now,
+      sleep: s.sleep,
+    });
+    expect(gate.getDailyCount()).toBe(0);
+    expect(gate.getDailyCount()).toBe(0);
+    expect(s.clock).toBe(0);
+    await gate.acquireToken();
+    expect(gate.getDailyCount()).toBe(1);
+  });
+
+  it("rolls over at the UTC date boundary", async () => {
+    let clock = DAY1;
+    const gate = new GateLogic({ ratePerSecond: 1e9, now: () => clock });
+    await gate.acquireToken();
+    await gate.acquireToken();
+    expect(gate.getDailyCount()).toBe(2);
+    clock = DAY2;
+    expect(gate.getDailyCount()).toBe(0);
+    await gate.acquireToken();
+    expect(gate.getDailyCount()).toBe(1);
+  });
+
+  it("reports every change to onCount, and restoreCount resumes today's count", async () => {
+    const seen: unknown[] = [];
+    const gate = new GateLogic({
+      ratePerSecond: 1e9,
+      now: () => DAY1,
+      onCount: (c) => seen.push(c),
+    });
+    await gate.acquireToken();
+    expect(seen).toEqual([{ day: "2026-10-15", count: 1 }]);
+
+    const restored = new GateLogic({ ratePerSecond: 1e9, now: () => DAY1 });
+    restored.restoreCount({ day: "2026-10-15", count: 40 });
+    expect(restored.getDailyCount()).toBe(40);
+    await restored.acquireToken();
+    expect(restored.getDailyCount()).toBe(41);
+  });
+
+  it("ignores a restored count from another day", () => {
+    const gate = new GateLogic({ now: () => DAY1 });
+    gate.restoreCount({ day: "2026-10-14", count: 99 });
+    expect(gate.getDailyCount()).toBe(0);
+  });
+});

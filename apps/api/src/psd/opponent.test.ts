@@ -38,7 +38,6 @@ const cacheMock: KvCacheInterface = {
     ),
   set: () => Effect.succeed(undefined),
   delete: () => Effect.succeed(undefined),
-  increment: () => Effect.succeed(undefined),
   durable: noopDurableKv,
 };
 

@@ -23,7 +23,6 @@ function makeCacheDouble() {
       Effect.sync(() => {
         store.delete(key);
       }),
-    increment: () => Effect.succeed(undefined),
     durable: noopDurableKv,
   };
   return { cache, store };

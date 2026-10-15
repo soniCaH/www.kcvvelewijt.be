@@ -11,7 +11,6 @@ import {
   BG_REFRESH_TIMEOUT_MS,
   MISS_FETCH_TIMEOUT_MS,
   NOT_FOUND_TTL,
-  psdCallsKey,
   KvError,
   makeDurableKv,
 } from "./kv-cache";
@@ -1409,54 +1408,6 @@ describe("KvCacheService", () => {
       expirationTtl: 60,
     });
   });
-
-  const runIncrement = (mockKv: ReturnType<typeof makeMockKv>, by?: number) =>
-    Effect.runPromise(
-      Effect.gen(function* () {
-        const cache = yield* KvCacheService;
-        yield* cache.increment(by);
-      }).pipe(
-        Effect.provide(KvCacheLive),
-        Effect.provide(PsdGateTest),
-        Effect.provide(makeEnvLayer(mockKv)),
-      ),
-    );
-
-  const DAILY_KEY = /^psd:calls:\d{4}-\d{2}-\d{2}$/;
-
-  it("starts today's counter at 1 on a cache miss", async () => {
-    const mockKv = makeMockKv();
-    await runIncrement(mockKv);
-    expect(mockKv.put).toHaveBeenCalledWith(
-      expect.stringMatching(DAILY_KEY),
-      "1",
-      { expirationTtl: 60 * 60 * 48 },
-    );
-  });
-
-  it("adds `by` to an existing numeric counter", async () => {
-    const mockKv = makeMockKv();
-    mockKv.get = vi.fn(async () => "5");
-    await runIncrement(mockKv, 3);
-    expect(mockKv.put).toHaveBeenCalledWith(
-      expect.stringMatching(DAILY_KEY),
-      "8",
-      { expirationTtl: 60 * 60 * 48 },
-    );
-  });
-
-  it("recovers from a malformed counter value instead of persisting NaN", async () => {
-    const mockKv = makeMockKv();
-    // A non-numeric value would make parseInt return NaN, which must not be
-    // written back as the string "NaN" (that would wedge the counter for 48h).
-    mockKv.get = vi.fn(async () => "NaN");
-    await runIncrement(mockKv);
-    expect(mockKv.put).toHaveBeenCalledWith(
-      expect.stringMatching(DAILY_KEY),
-      "1",
-      { expirationTtl: 60 * 60 * 48 },
-    );
-  });
 });
 
 describe("makeDurableKv (#2873)", () => {
@@ -1647,14 +1598,20 @@ describe("TypedKvCache — not-found cache (#3468)", () => {
 
 describe("TypedKvCache — PSD on-demand daily budget (#3468)", () => {
   const budgetEnv = { PSD_ONDEMAND_DAILY_BUDGET: "100" };
-  const spentKv = () => {
-    const mockKv = makeMockKv();
-    mockKv.store.set(psdCallsKey(), "100");
-    return mockKv;
+  // The count lives in the PsdGate DO (#3490), not KV: seed a gate with `n`
+  // calls already granted today.
+  const gateWith = (n: number) => {
+    const logic = new GateLogic({ ratePerSecond: 1e9 });
+    logic.restoreCount({
+      day: new Date().toISOString().slice(0, 10),
+      count: n,
+    });
+    return makePsdGateLayer(logic);
   };
 
   it("a cold miss past the budget fails fast with UpstreamUnavailable and makes no fetch", async () => {
-    const mockKv = spentKv();
+    const mockKv = makeMockKv();
+    const gate = gateWith(100);
     const fetch = vi.fn(() => ({ name: "fresh", value: 1 }));
 
     const error = await Effect.runPromise(
@@ -1663,7 +1620,7 @@ describe("TypedKvCache — PSD on-demand daily budget (#3468)", () => {
         .pipe(
           Effect.flip,
           Effect.provide(KvCacheLive),
-          Effect.provide(PsdGateTest),
+          Effect.provide(gate),
           Effect.provide(makeEnvLayer(mockKv, budgetEnv)),
         ),
     );
@@ -1672,9 +1629,37 @@ describe("TypedKvCache — PSD on-demand daily budget (#3468)", () => {
     expect(error).toBeInstanceOf(UpstreamUnavailableError);
   });
 
+  it("a granted acquireToken moves the count the budget sees", async () => {
+    const logic = new GateLogic({ ratePerSecond: 1e9 });
+    logic.restoreCount({
+      day: new Date().toISOString().slice(0, 10),
+      count: 99,
+    });
+    const gate = makePsdGateLayer(logic);
+    const run = () =>
+      Effect.runPromise(
+        TypedKvCache(TestSchema)
+          .getOrFetch(
+            `k-${Math.random()}`,
+            Effect.succeed({ name: "x", value: 1 }),
+            60,
+          )
+          .pipe(
+            Effect.either,
+            Effect.provide(KvCacheLive),
+            Effect.provide(gate),
+            Effect.provide(makeEnvLayer(makeMockKv(), budgetEnv)),
+          ),
+      );
+
+    expect((await run())._tag).toBe("Right");
+    await logic.acquireToken(); // one PSD call elsewhere takes the day to 100
+    expect((await run())._tag).toBe("Left");
+  });
+
   it("a cold miss under the budget still fetches", async () => {
     const mockKv = makeMockKv();
-    mockKv.store.set(psdCallsKey(), "99");
+    const gate = gateWith(99);
     const fetch = vi.fn(() => ({ name: "fresh", value: 1 }));
 
     await Effect.runPromise(
@@ -1682,7 +1667,7 @@ describe("TypedKvCache — PSD on-demand daily budget (#3468)", () => {
         .getOrFetch("test-key", Effect.sync(fetch), 60)
         .pipe(
           Effect.provide(KvCacheLive),
-          Effect.provide(PsdGateTest),
+          Effect.provide(gate),
           Effect.provide(makeEnvLayer(mockKv, budgetEnv)),
         ),
     );
@@ -1691,13 +1676,14 @@ describe("TypedKvCache — PSD on-demand daily budget (#3468)", () => {
   });
 
   it("a stale key past the budget still serves stale, and its background refresh still runs", async () => {
-    const mockKv = spentKv();
+    const mockKv = makeMockKv();
+    const gate = gateWith(100);
     mockKv.store.set(
       "test-key",
       makeWrapper({ name: "old", value: 1 }, 2 * 60 * 60 * 1000),
     );
     const pending: Promise<void>[] = [];
-    const layer = Layer.mergeAll(KvCacheLive, PsdGateTest).pipe(
+    const layer = Layer.mergeAll(KvCacheLive, gate).pipe(
       Layer.provideMerge(makeEnvLayer(mockKv, budgetEnv)),
     );
     const runnerLayer = Layer.succeed(BackgroundRunnerService, {
@@ -1724,7 +1710,8 @@ describe("TypedKvCache — PSD on-demand daily budget (#3468)", () => {
   });
 
   it("sends one Slack alert per UTC day when the budget is hit", async () => {
-    const mockKv = spentKv();
+    const mockKv = makeMockKv();
+    const gate = gateWith(100);
     const slack = vi
       .spyOn(globalThis, "fetch")
       .mockResolvedValue(new Response("ok"));
@@ -1735,7 +1722,7 @@ describe("TypedKvCache — PSD on-demand daily budget (#3468)", () => {
           .pipe(
             Effect.flip,
             Effect.provide(KvCacheLive),
-            Effect.provide(PsdGateTest),
+            Effect.provide(gate),
             Effect.provide(
               makeEnvLayer(mockKv, {
                 ...budgetEnv,
@@ -1754,7 +1741,8 @@ describe("TypedKvCache — PSD on-demand daily budget (#3468)", () => {
   });
 
   it("a non-PSD cache (psdBacked: false) ignores the budget", async () => {
-    const mockKv = spentKv();
+    const mockKv = makeMockKv();
+    const gate = gateWith(100);
     const fetch = vi.fn(() => ({ name: "fresh", value: 1 }));
 
     await Effect.runPromise(
@@ -1762,7 +1750,7 @@ describe("TypedKvCache — PSD on-demand daily budget (#3468)", () => {
         .getOrFetch("test-key", Effect.sync(fetch), 60)
         .pipe(
           Effect.provide(KvCacheLive),
-          Effect.provide(PsdGateTest),
+          Effect.provide(gate),
           Effect.provide(makeEnvLayer(mockKv, budgetEnv)),
         ),
     );

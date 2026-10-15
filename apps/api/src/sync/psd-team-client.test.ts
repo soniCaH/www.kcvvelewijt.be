@@ -2,19 +2,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { Effect, Layer } from "effect";
 import { PsdTeamClient, PsdTeamClientLive } from "./psd-team-client";
 import { PsdGateService } from "../psd/gate";
-import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
-import { noopDurableKv } from "../test-helpers/kv-cache-mock";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
 
 global.fetch = vi.fn();
-
-const cacheMock: KvCacheInterface = {
-  get: () => Effect.succeed(null),
-  set: () => Effect.succeed(undefined),
-  delete: () => Effect.succeed(undefined),
-  increment: () => Effect.succeed(undefined),
-  durable: noopDurableKv,
-};
 
 /**
  * Every fetch must be covered by a token taken BEFORE it. Under `paginateAll`'s
@@ -42,11 +32,12 @@ function expectEveryFetchPaced(trace: string[]) {
  * Gate that records every token grant into a shared trace, so a test can assert
  * both HOW MANY tokens a call path takes and that each one precedes its fetch.
  */
-function makeCountingGate(trace: string[]) {
+function makeCountingGate(trace: string[], spentToday = 0) {
   return Layer.succeed(PsdGateService, {
     acquireToken: Effect.sync(() => {
       trace.push("token");
     }),
+    getDailyCount: Effect.succeed(spentToday),
     beginFlight: () => Effect.succeed(1),
     endFlight: () => Effect.succeed(undefined),
     awaitFlight: () => Effect.succeed(undefined),
@@ -102,7 +93,6 @@ function run<A, E>(
     program.pipe(
       Effect.provide(PsdTeamClientLive),
       Effect.provide(makeCountingGate(trace)),
-      Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
       Effect.provide(makeTestEnvLayer()),
     ),
   );
@@ -163,17 +153,11 @@ describe("PsdTeamClient and the PSD on-demand budget (#3468)", () => {
   it("the cron sync still fetches when today's on-demand budget is spent", async () => {
     const trace: string[] = [];
     stubFetch(trace, [[TEAM]]);
-    const spentCache: KvCacheInterface = {
-      ...cacheMock,
-      // Every counter reads far over the budget below.
-      get: () => Effect.succeed("9999"),
-    };
-
     const teams = await Effect.runPromise(
       Effect.flatMap(PsdTeamClient, (client) => client.getRawTeams()).pipe(
         Effect.provide(PsdTeamClientLive),
-        Effect.provide(makeCountingGate(trace)),
-        Effect.provide(Layer.succeed(KvCacheService, spentCache)),
+        // The gate's daily count reads far over the budget below.
+        Effect.provide(makeCountingGate(trace, 9999)),
         Effect.provide(makeTestEnvLayer({ PSD_ONDEMAND_DAILY_BUDGET: "600" })),
       ),
     );
