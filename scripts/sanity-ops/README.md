@@ -8,6 +8,7 @@ delete and change documents, so they sit in the workspace and CI runs
 | ----------------------------- | --------------------------------------------------------------------------- |
 | `src/board-2627/`             | The 2026-2027 board update of the organigram and help topics (`board-2627`) |
 | `src/board-cleanup/`          | Audit and migrate board staff documents                                     |
+| `src/psd-privacy-cleanup/`    | Unset staff `birthDate`, delete unreferenced PSD portrait assets (#3469)    |
 | `src/responsibility-seeding/` | Seed and repair `responsibility` help topics — see its README               |
 | `src/staff-cleanup/`          | Phased staff member cleanup and organigram seeding                          |
 | `src/team-image-backfill/`    | Recover team photos from Drupal — see its README                            |
