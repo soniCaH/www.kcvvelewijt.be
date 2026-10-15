@@ -267,3 +267,52 @@ describe("next.config redirects", () => {
     }
   });
 });
+
+describe("next.config security surface (#3476)", () => {
+  it("sends exactly the four baseline security headers on every path", async () => {
+    const rules = await nextConfig.headers!();
+
+    expect(rules).toHaveLength(1);
+    expect(rules[0]!.source).toBe("/:path*");
+    expect(rules[0]!.headers).toEqual([
+      { key: "X-Frame-Options", value: "SAMEORIGIN" },
+      { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      {
+        key: "Referrer-Policy",
+        value: "strict-origin-when-cross-origin",
+      },
+    ]);
+  });
+
+  it("does not advertise x-powered-by", () => {
+    expect(nextConfig.poweredByHeader).toBe(false);
+  });
+
+  it("pins the Sanity image optimizer to our own project", () => {
+    const sanity = nextConfig.images!.remotePatterns!.filter(
+      (p) => "hostname" in p && p.hostname === "cdn.sanity.io",
+    );
+
+    expect(sanity).toHaveLength(1);
+    expect(sanity[0]!.pathname).toBe("/images/vhb33jaz/**");
+  });
+
+  it("keeps story-only hosts out of the optimizer allowlist", () => {
+    const hosts = nextConfig.images!.remotePatterns!.map((p) =>
+      "hostname" in p ? p.hostname : undefined,
+    );
+
+    expect(hosts).not.toContain("picsum.photos");
+    expect(hosts).not.toContain("placehold.co");
+  });
+
+  it("sets a restrictive image CSP whenever SVG is allowed", () => {
+    const images = nextConfig.images!;
+
+    expect(images.dangerouslyAllowSVG).toBe(true);
+    expect(images.contentSecurityPolicy).toBe(
+      "default-src 'self'; script-src 'none'; sandbox;",
+    );
+  });
+});
