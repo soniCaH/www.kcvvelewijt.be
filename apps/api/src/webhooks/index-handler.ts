@@ -265,13 +265,35 @@ const webhookEffect = (request: Request, webhookSecret: string) =>
       return Response.json({ ok: true, action: "skipped_unknown_operation" });
     }
 
+    // Built ahead of the delete path, which needs it before the type gate.
+    const sanityClient = createClient({
+      ...sanityClientConfig(env),
+      useCdn: false,
+    });
+
     // 6. Delete path — ahead of the type gate on purpose. A retired type still
     // has vectors in the index from when it was indexed, and its delete
     // webhook is the only event that will ever name them; gating it on the
     // current ALLOWED_TYPES stranded every `responsibilityPath` vector, and one
     // stranded vector fails the whole search response, not just its own row.
     // Deleting an id the index does not hold is a no-op.
+    //
+    // The `sanity-operation` header is not covered by the signature, so a
+    // replayed signed delivery can claim `delete` for a live document. Confirm
+    // against the published dataset first; a failed lookup must surface as a
+    // 500 (Sanity retries) and never as a skip.
     if (operation === "delete") {
+      const stillExists = yield* Effect.tryPromise({
+        try: () =>
+          sanityClient.fetch<string | null>("*[_id == $id][0]._id", {
+            id: _id,
+          }),
+        catch: (err) =>
+          new WebhookServiceError("sanity_fetch_failed", errorMessage(err)),
+      });
+      if (stillExists !== null) {
+        return Response.json({ ok: true, action: "skipped_still_exists" });
+      }
       yield* vectorize
         .deleteByIds([_id])
         .pipe(
@@ -290,10 +312,6 @@ const webhookEffect = (request: Request, webhookSecret: string) =>
     const docType = _type;
 
     // 8. Fetch document from Sanity
-    const sanityClient = createClient({
-      ...sanityClientConfig(env),
-      useCdn: false,
-    });
     const doc = yield* Effect.tryPromise({
       try: () =>
         sanityClient.fetch<Record<string, unknown> | null>(
