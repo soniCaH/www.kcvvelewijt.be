@@ -77,7 +77,7 @@ real:
 
 - `cache/kv-cache-live.workerd.test.ts` — `KvCacheLive` and `makeDurableKv`
   against the real `PSD_CACHE` binding: read/write round-trips, delete, a
-  real `expirationTtl` visible on the key's `list()` metadata, `increment`,
+  real `expirationTtl` visible on the key's `list()` metadata,
   and a durable `list()` round-trip into the port's page shape. (Not
   multi-page cursor-following — `makeDurableKv`'s `list` forwards no
   `limit`, so it can't force a real second page; that loop is covered on

@@ -398,7 +398,7 @@ export const TypedKvCache = <A, I>(
 
         // The ONLY way this cache reports to the gate: a non-PSD cache
         // instance never does (see the `psdBacked` option doc above), on
-        // every path — cold miss, blocking and background refresh.
+        // every path — cold miss and background refresh.
         const report = (outcome: Parameters<typeof gate.reportOutcome>[0]) =>
           psdBacked
             ? gate.reportOutcome(outcome)
