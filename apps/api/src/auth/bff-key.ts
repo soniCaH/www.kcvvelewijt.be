@@ -11,12 +11,19 @@ import type { WorkerEnv } from "../env";
 
 const encoder = new TextEncoder();
 
-/** Constant-time compare; unequal length (or no header) is a mismatch. */
+/**
+ * Constant-time compare; unequal length (or no header) is a mismatch. A length
+ * mismatch still runs a same-length compare (the secret against itself), so
+ * the response time does not reveal whether the guessed length was right.
+ */
 export const bffKeyMatches = (given: string | null, expected: string) => {
   if (given === null) return false;
   const a = encoder.encode(given);
   const b = encoder.encode(expected);
-  return a.byteLength === b.byteLength && crypto.subtle.timingSafeEqual(a, b);
+  if (a.byteLength !== b.byteLength) {
+    return !crypto.subtle.timingSafeEqual(b, b);
+  }
+  return crypto.subtle.timingSafeEqual(a, b);
 };
 
 /** `401` when the request may not reach the app, `null` when it may. */
