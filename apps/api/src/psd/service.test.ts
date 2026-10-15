@@ -972,6 +972,39 @@ describe("PsdService.getMatchesWindow", () => {
     }
   });
 
+  it("treats a 15:00 Brussels kickoff as started at 13:00Z, not 15:00Z (#3491)", async () => {
+    const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
+    const afternoon = game({
+      id: 210,
+      date: "2026-06-17 15:00",
+      time: "15:00",
+    });
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("/games/team/")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({ content: [afternoon] }),
+        });
+      }
+      if (url.includes("/seasons")) {
+        return Promise.resolve({ ok: true, json: async () => windowSeasons });
+      }
+      return Promise.resolve({ ok: true, json: async () => [rawTeams[0]] });
+    });
+    const ids = async (op: "getNextMatches" | "getMatchesWindow") => {
+      const r = await runService((svc) => svc[op]());
+      return r._tag === "Right" ? r.right.map((m) => m.id) : "failed";
+    };
+
+    vi.setSystemTime(new Date("2026-06-17T12:59:00.000Z"));
+    expect(await ids("getNextMatches")).toEqual([210]);
+    vi.setSystemTime(new Date("2026-06-17T13:01:00.000Z"));
+    expect(await ids("getNextMatches")).toEqual([]);
+    // The window's lower bound is the real start of the Brussels day, so the
+    // started match is still in it.
+    expect(await ids("getMatchesWindow")).toEqual([210]);
+  });
+
   it("flattens in-window games across teams and sorts by kickoff (incl. same-day time)", async () => {
     const teamB = {
       id: 2,

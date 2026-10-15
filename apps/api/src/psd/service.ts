@@ -49,6 +49,7 @@ import {
   psdGameToMs,
 } from "./transforms";
 import { resolveVenue } from "./venue";
+import { kickoffMs, wallClockToInstantMs } from "./wall-clock";
 
 // ─── Service definition ────────────────────────────────────────────────────────
 
@@ -828,21 +829,20 @@ export const PsdServiceLive = Layer.effect(
           const season = yield* getCurrentSeason();
           const competitionLabels = yield* getCompetitionLabels();
 
-          // Window: [start of today (Brussels), now + 7 days].
-          // The lower bound is the start of the current Brussels calendar day,
-          // expressed in the same wall-clock-as-UTC space psdGameToMs uses
-          // (PSD stores wall-clock times as plain "YYYY-MM-DD HH:MM" strings),
-          // so a match that already kicked off earlier today still qualifies —
-          // the key difference from getNextMatches, which drops it once
-          // psdGameToMs(m) < now. The 7-day upper bound covers pre-game posts;
-          // a couple of hours of timezone fuzz at its far edge is immaterial.
+          // Window: [start of today (Brussels), now + 7 days], both as real
+          // instants — the same space psdGameToMs returns (#3491). A match that
+          // already kicked off earlier today still qualifies — the key
+          // difference from getNextMatches, which drops it once
+          // psdGameToMs(m) < now. The 7-day upper bound covers pre-game posts.
           const now = Date.now();
           const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
           const brusselsToday = new Date(now).toLocaleDateString("en-CA", {
             timeZone: "Europe/Brussels",
           });
           const [ty, tm, td] = brusselsToday.split("-").map(Number);
-          const startOfTodayMs = Date.UTC(ty!, tm! - 1, td!, 0, 0, 0);
+          const startOfTodayMs = wallClockToInstantMs(
+            Date.UTC(ty!, tm! - 1, td!, 0, 0, 0),
+          );
           const windowEndMs = now + SEVEN_DAYS_MS;
 
           const visibleTeams = visiblePsdIds
@@ -1017,7 +1017,7 @@ export const PsdServiceLive = Layer.effect(
                     !isSettledMatchStatus(detail.status)) ||
                   (entry.status !== "scheduled" &&
                     detail.status === "scheduled" &&
-                    new Date(detail.date).getTime() < Date.now());
+                    kickoffMs(detail.date) < Date.now());
 
                 const enriched = {
                   ...detail,

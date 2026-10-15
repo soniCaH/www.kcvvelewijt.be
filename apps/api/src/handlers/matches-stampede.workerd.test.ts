@@ -17,12 +17,13 @@ import { PsdGateLive } from "../psd/gate";
 import { PsdService, type PsdServiceInterface } from "../psd/service";
 import { BackgroundRunnerService } from "../psd/background";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
+import { wireDate } from "../test-helpers/wire-date";
 
 const HOUR = 60 * 60 * 1000;
 
 const match = (id: number, offsetMs: number): Match => ({
   id,
-  date: new Date(Date.now() + offsetMs),
+  date: wireDate(Date.now() + offsetMs),
   time: "15:00",
   home_team: { id: 123, name: "KCVV Elewijt" },
   away_team: { id: 456, name: "Opponent FC" },

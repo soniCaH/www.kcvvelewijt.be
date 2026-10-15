@@ -23,6 +23,7 @@ import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import { noopDurableKv } from "../test-helpers/kv-cache-mock";
 import { WorkerEnvTag } from "../env";
 import { testEnvLayer } from "../test-helpers/env-layer";
+import { wireDate } from "../test-helpers/wire-date";
 import { PsdGateService, PsdGateTest } from "../psd/gate";
 import {
   MatchesArray,
@@ -146,7 +147,7 @@ describe("getNextMatchesHandler", () => {
   const at = (offsetMs: number, id: number): MatchType => ({
     ...baseMatch,
     id,
-    date: new Date(Date.now() + offsetMs),
+    date: wireDate(Date.now() + offsetMs),
   });
   const past = () => at(-HOUR, 10);
   const future = () => at(HOUR, 11);
@@ -208,6 +209,27 @@ describe("getNextMatchesHandler", () => {
       ]),
     );
     expect(result.map((m) => m.id)).toEqual([11]);
+  });
+
+  it("serve-time filter keeps a summer 15:00 match until 15:00 Brussels (13:00Z)", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    try {
+      const m = {
+        ...baseMatch,
+        id: 12,
+        date: new Date("2026-07-19T15:00:00Z"),
+      };
+      const serve = () =>
+        Effect.runPromise(provideSeeded(null, [m])).then((r) =>
+          r.map((x) => x.id),
+        );
+      vi.setSystemTime(new Date("2026-07-19T12:59:00Z"));
+      expect(await serve()).toEqual([12]);
+      vi.setSystemTime(new Date("2026-07-19T13:01:00Z"));
+      expect(await serve()).toEqual([]);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("propagates UpstreamUnavailableError from service", async () => {
@@ -390,7 +412,7 @@ describe("getMatchDetailHandler", () => {
 
 describe("matchDetailTtl", () => {
   const now = new Date("2025-06-01T12:00:00.000Z").getTime();
-  const at = (offsetMs: number) => new Date(now + offsetMs);
+  const at = (offsetMs: number) => wireDate(now + offsetMs);
   const H = 60 * 60 * 1000;
 
   // A match WITH report data exercises the pure proximity ladder — the
@@ -530,7 +552,7 @@ describe("matchDetailTtl", () => {
 
 describe("teamMatchesTtl", () => {
   const now = new Date("2025-06-01T12:00:00.000Z").getTime();
-  const at = (offsetMs: number) => new Date(now + offsetMs);
+  const at = (offsetMs: number) => wireDate(now + offsetMs);
   const H = 60 * 60 * 1000;
 
   const match = (date: Date, status: MatchType["status"]): MatchType => ({
@@ -584,7 +606,7 @@ describe("teamMatchesTtl", () => {
 
 describe("nextMatchesTtl", () => {
   const now = new Date("2025-06-01T12:00:00.000Z").getTime();
-  const at = (offsetMs: number) => new Date(now + offsetMs);
+  const at = (offsetMs: number) => wireDate(now + offsetMs);
   const H = 60 * 60 * 1000;
 
   const match = (date: Date): MatchType => ({ ...baseMatch, date });
@@ -603,6 +625,42 @@ describe("nextMatchesTtl", () => {
 
   it("returns the 4h TTL for an empty list", () => {
     expect(nextMatchesTtl([], now)).toBe(TTL.NEXT_MATCHES);
+  });
+});
+
+describe("kickoff boundary — wire date is Brussels wall-clock-as-UTC (#3491)", () => {
+  // Summer 15:00 Brussels = 13:00Z; winter 15:00 Brussels = 14:00Z.
+  const summer = new Date("2026-07-19T15:00:00.000Z");
+  const winter = new Date("2026-01-17T15:00:00.000Z");
+  const instants = (kickoffZ: string) => {
+    const k = Date.parse(kickoffZ);
+    return { before: k - 60_000, after: k + 60_000 };
+  };
+
+  it.each([
+    ["summer", summer, "2026-07-19T13:00:00.000Z"],
+    ["winter", winter, "2026-01-17T14:00:00.000Z"],
+  ])("%s kickoff flips every TTL at the real instant", (_l, date, kickoffZ) => {
+    const { before, after } = instants(kickoffZ);
+    const m = { ...baseMatch, date, status: "scheduled" as const };
+    expect(nextMatchesTtl([m], before)).toBe(TTL.NEXT_MATCHES);
+    expect(nextMatchesTtl([m], after)).toBe(TTL.MATCH_DETAIL_MATCHDAY);
+    expect(teamMatchesTtl([m], before)).toBe(TTL.MATCHES_TEAM);
+    expect(teamMatchesTtl([m], after)).toBe(TTL.MATCH_DETAIL_MATCHDAY);
+    // 48 h grace window is also measured from the real kickoff.
+    const k = Date.parse(kickoffZ);
+    expect(teamMatchesTtl([m], k + 48 * 3_600_000 - 1)).toBe(
+      TTL.MATCH_DETAIL_MATCHDAY,
+    );
+    expect(teamMatchesTtl([m], k + 48 * 3_600_000)).toBe(TTL.MATCHES_TEAM);
+    // matchDetailTtl: the 48 h "finished" cutoff is measured from the real kickoff.
+    const done = { hasReportData: true, hasReport: true };
+    expect(
+      matchDetailTtl(date, "finished", done, k + 48 * 3_600_000 - 60_000),
+    ).toBe(TTL.MATCH_DETAIL_WEEK);
+    expect(
+      matchDetailTtl(date, "finished", done, k + 48 * 3_600_000 + 60_000),
+    ).toBe(TTL.MATCH_DETAIL_PAST);
   });
 });
 

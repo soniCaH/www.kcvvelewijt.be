@@ -10,6 +10,7 @@ import {
 } from "@kcvv/api-contract";
 import { PsdService, isPartialFanout } from "../psd/service";
 import { isSettledMatchStatus } from "../psd/transforms";
+import { kickoffMs } from "../psd/wall-clock";
 import { shouldServeStale, type BffError } from "../psd/errors";
 import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
 import { WorkerEnvTag } from "../env";
@@ -88,10 +89,10 @@ export const getNextMatchesHandler = (): Effect.Effect<
       // every serve rather than blocking on a refresh. The stored value stays
       // unfiltered, so `nextMatchesTtl` still sees the started match and
       // refreshes at matchday cadence. Same comparison as `getNextMatches` in
-      // `psd/service.ts` (`psdGameToMs(m) >= now`): when #3491 fixes the
-      // wall-clock-as-UTC offset, both sites move together.
+      // `psd/service.ts` (`psdGameToMs(m) >= now`), both on the real kickoff
+      // instant (#3491).
       Effect.map((matches) =>
-        matches.filter((m) => new Date(m.date).getTime() >= Date.now()),
+        matches.filter((m) => kickoffMs(m.date) >= Date.now()),
       ),
     );
 };
@@ -140,7 +141,7 @@ export function teamMatchesTtl(
   now: number = Date.now(),
 ): number {
   const resultPending = matches.some((m) => {
-    const kickoff = new Date(m.date).getTime();
+    const kickoff = kickoffMs(m.date);
     return (
       m.status === "scheduled" && now > kickoff && now - kickoff < 48 * HOUR_MS
     );
@@ -162,7 +163,7 @@ export function nextMatchesTtl(
   matches: readonly Match[],
   now: number = Date.now(),
 ): number {
-  const started = matches.some((m) => new Date(m.date).getTime() < now);
+  const started = matches.some((m) => kickoffMs(m.date) < now);
   return started ? TTL.MATCH_DETAIL_MATCHDAY : TTL.NEXT_MATCHES;
 }
 
@@ -222,7 +223,7 @@ export function matchDetailTtl(
   report: MatchReportState = { hasReportData: true, hasReport: false },
   now: number = Date.now(),
 ): number {
-  const kickoff = new Date(date).getTime();
+  const kickoff = kickoffMs(date);
   const natural = proximityTtl(kickoff, isSettledMatchStatus(status), now);
 
   const reportPending =

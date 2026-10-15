@@ -20,6 +20,7 @@ import {
   FootbalistoClub,
 } from "./schemas";
 import { resolveVenue } from "./venue";
+import { wallClockToInstantMs } from "./wall-clock";
 
 // ─── Competition label helpers ────────────────────────────────────────────────
 
@@ -370,11 +371,16 @@ function parseDateString(dateStr: string): { date: Date; time: string } {
   return { date, time: timePart };
 }
 
-/** Convert a PsdGame date + time fields to UTC milliseconds (for sorting). */
+/**
+ * A PsdGame's real kickoff instant in epoch ms — comparable with `Date.now()`
+ * and sortable (#3491; the wire date stays wall-clock-as-UTC, see `wall-clock.ts`).
+ */
 export function psdGameToMs(m: PsdGame): number {
   const datePart = m.date.split(" ")[0]!;
   const timeStr = m.time ?? m.date.split(" ")[1] ?? "00:00";
-  return parseDateString(`${datePart} ${timeStr}`).date.getTime();
+  return wallClockToInstantMs(
+    parseDateString(`${datePart} ${timeStr}`).date.getTime(),
+  );
 }
 
 /**
