@@ -1,6 +1,9 @@
 import {at, set} from 'sanity/migrate'
-import {describe, expect, it} from 'vitest'
-import {migrateTitlePortableTextToString} from './title-portable-text-to-string'
+import {afterEach, describe, expect, it, vi} from 'vitest'
+import {
+  assertTitleRollbackAllowed,
+  migrateTitlePortableTextToString,
+} from './title-portable-text-to-string'
 import {migrateTitleToPortableText} from './title-to-portable-text'
 
 describe('migrateTitlePortableTextToString', () => {
@@ -29,5 +32,32 @@ describe('migrateTitlePortableTextToString', () => {
     const [forward] = migrateTitleToPortableText({_id: 'a', title: 'Grote zege'}) ?? []
     const title = (forward.op as {value: unknown}).value
     expect(migrateTitlePortableTextToString({title})).toEqual([at('title', set('Grote zege'))])
+  })
+})
+
+describe('assertTitleRollbackAllowed', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  it('throws unless ALLOW_TITLE_ROLLBACK is exactly "yes"', () => {
+    expect(() => assertTitleRollbackAllowed({})).toThrow(/ALLOW_TITLE_ROLLBACK=yes/)
+    expect(() => assertTitleRollbackAllowed({ALLOW_TITLE_ROLLBACK: '1'})).toThrow()
+  })
+
+  it('passes with ALLOW_TITLE_ROLLBACK=yes', () => {
+    expect(() => assertTitleRollbackAllowed({ALLOW_TITLE_ROLLBACK: 'yes'})).not.toThrow()
+  })
+
+  it('guards the migration handler, not module import', async () => {
+    const {default: migration} = await import('./title-portable-text-to-string')
+    const handler = migration.migrate as {document: (doc: unknown, ctx: unknown) => unknown}
+    const doc = {_id: 'a', title: [{children: [{text: 'Grote zege'}]}]}
+
+    vi.stubEnv('ALLOW_TITLE_ROLLBACK', '')
+    expect(() => handler.document(doc, {})).toThrow(/rollback-only/)
+
+    vi.stubEnv('ALLOW_TITLE_ROLLBACK', 'yes')
+    expect(handler.document(doc, {})).toEqual([at('title', set('Grote zege'))])
   })
 })

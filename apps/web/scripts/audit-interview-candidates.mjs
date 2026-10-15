@@ -19,9 +19,10 @@
  *   SANITY_DATASET=staging node scripts/audit-interview-candidates.mjs
  *   SANITY_DATASET=production node scripts/audit-interview-candidates.mjs
  *
- * No token required — uses the public Sanity dataset (articles are
- * public documents). A token is still honoured if SANITY_API_TOKEN is
- * set, which is useful for draft-inclusive queries.
+ * Needs a Sanity read token (`SANITY_API_TOKEN` or `sanity login`) on
+ * production — that dataset is private since 2026-10-14, so a tokenless
+ * read returns 0 rows without an error. The script exits non-zero when it
+ * reads no articles at all.
  */
 
 import { createClient } from "@sanity/client";
@@ -61,6 +62,8 @@ const INTERVIEW_TITLE_PATTERNS = [
 
 const INTERVIEW_SLUG_PATTERNS = [/interview/i, /gesprek/i, /vraaggesprek/i];
 
+// Production is private: a tokenless read returns 0 rows without an error.
+// Staging stays readable without a token, so only production requires one.
 function resolveToken() {
   if (process.env.SANITY_API_TOKEN) return process.env.SANITY_API_TOKEN;
   try {
@@ -68,11 +71,18 @@ function resolveToken() {
     const config = JSON.parse(readFileSync(configPath, "utf-8"));
     if (config.authToken) return config.authToken;
   } catch (err) {
-    // ENOENT = no `sanity login` yet → public reads still work. Other
-    // errors (malformed JSON, permission denied) should surface loudly.
+    // ENOENT = no `sanity login` yet. Other errors (malformed JSON,
+    // permission denied) should surface loudly.
     if (err?.code !== "ENOENT") {
       console.warn(`⚠️  Could not read Sanity config: ${err.message}`);
     }
+  }
+  if (DATASET === "production") {
+    console.error(
+      "No Sanity auth token found. Production is private — set " +
+        "SANITY_API_TOKEN or run `sanity login`.",
+    );
+    process.exit(1);
   }
   return undefined;
 }
@@ -123,6 +133,13 @@ async function main() {
      } | order(coalesce(publishAt, _createdAt) desc)`,
   );
 
+  if (articles.length === 0) {
+    console.error(
+      `No articles read from ${DATASET} — missing or unauthorised token? Refusing to report "Nothing to review".`,
+    );
+    process.exit(1);
+  }
+
   const candidates = articles
     .filter((a) => a.articleType !== "interview")
     .map((a) => ({ ...a, signal: classifySignal(a) }))
@@ -131,7 +148,9 @@ async function main() {
   console.log("━".repeat(72));
   console.log(`Dataset: ${DATASET}`);
   console.log(`Total articles scanned: ${articles.length}`);
-  console.log(`Interview candidates (not yet tagged as 'interview'): ${candidates.length}`);
+  console.log(
+    `Interview candidates (not yet tagged as 'interview'): ${candidates.length}`,
+  );
   console.log("━".repeat(72));
 
   if (candidates.length === 0) {
