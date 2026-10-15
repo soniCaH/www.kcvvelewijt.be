@@ -3,6 +3,27 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
 
+  poweredByHeader: false,
+
+  // #3476 — baseline security headers. `frame-ancestors` is the only CSP
+  // directive on purpose; a full CSP is a separate decision.
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+        ],
+      },
+    ];
+  },
+
   // Static SEO redirects for renamed/retired routes. Dynamic legacy resolvers
   // that need a CMS lookup (player/staff name-slug → psdId, youth age → team
   // slug) are routes under src/app/{player,players,staff}/[slug] and
@@ -277,38 +298,33 @@ const nextConfig: NextConfig = {
 
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "placehold.co", pathname: "/**" },
       { protocol: "https", hostname: "api.kcvvelewijt.be", pathname: "/**" },
       {
         protocol: "https",
         hostname: "dfaozfi7c7f3s.cloudfront.net",
         pathname: "/**",
       },
-      { protocol: "https", hostname: "picsum.photos", pathname: "/**" },
-      { protocol: "https", hostname: "cdn.sanity.io", pathname: "/**" },
+      // Pinned to our project (prod and staging share `vhb33jaz`) so the
+      // optimizer cannot be used to proxy any other Sanity project's images.
+      {
+        protocol: "https",
+        hostname: "cdn.sanity.io",
+        pathname: "/images/vhb33jaz/**",
+      },
     ],
     // PERF-2 (#2235): serve optimizer-transformed heroes as AVIF (best
     // compression) with WebP fallback, and cache optimized variants for a
     // day so repeat views skip re-optimization. Most photos already arrive
     // as pre-transformed Sanity CDN URLs; this only governs the optimizer-
-    // served path. `picsum.photos`/`placehold.co` remotePatterns are used
-    // exclusively by Storybook stories + `*.mocks.ts` — confirmed not
-    // referenced by any production render path.
+    // served path. Story-only hosts (picsum.photos, placehold.co) are not
+    // listed: Storybook renders every <Image /> unoptimized.
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 86400,
-    // SVG Security Configuration
-    // Current analysis (2025-01-05):
-    // - Drupal API serves standard image formats: JPEG, PNG, GIF, WebP
-    // - Schema validation enforces image MIME types (no SVG from Drupal API)
-    // - Local SVGs are controlled files (footer-top.svg)
-    // - placehold.co is a trusted placeholder service
-    // SECURITY NOTE: If user-uploaded SVGs are added in the future:
-    // 1. Add server-side SVG sanitization (e.g., dompurify, svg-sanitizer)
-    // 2. Implement magic byte validation in Drupal (not just MIME types)
-    // 3. Consider converting SVGs to PNG/WebP on upload
-    // 4. Use Content-Security-Policy headers to restrict SVG capabilities
-    // See SECURITY.md for full file validation guidelines
+    // SVG is allowed (local controlled files such as footer-top.svg), so the
+    // optimizer response gets a locked-down CSP and is served as an attachment
+    // (below) — defence in depth against SVG XSS. Sanity serves raster images.
     dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     contentDispositionType: "attachment",
     // Content-Disposition: attachment forces download instead of inline display
     // This provides defense-in-depth against potential SVG XSS
