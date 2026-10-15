@@ -64,9 +64,10 @@ export const homePage = defineType({
     // no value yet degrades by disappearing, it never shows a half-claim.
     // `initialValue` only seeds a NEWLY created document — the singleton
     // already exists in both datasets, so it does nothing for the current
-    // rollout on its own. The migration (`set-homepage-youth-stats`,
-    // #2401 review finding 3) is what backfills the existing document;
-    // `initialValue` just keeps a future fresh dataset from starting blank.
+    // rollout on its own. A one-off migration (#2401 review finding 3,
+    // since deleted — it ran on every dataset) backfilled the existing
+    // document; `initialValue` just keeps a future fresh dataset from
+    // starting blank.
     defineField({
       name: 'youthPlayerCount',
       title: 'Aantal jeugdspelers',

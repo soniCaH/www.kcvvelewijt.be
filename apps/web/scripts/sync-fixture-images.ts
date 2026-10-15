@@ -19,6 +19,9 @@
  * Run:
  *   pnpm --filter @kcvv/web fixtures:sync
  *
+ * Needs a Sanity read token (`SANITY_API_TOKEN` or `sanity login`): the
+ * production dataset is private, so a tokenless run reads nothing.
+ *
  * Optional flags:
  *   --refresh   Re-discover candidate images via GROQ even if the manifest
  *               already has entries. Use after schema/content changes.
@@ -34,6 +37,7 @@ import { fileURLToPath } from "node:url";
 // sharp >= 0.35 ships ESM types as named exports; the old `sharp.Gravity`
 // namespace form is gone, so `Gravity` is imported directly.
 import sharp, { type Gravity } from "sharp";
+import { resolveToken } from "./seeds/phase-5-shared.mjs";
 
 // -----------------------------------------------------------------------
 // Config
@@ -54,7 +58,10 @@ const client = createClient({
   projectId: PROJECT_ID,
   dataset: DATASET,
   apiVersion: "2024-01-01",
-  useCdn: true,
+  // The production dataset is private since 2026-10-14: a tokenless read
+  // returns 0 rows without an error. `resolveToken` exits when none is found.
+  token: resolveToken(),
+  useCdn: false,
 });
 
 type FixtureShape =
@@ -363,6 +370,9 @@ const writeManifest = async (manifest: Manifest): Promise<void> => {
 // Sync logic
 // -----------------------------------------------------------------------
 
+/** GROQ reads this run made / how many returned 0 rows; `main` fails when all were empty. */
+const groqReads = { queried: 0, empty: 0 };
+
 type Candidate = { sourceId: string; slug: string; assetRef: string };
 
 const queryCandidates = async (spec: GroqShape): Promise<Candidate[]> => {
@@ -391,8 +401,10 @@ const ensureGroqShape = async (
   }
 
   const candidates = await queryCandidates(spec);
+  groqReads.queried += 1;
   if (candidates.length === 0) {
     console.warn(`⚠ ${shape}: GROQ returned 0 candidates`);
+    groqReads.empty += 1;
     return;
   }
 
@@ -564,6 +576,12 @@ const main = async (): Promise<void> => {
     if (spec.kind === "crop") {
       await ensureCropShape(shape, spec, manifest);
     }
+  }
+
+  if (groqReads.queried > 0 && groqReads.empty === groqReads.queried) {
+    throw new Error(
+      `Every GROQ shape returned 0 candidates from ${DATASET} — missing or unauthorised token? Refusing to prune or write the manifest.`,
+    );
   }
 
   await pruneOrphans(manifest);
