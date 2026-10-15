@@ -423,10 +423,10 @@ function waitTwoFrames(frameTimeoutMs: number) {
 // Runs in the page context (self-contained, like `waitForFontsSettled`):
 // flips lazy images to eager, then waits for every image to load and decode.
 // `budgetMs` caps each wait (load, then decode) on its own. Never silent
-// (#3466): a wait that ends on its timer warns the URLs still pending. Called once per capture viewport,
-// then again with the retry budget for whatever `collectImageSamples` finds
-// unpainted — already-decoded images settle instantly, so the second call
-// effectively waits on the pending ones only.
+// (#3466): a wait that ends on its timer warns the URLs still pending. Called
+// once per capture viewport, then again with the retry budget for whatever
+// `collectImageSamples` finds unpainted — already-decoded images settle
+// instantly, so the second call effectively waits on the pending ones only.
 async function waitForImagesSettled(budgetMs: number) {
   // Resolves true when `work` finished, false when the cap won.
   const finishedInTime = async (work: Promise<unknown>) => {
