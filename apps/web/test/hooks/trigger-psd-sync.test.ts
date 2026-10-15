@@ -72,6 +72,8 @@ createServer((req, res) => {
     // KV writes, the reconciliation branch and the cursor advance, so the
     // script deliberately waits for this one instead (#2890 review).
     // No backticks in this block: it is all one template literal.
+    // STUB_ALSO_FAIL: a failure logged in the same breath as the terminal line.
+    if (process.env.STUB_ALSO_FAIL) console.log("Sync failed: SyncIncompleteError: player 502 | cause: none");
     console.log("sync completed — cursor advanced to 1 (next: team index 1)");
   }
   res.writeHead(200).end("ok");
@@ -123,7 +125,7 @@ afterAll(() => {
   if (dir) rmSync(dir, { recursive: true, force: true });
 });
 
-async function run(args: string[]) {
+async function run(args: string[], extraEnv: Record<string, string> = {}) {
   const n = seq++;
   const port = await freePort();
   const hitsFile = join(dir, `hits-${n}.txt`);
@@ -138,6 +140,7 @@ async function run(args: string[]) {
       TRIGGER_PSD_SYNC_SERVER_CMD: `node ${stubPath} ${port} ${hitsFile}`,
       TRIGGER_PSD_SYNC_PORT: String(port),
       TRIGGER_PSD_SYNC_LOG: logPath,
+      ...extraEnv,
     },
   });
   // The stub's own errors (`EADDRINUSE`) land only in this log. A refused
@@ -182,6 +185,28 @@ describe("trigger-psd-sync.sh", () => {
     expect(r.stdout).toContain("already up to date      : players 1, staff 0");
     // The fixture's staff-only 429 must not bleed into the players' count.
     expect(r.stdout).toContain("rate-limited (429)      : players 0, staff 1");
+  });
+
+  it("marks the worker as a manual run so the hand-run team never touches cycle-end state (#3465)", () => {
+    const script = readFileSync(SCRIPT, "utf8");
+    expect(script).toContain("--var SYNC_MANUAL_RUN:1");
+  });
+
+  it("checks for `Sync failed:` before `cursor advanced to` when polling the log (#3465)", () => {
+    const script = readFileSync(SCRIPT, "utf8");
+    const poll = script.slice(
+      script.indexOf('for _ in $(seq 1 "${SYNC_TIMEOUT_S}")'),
+    );
+    expect(poll.indexOf('grep -q "Sync failed:"')).toBeGreaterThan(-1);
+    expect(poll.indexOf('grep -q "Sync failed:"')).toBeLessThan(
+      poll.indexOf('grep -q "cursor advanced to"'),
+    );
+  });
+
+  it("reports a run whose log has BOTH lines as failed, not finished (#3465)", async () => {
+    const r = await run(["0"], { STUB_ALSO_FAIL: "1" });
+    expect(r.status).toBe(1);
+    expect(r.stderr).toContain("the sync reported a failure");
   });
 
   it("refuses a missing or non-numeric team index rather than syncing the wrong team", async () => {

@@ -54,6 +54,10 @@ export interface SanityProjectionInterface {
     string[],
     SanityQueryError
   >;
+  /** Fetch PSD IDs of the players a team document currently references (empty when the team doc is missing). */
+  readonly getTeamPlayerPsdIds: (
+    teamPsdId: string,
+  ) => Effect.Effect<string[], SanityQueryError>;
   /** Fetch PSD IDs of all non-archived teams. */
   readonly getActiveTeamPsdIds: () => Effect.Effect<string[], SanityQueryError>;
   /** Fetch PSD IDs of staff members referenced by active organigramNode or responsibility documents. */
@@ -170,6 +174,24 @@ export const SanityProjectionLive = Layer.effect(
           },
           catch: (cause) =>
             new SanityQueryError("Failed to fetch active staff PSD IDs", cause),
+        }),
+
+      getTeamPlayerPsdIds: (teamPsdId) =>
+        Effect.tryPromise({
+          try: async () => {
+            const rows = await client.fetch<Array<string | null> | null>(
+              `*[_type == "team" && psdId == $teamPsdId][0].players[]->psdId`,
+              { teamPsdId },
+            );
+            return (rows ?? []).filter(
+              (id): id is string => typeof id === "string" && id.length > 0,
+            );
+          },
+          catch: (cause) =>
+            new SanityQueryError(
+              `Failed to fetch player PSD IDs of team ${teamPsdId}`,
+              cause,
+            ),
         }),
 
       getActiveTeamPsdIds: () =>

@@ -49,6 +49,7 @@ const projectionMock: SanityProjectionInterface = {
   getActivePlayerPsdIds: () => Effect.succeed([]),
   getActiveStaffPsdIds: () => Effect.succeed([]),
   getActiveTeamPsdIds: () => Effect.succeed([]),
+  getTeamPlayerPsdIds: () => Effect.succeed([]),
   getVisibleTeamPsdIds: () => Effect.succeed([]),
   getProtectedStaffPsdIds: () => Effect.succeed([]),
   getFormRoutingConfig: () => Effect.succeed(null),
