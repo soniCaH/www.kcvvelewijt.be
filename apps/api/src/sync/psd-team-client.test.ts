@@ -158,3 +158,27 @@ describe("PsdTeamClient gate pacing", () => {
     expectEveryFetchPaced(trace);
   });
 });
+
+describe("PsdTeamClient and the PSD on-demand budget (#3468)", () => {
+  it("the cron sync still fetches when today's on-demand budget is spent", async () => {
+    const trace: string[] = [];
+    stubFetch(trace, [[TEAM]]);
+    const spentCache: KvCacheInterface = {
+      ...cacheMock,
+      // Every counter reads far over the budget below.
+      get: () => Effect.succeed("9999"),
+    };
+
+    const teams = await Effect.runPromise(
+      Effect.flatMap(PsdTeamClient, (client) => client.getRawTeams()).pipe(
+        Effect.provide(PsdTeamClientLive),
+        Effect.provide(makeCountingGate(trace)),
+        Effect.provide(Layer.succeed(KvCacheService, spentCache)),
+        Effect.provide(makeTestEnvLayer({ PSD_ONDEMAND_DAILY_BUDGET: "600" })),
+      ),
+    );
+
+    expect(teams).toHaveLength(1);
+    expect(trace).toContain("fetch");
+  });
+});
