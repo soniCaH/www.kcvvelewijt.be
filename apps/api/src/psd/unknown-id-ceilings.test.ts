@@ -12,10 +12,8 @@ import { type PsdGateService, PsdGateTest } from "./gate";
 import { type KvCacheService, KvCacheLive } from "../cache/kv-cache";
 import type { WorkerEnvTag } from "../env";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
-import {
-  SanityProjection,
-  type SanityProjectionInterface,
-} from "../sanity/projection";
+import { makeSanityProjectionStub } from "../test-helpers/sanity-projection-stub";
+import { SanityProjection } from "../sanity/projection";
 import {
   getMatchDetailHandler,
   getMatchesByTeamHandler,
@@ -59,17 +57,7 @@ const psd = vi.fn(async (input: RequestInfo | URL): Promise<Response> => {
 const callsTo = (fragment: string) =>
   psd.mock.calls.filter(([u]) => String(u).includes(fragment)).length;
 
-const sanity: SanityProjectionInterface = {
-  getPlayersImageState: () => Effect.succeed(new Map()),
-  getStaffImageState: () => Effect.succeed(new Map()),
-  getActivePlayerPsdIds: () => Effect.succeed([]),
-  getActiveStaffPsdIds: () => Effect.succeed([]),
-  getActiveTeamPsdIds: () => Effect.succeed([]),
-  getTeamPlayerPsdIds: () => Effect.succeed([]),
-  getVisibleTeamPsdIds: () => Effect.succeed([]),
-  getProtectedStaffPsdIds: () => Effect.succeed([]),
-  getFormRoutingConfig: () => Effect.succeed(null),
-};
+const sanity = makeSanityProjectionStub();
 
 function makeKv() {
   const store = new Map<string, string>();

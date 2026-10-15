@@ -3,13 +3,11 @@ import { Effect, Layer } from "effect";
 import { PsdService, PsdServiceLive } from "./service";
 import { PsdGateTest } from "./gate";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
+import { makeSanityProjectionStub } from "../test-helpers/sanity-projection-stub";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import { noopDurableKv } from "../test-helpers/kv-cache-mock";
 import { UpstreamUnavailableError } from "./errors";
-import {
-  SanityProjection,
-  type SanityProjectionInterface,
-} from "../sanity/projection";
+import { SanityProjection } from "../sanity/projection";
 
 global.fetch = vi.fn();
 
@@ -27,17 +25,7 @@ const cacheMock: KvCacheInterface = {
   durable: noopDurableKv,
 };
 
-const sanityMock: SanityProjectionInterface = {
-  getPlayersImageState: () => Effect.succeed(new Map()),
-  getStaffImageState: () => Effect.succeed(new Map()),
-  getActivePlayerPsdIds: () => Effect.succeed([]),
-  getActiveStaffPsdIds: () => Effect.succeed([]),
-  getActiveTeamPsdIds: () => Effect.succeed([]),
-  getTeamPlayerPsdIds: () => Effect.succeed([]),
-  getVisibleTeamPsdIds: () => Effect.succeed([]),
-  getProtectedStaffPsdIds: () => Effect.succeed([]),
-  getFormRoutingConfig: () => Effect.succeed(null),
-};
+const sanityMock = makeSanityProjectionStub();
 
 const seasons = [
   {

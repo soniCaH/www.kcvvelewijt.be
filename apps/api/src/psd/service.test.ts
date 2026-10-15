@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { makeSanityProjectionStub } from "../test-helpers/sanity-projection-stub";
 import { Effect, Layer, Logger, Schema as S } from "effect";
 import { PsdService, PsdServiceLive, isPartialFanout } from "./service";
 import { PsdGateTest } from "./gate";
@@ -52,17 +53,9 @@ const cacheMock: KvCacheInterface = {
 function makeSanityMock(
   visiblePsdIds: string[] = ["1"],
 ): SanityProjectionInterface {
-  return {
-    getPlayersImageState: () => Effect.succeed(new Map()),
-    getStaffImageState: () => Effect.succeed(new Map()),
-    getActivePlayerPsdIds: () => Effect.succeed([]),
-    getActiveStaffPsdIds: () => Effect.succeed([]),
-    getActiveTeamPsdIds: () => Effect.succeed([]),
-    getTeamPlayerPsdIds: () => Effect.succeed([]),
+  return makeSanityProjectionStub({
     getVisibleTeamPsdIds: () => Effect.succeed(visiblePsdIds),
-    getProtectedStaffPsdIds: () => Effect.succeed([]),
-    getFormRoutingConfig: () => Effect.succeed(null),
-  };
+  });
 }
 
 const seasons = [

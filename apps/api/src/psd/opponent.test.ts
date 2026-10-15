@@ -5,12 +5,10 @@ import { PsdGateTest } from "./gate";
 import { OpponentHistory } from "@kcvv/api-contract";
 import { UpstreamUnavailableError, type BffError } from "./errors";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
+import { makeSanityProjectionStub } from "../test-helpers/sanity-projection-stub";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import { noopDurableKv } from "../test-helpers/kv-cache-mock";
-import {
-  SanityProjection,
-  type SanityProjectionInterface,
-} from "../sanity/projection";
+import { SanityProjection } from "../sanity/projection";
 import { CLUB_VENUE } from "./venue";
 
 global.fetch = vi.fn();
@@ -41,17 +39,7 @@ const cacheMock: KvCacheInterface = {
   durable: noopDurableKv,
 };
 
-const sanityProjectionMock: SanityProjectionInterface = {
-  getPlayersImageState: () => Effect.succeed(new Map()),
-  getStaffImageState: () => Effect.succeed(new Map()),
-  getActivePlayerPsdIds: () => Effect.succeed([]),
-  getActiveStaffPsdIds: () => Effect.succeed([]),
-  getActiveTeamPsdIds: () => Effect.succeed([]),
-  getTeamPlayerPsdIds: () => Effect.succeed([]),
-  getVisibleTeamPsdIds: () => Effect.succeed([]),
-  getProtectedStaffPsdIds: () => Effect.succeed([]),
-  getFormRoutingConfig: () => Effect.succeed(null),
-};
+const sanityProjectionMock = makeSanityProjectionStub();
 
 function runService<A>(
   fn: (svc: (typeof PsdService)["Service"]) => Effect.Effect<A, BffError>,

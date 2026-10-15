@@ -5,11 +5,7 @@ import {
   SanityMutation,
   type SanityMutationInterface,
 } from "../sanity/mutation";
-import {
-  SanityProjection,
-  type FormRoutingConfig,
-  type SanityProjectionInterface,
-} from "../sanity/projection";
+import { SanityProjection, type FormRoutingConfig } from "../sanity/projection";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import { noopDurableKv } from "../test-helpers/kv-cache-mock";
 import {
@@ -19,6 +15,7 @@ import {
 } from "../email/resend";
 import type { WorkerEnv } from "../env";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
+import { makeSanityProjectionStub } from "../test-helpers/sanity-projection-stub";
 import { handleMembership } from "./forms";
 
 const validPayload: MembershipRequest = {
@@ -51,17 +48,7 @@ function makeMutationMock(
   };
 }
 
-const projectionMock: SanityProjectionInterface = {
-  getPlayersImageState: () => Effect.succeed(new Map()),
-  getStaffImageState: () => Effect.succeed(new Map()),
-  getActivePlayerPsdIds: () => Effect.succeed([]),
-  getActiveStaffPsdIds: () => Effect.succeed([]),
-  getActiveTeamPsdIds: () => Effect.succeed([]),
-  getTeamPlayerPsdIds: () => Effect.succeed([]),
-  getVisibleTeamPsdIds: () => Effect.succeed([]),
-  getProtectedStaffPsdIds: () => Effect.succeed([]),
-  getFormRoutingConfig: () => Effect.succeed(null),
-};
+const projectionMock = makeSanityProjectionStub();
 
 const cacheMock: KvCacheInterface = {
   get: () => Effect.succeed(null),

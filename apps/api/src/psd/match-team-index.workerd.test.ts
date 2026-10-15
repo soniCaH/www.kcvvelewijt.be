@@ -11,20 +11,12 @@ import { PsdService, PsdServiceLive } from "./service";
 import { PsdGateLive } from "./gate";
 import { KvCacheLive } from "../cache/kv-cache";
 import { SanityProjection } from "../sanity/projection";
-import type { SanityProjectionInterface } from "../sanity/projection";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
+import { makeSanityProjectionStub } from "../test-helpers/sanity-projection-stub";
 
-const sanity: SanityProjectionInterface = {
-  getPlayersImageState: () => Effect.succeed(new Map()),
-  getStaffImageState: () => Effect.succeed(new Map()),
-  getActivePlayerPsdIds: () => Effect.succeed([]),
-  getActiveStaffPsdIds: () => Effect.succeed([]),
-  getActiveTeamPsdIds: () => Effect.succeed([]),
-  getTeamPlayerPsdIds: () => Effect.succeed([]),
+const sanity = makeSanityProjectionStub({
   getVisibleTeamPsdIds: () => Effect.succeed(["1"]),
-  getProtectedStaffPsdIds: () => Effect.succeed([]),
-  getFormRoutingConfig: () => Effect.succeed(null),
-};
+});
 
 const season = {
   id: 42,
