@@ -309,7 +309,6 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
       (_sanityClient ??= createClient({
         ...sanityClientConfig(env),
         useCdn: false,
-        perspective: "published",
       }));
 
     // A failed embedding drops just its own document from the batch.
