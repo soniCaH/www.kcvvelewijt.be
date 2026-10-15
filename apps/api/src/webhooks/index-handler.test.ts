@@ -85,11 +85,16 @@ function makeEnv(overrides: Partial<WorkerEnv> = {}): WorkerEnv {
 
 const upsertSpy = vi.fn<(vectors: unknown[]) => void>();
 const deleteByIdsSpy = vi.fn<(ids: string[]) => void>();
+const embedSpy = vi.fn<(text: string) => void>();
 
 function makeTestLayer(): WebhookLayer {
   return Layer.mergeAll(
     Layer.succeed(EmbeddingService, {
-      embed: () => Effect.succeed(FAKE_VECTOR),
+      embed: (text) =>
+        Effect.sync(() => {
+          embedSpy(text);
+          return FAKE_VECTOR;
+        }),
     }),
     Layer.succeed(VectorizeService, {
       upsert: (vectors) =>
@@ -112,6 +117,7 @@ describe("handleIndexWebhook", () => {
   beforeEach(() => {
     upsertSpy.mockClear();
     deleteByIdsSpy.mockClear();
+    embedSpy.mockClear();
     mockSanityFetch.mockReset();
     mockSanityFetch.mockResolvedValue(null);
   });
@@ -172,6 +178,53 @@ describe("handleIndexWebhook", () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ ok: true, action: "deleted" });
     expect(deleteByIdsSpy).toHaveBeenCalledWith(["path-legacy"]);
+  });
+
+  it("does not delete when a delete webhook names a document that still exists (#3477)", async () => {
+    // `sanity-operation` is outside the signature, so a replayed delivery can
+    // claim `delete` for a live document.
+    const body = JSON.stringify({ _id: "live-doc", _type: "article" });
+    const request = await makeSignedRequest(body, { operation: "delete" });
+    mockSanityFetch.mockResolvedValue("live-doc");
+
+    const response = await handleIndexWebhook(request, makeEnv(), defaultLayer);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({ ok: true });
+    expect(mockSanityFetch).toHaveBeenCalledWith("*[_id == $id][0]._id", {
+      id: "live-doc",
+    });
+    expect(deleteByIdsSpy).not.toHaveBeenCalled();
+  });
+
+  it("answers 500, never a skip, when the delete-path lookup fails (#3477)", async () => {
+    const body = JSON.stringify({ _id: "doc-x", _type: "article" });
+    const request = await makeSignedRequest(body, { operation: "delete" });
+    mockSanityFetch.mockRejectedValue(new Error("sanity down"));
+
+    const response = await handleIndexWebhook(request, makeEnv(), defaultLayer);
+
+    expect(response.status).toBe(500);
+    expect(await response.json()).not.toHaveProperty("action");
+    expect(deleteByIdsSpy).not.toHaveBeenCalled();
+  });
+
+  it("skips a draft id as not found without embedding or upserting (#3477)", async () => {
+    const body = JSON.stringify({
+      _id: "drafts.article-1",
+      _type: "article",
+    });
+    const request = await makeSignedRequest(body);
+    mockSanityFetch.mockResolvedValue(null);
+
+    const response = await handleIndexWebhook(request, makeEnv(), defaultLayer);
+
+    expect(await response.json()).toEqual({
+      ok: true,
+      action: "skipped_not_found",
+    });
+    expect(upsertSpy).not.toHaveBeenCalled();
+    expect(embedSpy).not.toHaveBeenCalled();
   });
 
   it("returns 200 with skipped_unknown_type for unknown document type", async () => {

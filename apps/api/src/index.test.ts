@@ -33,6 +33,25 @@ vi.mock("@effect/platform", async (importOriginal) => {
   };
 });
 
+// Lets one test make the webhook handler throw; every other test runs the
+// real one.
+const webhookOverride = vi.hoisted(() => ({
+  fail: undefined as Error | undefined,
+}));
+vi.mock("./webhooks/index-handler", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("./webhooks/index-handler")>();
+  return {
+    ...actual,
+    handleIndexWebhook: (
+      ...args: Parameters<typeof actual.handleIndexWebhook>
+    ) => {
+      if (webhookOverride.fail) throw webhookOverride.fail;
+      return actual.handleIndexWebhook(...args);
+    },
+  };
+});
+
 const { default: worker } = await import("./index");
 
 const SECRET = "test-bff-shared-secret";
@@ -62,6 +81,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  webhookOverride.fail = undefined;
   handlerSpy.mockReset();
   vi.restoreAllMocks();
 });
@@ -157,6 +177,27 @@ describe("worker fetch — /webhooks/index is exempt and keeps its HMAC", () => 
       ctx,
     );
     expect(res.status).toBe(409);
+  });
+});
+
+describe("worker fetch — /webhooks/index catch-all (#3477)", () => {
+  it("answers internal_error without echoing the exception message", async () => {
+    webhookOverride.fail = new Error("secret internal detail");
+    vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const res = await worker.fetch(
+      new Request("https://kcvv-api.workers.dev/webhooks/index", {
+        method: "POST",
+        body: "{}",
+      }),
+      env(),
+      ctx,
+    );
+
+    expect(res.status).toBe(500);
+    const text = await res.text();
+    expect(JSON.parse(text)).toEqual({ ok: false, code: "internal_error" });
+    expect(text).not.toContain("secret internal detail");
   });
 });
 

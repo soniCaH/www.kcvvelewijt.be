@@ -107,10 +107,9 @@ export default {
       try {
         return await handleIndexWebhook(request, env);
       } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
         console.error("[webhook] unhandled error:", err);
         return Response.json(
-          { ok: false, error: message, code: "internal_error" },
+          { ok: false, code: "internal_error" },
           { status: 500 },
         );
       }
