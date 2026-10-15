@@ -921,7 +921,6 @@ export type StaffMember = {
   };
   email?: string;
   phone?: string;
-  birthDate?: string;
   joinDate?: string;
   bio?: Array<{
     children?: Array<{

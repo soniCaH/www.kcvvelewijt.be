@@ -31,7 +31,7 @@ src/
 │   └── background-live.ts    ← waitUntil-backed runner implementation
 ├── sanity/
 │   ├── config.ts             ← Sanity client config (project ID, dataset, token)
-│   ├── mutation.ts           ← SanityMutation — write ops (upsert, archive, image upload)
+│   ├── mutation.ts           ← SanityMutation — write ops (upsert, archive, image upload / unset)
 │   └── projection.ts         ← SanityProjection — read ops (GROQ queries → typed results)
 ├── handlers/
 │   ├── matches.ts            ← MatchesApi HttpApiGroup
@@ -132,6 +132,15 @@ Every call passes a config object with a **required** `releaseLeverHint` — the
 - **Zero roster.** PSD returns 0 players for a team Sanity lists players for (`SanityProjection.getTeamPlayerPsdIds`): no `upsertTeam`, the team and its existing player ids are accumulated, and `sync:empty-roster:<teamId>` is written. A second consecutive empty roster is trusted (`players: []`, marker deleted); a non-empty roster deletes the marker. Never "don't accumulate" — that turns player reconciliation off.
 - **Member isolation.** Each member's upsert and image sync is isolated. The team is still written, the cursor still advances, then the run **fails** naming the failed psd ids (`SyncIncompleteError`), because `reportScheduledJobOutcome` only sees ok/fail. A failed member with no doc yet is left out of the team's strong `players`/`staff` references but stays in the accumulator. A `getRawMembers`/`getRawStaff` failure advances the cursor without accumulating the team, then fails. A cursor write that fails at cycle end fails the run (mid-cycle it is still only logged).
 - **Manual runs.** `SYNC_MANUAL_RUN=1` (`WorkerEnv`, set by `scripts/trigger-psd-sync.sh` through `wrangler dev --var`; never in `wrangler.toml`) skips cycle-end reconciliation and every accumulator and marker write/clear. The cursor still moves. The script's index is a position in id-sorted order, and its `--preview` KV is staging's real namespace (`preview_id` equals the staging `id`).
+
+### PSD portraits and personal data (#3469)
+
+The sync owns `psdImage` + `psdImageUrl` on `player` and `staffMember` documents, so it also removes them.
+
+- **No portrait in PSD → none on the site.** `syncMemberImage` calls `SanityMutation.unsetPlayerImage` / `unsetStaffImage` when PSD has no `profilePictureURL` **and** the stored `psdImageUrl` is set; otherwise it is a no-op, so documents that never had a portrait are not patched nightly. The PSD placeholder (`PSD_PLACEHOLDER_IMAGE_SHA1`, #1895) counts as "no portrait": `uploadMemberImage` calls the same unset when the downloaded bytes match it. A failed unset returns `false` from `syncMemberImage`, so the member is not checkpointed and retries.
+- **Superseded assets are deleted.** After an unset, or after a re-upload that landed a different asset, the previous asset is deleted only when `count(*[references($assetId)]) == 0` (`deleteAssetIfUnreferenced`). The just-uploaded asset is never a candidate (Sanity dedups identical bytes to one id). A failed delete is logged (`logWarning`) and never fails the member's sync; `scripts/sanity-ops` `psd-privacy:cleanup` sweeps what is left.
+- **Portrait downloads take a gate token.** `uploadMemberImage` runs `gate.acquireToken` before the PSD `fetch`, like both PSD clients. `SanityMutationLive` therefore requires `PsdGateService`: every layer that builds it must provide `PsdGateLive` (in `buildAppLayer` it sits below `SanityMutationLive` for that reason). Type-check fails if one does not.
+- **Staff birth dates are not stored.** `transformStaff` emits no `birthDate` and `staffMember` has no such field. Player `birthDate` is unchanged: `PlayerHero` needs the full date for an exact age (owner decision, 2026-10-15). The `production` dataset has been private since 2026-10-14.
 
 ### Releasing a stuck PSD sync orphan-cap refusal
 

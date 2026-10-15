@@ -96,14 +96,13 @@ export function transformTeam(
  * for exactly that reason: passed a club-wide member, `_psdImageUrl` /
  * `_psdImageFetchUrl` come back `null` and the caller skips the upload.
  *
- * @param psd - PSD member object (uses fields: id, firstName, lastName, birthDate, functionTitle, profilePictureURL)
+ * @param psd - PSD member object (uses fields: id, firstName, lastName, functionTitle, profilePictureURL — staff birth dates are not stored, #3469)
  * @param baseUrl - Base URL to prepend to `profilePictureURL` to form an absolute `_psdImageUrl`
  */
 export function transformStaff(
-  psd: Pick<
-    PsdMember,
-    "id" | "firstName" | "lastName" | "birthDate" | "functionTitle"
-  > & { profilePictureURL?: string | null },
+  psd: Pick<PsdMember, "id" | "firstName" | "lastName" | "functionTitle"> & {
+    profilePictureURL?: string | null;
+  },
   baseUrl: string,
 ): SanityStaffDoc & {
   _psdImageUrl: string | null;
@@ -114,7 +113,6 @@ export function transformStaff(
     psdId: String(psd.id),
     firstName: psd.firstName,
     lastName: psd.lastName,
-    birthDate: psd.birthDate ? psd.birthDate.split(" ")[0]! : null,
     functionTitle: psd.functionTitle,
     _psdImageUrl: extractStableImageUrl(profilePictureURL, baseUrl),
     // Full URL including ?profileAccessKey — required to actually fetch the image.
@@ -243,7 +241,8 @@ export const reconcileEntity = <E>(
  * done-id set gates the next run's resume-skip, and skipping a member whose
  * image never actually landed would mean it never retries until this
  * team's full N-night rotation comes back around, a regression from the
- * pre-#2900 behaviour of retrying every night.
+ * pre-#2900 behaviour of retrying every night. The same holds for a failed
+ * removal of a portrait PSD no longer has (#3469).
  */
 export function syncMemberImage(
   kind: "player" | "staff",
@@ -256,13 +255,30 @@ export function syncMemberImage(
     fetchUrl: string,
     stableUrl: string,
   ) => Effect.Effect<void, SanityMutationError>,
+  unset: (psdId: string) => Effect.Effect<void, SanityMutationError>,
 ): Effect.Effect<boolean> {
   return Effect.gen(function* () {
     if (!stableImageUrl || !fetchImageUrl) {
+      // PSD has no portrait. A stored one is removed (#3469) — the only way a
+      // removal request made in PSD reaches the site. A no-op otherwise, so
+      // documents that never had one are not patched every night.
+      if (!existing?.psdImageUrl) {
+        yield* Effect.log(
+          `${kind} ${psdId}: no profilePictureURL from PSD — skipping image`,
+        );
+        return true;
+      }
       yield* Effect.log(
-        `${kind} ${psdId}: no profilePictureURL from PSD — skipping image`,
+        `${kind} ${psdId}: no profilePictureURL from PSD — removing stored image (storedUrl=${existing.psdImageUrl})`,
       );
-      return true;
+      return yield* unset(psdId).pipe(
+        Effect.as(true),
+        Effect.catchAll((e) =>
+          Effect.log(
+            `${kind} ${psdId}: image removal failed — ${e.message} | cause: ${String(e.cause)}`,
+          ).pipe(Effect.as(false)),
+        ),
+      );
     }
 
     const shouldUpload = needsUpload(
@@ -690,6 +706,7 @@ export const runSync = Effect.gen(function* () {
           doc._psdImageFetchUrl,
           imageState.get(doc.psdId),
           sanityWriter.uploadPlayerImage,
+          sanityWriter.unsetPlayerImage,
         );
 
         // Only checkpoint a member whose image genuinely landed (or needed
@@ -729,6 +746,7 @@ export const runSync = Effect.gen(function* () {
           doc._psdImageFetchUrl,
           staffImageState.get(doc.psdId),
           sanityWriter.uploadStaffImage,
+          sanityWriter.unsetStaffImage,
         );
 
         if (imageOk) doneStaffIds.add(doc.psdId);

@@ -261,7 +261,7 @@ An athlete registered with the club. Synced from PSD, editorially enriched in Sa
 | `player` (Sanity document)       | Speler | PSD-synced + editorial fields |
 | `PsdMember` (status: `"speler"`) | —      | Raw PSD shape                 |
 
-**PSD-synced fields (read-only):** `psdId`, `firstName`, `lastName`, `birthDate`, `nationality`, `keeper`, `positionPsd`, `psdImage`
+**PSD-synced fields (read-only):** `psdId`, `firstName`, `lastName`, `birthDate`, `nationality`, `keeper`, `positionPsd`, `psdImage` (removed again when PSD no longer has a portrait, #3469)
 
 **Editorial fields:** `jerseyNumber`, `height`, `weight`, `position`, `transparentImage`, `celebrationImage`, `bio`
 

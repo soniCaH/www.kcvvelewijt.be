@@ -37,6 +37,8 @@ function makeMutationMock(
     upsertStaff: () => Effect.succeed(undefined),
     uploadPlayerImage: () => Effect.succeed(undefined),
     uploadStaffImage: () => Effect.succeed(undefined),
+    unsetPlayerImage: () => Effect.succeed(undefined),
+    unsetStaffImage: () => Effect.succeed(undefined),
     archivePlayers: () => Effect.succeed(undefined),
     archiveStaff: () => Effect.succeed(undefined),
     archiveTeams: () => Effect.succeed(undefined),

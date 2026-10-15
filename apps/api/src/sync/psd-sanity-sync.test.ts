@@ -171,8 +171,12 @@ describe("transformStaff", () => {
     expect(result.psdId).toBe("99");
     expect(result.firstName).toBe("Marc");
     expect(result.lastName).toBe("Peeters");
-    expect(result.birthDate).toBe("1975-04-12");
     expect(result.functionTitle).toBe("T1");
+  });
+
+  it("emits no birthDate (staff birth dates are not stored, #3469)", () => {
+    const result = transformStaff(baseStaff, BASE_URL);
+    expect(result).not.toHaveProperty("birthDate");
   });
 
   it("handles null functionTitle", () => {
@@ -181,11 +185,6 @@ describe("transformStaff", () => {
       BASE_URL,
     );
     expect(result.functionTitle).toBeNull();
-  });
-
-  it("handles null birthDate", () => {
-    const result = transformStaff({ ...baseStaff, birthDate: null }, BASE_URL);
-    expect(result.birthDate).toBeNull();
   });
 
   it("passes through full functionTitle without truncation", () => {
@@ -454,17 +453,66 @@ describe("reconcileEntity", () => {
 describe("syncMemberImage (#2900 review)", () => {
   it("returns true and skips upload when there is no PSD image", async () => {
     const upload = vi.fn(() => Effect.succeed(undefined as void));
+    const unset = vi.fn(() => Effect.succeed(undefined as void));
 
     const ok = await Effect.runPromise(
-      syncMemberImage("player", "1", null, null, undefined, upload),
+      syncMemberImage("player", "1", null, null, undefined, upload, unset),
     );
 
     expect(ok).toBe(true);
     expect(upload).not.toHaveBeenCalled();
+    expect(unset).not.toHaveBeenCalled();
+  });
+
+  it("unsets the stored portrait when PSD no longer has one (#3469)", async () => {
+    const upload = vi.fn(() => Effect.succeed(undefined as void));
+    const unset = vi.fn(() => Effect.succeed(undefined as void));
+
+    const ok = await Effect.runPromise(
+      syncMemberImage(
+        "player",
+        "1",
+        null,
+        null,
+        {
+          psdImageUrl: "https://kcvv.prosoccerdata.com/images/player/1.jpg?v=2",
+          hasPsdImage: true,
+        },
+        upload,
+        unset,
+      ),
+    );
+
+    expect(ok).toBe(true);
+    expect(unset).toHaveBeenCalledExactlyOnceWith("1");
+    expect(upload).not.toHaveBeenCalled();
+  });
+
+  it("returns false when the unset fails — the member retries next run (#3469)", async () => {
+    const upload = vi.fn(() => Effect.succeed(undefined as void));
+    const unset = vi.fn(() => Effect.fail(new SanityMutationError("boom")));
+
+    const ok = await Effect.runPromise(
+      syncMemberImage(
+        "staff",
+        "9",
+        null,
+        null,
+        {
+          psdImageUrl: "https://kcvv.prosoccerdata.com/images/staff/9.jpg?v=2",
+          hasPsdImage: true,
+        },
+        upload,
+        unset,
+      ),
+    );
+
+    expect(ok).toBe(false);
   });
 
   it("returns true and skips upload when the stored image already matches", async () => {
     const upload = vi.fn(() => Effect.succeed(undefined as void));
+    const unset = vi.fn(() => Effect.succeed(undefined as void));
     const stableUrl = "https://kcvv.prosoccerdata.com/images/player/1.jpg?v=2";
 
     const ok = await Effect.runPromise(
@@ -475,6 +523,7 @@ describe("syncMemberImage (#2900 review)", () => {
         `${stableUrl}&profileAccessKey=abc`,
         { psdImageUrl: stableUrl, hasPsdImage: true },
         upload,
+        unset,
       ),
     );
 
@@ -484,6 +533,7 @@ describe("syncMemberImage (#2900 review)", () => {
 
   it("returns true when the upload succeeds", async () => {
     const upload = vi.fn(() => Effect.succeed(undefined as void));
+    const unset = vi.fn(() => Effect.succeed(undefined as void));
     const stableUrl = "https://kcvv.prosoccerdata.com/images/player/1.jpg?v=3";
 
     const ok = await Effect.runPromise(
@@ -497,6 +547,7 @@ describe("syncMemberImage (#2900 review)", () => {
           hasPsdImage: true,
         },
         upload,
+        unset,
       ),
     );
 
@@ -508,6 +559,7 @@ describe("syncMemberImage (#2900 review)", () => {
     const upload = vi.fn(() =>
       Effect.fail(new SanityMutationError("rate limited (429)")),
     );
+    const unset = vi.fn(() => Effect.succeed(undefined as void));
     const stableUrl = "https://kcvv.prosoccerdata.com/images/staff/9.jpg?v=2";
 
     const ok = await Effect.runPromise(
@@ -518,6 +570,7 @@ describe("syncMemberImage (#2900 review)", () => {
         `${stableUrl}&profileAccessKey=abc`,
         undefined,
         upload,
+        unset,
       ),
     );
 
