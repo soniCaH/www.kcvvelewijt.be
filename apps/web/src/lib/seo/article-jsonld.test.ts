@@ -372,6 +372,18 @@ describe("buildEventJsonLdInput", () => {
     expect(result?.startDate).toBe("2026-04-27");
   });
 
+  it("keeps the raw date when the date itself is unparseable", () => {
+    const result = buildEventJsonLdInput(
+      {
+        ...baseArticle,
+        articleType: "event",
+        body: [eventFact({ date: "not-a-date", startTime: "10:00" })],
+      },
+      SHARE_URL,
+    );
+    expect(result?.startDate).toBe("not-a-date");
+  });
+
   it("omits endDate when neither endDate nor endTime is set", () => {
     const result = buildEventJsonLdInput(
       {
