@@ -20,8 +20,9 @@ export interface WorkerEnv {
   readonly PSD_GATE: DurableObjectNamespace; // global PSD rate-limit + single-flight gate (see psd/gate.ts)
   readonly BFF_SHARED_SECRET?: string; // wrangler secret; required — every route except `/webhooks/index` refuses without it (#3485). Same value as the web app's server-only BFF_SHARED_SECRET, sent as the `x-kcvv-bff-key` header
   readonly SANITY_WEBHOOK_SECRET: string; // Sanity webhook signing secret (same value as on the Sanity hook) — wrangler secret
-  readonly RESEND_API_KEY?: string; // Resend transactional email — wrangler secret (absent locally → email dispatch is a no-op)
-  readonly TURNSTILE_SECRET?: string; // Cloudflare Turnstile secret — wrangler secret (absent locally → verification is skipped)
+  readonly RESEND_API_KEY?: string; // Resend transactional email — wrangler secret (absent without ALLOW_MISSING_FORM_SECRETS → dispatch fails with EmailDeliveryError)
+  readonly TURNSTILE_SECRET?: string; // Cloudflare Turnstile secret — wrangler secret (absent without ALLOW_MISSING_FORM_SECRETS → verification fails closed)
+  readonly ALLOW_MISSING_FORM_SECRETS?: string; // "true" only in .dev.vars — lets a missing TURNSTILE_SECRET / RESEND_API_KEY skip verification / dispatch with a warning (#3464). Never set in wrangler.toml, never a secret: anything else, or unset, fails closed
   readonly SLACK_ALERT_WEBHOOK_URL?: string; // Slack incoming-webhook for PSD incident/drift alerts — wrangler secret (absent locally → alerting is a no-op)
   readonly PSD_ONDEMAND_DAILY_BUDGET?: string; // [vars] — once today's psd:calls counter reaches it, a cold cache miss fails fast with no PSD call (#3468). Unset → no budget
   readonly SYNC_MANUAL_RUN?: string; // "1" only via `scripts/trigger-psd-sync.sh` (`wrangler dev --var`) — the PSD sync then skips cycle-end reconciliation and every accumulator write/clear, so a hand-run team never touches nightly-cycle state (#3465). Never set in wrangler.toml

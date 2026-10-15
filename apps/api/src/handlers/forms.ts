@@ -141,7 +141,7 @@ export const handleMembership = (payload: MembershipRequest) =>
           .dispatchEmail(message)
           .pipe(
             Effect.catchAll((err) =>
-              Effect.logWarning(
+              Effect.logError(
                 `[membership] email dispatch failed: ${String(err)}`,
               ),
             ),
