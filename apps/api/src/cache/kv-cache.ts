@@ -9,6 +9,7 @@ import {
   postSlack,
 } from "../psd/slack-alert";
 import { ResourceNotFoundError, UpstreamUnavailableError } from "../psd/errors";
+import { oncePerDay, parseCeiling, parseCount, utcDay } from "./daily-ceiling";
 
 /**
  * Per-endpoint soft TTLs in seconds.
@@ -39,20 +40,9 @@ export const TTL = {
  * same key, so a repeated unknown id costs no PSD call (#3468). */
 export const NOT_FOUND_TTL = 60 * 60; // 1 hour
 
-/** UTC date as `YYYY-MM-DD` — the day key of every daily counter. */
-export const utcDay = (d: Date = new Date()): string =>
-  d.toISOString().slice(0, 10);
-
 /** Today's PSD-call counter (`increment` writes it, the on-demand budget reads it). */
 export const psdCallsKey = (d: Date = new Date()): string =>
   `psd:calls:${utcDay(d)}`;
-
-/** A positive integer `[vars]` ceiling, or `undefined` (no ceiling) when the
- * var is unset or not a number. */
-export const parseCeiling = (raw: string | undefined): number | undefined => {
-  const n = Number.parseInt(raw ?? "", 10);
-  return Number.isFinite(n) && n >= 0 ? n : undefined;
-};
 
 /** Persisted negative marker TTL (seconds). Suppresses re-storming after a failed
  * refresh: subsequent requests serve stale without re-fanning until it expires.
@@ -599,24 +589,22 @@ export const TypedKvCache = <A, I>(
         const budget = parseCeiling(env.PSD_ONDEMAND_DAILY_BUDGET);
         const checkBudget = Effect.gen(function* () {
           if (!psdBacked || budget === undefined) return;
-          const spent = Number.parseInt(
-            (yield* cache.get(psdCallsKey())) ?? "0",
-            10,
-          );
-          if (!(spent >= budget)) return;
+          const spent = parseCount(yield* cache.get(psdCallsKey()));
+          if (spent < budget) return;
           const day = utcDay();
           yield* Effect.logError(
             `TypedKvCache "${key}": PSD on-demand budget reached (${spent}/${budget} on ${day}) — cold miss refused`,
           );
-          if ((yield* cache.get(budgetAlertKey(day))) === null) {
-            yield* cache.set(budgetAlertKey(day), "1", 60 * 60 * 48);
-            yield* Effect.promise(() =>
+          yield* oncePerDay(
+            cache,
+            budgetAlertKey(day),
+            Effect.promise(() =>
               postSlack(
                 env.SLACK_ALERT_WEBHOOK_URL,
                 buildPsdBudgetMessage({ day, spent, budget }),
               ),
-            );
-          }
+            ),
+          );
           return yield* Effect.fail(
             new UpstreamUnavailableError({
               message: `PSD on-demand daily budget reached (${spent}/${budget})`,
@@ -772,12 +760,7 @@ export const KvCacheLive = Layer.effect(
         Effect.tryPromise({
           try: async () => {
             const key = psdCallsKey();
-            const current = await env.PSD_CACHE.get(key);
-            // Guard against a malformed cached value: parseInt on a
-            // non-numeric string yields NaN, which would persist as "NaN"
-            // and break every future increment until the 48 h TTL expires.
-            const parsed = current ? parseInt(current, 10) : 0;
-            const next = (Number.isFinite(parsed) ? parsed : 0) + by;
+            const next = parseCount(await env.PSD_CACHE.get(key)) + by;
             // Keep counter for 48 h so yesterday's value stays visible
             await env.PSD_CACHE.put(key, String(next), {
               expirationTtl: 60 * 60 * 48,

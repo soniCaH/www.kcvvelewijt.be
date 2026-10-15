@@ -1,6 +1,12 @@
 import { Context, Effect, Layer } from "effect";
 import { WorkerEnvTag } from "../env";
-import { KvCacheService, parseCeiling, utcDay } from "../cache/kv-cache";
+import { KvCacheService } from "../cache/kv-cache";
+import {
+  oncePerDay,
+  parseCeiling,
+  parseCount,
+  utcDay,
+} from "../cache/daily-ceiling";
 
 export class AiAnswerError extends Error {
   readonly _tag = "AiAnswerError" as const;
@@ -46,20 +52,14 @@ export const AiAnswerServiceLive = Layer.effect(
 
     // Daily cap (#3468): Workers AI has no hard spending cap. Approximate —
     // KV is not atomic — which is fine for a ceiling.
-    const answersToday = (day: string) =>
-      Effect.map(cache.get(answersKey(day)), (raw) => {
-        const n = Number.parseInt(raw ?? "0", 10);
-        return Number.isFinite(n) ? n : 0;
-      });
-
     const logCappedOncePerDay = (day: string, count: number, max: number) =>
-      Effect.gen(function* () {
-        if ((yield* cache.get(cappedLoggedKey(day))) !== null) return;
-        yield* cache.set(cappedLoggedKey(day), "1", COUNTER_TTL);
-        yield* Effect.logError(
+      oncePerDay(
+        cache,
+        cappedLoggedKey(day),
+        Effect.logError(
           `[Workers AI] daily cap reached (${count}/${max} answers on ${day}) — /search serves results without an answer until midnight UTC`,
-        );
-      });
+        ),
+      );
 
     const run = (query: string, context: string) =>
       Effect.tryPromise({
@@ -99,7 +99,7 @@ export const AiAnswerServiceLive = Layer.effect(
       generateAnswer: (query: string, context: string) =>
         Effect.gen(function* () {
           const day = utcDay();
-          const count = yield* answersToday(day);
+          const count = parseCount(yield* cache.get(answersKey(day)));
           if (cap !== undefined && count >= cap) {
             yield* logCappedOncePerDay(day, count, cap);
             return undefined;

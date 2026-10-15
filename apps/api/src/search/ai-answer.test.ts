@@ -5,7 +5,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { Effect, Layer, Logger } from "effect";
 import { AiAnswerService, AiAnswerServiceLive } from "./ai-answer";
-import { KvCacheLive, utcDay } from "../cache/kv-cache";
+import { KvCacheLive } from "../cache/kv-cache";
+import { utcDay } from "../cache/daily-ceiling";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
 
 function setup(cap: string | undefined, answersToday?: number) {
