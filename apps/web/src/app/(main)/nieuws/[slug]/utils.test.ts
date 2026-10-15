@@ -29,7 +29,6 @@ function makeMatch(overrides: Partial<MatchDetail> = {}): MatchDetail {
     },
     status: "finished",
     competition: "3e Provinciale",
-    is_home: true,
     hasReport: true,
     ...overrides,
   } as MatchDetail;
@@ -50,21 +49,10 @@ describe("toHeroMatchData", () => {
     expect(data.status).toBe("finished");
   });
 
-  it("derives kcvvSide from is_home when present (teamId-driven, never name-based)", () => {
-    expect(
-      assertHero(toHeroMatchData(makeMatch({ is_home: true }))).kcvvSide,
-    ).toBe("home");
-    expect(
-      assertHero(toHeroMatchData(makeMatch({ is_home: false }))).kcvvSide,
-    ).toBe("away");
-  });
-
-  it("falls back to the KCVV club id when is_home is absent (getMatchDetail)", () => {
-    // getMatchDetail leaves is_home null — derive from the club id (1235).
+  it("derives kcvvSide from the KCVV club id (getMatchDetail carries no is_home)", () => {
     const homeKcvv = assertHero(
       toHeroMatchData(
         makeMatch({
-          is_home: undefined,
           home_team: { id: 1235, name: "KCVV Elewijt", logo: "kcvv.png" },
           away_team: { id: 999, name: "Racing Mechelen", logo: "r.png" },
         }),
@@ -75,7 +63,6 @@ describe("toHeroMatchData", () => {
     const awayKcvv = assertHero(
       toHeroMatchData(
         makeMatch({
-          is_home: undefined,
           home_team: { id: 999, name: "Racing Mechelen", logo: "r.png" },
           away_team: { id: 1235, name: "KCVV Elewijt", logo: "kcvv.png" },
         }),
@@ -84,11 +71,10 @@ describe("toHeroMatchData", () => {
     expect(awayKcvv.kcvvSide).toBe("away");
   });
 
-  it("leaves kcvvSide undefined when neither side is KCVV and is_home is absent", () => {
+  it("leaves kcvvSide undefined when neither side is KCVV", () => {
     const data = assertHero(
       toHeroMatchData(
         makeMatch({
-          is_home: undefined,
           home_team: { id: 111, name: "Team A", logo: "a.png" },
           away_team: { id: 222, name: "Team B", logo: "b.png" },
         }),

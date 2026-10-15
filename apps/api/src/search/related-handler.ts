@@ -1,7 +1,7 @@
 import { Effect } from "effect";
 import { Schema as S } from "effect";
 import { RelatedItem } from "@kcvv/api-contract";
-import { VectorizeService } from "./vectorize";
+import { VectorizeService, type VectorizeError } from "./vectorize";
 
 /** No related items for an id. Raised by `handlers/related.ts` so an empty
  * result stays out of KV (#3468). */
@@ -27,17 +27,22 @@ export class NoRelatedItems extends Error {
 export const handleRelated = (request: {
   id: string;
   limit: number;
-}): Effect.Effect<(typeof RelatedItem.Type)[], never, VectorizeService> =>
+}): Effect.Effect<
+  (typeof RelatedItem.Type)[],
+  VectorizeError,
+  VectorizeService
+> =>
   Effect.gen(function* () {
     const vectorize = yield* VectorizeService;
 
-    const stored = yield* vectorize.getByIds([request.id]).pipe(Effect.orDie);
+    const stored = yield* vectorize.getByIds([request.id]);
     if (stored.length === 0) return [];
 
     const vector = stored[0]!.values;
-    const matches = yield* vectorize
-      .query(vector, { topK: request.limit * 3 + 1, returnMetadata: "all" })
-      .pipe(Effect.orDie);
+    const matches = yield* vectorize.query(vector, {
+      topK: request.limit * 3 + 1,
+      returnMetadata: "all",
+    });
 
     // Preserve query-side score ordering; only drop the self match up front
     // (cheap id comparison, no metadata dependency).
@@ -48,7 +53,7 @@ export const handleRelated = (request: {
 
     if (candidateIds.length === 0) return [];
 
-    const enriched = yield* vectorize.getByIds(candidateIds).pipe(Effect.orDie);
+    const enriched = yield* vectorize.getByIds(candidateIds);
     const byId = new Map(enriched.map((r) => [r.id, r]));
 
     return candidateIds
