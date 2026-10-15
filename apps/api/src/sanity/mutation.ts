@@ -2,6 +2,7 @@ import { createClient } from "@sanity/client";
 import { Context, Effect, Layer } from "effect";
 import { WorkerEnvTag } from "../env";
 import { KvCacheService } from "../cache/kv-cache";
+import { PsdGateService } from "../psd/gate";
 import { sanityClientConfig } from "./config";
 
 /**
@@ -83,7 +84,6 @@ export interface SanityStaffDoc {
   psdId: string;
   firstName: string | null;
   lastName: string | null;
-  birthDate: string | null; // "YYYY-MM-DD"
   functionTitle: string | null; // from PSD functionTitle; null clears the stored value
 }
 
@@ -161,6 +161,16 @@ export interface SanityMutationInterface {
     fetchUrl: string,
     stableUrl: string,
   ) => Effect.Effect<void, SanityMutationError>;
+  /** Remove the stored PSD portrait (`psdImage` + `psdImageUrl`) of a player /
+   * staff member PSD no longer has a portrait for, then delete the asset if
+   * no document references it any more (#3469). A no-op when the document
+   * has no stored portrait. A failed asset delete is logged, never raised. */
+  readonly unsetPlayerImage: (
+    psdId: string,
+  ) => Effect.Effect<void, SanityMutationError>;
+  readonly unsetStaffImage: (
+    psdId: string,
+  ) => Effect.Effect<void, SanityMutationError>;
   /** Create a membershipApplication document (status defaults to "new"). */
   readonly writeMembershipApplication: (
     doc: SanityMembershipApplicationDoc,
@@ -191,6 +201,9 @@ export const SanityMutationLive = Layer.effect(
   Effect.gen(function* () {
     const env = yield* WorkerEnvTag;
     const cache = yield* KvCacheService;
+    // Portrait downloads are PSD calls: they take a gate token like every
+    // other one (#3469), or they run outside the ≤5/s worldwide budget.
+    const gate = yield* PsdGateService;
     const client = createClient({
       ...sanityClientConfig(env),
       useCdn: false,
@@ -227,6 +240,70 @@ export const SanityMutationLive = Layer.effect(
         catch: (cause) =>
           new SanityMutationError(`Failed to upsert ${type} ${psdId}`, cause),
       }).pipe(Effect.asVoid);
+
+    /** Stored portrait of a member doc: the dedup url and the asset it points at. */
+    const readStoredImage = (entityType: string, psdId: string) =>
+      Effect.tryPromise({
+        try: async () => {
+          const doc = (await client.getDocument(docId(entityType, psdId))) as {
+            psdImageUrl?: string;
+            psdImage?: { asset?: { _ref?: string } };
+          } | null;
+          return {
+            url: doc?.psdImageUrl ?? null,
+            assetId: doc?.psdImage?.asset?._ref ?? null,
+          };
+        },
+        catch: (cause) =>
+          new SanityMutationError(
+            `Failed to read stored image of ${entityType} ${psdId}`,
+            cause,
+          ),
+      });
+
+    /**
+     * Delete a superseded portrait asset unless a document still references it
+     * (#3469). Never fails: the member's sync already succeeded, and a leftover
+     * asset is what the sanity-ops cleanup script sweeps.
+     */
+    const deleteAssetIfUnreferenced = (assetId: string) =>
+      Effect.tryPromise({
+        try: async () => {
+          const refs = await client.fetch<number>(
+            "count(*[references($assetId)])",
+            { assetId },
+          );
+          if (refs === 0) await client.delete(assetId);
+        },
+        catch: (cause) => cause,
+      }).pipe(
+        Effect.catchAll((cause) =>
+          Effect.logWarning(
+            `[deleteAssetIfUnreferenced] ${assetId} not deleted — ${String(cause)}`,
+          ),
+        ),
+      );
+
+    /** Unset the stored portrait (when there is one), then drop its asset. */
+    const unsetMemberImage =
+      (entityType: "player" | "staffMember") => (psdId: string) =>
+        Effect.gen(function* () {
+          const stored = yield* readStoredImage(entityType, psdId);
+          if (!stored.url && !stored.assetId) return;
+          yield* Effect.tryPromise({
+            try: () =>
+              client
+                .patch(docId(entityType, psdId))
+                .unset(["psdImage", "psdImageUrl"])
+                .commit(),
+            catch: (cause) =>
+              new SanityMutationError(
+                `Failed to unset image of ${entityType} ${psdId}`,
+                cause,
+              ),
+          });
+          if (stored.assetId) yield* deleteAssetIfUnreferenced(stored.assetId);
+        });
 
     /**
      * Shared body behind uploadPlayerImage / uploadStaffImage (#2895) — the
@@ -274,7 +351,9 @@ export const SanityMutationLive = Layer.effect(
           // Fetch image from PSD with timeout. Image downloads use fetch()
           // directly so they bypass countedFetch — the daily PSD-call counter
           // is incremented via Effect.ensuring below, so it ticks even on
-          // timeout/network error.
+          // timeout/network error. The gate token comes first, as in every
+          // PSD client (#3469).
+          yield* gate.acquireToken;
           const response = yield* Effect.tryPromise({
             try: async () => {
               const psdAbort = new AbortController();
@@ -357,6 +436,8 @@ export const SanityMutationLive = Layer.effect(
             yield* Effect.log(
               `[${logName}] ${entityLabel}=${psdId} bytes match PSD "no image available" placeholder (sha1=${sha1Hex}) — ${placeholderFallbackNote}`,
             );
+            // The placeholder is "no portrait": a stored real one goes (#3469).
+            yield* unsetMemberImage(entityType)(psdId);
             return;
           }
 
@@ -401,6 +482,8 @@ export const SanityMutationLive = Layer.effect(
             `[${logName}] ${entityLabel}=${psdId} sanity_asset_id=${asset._id}`,
           );
 
+          const previous = yield* readStoredImage(entityType, psdId);
+
           yield* Effect.tryPromise({
             try: () =>
               client
@@ -426,6 +509,11 @@ export const SanityMutationLive = Layer.effect(
           yield* Effect.log(
             `[${logName}] ${entityLabel}=${psdId} patch committed — image upload complete`,
           );
+
+          // Identical bytes dedup to the same asset id — never delete that one.
+          if (previous.assetId && previous.assetId !== asset._id) {
+            yield* deleteAssetIfUnreferenced(previous.assetId);
+          }
         }).pipe(Effect.asVoid);
       };
 
@@ -460,6 +548,10 @@ export const SanityMutationLive = Layer.effect(
       uploadPlayerImage: uploadPlayerImageImpl,
 
       uploadStaffImage: uploadStaffImageImpl,
+
+      unsetPlayerImage: unsetMemberImage("player"),
+
+      unsetStaffImage: unsetMemberImage("staffMember"),
 
       archivePlayers: (psdIds) => archiveByPsdIds("player", psdIds),
 
@@ -571,7 +663,6 @@ export const SanityMutationLive = Layer.effect(
           psdId: doc.psdId,
           firstName: doc.firstName,
           lastName: doc.lastName,
-          birthDate: doc.birthDate,
           functionTitle: doc.functionTitle,
           archived: false,
         }),

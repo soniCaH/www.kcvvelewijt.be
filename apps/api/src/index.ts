@@ -79,12 +79,14 @@ function buildAppLayer(env: WorkerEnv, ctx: ExecutionContext) {
     Layer.provide(VectorizeServiceLive),
     Layer.provide(AiAnswerServiceLive),
     Layer.provide(PsdServiceLive),
-    // Global PSD gate (token bucket + single-flight) and the SWR background
-    // runner that keeps the read path fresh without storming PSD (#2328).
-    Layer.provide(PsdGateLive),
+    // The SWR background runner keeps the read path fresh without storming
+    // PSD (#2328).
     Layer.provide(BackgroundRunnerLive(env, ctx)),
     Layer.provide(SanityProjectionLive),
     Layer.provide(SanityMutationLive),
+    // Global PSD gate (token bucket + single-flight). Below SanityMutationLive
+    // on purpose: the portrait download takes a gate token too (#3469).
+    Layer.provide(PsdGateLive),
     Layer.provide(KvCacheLive),
     Layer.provide(Layer.succeed(WorkerEnvTag, env)),
     Layer.provideMerge(WorkerPlatformLayer),

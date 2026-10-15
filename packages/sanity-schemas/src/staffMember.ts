@@ -64,13 +64,6 @@ export const staffMember = defineType({
       description: 'Optioneel telefoonnummer. Wordt enkel getoond waar het staflid als contactpersoon is gekoppeld.',
     }),
     defineField({
-      name: 'birthDate',
-      title: 'Birth date',
-      type: 'date',
-      group: 'identiteit',
-      description: 'Geboortedatum (optioneel, niet publiek getoond — voor intern overzicht).',
-    }),
-    defineField({
       name: 'joinDate',
       title: 'Join date',
       type: 'date',

@@ -54,6 +54,12 @@ function makeSanityMocks() {
   const upsertStaff = vi.fn(() => Effect.succeed(undefined as void));
   const uploadPlayerImage = vi.fn(() => Effect.succeed(undefined as void));
   const uploadStaffImage = vi.fn(() => Effect.succeed(undefined as void));
+  const unsetPlayerImage = vi.fn((_psdId: string) =>
+    Effect.succeed(undefined as void),
+  );
+  const unsetStaffImage = vi.fn((_psdId: string) =>
+    Effect.succeed(undefined as void),
+  );
   const archivePlayers = vi.fn(() => Effect.succeed(undefined as void));
   const archiveStaff = vi.fn(() => Effect.succeed(undefined as void));
   const archiveTeams = vi.fn(() => Effect.succeed(undefined as void));
@@ -88,6 +94,8 @@ function makeSanityMocks() {
     upsertStaff,
     uploadPlayerImage,
     uploadStaffImage,
+    unsetPlayerImage,
+    unsetStaffImage,
     archivePlayers,
     archiveStaff,
     archiveTeams,
@@ -112,6 +120,8 @@ function makeSanityMocks() {
     upsertStaff,
     uploadPlayerImage,
     uploadStaffImage,
+    unsetPlayerImage,
+    unsetStaffImage,
     archivePlayers,
     archiveStaff,
     archiveTeams,
@@ -330,6 +340,34 @@ function buildTestLayer(
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
 describe("runSync", () => {
+  it("unsets the stored portrait of a player PSD no longer has a portrait for (#3469)", async () => {
+    const kvStub = makeKvStub();
+    const { unsetPlayerImage, getPlayersImageState, writerMock, readerMock } =
+      makeSanityMocks();
+    getPlayersImageState.mockReturnValue(
+      Effect.succeed(
+        new Map([
+          [
+            "6453",
+            {
+              psdImageUrl: "https://kcvv.prosoccerdata.com/old.jpg?v=1",
+              hasPsdImage: true,
+            },
+          ],
+        ]),
+      ),
+    );
+    const psdMock = makePsdTeamClientMock([ONE_TEAM], [ONE_PLAYER]);
+
+    await Effect.runPromise(
+      runSync.pipe(
+        Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
+      ),
+    );
+
+    expect(unsetPlayerImage).toHaveBeenCalledExactlyOnceWith("6453");
+  });
+
   it("upserts 1 player and 1 team, skips staff, when given 1 team with 1 player", async () => {
     const kvStub = makeKvStub();
     const {
@@ -458,6 +496,8 @@ describe("runSync", () => {
       }),
       uploadPlayerImage: vi.fn(() => Effect.succeed(undefined as void)),
       uploadStaffImage: vi.fn(() => Effect.succeed(undefined as void)),
+      unsetPlayerImage: vi.fn(() => Effect.succeed(undefined as void)),
+      unsetStaffImage: vi.fn(() => Effect.succeed(undefined as void)),
       archivePlayers: vi.fn(() => Effect.succeed(undefined as void)),
       archiveStaff: vi.fn(() => Effect.succeed(undefined as void)),
       archiveTeams: vi.fn(() => Effect.succeed(undefined as void)),
