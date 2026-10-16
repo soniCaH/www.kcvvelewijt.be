@@ -7,7 +7,7 @@ import { HttpNotFound, type Match } from "@kcvv/api-contract";
 // "Import the module under test at module scope".
 import "@/lib/effect/runtime";
 
-import sitemap from "./sitemap";
+import sitemap, * as sitemapModule from "./sitemap";
 
 const mockFetch = vi.fn();
 const { mockGetMatches } = vi.hoisted(() => ({ mockGetMatches: vi.fn() }));
@@ -275,5 +275,16 @@ describe("sitemap.ts", () => {
       expect(await matchUrls()).toEqual([]);
       expect(console.error).toHaveBeenCalledTimes(1);
     });
+  });
+});
+
+describe("sitemap.ts route config", () => {
+  // #3495: Vercel serves the prerendered sitemap as a static file (same
+  // headers as robots.txt), so `revalidate = 3600` (#3472) never fired and
+  // `/sitemap.xml` stayed frozen at the deploy. A request-time route has no
+  // prerendered copy to freeze. Do not switch this back to `revalidate`.
+  it("renders per request, never as a prerendered file", () => {
+    expect(sitemapModule.dynamic).toBe("force-dynamic");
+    expect("revalidate" in sitemapModule).toBe(false);
   });
 });
