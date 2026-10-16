@@ -92,11 +92,11 @@ describe("ClubEditorialHub", () => {
     ).toHaveAttribute("href", "/club/contact");
   });
 
-  it("renders the three news covers as images", () => {
+  it("renders the three news covers and the Jeugdbestuur photo as images", () => {
     const { container } = render(<ClubEditorialHub />);
-    // News covers are decorative (alt=""), so they are presentational rather
+    // Card photos are decorative (alt=""), so they are presentational rather
     // than role=img — count them straight off the DOM instead.
-    expect(container.querySelectorAll("img")).toHaveLength(3);
+    expect(container.querySelectorAll("img")).toHaveLength(4);
   });
 
   it("exposes a 12-card config of three news + nine nav cards", () => {

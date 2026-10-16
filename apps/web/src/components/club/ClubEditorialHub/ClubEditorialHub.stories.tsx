@@ -5,13 +5,13 @@ import {
   type ClubHubCard,
 } from "./ClubEditorialHub";
 
-// Local committed asset served by Storybook `staticDirs` so the news covers
-// render deterministically in VR (the production config points at Sanity CDN
+// Local committed asset served by Storybook `staticDirs` so every card photo
+// renders deterministically in VR (the production config points at Sanity CDN
 // URLs, which are non-deterministic at capture time).
 const COVER = "/images/youth-trainers.jpg";
 
 const vrCards: ClubHubCard[] = CLUB_HUB_CARDS.map((card) =>
-  card.variant === "news" ? { ...card, imageUrl: COVER } : card,
+  card.imageUrl ? { ...card, imageUrl: COVER } : card,
 );
 
 const meta = {
@@ -23,7 +23,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "The /club index nav hub (design lock 10c3 + #2208): a uniform 3-up grid of 16:9 `<EditorialHubCard>`s under a 'Dit is KCVV.' header, four rows deep. Three news cards (newsprint-colour cover, jersey-deep tag) — Geschiedenis · Ultras · Aansluiten, spaced one per row — and nine nav cards (jersey-deep glyph panel, cream tag) — Bestuur · Jeugdbestuur · Organigram · Angels · Downloads · Praktisch · Vrijwilligers · Cashless · Contact. Source order in `CLUB_HUB_CARDS` is render order. The hub must stay a superset of the `De club` dropdown (#2414).",
+          "The /club index nav hub (design lock 10c3 + #2208): a uniform 3-up grid of 16:9 `<EditorialHubCard>`s under a 'Dit is KCVV.' header, four rows deep. Three news cards (newsprint-colour cover, jersey-deep tag) — Geschiedenis · Ultras · Aansluiten, spaced one per row — and nine nav cards (jersey-deep glyph panel, cream tag; Jeugdbestuur shows its group photo behind the scrim) — Bestuur · Jeugdbestuur · Organigram · Angels · Downloads · Praktisch · Vrijwilligers · Cashless · Contact. Source order in `CLUB_HUB_CARDS` is render order. The hub must stay a superset of the `De club` dropdown (#2414).",
       },
     },
   },
