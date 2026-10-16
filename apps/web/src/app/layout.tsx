@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { isUnderJeugd } from "@/components/layout/menuItems";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
+import { HashHistorySync } from "@/components/layout/HashHistorySync";
 import { CookieConsentBanner } from "@/components/layout/CookieConsentBanner";
 import { GoogleTagManagerLoader } from "@/components/layout/GoogleTagManagerLoader";
 // Deep import, not the `@/components/analytics` barrel — deliberately: the
@@ -106,6 +107,8 @@ export default async function RootLayout({
       </Script>
       <GoogleTagManagerLoader gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
       <ScrollToTop />
+      {/* Lets Back leave a page after a plain #hash link (#3501). */}
+      <HashHistorySync />
       {/* Global empty-state-undo click listener (#2719) — see
             EmptyStateUndoTracker.tsx for why it lives here. */}
       <EmptyStateUndoTracker />
