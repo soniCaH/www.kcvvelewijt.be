@@ -49,7 +49,7 @@ describe("/club page", () => {
     render(<ClubPage />);
 
     const link = screen.getByRole("link", {
-      name: /het team achter het team/i,
+      name: /dagelijkse werking/i,
     });
     expect(link).toHaveAttribute("href", "/club/bestuur");
   });

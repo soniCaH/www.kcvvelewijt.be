@@ -55,7 +55,7 @@ describe("ClubEditorialHub", () => {
       screen.getByRole("link", { name: /meer dan een eeuw voetbalpassie/i }),
     ).toHaveAttribute("href", "/club/geschiedenis");
     expect(
-      screen.getByRole("link", { name: /het team achter het team/i }),
+      screen.getByRole("link", { name: /dagelijkse werking/i }),
     ).toHaveAttribute("href", "/club/bestuur");
     expect(
       screen.getByRole("link", { name: /onze structuur/i }),

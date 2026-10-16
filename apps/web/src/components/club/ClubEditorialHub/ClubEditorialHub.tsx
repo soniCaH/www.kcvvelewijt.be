@@ -70,7 +70,7 @@ export const CLUB_HUB_CARDS: ClubHubCard[] = [
     variant: "nav",
     tag: "Bestuur",
     href: "/club/bestuur",
-    title: "Het team achter het team",
+    title: "Dagelijkse Werking",
     arrowText: "Ontdek",
     iconName: "UsersThree",
   },
