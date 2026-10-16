@@ -2,9 +2,13 @@ import type { MetadataRoute } from "next";
 
 import { SITE_CONFIG } from "@/lib/constants";
 
-// Without this the sitemap is built once and frozen: new and expired content
-// would only show after the next deploy (#3472).
-export const revalidate = 3600;
+// Rendered per request, not prerendered (#3495). #3472 used `revalidate = 3600`
+// and Next honours it (`x-nextjs-cache: STALE` on `next start`), but on Vercel
+// the prerendered sitemap is served as a static file - same headers as
+// robots.txt - and stayed frozen at the deploy (`age` > 4800 s, always HIT).
+// A request-time route has no prerendered copy to freeze, so new, scheduled
+// and expired articles show up on the next crawl. Never use `revalidate` here.
+export const dynamic = "force-dynamic";
 
 const staticRoutes: Array<{
   path: string;

@@ -272,7 +272,6 @@ describe("next.config security surface (#3476)", () => {
   it("sends exactly the four baseline security headers on every path", async () => {
     const rules = await nextConfig.headers!();
 
-    expect(rules).toHaveLength(1);
     expect(rules[0]!.source).toBe("/:path*");
     expect(rules[0]!.headers).toEqual([
       { key: "X-Frame-Options", value: "SAMEORIGIN" },
@@ -283,6 +282,21 @@ describe("next.config security surface (#3476)", () => {
         value: "strict-origin-when-cross-origin",
       },
     ]);
+  });
+
+  it("caches /sitemap.xml at the CDN for at most 30 min + 10 min stale (#3495)", async () => {
+    const rules = await nextConfig.headers!();
+    const sitemap = rules.filter((r) => r.source === "/sitemap.xml");
+
+    expect(sitemap).toHaveLength(1);
+    expect(sitemap[0]!.headers).toEqual([
+      {
+        key: "Cache-Control",
+        value: "public, s-maxage=1800, stale-while-revalidate=600",
+      },
+    ]);
+    // The security headers still reach it through the `/:path*` rule.
+    expect(rules[0]!.source).toBe("/:path*");
   });
 
   it("does not advertise x-powered-by", () => {
