@@ -44,6 +44,10 @@ import { HubSearchQueryProvider } from "@/components/organigram/HubSearch";
 import { StructureDirectory } from "@/components/organigram/StructureDirectory";
 import { OrganigramOverview } from "@/components/organigram/OrganigramExplorer";
 import { HulpFinder } from "@/components/hulp/HulpFinder";
+// PROTOTYPE — throwaway variants for the structuur section (?variant=huidig|A|B).
+import { VariantPillars } from "@/components/organigram/prototype/VariantPillars";
+import { VariantSpine } from "@/components/organigram/prototype/VariantSpine";
+import { PrototypeSwitcher } from "@/components/organigram/prototype/PrototypeSwitcher";
 
 export const revalidate = 3600;
 
@@ -74,7 +78,12 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function HulpHubPage() {
+export default async function HulpHubPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ variant?: string }>;
+}) {
+  const variant = (await searchParams).variant ?? "A";
   // Subject read: both the org structure and the FAQ are this page's entire
   // content, so a failed read takes the page down with it (#2864).
   const [members, responsibilityPaths] = await runPromise(
@@ -184,7 +193,13 @@ export default async function HulpHubPage() {
             </p>
 
             <div className="mt-8">
-              <StructureDirectory nodes={members} interactive />
+              {variant === "A" ? (
+                <VariantPillars nodes={members} />
+              ) : variant === "B" ? (
+                <VariantSpine nodes={members} />
+              ) : (
+                <StructureDirectory nodes={members} interactive />
+              )}
             </div>
 
             {/* Volledig organigram — demoted behind a quiet disclosure (7o9 · 2):
@@ -208,6 +223,7 @@ export default async function HulpHubPage() {
           href="/club/contact"
         />
       </HubMemberPanel>
+      <PrototypeSwitcher current={variant} />
     </HubSearchQueryProvider>
   );
 }
