@@ -9,10 +9,14 @@ import {
 // renders deterministically in VR (the production config points at Sanity CDN
 // URLs, which are non-deterministic at capture time).
 const COVER = "/images/youth-trainers.jpg";
+// The real group photo at tile size, so the Jeugdbestuur tile shows what ships.
+const JEUGDBESTUUR_COVER = "/test-fixtures/images/jeugdbestuur-group.jpg";
 
-const vrCards: ClubHubCard[] = CLUB_HUB_CARDS.map((card) =>
-  card.imageUrl ? { ...card, imageUrl: COVER } : card,
-);
+const vrCards: ClubHubCard[] = CLUB_HUB_CARDS.map((card) => {
+  if (!card.imageUrl) return card;
+  const imageUrl = card.tag === "Jeugdbestuur" ? JEUGDBESTUUR_COVER : COVER;
+  return { ...card, imageUrl };
+});
 
 const meta = {
   title: "Features/Club/ClubEditorialHub",
