@@ -21,6 +21,18 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // #3495 — /sitemap.xml is rendered per request (`dynamic = "force-dynamic"`),
+      // so the CDN, not a prerender, bounds its cost and staleness: <= 30 min
+      // fresh + 10 min stale-while-revalidate, inside the 60-min publish window.
+      {
+        source: "/sitemap.xml",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, s-maxage=1800, stale-while-revalidate=600",
+          },
+        ],
+      },
     ];
   },
 
