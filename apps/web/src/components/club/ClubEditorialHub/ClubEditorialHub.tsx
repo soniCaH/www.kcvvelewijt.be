@@ -4,7 +4,11 @@ import {
   type NavGlyphName,
 } from "@/components/editorial/NavGlyph/NavGlyph";
 import { SectionHeader, TapedCardGrid } from "@/components/design-system";
-import { HISTORY_24_25_CARD, ULTRAS_HEADER_CARD } from "@/lib/sanity/images";
+import {
+  HISTORY_24_25_CARD,
+  JEUGDBESTUUR_CARD,
+  ULTRAS_HEADER_CARD,
+} from "@/lib/sanity/images";
 
 interface ClubHubNewsCard {
   variant: "news";
@@ -24,6 +28,8 @@ interface ClubHubNavCard {
   arrowText: string;
   /** Phosphor-fill glyph rendered on the jersey-deep nav panel. */
   iconName: NavGlyphName;
+  /** Optional photo behind a `jersey-deep-dark` scrim, glyph kept on top. */
+  imageUrl?: string;
 }
 
 export type ClubHubCard = ClubHubNewsCard | ClubHubNavCard;
@@ -42,10 +48,9 @@ export type ClubHubCard = ClubHubNewsCard | ClubHubNavCard;
  * photo behind a `jersey-deep-dark` scrim with the glyph and pill kept on top
  * — the one recipe for a photographic nav tile, see `EditorialHubCard`'s own
  * docblock and DESIGN.md § The Imageless Card → "No Filler Photo, Ever Rule"
- * (#2965). `ClubHubNavCard` above carries no `imageUrl` field yet, so wiring
- * one through is the actual change here, not a `variant` flip — this
- * docblock states the recipe, it doesn't add the field. Either change needs
- * a scoped VR re-capture of `features-club-clubeditorialhub`.
+ * (#2965). `ClubHubNavCard.imageUrl` carries it; Jeugdbestuur is the first
+ * nav tile with a photo. Adding one needs a scoped VR re-capture of
+ * `features-club-clubeditorialhub`.
  *
  * The hub must stay a superset of the `De club` dropdown — #2409 deletes that
  * panel and relies on this grid to index the same routes. Jeugdbestuur ·
@@ -76,6 +81,7 @@ export const CLUB_HUB_CARDS: ClubHubCard[] = [
     title: "Wie de jeugd draaiende houdt",
     arrowText: "Ontdek",
     iconName: "SoccerBall",
+    imageUrl: JEUGDBESTUUR_CARD,
   },
   {
     variant: "nav",
@@ -185,7 +191,7 @@ export function ClubEditorialHub({
             tag={card.tag}
             title={card.title}
             arrowText={card.arrowText}
-            imageUrl={card.variant === "news" ? card.imageUrl : undefined}
+            imageUrl={card.imageUrl}
             icon={
               card.variant === "nav" ? (
                 <NavGlyph name={card.iconName} />

@@ -89,6 +89,14 @@ export const HISTORY_24_25_CARD = sanityImageUrl(
   900,
 );
 
+// Jeugdbestuur group photo (2026 shoot, also the team's `teamImage`) as the /club nav tile: w=900
+export const JEUGDBESTUUR_CARD = sanityImageUrl(
+  "d259bb23fd369ff6306102c664fe7da675fb9730",
+  "5385x3583",
+  "jpg",
+  900,
+);
+
 // Ultras hero: full-width, w=1600
 export const ULTRAS_HEADER_HERO = sanityImageUrl(
   "119751c3b9c4251069f6aab4200d411dc6805eab",

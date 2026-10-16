@@ -97,6 +97,11 @@ merge by editing `manifest.json` and re-syncing.
   with consent are fine to re-use as fixtures.
 - Sponsor logos already published on `kcvvelewijt.be` are fine.
 
+A hand-placed `.jpg` sits outside the synced pool (sync only cleans up
+`.webp`): `jeugdbestuur-group.jpg` is the real Jeugdbestuur group photo
+(asset `image-d259bb23fd369ff6306102c664fe7da675fb9730-5385x3583-jpg`,
+900px) so the `/club` hub story shows the photo that ships.
+
 Each PR that touches the fixture pool must list every chosen image in
 the PR body (shape + slug + source `_id`) so the club owner can sign
 off before merge.
