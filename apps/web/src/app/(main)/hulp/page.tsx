@@ -47,6 +47,12 @@ import { HulpFinder } from "@/components/hulp/HulpFinder";
 // PROTOTYPE — throwaway variants for the structuur section (?variant=huidig|A|B).
 import { VariantPillars } from "@/components/organigram/prototype/VariantPillars";
 import { VariantSpine } from "@/components/organigram/prototype/VariantSpine";
+import { VariantA1 } from "@/components/organigram/prototype/VariantA1";
+import { VariantA2 } from "@/components/organigram/prototype/VariantA2";
+import { VariantA3 } from "@/components/organigram/prototype/VariantA3";
+import { VariantA4 } from "@/components/organigram/prototype/VariantA4";
+import { VariantA5 } from "@/components/organigram/prototype/VariantA5";
+import { VariantA6 } from "@/components/organigram/prototype/VariantA6";
 import { PrototypeSwitcher } from "@/components/organigram/prototype/PrototypeSwitcher";
 
 export const revalidate = 3600;
@@ -83,7 +89,7 @@ export default async function HulpHubPage({
 }: {
   searchParams: Promise<{ variant?: string }>;
 }) {
-  const variant = (await searchParams).variant ?? "A";
+  const variant = (await searchParams).variant ?? "A1";
   // Subject read: both the org structure and the FAQ are this page's entire
   // content, so a failed read takes the page down with it (#2864).
   const [members, responsibilityPaths] = await runPromise(
@@ -193,7 +199,19 @@ export default async function HulpHubPage({
             </p>
 
             <div className="mt-8">
-              {variant === "A" ? (
+              {variant === "A1" ? (
+                <VariantA1 nodes={members} />
+              ) : variant === "A2" ? (
+                <VariantA2 nodes={members} />
+              ) : variant === "A3" ? (
+                <VariantA3 nodes={members} />
+              ) : variant === "A4" ? (
+                <VariantA4 nodes={members} />
+              ) : variant === "A5" ? (
+                <VariantA5 nodes={members} />
+              ) : variant === "A6" ? (
+                <VariantA6 nodes={members} />
+              ) : variant === "A" ? (
                 <VariantPillars nodes={members} />
               ) : variant === "B" ? (
                 <VariantSpine nodes={members} />

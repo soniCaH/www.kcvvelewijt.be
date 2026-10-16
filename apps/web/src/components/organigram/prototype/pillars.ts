@@ -1,6 +1,6 @@
 // PROTOTYPE — throwaway. Simulates the proposed 5-value `department` field by
 // mapping today's roleCodes. The real build would read the field from Sanity.
-import type { OrgChartNode } from "@/types/organigram";
+import type { OrgChartMember, OrgChartNode } from "@/types/organigram";
 
 export type PillarKey =
   | "bestuur"
@@ -86,4 +86,92 @@ export function otherSeats(
         n.members.some((m) => m.id === memberId),
     )
     .map((n) => n.title);
+}
+
+// ─── Refinement round (2026-10-16) ──────────────────────────────────────────
+
+/**
+ * PROPOSAL — who gets the top row. Two groups, each with a reason:
+ * - "Dagelijks bestuur": runs the vzw day to day (WVV optional body).
+ * - "Aanspreekpunten": the federation-mandated or most-asked-for roles a
+ *   visitor needs first. GC + club-API are mandated by the KBVB / Voetbal
+ *   Vlaanderen; Jeugdvoorzitter, Sportief verantwoordelijke and TVJO head the
+ *   two sporting halves.
+ */
+export const KEY_FIGURES = [
+  { code: "VZ", group: "dagelijks", why: "Eindverantwoordelijke van de club" },
+  { code: "SEC", group: "dagelijks", why: "Post, verslagen, de vzw" },
+  { code: "PEN", group: "dagelijks", why: "Lidgeld, facturen, budget" },
+  { code: "TD", group: "aanspreek", why: "A- en B-elftal" },
+  { code: "JVZ", group: "aanspreek", why: "Alles rond de jeugdwerking" },
+  { code: "TVJO", group: "aanspreek", why: "Opleiding en trainers jeugd" },
+  { code: "GC", group: "aanspreek", why: "Officieel contact met de bond" },
+  { code: "API", group: "aanspreek", why: "Vertrouwenspersoon integriteit" },
+] as const;
+
+export type KeyGroup = (typeof KEY_FIGURES)[number]["group"];
+
+export function keyFigures(nodes: OrgChartNode[], group?: KeyGroup) {
+  return KEY_FIGURES.filter((k) => !group || k.group === group).flatMap((k) => {
+    const node = nodes.find((n) => n.roleCode === k.code);
+    return node ? [{ ...k, node }] : [];
+  });
+}
+
+/** Board members (the BST seat) who hold a seat in this pillar. */
+export function boardIn(nodes: OrgChartNode[], key: PillarKey) {
+  const board = boardMemberIds(nodes);
+  const seen = new Map<string, OrgChartMember>();
+  for (const n of seatsIn(nodes, key))
+    for (const m of n.members) if (board.has(m.id)) seen.set(m.id, m);
+  return [...seen.values()];
+}
+
+/** One row per single person: their seats in one list merge into one. */
+export function mergeSolo(seats: OrgChartNode[]) {
+  return seats.reduce<{ node: OrgChartNode; titles: string[] }[]>((acc, n) => {
+    const solo = n.members.length === 1 ? n.members[0].id : null;
+    const hit = solo
+      ? acc.find(
+          (r) => r.node.members.length === 1 && r.node.members[0].id === solo,
+        )
+      : undefined;
+    if (hit) hit.titles.push(n.title);
+    else acc.push({ node: n, titles: [n.title] });
+    return acc;
+  }, []);
+}
+
+export const PILLARS = [
+  {
+    key: "sportief",
+    title: "Sportief",
+    purpose: "Het A- en B-elftal: trainers, keepers en doorstroom.",
+  },
+  {
+    key: "jeugd",
+    title: "Jeugd",
+    purpose: "Van de kleinsten tot de beloften: organisatie en opleiding.",
+  },
+  {
+    key: "club",
+    title: "Club & werking",
+    purpose: "Alles naast het veld: sponsors, gebouw, kantine, kledij.",
+  },
+  {
+    key: "integriteit",
+    title: "Integriteit",
+    purpose:
+      "Voor elk probleem rond welzijn, pesten of grensoverschrijdend gedrag.",
+  },
+] as const;
+
+/** Seats of a pillar; "jeugd" spans organisatie + opleiding. */
+export function pillarSeats(nodes: OrgChartNode[], key: string) {
+  if (key === "jeugd")
+    return [
+      ...seatsIn(nodes, "jeugd-organisatie"),
+      ...seatsIn(nodes, "jeugd-opleiding"),
+    ];
+  return seatsIn(nodes, key as PillarKey);
 }

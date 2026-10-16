@@ -5,7 +5,13 @@ import { usePathname, useRouter } from "next/navigation";
 
 const VARIANTS = [
   { key: "huidig", label: "Huidig (live)" },
-  { key: "A", label: "A · Bestuur + pijlers" },
+  { key: "A", label: "A · eerste versie" },
+  { key: "A1", label: "A1 · Clubboek" },
+  { key: "A2", label: "A2 · Smoelenboek" },
+  { key: "A3", label: "A3 · Per pijler" },
+  { key: "A4", label: "A4 · Bouwplan" },
+  { key: "A5", label: "A5 · Kaartenbak" },
+  { key: "A6", label: "A6 · Wegwijzer" },
   { key: "B", label: "B · Van top naar ploeg" },
 ] as const;
 
