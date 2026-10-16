@@ -66,8 +66,8 @@ const ROLE_BUCKET_LABELS: Record<string, string> = {
  *      site does not translate them (#2495).
  *   2. functionTitle null, role is a known bucket → bucket label (Trainer / …)
  *   3. functionTitle null, role is free text → pass the role through verbatim
- *      (board titles "Voorzitter" / "Secretaris" / … live in `role`; their
- *      `functionTitle` is PSD-empty, so without this they'd fall to null)
+ *      (a board's `staff[].boardTitle` — "Voorzitter" / "Secretaris" / … —
+ *      arrives here as `role` with `functionTitle` cleared by the repository)
  *   4. nothing usable → null (#2638) — the card omits the function line
  *      entirely rather than shipping a last-resort "Staf" that classifies
  *      nobody. `role` is empty club-wide today but is the board's path

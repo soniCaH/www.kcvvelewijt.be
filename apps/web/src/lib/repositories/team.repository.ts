@@ -33,7 +33,7 @@ export const TEAM_BY_SLUG_QUERY =
     "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",
     "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max"
   },
-  staff[] { role, "member": member-> {
+  staff[] { role, boardTitle, "member": member-> {
     _id, psdId, archived, firstName, lastName, functionTitle,
     "photoUrl": photo.asset->url + "?w=300&h=400&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(photo.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(photo.hotspot.y, 0.5)),
     // fit=max, not the hotspot-crop route photoUrl above uses: psdImage has
@@ -214,12 +214,17 @@ function toStaffMemberVM(
   const psdId = row.member.psdId != null ? String(row.member.psdId).trim() : "";
   const hasDetailPage =
     psdId !== "" && row.member.archived !== true && row.member.hasBio === true;
+  // A board's own title for this seat beats the person's one club-wide PSD
+  // functionTitle (e.g. "Controller"), which never names a board seat.
+  const boardTitle = row.boardTitle?.trim() || undefined;
   return {
     id: row.member._id,
     firstName: row.member.firstName ?? "",
     lastName: row.member.lastName ?? "",
-    role: row.role ?? row.member.functionTitle ?? "",
-    functionTitle: row.member.functionTitle ?? undefined,
+    role: boardTitle ?? row.role ?? row.member.functionTitle ?? "",
+    functionTitle: boardTitle
+      ? undefined
+      : (row.member.functionTitle ?? undefined),
     // Editorial `photo` wins over the sync-owned `psdImage` when both are
     // present (#2895) — same ?? chain player.repository.ts uses for
     // transparentImage ?? psdImageUrl.

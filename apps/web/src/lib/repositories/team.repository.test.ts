@@ -166,6 +166,7 @@ describe("TeamRepository", () => {
         staff: [
           {
             role: null,
+            boardTitle: null,
             member: {
               _id: "staff-1",
               psdId: null,
@@ -237,6 +238,7 @@ describe("TeamRepository", () => {
           staff: [
             {
               role: "trainer",
+              boardTitle: null,
               member: {
                 _id: "staff-1",
                 psdId: "98765",
@@ -269,6 +271,7 @@ describe("TeamRepository", () => {
           staff: [
             {
               role: "trainer",
+              boardTitle: null,
               member: {
                 _id: "staff-1",
                 psdId: "98765",
@@ -365,10 +368,12 @@ describe("TeamRepository", () => {
           staff: [
             {
               role: null,
+              boardTitle: null,
               member: null,
             },
             {
               role: "trainer",
+              boardTitle: null,
               member: {
                 _id: "staff-2",
                 psdId: null,
@@ -402,6 +407,7 @@ describe("TeamRepository", () => {
           staff: [
             {
               role: null,
+              boardTitle: null,
               member: {
                 _id: "s1",
                 psdId: null,
@@ -428,6 +434,40 @@ describe("TeamRepository", () => {
       expect(t!.staff[0].imageUrl).toBeUndefined();
     });
 
+    it("lets a board title beat the member's PSD functionTitle", async () => {
+      mockFetch.mockResolvedValueOnce(
+        makeDetailRow({
+          staff: [
+            {
+              role: null,
+              boardTitle: " Penningmeester ",
+              member: {
+                _id: "s1",
+                psdId: "245",
+                archived: false,
+                hasBio: null,
+                firstName: "A",
+                lastName: "B",
+                functionTitle: "Controller",
+                photoUrl: null,
+                psdImageUrl: null,
+              },
+            },
+          ],
+        }),
+      );
+
+      const t = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findBySlug("test");
+        }),
+      );
+
+      expect(t!.staff[0].role).toBe("Penningmeester");
+      expect(t!.staff[0].functionTitle).toBeUndefined();
+    });
+
     // ─── Sync-owned staff portrait (#2895) ──────────────────────────────────
 
     it("falls back to the sync-owned psdImage when the editorial photo is absent", async () => {
@@ -436,6 +476,7 @@ describe("TeamRepository", () => {
           staff: [
             {
               role: null,
+              boardTitle: null,
               member: {
                 _id: "staff-1",
                 psdId: null,
@@ -468,6 +509,7 @@ describe("TeamRepository", () => {
           staff: [
             {
               role: null,
+              boardTitle: null,
               member: {
                 _id: "staff-1",
                 psdId: null,

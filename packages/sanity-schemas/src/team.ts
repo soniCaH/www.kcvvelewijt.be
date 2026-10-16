@@ -185,17 +185,26 @@ export const team = defineType({
                 ],
               },
             }),
+            defineField({
+              name: 'boardTitle',
+              title: 'Functie in dit bestuur',
+              type: 'string',
+              description:
+                'Vrije tekst, bv. "Voorzitter" of "Secretaris". Wint op de site van de functietitel uit PSD. Alleen voor besturen (ploegen zonder PSD-koppeling).',
+              hidden: ({document}) => Boolean(document?.psdId),
+            }),
           ],
           preview: {
             select: {
               firstName: 'member.firstName',
               lastName: 'member.lastName',
               role: 'role',
+              boardTitle: 'boardTitle',
             },
-            prepare({firstName, lastName, role}) {
+            prepare({firstName, lastName, role, boardTitle}) {
               return {
                 title: `${firstName ?? ''} ${lastName ?? ''}`.trim(),
-                subtitle: role ?? '',
+                subtitle: boardTitle ?? role ?? '',
               }
             },
           },
