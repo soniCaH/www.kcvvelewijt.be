@@ -1,6 +1,7 @@
 // PROTOTYPE — throwaway. A1 "Clubboek": a typographic ledger like a printed club yearbook — dotted `functie …… naam` rows that unfold contact in place.
 import type { OrgChartNode } from "@/types/organigram";
 import { RoundAvatar } from "@/components/design-system";
+import { BoardLink } from "./BoardLink";
 import { InlineContact } from "./InlineContact";
 import {
   PILLARS,
@@ -165,6 +166,9 @@ function Chapter({
           {board.map((m) => m.name).join(", ")}
         </p>
       )}
+      {pillarKey === "jeugd" && (
+        <BoardLink board="jeugdbestuur" className="mt-2 self-start" />
+      )}
       <div className="mt-3 flex flex-col gap-4">{children}</div>
     </section>
   );
@@ -188,12 +192,15 @@ export function VariantA1({ nodes }: { nodes: OrgChartNode[] }) {
           figures={keyFigures(nodes, "aanspreek")}
           cols="sm:grid-cols-2 lg:grid-cols-3"
         />
-        {raad && raad.members.length > 0 && (
-          <p className="text-ink-muted text-body-sm">
-            <span className="text-ink font-semibold">Raad van bestuur</span> —{" "}
-            {names(raad)}.
-          </p>
-        )}
+        <div className="flex flex-col items-start gap-2">
+          {raad && raad.members.length > 0 && (
+            <p className="text-ink-muted text-body-sm">
+              <span className="text-ink font-semibold">Raad van bestuur</span> —{" "}
+              {names(raad)}.
+            </p>
+          )}
+          <BoardLink board="hoofdbestuur" />
+        </div>
       </div>
 
       {/* The book proper: one chapter per pillar. */}

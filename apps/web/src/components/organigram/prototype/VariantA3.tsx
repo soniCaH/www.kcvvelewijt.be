@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import type { OrgChartMember, OrgChartNode } from "@/types/organigram";
 import { RoundAvatar } from "@/components/design-system";
+import { BoardLink } from "./BoardLink";
 import {
   PILLARS,
   boardIn,
@@ -176,11 +177,14 @@ export function VariantA3({ nodes }: { nodes: OrgChartNode[] }) {
             label="Aanspreekpunten"
           />
         </div>
-        {board && board.members.length > 0 && (
-          <p className="text-ink-muted text-body-sm">
-            Raad van bestuur: {board.members.map((m) => m.name).join(", ")}.
-          </p>
-        )}
+        <div className="flex flex-col gap-2">
+          {board && board.members.length > 0 && (
+            <p className="text-ink-muted text-body-sm">
+              Raad van bestuur: {board.members.map((m) => m.name).join(", ")}.
+            </p>
+          )}
+          <BoardLink board="hoofdbestuur" className="self-start" />
+        </div>
       </section>
 
       {/* One pillar at a time */}
@@ -251,6 +255,9 @@ export function VariantA3({ nodes }: { nodes: OrgChartNode[] }) {
                   <p className="text-ink-muted text-body-lg max-w-prose">
                     {p.purpose}
                   </p>
+                  {p.key === "jeugd" && (
+                    <BoardLink board="jeugdbestuur" className="self-start" />
+                  )}
                 </div>
                 {leads.length > 0 && (
                   <div className="flex shrink-0 flex-col gap-2">

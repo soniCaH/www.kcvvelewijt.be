@@ -10,6 +10,7 @@ import {
   pillarSeats,
   seatsIn,
 } from "./pillars";
+import { BoardLink } from "./BoardLink";
 
 /** Mail + phone, always shown. No data → the secretariat. */
 function Contact({ m }: { m: OrgChartMember }) {
@@ -193,12 +194,15 @@ export function VariantA5({ nodes }: { nodes: OrgChartNode[] }) {
     <div data-testid="proto-variant-a5" className="flex flex-col gap-12">
       <KeyGroup label="Dagelijks bestuur" group="dagelijks" nodes={nodes} />
       <KeyGroup label="Aanspreekpunten" group="aanspreek" nodes={nodes} />
-      {boardSeat && boardSeat.members.length > 0 && (
-        <p className="text-body-sm text-ink-muted -mt-6">
-          <span className="text-ink font-semibold">Raad van bestuur: </span>
-          {boardSeat.members.map((m) => m.name).join(", ")}
-        </p>
-      )}
+      <div className="-mt-6 flex flex-col items-start gap-2">
+        {boardSeat && boardSeat.members.length > 0 && (
+          <p className="text-body-sm text-ink-muted">
+            <span className="text-ink font-semibold">Raad van bestuur: </span>
+            {boardSeat.members.map((m) => m.name).join(", ")}
+          </p>
+        )}
+        <BoardLink board="hoofdbestuur" />
+      </div>
 
       {PILLARS.map((p) => {
         const board = boardIn(
@@ -229,6 +233,9 @@ export function VariantA5({ nodes }: { nodes: OrgChartNode[] }) {
                 <span className="font-semibold">In het bestuur: </span>
                 {boardAll.map((m) => m.name).join(", ")}
               </p>
+            )}
+            {p.key === "jeugd" && (
+              <BoardLink board="jeugdbestuur" className="self-start" />
             )}
             {p.key === "jeugd" ? (
               <>

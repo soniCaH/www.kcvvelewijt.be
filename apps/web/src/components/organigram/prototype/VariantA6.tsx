@@ -5,6 +5,7 @@ import {
   RoundAvatar,
   StripedSeam,
 } from "@/components/design-system";
+import { BoardLink } from "./BoardLink";
 import { InlineContact } from "./InlineContact";
 import {
   PILLARS,
@@ -165,12 +166,15 @@ export function VariantA6({ nodes }: { nodes: OrgChartNode[] }) {
           <Group label="Dagelijks bestuur" group="dagelijks" nodes={nodes} />
           <Group label="Aanspreekpunten" group="aanspreek" nodes={nodes} />
         </div>
-        {boardSeat && boardSeat.members.length > 0 && (
-          <p className="text-ink-muted text-body-sm">
-            <span className="text-ink font-semibold">Raad van bestuur: </span>
-            {names(boardSeat.members)}.
-          </p>
-        )}
+        <div className="flex flex-col items-start gap-2">
+          {boardSeat && boardSeat.members.length > 0 && (
+            <p className="text-ink-muted text-body-sm">
+              <span className="text-ink font-semibold">Raad van bestuur: </span>
+              {names(boardSeat.members)}.
+            </p>
+          )}
+          <BoardLink board="hoofdbestuur" />
+        </div>
       </section>
 
       <StripedSeam />
@@ -208,6 +212,9 @@ export function VariantA6({ nodes }: { nodes: OrgChartNode[] }) {
                     <span className="font-semibold">In het bestuur: </span>
                     {names(board)}
                   </p>
+                )}
+                {p.key === "jeugd" && (
+                  <BoardLink board="jeugdbestuur" className="mt-1 self-start" />
                 )}
                 <div className="mt-3 flex flex-col">
                   {p.key === "jeugd" ? (

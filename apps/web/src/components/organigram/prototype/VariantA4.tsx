@@ -1,6 +1,7 @@
 // PROTOTYPE — throwaway. A4 "Bouwplan": the structure drawn as a diagram — a dark board band, ink connectors dropping into four pillar columns, seats hanging on a rule.
 import type { OrgChartNode } from "@/types/organigram";
 import { RoundAvatar } from "@/components/design-system";
+import { BoardLink } from "./BoardLink";
 import { InlineContact } from "./InlineContact";
 import {
   PILLARS,
@@ -147,12 +148,17 @@ export function VariantA4({ nodes }: { nodes: OrgChartNode[] }) {
             </div>
           </div>
         </div>
-        {raad && raad.members.length > 0 && (
-          <p className="text-body-sm text-cream-quiet border-cream/20 border-t pt-4">
-            <span className="text-cream font-semibold">Raad van bestuur: </span>
-            {names(raad)}.
-          </p>
-        )}
+        <div className="border-cream/20 flex flex-col gap-2 border-t pt-4">
+          {raad && raad.members.length > 0 && (
+            <p className="text-body-sm text-cream-quiet">
+              <span className="text-cream font-semibold">
+                Raad van bestuur:{" "}
+              </span>
+              {names(raad)}.
+            </p>
+          )}
+          <BoardLink board="hoofdbestuur" tone="cream" />
+        </div>
       </section>
 
       {/* Stub from the band: centred on desktop, the spine's start on mobile. */}
@@ -207,6 +213,7 @@ export function VariantA4({ nodes }: { nodes: OrgChartNode[] }) {
                     ))}
                   </div>
                 )}
+                {p.key === "jeugd" && <BoardLink board="jeugdbestuur" />}
               </header>
               {p.key === "jeugd" ? (
                 <>

@@ -1,6 +1,7 @@
 // PROTOTYPE — throwaway. A2 "Smoelenboek": photo-first — the faces you recognise at the canteen, tap one for its contact.
 import type { OrgChartMember, OrgChartNode } from "@/types/organigram";
 import { MonoLabel, RoundAvatar } from "@/components/design-system";
+import { BoardLink } from "./BoardLink";
 import { InlineContact } from "./InlineContact";
 import {
   PILLARS,
@@ -201,6 +202,7 @@ export function VariantA2({ nodes }: { nodes: OrgChartNode[] }) {
             {boardSeat.members.map((m) => m.name).join(", ")}
           </p>
         )}
+        <BoardLink board="hoofdbestuur" />
       </section>
 
       {PILLARS.map((p) => (
@@ -219,6 +221,7 @@ export function VariantA2({ nodes }: { nodes: OrgChartNode[] }) {
             </h3>
             <p className="text-body-sm text-ink-muted">{p.purpose}</p>
             <BoardLine members={boardOf(p.key)} />
+            {p.key === "jeugd" && <BoardLink board="jeugdbestuur" />}
           </header>
           {p.key === "jeugd" ? (
             <>
