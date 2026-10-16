@@ -24,12 +24,15 @@ const nextConfig: NextConfig = {
       // #3495 — /sitemap.xml is rendered per request (`dynamic = "force-dynamic"`),
       // so the CDN, not a prerender, bounds its cost and staleness: <= 30 min
       // fresh + 10 min stale-while-revalidate, inside the 60-min publish window.
+      // Vercel-CDN-Cache-Control, not Cache-Control: on Vercel, Next's own
+      // `max-age=0, must-revalidate` wins over a config Cache-Control (measured:
+      // always MISS); Vercel reads this header first and strips it before the browser.
       {
         source: "/sitemap.xml",
         headers: [
           {
-            key: "Cache-Control",
-            value: "public, s-maxage=1800, stale-while-revalidate=600",
+            key: "Vercel-CDN-Cache-Control",
+            value: "max-age=1800, stale-while-revalidate=600",
           },
         ],
       },

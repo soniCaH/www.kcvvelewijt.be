@@ -291,8 +291,8 @@ describe("next.config security surface (#3476)", () => {
     expect(sitemap).toHaveLength(1);
     expect(sitemap[0]!.headers).toEqual([
       {
-        key: "Cache-Control",
-        value: "public, s-maxage=1800, stale-while-revalidate=600",
+        key: "Vercel-CDN-Cache-Control",
+        value: "max-age=1800, stale-while-revalidate=600",
       },
     ]);
     // The security headers still reach it through the `/:path*` rule.
