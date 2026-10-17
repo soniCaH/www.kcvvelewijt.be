@@ -12,6 +12,7 @@ const VARIANTS = [
   { key: "A4", label: "A4 · Bouwplan" },
   { key: "A5", label: "A5 · Kaartenbak" },
   { key: "A6", label: "A6 · Wegwijzer" },
+  { key: "A7", label: "A7 · Mix 1+5+6" },
   { key: "B", label: "B · Van top naar ploeg" },
 ] as const;
 

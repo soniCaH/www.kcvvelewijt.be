@@ -186,12 +186,11 @@ function Sub({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function VariantA5({ nodes }: { nodes: OrgChartNode[] }) {
+/** Key-figure cards + board line; reused by A7. */
+export function KeyCards({ nodes }: { nodes: OrgChartNode[] }) {
   const boardSeat = nodes.find((n) => n.roleCode === "BST");
-  const overig = seatsIn(nodes, "overig");
-
   return (
-    <div data-testid="proto-variant-a5" className="flex flex-col gap-12">
+    <div className="flex flex-col gap-12">
       <KeyGroup label="Dagelijks bestuur" group="dagelijks" nodes={nodes} />
       <KeyGroup label="Aanspreekpunten" group="aanspreek" nodes={nodes} />
       <div className="-mt-6 flex flex-col items-start gap-2">
@@ -203,6 +202,16 @@ export function VariantA5({ nodes }: { nodes: OrgChartNode[] }) {
         )}
         <BoardLink board="hoofdbestuur" />
       </div>
+    </div>
+  );
+}
+
+export function VariantA5({ nodes }: { nodes: OrgChartNode[] }) {
+  const overig = seatsIn(nodes, "overig");
+
+  return (
+    <div data-testid="proto-variant-a5" className="flex flex-col gap-12">
+      <KeyCards nodes={nodes} />
 
       {PILLARS.map((p) => {
         const board = boardIn(

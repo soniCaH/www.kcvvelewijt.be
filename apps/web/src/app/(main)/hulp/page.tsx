@@ -53,6 +53,7 @@ import { VariantA3 } from "@/components/organigram/prototype/VariantA3";
 import { VariantA4 } from "@/components/organigram/prototype/VariantA4";
 import { VariantA5 } from "@/components/organigram/prototype/VariantA5";
 import { VariantA6 } from "@/components/organigram/prototype/VariantA6";
+import { VariantA7 } from "@/components/organigram/prototype/VariantA7";
 import { PrototypeSwitcher } from "@/components/organigram/prototype/PrototypeSwitcher";
 
 export const revalidate = 3600;
@@ -211,6 +212,8 @@ export default async function HulpHubPage({
                 <VariantA5 nodes={members} />
               ) : variant === "A6" ? (
                 <VariantA6 nodes={members} />
+              ) : variant === "A7" ? (
+                <VariantA7 nodes={members} />
               ) : variant === "A" ? (
                 <VariantPillars nodes={members} />
               ) : variant === "B" ? (

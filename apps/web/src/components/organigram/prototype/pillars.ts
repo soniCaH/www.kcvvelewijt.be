@@ -47,6 +47,7 @@ const BY_CODE: Record<string, PillarKey> = {
   KLE: "club",
   INF: "club",
   "K&E": "club",
+  EVT: "club",
   WEB: "club",
   API: "integriteit",
   EC: "integriteit",

@@ -174,35 +174,11 @@ function Chapter({
   );
 }
 
-export function VariantA1({ nodes }: { nodes: OrgChartNode[] }) {
-  const raad = nodes.find((n) => n.roleCode === "BST");
+/** The pillar chapters as ledgers; reused by A7. */
+export function ClubBook({ nodes }: { nodes: OrgChartNode[] }) {
   const overig = seatsIn(nodes, "overig");
-
   return (
-    <div data-testid="proto-variant-a1" className="flex flex-col gap-12">
-      {/* Front matter: the faces you contact first. */}
-      <div className="flex flex-col gap-8">
-        <FigureGroup
-          title="Dagelijks bestuur"
-          figures={keyFigures(nodes, "dagelijks")}
-          cols="sm:grid-cols-2 lg:grid-cols-3"
-        />
-        <FigureGroup
-          title="Aanspreekpunten"
-          figures={keyFigures(nodes, "aanspreek")}
-          cols="sm:grid-cols-2 lg:grid-cols-3"
-        />
-        <div className="flex flex-col items-start gap-2">
-          {raad && raad.members.length > 0 && (
-            <p className="text-ink-muted text-body-sm">
-              <span className="text-ink font-semibold">Raad van bestuur</span> —{" "}
-              {names(raad)}.
-            </p>
-          )}
-          <BoardLink board="hoofdbestuur" />
-        </div>
-      </div>
-
+    <div className="flex flex-col gap-12">
       {/* The book proper: one chapter per pillar. */}
       <div className="grid grid-cols-1 gap-x-12 gap-y-12 lg:grid-cols-2">
         {PILLARS.map((p) => (
@@ -237,6 +213,38 @@ export function VariantA1({ nodes }: { nodes: OrgChartNode[] }) {
           <Ledger seats={overig} />
         </section>
       )}
+    </div>
+  );
+}
+
+export function VariantA1({ nodes }: { nodes: OrgChartNode[] }) {
+  const raad = nodes.find((n) => n.roleCode === "BST");
+  return (
+    <div data-testid="proto-variant-a1" className="flex flex-col gap-12">
+      {/* Front matter: the faces you contact first. */}
+      <div className="flex flex-col gap-8">
+        <FigureGroup
+          title="Dagelijks bestuur"
+          figures={keyFigures(nodes, "dagelijks")}
+          cols="sm:grid-cols-2 lg:grid-cols-3"
+        />
+        <FigureGroup
+          title="Aanspreekpunten"
+          figures={keyFigures(nodes, "aanspreek")}
+          cols="sm:grid-cols-2 lg:grid-cols-3"
+        />
+        <div className="flex flex-col items-start gap-2">
+          {raad && raad.members.length > 0 && (
+            <p className="text-ink-muted text-body-sm">
+              <span className="text-ink font-semibold">Raad van bestuur</span> —{" "}
+              {names(raad)}.
+            </p>
+          )}
+          <BoardLink board="hoofdbestuur" />
+        </div>
+      </div>
+
+      <ClubBook nodes={nodes} />
     </div>
   );
 }
