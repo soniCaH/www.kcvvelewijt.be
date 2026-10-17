@@ -343,9 +343,22 @@ export const MobileStacked320: Story = {
   play: playShortBesideLong,
 };
 
-/** The same pair at 375px. */
+/**
+ * The same shape at 375px. The columns are wider there, so the long name is
+ * three 10-11 letter words — no two fit one line in any font, which keeps
+ * "three lines against two" true whatever face the runner has.
+ */
 export const MobileStacked375: Story = {
-  args: { match: stackedMatch },
+  args: {
+    match: {
+      ...stackedMatch,
+      awayTeam: {
+        ...defaultAwayTeam,
+        name: "Koninklijke Sportkring Kampenhout",
+        score: 1,
+      },
+    },
+  },
   globals: { viewport: { value: "kcvvMobile" } },
   parameters: { phoneFrame: true },
   tags: ["!vr"],
