@@ -235,6 +235,59 @@ describe("useSemanticSearch", () => {
     await waitFor(() => expect(result.current.answer).toBe("Tweede."));
   });
 
+  it("ignores a superseded request that rejects with a non-abort error after the newer one resolved", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const hit = {
+      id: "doc-abc",
+      slug: "kantine",
+      type: "responsibility",
+      score: 0.9,
+      title: "Kantine",
+      excerpt: "De kantine...",
+    };
+    // A is superseded but, as on WebKit, does NOT reject with an AbortError
+    // when its signal fires: it settles later with a plain network error.
+    let failA!: (reason: unknown) => void;
+    vi.mocked(fetch).mockReturnValueOnce(
+      new Promise<Response>((_, reject) => {
+        failA = reject;
+      }),
+    );
+    // B honours its signal like a spec-compliant fetch: an abort rejects with
+    // an AbortError. Here it is never aborted, so it just resolves.
+    vi.mocked(fetch).mockImplementationOnce(
+      (_url, init) =>
+        new Promise<Response>((resolve, reject) => {
+          init?.signal?.addEventListener("abort", () =>
+            reject(new DOMException("aborted", "AbortError")),
+          );
+          resolve({
+            ok: true,
+            json: async () => ({ results: [hit] }),
+          } as Response);
+        }),
+    );
+
+    const { result } = renderHook(() =>
+      useSemanticSearch({ type: "responsibility", debounceMs: 0 }),
+    );
+
+    act(() => result.current.search("kantine"));
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
+    act(() => result.current.search("kantine open"));
+    await waitFor(() => expect(result.current.results).toHaveLength(1));
+    expect(result.current.executedQuery).toBe("kantine open");
+
+    await act(async () => {
+      failA(new TypeError("Load failed"));
+    });
+
+    expect(result.current.results).toHaveLength(1);
+    expect(result.current.executedQuery).toBe("kantine open");
+    expect(result.current.error).toBe(false);
+    expect(warn).not.toHaveBeenCalled();
+  });
+
   it("clears results on clear()", () => {
     const { result } = renderHook(() => useSemanticSearch());
     act(() => result.current.clear());
