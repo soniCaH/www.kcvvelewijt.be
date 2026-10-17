@@ -102,9 +102,11 @@ const BARE_TO_LOCALE_STRING = /\.toLocaleString\s*\(/;
 /**
  * The one exemption: `PrintDate` formats "today" on the client with
  * `Intl.DateTimeFormat` so `/scheurkalender` does not ship Luxon for a single
- * line (#3480). It reads the zone from `CLUB_TIMEZONE`, and a test
- * (`PrintDate.test.tsx`) pins its output to `formatArticleDate`, so the
- * ICU-drift this rule exists for is covered there, not by the ban.
+ * line. The owner chose Intl there (#3480). It reads the zone from
+ * `CLUB_TIMEZONE`, and `PrintDate.test.tsx` pins its output to
+ * `formatArticleDate` — but that compares Node's ICU with Node's ICU, so the
+ * browser-ICU drift this rule exists for is an accepted residual risk, not a
+ * covered one.
  */
 const INTL_DATE_EXEMPT = "components/scheurkalender/PrintDate.tsx";
 

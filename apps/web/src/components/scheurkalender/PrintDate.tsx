@@ -6,14 +6,16 @@ import { CLUB_TIMEZONE } from "@/lib/utils/club-timezone";
 const noopSubscribe = () => () => {};
 
 // Same shape as `formatArticleDate` ("d MMMM yyyy", nl) without Luxon, which
-// would otherwise ship to the browser for this one line (#3480).
+// would otherwise ship to the browser for this one line (#3480). Built once,
+// lazily: `useSyncExternalStore` calls the snapshot on every render.
+let formatter: Intl.DateTimeFormat | undefined;
 const getToday = () =>
-  new Intl.DateTimeFormat("nl-BE", {
+  (formatter ??= new Intl.DateTimeFormat("nl-BE", {
     timeZone: CLUB_TIMEZONE,
     day: "numeric",
     month: "long",
     year: "numeric",
-  }).format(new Date());
+  })).format(new Date());
 
 /**
  * PrintDate — today's Belgian date, read at hydration/print time.
