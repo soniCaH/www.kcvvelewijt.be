@@ -212,6 +212,62 @@ describe("<ClubBook>", () => {
     expect(document.activeElement).toHaveAttribute("data-key-node-id", "sec");
   });
 
+  it("fires the member event for a key-figure card too, since nothing toggles", () => {
+    render(<ClubBook nodes={nodes} responsibilityPaths={paths} />);
+
+    openStructureRow("sec");
+
+    expect(trackEvent).toHaveBeenCalledTimes(1);
+    expect(trackEvent).toHaveBeenLastCalledWith("organigram_member_clicked", {
+      member_id: hashMemberId("kevin"),
+      view: "cards",
+    });
+  });
+
+  it("carries the view of an open that came from the explorer", async () => {
+    render(<ClubBook nodes={nodes} responsibilityPaths={paths} />);
+
+    openStructureRow("gdpr", "chart");
+
+    await waitFor(() => expect(trackEvent).toHaveBeenCalledTimes(1));
+    expect(trackEvent).toHaveBeenLastCalledWith("organigram_member_clicked", {
+      member_id: hashMemberId("shauni"),
+      view: "chart",
+    });
+    // The hint does not outlive that open: a later click is a "cards" open.
+    await userEvent.click(screen.getByText("GDPR", { selector: "summary *" }));
+    await userEvent.click(screen.getByText("GDPR", { selector: "summary *" }));
+    await waitFor(() => expect(trackEvent).toHaveBeenCalledTimes(2));
+    expect(trackEvent).toHaveBeenLastCalledWith("organigram_member_clicked", {
+      member_id: hashMemberId("shauni"),
+      view: "cards",
+    });
+  });
+
+  it("gives the Raad van bestuur line as the target of the Bestuursorgaan box", () => {
+    render(<ClubBook nodes={nodes} responsibilityPaths={paths} />);
+
+    expect(openStructureRow("bst")).toBe(true);
+    expect(document.activeElement).toHaveTextContent("Raad van bestuur:");
+  });
+
+  it("reveals a question again when its hash is already in the URL", async () => {
+    window.location.hash = "privacy";
+    const onHashChange = vi.fn();
+    window.addEventListener("hashchange", onHashChange);
+    render(<ClubBook nodes={nodes} responsibilityPaths={paths} />);
+    await userEvent.click(screen.getByText("GDPR", { selector: "summary *" }));
+    onHashChange.mockClear();
+
+    await userEvent.click(
+      screen.getByRole("link", { name: "Ik wil mijn gegevens laten wissen" }),
+    );
+
+    expect(onHashChange).toHaveBeenCalled();
+    window.removeEventListener("hashchange", onHashChange);
+    window.location.hash = "";
+  });
+
   it("opens the row a ?member= link points at on arrival", async () => {
     window.history.replaceState(null, "", "/hulp?member=gdpr");
     render(<ClubBook nodes={nodes} responsibilityPaths={paths} />);

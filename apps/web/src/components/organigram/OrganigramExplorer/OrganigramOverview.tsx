@@ -2,7 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { OrgChartNode } from "@/types/organigram";
-import { openStructureRow } from "@/components/organigram/ClubBook";
+import {
+  hasStructureTarget,
+  openStructureRow,
+} from "@/components/organigram/ClubBook";
 import { PRESS_DOWN_CLASSES } from "@/components/design-system/press-down";
 import { OrganigramExplorer } from "./OrganigramExplorer";
 import { VolledigOrganigram } from "./VolledigOrganigram";
@@ -42,7 +45,7 @@ export function OrganigramOverview({
 
   useEffect(() => {
     if (open || !rowAfterClose.current) return;
-    openStructureRow(rowAfterClose.current);
+    openStructureRow(rowAfterClose.current, "chart");
     rowAfterClose.current = null;
   }, [open]);
 
@@ -93,9 +96,12 @@ export function OrganigramOverview({
         onClose={() => setOpen(false)}
         {...(focusId ? { initialFocusId: focusId } : {})}
         returnFocusRef={returnFocusRef}
+        canOpenMember={(node) => hasStructureTarget(node.id)}
         onOpenMember={(node) => {
           // Collapse the verkenner and show the person where the structuur
-          // lists them: their row in the clubboek, unfolded.
+          // lists them: their row in the clubboek, unfolded. A box with no row
+          // or card keeps the explorer open instead of closing onto nothing.
+          if (!hasStructureTarget(node.id)) return;
           rowAfterClose.current = node.id;
           setOpen(false);
         }}

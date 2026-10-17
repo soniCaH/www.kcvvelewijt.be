@@ -1,16 +1,16 @@
-import Link from "next/link";
-import { RoundAvatar } from "@/components/design-system";
+import { RoundAvatar, SectionHeader } from "@/components/design-system";
+import { KAARTENBAK } from "./card-style";
 import type { KeyFigure, KeyGroup } from "./club-book";
 import { MemberContact, MemberName } from "./MemberContact";
-
-const VACANT_LINK = "text-jersey-deep text-body-sm font-semibold underline";
+import { VacantLink } from "./Vacant";
 
 function KeyFigureCard({ figure }: { figure: KeyFigure }) {
   return (
     <li
       data-key-node-id={figure.nodeId}
+      data-key-member-id={figure.holders[0]?.id}
       tabIndex={-1}
-      className="border-ink bg-cream-soft shadow-paper-sm break-inside-avoid border p-4 print:p-3"
+      className={`${KAARTENBAK} break-inside-avoid p-4 print:p-3`}
     >
       <h4 className="text-label text-jersey-deep font-mono uppercase">
         {figure.title}
@@ -19,9 +19,7 @@ function KeyFigureCard({ figure }: { figure: KeyFigure }) {
         <p className="text-body-sm text-ink-muted mt-1">{figure.why}</p>
       )}
       {figure.holders.length === 0 ? (
-        <Link href="/club/contact" className={`${VACANT_LINK} mt-3 block`}>
-          plek vrij — iets voor jou?
-        </Link>
+        <VacantLink className="mt-3 block" />
       ) : (
         <ul className="mt-4 flex flex-col gap-4 print:mt-2 print:gap-2">
           {figure.holders.map((holder) => (
@@ -59,9 +57,14 @@ export function KeyFigureCards({ groups }: { groups: KeyGroup[] }) {
             aria-label={group.title}
             className="flex flex-col gap-4"
           >
-            <h3 className="font-display text-ink border-ink text-display-sm border-b pb-1 font-bold">
-              {group.title}
-            </h3>
+            <div className="border-ink border-b pb-1">
+              <SectionHeader
+                as="h3"
+                size="display-sm"
+                title={group.title}
+                className="mb-0 sm:mb-0"
+              />
+            </div>
             <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 print:grid-cols-3 print:gap-3">
               {group.figures.map((figure) => (
                 <KeyFigureCard key={figure.nodeId} figure={figure} />

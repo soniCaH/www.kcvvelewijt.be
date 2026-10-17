@@ -71,8 +71,8 @@ export interface Pillar {
 
 export interface ClubBookVM {
   keyGroups: KeyGroup[];
-  /** Members of the Bestuursorgaan box; undefined when there is none or it is empty. */
-  raad: OrgChartMember[] | undefined;
+  /** The Bestuursorgaan box and its members; undefined when there is none or it has no named member. */
+  raad: { nodeId: string; members: OrgChartMember[] } | undefined;
   pillars: Pillar[];
   /** Boxes with no pillar — shown last so nothing silently disappears. */
   overige: LedgerRow[];
@@ -127,6 +127,17 @@ const PILLARS: ReadonlyArray<{
   },
 ];
 
+/** A holder with no name has nothing to show; they count as no holder. */
+const named = (members: OrgChartMember[]) =>
+  members.filter((m) => m.name?.trim());
+
+/** `Ann, Bob` — names only, so a nameless holder never leaves a stray comma. */
+export function joinNames(members: OrgChartMember[]): string {
+  return named(members)
+    .map((m) => m.name?.trim())
+    .join(", ");
+}
+
 /** The questions `holder` answers from this box: primary contact is this box and includes them. */
 function questionsFor(
   holder: OrgChartMember,
@@ -153,18 +164,21 @@ function toRows(
   boxes: OrgChartNode[],
   paths: ResponsibilityPath[],
 ): LedgerRow[] {
+  const holders = (box: OrgChartNode) => named(box.members);
   const ordered = [
-    ...boxes.filter((b) => b.members.length > 0),
-    ...boxes.filter((b) => b.members.length === 0),
+    ...boxes.filter((b) => holders(b).length > 0),
+    ...boxes.filter((b) => holders(b).length === 0),
   ];
 
   const groups: OrgChartNode[][] = [];
   for (const box of ordered) {
-    const solo = box.members.length === 1 ? box.members[0]?.id : undefined;
+    const solo = holders(box).length === 1 ? holders(box)[0]?.id : undefined;
     const home = solo
       ? groups.find(
           ([first]) =>
-            first?.members.length === 1 && first.members[0]?.id === solo,
+            first &&
+            holders(first).length === 1 &&
+            holders(first)[0]?.id === solo,
         )
       : undefined;
     if (home) home.push(box);
@@ -177,7 +191,7 @@ function toRows(
       id: nodeIds[0] ?? "",
       nodeIds,
       titles: group.map((b) => b.title),
-      holders: (group[0]?.members ?? []).map((m) => ({
+      holders: (group[0] ? holders(group[0]) : []).map((m) => ({
         ...m,
         questions: questionsFor(m, nodeIds, paths),
       })),
@@ -193,28 +207,34 @@ export function buildClubBook(
   const nodes = allNodes.filter((n) => n.id !== CLUB_ROOT_ID);
   const byCode = (code: string) => nodes.find((n) => n.roleCode === code);
 
-  const keyCodes = new Set(KEY_GROUPS.flatMap((g) => g.roleCodes));
+  // Boxes a card or the Raad line already shows. Any other box lands in a
+  // ledger row, so a second box with a key code never vanishes.
+  const consumed = new Set<string>();
   const keyGroups = KEY_GROUPS.map(({ title, roleCodes }) => ({
     title,
     figures: roleCodes.flatMap((code) => {
       const node = byCode(code);
-      return node
-        ? [
-            {
-              nodeId: node.id,
-              title: node.title,
-              why: node.description?.trim() || undefined,
-              holders: node.members,
-            },
-          ]
-        : [];
+      if (!node) return [];
+      consumed.add(node.id);
+      return [
+        {
+          nodeId: node.id,
+          title: node.title,
+          why: node.description?.trim() || undefined,
+          holders: named(node.members),
+        },
+      ];
     }),
   }));
 
   const raadBox = byCode(RAAD_ROLE_CODE);
+  const raadMembers = raadBox ? named(raadBox.members) : [];
   const raad =
-    raadBox && raadBox.members.length > 0 ? raadBox.members : undefined;
-  const raadIds = new Set((raadBox?.members ?? []).map((m) => m.id));
+    raadBox && raadMembers.length > 0
+      ? { nodeId: raadBox.id, members: raadMembers }
+      : undefined;
+  if (raad) consumed.add(raad.nodeId);
+  const raadIds = new Set(raadMembers.map((m) => m.id));
 
   const inPillars = (wanted: OrgPillar[]) =>
     nodes.filter((n) => n.pillar !== undefined && wanted.includes(n.pillar));
@@ -238,17 +258,13 @@ export function buildClubBook(
     };
   });
 
-  // A `bestuur` box shows in the key row or the Raad line; one that is neither
-  // would otherwise vanish.
-  const placed = new Set(
+  // Not in a ledger (no pillar, or `bestuur`, which has none) and not on a
+  // card or the Raad line: shown last so nothing silently disappears.
+  const inLedger = new Set<OrgPillar>(
     PILLARS.flatMap((p) => p.sections.flatMap((s) => s.pillars)),
   );
   const isLeftover = (n: OrgChartNode) =>
-    n.pillar === undefined
-      ? true
-      : n.pillar === "bestuur"
-        ? !keyCodes.has(n.roleCode ?? "") && n.roleCode !== RAAD_ROLE_CODE
-        : !placed.has(n.pillar);
+    !consumed.has(n.id) && !(n.pillar !== undefined && inLedger.has(n.pillar));
 
   return {
     keyGroups,

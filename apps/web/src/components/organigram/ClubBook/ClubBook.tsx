@@ -1,7 +1,7 @@
 import { EditorialLink } from "@/components/design-system";
 import type { OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
-import { buildClubBook } from "./club-book";
+import { buildClubBook, joinNames } from "./club-book";
 import { KeyFigureCards } from "./KeyFigureCards";
 import { OverigeFuncties, PillarChapter } from "./PillarChapter";
 import { PdfButton } from "./PdfButton";
@@ -40,9 +40,16 @@ export function ClubBook({ nodes, responsibilityPaths }: ClubBookProps) {
         <KeyFigureCards groups={book.keyGroups} />
         <div className="flex flex-col items-start gap-2">
           {book.raad && (
-            <p className="text-ink-muted text-body-sm">
+            <p
+              // A target for `openStructureRow` — the Bestuursorgaan box has no
+              // ledger row, this line is where it lives.
+              data-key-node-id={book.raad.nodeId}
+              data-key-member-id={book.raad.members[0]?.id}
+              tabIndex={-1}
+              className="text-ink-muted text-body-sm"
+            >
               <span className="text-ink font-semibold">Raad van bestuur: </span>
-              {book.raad.map((m) => m.name).join(", ")}
+              {joinNames(book.raad.members)}
             </p>
           )}
           <EditorialLink href="/club/bestuur" className="print:hidden">

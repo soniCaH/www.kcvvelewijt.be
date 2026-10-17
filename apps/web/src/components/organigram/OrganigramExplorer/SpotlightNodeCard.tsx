@@ -3,11 +3,11 @@ import { cn } from "@/lib/utils/cn";
 import { deriveCardState } from "./card-state";
 
 /**
- * A single node card inside the spotlight stage (7o3). Unlike the directory's
- * person-forward `<OrgPersonCard>`, the explorer is **position-forward** — you
+ * A single node card inside the spotlight stage (7o3). Unlike the clubboek's
+ * person-forward ledger, the explorer is **position-forward** — you
  * navigate the reporting structure — so the card leads with the position title
  * and shows the holder(s) as the sub-label. Occupancy state (single / shared /
- * vacant) is derived from `members.length` and shares the directory's vocabulary
+ * vacant) is derived from `members.length` and shares the clubboek's vocabulary
  * (vacant = warm). Two scales: `center` (the spotlight focus) and `node`
  * (parent / children / explorer leaves).
  */

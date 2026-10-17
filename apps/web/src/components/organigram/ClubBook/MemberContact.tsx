@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CONTACT_HREF } from "./Vacant";
 import type { OrgChartMember } from "@/types/organigram";
 
 /**
@@ -11,7 +12,7 @@ export function MemberContact({ member }: { member: OrgChartMember }) {
     return (
       <p className="text-ink-muted text-body-sm">
         Contact via{" "}
-        <Link href="/club/contact" className="prose-link">
+        <Link href={CONTACT_HREF} className="prose-link">
           het secretariaat
         </Link>
       </p>

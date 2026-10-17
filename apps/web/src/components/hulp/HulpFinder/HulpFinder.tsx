@@ -312,9 +312,18 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
   const handleShowInStructure = useCallback(
     (event: MouseEvent<HTMLAnchorElement>, pathId: string, nodeId: string) => {
       trackOrganigramLink(pathId, nodeId);
-      // Opens the row and scrolls to it. Outside the hub (Storybook) no row
-      // exists and the link stays a plain link to `/hulp?member=…#structuur`.
-      if (openStructureRow(nodeId)) event.preventDefault();
+      // Never a soft navigation: `/hulp?member=…` is this very route, and a
+      // same-route `<Link>` would leave the row shut. The href stays for
+      // middle-click and no-JS. A box with no row or card (or no clubboek on
+      // the page, as in Storybook) falls back to the section.
+      // A modified click (new tab) is the browser's: `?member=` opens the row there.
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+        return;
+      event.preventDefault();
+      if (!openStructureRow(nodeId)) {
+        const structuur = document.getElementById("structuur");
+        if (structuur) scrollIntoViewMotionSafe(structuur);
+      }
     },
     [trackOrganigramLink],
   );

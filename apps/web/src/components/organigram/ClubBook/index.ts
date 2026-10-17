@@ -1,3 +1,3 @@
 export { ClubBook } from "./ClubBook";
 export type { ClubBookProps } from "./ClubBook";
-export { openStructureRow } from "./open-row";
+export { hasStructureTarget, openStructureRow } from "./open-row";

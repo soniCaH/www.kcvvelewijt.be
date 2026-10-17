@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
-import type { OrgChartNode } from "@/types/organigram";
+import type { OrgChartMember, OrgChartNode } from "@/types/organigram";
 import type { Contact, ResponsibilityPath } from "@/types/responsibility";
 import { explorerFixture } from "../OrganigramExplorer/organigram-explorer.fixture";
-import { buildClubBook } from "./club-book";
+import { buildClubBook, joinNames } from "./club-book";
 
 const person = (id: string, name = id) => ({ id, name });
 
 const box = (
   id: string,
   title: string,
-  members: { id: string; name: string }[],
+  members: OrgChartMember[],
   rest: Partial<OrgChartNode> = {},
 ): OrgChartNode => ({ id, title, members, parentId: "club", ...rest });
 
@@ -60,6 +60,25 @@ describe("buildClubBook", () => {
           ],
         ],
       ]);
+    });
+
+    it("shows a second box with a key role code in a row instead of dropping it", () => {
+      const nodes = [
+        box("sec", "Secretaris", [person("a")], {
+          roleCode: "SEC",
+          pillar: "bestuur",
+        }),
+        box("sec2", "Tweede secretaris", [person("b")], {
+          roleCode: "SEC",
+          pillar: "bestuur",
+        }),
+      ];
+
+      const book = buildClubBook(nodes, []);
+      expect(
+        book.keyGroups.flatMap((g) => g.figures.map((f) => f.nodeId)),
+      ).toEqual(["sec"]);
+      expect(book.overige.flatMap((r) => r.nodeIds)).toEqual(["sec2"]);
     });
 
     it("skips a key box that does not exist", () => {
@@ -123,16 +142,37 @@ describe("buildClubBook", () => {
         }),
       ];
 
-      expect(buildClubBook(nodes, []).raad?.map((m) => m.name)).toEqual([
-        "Ann",
-        "Bob",
-      ]);
+      const { raad } = buildClubBook(nodes, []);
+      expect(raad?.nodeId).toBe("bst");
+      expect(raad?.members.map((m) => m.name)).toEqual(["Ann", "Bob"]);
     });
 
     it("is absent without a Bestuursorgaan box or without members", () => {
       expect(buildClubBook([], []).raad).toBeUndefined();
       const empty = [box("bst", "Bestuursorgaan", [], { roleCode: "BST" })];
       expect(buildClubBook(empty, []).raad).toBeUndefined();
+    });
+
+    it("leaves an empty Bestuursorgaan box in a row, so it does not vanish", () => {
+      const empty = [
+        box("bst", "Bestuursorgaan", [], {
+          roleCode: "BST",
+          pillar: "bestuur",
+        }),
+      ];
+      expect(buildClubBook(empty, []).overige.flatMap((r) => r.titles)).toEqual(
+        ["Bestuursorgaan"],
+      );
+    });
+
+    it("leaves a second Bestuursorgaan box in a row", () => {
+      const nodes = [
+        box("bst", "Bestuursorgaan", [person("a")], { roleCode: "BST" }),
+        box("bst2", "Bestuursorgaan bis", [person("b")], { roleCode: "BST" }),
+      ];
+      const book = buildClubBook(nodes, []);
+      expect(book.raad?.nodeId).toBe("bst");
+      expect(book.overige.flatMap((r) => r.nodeIds)).toEqual(["bst2"]);
     });
   });
 
@@ -404,6 +444,40 @@ describe("buildClubBook", () => {
 
       const row = rowsOf(buildClubBook(merged, both), "jeugd")[0];
       expect(row?.holders[0]?.questions.map((q) => q.id)).toEqual(["qa", "qb"]);
+    });
+  });
+
+  describe("holders without a name", () => {
+    const nameless = { id: "ghost" };
+
+    it("treats a box held only by a nameless person as vacant", () => {
+      const nodes = [
+        box("a", "Scouting", [nameless], { pillar: "sportief" }),
+        box("b", "T1", [person("p1", "Piet")], { pillar: "sportief" }),
+      ];
+
+      const rows = rowsOf(buildClubBook(nodes, []), "sportief");
+      expect(rows.map((r) => [r.titles[0], r.holders.length])).toEqual([
+        ["T1", 1],
+        ["Scouting", 0],
+      ]);
+    });
+
+    it("drops them from a shared box's names and from the Raad", () => {
+      const nodes = [
+        box("bst", "Bestuursorgaan", [nameless, person("a", "Ann")], {
+          roleCode: "BST",
+        }),
+        box("kan", "Kantine", [person("a", "Ann"), nameless], {
+          pillar: "club",
+        }),
+      ];
+
+      const book = buildClubBook(nodes, []);
+      expect(joinNames(book.raad?.members ?? [])).toBe("Ann");
+      expect(rowsOf(book, "club")[0]?.holders.map((h) => h.name)).toEqual([
+        "Ann",
+      ]);
     });
   });
 });

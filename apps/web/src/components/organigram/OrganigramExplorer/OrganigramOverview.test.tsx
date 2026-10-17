@@ -81,6 +81,26 @@ describe("OrganigramOverview", () => {
     ).toHaveFocus();
   });
 
+  it("offers 'Contactgegevens' only for a box that has a row or card, and keeps the explorer open otherwise", async () => {
+    render(
+      <>
+        <details data-node-ids="tvjo" data-testid="row">
+          <summary>TVJO</summary>
+        </details>
+        <OrganigramOverview nodes={explorerFixture} />
+      </>,
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: /Blader door het organigram/ }),
+    );
+    // Opens on the Voorzitter, who has no row on this page: no trigger.
+    await screen.findByRole("button", { current: true });
+    expect(
+      screen.queryByRole("button", { name: "Contactgegevens" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+  });
+
   it("collapsible: hides the chart behind a disclosure until opened (7o9 · 2)", async () => {
     render(<OrganigramOverview nodes={explorerFixture} collapsible />);
     // Chart (and its toolbar) hidden; only the quiet disclosure shows.

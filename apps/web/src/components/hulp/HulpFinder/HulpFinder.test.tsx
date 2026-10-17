@@ -186,13 +186,29 @@ describe("HulpFinder", () => {
     expect(screen.getByTestId("row")).toHaveProperty("open", true);
   });
 
-  it("leaves 'Toon in structuur' a plain link when the page has no clubboek row", () => {
+  it("never soft-navigates 'Toon in structuur': without a row it scrolls to the structuur section", () => {
+    Element.prototype.scrollIntoView = vi.fn();
+    render(
+      <>
+        <section id="structuur" data-testid="structuur" />
+        <HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />
+      </>,
+    );
+    fireEvent.click(q(/mijn kind is geblesseerd/i));
+    const link = answerOf(/mijn kind is geblesseerd/i).getByRole("link", {
+      name: /toon in structuur/i,
+    });
+    expect(fireEvent.click(link)).toBe(false);
+    expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
+  });
+
+  it("leaves a modified click on 'Toon in structuur' to the browser", () => {
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
     fireEvent.click(q(/mijn kind is geblesseerd/i));
     const link = answerOf(/mijn kind is geblesseerd/i).getByRole("link", {
       name: /toon in structuur/i,
     });
-    expect(fireEvent.click(link)).toBe(true);
+    expect(fireEvent.click(link, { metaKey: true })).toBe(true);
   });
 
   it("shows a per-category empty state when the active audience empties a category", () => {

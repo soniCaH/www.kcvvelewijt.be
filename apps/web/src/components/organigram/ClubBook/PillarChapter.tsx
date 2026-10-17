@@ -1,5 +1,9 @@
-import { EditorialLink } from "@/components/design-system";
-import type { LedgerRow as LedgerRowVM, Pillar } from "./club-book";
+import { EditorialLink, SectionHeader } from "@/components/design-system";
+import {
+  joinNames,
+  type LedgerRow as LedgerRowVM,
+  type Pillar,
+} from "./club-book";
 import { LedgerRow } from "./LedgerRow";
 
 function Ledger({ rows }: { rows: LedgerRowVM[] }) {
@@ -28,9 +32,14 @@ export function PillarChapter({ pillar }: { pillar: Pillar }) {
       aria-label={pillar.title}
       className="flex min-w-0 flex-col print:mb-4"
     >
-      <h3 className="font-display text-ink border-ink text-display-sm border-t-2 pt-3 font-bold print:break-after-avoid">
-        {pillar.title}
-      </h3>
+      <div className="border-ink border-t-2 pt-3 print:break-after-avoid">
+        <SectionHeader
+          as="h3"
+          size="display-sm"
+          title={pillar.title}
+          className="mb-0 sm:mb-0"
+        />
+      </div>
       <p className="text-ink-muted text-body-sm mt-1 italic print:break-after-avoid">
         {pillar.purpose}
       </p>
@@ -39,7 +48,7 @@ export function PillarChapter({ pillar }: { pillar: Pillar }) {
           <span className="text-jersey-deep font-semibold">
             In het bestuur:
           </span>{" "}
-          {pillar.board.map((m) => m.name).join(", ")}
+          {joinNames(pillar.board)}
         </p>
       )}
       {pillar.boardLink && (

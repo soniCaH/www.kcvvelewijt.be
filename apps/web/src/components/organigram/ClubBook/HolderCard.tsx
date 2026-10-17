@@ -1,15 +1,19 @@
-import { RoundAvatar } from "@/components/design-system";
+"use client";
+
+import { MonoLabel, RoundAvatar } from "@/components/design-system";
+import { revealHash } from "@/lib/utils/same-page-anchor";
+import { KAARTENBAK } from "./card-style";
 import type { RowHolder } from "./club-book";
 import { MemberContact, MemberName } from "./MemberContact";
 
 /**
  * Unfolded under a ledger row: one card per holder — face, name, contact and
  * the questions this person answers **in this role**, each linking to that
- * question in the finder (the finder reveals a `#<id>` itself).
+ * question in the finder.
  */
 export function HolderCard({ holder }: { holder: RowHolder }) {
   return (
-    <div className="border-ink bg-cream-soft shadow-paper-sm flex gap-3 border p-3">
+    <div className={`${KAARTENBAK} flex gap-3 p-3`}>
       <RoundAvatar
         size={40}
         name={holder.name}
@@ -24,13 +28,23 @@ export function HolderCard({ holder }: { holder: RowHolder }) {
         <MemberContact member={holder} />
         {holder.questions.length > 0 && (
           <>
-            <p className="text-label text-ink-muted mt-2 font-mono uppercase">
-              Hier kan je terecht voor
+            <p className="mt-2">
+              <MonoLabel tone="muted">Hier kan je terecht voor</MonoLabel>
             </p>
             <ul className="text-body-sm text-ink flex flex-col gap-1">
               {holder.questions.map((q) => (
                 <li key={q.id}>
-                  <a href={`#${q.id}`} className="hover:underline">
+                  <a
+                    href={`#${q.id}`}
+                    // The finder reveals a `#<id>` itself, but only on a
+                    // `hashchange`: a question whose hash is already in the
+                    // URL needs `revealHash` to reveal it again.
+                    onClick={(event) => {
+                      event.preventDefault();
+                      revealHash(q.id);
+                    }}
+                    className="hover:underline"
+                  >
                     Ik {q.question}
                   </a>
                 </li>

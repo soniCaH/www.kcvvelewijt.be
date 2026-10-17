@@ -2,10 +2,12 @@
  * Organigram (Organizational Chart) Types
  *
  * Used for the club organizational structure visualisation — the `/hulp#structuur`
- * directory and the spotlight `<OrganigramExplorer>`. The flat `OrgChartNode[]`
+ * clubboek and the spotlight `<OrganigramExplorer>`. The flat `OrgChartNode[]`
  * (with `parentId`) is turned into a navigable tree by the explorer's
  * `spotlight-tree` model.
  */
+
+import type { OrganigramNode } from "@/lib/sanity/sanity.types";
 
 /**
  * A single member (person) linked to an organigram node.
@@ -32,19 +34,27 @@ export interface OrgChartMember {
 
 /**
  * The pillar of the `/hulp` clubboek a box sits under — the Studio field
- * `organigramNode.pillar`, written by editors. `jeugd-organisatie` and
+ * `organigramNode.pillar`, written by editors. Derived from the generated
+ * schema type, so it is the schema's own list; `jeugd-organisatie` and
  * `jeugd-opleiding` render as the two sub-heads of the one Jeugd pillar.
  */
-export const ORG_PILLARS = [
-  "bestuur",
-  "sportief",
-  "jeugd-organisatie",
-  "jeugd-opleiding",
-  "club",
-  "integriteit",
-] as const;
+export type OrgPillar = NonNullable<OrganigramNode["pillar"]>;
 
-export type OrgPillar = (typeof ORG_PILLARS)[number];
+/**
+ * Every pillar, for narrowing a raw string. A `Record` over `OrgPillar` rather
+ * than a bare array: a pillar added to the schema fails type-check here, instead
+ * of silently dropping its boxes to "Overige functies".
+ */
+const PILLAR_KEYS: Record<OrgPillar, true> = {
+  bestuur: true,
+  sportief: true,
+  "jeugd-organisatie": true,
+  "jeugd-opleiding": true,
+  club: true,
+  integriteit: true,
+};
+
+export const ORG_PILLARS = Object.keys(PILLAR_KEYS) as OrgPillar[];
 
 /**
  * A single position/role in the organizational chart.
