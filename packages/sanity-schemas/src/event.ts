@@ -1,4 +1,5 @@
 import {defineField, defineType} from 'sanity'
+import {validateEventDateEnd} from './validation/event-date-end'
 
 export const event = defineType({
   name: 'event',
@@ -82,6 +83,10 @@ export const event = defineType({
       type: 'datetime',
       group: 'datum',
       description: 'Einddatum en -tijd voor meerdaagse evenementen. Laat leeg voor een evenement op één moment.',
+      validation: (r) =>
+        r.custom((dateEnd, ctx) =>
+          validateEventDateEnd(dateEnd, {parent: ctx.parent as {dateStart?: string} | undefined}),
+        ),
     }),
     defineField({
       name: 'location',
