@@ -412,7 +412,6 @@ export type TransferFact = {
     crop?: SanityImageCrop;
     _type: "image";
   };
-  otherClubContext?: string;
   kcvvContext?: string;
   until?: string;
   note?: string;
@@ -1686,7 +1685,6 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
           crop?: SanityImageCrop;
           _type: "image";
         };
-        otherClubContext?: string;
         kcvvContext?: string;
         until?: string;
         note?: string;

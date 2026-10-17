@@ -8,9 +8,11 @@ import {defineField, defineType} from 'sanity'
  * which row is auto-rendered as KCVV, and the front-end supplies the
  * logo + club name.
  *
- * `otherClubName` / `otherClubLogo` / `otherClubContext` are hidden for
+ * `otherClubName` / `otherClubLogo` are hidden for
  * `extension` (the move is KCVV → KCVV, so there is no counterparty).
  * `until` is the inverse.
+ * (A free-text subtitle under the other club used to sit beside them; the R1.5
+ * club row (#1749) superseded it and #3478 deleted the dead field.)
  *
  * Layout notes:
  *   - The **first** transferFact in the body powers the hero (player name,
@@ -83,14 +85,6 @@ export const transferFact = defineType({
       name: 'otherClubLogo',
       title: 'Other club logo',
       type: 'image',
-      hidden: ({parent}) => parent?.direction === 'extension',
-    }),
-    defineField({
-      name: 'otherClubContext',
-      title: 'Other club context',
-      type: 'string',
-      description:
-        'Korte vrije tekst onder de naam van de andere club op de van/naar-strip — bijv. "Jupiler Pro League · U23".',
       hidden: ({parent}) => parent?.direction === 'extension',
     }),
     defineField({

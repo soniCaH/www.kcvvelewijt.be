@@ -19,8 +19,6 @@ export interface TransferFactValue {
   age?: number;
   otherClubName?: string;
   otherClubLogoUrl?: string | null;
-  /** Short context line beneath the other club on the van/naar strip. */
-  otherClubContext?: string;
   /** Short context line beneath the KCVV row on the strip. */
   kcvvContext?: string;
   /** Only rendered when `direction === "extension"`. */

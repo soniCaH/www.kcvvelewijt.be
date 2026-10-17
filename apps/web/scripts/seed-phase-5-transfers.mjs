@@ -86,7 +86,6 @@ function buildTracerTransferMatrix(opponentLogoRef) {
         age: 27,
         otherClubName: "Standard Luik",
         otherClubLogo: imageRef(opponentLogoRef),
-        otherClubContext: "Jupiler Pro League · U23",
         kcvvContext: "Derde Amateur · A-ploeg · #8",
         note: "Blij om thuis te zijn. Elewijt voelt onmiddellijk vertrouwd.",
         noteAttribution: "Maxim Breugelmans",
@@ -119,7 +118,6 @@ function buildTracerTransferMatrix(opponentLogoRef) {
         age: 31,
         otherClubName: "KV Mechelen",
         otherClubLogo: imageRef(opponentLogoRef),
-        otherClubContext: "Challenger Pro League",
       },
 
       // Overview — outgoing without logo (null-logo fallback).
@@ -216,7 +214,6 @@ function buildTransferIncoming(opponentLogoRef) {
         age: 26,
         otherClubName: "KAS Eupen",
         otherClubLogo: imageRef(opponentLogoRef),
-        otherClubContext: "Challenger Pro League",
         kcvvContext: "Derde Amateur · A-ploeg · #4",
         note: "Ik wou opnieuw plezier in het voetbal. Elewijt voelt direct als thuis.",
         noteAttribution: "Yannick Vermeulen",
@@ -263,7 +260,6 @@ function buildTransferOutgoing(opponentLogoRef) {
         age: 24,
         otherClubName: "SK Sturm Graz II",
         otherClubLogo: imageRef(opponentLogoRef),
-        otherClubContext: "Österreichische 2. Liga",
         kcvvContext: "Derde Amateur · A-ploeg · #9",
         note: "Vier jaar Elewijt heeft me gevormd. Tijd voor een volgende stap.",
         noteAttribution: "Jens De Backer",
@@ -364,7 +360,6 @@ function buildTransferMulti(opponentLogoRef) {
         age: 25,
         otherClubName: "KV Oostende",
         otherClubLogo: imageRef(opponentLogoRef),
-        otherClubContext: "Challenger Pro League",
         kcvvContext: "Derde Amateur · A-ploeg · #1",
         note: "Een ploeg die me uitnodigt om mezelf te zijn — dat zoek ik al een tijd.",
         noteAttribution: "Robin Claes",
@@ -380,7 +375,6 @@ function buildTransferMulti(opponentLogoRef) {
         age: 23,
         otherClubName: "RWDM",
         otherClubLogo: imageRef(opponentLogoRef),
-        otherClubContext: "Challenger Pro League · U23",
       },
       // Overview row 3 — no logo, exercises null-logo fallback.
       {

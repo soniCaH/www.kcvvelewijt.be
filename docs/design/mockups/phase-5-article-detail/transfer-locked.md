@@ -8,7 +8,7 @@
 
 ## Scope reminder
 
-This drill is **body-only**. The transfer hero is locked at Phase 3-b R1.5 (#1749) — see `docs/design/mockups/phase-3-b-editorial-hero/transfer-locked.md`. The hero already consumes every `transferFact` field (direction, playerName, position, age, otherClubName + Logo + Context, kcvvContext, until, note, noteAttribution).
+This drill is **body-only**. The transfer hero is locked at Phase 3-b R1.5 (#1749) — see `docs/design/mockups/phase-3-b-editorial-hero/transfer-locked.md`. The hero already consumes every `transferFact` field (direction, playerName, position, age, otherClubName + Logo, kcvvContext, until, note, noteAttribution).
 
 ## Decision — Body treatment for additional `transferFact` blocks
 
@@ -39,7 +39,7 @@ Editor controls placement and grouping. The renderer's only adjacency-aware beha
 
 - **Honors the schema's promise** that "every subsequent transferFact renders as a compact overview row" without enforcing extraction-and-grouping. PortableText semantics stay clean.
 - **Editor controls density** — group transferFacts adjacent for the grid look, or intersperse with prose to give each transfer its own narrative paragraph.
-- **No new schema** — uses existing transferFact fields (direction, playerName, position, age, otherClubName, otherClubLogo, otherClubContext, kcvvContext, until).
+- **No new schema** — uses existing transferFact fields (direction, playerName, position, age, otherClubName, otherClubLogo, kcvvContext, until).
 - **Reuses Phase 0/4 vocabulary** — `<TapedCard>` + `<TapeStrip>` + slot-deterministic rotation + ink border + offset shadow. Same primitives as `<NewsCard>` / `<PlayerFigure>`.
 
 ## TapedCard composition (locked)

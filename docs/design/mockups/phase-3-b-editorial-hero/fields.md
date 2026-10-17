@@ -102,7 +102,6 @@ These were rendered in the mockups but **DO NOT EXIST**:
 | `age`                | number (14–45)                          | meta row                                                   |
 | `otherClubName`      | string (req when not extension)         | "from" or "to" club label                                  |
 | `otherClubLogo`      | image (when not extension)              | shield image                                               |
-| `otherClubContext`   | string                                  | sub-label under other-club ("Jupiler Pro League · U23")    |
 | `kcvvContext`        | string                                  | sub-label under KCVV side ("Derde Amateur · A-ploeg · #8") |
 | `until`              | string (extension only)                 | "verlengd tot 2028"                                        |
 | `note`               | text (140 max)                          | optional pull-quote in hero                                |

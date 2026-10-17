@@ -298,13 +298,6 @@ export const transferFact = defineType({
       hidden: ({ parent }) => parent?.direction === "extension",
     }),
     defineField({
-      name: "otherClubContext",
-      type: "string",
-      description:
-        'Short subtitle beneath the other club on the van/naar strip — e.g. "Jupiler Pro League · U23".',
-      hidden: ({ parent }) => parent?.direction === "extension",
-    }),
-    defineField({
       name: "kcvvContext",
       type: "string",
       description:
@@ -402,9 +395,7 @@ export const eventFact = defineType({
 of: [
   {
     type: "block",
-    marks: {
-      /* existing link + internalLink */
-    },
+    marks: {/* existing link + internalLink */},
   },
   { type: "articleImage" },
   { type: "fileAttachment" },
@@ -514,7 +505,7 @@ Two-column hero with a horizontal van → naar strip beneath the metadata bar.
 - **Transfer strip** (below the metadata bar, see §8.1):
   - Horizontal `VAN → label → NAAR` composition. Direction label `Inkomend` / `Uitgaand` / `Verlengd` beneath the arrow.
   - Colours: incoming = `kcvv-green-bright`; outgoing = `kcvv-warning` (amber — reported without alarm); extension = `kcvv-green-dark` label with **no arrow** (the absence of direction is the signal).
-  - Each club carries a context subtitle (`otherClubContext` / `kcvvContext` — free-text league/level/jersey, e.g. `Jupiler Pro League · U23` or `Derde Amateur · A-ploeg · #8`).
+  - The KCVV side carries a context subtitle (`kcvvContext` — free-text league/level/jersey, e.g. `Derde Amateur · A-ploeg · #8`). The other club's free-text subtitle was superseded by the R1.5 club row (#1749) and deleted in #3478.
 - **First transferFact is absorbed by the hero + strip** — the template filters it out of the body so it doesn't render a second time. Subsequent transferFact blocks render inline as `TransferFactOverview` rows (§8.1), typically beneath an editor-authored `Ander transfernieuws` H2 (no auto-injected section header; editors control placement via a regular H2 block).
 
 ### 5.4 `event` template
@@ -731,7 +722,7 @@ There is no separate "feature card" component. The first `transferFact` in a `tr
 
 - Width: `max-w-inner-lg` container, `py-10`.
 - Grid: `grid-cols-[1fr_auto_1fr] items-center`. Left side right-aligned, right side left-aligned.
-- Each side: mono small-caps `VAN` / `NAAR` label above a club block — Quasimoda 700 `text-2xl` club name (KCVV side in `kcvv-green-dark`, other side in `kcvv-gray-blue`) + 28 px logo + optional `otherClubContext` / `kcvvContext` subtitle in mono small-caps `kcvv-gray`.
+- Each side: mono small-caps `VAN` / `NAAR` label above a club block — Quasimoda 700 `text-2xl` club name (KCVV side in `kcvv-green-dark`, other side in `kcvv-gray-blue`) + 28 px logo + optional `kcvvContext` subtitle (KCVV side only; the other club's subtitle was superseded by the R1.5 club row, #1749) in mono small-caps `kcvv-gray`.
 - Middle: Lucide `ArrowRight` at 24 px, colour-coded per direction:
   - `incoming` → `kcvv-green-bright` arrow + `kcvv-green-dark` label `Inkomend`.
   - `outgoing` → `kcvv-warning` (amber, `#ffae00`) arrow + label `Uitgaand`. Reuses the existing semantic palette — warm enough to flag a departure, not alarmed like alert-red.
