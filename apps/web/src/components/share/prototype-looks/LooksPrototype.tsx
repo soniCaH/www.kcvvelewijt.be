@@ -167,11 +167,11 @@ function dayMonth(it: LookItem): { day: string; month: string } {
   };
 }
 function metaParts(it: LookItem): string[] {
-  return [
-    dateLine(it),
-    timeLine(it),
-    isEventish(it) ? it.location : null,
-  ].filter((x): x is string => Boolean(x));
+  // Owner: date + hour on one line, location on the next.
+  const when = [dateLine(it), timeLine(it)].filter(Boolean).join(" · ");
+  return [when, isEventish(it) ? it.location : null].filter((x): x is string =>
+    Boolean(x),
+  );
 }
 function titleSize(title: string, base: number): number {
   // Long titles step down so they never run off the canvas.
