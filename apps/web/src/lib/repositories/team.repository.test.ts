@@ -115,6 +115,26 @@ describe("TeamRepository", () => {
       expect(TEAM_BY_SLUG_QUERY).toContain("archived != true");
     });
 
+    // The board page derefs staff and players, so an edit to either must
+    // refresh `/club/<slug>`. Tags only: no `revalidate`, so the read keeps
+    // inheriting its segment's (#3483).
+    it("tags the read with teams, staff and players, and sets no revalidate", async () => {
+      mockFetch.mockResolvedValueOnce(null);
+
+      await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findBySlug("bestuur");
+        }),
+      );
+
+      const [query, params, options] = mockFetch.mock.calls.at(-1)!;
+      expect(query).toBe(TEAM_BY_SLUG_QUERY);
+      expect(params).toEqual({ slug: "bestuur" });
+      expect(options.next.tags).toEqual(["teams", "staff", "players"]);
+      expect(options.next.revalidate).toBeUndefined();
+    });
+
     // The full-screen viewer shows the whole photo; the hero's own URL is a
     // 3:2 hotspot crop that cuts off the players at the edges (#3447).
     it("selects the team photo uncropped for the full-screen viewer", () => {

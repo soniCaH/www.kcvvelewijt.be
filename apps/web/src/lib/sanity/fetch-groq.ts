@@ -47,7 +47,8 @@ export const fetchGroq = <T>(
 ): Effect.Effect<T, SanityReadError> =>
   Effect.tryPromise({
     // Only pass the 3rd arg when caching is requested, so untagged callers keep
-    // inheriting the route segment's `revalidate` (current behaviour).
+    // inheriting the route segment's `revalidate`. A tags-only call passes
+    // `revalidate: undefined`, which inherits it the same way (#3483).
     try: () =>
       options
         ? sanityClient.fetch<T>(query, params ?? {}, {

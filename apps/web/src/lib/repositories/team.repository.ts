@@ -328,9 +328,14 @@ export const TeamRepositoryLive = Layer.succeed(TeamRepository, {
       tags: [SANITY_TAGS.teams],
     }).pipe(Effect.map((rows) => rows.map(toTeamNavVM))),
   findBySlug: (slug) =>
-    fetchGroq<TEAM_BY_SLUG_QUERY_RESULT>(TEAM_BY_SLUG_QUERY, { slug }).pipe(
-      Effect.map((row) => (row ? toTeamDetailVM(row) : null)),
-    ),
+    // Tags only, no `revalidate` (#3483): the board pages (`/club/<slug>`)
+    // read this and deref staff and players, so any of the three refreshes
+    // them; the segment's own `revalidate` stays the time bound.
+    fetchGroq<TEAM_BY_SLUG_QUERY_RESULT>(
+      TEAM_BY_SLUG_QUERY,
+      { slug },
+      { tags: [SANITY_TAGS.teams, SANITY_TAGS.staff, SANITY_TAGS.players] },
+    ).pipe(Effect.map((row) => (row ? toTeamDetailVM(row) : null))),
   findAllForLanding: () =>
     fetchGroq<TEAMS_LANDING_QUERY_RESULT>(TEAMS_LANDING_QUERY).pipe(
       Effect.map((rows) => rows.map(toTeamLandingItem)),
