@@ -187,4 +187,38 @@ export const params = [
   // keeps `create-ga4-dimensions.mjs` from minting a dimension while the
   // 50-dimension cap is already exceeded.
   { parameterName: "has_remark", displayName: "Has remark", registered: false },
+  // ── Share tool (#3539) ──────────────────────────────────────────────────
+  // `share_image_saved`. Reuses `article_type` / `event_type` above (registered
+  // dimensions); the other nine are forwarded by the GA4 tag as unregistered
+  // params (one DLV + one tag row each, `registered: false`): visible in
+  // DebugView, no custom dimension (the 50-dimension cap is full).
+  {
+    parameterName: "content_type",
+    displayName: "Share content type",
+    registered: false,
+  },
+  {
+    parameterName: "template",
+    displayName: "Share template",
+    registered: false,
+  },
+  { parameterName: "look", displayName: "Share look", registered: false },
+  { parameterName: "theme", displayName: "Share theme", registered: false },
+  { parameterName: "wash", displayName: "Share wash", registered: false },
+  { parameterName: "format", displayName: "Share format", registered: false },
+  {
+    parameterName: "cover_mode",
+    displayName: "Share cover mode",
+    registered: false,
+  },
+  {
+    parameterName: "blocks_moved",
+    displayName: "Share blocks moved",
+    registered: false,
+  },
+  {
+    parameterName: "fallback_used",
+    displayName: "Share fallback used",
+    registered: false,
+  },
 ];

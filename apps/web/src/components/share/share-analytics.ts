@@ -15,10 +15,11 @@ import type { AnyLook, ShareMode } from "./SharePage/story-session";
  * download link was clicked. Never on a cancelled share or a bare capture;
  * the caller decides when, this module decides what.
  *
- * `share_` is a prefix of its own in `scripts/analytics-taxonomy.mjs`. The
- * params reuse `article_type` / `event_type` (registered dimensions); the
- * rest stay unregistered (the 50-dimension cap is full) and show in
- * DebugView only.
+ * `share_` is a prefix of its own in `scripts/analytics-taxonomy.mjs`.
+ * `article_type` / `event_type` are registered dimensions; the other nine
+ * are forwarded by the GA4 tag as unregistered params (`registered: false`
+ * in the taxonomy): visible in DebugView, no custom dimension (the
+ * 50-dimension cap is full).
  *
  * Privacy: no ids, slugs, names or titles — only the item's type and the
  * editor's style choices.

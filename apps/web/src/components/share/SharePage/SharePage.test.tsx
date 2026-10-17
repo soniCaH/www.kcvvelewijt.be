@@ -1798,14 +1798,16 @@ describe("SharePage", () => {
 
       await save(user);
 
-      expect(payload()).toMatchObject({
+      expect(payload()).toEqual({
         content_type: "event",
         event_type: "Supportersactiviteit",
         look: "kaart",
+        theme: "licht",
+        format: "story",
+        cover_mode: "affiche_wazig",
+        blocks_moved: false,
         fallback_used: true,
       });
-      expect(payload()).not.toHaveProperty("article_type");
-      expect(payload()).not.toHaveProperty("template");
       expectNoIdentity(QUIZ.title, QUIZ.slug, QUIZ.location);
     });
 
