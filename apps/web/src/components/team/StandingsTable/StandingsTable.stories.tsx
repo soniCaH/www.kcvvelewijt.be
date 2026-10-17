@@ -18,6 +18,8 @@ function entry(
   return {
     position,
     team_id,
+    // Mock: club_id mirrors team_id, as the highlight matches on the club.
+    club_id: team_id,
     team_name,
     played,
     won,
@@ -68,7 +70,7 @@ type Story = StoryObj<typeof meta>;
  * exists alongside).
  */
 export const FullDivision: Story = {
-  args: { entries: fullDivision, highlightTeamId: 1235 },
+  args: { entries: fullDivision, highlightClubId: 1235 },
   tags: ["vr-assert-mobile-overflow"],
 };
 
@@ -98,7 +100,7 @@ export const NoHighlight: Story = {
  * — so this needs no runner-specific opt-out tag.
  */
 export const StickyColumnsPinned: Story = {
-  args: { entries: fullDivision, highlightTeamId: 1235 },
+  args: { entries: fullDivision, highlightClubId: 1235 },
   tags: ["!vr"],
   // `kcvvMobile` (375px) turned out too wide — measured, the 8-column
   // division stops overflowing at that width — so this uses a dedicated
@@ -140,7 +142,7 @@ const numberlessDivision: RankingEntry[] = [
 export const Numberless: Story = {
   args: {
     entries: numberlessDivision,
-    highlightTeamId: 1235,
+    highlightClubId: 1235,
     caption: "3de Afdeling Voetb Vl A",
   },
 };

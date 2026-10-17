@@ -51,7 +51,7 @@ describe("MatchStandingsSection", () => {
         entries={fullDivision}
         homeClubId={1235}
         awayClubId={103}
-        highlightTeamId={1235}
+        highlightClubId={1235}
       />,
     );
     expect(screen.getByText("KLASSEMENT")).toBeInTheDocument();
@@ -64,7 +64,7 @@ describe("MatchStandingsSection", () => {
         entries={fullDivision}
         homeClubId={1235}
         awayClubId={103}
-        highlightTeamId={1235}
+        highlightClubId={1235}
       />,
     );
     expect(screen.getByText("KCVV Elewijt")).toBeInTheDocument();
@@ -134,13 +134,13 @@ describe("MatchStandingsSection", () => {
     expect(accent.tagName).toBe("EM");
   });
 
-  it("tints the KCVV row via highlightTeamId", () => {
+  it("tints the KCVV row via highlightClubId", () => {
     render(
       <MatchStandingsSection
         entries={fullDivision}
         homeClubId={1235}
         awayClubId={103}
-        highlightTeamId={1235}
+        highlightClubId={1235}
       />,
     );
     const kcvvRow = screen.getByTestId("standings-kcvv-row");

@@ -671,7 +671,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
                 className={spacing}
                 homeClubId={match.home_team.id}
                 awayClubId={match.away_team.id}
-                highlightTeamId={match.kcvv_team_id}
+                highlightClubId={KCVV_CLUB_ID}
               />
             ) : (
               <TrackInView
@@ -683,7 +683,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
                   entries={standingsResult}
                   homeClubId={match.home_team.id}
                   awayClubId={match.away_team.id}
-                  highlightTeamId={match.kcvv_team_id}
+                  highlightClubId={KCVV_CLUB_ID}
                 />
               </TrackInView>
             ))}

@@ -43,6 +43,7 @@ const DIVISION: RankingEntry[] = [
   entry({
     position: 2,
     team_id: 1235,
+    club_id: 1235,
     team_name: "KCVV Elewijt",
     points: 24,
     goal_difference: 5,
@@ -68,6 +69,7 @@ const NUMBERLESS_DIVISION: RankingEntry[] = [
   entry({
     position: 0,
     team_id: 1235,
+    club_id: 1235,
     team_name: "KCVV Elewijt",
     played: 0,
     points: 0,
@@ -108,22 +110,36 @@ describe("StandingsTable", () => {
     expect(headers).toEqual(["#", "Ploeg", "M", "W", "G", "V", "+/-", "Ptn"]);
   });
 
-  it("highlights the KCVV row when highlightTeamId matches", () => {
-    render(<StandingsTable entries={DIVISION} highlightTeamId={1235} />);
+  it("highlights the KCVV row when highlightClubId matches", () => {
+    render(<StandingsTable entries={DIVISION} highlightClubId={1235} />);
     const kcvvRow = screen.getByTestId("standings-kcvv-row");
     expect(kcvvRow).toBeInTheDocument();
     expect(kcvvRow.textContent).toContain("KCVV Elewijt");
   });
 
   it("renders the KCVV team name non-italic + bold", () => {
-    render(<StandingsTable entries={DIVISION} highlightTeamId={1235} />);
+    render(<StandingsTable entries={DIVISION} highlightClubId={1235} />);
     const kcvvRow = screen.getByTestId("standings-kcvv-row");
     const nameSpan = kcvvRow.querySelector('[title="KCVV Elewijt"]');
     expect(nameSpan?.className).toContain("not-italic");
     expect(nameSpan?.className).toContain("font-semibold");
   });
 
-  it("does not highlight any row when highlightTeamId is absent", () => {
+  it("highlights by club id: PSD's ranking team_id is a per-competition id, never the club's (#3504)", () => {
+    // Measured against the real feed: KCVV's ranking row carries
+    // team.id 523923 (club 1235) while the team page knows team 1.
+    const real = [
+      entry({ team_id: 523922, club_id: 70, team_name: "Leader FC" }),
+      entry({ team_id: 523923, club_id: 1235, team_name: "KCVV Elewijt" }),
+    ];
+    render(<StandingsTable entries={real} highlightClubId={1235} />);
+    expect(screen.getAllByTestId("standings-kcvv-row")).toHaveLength(1);
+    expect(screen.getByTestId("standings-kcvv-row").textContent).toContain(
+      "KCVV Elewijt",
+    );
+  });
+
+  it("does not highlight any row when highlightClubId is absent", () => {
     render(<StandingsTable entries={DIVISION} />);
     expect(screen.queryByTestId("standings-kcvv-row")).toBeNull();
   });
@@ -144,12 +160,12 @@ describe("StandingsTable", () => {
   });
 
   it("does not highlight a non-matching team", () => {
-    render(<StandingsTable entries={DIVISION} highlightTeamId={9999} />);
+    render(<StandingsTable entries={DIVISION} highlightClubId={9999} />);
     expect(screen.queryByTestId("standings-kcvv-row")).toBeNull();
   });
 
   it("formats positive goal difference with a leading +", () => {
-    render(<StandingsTable entries={DIVISION} highlightTeamId={1235} />);
+    render(<StandingsTable entries={DIVISION} highlightClubId={1235} />);
     expect(screen.getByText("+5")).toBeInTheDocument();
   });
 
@@ -181,7 +197,7 @@ describe("StandingsTable", () => {
     render(
       <StandingsTable
         entries={NUMBERLESS_DIVISION}
-        highlightTeamId={1235}
+        highlightClubId={1235}
         caption="3de Afdeling Voetb Vl A"
       />,
     );
@@ -198,7 +214,7 @@ describe("StandingsTable", () => {
 
   it("still highlights the KCVV row when numberless", () => {
     render(
-      <StandingsTable entries={NUMBERLESS_DIVISION} highlightTeamId={1235} />,
+      <StandingsTable entries={NUMBERLESS_DIVISION} highlightClubId={1235} />,
     );
 
     const kcvvRow = screen.getByTestId("standings-kcvv-row");
@@ -287,7 +303,7 @@ describe("StandingsTable", () => {
     });
 
     it("gives the KCVV row's pinned cells its own tint, never a flat bg-cream (review finding 2)", () => {
-      render(<StandingsTable entries={DIVISION} highlightTeamId={1235} />);
+      render(<StandingsTable entries={DIVISION} highlightClubId={1235} />);
       const kcvvRow = screen.getByTestId("standings-kcvv-row");
       const pinnedCells = kcvvRow.querySelectorAll("td.sticky");
       expect(pinnedCells).toHaveLength(3); // #, Ploeg, Ptn

@@ -6,8 +6,11 @@ import type { RankingEntry } from "@kcvv/api-contract";
 
 export interface StandingsTableProps {
   entries: readonly RankingEntry[];
-  /** PSD team_id of the KCVV team to highlight. */
-  highlightTeamId?: number;
+  /** Club id (`RankingEntry.club_id`) of the KCVV row to highlight. Not a
+   * team id: PSD's ranking `team_id` is a per-competition id (KCVV's is
+   * 523923 while the team page knows team 1), so no id the pages hold would
+   * ever match it (#3504). */
+  highlightClubId?: number;
   /** Name of the competition this table ranks. Also names the region, so a
    * team playing two phases gets two distinct landmark names instead of two
    * identical "Klassement" ones (#2631). */
@@ -80,11 +83,11 @@ function ClubIdentity({
 
 function NumberlessClubList({
   entries,
-  highlightTeamId,
+  highlightClubId,
   caption,
 }: {
   entries: readonly RankingEntry[];
-  highlightTeamId: number | undefined;
+  highlightClubId: number | undefined;
   caption: string | undefined;
 }) {
   return (
@@ -102,7 +105,8 @@ function NumberlessClubList({
       ) : null}
       <ul className="font-mono text-xs">
         {entries.map((entry) => {
-          const isKcvv = entry.team_id === highlightTeamId;
+          const isKcvv =
+            highlightClubId !== undefined && entry.club_id === highlightClubId;
           return (
             <li
               key={entry.team_id}
@@ -127,7 +131,7 @@ function NumberlessClubList({
 
 export function StandingsTable({
   entries,
-  highlightTeamId,
+  highlightClubId,
   caption,
 }: StandingsTableProps) {
   if (entries.length === 0) return null;
@@ -141,7 +145,7 @@ export function StandingsTable({
     return (
       <NumberlessClubList
         entries={entries}
-        highlightTeamId={highlightTeamId}
+        highlightClubId={highlightClubId}
         caption={caption}
       />
     );
@@ -218,7 +222,9 @@ export function StandingsTable({
           </thead>
           <tbody>
             {entries.map((entry) => {
-              const isKcvv = entry.team_id === highlightTeamId;
+              const isKcvv =
+                highlightClubId !== undefined &&
+                entry.club_id === highlightClubId;
               return (
                 <tr
                   key={entry.team_id}

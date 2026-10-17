@@ -41,7 +41,12 @@ function table(overrides: Partial<RankingTable> = {}): RankingTable {
     competition_name: "3de Afdeling Voetb Vl A",
     entries: [
       entry({ position: 1, team_id: 1, team_name: "Leader FC", points: 30 }),
-      entry({ position: 2, team_id: 1235, team_name: "KCVV Elewijt" }),
+      entry({
+        position: 2,
+        team_id: 1235,
+        club_id: 1235,
+        team_name: "KCVV Elewijt",
+      }),
     ],
     ...overrides,
   } as RankingTable;
@@ -132,7 +137,7 @@ describe("StandingsSection", () => {
 
   it("highlights the KCVV row in every table, not just the first", () => {
     render(
-      <StandingsSection tables={[AUTUMN, SPRING]} highlightTeamId={1235} />,
+      <StandingsSection tables={[AUTUMN, SPRING]} highlightClubId={1235} />,
     );
 
     expect(screen.getAllByTestId("standings-kcvv-row")).toHaveLength(2);

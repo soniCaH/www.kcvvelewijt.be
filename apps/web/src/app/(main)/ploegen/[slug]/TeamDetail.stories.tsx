@@ -65,6 +65,8 @@ function rankEntry(
   return {
     position,
     team_id,
+    // Mock: club_id mirrors team_id, as the highlight matches on the club.
+    club_id: team_id,
     team_name,
     played,
     won,
@@ -385,7 +387,7 @@ function TeamDetailAssembly({ competitive = "live" }: TeamDetailAssemblyProps) {
               <StandingsSection
                 tables={standings}
                 divisionFull="Eerste Elftal A – 3e Nat. A"
-                highlightTeamId={KCVV_TEAM_ID}
+                highlightClubId={KCVV_TEAM_ID}
               />
             </PageContainer>
           )}
