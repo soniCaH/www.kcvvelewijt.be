@@ -42,7 +42,7 @@ vi.mock("./actions", () => ({
   ),
 }));
 
-import NewsPage from "./page";
+import NewsPage, { generateMetadata } from "./page";
 
 describe("/nieuws degrades on a failed tag-list read (#2863)", () => {
   beforeEach(() => {
@@ -58,5 +58,18 @@ describe("/nieuws degrades on a failed tag-list read (#2863)", () => {
     });
     render(element);
     expect(screen.getByText("Nieuwsarchief")).toBeInTheDocument();
+  });
+});
+
+describe("/nieuws metadata ignores ?categorie (#3483)", () => {
+  // `generateMetadata` takes no `searchParams`, so whatever `?categorie=` says
+  // can never reach <title> or the description (it used to be echoed into both).
+  it("is the default Nieuwsarchief title and description", () => {
+    expect(generateMetadata.length).toBe(0);
+    const metadata = generateMetadata();
+    expect(metadata.title).toBe("Nieuwsarchief");
+    expect(metadata.description).toBe(
+      "Bekijk al het nieuws van KCVV Elewijt. Filter op categorie of zoek naar specifieke artikelen.",
+    );
   });
 });

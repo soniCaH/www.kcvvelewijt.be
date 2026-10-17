@@ -177,11 +177,11 @@ describe("Canonical URLs backfilled via buildPageMetadata", () => {
       body: [],
     });
     const metadata = await clubSlug.generateMetadata({
-      params: Promise.resolve({ slug: "inschrijven" }),
+      params: Promise.resolve({ slug: "praktische-informatie" }),
     });
     expect(metadata).toHaveProperty(
       "alternates.canonical",
-      `${SITE_CONFIG.siteUrl}/club/inschrijven`,
+      `${SITE_CONFIG.siteUrl}/club/praktische-informatie`,
     );
   });
 
@@ -208,18 +208,9 @@ describe("Static listing canonicals (#2228)", () => {
     );
   });
 
-  it("/nieuws canonicalizes to /nieuws, including ?categorie views", async () => {
-    const base = await nieuwsIndex.generateMetadata({
-      searchParams: Promise.resolve({}),
-    });
-    expect(base).toHaveProperty(
-      "alternates.canonical",
-      `${SITE_CONFIG.siteUrl}/nieuws`,
-    );
-    const filtered = await nieuwsIndex.generateMetadata({
-      searchParams: Promise.resolve({ categorie: "Jeugd" }),
-    });
-    expect(filtered).toHaveProperty(
+  it("/nieuws canonicalizes to /nieuws for every ?categorie view", async () => {
+    // `generateMetadata` takes no `searchParams` (#3483): one canonical for all.
+    expect(nieuwsIndex.generateMetadata()).toHaveProperty(
       "alternates.canonical",
       `${SITE_CONFIG.siteUrl}/nieuws`,
     );
