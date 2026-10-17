@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // PROTOTYPE (#3508): let a phone on the LAN load dev JS. Never merge.
+  allowedDevOrigins: ["192.168.1.187"],
   /* config options here */
 
   poweredByHeader: false,

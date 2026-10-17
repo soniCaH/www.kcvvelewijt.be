@@ -193,6 +193,28 @@ function CaptureColumn({
   );
 }
 
+// A mouse drag otherwise selects every text it crosses, and long-press on iOS
+// opens the copy/lookup callout. Applied to every pointer-dragged block.
+const NO_SELECT: React.CSSProperties = {
+  userSelect: "none",
+  WebkitUserSelect: "none",
+  WebkitTouchCallout: "none",
+  touchAction: "none",
+};
+
+/** Largest preview scale (≤ max) that fits the viewport width with a 16px gutter. */
+function useFitScale(max: number) {
+  const [scale, setScale] = useState(max);
+  useEffect(() => {
+    const fit = () =>
+      setScale(Math.min(max, (window.innerWidth - 32) / CAPTURE_WIDTH));
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, [max]);
+  return scale;
+}
+
 function move<T>(list: T[], from: number, to: number): T[] {
   const next = [...list];
   const [item] = next.splice(from, 1);
@@ -271,6 +293,7 @@ function VariantB() {
   const [order, setOrder] = useState(DEFAULT_ORDER);
   const [dragging, setDragging] = useState<SectionId | null>(null);
   const els = useRef(new Map<SectionId, HTMLDivElement>());
+  const scale = useFitScale(0.4);
   const cap = useCapture();
 
   const onMove = (e: React.PointerEvent) => {
@@ -292,7 +315,7 @@ function VariantB() {
           Sleep een blok in de preview omhoog of omlaag. Logo bovenaan en
           website onderaan liggen vast.
         </p>
-        <Preview scale={0.4} captureRef={cap.ref}>
+        <Preview scale={scale} captureRef={cap.ref}>
           <KickoffFrame>
             {order.map((id) => (
               <div
@@ -301,15 +324,17 @@ function VariantB() {
                   if (el) els.current.set(id, el);
                 }}
                 onPointerDown={(e) => {
+                  e.preventDefault();
                   e.currentTarget.setPointerCapture(e.pointerId);
                   setDragging(id);
                 }}
                 onPointerMove={onMove}
                 onPointerUp={() => setDragging(null)}
                 onPointerCancel={() => setDragging(null)}
+                onDragStart={(e) => e.preventDefault()}
                 style={{
+                  ...NO_SELECT,
                   cursor: dragging === id ? "grabbing" : "grab",
-                  touchAction: "none",
                   width: "100%",
                   display: "flex",
                   justifyContent: "center",
@@ -344,9 +369,8 @@ const ZERO: Offsets = {
   names: { x: 0, y: 0 },
   date: { x: 0, y: 0 },
 };
-const C_SCALE = 0.4;
-
 function VariantC() {
+  const C_SCALE = useFitScale(0.4);
   const [offsets, setOffsets] = useState(ZERO);
   const [dragging, setDragging] = useState<SectionId | null>(null);
   // Offset + pointer position at pointerdown; movementX is 0 on some synthetic/touch moves.
@@ -365,6 +389,7 @@ function VariantC() {
               <div
                 key={id}
                 onPointerDown={(e) => {
+                  e.preventDefault();
                   e.currentTarget.setPointerCapture(e.pointerId);
                   start.current = {
                     ...offsets[id],
@@ -386,9 +411,10 @@ function VariantC() {
                 }}
                 onPointerUp={() => setDragging(null)}
                 onPointerCancel={() => setDragging(null)}
+                onDragStart={(e) => e.preventDefault()}
                 style={{
+                  ...NO_SELECT,
                   cursor: dragging === id ? "grabbing" : "grab",
-                  touchAction: "none",
                   position: "relative",
                   zIndex: dragging === id ? 2 : 1,
                   transform: `translate(${offsets[id].x}px, ${offsets[id].y}px)`,
