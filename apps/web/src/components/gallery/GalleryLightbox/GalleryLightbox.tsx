@@ -7,6 +7,11 @@ import Image from "next/image";
 // shared by `lazy()` and the hover/focus preload, so both hit one import.
 const loadViewer = () => import("./GalleryViewer");
 const GalleryViewer = lazy(loadViewer);
+// A hover/focus warm-up that fails (deploy skew, flaky network) must not be an
+// unhandled rejection; the click's own `lazy()` load surfaces a real failure.
+const preloadViewer = () => {
+  loadViewer().catch(() => {});
+};
 
 export interface GalleryLightboxImage {
   url: string | null;
@@ -98,8 +103,8 @@ export const GalleryLightbox = ({
                   setIndex(i);
                   setRequested(true);
                 }}
-                onPointerEnter={loadViewer}
-                onFocus={loadViewer}
+                onPointerEnter={preloadViewer}
+                onFocus={preloadViewer}
                 aria-label={`${alt} vergroten`}
                 className="group relative block aspect-square w-full overflow-hidden"
               >
