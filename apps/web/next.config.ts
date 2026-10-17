@@ -97,6 +97,27 @@ const nextConfig: NextConfig = {
         destination: "/ploegen",
         permanent: true,
       },
+      // #3483 — the three board teams live at `/club/<slug>` only. Listing them
+      // under `/ploegen` made a second public URL for the same page, and the
+      // generic `/team/:slug` rename would take two hops to reach it. Literal
+      // list on purpose: `showInNavigation` would also hide the real teams
+      // `kcvve-u5` and `fc-weitse-gans`. Keep in step with the `club/*` folders
+      // that call `createBoardPage`.
+      {
+        source: "/team/:slug(bestuur|jeugdbestuur|angels)",
+        destination: "/club/:slug",
+        permanent: true,
+      },
+      {
+        source: "/ploegen/:slug(bestuur|jeugdbestuur|angels)",
+        destination: "/club/:slug",
+        permanent: true,
+      },
+      {
+        source: "/ploegen/:slug(bestuur|jeugdbestuur|angels)/wedstrijden",
+        destination: "/club/:slug",
+        permanent: true,
+      },
       // Gatsby emitted directory-style URLs. Redirect to the extension-less
       // form rather than straight to `/ploegen/:slug`, so the rules above get
       // their turn on the second hop instead of being bypassed.

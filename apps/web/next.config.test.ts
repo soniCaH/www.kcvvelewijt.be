@@ -178,6 +178,70 @@ describe("next.config redirects", () => {
     }
   });
 
+  describe("board teams live at /club/<slug> only (#3483)", () => {
+    const BOARD = ["bestuur", "jeugdbestuur", "angels"];
+
+    // Resolve a redirect the way Next does for these two source shapes:
+    // `/x/:slug(a|b|c)` and `/x/:slug(a|b|c)/y`. Returns the destination or null.
+    const resolve = async (pathname: string) => {
+      const redirects = await nextConfig.redirects!();
+      for (const r of redirects) {
+        const m = r.source.match(/^(.*):slug\(([^)]+)\)(.*)$/);
+        if (!m) continue;
+        const re = new RegExp(`^${m[1]}(${m[2]})${m[3]}$`);
+        const hit = pathname.match(re);
+        if (hit) return r.destination.replace(":slug", hit[1]!);
+      }
+      return null;
+    };
+
+    it("sends every /ploegen board URL, and its /wedstrijden, to /club/<slug> with 308", async () => {
+      const redirects = await nextConfig.redirects!();
+      for (const slug of BOARD) {
+        expect(await resolve(`/ploegen/${slug}`)).toBe(`/club/${slug}`);
+        expect(await resolve(`/ploegen/${slug}/wedstrijden`)).toBe(
+          `/club/${slug}`,
+        );
+      }
+      for (const source of [
+        "/ploegen/:slug(bestuur|jeugdbestuur|angels)",
+        "/ploegen/:slug(bestuur|jeugdbestuur|angels)/wedstrijden",
+      ]) {
+        const match = redirects.find((r) => r.source === source);
+        expect(match, `Missing redirect for ${source}`).toBeDefined();
+        expect(match!.destination).toBe("/club/:slug");
+        expect(match!.permanent).toBe(true);
+      }
+    });
+
+    it("sends legacy /team board URLs straight to /club/<slug>, ahead of /team/:slug (one hop)", async () => {
+      const redirects = await nextConfig.redirects!();
+      const source = "/team/:slug(bestuur|jeugdbestuur|angels)";
+      const idx = redirects.findIndex((r) => r.source === source);
+      expect(idx).toBeGreaterThan(-1);
+      expect(redirects[idx]!.destination).toBe("/club/:slug");
+      expect(redirects[idx]!.permanent).toBe(true);
+      expect(idx).toBeLessThan(
+        redirects.findIndex((r) => r.source === "/team/:slug"),
+      );
+      for (const slug of BOARD) {
+        expect(await resolve(`/team/${slug}`)).toBe(`/club/${slug}`);
+      }
+    });
+
+    it("leaves real teams alone, including the two with showInNavigation == false", async () => {
+      for (const slug of [
+        "kcvve-u5",
+        "fc-weitse-gans",
+        "eerste-elftallen-a",
+        "bestuurders",
+      ]) {
+        expect(await resolve(`/ploegen/${slug}`)).toBeNull();
+        expect(await resolve(`/ploegen/${slug}/wedstrijden`)).toBeNull();
+      }
+    });
+  });
+
   it("routes the Gatsby category archives to the tag listing (#2963)", async () => {
     const redirects = await nextConfig.redirects!();
 
