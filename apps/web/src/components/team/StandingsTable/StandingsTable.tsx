@@ -55,7 +55,7 @@ const ANCHOR_DIVIDER_CLASSES = [
  * would match every entry that lacks one (`undefined === undefined`).
  *
  * shortcut: matches the whole club, so two KCVV sides in one poule would
- * both tint. Census 2026-10-17: all 9 published KCVV tables hold exactly one
+ * both tint. Census 2026-10-17: all 8 published KCVV tables hold exactly one
  * KCVV row, and PSD's ranking row carries no stable team-level id (`team_id`
  * is per-competition). Upgrade when a poule with two KCVV sides appears. */
 function isHighlighted(
