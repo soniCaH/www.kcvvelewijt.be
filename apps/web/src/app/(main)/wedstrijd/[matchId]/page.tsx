@@ -132,7 +132,9 @@ export async function generateMetadata({
     return {
       title,
       description,
-      alternates: { canonical: `${SITE_CONFIG.siteUrl}/wedstrijd/${matchId}` },
+      alternates: {
+        canonical: `${SITE_CONFIG.siteUrl}/wedstrijd/${numericId}`,
+      },
       openGraph: {
         title,
         description,

@@ -46,6 +46,8 @@ vi.mock("@/lib/effect/services/BffService", async (importOriginal) => {
 
 import MatchPage, { generateMetadata } from "./page";
 import MatchLayout from "./layout";
+import { createMatchDetail } from "./match-detail.fixtures";
+import { SITE_CONFIG } from "@/lib/constants";
 
 const params = (matchId: string) => Promise.resolve({ matchId });
 
@@ -54,7 +56,7 @@ describe("/wedstrijd/[matchId] rejects a non-strict id before any read (#3486)",
     mockGetMatchDetail.mockReset();
   });
 
-  it.each(["123abc", "-1", "1234567890"])(
+  it.each(["123abc", "-1", "1234567890", "03602", "0"])(
     "404s %j in the layout, the page and the metadata, with no BFF call",
     async (matchId) => {
       await expect(
@@ -73,5 +75,13 @@ describe("/wedstrijd/[matchId] rejects a non-strict id before any read (#3486)",
     mockGetMatchDetail.mockReturnValue(Effect.die("stop after the read"));
     await generateMetadata({ params: params("123") });
     expect(mockGetMatchDetail).toHaveBeenCalledWith(123);
+  });
+
+  it("builds the canonical from the numeric id (#3483)", async () => {
+    mockGetMatchDetail.mockReturnValue(Effect.succeed(createMatchDetail()));
+    const metadata = await generateMetadata({ params: params("3602") });
+    expect(metadata.alternates?.canonical).toBe(
+      `${SITE_CONFIG.siteUrl}/wedstrijd/3602`,
+    );
   });
 });
