@@ -7,7 +7,7 @@
 // square (1080×1080), on real Sanity content. Inline styles on purpose: the
 // real templates are captured with html-to-image, so this keeps that shape.
 
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toPng } from "html-to-image";
 import {
@@ -577,22 +577,63 @@ function Grain() {
   );
 }
 
+// ── Licht / Donker (#3511 switch, here tried on every look) ───────────────
+type Theme = "light" | "dark";
+const ThemeCtx = createContext<Theme>("light");
+interface Pal {
+  ground: string;
+  surface: string;
+  edge: string;
+  shadow: string;
+  text: string;
+  soft: string;
+  muted: string;
+  accent: string;
+}
+const PAL: Record<Theme, Pal> = {
+  light: {
+    ground: TOKENS.cream,
+    surface: "#fff",
+    edge: TOKENS.ink,
+    shadow: TOKENS.ink,
+    text: TOKENS.ink,
+    soft: TOKENS.inkSoft,
+    muted: TOKENS.inkMuted,
+    accent: TOKENS.jerseyDeep,
+  },
+  dark: {
+    ground: TOKENS.jerseyDeepDark,
+    surface: TOKENS.ink,
+    edge: TOKENS.cream,
+    shadow: TOKENS.jerseyDeep,
+    text: TOKENS.cream,
+    soft: "rgba(245,241,230,0.86)",
+    muted: "rgba(245,241,230,0.6)",
+    accent: TOKENS.warm,
+  },
+};
+function usePal(): Pal & { dark: boolean } {
+  const t = useContext(ThemeCtx);
+  return { ...PAL[t], dark: t === "dark" };
+}
+
 // ── A · Kaart — photo up top, a ClippedCard laid over its edge ─────────────
 function LookA({ it, f }: { it: LookItem; f: Format }) {
   const s = styleOf(it);
+  const p = usePal();
   const sq = f === "square";
   const photoH = sq ? 380 : 900;
   const bracket = (pos: "tl" | "br"): React.CSSProperties => ({
     position: "absolute",
     width: 44,
     height: 44,
-    border: `5px solid ${TOKENS.ink}`,
+    border: `5px solid ${p.edge}`,
     ...(pos === "tl"
       ? { top: -18, left: -18, borderRight: 0, borderBottom: 0 }
       : { bottom: -18, right: -18, borderLeft: 0, borderTop: 0 }),
   });
   return (
-    <Canvas f={f} bg={TOKENS.cream}>
+    <Canvas f={f} bg={p.ground}>
       <Grain />
       {/* Column: the photo takes every pixel the card and footer leave. */}
       <div
@@ -614,9 +655,9 @@ function LookA({ it, f }: { it: LookItem; f: Format }) {
           style={{
             position: "relative",
             margin: sq ? "-170px 72px 0" : "-220px 72px 0",
-            background: "#fff",
-            border: `5px solid ${TOKENS.ink}`,
-            boxShadow: `16px 16px 0 ${TOKENS.ink}`,
+            background: p.surface,
+            border: `5px solid ${p.edge}`,
+            boxShadow: `16px 16px 0 ${p.shadow}`,
             padding: sq ? "64px 56px 48px" : "88px 64px 64px",
             display: "flex",
             flexDirection: "column",
@@ -632,21 +673,21 @@ function LookA({ it, f }: { it: LookItem; f: Format }) {
             style={{ position: "absolute", top: -30, right: 56 }}
           />
           {s.accent === "quote" && (
-            <Accent
-              it={it}
-              s={s}
-              color={TOKENS.jerseyDeep}
-              size={sq ? 0.6 : 1}
-            />
+            <Accent it={it} s={s} color={p.accent} size={sq ? 0.6 : 1} />
           )}
           <RuleKicker
             text={dateLine(it) || s.label}
-            color={TOKENS.jerseyDeep}
+            color={p.accent}
             size={sq ? 26 : 30}
           />
-          <Title it={it} size={sq ? 76 : 100} color={TOKENS.ink} />
+          <Title
+            it={it}
+            size={sq ? 76 : 100}
+            color={p.text}
+            accent={p.accent}
+          />
           {isEventish(it) && (
-            <Meta it={it} color={TOKENS.inkSoft} size={sq ? 26 : 32} />
+            <Meta it={it} color={p.soft} size={sq ? 26 : 32} />
           )}
         </div>
         <div
@@ -664,12 +705,12 @@ function LookA({ it, f }: { it: LookItem; f: Format }) {
               fontWeight: 700,
               fontSize: 28,
               letterSpacing: "0.16em",
-              color: TOKENS.inkMuted,
+              color: p.muted,
             }}
           >
             KCVV ELEWIJT
           </span>
-          <Cta color={TOKENS.ink} size={sq ? 24 : 30} />
+          <Cta color={p.text} size={sq ? 24 : 30} />
         </div>
       </div>
     </Canvas>
@@ -679,6 +720,7 @@ function LookA({ it, f }: { it: LookItem; f: Format }) {
 // ── B · Plakboek — cream paper, the photo taped on as a print ──────────────
 function LookB({ it, f }: { it: LookItem; f: Format }) {
   const s = styleOf(it);
+  const p = usePal();
   const sq = f === "square";
   const tapeChip = (
     <span
@@ -687,7 +729,7 @@ function LookB({ it, f }: { it: LookItem; f: Format }) {
         background: s.fill === TOKENS.cream ? TOKENS.jersey : s.fill,
         color: s.fill === TOKENS.cream ? TOKENS.ink : s.onFill,
         transform: "rotate(-1deg)",
-        boxShadow: `6px 6px 0 ${TOKENS.ink}`,
+        boxShadow: `6px 6px 0 ${p.dark ? TOKENS.cream : TOKENS.ink}`,
         padding: sq ? "10px 22px" : "14px 30px",
         fontFamily: MONO_FONT,
         fontWeight: 700,
@@ -724,7 +766,7 @@ function LookB({ it, f }: { it: LookItem; f: Format }) {
   );
   if (sq)
     return (
-      <Canvas f={f} bg={TOKENS.cream}>
+      <Canvas f={f} bg={p.ground}>
         <Grain />
         <div
           style={{
@@ -749,9 +791,9 @@ function LookB({ it, f }: { it: LookItem; f: Format }) {
             }}
           >
             {tapeChip}
-            <Accent it={it} s={s} color={TOKENS.jerseyDeep} size={0.55} />
-            <Title it={it} size={66} color={TOKENS.ink} />
-            <Meta it={it} color={TOKENS.inkSoft} size={24} />
+            <Accent it={it} s={s} color={p.accent} size={0.55} />
+            <Title it={it} size={66} color={p.text} accent={p.accent} />
+            <Meta it={it} color={p.soft} size={24} />
             <div
               style={{
                 display: "flex",
@@ -761,14 +803,14 @@ function LookB({ it, f }: { it: LookItem; f: Format }) {
               }}
             >
               <Crest size={64} />
-              <Cta color={TOKENS.jerseyDeep} size={20} />
+              <Cta color={p.accent} size={20} />
             </div>
           </div>
         </div>
       </Canvas>
     );
   return (
-    <Canvas f={f} bg={TOKENS.cream}>
+    <Canvas f={f} bg={p.ground}>
       <Grain />
       <div
         style={{
@@ -791,7 +833,7 @@ function LookB({ it, f }: { it: LookItem; f: Format }) {
           {tapeChip}
           <Crest size={104} />
         </div>
-        <Title it={it} size={112} color={TOKENS.ink} />
+        <Title it={it} size={112} color={p.text} accent={p.accent} />
         <div
           style={{
             display: "flex",
@@ -819,16 +861,12 @@ function LookB({ it, f }: { it: LookItem; f: Format }) {
               gap: 24,
             }}
           >
-            <Meta it={it} color={TOKENS.inkSoft} size={32} />
+            <Meta it={it} color={p.soft} size={32} />
             {s.accent !== "quote" && (
-              <Accent it={it} s={s} color={TOKENS.jerseyDeep} size={0.7} />
+              <Accent it={it} s={s} color={p.accent} size={0.7} />
             )}
           </div>
-          <RuleKicker
-            text="kcvvelewijt.be"
-            color={TOKENS.jerseyDeep}
-            size={30}
-          />
+          <RuleKicker text="kcvvelewijt.be" color={p.accent} size={30} />
         </div>
       </div>
     </Canvas>
@@ -838,6 +876,9 @@ function LookB({ it, f }: { it: LookItem; f: Format }) {
 // ── C · Affiche — full-bleed photo, bottom wash, seam + footer band ────────
 function LookC({ it, f }: { it: LookItem; f: Format }) {
   const s = styleOf(it);
+  const p = usePal();
+  // #3511: Licht = cream wash + ink text, Donker = jersey-deep wash + cream.
+  const w = p.dark ? "8,26,18" : "245,241,230";
   const sq = f === "square";
   const footH = sq ? 88 : 120;
   return (
@@ -854,8 +895,7 @@ function LookC({ it, f }: { it: LookItem; f: Format }) {
           position: "absolute",
           inset: 0,
           bottom: footH,
-          background:
-            "linear-gradient(180deg, rgba(8,26,18,0.6) 0%, rgba(8,26,18,0) 20%, rgba(8,26,18,0.15) 45%, rgba(8,26,18,0.82) 72%, rgba(8,26,18,0.95) 100%)",
+          background: `linear-gradient(180deg, rgba(${w},0.6) 0%, rgba(${w},0) 20%, rgba(${w},0.15) 45%, rgba(${w},0.82) 72%, rgba(${w},0.95) 100%)`,
           zIndex: 1,
         }}
       />
@@ -880,11 +920,16 @@ function LookC({ it, f }: { it: LookItem; f: Format }) {
         >
           <div
             style={{
-              background: "rgba(8,26,18,0.88)",
+              background: `rgba(${w},0.88)`,
               padding: sq ? "10px 16px" : "16px 24px",
             }}
           >
-            <Accent it={it} s={s} color={TOKENS.cream} size={sq ? 0.6 : 0.85} />
+            <Accent
+              it={it}
+              s={s}
+              color={p.dark ? TOKENS.cream : TOKENS.ink}
+              size={sq ? 0.6 : 0.85}
+            />
           </div>
         </div>
       )}
@@ -901,7 +946,7 @@ function LookC({ it, f }: { it: LookItem; f: Format }) {
         }}
       >
         {s.accent === "quote" && (
-          <Accent it={it} s={s} color={TOKENS.warm} size={sq ? 0.6 : 1} />
+          <Accent it={it} s={s} color={p.accent} size={sq ? 0.6 : 1} />
         )}
         <span
           style={{
@@ -923,10 +968,14 @@ function LookC({ it, f }: { it: LookItem; f: Format }) {
         <Title
           it={it}
           size={sq ? 84 : 124}
-          color={TOKENS.cream}
-          accent={TOKENS.warm}
+          color={p.dark ? TOKENS.cream : TOKENS.ink}
+          accent={p.accent}
         />
-        <Meta it={it} color="rgba(245,241,230,0.88)" size={sq ? 26 : 34} />
+        <Meta
+          it={it}
+          color={p.dark ? "rgba(245,241,230,0.88)" : TOKENS.inkSoft}
+          size={sq ? 26 : 34}
+        />
       </div>
       <div
         style={{
@@ -1121,6 +1170,11 @@ export function LookD({ it, f }: { it: LookItem; f: Format }) {
 // ── E · Ticket — a stub on a pitch-dark ground, date as the hero ───────────
 function LookE({ it, f }: { it: LookItem; f: Format }) {
   const s = styleOf(it);
+  const p = usePal();
+  // Ticket and ground swap places in Donker so the ticket still stands out.
+  const ground = p.dark ? TOKENS.cream : TOKENS.jerseyDeepDark;
+  const ticket = p.dark ? TOKENS.ink : TOKENS.cream;
+  const tText = p.dark ? TOKENS.cream : TOKENS.ink;
   const sq = f === "square";
   const { day, month } = dayMonth(it);
   const perf = (
@@ -1128,7 +1182,7 @@ function LookE({ it, f }: { it: LookItem; f: Format }) {
       style={{
         position: "relative",
         height: 0,
-        borderTop: `5px dashed ${TOKENS.ink}`,
+        borderTop: `5px dashed ${tText}`,
         margin: "0 0",
       }}
     >
@@ -1140,7 +1194,7 @@ function LookE({ it, f }: { it: LookItem; f: Format }) {
           top: -22,
           width: 36,
           height: 36,
-          background: TOKENS.jerseyDeepDark,
+          background: ground,
         }}
       />
       <span
@@ -1150,7 +1204,7 @@ function LookE({ it, f }: { it: LookItem; f: Format }) {
           top: -22,
           width: 36,
           height: 36,
-          background: TOKENS.jerseyDeepDark,
+          background: ground,
         }}
       />
     </div>
@@ -1216,27 +1270,30 @@ function LookE({ it, f }: { it: LookItem; f: Format }) {
             fontSize: sq ? 22 : 30,
             letterSpacing: "0.18em",
             textTransform: "uppercase",
-            color: TOKENS.jerseyDeep,
+            color: p.accent,
           }}
         >
           {s.label}
           {s.accent === "quote" ? " · “…”" : ""}
         </span>
-        <Title it={it} size={sq ? 54 : 84} color={TOKENS.ink} />
+        <Title it={it} size={sq ? 54 : 84} color={tText} accent={p.accent} />
         {isEventish(it) && (
-          <Meta it={it} color={TOKENS.inkSoft} size={sq ? 20 : 28} />
+          <Meta
+            it={it}
+            color={p.dark ? p.soft : TOKENS.inkSoft}
+            size={sq ? 20 : 28}
+          />
         )}
       </div>
     </div>
   );
   return (
-    <Canvas f={f} bg={TOKENS.jerseyDeepDark}>
+    <Canvas f={f} bg={ground}>
       <div
         style={{
           position: "absolute",
           inset: 0,
-          backgroundImage:
-            "repeating-linear-gradient(90deg, rgba(245,241,230,0.05) 0 84px, transparent 84px 168px)",
+          backgroundImage: `repeating-linear-gradient(90deg, ${p.dark ? "rgba(10,10,10,0.04)" : "rgba(245,241,230,0.05)"} 0 84px, transparent 84px 168px)`,
         }}
       />
       <div
@@ -1258,7 +1315,7 @@ function LookE({ it, f }: { it: LookItem; f: Format }) {
               fontWeight: 700,
               fontSize: sq ? 22 : 30,
               letterSpacing: "0.2em",
-              color: TOKENS.cream,
+              color: p.dark ? TOKENS.ink : TOKENS.cream,
             }}
           >
             KCVV ELEWIJT
@@ -1267,9 +1324,9 @@ function LookE({ it, f }: { it: LookItem; f: Format }) {
         <div
           style={{
             width: "100%",
-            background: TOKENS.cream,
+            background: ticket,
             border: `5px solid ${TOKENS.ink}`,
-            boxShadow: `14px 14px 0 ${TOKENS.ink}`,
+            boxShadow: `14px 14px 0 ${p.dark ? TOKENS.jerseyDeep : TOKENS.ink}`,
             display: "flex",
             flexDirection: "column",
             transform: "rotate(-1.2deg)",
@@ -1303,7 +1360,7 @@ function LookE({ it, f }: { it: LookItem; f: Format }) {
                 fontWeight: 700,
                 fontSize: sq ? 20 : 28,
                 letterSpacing: "0.14em",
-                color: TOKENS.ink,
+                color: tText,
               }}
             >
               KCVVELEWIJT.BE
@@ -1344,7 +1401,8 @@ function Tile({
 }) {
   const scale = f === "story" ? 0.3 : 0.3;
   const Look = LOOKS[variant]!.C;
-  const id = `look-${variant}-${it.key}-${f}`;
+  const theme = useContext(ThemeCtx);
+  const id = `look-${variant}-${theme}-${it.key}-${f}`;
   async function save() {
     const node = document.getElementById(id);
     if (!node) return;
@@ -1416,6 +1474,7 @@ export function LooksPrototype({
   const router = useRouter();
   const v = LOOKS[variant] ? variant : "A";
   const [format, setFormat] = useState<Format>("story");
+  const [theme, setTheme] = useState<Theme>("light");
   const go = (d: number) => {
     const next = KEYS[(KEYS.indexOf(v) + d + KEYS.length) % KEYS.length]!;
     router.replace(`?variant=${next}`, { scroll: false });
@@ -1444,16 +1503,18 @@ export function LooksPrototype({
         newest article per type with a cover, newest event with and without
         cover.
       </p>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 24 }}>
-        {items.map((it) => (
-          <Tile
-            key={`${v}-${it.key}-${format}`}
-            it={it}
-            f={format}
-            variant={v}
-          />
-        ))}
-      </div>
+      <ThemeCtx.Provider value={theme}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 24 }}>
+          {items.map((it) => (
+            <Tile
+              key={`${v}-${it.key}-${format}`}
+              it={it}
+              f={format}
+              variant={v}
+            />
+          ))}
+        </div>
+      </ThemeCtx.Provider>
       <div
         style={{
           position: "fixed",
@@ -1507,6 +1568,24 @@ export function LooksPrototype({
             }}
           >
             {x === "story" ? "9:16" : "1:1"}
+          </button>
+        ))}
+        <span
+          style={{ width: 1, height: 24, background: "#555", margin: "0 6px" }}
+        />
+        {(["light", "dark"] as const).map((x) => (
+          <button
+            key={x}
+            type="button"
+            onClick={() => setTheme(x)}
+            style={{
+              padding: "10px 12px",
+              cursor: "pointer",
+              background: theme === x ? "#fff" : "transparent",
+              color: theme === x ? "#111" : "#fff",
+            }}
+          >
+            {x === "light" ? "Licht" : "Donker"}
           </button>
         ))}
       </div>
