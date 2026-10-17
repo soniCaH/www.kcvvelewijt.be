@@ -26,6 +26,7 @@ vi.mock("@/lib/repositories/article.repository", async (importOriginal) => {
   return {
     ...mod,
     ArticleRepositoryLive: Layer.succeed(mod.ArticleRepository, {
+      findForShare: () => Effect.die("not used by this suite"),
       findAll: () => Effect.die(new Error("Sanity is unreachable")),
       findBySlug: () => Effect.die(new Error("Sanity is unreachable")),
       findPaginated: () => Effect.die(new Error("Sanity is unreachable")),

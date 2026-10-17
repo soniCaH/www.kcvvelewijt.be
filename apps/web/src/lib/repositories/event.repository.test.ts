@@ -371,6 +371,30 @@ describe("EventRepository", () => {
     });
   });
 
+  describe("findForShare (#3540)", () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("reads from Brussels midnight 7 days ago, with an empty slug when there is no deep link", async () => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date("2026-10-17T10:00:00Z"));
+      mockFetch.mockResolvedValueOnce({ list: [], picked: null });
+
+      await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* EventRepository;
+          return yield* repo.findForShare(undefined);
+        }),
+      );
+
+      expect(mockFetch).toHaveBeenCalledWith(expect.any(String), {
+        since: "2026-10-09T22:00:00.000Z",
+        slug: "",
+      });
+    });
+  });
+
   describe("findUpcomingForList", () => {
     it("fetches both sources and returns one merged, chronologically-sorted feed", async () => {
       // Two concurrent fetches (Effect.all) — route by query identity, not call

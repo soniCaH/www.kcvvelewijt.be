@@ -9,6 +9,7 @@ import type {
   EVENT_ARTICLES_QUERY_RESULT,
   EVENT_BY_SLUG_QUERY_RESULT,
   NEXT_FEATURED_EVENT_QUERY_RESULT,
+  SHARE_EVENTS_QUERY_RESULT,
 } from "../sanity/sanity.types";
 
 // ─── GROQ Queries ────────────────────────────────────────────────────────────
@@ -81,6 +82,26 @@ export const EVENT_ARTICLES_QUERY =
   "fact": body[_type == "eventFact"][0]{ date, endDate, startTime, location, eventType }
 }`);
 
+/**
+ * `/share` (#3540): events from `$since` (Brussels midnight 7 days ago) on,
+ * soonest first, plus one deep-linked event by `$slug` (`""` = none) so a link
+ * to an older event still opens it. Raw cover URL + crop + hotspot, as in
+ * `SHARE_ARTICLES_QUERY`. The client reads the published perspective, so
+ * `picked` never returns a draft.
+ */
+const SHARE_EVENT_PROJECTION = `{
+  "slug": coalesce(slug.current, ""), "title": coalesce(title, ""), eventType,
+  "dateStart": coalesce(dateStart, ""), location,
+  "coverUrl": coverImage.asset->url, "hotspot": coverImage.hotspot{ x, y },
+  "crop": coverImage.crop{ top, bottom, left, right },
+  "dimensions": coverImage.asset->metadata.dimensions{ width, height }
+}`;
+
+export const SHARE_EVENTS_QUERY = defineQuery(`{
+  "list": *[_type == "event" && defined(slug.current) && dateTime(coalesce(dateEnd, dateStart)) >= dateTime($since)] | order(dateStart asc) ${SHARE_EVENT_PROJECTION},
+  "picked": *[_type == "event" && slug.current == $slug][0] ${SHARE_EVENT_PROJECTION}
+}`);
+
 // ─── View Models ─────────────────────────────────────────────────────────────
 
 /** GROQ projection now returns the final shape — EventVM is a type alias.
@@ -95,6 +116,9 @@ export type EventVM = Omit<
   href: string;
   featuredOnHome: boolean;
 };
+
+/** One `/share` picker row (#3540) — see `SHARE_EVENTS_QUERY`. */
+export type ShareEventRow = SHARE_EVENTS_QUERY_RESULT["list"][number];
 
 export type EventDetailVM = Omit<
   NonNullable<EVENT_BY_SLUG_QUERY_RESULT>,
@@ -235,6 +259,14 @@ export interface EventRepositoryInterface {
   readonly findBySlug: (
     slug: string,
   ) => Effect.Effect<EventDetailVM | null, SanityReadError>;
+  /** `/share` story picker (#3540): upcoming events plus the last 7 days,
+   *  plus the deep-linked one by slug (`picked`, `null` for none or unknown). */
+  readonly findForShare: (
+    slug: string | undefined,
+  ) => Effect.Effect<
+    { list: ShareEventRow[]; picked: ShareEventRow | null },
+    SanityReadError
+  >;
 }
 
 export class EventRepository extends Context.Tag("EventRepository")<
@@ -265,4 +297,15 @@ export const EventRepositoryLive = Layer.succeed(EventRepository, {
     fetchGroq<EVENT_BY_SLUG_QUERY_RESULT>(EVENT_BY_SLUG_QUERY, { slug }).pipe(
       Effect.map((row) => row ?? null),
     ),
+  findForShare: (slug) =>
+    fetchGroq<SHARE_EVENTS_QUERY_RESULT>(SHARE_EVENTS_QUERY, {
+      // Minus 7 club days (not 7×24 h), so a DST change keeps it at midnight.
+      since: DateTime.now()
+        .setZone(CLUB_TIMEZONE)
+        .startOf("day")
+        .minus({ days: 7 })
+        .toUTC()
+        .toISO(),
+      slug: slug ?? "",
+    }),
 });

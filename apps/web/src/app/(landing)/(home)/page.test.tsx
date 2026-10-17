@@ -47,6 +47,7 @@ vi.mock("@/lib/repositories/article.repository", async (importOriginal) => {
   return {
     ...mod,
     ArticleRepositoryLive: Layer.succeed(mod.ArticleRepository, {
+      findForShare: () => Effect.die("not used by this suite"),
       // At least one article so the page's "nothing at all" early return
       // (`articles.length === 0 && matches.length === 0`) doesn't fire —
       // these tests are about the FirstTeamsBlock/agenda sections, not that
@@ -128,6 +129,7 @@ vi.mock("@/lib/repositories/event.repository", async (importOriginal) => {
   return {
     ...mod,
     EventRepositoryLive: Layer.succeed(mod.EventRepository, {
+      findForShare: () => Effect.die("not used by this suite"),
       findAll: () => Effect.die("not used by this suite"),
       findUpcomingForList: () => Effect.die("not used by this suite"),
       findNextFeatured: mockFindNextFeatured,

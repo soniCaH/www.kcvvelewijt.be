@@ -460,6 +460,14 @@ const eslintConfig = [
     },
   },
   {
+    // /share's story templates and looks are rasterised by html-to-image,
+    // which needs a plain `<img>` with an exact, same-origin src —
+    // `next/image`'s lazy loading and srcset would capture blank or the wrong
+    // size. Covers the generated-PNG preview in SharePage too.
+    files: ["src/components/share/**/*.tsx"],
+    rules: { "@next/next/no-img-element": "off" },
+  },
+  {
     // Test-file rules: img rules off (we mock Next.js Image), plus the
     // module-scope import guard, the window-size ban and the fixed-port ban above.
     files: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],

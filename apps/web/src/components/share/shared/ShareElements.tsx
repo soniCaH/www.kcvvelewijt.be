@@ -332,7 +332,6 @@ function CrestTile({
         transform: `rotate(${rotate}deg)`,
       }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         // Route + sanitize at the sink (same-origin optimizer for remote crests
         // so html-to-image can capture them; js/xss-through-dom barrier).

@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CAPTURE_WIDTH, CAPTURE_HEIGHT, SQUARE_SIZE } from "../constants";
 import type { PlayerForShare, MatchOption } from "./SharePage";
+import type { ShareItem } from "../looks/share-content";
 
 // Mock html-to-image — browser canvas API not available in happy-dom
 vi.mock("html-to-image", () => ({
@@ -21,6 +22,10 @@ globalThis.fetch = vi.fn().mockResolvedValue({
 } as unknown as Response);
 
 import { SharePage } from "./SharePage";
+
+/** Today's templates are look W; a fresh phone starts on A Kaart (#3536). */
+const pickW = (user: ReturnType<typeof userEvent.setup>) =>
+  user.click(screen.getByRole("button", { name: "W · Wedstrijd" }));
 
 const PLAYERS: PlayerForShare[] = [
   {
@@ -81,6 +86,8 @@ const COLLIDING_MATCHES: MatchOption[] = [
 describe("SharePage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // The story session (#3536) lives in localStorage: every test starts on a fresh phone.
+    localStorage.clear();
   });
 
   // ─── Existing Phase 1 tests (updated for Phase 4 generate flow) ──────────
@@ -212,8 +219,14 @@ describe("SharePage", () => {
 
   // ─── Phase 3: Template picker ─────────────────────────────────────────────
 
-  it("renders 9 template picker buttons", () => {
+  it("W renders its 9 story template buttons; A–E offer all 11 moments", async () => {
+    const user = userEvent.setup();
     render(<SharePage matches={MATCHES} players={PLAYERS} />);
+    expect(
+      screen.getByRole("button", { name: "Eindstand 1:1" }),
+    ).toBeInTheDocument();
+    await pickW(user);
+    expect(screen.queryByRole("button", { name: "Eindstand 1:1" })).toBeNull();
     // All 9 templates should be present as buttons
     const templateLabels = [
       /goal kcvv/i,
@@ -327,7 +340,7 @@ describe("SharePage", () => {
       screen.queryByRole("combobox", { name: /resultaat/i }),
     ).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: /eindstand/i }));
+    await user.click(screen.getByRole("button", { name: "Eindstand" }));
 
     expect(
       screen.getByRole("combobox", { name: /resultaat/i }),
@@ -810,9 +823,10 @@ describe("SharePage", () => {
     ).toBeInTheDocument();
   });
 
-  it("switching to Square shows only the two square templates", async () => {
+  it("in W, switching to Square shows only the two square templates", async () => {
     const user = userEvent.setup();
     render(<SharePage matches={MATCHES} players={PLAYERS} />);
+    await pickW(user);
 
     await user.click(screen.getByRole("button", { name: /vierkant · 1:1/i }));
 
@@ -855,14 +869,19 @@ describe("SharePage", () => {
       screen.queryByPlaceholderText(/2e provinciale/i),
     ).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: /eindstand/i }));
+    await user.click(screen.getByRole("button", { name: "Eindstand" }));
 
     expect(screen.getByPlaceholderText(/2e provinciale/i)).toBeInTheDocument();
   });
 
-  it("shows the photo upload for image-capable templates only", async () => {
+  it("A–E have a photo slot on every template; W only on its image-capable ones", async () => {
     const user = userEvent.setup();
     render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+    await user.click(screen.getByRole("button", { name: /goal teg/i }));
+    expect(screen.getByLabelText(/foto uploaden/i)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /goal kcvv/i }));
+    await pickW(user);
 
     // goal-kcvv is image-capable
     expect(screen.getByLabelText(/foto uploaden/i)).toBeInTheDocument();
@@ -1022,5 +1041,562 @@ describe("SharePage", () => {
     expect(goalKcvvBtn).toHaveAttribute("aria-pressed", "true");
     // The guard returns early, so session fields are untouched.
     expect(screen.getByPlaceholderText(/2 - 0/i)).toHaveValue("3 - 1");
+  });
+
+  // ─── News and events in the four new looks (#3540) ─────────────────────
+
+  describe("news and events (#3540)", () => {
+    const INTERVIEW: ShareItem = {
+      kind: "article",
+      slug: "interview-jan",
+      type: "interview",
+      title: "Jan over zijn eerste seizoen",
+      spans: [
+        { text: "Jan over zijn ", accent: false },
+        { text: "eerste seizoen", accent: true },
+      ],
+      date: "vrijdag 17 oktober",
+      time: "",
+      location: "",
+      day: "17",
+      month: "okt",
+      cover: {
+        url: "https://cdn.sanity.io/images/p/d/cover.jpg",
+        hotspot: { x: 0.3, y: 0.2 },
+      },
+    };
+    const TRANSFER: ShareItem = {
+      ...INTERVIEW,
+      slug: "transfer-piet",
+      type: "transfer",
+      title: "Piet tekent bij",
+      spans: [{ text: "Piet tekent bij", accent: false }],
+    };
+    const QUIZ: ShareItem = {
+      kind: "event",
+      slug: "quiz",
+      type: "Supportersactiviteit",
+      title: "Supportersquiz",
+      spans: [{ text: "Supportersquiz", accent: false }],
+      date: "zaterdag 25 oktober",
+      time: "20:00",
+      location: "Kantine Driesstraat",
+      day: "25",
+      month: "okt",
+      cover: null,
+    };
+    const ARTICLES = [INTERVIEW, TRANSFER];
+    const EVENTS = [QUIZ];
+
+    const renderTool = (initial?: {
+      kind: "article" | "event";
+      item: ShareItem | null;
+    }) =>
+      render(
+        <SharePage
+          matches={MATCHES}
+          players={PLAYERS}
+          articles={ARTICLES}
+          events={EVENTS}
+          initial={initial}
+        />,
+      );
+    const preview = () => screen.getByTestId("share-preview");
+
+    it("starts on Wedstrijd and keeps the match form; Nieuws swaps in the article picker and the four looks", async () => {
+      const user = userEvent.setup();
+      renderTool();
+
+      expect(screen.getByRole("button", { name: "Wedstrijd" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      expect(screen.getByRole("button", { name: /goal kcvv/i })).toBeVisible();
+      expect(screen.getByRole("button", { name: "Kaart" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      expect(
+        screen.getByRole("button", { name: "W · Wedstrijd" }),
+      ).toBeVisible();
+
+      await user.click(screen.getByRole("button", { name: "Nieuws" }));
+
+      expect(
+        screen.queryByRole("button", { name: "W · Wedstrijd" }),
+      ).toBeNull();
+
+      expect(screen.queryByRole("button", { name: /goal kcvv/i })).toBeNull();
+      expect(screen.getByRole("listbox", { name: "Artikels" })).toBeVisible();
+      for (const look of ["Kaart", "Plakboek", "Affiche", "Ticket"]) {
+        expect(screen.getByRole("button", { name: look })).toBeVisible();
+      }
+    });
+
+    it("filters the article list as you type", async () => {
+      const user = userEvent.setup();
+      renderTool();
+      await user.click(screen.getByRole("button", { name: "Nieuws" }));
+
+      await user.type(screen.getByLabelText("Zoek artikel"), "tekent");
+
+      const list = screen.getByRole("listbox", { name: "Artikels" });
+      expect(within(list).getAllByRole("option")).toHaveLength(1);
+      expect(within(list).getByRole("option")).toHaveTextContent(
+        "Piet tekent bij",
+      );
+    });
+
+    it("picking an article prefills its title and draws its type, detail and italic accent", async () => {
+      const user = userEvent.setup();
+      renderTool();
+      await user.click(screen.getByRole("button", { name: "Nieuws" }));
+      await user.click(
+        screen.getByRole("option", { name: "Jan over zijn eerste seizoen" }),
+      );
+
+      expect(screen.getByLabelText("Titel")).toHaveValue(
+        "Jan over zijn eerste seizoen",
+      );
+      expect(within(preview()).getByText("Interview")).toBeInTheDocument();
+      expect(within(preview()).getByText("“")).toBeInTheDocument();
+      expect(within(preview()).getByText("eerste seizoen").tagName).toBe("EM");
+      expect(
+        within(preview()).getByText("Meer op kcvvelewijt.be"),
+      ).toBeInTheDocument();
+    });
+
+    it("an edited title reaches the preview", async () => {
+      const user = userEvent.setup();
+      renderTool({ kind: "article", item: TRANSFER });
+
+      const title = screen.getByLabelText("Titel");
+      await user.clear(title);
+      await user.type(title, "Welkom Piet");
+
+      expect(within(preview()).getByText("Welkom Piet")).toBeInTheDocument();
+      expect(within(preview()).getByText("Transfer")).toBeInTheDocument();
+      expect(within(preview()).getByText("→ KCVV ELEWIJT")).toBeInTheDocument();
+    });
+
+    it("an event shows its type label, the date block and <date · hour> / <location> on two lines", () => {
+      renderTool({ kind: "event", item: QUIZ });
+
+      expect(screen.getByRole("button", { name: "Evenement" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      expect(screen.getByLabelText("Locatie")).toHaveValue(
+        "Kantine Driesstraat",
+      );
+      expect(within(preview()).getByText("Supporters")).toBeInTheDocument();
+      expect(
+        within(preview()).getByText("zaterdag 25 oktober · 20:00"),
+      ).toBeInTheDocument();
+      expect(
+        within(preview()).getByText("Kantine Driesstraat"),
+      ).toBeInTheDocument();
+      expect(within(preview()).getByText("25")).toBeInTheDocument();
+    });
+
+    it("a deep-linked item preselects even when it is not in the list", () => {
+      const older: ShareItem = {
+        ...TRANSFER,
+        slug: "oud",
+        title: "Oud nieuws",
+        spans: [],
+      };
+      renderTool({ kind: "article", item: older });
+
+      expect(screen.getByRole("button", { name: "Nieuws" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      expect(screen.getByLabelText("Titel")).toHaveValue("Oud nieuws");
+    });
+
+    it("an unknown deep link opens the empty picker with no preview", () => {
+      renderTool({ kind: "event", item: null });
+
+      expect(
+        screen.getByRole("listbox", { name: "Evenementen" }),
+      ).toBeVisible();
+      expect(screen.queryByTestId("share-preview")).toBeNull();
+    });
+
+    it("Omslag starts on Affiche wazig; Foto fills the slot positioned on the hotspot, through the same-origin optimizer", async () => {
+      const user = userEvent.setup();
+      renderTool({ kind: "article", item: INTERVIEW });
+
+      expect(
+        screen.getByRole("button", { name: "Affiche wazig" }),
+      ).toHaveAttribute("aria-pressed", "true");
+
+      await user.click(screen.getByRole("button", { name: "Foto" }));
+
+      const img = preview().querySelector<HTMLImageElement>(
+        "img[src^='/_next/image']",
+      )!;
+      expect(img.getAttribute("src")).toContain("q=75");
+      expect(img.style.objectPosition).toBe("30% 20%");
+    });
+
+    it("an event without a cover draws the event fallback picture", () => {
+      renderTool({ kind: "event", item: QUIZ });
+
+      expect(
+        preview().querySelector("img[src='/images/event-fallback.jpg']"),
+      ).not.toBeNull();
+    });
+
+    // Omslag only chooses how a cover is shown; without a cover every choice
+    // would draw the same fallback, so the row would be a control that does nothing.
+    it("hides Omslag for an item without a cover", () => {
+      renderTool({ kind: "event", item: QUIZ });
+
+      expect(screen.queryByRole("button", { name: "Reservefoto" })).toBeNull();
+      expect(
+        screen.queryByRole("button", { name: "Affiche wazig" }),
+      ).toBeNull();
+    });
+
+    it("Reservefoto swaps the cover for the look's own fallback picture", async () => {
+      const user = userEvent.setup();
+      renderTool({ kind: "article", item: INTERVIEW });
+
+      await user.click(screen.getByRole("button", { name: "Reservefoto" }));
+
+      expect(
+        preview().querySelector("img[src^='/images/share-fallback/A-']"),
+      ).not.toBeNull();
+    });
+
+    it("Licht / Donker show for every look, the wash steps for Affiche only, defaulting to Licht + Normaal", async () => {
+      const user = userEvent.setup();
+      renderTool({ kind: "article", item: INTERVIEW });
+
+      expect(screen.getByRole("button", { name: "Licht" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      expect(screen.queryByRole("button", { name: "Normaal" })).toBeNull();
+
+      await user.click(screen.getByRole("button", { name: "Affiche" }));
+
+      expect(screen.getByRole("button", { name: "Normaal" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      expect(screen.getByRole("button", { name: "Zacht" })).toBeVisible();
+      expect(screen.getByRole("button", { name: "Sterk" })).toBeVisible();
+    });
+
+    it("a match story has Licht / Donker in A–E, none in W, and never an Omslag row", async () => {
+      const user = userEvent.setup();
+      renderTool();
+
+      expect(screen.getByRole("button", { name: "Licht" })).toBeVisible();
+      expect(screen.queryByRole("button", { name: "Foto" })).toBeNull();
+
+      await user.click(screen.getByRole("button", { name: "Affiche" }));
+      expect(screen.getByRole("button", { name: "Normaal" })).toBeVisible();
+
+      await pickW(user);
+      expect(screen.queryByRole("button", { name: "Licht" })).toBeNull();
+      expect(screen.queryByRole("button", { name: "Normaal" })).toBeNull();
+    });
+
+    it("captures a news story twice with includeQueryParams at the square size", async () => {
+      const { toPng } = await import("html-to-image");
+      const user = userEvent.setup();
+      renderTool({ kind: "article", item: INTERVIEW });
+
+      await user.click(screen.getByRole("button", { name: /vierkant/i }));
+      await user.click(screen.getByRole("button", { name: /genereer/i }));
+
+      expect(toPng).toHaveBeenCalledTimes(2);
+      expect(toPng).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          width: SQUARE_SIZE,
+          height: SQUARE_SIZE,
+          includeQueryParams: true,
+        }),
+      );
+    });
+  });
+
+  describe("match moments and the story session (#3536)", () => {
+    const KEY = "kcvv-share-session";
+    const STORED_MATCH = MATCHES[0]!.label;
+    const NEWS: ShareItem = {
+      kind: "article",
+      slug: "nieuws-1",
+      type: "announcement",
+      title: "Nieuwe kantine open",
+      spans: [{ text: "Nieuwe kantine open", accent: false }],
+      date: "vrijdag 17 oktober",
+      time: "",
+      location: "",
+      day: "17",
+      month: "okt",
+      cover: null,
+    };
+    const OTHER_NEWS: ShareItem = {
+      ...NEWS,
+      slug: "nieuws-2",
+      title: "Ander nieuws",
+      spans: [],
+    };
+
+    const renderTool = () =>
+      render(
+        <SharePage
+          matches={MATCHES}
+          players={PLAYERS}
+          articles={[NEWS, OTHER_NEWS]}
+        />,
+      );
+    const preview = () => screen.getByTestId("share-preview");
+    const previewHtml = () => preview().innerHTML;
+    const pressed = (name: string) =>
+      screen.getByRole("button", { name }).getAttribute("aria-pressed");
+    const save = async (user: ReturnType<typeof userEvent.setup>) => {
+      await user.click(screen.getByRole("button", { name: /genereer/i }));
+      await user.click(screen.getByRole("button", { name: /download png/i }));
+    };
+    const fillMatch = async (user: ReturnType<typeof userEvent.setup>) => {
+      await user.type(
+        screen.getByPlaceholderText(/fc tegenstander/i),
+        STORED_MATCH,
+      );
+      await user.type(screen.getByPlaceholderText("2 - 0"), "2 - 1");
+      await user.type(screen.getByPlaceholderText("45+2"), "67");
+    };
+
+    beforeEach(() => {
+      // happy-dom would navigate to the blob URL; the click itself is what counts.
+      vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(
+        () => {},
+      );
+    });
+    afterEach(() => {
+      vi.restoreAllMocks();
+      vi.useRealTimers();
+    });
+
+    it("a fresh phone starts a match on A Kaart: the moment's label, minute disc and score, the squad badge, the look's first fallback picture", async () => {
+      const user = userEvent.setup();
+      renderTool();
+      await fillMatch(user);
+
+      expect(pressed("Kaart")).toBe("true");
+      const p = within(preview());
+      expect(p.getByText("Goal")).toBeInTheDocument();
+      expect(p.getByText("2–1")).toBeInTheDocument();
+      expect(p.getByText("67'", { exact: false })).toBeInTheDocument();
+      expect(p.getByText("A")).toBeInTheDocument();
+      expect(previewHtml()).toContain("share-fallback/A-1.webp");
+
+      await user.click(screen.getByRole("button", { name: "Rust" }));
+      expect(within(preview()).getByText("45'")).toBeInTheDocument();
+    });
+
+    it("W keeps its own drawn no-photo poster", async () => {
+      const user = userEvent.setup();
+      renderTool();
+      await pickW(user);
+      expect(previewHtml()).not.toContain("share-fallback");
+    });
+
+    it("a reload brings the match details back", async () => {
+      const user = userEvent.setup();
+      const { unmount } = renderTool();
+      await fillMatch(user);
+      await user.click(screen.getByRole("button", { name: "Donker" }));
+      unmount();
+
+      renderTool();
+      expect(screen.getByPlaceholderText(/fc tegenstander/i)).toHaveValue(
+        MATCHES[0]!.matchName,
+      );
+      expect(screen.getByPlaceholderText("2 - 0")).toHaveValue("2 - 1");
+      expect(screen.getByPlaceholderText("45+2")).toHaveValue("67");
+      expect(screen.getByPlaceholderText("A")).toHaveValue("A");
+      expect(pressed("Donker")).toBe("true");
+    });
+
+    it("a news story's edited fields come back after a reload; another article clears them", async () => {
+      const user = userEvent.setup();
+      const { unmount } = renderTool();
+      await user.click(screen.getByRole("button", { name: "Nieuws" }));
+      await user.click(screen.getByRole("option", { name: NEWS.title }));
+      await user.clear(screen.getByLabelText("Titel"));
+      await user.type(screen.getByLabelText("Titel"), "Kantine open!");
+      unmount();
+
+      renderTool();
+      expect(screen.getByLabelText("Titel")).toHaveValue("Kantine open!");
+      await user.click(screen.getByRole("option", { name: OTHER_NEWS.title }));
+      expect(screen.getByLabelText("Titel")).toHaveValue("Ander nieuws");
+    });
+
+    it("the next Brussels day starts a new story but keeps the look", async () => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date("2026-10-17T21:30:00Z")); // 23:30 in Brussels
+      const user = userEvent.setup();
+      const { unmount } = renderTool();
+      await fillMatch(user);
+      await user.click(screen.getByRole("button", { name: "Ticket" }));
+      unmount();
+
+      vi.setSystemTime(new Date("2026-10-17T22:30:00Z")); // 00:30, next day
+      renderTool();
+      expect(screen.getByPlaceholderText(/fc tegenstander/i)).toHaveValue("");
+      expect(pressed("Ticket")).toBe("true");
+    });
+
+    it("picking another match clears the last one's score and minute", async () => {
+      const user = userEvent.setup();
+      renderTool();
+      await fillMatch(user);
+      const input = screen.getByPlaceholderText(/fc tegenstander/i);
+      await user.clear(input);
+      await user.type(input, MATCHES[1]!.label);
+
+      expect(screen.getByPlaceholderText("2 - 0")).toHaveValue("");
+      expect(screen.getByPlaceholderText("45+2")).toHaveValue("");
+    });
+
+    it("a store that throws, or holds junk, still renders a fresh tool", () => {
+      localStorage.setItem(KEY, "{not json");
+      const { unmount } = renderTool();
+      expect(pressed("Kaart")).toBe("true");
+      unmount();
+
+      vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+        throw new Error("SecurityError");
+      });
+      vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+        throw new Error("QuotaExceededError");
+      });
+      renderTool();
+      expect(pressed("Kaart")).toBe("true");
+    });
+
+    it("an own photo is never stored", async () => {
+      const user = userEvent.setup();
+      renderTool();
+      await user.upload(
+        screen.getByLabelText(/foto uploaden/i),
+        new File(["x"], "me.png", { type: "image/png" }),
+      );
+      expect(previewHtml()).toContain("blob:");
+      expect(localStorage.getItem(KEY)).not.toContain("blob:");
+    });
+
+    it("after each saved PNG a match moves A → B → C → E → W and wraps; news skips W", async () => {
+      const user = userEvent.setup();
+      renderTool();
+      for (const next of [
+        "Plakboek",
+        "Affiche",
+        "Ticket",
+        "W · Wedstrijd",
+        "Kaart",
+      ]) {
+        await save(user);
+        expect(pressed(next)).toBe("true");
+      }
+
+      await user.click(screen.getByRole("button", { name: "Nieuws" }));
+      await user.click(screen.getByRole("option", { name: NEWS.title }));
+      await user.click(screen.getByRole("button", { name: "Ticket" }));
+      await save(user);
+      expect(pressed("Kaart")).toBe("true");
+    });
+
+    it("a saved PNG that used a fallback moves the look to its next picture, wrapping on the uneven set", async () => {
+      localStorage.setItem(
+        KEY,
+        JSON.stringify({
+          look: "kaart",
+          fallbackNext: { kaart: 4 },
+          story: null,
+        }),
+      );
+      const user = userEvent.setup();
+      renderTool();
+      expect(previewHtml()).toContain("share-fallback/A-8.webp");
+
+      await save(user);
+      await user.click(screen.getByRole("button", { name: "Kaart" }));
+      expect(previewHtml()).toContain("share-fallback/A-1.webp");
+    });
+
+    it("a coverless event shows the event fallback, so its save leaves the AI rotation alone", async () => {
+      const EVENT: ShareItem = {
+        ...NEWS,
+        kind: "event",
+        slug: "quiz",
+        type: "Andere",
+        title: "Quiz",
+      };
+      const user = userEvent.setup();
+      render(
+        <SharePage matches={MATCHES} players={PLAYERS} events={[EVENT]} />,
+      );
+      await user.click(screen.getByRole("button", { name: "Evenement" }));
+      await user.click(screen.getByRole("option", { name: "Quiz" }));
+      await save(user);
+      expect(JSON.parse(localStorage.getItem(KEY)!).fallbackNext).toEqual({});
+    });
+
+    it("re-picking the same match after typing keeps its score", async () => {
+      const user = userEvent.setup();
+      renderTool();
+      await fillMatch(user);
+      const input = screen.getByPlaceholderText(/fc tegenstander/i);
+      await user.type(input, "x");
+      await user.clear(input);
+      await user.type(input, STORED_MATCH);
+      expect(screen.getByPlaceholderText("2 - 0")).toHaveValue("2 - 1");
+    });
+
+    it("a stored fallback index past its set wraps on read; unknown looks are dropped", () => {
+      localStorage.setItem(
+        KEY,
+        JSON.stringify({
+          look: "kaart",
+          fallbackNext: { kaart: 9, bogus: 2 },
+          story: null,
+        }),
+      );
+      renderTool();
+      // Kaart's set has 5 pictures: 9 % 5 = 4 → A-8.
+      expect(previewHtml()).toContain("share-fallback/A-8.webp");
+      expect(JSON.parse(localStorage.getItem(KEY)!).fallbackNext).toEqual({
+        kaart: 4,
+      });
+    });
+
+    it("a saved PNG resets Omslag for the next story", async () => {
+      const COVERED = {
+        ...NEWS,
+        cover: {
+          url: "https://cdn.sanity.io/images/p/d/c.jpg",
+          hotspot: { x: 0.5, y: 0.5 },
+        },
+      };
+      const user = userEvent.setup();
+      render(
+        <SharePage matches={MATCHES} players={PLAYERS} articles={[COVERED]} />,
+      );
+      await user.click(screen.getByRole("button", { name: "Nieuws" }));
+      await user.click(screen.getByRole("option", { name: NEWS.title }));
+      await user.click(screen.getByRole("button", { name: "Foto" }));
+      await save(user);
+      expect(pressed("Affiche wazig")).toBe("true");
+    });
   });
 });
