@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { act, render, screen } from "@testing-library/react";
 import {
   ShareBadgeContext,
+  ShareBlocksContext,
   ShareFrame,
   ShareTop,
   ShareFoot,
@@ -357,5 +358,50 @@ describe("ShareFrame", () => {
     // in textContent (see reference_editorialheading_a11y_name_spacing).
     const heading = screen.getByRole("heading", { name: /Verloren/i });
     expect(heading.textContent).toBe("Verloren.");
+  });
+});
+
+describe("ShareMid movable blocks (#3537)", () => {
+  const mid = () => (
+    <ShareMid center>
+      <span>Aftrap</span>
+      <span>KCVV</span>
+      <span>Dummy</span>
+    </ShareMid>
+  );
+
+  it("leaves the middle zone untouched without a block layout", () => {
+    const { container } = render(mid());
+    expect(container.querySelector("[data-block]")).toBeNull();
+  });
+
+  it("tags each direct child and translates a moved one by its offset", () => {
+    const { container } = render(
+      <ShareBlocksContext.Provider
+        value={{ w1: { x: 40, y: -12, layer: "voor" } }}
+      >
+        {mid()}
+      </ShareBlocksContext.Provider>,
+    );
+    const blocks = container.querySelectorAll<HTMLElement>("[data-block]");
+    expect([...blocks].map((b) => b.dataset.block)).toEqual(["w0", "w1", "w2"]);
+    expect(blocks[1]!.style.translate).toBe("40px -12px");
+    expect(blocks[0]!.style.translate).toBe("");
+  });
+
+  it("puts an achter block below the pinned top row and footer", () => {
+    const { container } = render(
+      <ShareBlocksContext.Provider
+        value={{
+          w0: { x: 0, y: 0, layer: "achter" },
+          w2: { x: 0, y: 5, layer: "voor" },
+        }}
+      >
+        {mid()}
+      </ShareBlocksContext.Provider>,
+    );
+    const blocks = container.querySelectorAll<HTMLElement>("[data-block]");
+    expect(Number(blocks[0]!.style.zIndex)).toBeLessThan(0);
+    expect(Number(blocks[2]!.style.zIndex)).toBeGreaterThan(0);
   });
 });

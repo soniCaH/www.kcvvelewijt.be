@@ -1,6 +1,7 @@
 import { MONO_FONT, TOKENS } from "../constants";
 import {
   accentOf,
+  Block,
   Canvas,
   Crest,
   Cta,
@@ -15,6 +16,7 @@ import {
   type LookProps,
 } from "./look-parts";
 import { unclash } from "./share-content";
+import { PINNED_Z } from "./block-layout";
 
 /**
  * B · Plakboek — paper ground, the photo taped on as a print. Donker is
@@ -25,6 +27,7 @@ export function PlakboekLook({
   format,
   theme,
   coverMode,
+  blocks,
   fallbackIndex,
 }: LookProps) {
   const dark = theme === "donker";
@@ -114,28 +117,35 @@ export function PlakboekLook({
               justifyContent: "center",
             }}
           >
-            <div style={{ alignSelf: "flex-start" }}>{label}</div>
-            {content.hero && (
-              <Hero content={content} color={text} size={0.45} />
-            )}
-            {content.detail !== "none" && (
-              <div style={{ alignSelf: "flex-start" }}>
-                <Detail content={content} color={accent} size={0.55} />
-              </div>
-            )}
-            <Title
-              runs={content.title}
-              size={66}
-              color={text}
-              accent={accent}
-            />
-            <Info lines={content.info} color={soft} size={24} />
+            <Block
+              id="tekst"
+              blocks={blocks}
+              style={{ display: "flex", flexDirection: "column", gap: 28 }}
+            >
+              <div style={{ alignSelf: "flex-start" }}>{label}</div>
+              {content.hero && (
+                <Hero content={content} color={text} size={0.45} />
+              )}
+              {content.detail !== "none" && (
+                <div style={{ alignSelf: "flex-start" }}>
+                  <Detail content={content} color={accent} size={0.55} />
+                </div>
+              )}
+              <Title
+                runs={content.title}
+                size={66}
+                color={text}
+                accent={accent}
+              />
+              <Info lines={content.info} color={soft} size={24} />
+            </Block>
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: 16,
                 marginTop: 12,
+                zIndex: PINNED_Z,
               }}
             >
               <Crest size={64} squad={content.squad} />
@@ -167,11 +177,21 @@ export function PlakboekLook({
             alignItems: "center",
           }}
         >
-          {label}
-          <Crest size={104} squad={content.squad} />
+          <Block id="label" blocks={blocks} style={{ display: "flex" }}>
+            {label}
+          </Block>
+          <div style={{ display: "flex", zIndex: PINNED_Z }}>
+            <Crest size={104} squad={content.squad} />
+          </div>
         </div>
-        <Title runs={content.title} size={112} color={text} accent={accent} />
-        {content.hero && <Hero content={content} color={text} size={0.8} />}
+        <Block id="titel" blocks={blocks}>
+          <Title runs={content.title} size={112} color={text} accent={accent} />
+        </Block>
+        {content.hero && (
+          <Block id="hero" blocks={blocks}>
+            <Hero content={content} color={text} size={0.8} />
+          </Block>
+        )}
         <div
           style={{
             display: "flex",
@@ -185,7 +205,9 @@ export function PlakboekLook({
           {print(880, "100%", -2)}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-          <div
+          <Block
+            id="info"
+            blocks={blocks}
             style={{
               display: "flex",
               alignItems: "flex-end",
@@ -197,8 +219,14 @@ export function PlakboekLook({
             {content.detail !== "none" && (
               <Detail content={content} color={accent} size={0.7} />
             )}
+          </Block>
+          <div style={{ zIndex: PINNED_Z }}>
+            <RuleKicker
+              text="Meer op kcvvelewijt.be"
+              color={accent}
+              size={30}
+            />
           </div>
-          <RuleKicker text="Meer op kcvvelewijt.be" color={accent} size={30} />
         </div>
       </div>
     </Canvas>

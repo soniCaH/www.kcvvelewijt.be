@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { MONO_FONT, TOKENS } from "../constants";
 import {
   accentOf,
+  Block,
   Canvas,
   Crest,
   Cta,
@@ -15,6 +16,7 @@ import {
   type LookProps,
 } from "./look-parts";
 import { unclash } from "./share-content";
+import { PINNED_Z } from "./block-layout";
 
 /**
  * A · Kaart — photo up top, a card laid over its bottom edge. Donker is a
@@ -25,6 +27,7 @@ export function KaartLook({
   format,
   theme,
   coverMode,
+  blocks,
   fallbackIndex,
 }: LookProps) {
   const dark = theme === "donker";
@@ -66,7 +69,14 @@ export function KaartLook({
             coverMode={coverMode}
             fallbackIndex={fallbackIndex}
           />
-          <div style={{ position: "absolute", top: 56, left: 64 }}>
+          <div
+            style={{
+              position: "absolute",
+              top: 56,
+              left: 64,
+              zIndex: PINNED_Z,
+            }}
+          >
             <Crest size={sq ? 84 : 104} squad={content.squad} />
           </div>
         </div>
@@ -85,18 +95,28 @@ export function KaartLook({
         >
           <span style={bracket("tl")} />
           <span style={bracket("br")} />
-          <div style={{ position: "absolute", top: -30, right: 56 }}>
+          <Block
+            id="stempel"
+            blocks={blocks}
+            style={{ position: "absolute", top: -30, right: 56 }}
+          >
             <Stamp
               label={content.label}
               fill={stamp.fill}
               onFill={stamp.onFill}
               size={sq ? 28 : 34}
             />
-          </div>
+          </Block>
           {content.hero && (
-            <Hero content={content} color={text} size={sq ? 0.55 : 0.8} />
+            <Block id="hero" blocks={blocks}>
+              <Hero content={content} color={text} size={sq ? 0.55 : 0.8} />
+            </Block>
           )}
-          <div style={{ display: "flex", flexDirection: "column", gap }}>
+          <Block
+            id="tekst"
+            blocks={blocks}
+            style={{ display: "flex", flexDirection: "column", gap }}
+          >
             {content.detail !== "none" && (
               <div style={{ alignSelf: "flex-start" }}>
                 <Detail
@@ -113,7 +133,7 @@ export function KaartLook({
               accent={accent}
             />
             <Info lines={content.info} color={soft} size={sq ? 26 : 32} />
-          </div>
+          </Block>
         </div>
         <div
           style={{
@@ -121,6 +141,8 @@ export function KaartLook({
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            position: "relative",
+            zIndex: PINNED_Z,
           }}
         >
           <span

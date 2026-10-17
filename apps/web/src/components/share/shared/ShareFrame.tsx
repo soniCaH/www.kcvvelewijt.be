@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext } from "react";
+import React, {
+  createContext,
+  useContext,
+  useLayoutEffect,
+  useRef,
+} from "react";
+import { wedstrijdZ, type BlockLayout } from "../looks/block-layout";
 import {
   BODY_FONT,
   GRAIN_DATA_URL,
@@ -47,6 +53,13 @@ export function useSharePalette(): SharePalette {
  * unless it is wrapped in this provider.
  */
 export const ShareBadgeContext = createContext<string | undefined>(undefined);
+
+/**
+ * The block layout of the story being composed in `/share` (#3537). With
+ * one, {@link ShareMid} makes each of its direct children a movable block;
+ * without one (Storybook, VR, unit tests) it renders exactly as before.
+ */
+export const ShareBlocksContext = createContext<BlockLayout | null>(null);
 
 export interface ShareFrameProps {
   /** Canvas width in px (1080 for both Story and Square). */
@@ -285,8 +298,26 @@ export function ShareMid({
   style?: React.CSSProperties;
 }) {
   const photoLayout = useContext(SharePhotoContext);
+  const blocks = useContext(ShareBlocksContext);
+  const ref = useRef<HTMLDivElement>(null);
+  // The templates stay as they are: their middle-zone children are tagged
+  // here, in the DOM. The standalone `translate` property keeps a child's
+  // own `transform` (a rotated card). Each child is a flex item, so its
+  // z-index applies without a `position`.
+  useLayoutEffect(() => {
+    if (!blocks || !ref.current) return;
+    [...ref.current.children].forEach((child, i) => {
+      if (!(child instanceof HTMLElement)) return;
+      const id = `w${i}`;
+      const at = blocks[id];
+      child.dataset.block = id;
+      child.style.translate = at ? `${at.x}px ${at.y}px` : "";
+      child.style.zIndex = at ? String(wedstrijdZ(blocks, id)) : "";
+    });
+  });
   return (
     <div
+      ref={ref}
       style={{
         flex: "1 1 auto",
         minHeight: 0,

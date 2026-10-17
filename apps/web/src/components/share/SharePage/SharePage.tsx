@@ -23,7 +23,7 @@ import {
   SQUARE_SIZE,
   TEMPLATE_SCALE,
 } from "../constants";
-import { ShareBadgeContext } from "../shared/ShareFrame";
+import { ShareBadgeContext, ShareBlocksContext } from "../shared/ShareFrame";
 import { shortSquadLabel, type ResultMood } from "../shared/theme";
 import { Button } from "@/components/design-system/Button/Button";
 import { EmptyState } from "@/components/design-system/EmptyState";
@@ -60,6 +60,13 @@ import {
   type TemplateId,
 } from "../looks/share-content";
 import {
+  moveBlock,
+  placeBlock,
+  type BlockLayer,
+  type BlockLayout,
+} from "../looks/block-layout";
+import {
+  NO_BLOCKS,
   readSession,
   writeSession,
   type AnyLook,
@@ -261,6 +268,17 @@ const ALL_LOOKS: { id: AnyLook; name: string }[] = [
 
 const noSubscribe = () => () => {};
 
+// Drag mode on the preview (#3537): no text selection, no iOS callout, no
+// page scroll from a block (the page still scrolls from empty areas), and
+// an outline only on the block being dragged.
+const DRAG_CLASSES =
+  "[&_[data-block]]:cursor-grab [&_[data-block]]:touch-none [&_[data-block]]:select-none [&_[data-block]]:[-webkit-touch-callout:none] [&_[data-dragging]]:outline-8 [&_[data-dragging]]:outline-offset-8 [&_[data-dragging]]:outline-dashed [&_[data-dragging]]:outline-card-red";
+
+const LAYERS: { value: BlockLayer; label: string }[] = [
+  { value: "voor", label: "Voor" },
+  { value: "achter", label: "Achter" },
+];
+
 const COVER_MODES: { value: CoverMode; label: string }[] = [
   { value: "foto", label: "Foto" },
   { value: "affiche_wazig", label: "Affiche wazig" },
@@ -274,12 +292,14 @@ function Choice<T extends string>({
   options,
   value,
   onChange,
+  disabled = false,
 }: {
   id: string;
   label: string;
   options: { value: T; label: string }[];
   value: T;
   onChange: (next: T) => void;
+  disabled?: boolean;
 }) {
   return (
     <section aria-labelledby={id}>
@@ -295,8 +315,9 @@ function Choice<T extends string>({
             key={opt.value}
             type="button"
             onClick={() => onChange(opt.value)}
+            disabled={disabled}
             aria-pressed={value === opt.value}
-            className={`flex-1 basis-[6.5rem] rounded-none border-2 px-3 py-3 font-mono text-sm font-semibold uppercase transition-colors duration-300 ${
+            className={`flex-1 basis-[6.5rem] rounded-none border-2 px-3 py-3 font-mono text-sm font-semibold uppercase transition-colors duration-300 disabled:opacity-40 ${
               value === opt.value
                 ? "border-ink bg-jersey-deep text-cream"
                 : "border-ink/30 text-ink hover:border-ink bg-cream"
@@ -584,6 +605,23 @@ function ShareTool({
   // Manual photo upload (object URL)
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
 
+  // Movable blocks (#3537): one layout per format.
+  const [blocks, setBlocks] = useState(saved?.blocks ?? NO_BLOCKS);
+  const [dragMode, setDragMode] = useState(false);
+  const [snap, setSnap] = useState(true);
+  const [snapping, setSnapping] = useState(false);
+  const dragRef = useRef<{
+    el: HTMLElement;
+    id: string;
+    from: { x: number; y: number };
+    cx: number;
+    cy: number;
+    centre: number;
+  } | null>(null);
+  const layout = blocks[aspect];
+  /** The block moved last: Voor / Achter act on it. */
+  const topBlock = Object.keys(layout).at(-1);
+
   // Drop a generated preview once it no longer matches the form, so the
   // Share/Download buttons can never emit a stale graphic. Also drops any
   // export failure notice: it can only ever describe the preview/blob this
@@ -609,6 +647,11 @@ function ShareTool({
     setUploadedImageUrl(null);
     clearPreview();
   }, [clearPreview]);
+
+  const setLayout = (next: (prev: BlockLayout) => BlockLayout) => {
+    setBlocks((prev) => ({ ...prev, [aspect]: next(prev[aspect]) }));
+    clearPreview();
+  };
 
   const currentTemplate = TEMPLATES.find((t) => t.id === selectedTemplateId)!;
   // Looks that can draw the story: A–E draw everything; W only matches, and
@@ -654,6 +697,7 @@ function ShareTool({
       setMinute("");
       setSelectedPlayerId(null);
       setMood("win");
+      setBlocks(NO_BLOCKS);
     }
     if (pickedByLabel) {
       lastPickedMatchIdRef.current = pickedByLabel.id;
@@ -697,6 +741,7 @@ function ShareTool({
   const handleTemplateChange = (id: TemplateId) => {
     if (id === selectedTemplateId) return;
     setSelectedTemplateId(id);
+    setBlocks(NO_BLOCKS);
     resetTemplateFields();
   };
 
@@ -708,6 +753,7 @@ function ShareTool({
       setSelectedTemplateId(
         next === "square" ? "square-pre-game" : "goal-kcvv",
       );
+      setBlocks(NO_BLOCKS);
       resetTemplateFields();
     } else {
       clearPreview();
@@ -817,6 +863,7 @@ function ShareTool({
         },
         itemSlug: item?.slug ?? null,
         fields,
+        blocks,
       },
     });
   }, [
@@ -839,6 +886,7 @@ function ShareTool({
     mood,
     item,
     fields,
+    blocks,
   ]);
 
   /**
@@ -856,6 +904,7 @@ function ShareTool({
     const at = fittingLooks.findIndex((l) => l.id === activeLook);
     setLook(fittingLooks[(at + 1) % fittingLooks.length]!.id);
     setCoverMode(defaultCover(mode));
+    setBlocks(NO_BLOCKS);
     // The PNG on screen is the saved story, not the next one. Its object
     // URL is revoked a beat later: a download may still be reading it.
     const url = previewUrlRef.current;
@@ -869,6 +918,7 @@ function ShareTool({
     if (next === mode) return;
     setMode(next);
     setItem(null);
+    setBlocks(NO_BLOCKS);
     setFields(null);
     setItemSearch("");
     setCoverMode(defaultCover(next));
@@ -876,10 +926,64 @@ function ShareTool({
   };
 
   const handlePickItem = (picked: ShareItem) => {
+    if (picked.slug !== item?.slug) setBlocks(NO_BLOCKS);
     setItem(picked);
     setFields(fieldsOf(picked));
     setCoverMode("affiche_wazig");
     clearPreview();
+  };
+
+  // Drag a block (#3537): the offset is the pointer delta since pointer-down
+  // over the preview scale; the drag outline is a data attribute that lives
+  // only between pointer-down and pointer-up, so no capture can include it.
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    const node = templateRef.current;
+    const el =
+      e.target instanceof Element
+        ? e.target.closest<HTMLElement>("[data-block]")
+        : null;
+    if (!dragMode || !node || !el || !node.contains(el)) return;
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    const id = el.dataset.block!;
+    const at = layout[id] ?? { x: 0, y: 0 };
+    const box = el.getBoundingClientRect();
+    const canvas = node.getBoundingClientRect();
+    dragRef.current = {
+      el,
+      id,
+      from: { x: at.x, y: at.y },
+      cx: e.clientX,
+      cy: e.clientY,
+      centre: (box.left + box.width / 2 - canvas.left) / TEMPLATE_SCALE,
+    };
+    el.dataset.dragging = "";
+    // Touching a block brings it on top, and Voor / Achter act on it.
+    setLayout((prev) => placeBlock(prev, id, at));
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const d = dragRef.current;
+    if (!d) return;
+    const next = moveBlock({
+      from: d.from,
+      dx: e.clientX - d.cx,
+      dy: e.clientY - d.cy,
+      scale: TEMPLATE_SCALE,
+      centre: d.centre,
+      width: captureWidth,
+      snap,
+    });
+    setSnapping(next.snapped);
+    setLayout((prev) => placeBlock(prev, d.id, next));
+  };
+
+  const endDrag = () => {
+    const d = dragRef.current;
+    if (!d) return;
+    delete d.el.dataset.dragging;
+    dragRef.current = null;
+    setSnapping(false);
   };
 
   const fileName =
@@ -1309,6 +1413,7 @@ function ShareTool({
               key={l.id}
               type="button"
               onClick={() => {
+                if (l.id !== activeLook) setBlocks(NO_BLOCKS);
                 setLook(l.id);
                 clearPreview();
               }}
@@ -1351,6 +1456,67 @@ function ShareTool({
           }}
         />
       )}
+
+      {/* ── Schik: drag the text blocks (#3537) ───────────────────────── */}
+      <section aria-labelledby="arrange-label" className="flex flex-col gap-4">
+        <h2 id="arrange-label" className={labelClass}>
+          Blokken
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          {[
+            {
+              label: "Schik",
+              on: dragMode,
+              toggle: () => setDragMode(!dragMode),
+            },
+            ...(dragMode
+              ? [{ label: "Midden", on: snap, toggle: () => setSnap(!snap) }]
+              : []),
+          ].map((b) => (
+            <button
+              key={b.label}
+              type="button"
+              onClick={b.toggle}
+              aria-pressed={b.on}
+              className={`flex-1 basis-[6.5rem] rounded-none border-2 px-3 py-3 font-mono text-sm font-semibold uppercase transition-colors duration-300 ${
+                b.on
+                  ? "border-ink bg-jersey-deep text-cream"
+                  : "border-ink/30 text-ink hover:border-ink bg-cream"
+              }`}
+            >
+              {b.label}
+            </button>
+          ))}
+        </div>
+        {dragMode && (
+          <>
+            <p className="text-ink font-mono text-sm">
+              Sleep een tekstblok in de preview.
+            </p>
+            <Choice
+              id="layer-label"
+              label="Laatst verschoven blok"
+              options={LAYERS}
+              value={topBlock ? layout[topBlock]!.layer : "voor"}
+              disabled={!topBlock}
+              onChange={(layer) =>
+                topBlock &&
+                setLayout((prev) => ({
+                  ...prev,
+                  [topBlock]: { ...prev[topBlock]!, layer },
+                }))
+              }
+            />
+            <Button
+              variant="secondary"
+              onClick={() => setLayout(() => ({}))}
+              disabled={!topBlock}
+            >
+              Alles terugzetten
+            </Button>
+          </>
+        )}
+      </section>
 
       {/* ── News / event story (#3540) ───────────────────────────────── */}
       {mode !== "match" && (
@@ -1449,8 +1615,14 @@ function ShareTool({
               width: `${previewWidth}px`,
               height: `${previewHeight}px`,
               overflow: "hidden",
+              position: "relative",
             }}
-            className="border-ink self-center border-2"
+            className={`border-ink self-center border-2 ${dragMode ? DRAG_CLASSES : ""}`}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={endDrag}
+            onPointerCancel={endDrag}
+            onDragStart={(e) => e.preventDefault()}
           >
             <div
               style={{
@@ -1466,29 +1638,35 @@ function ShareTool({
                     theme={theme}
                     wash={wash}
                     coverMode={coverMode}
-                    blocks={{}}
+                    blocks={layout}
                     fallbackIndex={fallbackIndex}
                   />
                 ) : (
                   <ShareBadgeContext.Provider value={shortSquadLabel(squad)}>
-                    {renderTemplate(selectedTemplateId, {
-                      matchName: matchName || FALLBACK_MATCH_NAME,
-                      score: score || FALLBACK_SCORE,
-                      minute: minute || FALLBACK_MINUTE,
-                      player: selectedPlayer,
-                      mood,
-                      competition: competition.trim() || undefined,
-                      dateTime: dateTime.trim() || undefined,
-                      // Raw URLs — the templates route remote images through the
-                      // same-origin optimizer + sanitize at the <img> sink.
-                      homeLogo: selectedMatch?.homeLogo,
-                      awayLogo: selectedMatch?.awayLogo,
-                      imageUrl: resolvedImageUrl,
-                    })}
+                    <ShareBlocksContext.Provider value={layout}>
+                      {renderTemplate(selectedTemplateId, {
+                        matchName: matchName || FALLBACK_MATCH_NAME,
+                        score: score || FALLBACK_SCORE,
+                        minute: minute || FALLBACK_MINUTE,
+                        player: selectedPlayer,
+                        mood,
+                        competition: competition.trim() || undefined,
+                        dateTime: dateTime.trim() || undefined,
+                        // Raw URLs — the templates route remote images through the
+                        // same-origin optimizer + sanitize at the <img> sink.
+                        homeLogo: selectedMatch?.homeLogo,
+                        awayLogo: selectedMatch?.awayLogo,
+                        imageUrl: resolvedImageUrl,
+                      })}
+                    </ShareBlocksContext.Provider>
                   </ShareBadgeContext.Provider>
                 )}
               </div>
             </div>
+            {/* Outside the captured node: the centre guide never reaches the PNG. */}
+            {snapping && (
+              <div className="bg-card-red absolute inset-y-0 left-1/2 w-px" />
+            )}
           </div>
 
           {/* Tier 2, no action (#2818, mirrors #2580 rule 4): the Genereer/Delen

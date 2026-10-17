@@ -1,6 +1,7 @@
 import { MONO_FONT, TOKENS } from "../constants";
 import {
   accentOf,
+  Block,
   Canvas,
   Crest,
   Cta,
@@ -14,6 +15,7 @@ import {
   washRgb,
   type LookProps,
 } from "./look-parts";
+import { PINNED_Z } from "./block-layout";
 
 /**
  * C · Affiche — full-bleed photo, a wash over it, seam + footer band. The
@@ -26,6 +28,7 @@ export function AfficheLook({
   theme,
   wash,
   coverMode,
+  blocks,
   fallbackIndex,
 }: LookProps) {
   const dark = theme === "donker";
@@ -61,24 +64,25 @@ export function AfficheLook({
           position: "absolute",
           top: sq ? 48 : 64,
           left: sq ? 56 : 72,
-          zIndex: 2,
+          zIndex: PINNED_Z,
         }}
       >
         <Crest size={sq ? 84 : 112} squad={content.squad} />
       </div>
       {showDetail && (
-        <div
+        <Block
+          id="detail"
+          blocks={blocks}
           style={{
             position: "absolute",
             top: sq ? 56 : 72,
             right: sq ? 56 : 72,
-            zIndex: 2,
             background: `rgba(${washRgb(theme)},0.88)`,
             padding: sq ? "10px 16px" : "16px 24px",
           }}
         >
           <Detail content={content} color={text} size={sq ? 0.6 : 0.85} />
-        </div>
+        </Block>
       )}
       <div
         style={{
@@ -89,49 +93,60 @@ export function AfficheLook({
           display: "flex",
           flexDirection: "column",
           gap: sq ? 22 : 34,
-          zIndex: 2,
         }}
       >
         {content.hero && (
-          <Hero content={content} color={text} size={sq ? 0.55 : 0.85} />
+          <Block id="hero" blocks={blocks}>
+            <Hero content={content} color={text} size={sq ? 0.55 : 0.85} />
+          </Block>
         )}
-        {content.detail === "quote" && (
-          <Detail
-            content={content}
-            color={accentOf(theme)}
-            size={sq ? 0.6 : 1}
-          />
-        )}
-        <span
+        <Block
+          id="tekst"
+          blocks={blocks}
           style={{
-            alignSelf: "flex-start",
-            background: content.fill,
-            color: content.onFill,
-            border:
-              content.fill === TOKENS.cream
-                ? `4px solid ${TOKENS.ink}`
-                : "none",
-            padding: sq ? "10px 20px" : "14px 28px",
-            fontFamily: MONO_FONT,
-            fontWeight: 700,
-            fontSize: sq ? 26 : 34,
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
+            display: "flex",
+            flexDirection: "column",
+            gap: sq ? 22 : 34,
           }}
         >
-          {content.label}
-        </span>
-        <Title
-          runs={content.title}
-          size={sq ? 84 : 124}
-          color={text}
-          accent={accentOf(theme)}
-        />
-        <Info
-          lines={content.info}
-          color={dark ? "rgba(245,241,230,0.88)" : TOKENS.inkSoft}
-          size={sq ? 26 : 34}
-        />
+          {content.detail === "quote" && (
+            <Detail
+              content={content}
+              color={accentOf(theme)}
+              size={sq ? 0.6 : 1}
+            />
+          )}
+          <span
+            style={{
+              alignSelf: "flex-start",
+              background: content.fill,
+              color: content.onFill,
+              border:
+                content.fill === TOKENS.cream
+                  ? `4px solid ${TOKENS.ink}`
+                  : "none",
+              padding: sq ? "10px 20px" : "14px 28px",
+              fontFamily: MONO_FONT,
+              fontWeight: 700,
+              fontSize: sq ? 26 : 34,
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+            }}
+          >
+            {content.label}
+          </span>
+          <Title
+            runs={content.title}
+            size={sq ? 84 : 124}
+            color={text}
+            accent={accentOf(theme)}
+          />
+          <Info
+            lines={content.info}
+            color={dark ? "rgba(245,241,230,0.88)" : TOKENS.inkSoft}
+            size={sq ? 26 : 34}
+          />
+        </Block>
       </div>
       <div
         aria-hidden="true"
@@ -142,7 +157,7 @@ export function AfficheLook({
           bottom: footH,
           height: sq ? 20 : 28,
           backgroundImage: `repeating-linear-gradient(-45deg, ${TOKENS.cream} 0 16px, ${TOKENS.jerseyDeep} 16px 32px)`,
-          zIndex: 2,
+          zIndex: PINNED_Z,
         }}
       />
       <div
@@ -157,7 +172,7 @@ export function AfficheLook({
           alignItems: "center",
           justifyContent: "space-between",
           padding: sq ? "0 56px" : "0 72px",
-          zIndex: 2,
+          zIndex: PINNED_Z,
         }}
       >
         <span

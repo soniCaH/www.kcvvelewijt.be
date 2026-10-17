@@ -11,6 +11,7 @@ import { SoccerBall } from "@/lib/icons.redesign";
 import { CardGraphic, CrestMatchup } from "../shared/ShareElements";
 import { toSameOriginImage } from "../shared/theme";
 import type { ShareContent, TitleRun } from "./share-content";
+import { blockZ, type BlockLayout } from "./block-layout";
 
 // Shared vocabulary of the four new share looks (A Kaart, B Plakboek,
 // C Affiche, E Ticket — #3535), lifted from the #3509 prototype. Inline styles
@@ -23,11 +24,7 @@ export type ShareTheme = "licht" | "donker";
 export type WashStep = "zacht" | "normaal" | "sterk";
 export type CoverMode = "foto" | "affiche_wazig" | "reservefoto";
 
-/** Per block id, an offset in capture pixels (#3537 fills this in). */
-export type BlockLayout = Record<
-  string,
-  { x: number; y: number; layer: "voor" | "achter" }
->;
+export type { BlockLayout };
 
 export interface LookProps {
   content: ShareContent;
@@ -100,6 +97,37 @@ export const accentOf = (theme: ShareTheme) =>
   theme === "donker" ? TOKENS.warm : TOKENS.jerseyDeep;
 
 // ── Atoms ──────────────────────────────────────────────────────────────────
+
+/**
+ * A movable text group (#3537), in its default place. It is always a flex
+ * item or absolutely positioned, so its z-index applies without a
+ * `position` of its own; a moved block is translated by its offset.
+ */
+export function Block({
+  id,
+  blocks,
+  style,
+  children,
+}: {
+  id: string;
+  blocks: BlockLayout;
+  style?: React.CSSProperties;
+  children: React.ReactNode;
+}) {
+  const at = blocks[id];
+  return (
+    <div
+      data-block={id}
+      style={{
+        ...style,
+        zIndex: blockZ(blocks, id),
+        transform: at ? `translate(${at.x}px, ${at.y}px)` : undefined,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
 export function Canvas({
   format,
   bg,

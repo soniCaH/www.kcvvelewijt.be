@@ -7,6 +7,7 @@ import {
   type WashStep,
 } from "../looks/look-parts";
 import type { ShareFields, TemplateId } from "../looks/share-content";
+import type { BlockLayout } from "../looks/block-layout";
 import type { ResultMood } from "../shared/theme";
 import { clubToday } from "@/lib/utils/dates";
 
@@ -20,8 +21,7 @@ import { clubToday } from "@/lib/utils/dates";
  *   day it was written on.
  *
  * Every read and write swallows storage errors: a missing, full, blocked or
- * corrupt store is a fresh start, never a crash. Later slices add fields to
- * `StoryInProgress` (the block layout, #3537).
+ * corrupt store is a fresh start, never a crash.
  */
 
 export const STORY_SESSION_KEY = "kcvv-share-session";
@@ -56,7 +56,14 @@ export interface StoryInProgress {
   /** The picked article or event, and its edited text. */
   itemSlug: string | null;
   fields: ShareFields | null;
+  /** The moved blocks, per format: story and square compose apart (#3537). */
+  blocks: Record<ShareFormat, BlockLayout>;
 }
+
+export const NO_BLOCKS: Record<ShareFormat, BlockLayout> = {
+  story: {},
+  square: {},
+};
 
 export interface StorySession {
   look: AnyLook;
@@ -109,6 +116,22 @@ function oneOf<T extends string>(
 }
 const text = (v: unknown) => (typeof v === "string" ? v : "");
 
+/** A stored layout, keeping only blocks with numeric offsets (in order). */
+function layoutOf(v: unknown): BlockLayout {
+  if (!isObject(v)) return {};
+  const layout: BlockLayout = {};
+  for (const [id, b] of Object.entries(v)) {
+    if (isObject(b) && Number.isFinite(b.x) && Number.isFinite(b.y)) {
+      layout[id] = {
+        x: b.x as number,
+        y: b.y as number,
+        layer: oneOf(b.layer, ["voor", "achter"], "voor"),
+      };
+    }
+  }
+  return layout;
+}
+
 /** A stored story, every field checked: whatever is off falls back to the default. */
 function storyOf(s: Record<string, unknown>): StoryInProgress {
   const m = isObject(s.match) ? s.match : {};
@@ -142,6 +165,10 @@ function storyOf(s: Record<string, unknown>): StoryInProgress {
       date: text(f.date),
       time: text(f.time),
       location: text(f.location),
+    },
+    blocks: {
+      story: layoutOf(isObject(s.blocks) ? s.blocks.story : null),
+      square: layoutOf(isObject(s.blocks) ? s.blocks.square : null),
     },
   };
 }

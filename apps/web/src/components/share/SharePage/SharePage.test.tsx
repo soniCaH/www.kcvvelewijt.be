@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { CAPTURE_WIDTH, CAPTURE_HEIGHT, SQUARE_SIZE } from "../constants";
 import type { PlayerForShare, MatchOption } from "./SharePage";
 import type { ShareItem } from "../looks/share-content";
+import { clubToday } from "@/lib/utils/dates";
 
 // Mock html-to-image — browser canvas API not available in happy-dom
 vi.mock("html-to-image", () => ({
@@ -1597,6 +1598,201 @@ describe("SharePage", () => {
       await user.click(screen.getByRole("button", { name: "Foto" }));
       await save(user);
       expect(pressed("Affiche wazig")).toBe("true");
+    });
+  });
+
+  describe("movable blocks (#3537)", () => {
+    const KEY = "kcvv-share-session";
+    const NEWS: ShareItem = {
+      kind: "article",
+      slug: "nieuws-1",
+      type: "announcement",
+      title: "Nieuwe kantine open",
+      spans: [{ text: "Nieuwe kantine open", accent: false }],
+      date: "vrijdag 17 oktober",
+      time: "",
+      location: "",
+      day: "17",
+      month: "okt",
+      cover: null,
+    };
+    const OTHER_NEWS: ShareItem = { ...NEWS, slug: "nieuws-2", title: "Ander" };
+    const MOVED = { x: 40, y: -80, layer: "voor" };
+
+    /** A stored story of today, on `look`, with a moved block per format. */
+    const seed = (story: Record<string, unknown> = {}, look = "kaart") =>
+      localStorage.setItem(
+        KEY,
+        JSON.stringify({
+          look,
+          fallbackNext: {},
+          story: {
+            day: clubToday(),
+            mode: "match",
+            template: "goal-kcvv",
+            format: "story",
+            theme: "licht",
+            wash: "normaal",
+            coverMode: "foto",
+            match: {},
+            itemSlug: null,
+            fields: null,
+            blocks: {
+              story: { tekst: MOVED },
+              square: { tekst: { x: 0, y: 12, layer: "voor" } },
+            },
+            ...story,
+          },
+        }),
+      );
+    const renderTool = () =>
+      render(
+        <SharePage
+          matches={MATCHES}
+          players={PLAYERS}
+          articles={[NEWS, OTHER_NEWS]}
+        />,
+      );
+    const block = (id: string) =>
+      screen
+        .getByTestId("share-preview")
+        .querySelector<HTMLElement>(`[data-block="${id}"]`)!;
+    const storedBlocks = () =>
+      JSON.parse(localStorage.getItem(KEY)!).story.blocks;
+    const EMPTY = { story: {}, square: {} };
+
+    beforeEach(() => {
+      vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(
+        () => {},
+      );
+    });
+    afterEach(() => vi.restoreAllMocks());
+
+    it("a stored layout comes back after a reload, as a translate on the block", () => {
+      seed();
+      renderTool();
+      expect(block("tekst").style.transform).toBe("translate(40px, -80px)");
+      expect(block("hero").style.transform).toBe("");
+      expect(storedBlocks().story).toEqual({ tekst: MOVED });
+    });
+
+    it("story and square keep their own layouts", async () => {
+      seed();
+      const user = userEvent.setup();
+      renderTool();
+      await user.click(screen.getByRole("button", { name: /vierkant/i }));
+      expect(block("tekst").style.transform).toBe("translate(0px, 12px)");
+      await user.click(screen.getByRole("button", { name: /story/i }));
+      expect(block("tekst").style.transform).toBe("translate(40px, -80px)");
+    });
+
+    it("W moves the middle zone's children", () => {
+      seed(
+        {
+          template: "kickoff",
+          blocks: { story: { w1: MOVED }, square: {} },
+        },
+        "wedstrijd",
+      );
+      renderTool();
+      expect(block("w1").style.translate).toBe("40px -80px");
+    });
+
+    it("Achter puts the last moved block under the pinned parts; Voor back on top", async () => {
+      seed();
+      const user = userEvent.setup();
+      renderTool();
+      await user.click(screen.getByRole("button", { name: "Schik" }));
+      await user.click(screen.getByRole("button", { name: "Achter" }));
+      expect(Number(block("tekst").style.zIndex)).toBeLessThan(20);
+      expect(storedBlocks().story.tekst.layer).toBe("achter");
+      await user.click(screen.getByRole("button", { name: "Voor" }));
+      expect(Number(block("tekst").style.zIndex)).toBeGreaterThan(20);
+    });
+
+    it("Midden can be switched off", async () => {
+      const user = userEvent.setup();
+      renderTool();
+      await user.click(screen.getByRole("button", { name: "Schik" }));
+      const midden = screen.getByRole("button", { name: "Midden" });
+      expect(midden).toHaveAttribute("aria-pressed", "true");
+      await user.click(midden);
+      expect(midden).toHaveAttribute("aria-pressed", "false");
+    });
+
+    it("Alles terugzetten clears the layout", async () => {
+      seed();
+      const user = userEvent.setup();
+      renderTool();
+      await user.click(screen.getByRole("button", { name: "Schik" }));
+      await user.click(
+        screen.getByRole("button", { name: "Alles terugzetten" }),
+      );
+      expect(block("tekst").style.transform).toBe("");
+      expect(storedBlocks().story).toEqual({});
+    });
+
+    it("a saved PNG clears both layouts", async () => {
+      seed();
+      const user = userEvent.setup();
+      renderTool();
+      await user.click(screen.getByRole("button", { name: /genereer/i }));
+      await user.click(screen.getByRole("button", { name: /download png/i }));
+      expect(storedBlocks()).toEqual(EMPTY);
+    });
+
+    it("another look clears the layout", async () => {
+      seed();
+      const user = userEvent.setup();
+      renderTool();
+      await user.click(screen.getByRole("button", { name: "Ticket" }));
+      expect(storedBlocks()).toEqual(EMPTY);
+    });
+
+    it("another template clears the layout", async () => {
+      seed();
+      const user = userEvent.setup();
+      renderTool();
+      await user.click(screen.getByRole("button", { name: "Rust" }));
+      expect(storedBlocks()).toEqual(EMPTY);
+    });
+
+    it("another item clears the layout", async () => {
+      seed({ mode: "article", itemSlug: NEWS.slug });
+      const user = userEvent.setup();
+      renderTool();
+      expect(block("tekst").style.transform).toBe("translate(40px, -80px)");
+      await user.click(screen.getByRole("option", { name: OTHER_NEWS.title }));
+      expect(storedBlocks()).toEqual(EMPTY);
+    });
+
+    it("another match clears the layout", async () => {
+      seed({ match: { id: MATCHES[0]!.id, name: MATCHES[0]!.matchName } });
+      const user = userEvent.setup();
+      renderTool();
+      const input = screen.getByPlaceholderText(/fc tegenstander/i);
+      await user.clear(input);
+      expect(storedBlocks().story).toEqual({ tekst: MOVED });
+      await user.type(input, MATCHES[1]!.label);
+      expect(storedBlocks()).toEqual(EMPTY);
+    });
+
+    it("a stored layout with junk keeps only the valid blocks", () => {
+      seed({
+        blocks: {
+          story: {
+            tekst: MOVED,
+            bad: { x: "1", y: 0, layer: "voor" },
+            odd: { x: 1, y: 2, layer: "zijkant" },
+          },
+          square: "nope",
+        },
+      });
+      renderTool();
+      expect(storedBlocks()).toEqual({
+        story: { tekst: MOVED, odd: { x: 1, y: 2, layer: "voor" } },
+        square: {},
+      });
     });
   });
 });

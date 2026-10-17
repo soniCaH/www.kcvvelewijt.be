@@ -1,6 +1,7 @@
 import { MONO_FONT, TOKENS } from "../constants";
 import {
   accentOf,
+  Block,
   Canvas,
   Crest,
   Cta,
@@ -13,6 +14,7 @@ import {
   type LookProps,
 } from "./look-parts";
 import { unclash } from "./share-content";
+import { PINNED_Z } from "./block-layout";
 
 /**
  * E · Ticket — a ticket on a pitch-dark ground; Donker swaps them, a
@@ -23,6 +25,7 @@ export function TicketLook({
   format,
   theme,
   coverMode,
+  blocks,
   fallbackIndex,
 }: LookProps) {
   const dark = theme === "donker";
@@ -103,21 +106,23 @@ export function TicketLook({
               alignItems: "flex-start",
             }}
           >
-            {content.detail === "dateblock" ? (
-              <DateBlock
-                content={content}
-                color={block.onFill}
-                background={block.fill}
-                size={sq ? 0.8 : 1.27}
-              />
-            ) : (
-              content.detail !== "none" && (
-                <Detail
-                  content={content}
-                  color={accent}
-                  size={sq ? 0.4 : 0.6}
-                />
-              )
+            {content.detail !== "none" && (
+              <Block id="detail" blocks={blocks} style={{ display: "flex" }}>
+                {content.detail === "dateblock" ? (
+                  <DateBlock
+                    content={content}
+                    color={block.onFill}
+                    background={block.fill}
+                    size={sq ? 0.8 : 1.27}
+                  />
+                ) : (
+                  <Detail
+                    content={content}
+                    color={accent}
+                    size={sq ? 0.4 : 0.6}
+                  />
+                )}
+              </Block>
             )}
             <div
               style={{
@@ -129,40 +134,63 @@ export function TicketLook({
               }}
             >
               {content.hero && (
-                <Hero content={content} color={tText} size={sq ? 0.42 : 0.6} />
+                <Block id="hero" blocks={blocks}>
+                  <Hero
+                    content={content}
+                    color={tText}
+                    size={sq ? 0.42 : 0.6}
+                  />
+                </Block>
               )}
-              <span
+              <Block
+                id="tekst"
+                blocks={blocks}
                 style={{
-                  fontFamily: MONO_FONT,
-                  fontWeight: 700,
-                  fontSize: sq ? 22 : 30,
-                  letterSpacing: "0.18em",
-                  textTransform: "uppercase",
-                  color: accent,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: sq ? 12 : 20,
                 }}
               >
-                {content.kicker}
-              </span>
-              <Title
-                runs={content.title}
-                size={sq ? 54 : 84}
-                color={tText}
-                accent={accent}
-              />
-              <Info
-                lines={content.info}
-                color={dark ? "rgba(245,241,230,0.86)" : TOKENS.inkSoft}
-                size={sq ? 20 : 28}
-              />
+                <span
+                  style={{
+                    fontFamily: MONO_FONT,
+                    fontWeight: 700,
+                    fontSize: sq ? 22 : 30,
+                    letterSpacing: "0.18em",
+                    textTransform: "uppercase",
+                    color: accent,
+                  }}
+                >
+                  {content.kicker}
+                </span>
+                <Title
+                  runs={content.title}
+                  size={sq ? 54 : 84}
+                  color={tText}
+                  accent={accent}
+                />
+                <Info
+                  lines={content.info}
+                  color={dark ? "rgba(245,241,230,0.86)" : TOKENS.inkSoft}
+                  size={sq ? 20 : 28}
+                />
+              </Block>
             </div>
           </div>
-          <div style={{ height: 0, borderTop: `5px dashed ${tText}` }} />
+          <div
+            style={{
+              height: 0,
+              borderTop: `5px dashed ${tText}`,
+              zIndex: PINNED_Z,
+            }}
+          />
           <div
             style={{
               padding: sq ? "16px 36px" : "28px 48px",
               display: "flex",
               justifyContent: "flex-end",
               alignItems: "center",
+              zIndex: PINNED_Z,
             }}
           >
             <Cta color={tText} size={sq ? 20 : 28} />
