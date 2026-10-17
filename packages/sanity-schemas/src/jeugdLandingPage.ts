@@ -1,4 +1,5 @@
 import {defineField, defineType} from 'sanity'
+import {validateLink} from './validation/link'
 
 export const jeugdLandingPage = defineType({
   name: 'jeugdLandingPage',
@@ -48,10 +49,11 @@ export const jeugdLandingPage = defineType({
             }),
             defineField({
               name: 'href',
-              type: 'string',
+              type: 'url',
               title: 'Link URL',
               description:
                 'Bestemming wanneer een bezoeker op de kaart klikt (bijv. "/jeugd/visie" of een externe URL). Voor navigatiekaarten.',
+              validation: (Rule) => Rule.uri({allowRelative: true}).custom(validateLink),
             }),
             defineField({
               name: 'image',

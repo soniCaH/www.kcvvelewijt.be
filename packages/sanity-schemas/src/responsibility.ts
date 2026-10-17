@@ -1,6 +1,7 @@
 import {defineField, defineType} from 'sanity'
 import {responsibilityPreviewSelect, prepareResponsibilityPreview} from './preview/responsibility-preview'
 import {validateContactFields} from './validation/contact-fields'
+import {validateLink} from './validation/link'
 
 const contactFields = [
   defineField({
@@ -56,6 +57,9 @@ const contactFields = [
     name: 'email',
     title: 'Email',
     type: 'string',
+    // Runs on the hidden field too: a stale value left under another
+    // `contactType` still blocks publishing, so an editor can't miss it (#3478).
+    validation: (Rule) => Rule.email(),
     hidden: ({parent}) => parent?.contactType !== 'manual',
   }),
   defineField({
@@ -231,7 +235,7 @@ export const responsibility = defineType({
               type: 'url',
               description:
                 'Optioneel: relatieve of absolute URL (bijv. `/contact` of `https://...`). Als ingevuld, wordt de beschrijving een klikbare actie op de site.',
-              validation: (Rule) => Rule.uri({allowRelative: true}),
+              validation: (Rule) => Rule.uri({allowRelative: true}).custom(validateLink),
             }),
             defineField({
               name: 'contact',
