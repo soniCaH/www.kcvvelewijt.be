@@ -1,7 +1,7 @@
 // PROTOTYPE — throwaway. A5 "Kaartenbak": every person is an index card with contact always visible, no clicking.
 import Link from "next/link";
 import type { OrgChartMember, OrgChartNode } from "@/types/organigram";
-import { MonoLabel, RoundAvatar, TapedCard } from "@/components/design-system";
+import { MonoLabel, RoundAvatar } from "@/components/design-system";
 import {
   PILLARS,
   boardIn,
@@ -110,15 +110,7 @@ function Cards({ seats }: { seats: OrgChartNode[] }) {
 /** Large card: a key figure with photo, role, why-line and contact. */
 function KeyCard({ node, why }: { node: OrgChartNode; why: string }) {
   return (
-    <TapedCard
-      as="li"
-      bg="cream-soft"
-      shadow="md"
-      padding="md"
-      rotation="none"
-      tape={{ color: "jersey", length: "sm", seed: node.title }}
-      className="border-ink border"
-    >
+    <li className="border-ink bg-cream-soft shadow-paper-sm border p-4">
       <p className="text-label text-jersey-deep font-mono uppercase">
         {node.title}
       </p>
@@ -151,7 +143,7 @@ function KeyCard({ node, why }: { node: OrgChartNode; why: string }) {
           ))}
         </ul>
       )}
-    </TapedCard>
+    </li>
   );
 }
 

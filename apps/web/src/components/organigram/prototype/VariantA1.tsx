@@ -2,6 +2,7 @@
 import type { OrgChartNode } from "@/types/organigram";
 import { RoundAvatar } from "@/components/design-system";
 import { BoardLink } from "./BoardLink";
+import Link from "next/link";
 import { InlineContact } from "./InlineContact";
 import {
   PILLARS,
@@ -26,38 +27,54 @@ function Kicker({ children }: { children: React.ReactNode }) {
 /** One ledger line: `functie ........ naam`, unfolding contact beneath. */
 function LedgerRow({ node, titles }: { node: OrgChartNode; titles: string[] }) {
   const vacant = node.members.length === 0;
+  const emails = node.members.filter((m) => m.email);
+  // One step only: the name IS the profile link, an email shows inline.
   return (
-    <li className="border-ink/10 border-b last:border-b-0">
-      <InlineContact
-        node={node}
-        panelClassName="border-jersey-deep mb-3 ml-1 border-l-2 py-1 pl-4"
-        summary={
-          <span className="group-open:text-jersey-deep hover:text-jersey-deep flex items-baseline gap-2 py-2">
-            <span className="text-body-md text-ink min-w-0">
-              {titles.join(" · ")}
-            </span>
-            <span
-              aria-hidden="true"
-              className="border-ink-muted mb-1 h-0 min-w-4 flex-1 border-b border-dotted"
-            />
-            {vacant ? (
-              <span className="text-ink-muted text-body-sm shrink-0 italic">
-                plek vrij — iets voor jou?
+    <li className="border-ink/10 flex flex-col border-b py-2 last:border-b-0">
+      <span className="flex items-baseline gap-2">
+        <span className="text-body-md text-ink min-w-0">
+          {titles.join(" · ")}
+        </span>
+        <span
+          aria-hidden="true"
+          className="border-ink-muted mb-1 h-0 min-w-4 flex-1 border-b border-dotted"
+        />
+        {vacant ? (
+          <Link
+            href="/club/contact"
+            className="text-jersey-deep text-body-sm shrink-0 italic underline"
+          >
+            plek vrij — iets voor jou?
+          </Link>
+        ) : (
+          <span className="text-body-md text-ink min-w-0 text-right font-semibold">
+            {node.members.map((m, i) => (
+              <span key={m.id}>
+                {i > 0 && ", "}
+                {m.href ? (
+                  <Link
+                    href={m.href}
+                    className="hover:text-jersey-deep hover:underline"
+                  >
+                    {m.name}
+                  </Link>
+                ) : (
+                  m.name
+                )}
               </span>
-            ) : (
-              <span className="text-body-md text-ink min-w-0 text-right font-semibold">
-                {names(node)}
-              </span>
-            )}
-            <span
-              aria-hidden="true"
-              className="text-ink-muted text-mono-sm shrink-0 font-mono group-open:rotate-45"
-            >
-              +
-            </span>
+            ))}
           </span>
-        }
-      />
+        )}
+      </span>
+      {emails.map((m) => (
+        <a
+          key={m.id}
+          href={`mailto:${m.email}`}
+          className="text-jersey-deep text-body-sm self-end underline"
+        >
+          {m.email}
+        </a>
+      ))}
     </li>
   );
 }
