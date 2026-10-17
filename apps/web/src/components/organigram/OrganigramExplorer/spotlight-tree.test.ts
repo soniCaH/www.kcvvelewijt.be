@@ -97,6 +97,62 @@ describe("buildSpotlightTree", () => {
   });
 });
 
+describe("buildSpotlightTree — parent cycles (#3478)", () => {
+  const club = { id: "club", title: "KCVV", parentId: null, members: [] };
+
+  /** Walk down from the root: every id reachable through `childrenOf`. */
+  function reachable(tree: ReturnType<typeof buildSpotlightTree>): string[] {
+    const out: string[] = [];
+    const queue = [tree.rootId];
+    while (queue.length) {
+      const id = queue.shift() as string;
+      out.push(id);
+      queue.push(...(tree.childrenOf.get(id) ?? []).map((n) => n.id));
+    }
+    return out.sort();
+  }
+
+  it("attaches exactly one member of a two-node cycle to the root", () => {
+    const tree = buildSpotlightTree([club, node("a", "b"), node("b", "a")]);
+    const rootKids = tree.childrenOf.get(CLUB_ROOT_ID)?.map((n) => n.id);
+    expect(rootKids).toHaveLength(1);
+    expect(reachable(tree)).toEqual(["a", "b", "club"]);
+    expect(trailTo(tree, "a")[0]?.id).toBe(CLUB_ROOT_ID);
+    expect(trailTo(tree, "b")[0]?.id).toBe(CLUB_ROOT_ID);
+  });
+
+  it("breaks a longer cycle and keeps the subtree hanging off it reachable", () => {
+    const tree = buildSpotlightTree([
+      club,
+      node("a", "c"),
+      node("b", "a"),
+      node("c", "b"),
+      node("leaf", "b"), // hangs off the cycle, not part of it
+    ]);
+    expect(tree.childrenOf.get(CLUB_ROOT_ID)).toHaveLength(1);
+    expect(reachable(tree)).toEqual(["a", "b", "c", "club", "leaf"]);
+    expect(trailTo(tree, "leaf")[0]?.id).toBe(CLUB_ROOT_ID);
+  });
+
+  it("handles several independent cycles", () => {
+    const tree = buildSpotlightTree([
+      club,
+      node("a", "b"),
+      node("b", "a"),
+      node("x", "y"),
+      node("y", "x"),
+    ]);
+    expect(tree.childrenOf.get(CLUB_ROOT_ID)).toHaveLength(2);
+    expect(reachable(tree)).toEqual(["a", "b", "club", "x", "y"]);
+  });
+
+  it("leaves a healthy tree untouched", () => {
+    const healthy = buildSpotlightTree(NODES);
+    expect(reachable(healthy)).toEqual(NODES.map((n) => n.id).sort());
+    expect(healthy.parentOf.get("jeugdsecr")).toBe("jeugdvoorzitter");
+  });
+});
+
 describe("trailTo (breadcrumb)", () => {
   it("returns the reporting line root → focus inclusive", () => {
     expect(trailTo(tree, "ethische-commissie").map((n) => n.id)).toEqual([

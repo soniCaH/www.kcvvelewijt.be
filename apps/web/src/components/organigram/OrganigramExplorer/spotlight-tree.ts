@@ -46,6 +46,12 @@ export interface SpotlightView {
  * when that parent exists in the set; otherwise (null, missing, inactive, or a
  * self-reference) it becomes a child of the root. The root itself (`rootId`) has
  * no parent. Children preserve incoming order.
+ *
+ * A parent cycle (A → B → A) never reaches the root, so its members and the
+ * whole subtree below them would vanish. Studio validation refuses a cycle on
+ * save, but two drafts can each pass and still close one once both publish
+ * (#3478), so the builder breaks each cycle itself: the member that comes first
+ * in incoming order is re-attached to the root.
  */
 export function buildSpotlightTree(
   nodes: OrgChartNode[],
@@ -54,26 +60,66 @@ export function buildSpotlightTree(
   const byId = new Map<string, OrgChartNode>();
   for (const node of nodes) byId.set(node.id, node);
 
-  const childrenOf = new Map<string, OrgChartNode[]>();
   const parentOf = new Map<string, string | null>();
-
   for (const node of nodes) {
     if (node.id === rootId) {
       parentOf.set(node.id, null);
       continue;
     }
     const rawParent = node.parentId ?? null;
-    const parentId =
+    parentOf.set(
+      node.id,
       rawParent !== null && rawParent !== node.id && byId.has(rawParent)
         ? rawParent
-        : rootId;
-    parentOf.set(node.id, parentId);
+        : rootId,
+    );
+  }
+
+  breakParentCycles(nodes, parentOf, rootId);
+
+  const childrenOf = new Map<string, OrgChartNode[]>();
+  for (const node of nodes) {
+    const parentId = parentOf.get(node.id) ?? null;
+    if (parentId === null) continue;
     const bucket = childrenOf.get(parentId);
     if (bucket) bucket.push(node);
     else childrenOf.set(parentId, [node]);
   }
 
   return { rootId, byId, childrenOf, parentOf };
+}
+
+/**
+ * Re-attach one member of every parent cycle to the root (mutates `parentOf`).
+ * Walks up from each node; a walk that revisits a node of its own path has
+ * found a cycle, and the cycle's first member in incoming order is cut loose.
+ */
+function breakParentCycles(
+  nodes: OrgChartNode[],
+  parentOf: Map<string, string | null>,
+  rootId: string,
+): void {
+  const order = new Map(nodes.map((node, index) => [node.id, index]));
+  const settled = new Set<string>();
+
+  for (const start of nodes) {
+    const path: string[] = [];
+    const onPath = new Set<string>();
+    let current: string | null = start.id;
+    while (current !== null && !settled.has(current) && !onPath.has(current)) {
+      path.push(current);
+      onPath.add(current);
+      current = parentOf.get(current) ?? null;
+    }
+    if (current !== null && onPath.has(current)) {
+      const cycle = path.slice(path.indexOf(current));
+      const cut = cycle.reduce((a, b) =>
+        (order.get(b) ?? 0) < (order.get(a) ?? 0) ? b : a,
+      );
+      parentOf.set(cut, rootId);
+    }
+    for (const id of path) settled.add(id);
+  }
 }
 
 /** Children of a node (empty when leaf or unknown). */
