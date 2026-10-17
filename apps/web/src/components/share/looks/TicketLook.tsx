@@ -19,6 +19,12 @@ import { PINNED_Z } from "./block-layout";
 /**
  * E · Ticket — a ticket on a pitch-dark ground; Donker swaps them, a
  * dark-green ticket on cream (#3509). A dashed tear line, no notches.
+ *
+ * Accepted deviation (#3537): the ticket's tilt makes it its own stacking
+ * context, so its blocks stay inside it. An Achter block goes under the
+ * ticket footer but never under the header outside the ticket, and a drag
+ * moves along the ticket's 1.2° tilted axes. Lifting the blocks out would
+ * move every E baseline.
  */
 export function TicketLook({
   content,

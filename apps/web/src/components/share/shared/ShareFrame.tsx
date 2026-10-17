@@ -1,7 +1,10 @@
 "use client";
 
 import React, {
+  Children,
+  Fragment,
   createContext,
+  isValidElement,
   useContext,
   useLayoutEffect,
   useRef,
@@ -287,6 +290,26 @@ export function ShareTop({ crestSize }: { crestSize?: number }) {
   );
 }
 
+/**
+ * One block id per element the middle zone renders, from its JSX slot: a
+ * conditional child that renders nothing keeps its index, so a photo that
+ * drops the crest matchup does not shift the ids after it. A fragment's
+ * children get `w<slot>.<index>`.
+ */
+function slotIds(children: React.ReactNode, prefix = "w"): string[] {
+  const ids: string[] = [];
+  Children.forEach(children, (child, i) => {
+    if (!isValidElement(child)) return; // null, false, text: no element of its own
+    if (child.type === Fragment) {
+      const inner = (child.props as { children?: React.ReactNode }).children;
+      ids.push(...slotIds(inner, `${prefix}${i}.`));
+    } else {
+      ids.push(`${prefix}${i}`);
+    }
+  });
+  return ids;
+}
+
 /** Flexible middle zone (the per-event content area). */
 export function ShareMid({
   center = false,
@@ -300,19 +323,24 @@ export function ShareMid({
   const photoLayout = useContext(SharePhotoContext);
   const blocks = useContext(ShareBlocksContext);
   const ref = useRef<HTMLDivElement>(null);
+  const ids = blocks ? slotIds(children) : [];
   // The templates stay as they are: their middle-zone children are tagged
   // here, in the DOM. The standalone `translate` property keeps a child's
   // own `transform` (a rotated card). Each child is a flex item, so its
-  // z-index applies without a `position`.
+  // z-index applies without a `position`. Should an element ever render no
+  // DOM node, the counts differ and nothing is tagged: never a wrong block.
   useLayoutEffect(() => {
     if (!blocks || !ref.current) return;
-    [...ref.current.children].forEach((child, i) => {
+    const els = [...ref.current.children];
+    const tag = els.length === ids.length;
+    els.forEach((child, i) => {
       if (!(child instanceof HTMLElement)) return;
-      const id = `w${i}`;
-      const at = blocks[id];
-      child.dataset.block = id;
+      const id = tag ? ids[i] : undefined;
+      const at = id ? blocks[id] : undefined;
+      if (id) child.dataset.block = id;
+      else delete child.dataset.block;
       child.style.translate = at ? `${at.x}px ${at.y}px` : "";
-      child.style.zIndex = at ? String(wedstrijdZ(blocks, id)) : "";
+      child.style.zIndex = at && id ? String(wedstrijdZ(blocks, id)) : "";
     });
   });
   return (

@@ -1698,6 +1698,29 @@ describe("SharePage", () => {
       expect(block("w1").style.translate).toBe("40px -80px");
     });
 
+    it("a W block keeps its offset when a photo removes a sibling before it", async () => {
+      // Full-time: slot 0 is the crest matchup (gone over a photo), slot 1 the kicker.
+      seed(
+        {
+          template: "full-time",
+          blocks: { story: { w1: MOVED }, square: {} },
+        },
+        "wedstrijd",
+      );
+      const user = userEvent.setup();
+      renderTool();
+      expect(block("w1").textContent).toBe("Eindstand");
+      expect(block("w1").style.translate).toBe("40px -80px");
+
+      await user.upload(
+        screen.getByLabelText(/foto uploaden/i),
+        new File(["x"], "me.png", { type: "image/png" }),
+      );
+      expect(block("w1").textContent).toBe("Eindstand");
+      expect(block("w1").style.translate).toBe("40px -80px");
+      expect(block("w0")).toBeNull();
+    });
+
     it("Achter puts the last moved block under the pinned parts; Voor back on top", async () => {
       seed();
       const user = userEvent.setup();

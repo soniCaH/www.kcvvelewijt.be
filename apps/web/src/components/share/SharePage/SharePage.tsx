@@ -610,15 +610,20 @@ function ShareTool({
   const [dragMode, setDragMode] = useState(false);
   const [snap, setSnap] = useState(true);
   const [snapping, setSnapping] = useState(false);
+  // The layout while a finger is down: drawn live, written to the session
+  // (and so to storage) once, on pointer-up.
+  const [dragLayout, setDragLayout] = useState<BlockLayout | null>(null);
   const dragRef = useRef<{
+    pointerId: number;
     el: HTMLElement;
     id: string;
+    layout: BlockLayout;
     from: { x: number; y: number };
     cx: number;
     cy: number;
     centre: number;
   } | null>(null);
-  const layout = blocks[aspect];
+  const layout = dragLayout ?? blocks[aspect];
   /** The block moved last: Voor / Achter act on it. */
   const topBlock = Object.keys(layout).at(-1);
 
@@ -942,29 +947,35 @@ function ShareTool({
       e.target instanceof Element
         ? e.target.closest<HTMLElement>("[data-block]")
         : null;
-    if (!dragMode || !node || !el || !node.contains(el)) return;
+    // One finger drags; a second one is ignored until the first lifts.
+    if (dragRef.current || !dragMode || !node || !el || !node.contains(el))
+      return;
     e.preventDefault();
     e.currentTarget.setPointerCapture(e.pointerId);
     const id = el.dataset.block!;
     const at = layout[id] ?? { x: 0, y: 0 };
     const box = el.getBoundingClientRect();
     const canvas = node.getBoundingClientRect();
+    // Touching a block brings it on top, and Voor / Achter act on it.
+    const start = placeBlock(layout, id, at);
     dragRef.current = {
+      pointerId: e.pointerId,
       el,
       id,
+      layout: start,
       from: { x: at.x, y: at.y },
       cx: e.clientX,
       cy: e.clientY,
       centre: (box.left + box.width / 2 - canvas.left) / TEMPLATE_SCALE,
     };
     el.dataset.dragging = "";
-    // Touching a block brings it on top, and Voor / Achter act on it.
-    setLayout((prev) => placeBlock(prev, id, at));
+    setDragLayout(start);
+    clearPreview();
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     const d = dragRef.current;
-    if (!d) return;
+    if (!d || e.pointerId !== d.pointerId) return;
     const next = moveBlock({
       from: d.from,
       dx: e.clientX - d.cx,
@@ -974,16 +985,19 @@ function ShareTool({
       width: captureWidth,
       snap,
     });
+    d.layout = placeBlock(d.layout, d.id, next);
     setSnapping(next.snapped);
-    setLayout((prev) => placeBlock(prev, d.id, next));
+    setDragLayout(d.layout);
   };
 
-  const endDrag = () => {
+  const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
     const d = dragRef.current;
-    if (!d) return;
+    if (!d || e.pointerId !== d.pointerId) return;
     delete d.el.dataset.dragging;
     dragRef.current = null;
     setSnapping(false);
+    setDragLayout(null);
+    setLayout(() => d.layout);
   };
 
   const fileName =
@@ -1000,6 +1014,10 @@ function ShareTool({
     setIsGenerating(true);
     setExportFailure(null);
     clearPreview();
+    // The drag outline belongs to the screen, never to the PNG.
+    templateRef.current
+      .querySelectorAll<HTMLElement>("[data-dragging]")
+      .forEach((el) => delete el.dataset.dragging);
     try {
       const opts = {
         width: captureWidth,
@@ -1622,6 +1640,7 @@ function ShareTool({
             onPointerMove={handlePointerMove}
             onPointerUp={endDrag}
             onPointerCancel={endDrag}
+            onLostPointerCapture={endDrag}
             onDragStart={(e) => e.preventDefault()}
           >
             <div
@@ -1665,7 +1684,12 @@ function ShareTool({
             </div>
             {/* Outside the captured node: the centre guide never reaches the PNG. */}
             {snapping && (
-              <div className="bg-card-red absolute inset-y-0 left-1/2 w-px" />
+              <div
+                className="bg-card-red absolute inset-y-0 w-px"
+                // The canvas centre, measured from the padding edge (the
+                // border-2 box is narrower than the canvas, so not 50%).
+                style={{ left: previewWidth / 2 - 0.5 }}
+              />
             )}
           </div>
 
