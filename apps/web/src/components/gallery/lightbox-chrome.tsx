@@ -44,9 +44,9 @@ export const lightboxLoadingIcon = () => (
  * fallback for `<GalleryLightbox>` and `<TeamPhotoLightbox>`. Sits on the
  * library portal's own layer (`--yarl__portal_zindex`, default 9999).
  *
- * `kcvv-lightbox-loading` carries the delayed fade-in the library's
- * `yarl__slide_loading` would, because that class's CSS is in the chunk this is
- * waiting for. The status text is on the overlay, since the icon is
+ * `kcvv-lightbox-loading` carries its own delayed fade-in (globals.css),
+ * because the library's `yarl__slide_loading` fade lives in the chunk's CSS,
+ * which is what this is waiting for. The status text is on the overlay, since the icon is
  * `aria-hidden`.
  */
 export const LightboxLoading = () => (
