@@ -18,6 +18,7 @@ const TYPES = [
 ] as const;
 
 const ART = `{ "title": coalesce(pt::text(title), title, ""), articleType, publishedAt,
+  "spans": title[0].children[]{ "text": coalesce(text, ""), "accent": "accent" in coalesce(marks, []) },
   "img": coverImage.asset->url, "hx": coalesce(coverImage.hotspot.x, 0.5), "hy": coalesce(coverImage.hotspot.y, 0.5),
   "fact": body[_type == "eventFact"][0]{ date, startTime, location } }`;
 const EVT = `{ title, eventType, dateStart, location,
@@ -32,6 +33,7 @@ const QUERY = `{
 
 type Raw = {
   title: string;
+  spans?: { text: string; accent: boolean }[];
   articleType?: string;
   eventType?: string;
   publishedAt?: string;
@@ -68,6 +70,7 @@ export default async function ShareLooksPrototypeRoute({
       kind: "article",
       articleType: t,
       title: r.title,
+      spans: r.spans?.length ? r.spans : [{ text: r.title, accent: false }],
       date: r.fact?.date ?? r.publishedAt ?? null,
       time: r.fact?.startTime ?? null,
       location: r.fact?.location ?? null,
@@ -89,6 +92,7 @@ export default async function ShareLooksPrototypeRoute({
       kind: "event",
       eventType: r.eventType ?? "Andere",
       title: r.title,
+      spans: [{ text: r.title, accent: false }],
       date: r.dateStart ?? null,
       time: r.dateStart ?? null,
       location: r.location ?? null,

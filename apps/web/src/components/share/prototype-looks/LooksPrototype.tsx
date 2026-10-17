@@ -25,6 +25,8 @@ export interface LookItem {
   articleType?: string;
   eventType?: string;
   title: string;
+  /** Title split on the `accent` decorator; events have one plain span. */
+  spans: { text: string; accent: boolean }[];
   date: string | null;
   time: string | null;
   location: string | null;
@@ -256,14 +258,16 @@ function RuleKicker({
 }
 
 function Title({
-  text,
+  it,
   size,
   color,
+  accent = TOKENS.jerseyDeep,
   maxWidth,
 }: {
-  text: string;
+  it: LookItem;
   size: number;
   color: string;
+  accent?: string;
   maxWidth?: number;
 }) {
   return (
@@ -271,7 +275,7 @@ function Title({
       style={{
         fontFamily: DISPLAY_FONT,
         fontWeight: 900,
-        fontSize: titleSize(text, size),
+        fontSize: titleSize(it.title, size),
         lineHeight: 0.98,
         letterSpacing: "-0.015em",
         margin: 0,
@@ -282,7 +286,15 @@ function Title({
       }}
       lang="nl"
     >
-      {text}
+      {it.spans.map((sp, i) =>
+        sp.accent ? (
+          <span key={i} style={{ fontStyle: "italic", color: accent }}>
+            {sp.text}
+          </span>
+        ) : (
+          <span key={i}>{sp.text}</span>
+        ),
+      )}
     </h1>
   );
 }
@@ -304,10 +316,14 @@ function Meta({
         letterSpacing: "0.06em",
         textTransform: "uppercase",
         color,
-        lineHeight: 1.4,
+        lineHeight: 1.35,
+        display: "flex",
+        flexDirection: "column",
       }}
     >
-      {metaParts(it).join(" · ")}
+      {metaParts(it).map((m) => (
+        <span key={m}>{m}</span>
+      ))}
     </div>
   );
 }
@@ -324,7 +340,7 @@ function Cta({ color, size = 30 }: { color: string; size?: number }) {
         color,
       }}
     >
-      Lees meer · link in bio →
+      Meer op kcvvelewijt.be
     </span>
   );
 }
@@ -628,7 +644,7 @@ function LookA({ it, f }: { it: LookItem; f: Format }) {
             color={TOKENS.jerseyDeep}
             size={sq ? 26 : 30}
           />
-          <Title text={it.title} size={sq ? 76 : 100} color={TOKENS.ink} />
+          <Title it={it} size={sq ? 76 : 100} color={TOKENS.ink} />
           {isEventish(it) && (
             <Meta it={it} color={TOKENS.inkSoft} size={sq ? 26 : 32} />
           )}
@@ -734,7 +750,7 @@ function LookB({ it, f }: { it: LookItem; f: Format }) {
           >
             {tapeChip}
             <Accent it={it} s={s} color={TOKENS.jerseyDeep} size={0.55} />
-            <Title text={it.title} size={66} color={TOKENS.ink} />
+            <Title it={it} size={66} color={TOKENS.ink} />
             <Meta it={it} color={TOKENS.inkSoft} size={24} />
             <div
               style={{
@@ -775,7 +791,7 @@ function LookB({ it, f }: { it: LookItem; f: Format }) {
           {tapeChip}
           <Crest size={104} />
         </div>
-        <Title text={it.title} size={112} color={TOKENS.ink} />
+        <Title it={it} size={112} color={TOKENS.ink} />
         <div
           style={{
             display: "flex",
@@ -808,7 +824,11 @@ function LookB({ it, f }: { it: LookItem; f: Format }) {
               <Accent it={it} s={s} color={TOKENS.jerseyDeep} size={0.7} />
             )}
           </div>
-          <RuleKicker text="Link in bio" color={TOKENS.jerseyDeep} size={30} />
+          <RuleKicker
+            text="kcvvelewijt.be"
+            color={TOKENS.jerseyDeep}
+            size={30}
+          />
         </div>
       </div>
     </Canvas>
@@ -835,7 +855,7 @@ function LookC({ it, f }: { it: LookItem; f: Format }) {
           inset: 0,
           bottom: footH,
           background:
-            "linear-gradient(180deg, rgba(8,26,18,0.25) 0%, rgba(8,26,18,0) 22%, rgba(8,26,18,0.15) 45%, rgba(8,26,18,0.82) 72%, rgba(8,26,18,0.95) 100%)",
+            "linear-gradient(180deg, rgba(8,26,18,0.6) 0%, rgba(8,26,18,0) 20%, rgba(8,26,18,0.15) 45%, rgba(8,26,18,0.82) 72%, rgba(8,26,18,0.95) 100%)",
           zIndex: 1,
         }}
       />
@@ -858,7 +878,14 @@ function LookC({ it, f }: { it: LookItem; f: Format }) {
             zIndex: 2,
           }}
         >
-          <Accent it={it} s={s} color={TOKENS.cream} size={sq ? 0.6 : 0.85} />
+          <div
+            style={{
+              background: "rgba(8,26,18,0.88)",
+              padding: sq ? "10px 16px" : "16px 24px",
+            }}
+          >
+            <Accent it={it} s={s} color={TOKENS.cream} size={sq ? 0.6 : 0.85} />
+          </div>
         </div>
       )}
       <div
@@ -893,7 +920,12 @@ function LookC({ it, f }: { it: LookItem; f: Format }) {
         >
           {s.label}
         </span>
-        <Title text={it.title} size={sq ? 84 : 124} color={TOKENS.cream} />
+        <Title
+          it={it}
+          size={sq ? 84 : 124}
+          color={TOKENS.cream}
+          accent={TOKENS.warm}
+        />
         <Meta it={it} color="rgba(245,241,230,0.88)" size={sq ? 26 : 34} />
       </div>
       <div
@@ -931,7 +963,7 @@ function LookC({ it, f }: { it: LookItem; f: Format }) {
             color: TOKENS.cream,
           }}
         >
-          KCVVELEWIJT.BE
+          KCVV ELEWIJT
         </span>
         <Cta color={TOKENS.cream} size={sq ? 22 : 28} />
       </div>
@@ -940,7 +972,7 @@ function LookC({ it, f }: { it: LookItem; f: Format }) {
 }
 
 // ── D · Kleurvlak — the type's colour owns half, seam, photo the other ─────
-function LookD({ it, f }: { it: LookItem; f: Format }) {
+export function LookD({ it, f }: { it: LookItem; f: Format }) {
   const s = styleOf(it);
   const sq = f === "square";
   const ground = s.fill === TOKENS.cream ? TOKENS.creamSoft : s.fill;
@@ -1004,7 +1036,7 @@ function LookD({ it, f }: { it: LookItem; f: Format }) {
           <Accent it={it} s={s} color={TOKENS.warm} size={sq ? 0.5 : 0.9} />
         )}
         <RuleKicker text={s.label} color={ink} size={sq ? 22 : 30} />
-        <Title text={it.title} size={sq ? 62 : 108} color={ink} />
+        <Title it={it} size={sq ? 62 : 108} color={ink} />
         <Meta it={it} color={ink} size={sq ? 22 : 30} />
       </div>
     </div>
@@ -1037,7 +1069,7 @@ function LookD({ it, f }: { it: LookItem; f: Format }) {
                 letterSpacing: "0.12em",
               }}
             >
-              LINK IN BIO →
+              KCVVELEWIJT.BE
             </span>
           </div>
         </div>
@@ -1078,7 +1110,7 @@ function LookD({ it, f }: { it: LookItem; f: Format }) {
               boxShadow: `6px 6px 0 ${TOKENS.jerseyDeep}`,
             }}
           >
-            LEES MEER · LINK IN BIO →
+            MEER OP KCVVELEWIJT.BE
           </span>
         </div>
       </div>
@@ -1129,43 +1161,45 @@ function LookE({ it, f }: { it: LookItem; f: Format }) {
         display: "flex",
         gap: sq ? 28 : 40,
         padding: sq ? "28px 36px" : "48px 48px 40px",
-        alignItems: "stretch",
+        alignItems: "flex-start",
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          background: s.fill === TOKENS.cream ? TOKENS.ink : s.fill,
-          color: s.fill === TOKENS.cream ? TOKENS.cream : s.onFill,
-          padding: sq ? "12px 20px" : "20px 28px",
-          minWidth: sq ? 130 : 190,
-        }}
-      >
-        <span
+      {isEventish(it) && (
+        <div
           style={{
-            fontFamily: DISPLAY_FONT,
-            fontWeight: 900,
-            fontSize: sq ? 88 : 140,
-            lineHeight: 0.9,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            background: s.fill === TOKENS.cream ? TOKENS.ink : s.fill,
+            color: s.fill === TOKENS.cream ? TOKENS.cream : s.onFill,
+            padding: sq ? "12px 20px" : "20px 28px",
+            minWidth: sq ? 130 : 190,
           }}
         >
-          {day}
-        </span>
-        <span
-          style={{
-            fontFamily: MONO_FONT,
-            fontWeight: 700,
-            fontSize: sq ? 24 : 36,
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
-          }}
-        >
-          {month}
-        </span>
-      </div>
+          <span
+            style={{
+              fontFamily: DISPLAY_FONT,
+              fontWeight: 900,
+              fontSize: sq ? 88 : 140,
+              lineHeight: 0.9,
+            }}
+          >
+            {day}
+          </span>
+          <span
+            style={{
+              fontFamily: MONO_FONT,
+              fontWeight: 700,
+              fontSize: sq ? 24 : 36,
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+            }}
+          >
+            {month}
+          </span>
+        </div>
+      )}
       <div
         style={{
           display: "flex",
@@ -1188,7 +1222,7 @@ function LookE({ it, f }: { it: LookItem; f: Format }) {
           {s.label}
           {s.accent === "quote" ? " · “…”" : ""}
         </span>
-        <Title text={it.title} size={sq ? 54 : 84} color={TOKENS.ink} />
+        <Title it={it} size={sq ? 54 : 84} color={TOKENS.ink} />
         {isEventish(it) && (
           <Meta it={it} color={TOKENS.inkSoft} size={sq ? 20 : 28} />
         )}
@@ -1239,17 +1273,19 @@ function LookE({ it, f }: { it: LookItem; f: Format }) {
             display: "flex",
             flexDirection: "column",
             transform: "rotate(-1.2deg)",
-            flex: sq ? 1 : undefined,
+            flex: 1,
+            minHeight: 0,
           }}
         >
           <div
             style={{
-              height: sq ? 400 : 900,
+              flex: 1,
+              minHeight: sq ? 300 : 700,
               borderBottom: `5px solid ${TOKENS.ink}`,
               position: "relative",
             }}
           >
-            <Img src={photo(it, 940, sq ? 400 : 900)} />
+            <Img src={photo(it, 940, sq ? 600 : 1200)} />
           </div>
           {stub}
           {perf}
@@ -1257,7 +1293,7 @@ function LookE({ it, f }: { it: LookItem; f: Format }) {
             style={{
               padding: sq ? "16px 36px" : "28px 48px",
               display: "flex",
-              justifyContent: "space-between",
+              justifyContent: "flex-end",
               alignItems: "center",
             }}
           >
@@ -1267,21 +1303,10 @@ function LookE({ it, f }: { it: LookItem; f: Format }) {
                 fontWeight: 700,
                 fontSize: sq ? 20 : 28,
                 letterSpacing: "0.14em",
-                color: TOKENS.inkMuted,
-              }}
-            >
-              {isEventish(it) ? "TOEGANG" : "LEES MEER"}
-            </span>
-            <span
-              style={{
-                fontFamily: MONO_FONT,
-                fontWeight: 700,
-                fontSize: sq ? 20 : 28,
-                letterSpacing: "0.14em",
                 color: TOKENS.ink,
               }}
             >
-              LINK IN BIO →
+              KCVVELEWIJT.BE
             </span>
           </div>
         </div>
@@ -1297,7 +1322,7 @@ const LOOKS: Record<
   A: { name: "Kaart", C: LookA },
   B: { name: "Plakboek", C: LookB },
   C: { name: "Affiche", C: LookC },
-  D: { name: "Kleurvlak", C: LookD },
+  // D · Kleurvlak — rejected by the owner (2026-10-17), kept on the branch only.
   E: { name: "Ticket", C: LookE },
 };
 const KEYS = Object.keys(LOOKS);
