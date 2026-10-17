@@ -565,7 +565,7 @@ function Grain() {
 function LookA({ it, f }: { it: LookItem; f: Format }) {
   const s = styleOf(it);
   const sq = f === "square";
-  const photoH = sq ? 600 : 1240;
+  const photoH = sq ? 380 : 900;
   const bracket = (pos: "tl" | "br"): React.CSSProperties => ({
     position: "absolute",
     width: 44,
@@ -578,80 +578,83 @@ function LookA({ it, f }: { it: LookItem; f: Format }) {
   return (
     <Canvas f={f} bg={TOKENS.cream}>
       <Grain />
+      {/* Column: the photo takes every pixel the card and footer leave. */}
       <div
         style={{
           position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: photoH,
-        }}
-      >
-        <Img src={photo(it, W, photoH)} />
-      </div>
-      <div style={{ position: "absolute", top: 56, left: 64, zIndex: 2 }}>
-        <Crest size={sq ? 84 : 104} />
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          left: 72,
-          right: 72,
-          top: photoH - (sq ? 170 : 200),
-          background: "#fff",
-          border: `5px solid ${TOKENS.ink}`,
-          boxShadow: `16px 16px 0 ${TOKENS.ink}`,
-          padding: sq ? "64px 56px 48px" : "88px 64px 64px",
+          inset: 0,
           display: "flex",
           flexDirection: "column",
-          gap: sq ? 24 : 36,
           zIndex: 2,
         }}
       >
-        <span style={bracket("tl")} />
-        <span style={bracket("br")} />
-        <Stamp
-          s={s}
-          size={sq ? 28 : 34}
-          style={{ position: "absolute", top: -30, right: 56 }}
-        />
-        {s.accent === "quote" && (
-          <Accent it={it} s={s} color={TOKENS.jerseyDeep} size={sq ? 0.6 : 1} />
-        )}
-        <RuleKicker
-          text={dateLine(it) || s.label}
-          color={TOKENS.jerseyDeep}
-          size={sq ? 26 : 30}
-        />
-        <Title text={it.title} size={sq ? 76 : 100} color={TOKENS.ink} />
-        {isEventish(it) && (
-          <Meta it={it} color={TOKENS.inkSoft} size={sq ? 26 : 32} />
-        )}
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          left: 72,
-          right: 72,
-          bottom: sq ? 40 : 72,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          zIndex: 2,
-        }}
-      >
-        <span
+        <div style={{ flex: 1, minHeight: photoH, position: "relative" }}>
+          <Img src={photo(it, W, H[f])} />
+          <div style={{ position: "absolute", top: 56, left: 64 }}>
+            <Crest size={sq ? 84 : 104} />
+          </div>
+        </div>
+        <div
           style={{
-            fontFamily: MONO_FONT,
-            fontWeight: 700,
-            fontSize: 28,
-            letterSpacing: "0.16em",
-            color: TOKENS.inkMuted,
+            position: "relative",
+            margin: sq ? "-170px 72px 0" : "-220px 72px 0",
+            background: "#fff",
+            border: `5px solid ${TOKENS.ink}`,
+            boxShadow: `16px 16px 0 ${TOKENS.ink}`,
+            padding: sq ? "64px 56px 48px" : "88px 64px 64px",
+            display: "flex",
+            flexDirection: "column",
+            gap: sq ? 24 : 36,
+            zIndex: 2,
           }}
         >
-          KCVV ELEWIJT
-        </span>
-        <Cta color={TOKENS.ink} size={sq ? 24 : 30} />
+          <span style={bracket("tl")} />
+          <span style={bracket("br")} />
+          <Stamp
+            s={s}
+            size={sq ? 28 : 34}
+            style={{ position: "absolute", top: -30, right: 56 }}
+          />
+          {s.accent === "quote" && (
+            <Accent
+              it={it}
+              s={s}
+              color={TOKENS.jerseyDeep}
+              size={sq ? 0.6 : 1}
+            />
+          )}
+          <RuleKicker
+            text={dateLine(it) || s.label}
+            color={TOKENS.jerseyDeep}
+            size={sq ? 26 : 30}
+          />
+          <Title text={it.title} size={sq ? 76 : 100} color={TOKENS.ink} />
+          {isEventish(it) && (
+            <Meta it={it} color={TOKENS.inkSoft} size={sq ? 26 : 32} />
+          )}
+        </div>
+        <div
+          style={{
+            padding: sq ? "40px 72px 36px" : "64px 72px 64px",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            zIndex: 2,
+          }}
+        >
+          <span
+            style={{
+              fontFamily: MONO_FONT,
+              fontWeight: 700,
+              fontSize: 28,
+              letterSpacing: "0.16em",
+              color: TOKENS.inkMuted,
+            }}
+          >
+            KCVV ELEWIJT
+          </span>
+          <Cta color={TOKENS.ink} size={sq ? 24 : 30} />
+        </div>
       </div>
     </Canvas>
   );
@@ -681,7 +684,7 @@ function LookB({ it, f }: { it: LookItem; f: Format }) {
       {s.label}
     </span>
   );
-  const print = (w: number, h: number, rot: number) => (
+  const print = (w: number, h: number | string, rot: number) => (
     <div
       style={{
         position: "relative",
@@ -700,7 +703,7 @@ function LookB({ it, f }: { it: LookItem; f: Format }) {
         rotate={6}
         style={{ top: -26, right: 40 }}
       />
-      <Img src={photo(it, w - 44, h - 44)} />
+      <Img src={photo(it, w - 44, typeof h === "number" ? h - 44 : 1100)} />
     </div>
   );
   if (sq)
@@ -774,13 +777,19 @@ function LookB({ it, f }: { it: LookItem; f: Format }) {
         </div>
         <Title text={it.title} size={112} color={TOKENS.ink} />
         <div
-          style={{ display: "flex", justifyContent: "center", marginTop: 24 }}
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: 24,
+            flex: 1,
+            minHeight: 0,
+            padding: "0 0 24px",
+          }}
         >
-          {print(860, 860, -2)}
+          {print(880, "100%", -2)}
         </div>
         <div
           style={{
-            marginTop: "auto",
             display: "flex",
             flexDirection: "column",
             gap: 20,
