@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { OrgChartNode } from "@/types/organigram";
-import { useHubMemberPanel } from "@/components/organigram/HubMemberPanel";
+import { openStructureRow } from "@/components/organigram/ClubBook";
 import { PRESS_DOWN_CLASSES } from "@/components/design-system/press-down";
 import { OrganigramExplorer } from "./OrganigramExplorer";
 import { VolledigOrganigram } from "./VolledigOrganigram";
@@ -29,7 +29,6 @@ export function OrganigramOverview({
   nodes,
   collapsible = false,
 }: OrganigramOverviewProps) {
-  const hubPanel = useHubMemberPanel();
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(!collapsible);
   const [focusId, setFocusId] = useState<string | undefined>(undefined);
@@ -37,6 +36,15 @@ export function OrganigramOverview({
   // at the target node — no flash of the default node before it re-centres.
   const [openKey, setOpenKey] = useState(0);
   const returnFocusRef = useRef<HTMLElement | null>(null);
+  // The row to open once the explorer has closed and handed focus back to its
+  // launcher — opening it sooner would lose the focus to that hand-back.
+  const rowAfterClose = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (open || !rowAfterClose.current) return;
+    openStructureRow(rowAfterClose.current);
+    rowAfterClose.current = null;
+  }, [open]);
 
   const openAt = (id: string | undefined, trigger: HTMLElement) => {
     // Dedup: re-triggering the exact same open (already open, same node + same
@@ -85,22 +93,12 @@ export function OrganigramOverview({
         onClose={() => setOpen(false)}
         {...(focusId ? { initialFocusId: focusId } : {})}
         returnFocusRef={returnFocusRef}
-        {...(hubPanel
-          ? {
-              onOpenMember: (node) => {
-                // B2 — never stack two modal dialogs: collapse the verkenner as
-                // the person panel takes over. Return focus to the verkenner's
-                // own launcher (a live page element) rather than the now-
-                // unmounting in-chart node, so closing the panel lands the user
-                // back on the page.
-                setOpen(false);
-                hubPanel.openMember(node, {
-                  trigger: returnFocusRef.current,
-                  view: "chart",
-                });
-              },
-            }
-          : {})}
+        onOpenMember={(node) => {
+          // Collapse the verkenner and show the person where the structuur
+          // lists them: their row in the clubboek, unfolded.
+          rowAfterClose.current = node.id;
+          setOpen(false);
+        }}
       />
     </>
   );

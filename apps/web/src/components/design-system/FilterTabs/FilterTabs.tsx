@@ -83,8 +83,8 @@
  * filter narrows a list in place — a set of toggles, not tabs — and this
  * component renders no `tabpanel` for `role="tab"` to associate with
  * (#2429 resolution, rule 7). `role="tablist"` stays reserved for genuine
- * segmented switchers elsewhere (the Maand·Week·Agenda toggle,
- * `MemberDetailPanel`'s holder switcher), which are a different component.
+ * segmented switchers elsewhere (the Maand·Week·Agenda toggle),
+ * which is a different component.
  *
  * **One chip size.** The `size` prop is deleted (#2429 resolution, rule 6)
  * — every chip renders at the former `md` dimensions, ending the four

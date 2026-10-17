@@ -44,7 +44,7 @@ import {
 import { useHistoryFilterParam } from "@/hooks/useHistoryFilterParam";
 import { filteredEmptyBody } from "@/lib/utils/empty-state-copy";
 import { useResponsibilityAnalytics } from "@/hooks/useResponsibilityAnalytics";
-import { useHubMemberPanel } from "@/components/organigram/HubMemberPanel";
+import { openStructureRow } from "@/components/organigram/ClubBook";
 import {
   HUB_AUDIENCE_FILTERS,
   type ResponsibilityPath,
@@ -111,7 +111,6 @@ export interface HulpFinderProps {
 }
 
 export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
-  const panel = useHubMemberPanel();
   const {
     trackView,
     trackContactClicked,
@@ -124,7 +123,7 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
   // finder out of prerendering on this ISR route: the server HTML would carry
   // a small placeholder, and the page would grow by the whole finder once it
   // hydrates. Each write merges from the live `window.location.search`, so
-  // `HubMemberPanel`'s `?member=`/`?holder=` survives a filter press.
+  // a shared `?member=` survives a filter press.
   const [category, setCategoryParam] = useHistoryFilterParam<CategoryFilter>(
     CATEGORY_PARAM,
     CATEGORY_ORDER,
@@ -313,17 +312,11 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
   const handleShowInStructure = useCallback(
     (event: MouseEvent<HTMLAnchorElement>, pathId: string, nodeId: string) => {
       trackOrganigramLink(pathId, nodeId);
-      if (panel) {
-        event.preventDefault();
-        panel.openMemberById(nodeId, {
-          view: "cards",
-          trigger: event.currentTarget,
-        });
-        const structuur = document.getElementById("structuur");
-        if (structuur) scrollIntoViewMotionSafe(structuur);
-      }
+      // Opens the row and scrolls to it. Outside the hub (Storybook) no row
+      // exists and the link stays a plain link to `/hulp?member=…#structuur`.
+      if (openStructureRow(nodeId)) event.preventDefault();
     },
-    [panel, trackOrganigramLink],
+    [trackOrganigramLink],
   );
 
   const renderCard = (path: ResponsibilityPath) => (

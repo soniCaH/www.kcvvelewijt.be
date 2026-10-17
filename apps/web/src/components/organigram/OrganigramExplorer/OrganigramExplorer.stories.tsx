@@ -43,9 +43,40 @@ export const SharedNode: Story = {
 };
 
 /**
+ * A long holder name must not push the two-line title out of its card: with a
+ * wrapping holder line, "Website & Communicatie" lost its second line. Geometry,
+ * so it is a play assertion on the real layout, at a phone width.
+ */
+export const LongHolderNameKeepsTheTitle: Story = {
+  tags: ["!vr"],
+  args: {
+    initialFocusId: "website",
+    nodes: explorerFixture.map((node) =>
+      node.id === "website"
+        ? {
+            ...node,
+            members: [
+              { id: "long", name: "Kevin Van Ransbeeck-Vandenbroucke" },
+            ],
+          }
+        : node,
+    ),
+  },
+  globals: { viewport: { value: "kcvvMobile" } },
+  play: async ({ canvasElement }) => {
+    const card = await within(canvasElement).findByTestId(
+      "spotlight-node-card",
+    );
+    const title = card.firstElementChild as HTMLElement;
+    await expect(title.scrollHeight).toBeLessThanOrEqual(title.clientHeight);
+    await expect(card.scrollHeight).toBeLessThanOrEqual(card.clientHeight);
+  },
+};
+
+/**
  * Phase 4 (#2055) "trigger + consolidate": with `onOpenMember` wired, the centred
- * node shows a "Contactgegevens" trigger (opens the `<MemberDetailPanel>` over the
- * verkenner) instead of the inline profile link + shared-member list.
+ * node shows a "Contactgegevens" trigger (opens the person's row in the `/hulp`
+ * clubboek) instead of the inline profile link + shared-member list.
  */
 export const WithContactTrigger: Story = {
   args: { onOpenMember: fn() },

@@ -1,4 +1,4 @@
-import type { OrgChartNode } from "@/types/organigram";
+import type { OrgChartNode, OrgPillar } from "@/types/organigram";
 
 /**
  * Storybook/test fixture mirroring the REAL reporting-tree SHAPE from the live
@@ -61,6 +61,50 @@ const SPEC: Array<[string, string, string | null, number]> = [
   ["ethische-commissie", "Lid Ethische Commissie", "api", 1],
 ];
 
+/**
+ * Role code + pillar per spec row, as the 2026-10-17 backfill sets them. The
+ * handful of rows with no entry are the ones with no pillar (they land under
+ * "Overige functies"); a few have a pillar but no code.
+ */
+const META: Record<string, { roleCode?: string; pillar?: OrgPillar }> = {
+  voorzitter: { roleCode: "VZ", pillar: "bestuur" },
+  secretaris: { roleCode: "SEC", pillar: "bestuur" },
+  penningmeester: { roleCode: "PEN", pillar: "bestuur" },
+  "gerechtelijk-corr": { roleCode: "GC", pillar: "bestuur" },
+  bestuursorgaan: { roleCode: "BST", pillar: "bestuur" },
+  sportief: { roleCode: "TD", pillar: "sportief" },
+  "t1-a": { roleCode: "T1-A", pillar: "sportief" },
+  "t1-b": { roleCode: "T1-B", pillar: "sportief" },
+  "kt-fanion": { roleCode: "KT-F", pillar: "sportief" },
+  doorstroom: { roleCode: "DS-B", pillar: "sportief" },
+  scouting: { roleCode: "SCO", pillar: "sportief" },
+  jeugdvoorzitter: { roleCode: "JVZ", pillar: "jeugd-organisatie" },
+  jeugdsecr: { roleCode: "JSEC", pillar: "jeugd-organisatie" },
+  scheidsrechters: { roleCode: "REF", pillar: "jeugd-organisatie" },
+  "materiaal-wedstr": { roleCode: "MAT", pillar: "jeugd-organisatie" },
+  "kantine-trainingen": { roleCode: "KAN", pillar: "jeugd-organisatie" },
+  gdpr: { roleCode: "GDPR", pillar: "jeugd-organisatie" },
+  "lid-jeugdbestuur": { roleCode: "JBL", pillar: "jeugd-organisatie" },
+  ouderraad: { pillar: "jeugd-organisatie" },
+  tvjo: { roleCode: "TVJO", pillar: "jeugd-opleiding" },
+  prosoccerdata: { roleCode: "PSD", pillar: "jeugd-opleiding" },
+  atvjo: { pillar: "jeugd-opleiding" },
+  "jc-onderbouw": { roleCode: "JC-OB", pillar: "jeugd-opleiding" },
+  "jc-middenbouw": { roleCode: "JC-MB", pillar: "jeugd-opleiding" },
+  "jc-bovenbouw": { roleCode: "JC-BB", pillar: "jeugd-opleiding" },
+  videoanalist: { roleCode: "VID", pillar: "jeugd-opleiding" },
+  "kt-jeugd": { roleCode: "KT-J", pillar: "jeugd-opleiding" },
+  revalidatie: { pillar: "jeugd-opleiding" },
+  kinesist: { roleCode: "KIN", pillar: "jeugd-opleiding" },
+  sponsoring: { roleCode: "SPO", pillar: "club" },
+  kledij: { roleCode: "KLE", pillar: "club" },
+  infrastructuur: { roleCode: "INF", pillar: "club" },
+  "kantine-evt": { roleCode: "K&E", pillar: "club" },
+  website: { roleCode: "WEB", pillar: "club" },
+  api: { roleCode: "API", pillar: "integriteit" },
+  "ethische-commissie": { roleCode: "EC", pillar: "integriteit" },
+};
+
 const FIRST_NAMES = [
   "Jan",
   "An",
@@ -94,6 +138,7 @@ export const explorerFixture: OrgChartNode[] = SPEC.map(
     title,
     parentId,
     department: "algemeen",
+    ...META[id],
     members:
       id === "club"
         ? []

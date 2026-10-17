@@ -14,7 +14,7 @@ import Link from "next/link";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import type { OrgChartNode } from "@/types/organigram";
 import { cn } from "@/lib/utils/cn";
-import { deriveCardState } from "@/components/organigram/OrgPersonCard";
+import { deriveCardState } from "./card-state";
 import {
   ArrowRight,
   CaretDown,
@@ -85,10 +85,10 @@ export interface OrganigramExplorerProps {
   /** Element focus returns to on close (typically the launcher button). */
   returnFocusRef?: RefObject<HTMLElement | null>;
   /**
-   * Phase 4 (#2055): open the person-first `<MemberDetailPanel>` for the centred
-   * node (the verkenner entry point, 7o5 "trigger + consolidate"). When set, the
-   * centre shows a "Contactgegevens" trigger instead of the inline profile link +
-   * shared-member list — the panel becomes the single person-first surface.
+   * Open the centred node's row in the `/hulp` clubboek (the verkenner entry
+   * point, 7o5 "trigger + consolidate"). When set, the centre shows a
+   * "Contactgegevens" trigger instead of the inline profile link + shared-member
+   * list — the row becomes the single person-first surface.
    */
   onOpenMember?: (node: OrgChartNode, trigger: HTMLElement) => void;
 }

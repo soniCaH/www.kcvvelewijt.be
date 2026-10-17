@@ -791,6 +791,13 @@ const config: TestRunnerConfig = {
     if (size) {
       await page.setViewportSize(size);
     }
+
+    // `parameters.emulateMedia: "print"` renders the story under print media,
+    // so the `print:` styles a story exists to show are the ones captured.
+    // Always set, so a print story never leaks its media into the next one.
+    await page.emulateMedia({
+      media: story.parameters?.emulateMedia === "print" ? "print" : null,
+    });
   },
   async postVisit(page, context) {
     // Covers the mount phase — anything the story pulled in between

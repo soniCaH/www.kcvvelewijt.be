@@ -9,7 +9,7 @@
  *   the position title. The "toon in structuur →" cross-link deep-links the hub
  *   (`/hulp?member=<nodeId>#structuur`) — replacing the retired
  *   `/club/organigram?node=` route — and exposes `nodeId` so the finder can open
- *   the `<MemberDetailPanel>` via `useHubMemberPanel()` and fire
+ *   the person's clubboek row via `openStructureRow()` and fire
  *   `responsibility_organigram_link {node_id}`.
  * - **team-role**: a generic role label + a `/ploegen` link (per-team selection
  *   intentionally dropped — the team page routes the user to their own ploeg).
@@ -28,7 +28,7 @@ export interface ResolvedContact {
   phone?: string;
   /**
    * Organigram node (position) `_id` — only set for `position` contacts that
-   * carry a `nodeId`. Drives the in-page `<MemberDetailPanel>` open and the
+   * carry a `nodeId`. Drives the in-page clubboek row open and the
    * hashed `responsibility_organigram_link {node_id}` event. Never rendered.
    */
   nodeId?: string;

@@ -1,18 +1,12 @@
 /**
- * VolledigOrganigram unit tests — the full box-chart + A4 PDF (#2054).
+ * VolledigOrganigram unit tests — the full box-chart (#2054).
  */
 
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { VolledigOrganigram } from "./VolledigOrganigram";
 import { explorerFixture } from "./organigram-explorer.fixture";
-
-afterEach(() => {
-  document.getElementById("vo-print-style")?.remove();
-  document.documentElement.style.removeProperty("--vo-print-scale");
-  delete (window as { print?: unknown }).print;
-});
 
 describe("VolledigOrganigram", () => {
   it("renders the whole reporting tree from the root", () => {
@@ -65,30 +59,11 @@ describe("VolledigOrganigram", () => {
     expect(vacant[0]).toHaveAttribute("data-state", "vacant");
   });
 
-  it("triggers a print (PDF) and injects the A4 print stylesheet", async () => {
-    const print = vi.fn();
-    (window as { print?: () => void }).print = print;
+  it("offers no PDF: the list in the clubboek is what prints", () => {
     render(<VolledigOrganigram nodes={explorerFixture} />);
-
-    await userEvent.click(
-      screen.getByRole("button", { name: /Download als PDF/ }),
-    );
-
-    expect(print).toHaveBeenCalledOnce();
-    const style = document.getElementById("vo-print-style");
-    expect(style).not.toBeNull();
-    expect(style?.textContent).toContain("size: A4 landscape");
-  });
-
-  it("cleans up the injected print stylesheet after printing", async () => {
-    (window as { print?: () => void }).print = vi.fn();
-    render(<VolledigOrganigram nodes={explorerFixture} />);
-    await userEvent.click(
-      screen.getByRole("button", { name: /Download als PDF/ }),
-    );
-    // The afterprint listener removes the style; simulate the browser firing it.
-    window.dispatchEvent(new Event("afterprint"));
-    expect(document.getElementById("vo-print-style")).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: /Download als PDF/ }),
+    ).not.toBeInTheDocument();
   });
 });
 

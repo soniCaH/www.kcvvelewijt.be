@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 import type { OrgChartNode } from "@/types/organigram";
 import { cn } from "@/lib/utils/cn";
 import { PRESS_DOWN_CLASSES } from "@/components/design-system";
-import { deriveCardState } from "@/components/organigram/OrgPersonCard";
-import { ArrowsOut, DownloadSimple } from "@/lib/icons.redesign";
+import { deriveCardState } from "./card-state";
+import { ArrowsOut } from "@/lib/icons.redesign";
 import { ScrollOverlay } from "@/components/design-system/ScrollHint/ScrollOverlay";
 import { holderLabel } from "./SpotlightNodeCard";
 import { buildSpotlightTree, childrenOf, CLUB_ROOT_ID } from "./spotlight-tree";
@@ -14,10 +14,9 @@ import { buildSpotlightTree, childrenOf, CLUB_ROOT_ID } from "./spotlight-tree";
  * `<VolledigOrganigram>` — the full reporting tree as a pure-CSS DOM box chart
  * (no canvas, no library). Two jobs in one component (competitive analysis 7o3b
  * §5): it is the **accessible fallback** to the spotlight (a real nested
- * list/tree, keyboard- and screen-reader-navigable) AND the **print source** for
- * the "Download als PDF" — the whole organigram on one A4 sheet (the kept 7o7
- * print view). The A4 print stylesheet is injected only for the duration of the
- * print so it can never affect an unrelated page's print.
+ * list/tree, keyboard- and screen-reader-navigable). It is not printed: the
+ * PDF is the clubboek's list (#3525), not this tree, which cannot be read at
+ * any scale that fits a sheet.
  */
 
 export interface VolledigOrganigramProps {
@@ -29,18 +28,18 @@ export interface VolledigOrganigramProps {
   className?: string;
 }
 
-const A4_LANDSCAPE_PX = { width: 277 * 3.7795, height: 190 * 3.7795 }; // printable area at 96dpi, 10mm margins
-
 function OrgBranch({
   node,
   childrenByParent,
   onNodeClick,
   isRoot = false,
+  rootRef,
 }: {
   node: OrgChartNode;
   childrenByParent: (id: string) => OrgChartNode[];
   onNodeClick?: (id: string, trigger: HTMLElement) => void;
   isRoot?: boolean;
+  rootRef?: React.RefObject<HTMLLIElement | null>;
 }) {
   const kids = childrenByParent(node.id);
   const state = isRoot ? "root" : deriveCardState(node.members.length);
@@ -66,7 +65,7 @@ function OrgBranch({
   );
 
   return (
-    <li>
+    <li ref={rootRef}>
       {onNodeClick ? (
         <button
           type="button"
@@ -108,62 +107,32 @@ export function VolledigOrganigram({
   const childrenByParent = (id: string) => childrenOf(tree, id);
   const root = tree.byId.get(CLUB_ROOT_ID) ?? nodes[0];
 
-  const handleDownload = () => {
-    // Idempotent — clear any leftover from a previous (or cancelled) print.
-    document.getElementById("vo-print-style")?.remove();
-
-    // `<ScrollOverlay>` owns its scroll ref internally (deliberately not
-    // exposed — see its own docblock), so the print-scaling measurement
-    // reaches the track the same way the print stylesheet below already
-    // targets it: the `.vo-chart` class, which this component keeps
-    // globally unique by design (one organigram chart renders per page).
-    const chart = document.querySelector<HTMLElement>(".vo-chart");
-    if (chart) {
-      const scale = Math.min(
-        A4_LANDSCAPE_PX.width / chart.scrollWidth,
-        A4_LANDSCAPE_PX.height / chart.scrollHeight,
-        1,
-      );
-      document.documentElement.style.setProperty(
-        "--vo-print-scale",
-        String(scale),
-      );
-    }
-
-    const style = document.createElement("style");
-    style.id = "vo-print-style";
-    style.media = "print";
-    // `overflow: hidden` clips any box that scale-to-fit can't shrink, so the
-    // chart can never spill onto a second blank sheet.
-    style.textContent = `
-      @page { size: A4 landscape; margin: 8mm; }
-      body * { visibility: hidden !important; }
-      .vo-print, .vo-print * { visibility: visible !important; }
-      .vo-print { position: fixed; inset: 0; padding: 0; margin: 0; overflow: hidden; }
-      .vo-no-print { display: none !important; }
-      .vo-chart { transform: scale(var(--vo-print-scale, 1)); transform-origin: top left; }
-    `;
-    document.head.appendChild(style);
-
-    window.addEventListener(
-      "afterprint",
-      () => {
-        document.getElementById("vo-print-style")?.remove();
-        document.documentElement.style.removeProperty("--vo-print-scale");
-      },
-      { once: true },
-    );
-    window.print();
-  };
+  // The chart is wider than most viewports and the track opens at scrollLeft 0,
+  // which is the far left of the tree — not the root. Centre the root once.
+  const rootRef = useRef<HTMLLIElement>(null);
+  // Before paint, so the chart never shows its far-left start first.
+  useLayoutEffect(() => {
+    const rootBranch = rootRef.current;
+    const track = rootBranch?.closest<HTMLElement>(".vo-chart");
+    if (!rootBranch || !track) return;
+    const trackBox = track.getBoundingClientRect();
+    const rootBox = rootBranch.getBoundingClientRect();
+    // `instant`: the site's smooth-scroll default would animate this jump.
+    track.scrollTo({
+      left:
+        track.scrollLeft +
+        rootBox.left +
+        rootBox.width / 2 -
+        (trackBox.left + trackBox.width / 2),
+      behavior: "instant",
+    });
+  }, []);
 
   if (!root) return null;
 
   return (
-    <div
-      data-testid="volledig-organigram"
-      className={cn("vo-print", className)}
-    >
-      <div className="vo-no-print mb-4 flex flex-wrap items-center justify-between gap-3">
+    <div data-testid="volledig-organigram" className={className}>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         {/* Exempt from the reading-measure ban (DESIGN.md "The
             Reading-Measure Exemption Rule", #2645): this caption shares its
             row with the button group via `justify-between` above, so it is
@@ -173,7 +142,7 @@ export function VolledigOrganigram({
             group wraps to a second line, and the chart shifts down. */}
         <p className="text-ink max-w-[60ch] text-sm leading-relaxed">
           De volledige rapporteringsstructuur in één overzicht. Klik een functie
-          om ze in de verkenner te openen, of druk het geheel af.
+          om ze in de verkenner te openen.
         </p>
         <div className="flex shrink-0 flex-wrap items-center gap-2">
           {onOpenExplorer && (
@@ -187,28 +156,16 @@ export function VolledigOrganigram({
               Blader door het organigram ⤢
             </button>
           )}
-          <button
-            type="button"
-            onClick={handleDownload}
-            className={`border-ink bg-cream-soft text-ink shadow-paper-sm flex items-center gap-2 border-2 px-4 py-2.5 font-mono text-xs font-bold tracking-wide uppercase ${PRESS_DOWN_CLASSES}`}
-          >
-            <DownloadSimple size={16} aria-hidden />
-            Download als PDF
-          </button>
         </div>
       </div>
 
       {/* Scroll arrow — `<ScrollOverlay>`'s "content scrolled past" idiom
           (#2444, as amended by #2476): the chart is a diagram, not a row of
           tap targets, so it mounts only on real overflow and never holds a
-          gutter. `chromeClassName="vo-no-print"` keeps the arrows and their
-          fades out of the exported PDF — `.vo-print`'s print stylesheet
-          makes everything inside it visible by default, arrows included,
-          unless marked `vo-no-print` same as the toolbar above. */}
+          gutter. */}
       <ScrollOverlay
         direction="both"
         ariaLabel="Volledig organigram"
-        chromeClassName="vo-no-print"
         trackClassName="vo-chart pb-2"
       >
         {/* `safe center` centres a chart that fits but left-aligns (and
@@ -221,6 +178,7 @@ export function VolledigOrganigram({
             childrenByParent={childrenByParent}
             {...(onNodeClick ? { onNodeClick } : {})}
             isRoot={root.id === CLUB_ROOT_ID}
+            rootRef={rootRef}
           />
         </ul>
       </ScrollOverlay>

@@ -1,6 +1,6 @@
 import type { OrgChartNode } from "@/types/organigram";
 import { cn } from "@/lib/utils/cn";
-import { deriveCardState } from "@/components/organigram/OrgPersonCard";
+import { deriveCardState } from "./card-state";
 
 /**
  * A single node card inside the spotlight stage (7o3). Unlike the directory's
@@ -67,7 +67,10 @@ export function SpotlightNodeCard({
       <span className="font-display text-ink line-clamp-2 text-xs leading-[1.15] font-semibold">
         {node.title}
       </span>
-      <span className="text-ink-muted mt-1 block font-mono text-[11px] tracking-[0.06em] uppercase">
+      {/* One line, ellipsised: a long holder name ("Kevin Van Ransbeeck")
+          wrapped to two, pushed the clamped title out of the fixed-height box
+          and clipped its second line ("Website & Communicatie" read "Website &"). */}
+      <span className="text-ink-muted mt-1 block max-w-full truncate font-mono text-[11px] tracking-[0.06em] uppercase">
         {sublabel}
       </span>
     </span>
