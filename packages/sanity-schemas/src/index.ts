@@ -21,6 +21,12 @@ export {validateOrganigramMember} from './validation/organigram-members'
 export {validateSubjectsCount} from './validation/subjects-count'
 export {validateUnpublishAt} from './validation/unpublish-at'
 export type {UnpublishAtContext} from './validation/unpublish-at'
+export {
+  collectOrganigramExcludedIds,
+  normalizeOrganigramId,
+  organigramParentFilter,
+  validateOrganigramParent,
+} from './validation/organigram-parent'
 export {validateLink} from './validation/link'
 export {validateEventDateEnd} from './validation/event-date-end'
 export type {EventDateEndContext} from './validation/event-date-end'
