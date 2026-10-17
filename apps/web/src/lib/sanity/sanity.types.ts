@@ -804,6 +804,13 @@ export type OrganigramNode = {
   title?: string;
   description?: string;
   roleCode?: string;
+  pillar?:
+    | "bestuur"
+    | "sportief"
+    | "jeugd-organisatie"
+    | "jeugd-opleiding"
+    | "club"
+    | "integriteit";
   department?: "hoofdbestuur" | "jeugdbestuur" | "algemeen";
   parentNode?: OrganigramNodeReference;
   members?: Array<

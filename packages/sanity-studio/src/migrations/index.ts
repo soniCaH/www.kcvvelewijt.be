@@ -148,3 +148,15 @@ export {
   migrateTitlePortableTextToString,
 } from './title-portable-text-to-string'
 export type {PortableTextTitleArticleDoc as TitlePortableTextToStringDoc} from './title-portable-text-to-string'
+
+export {
+  default as backfillOrganigramPillarMigration,
+  migrateBackfillOrganigramPillar,
+} from './backfill-organigram-pillar'
+export type {OrganigramNodeDoc as BackfillOrganigramPillarDoc} from './backfill-organigram-pillar'
+
+export {
+  default as renameKantineVerhuurStepMigration,
+  migrateRenameKantineVerhuurStep,
+} from './rename-kantine-verhuur-step'
+export type {KantineVerhuurResponsibilityDoc as RenameKantineVerhuurStepDoc} from './rename-kantine-verhuur-step'
