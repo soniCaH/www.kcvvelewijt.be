@@ -811,6 +811,13 @@ describe("mapRelatedToRelatedRow", () => {
       ]);
     });
 
+    it("links a board team to /club/<slug>, not the redirecting /ploegen URL (#3483)", () => {
+      const [item] = mapRelatedToRelatedRow([
+        { ...team, slug: "jeugdbestuur" },
+      ]);
+      expect(item.href).toBe("/club/jeugdbestuur");
+    });
+
     it("falls back to the team artefact when there is no image", () => {
       const [item] = mapRelatedToRelatedRow([{ ...team, imageUrl: null }]);
       expect(item?.imageUrl).toBeUndefined();

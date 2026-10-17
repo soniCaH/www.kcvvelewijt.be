@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { existsSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { Effect, Layer } from "effect";
 import { HttpNotFound, type Match } from "@kcvv/api-contract";
 
@@ -46,7 +48,7 @@ vi.mock("@sanity/client", () => ({
 }));
 
 /** `sitemap()` issues exactly one Sanity query per `fetchFromSanity` call. */
-const SANITY_QUERY_COUNT = 6;
+const SANITY_QUERY_COUNT = 7;
 
 describe("sitemap.ts", () => {
   beforeEach(() => {
@@ -152,6 +154,119 @@ describe("sitemap.ts", () => {
     );
     expect(articleEntries[0].changeFrequency).toBe("monthly");
     expect(articleEntries[0].priority).toBe(0.7);
+  });
+
+  describe("CMS pages at /club/<slug> (#3483)", () => {
+    const clubUrl = (slug: string) => `https://www.kcvvelewijt.be/club/${slug}`;
+
+    /** Answers the `page` query with the given rows and every other query with []. */
+    function stubPages(...rows: Array<{ slug: string; updatedAt: string }>) {
+      mockFetch.mockImplementation(async (query: string) =>
+        query.includes('_type == "page"') ? rows : [],
+      );
+    }
+
+    it("emits every Sanity page document as /club/<slug>, with its own lastmod", async () => {
+      stubPages(
+        { slug: "vrijwilliger", updatedAt: "2026-03-15T10:00:00Z" },
+        { slug: "praktische-informatie", updatedAt: "2026-03-20T12:00:00Z" },
+      );
+
+      const result = await sitemap();
+
+      const vrijwilliger = result.find(
+        (e) => e.url === clubUrl("vrijwilliger"),
+      );
+      expect(vrijwilliger).toBeDefined();
+      expect(vrijwilliger!.lastModified).toEqual(
+        new Date("2026-03-15T10:00:00Z"),
+      );
+      expect(result.map((e) => e.url)).toContain(
+        clubUrl("praktische-informatie"),
+      );
+    });
+
+    it("lists no URL twice when a page document shares a slug with a static /club route", async () => {
+      stubPages(
+        { slug: "word-lid", updatedAt: "2026-03-15T10:00:00Z" },
+        { slug: "bestuur", updatedAt: "2026-03-15T10:00:00Z" },
+        { slug: "cashless", updatedAt: "2026-03-15T10:00:00Z" },
+      );
+
+      const urls = (await sitemap()).map((e) => e.url);
+
+      expect(new Set(urls).size).toBe(urls.length);
+      expect(urls).toContain(clubUrl("cashless"));
+    });
+  });
+
+  describe("no redirecting or shadowed URLs (#3483)", () => {
+    const urls = (result: Array<{ url: string }>) => result.map((e) => e.url);
+
+    it("leaves out a page document whose /club/<slug> next.config redirects away", async () => {
+      // `/club/inschrijven`, `/club/register`, `/club/history` are redirect
+      // sources; none may be listed even if a document carried the slug.
+      mockFetch.mockImplementation(async (query: string) =>
+        query.includes('_type == "page"')
+          ? ["inschrijven", "register", "history", "vrijwilliger"].map(
+              (slug) => ({
+                id: slug,
+                title: slug,
+                slug,
+                updatedAt: "2026-03-15T10:00:00Z",
+              }),
+            )
+          : [],
+      );
+
+      const listed = urls(await sitemap());
+
+      expect(listed).toContain("https://www.kcvvelewijt.be/club/vrijwilliger");
+      for (const slug of ["inschrijven", "register", "history"]) {
+        expect(listed).not.toContain(`https://www.kcvvelewijt.be/club/${slug}`);
+      }
+    });
+
+    it("lists every static /club/<folder> route, so a folder always shadows a same-slug document", async () => {
+      mockFetch.mockResolvedValue([]);
+      const clubDir = join(__dirname, "(main)/club");
+      const folders = readdirSync(clubDir, { withFileTypes: true })
+        .filter(
+          (d) =>
+            d.isDirectory() &&
+            !/^[[(]/.test(d.name) &&
+            existsSync(join(clubDir, d.name, "page.tsx")),
+        )
+        .map((d) => d.name);
+      expect(folders).toContain("bestuur");
+
+      const listed = urls(await sitemap());
+
+      for (const folder of folders) {
+        expect(listed).toContain(`https://www.kcvvelewijt.be/club/${folder}`);
+      }
+    });
+
+    it("lists the board teams only as /club/<slug>, never as /ploegen/<slug>", async () => {
+      mockFetch.mockImplementation(async (query: string) =>
+        query.includes('_type == "team"')
+          ? ["bestuur", "jeugdbestuur", "angels", "kcvve-u5"].map((slug) => ({
+              slug,
+              psdId: null,
+            }))
+          : [],
+      );
+
+      const listed = urls(await sitemap());
+
+      for (const slug of ["bestuur", "jeugdbestuur", "angels"]) {
+        expect(listed).not.toContain(
+          `https://www.kcvvelewijt.be/ploegen/${slug}`,
+        );
+        expect(listed).toContain(`https://www.kcvvelewijt.be/club/${slug}`);
+      }
+      expect(listed).toContain("https://www.kcvvelewijt.be/ploegen/kcvve-u5");
+    });
   });
 
   it("gracefully handles Sanity fetch failure", async () => {

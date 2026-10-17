@@ -29,6 +29,7 @@
  *    (deleted); RelatedArticles ships unchanged.
  */
 
+import { teamHref } from "@/lib/utils/team-href";
 import { cache } from "react";
 import { Effect } from "effect";
 import { notFound } from "next/navigation";
@@ -200,7 +201,7 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
       ? [
           {
             title: player.teamLabel,
-            href: `/ploegen/${player.teamSlug}`,
+            href: teamHref(player.teamSlug),
             imageUrl: player.teamImageUrl,
             artefact: player.teamImageUrl
               ? undefined

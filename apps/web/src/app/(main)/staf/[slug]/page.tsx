@@ -9,6 +9,7 @@
  * related.
  */
 
+import { teamHref } from "@/lib/utils/team-href";
 import { cache } from "react";
 import { Effect } from "effect";
 import { notFound } from "next/navigation";
@@ -156,7 +157,7 @@ export default async function StafPage({ params }: StaffPageProps) {
     .filter((team) => team.displayName !== "")
     .map((team) => ({
       title: team.displayName,
-      href: `/ploegen/${team.slug}`,
+      href: teamHref(team.slug),
       imageUrl: team.teamImageUrl ?? undefined,
       artefact: team.teamImageUrl ? undefined : { kind: "team" as const },
       badge: "PLOEG",

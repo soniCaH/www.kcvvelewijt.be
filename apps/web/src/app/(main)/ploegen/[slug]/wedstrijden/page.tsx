@@ -259,7 +259,7 @@ export default async function WedstrijdenPage({
 // reflect the current time instead of a stale 1-hour ISR snapshot (this
 // low-traffic route rarely regenerated). PSD rate limits stay protected by the
 // BFF itself — KV-backed reads plus global rate limiting and single-flight
-// (#2326/#2328) — and by the TeamRepository caches underneath; the BffService
-// `getMatches` cache that used to be cited here is gone (#2389).
+// (#2326/#2328); the BffService `getMatches` cache that used to be cited here
+// is gone (#2389), and no repository cache sits under this route.
 // Mirrors `/kalender`, which is force-dynamic for the same reason.
 export const dynamic = "force-dynamic";

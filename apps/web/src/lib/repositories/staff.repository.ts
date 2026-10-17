@@ -235,7 +235,11 @@ export const StaffRepositoryLive = Layer.succeed(StaffRepository, {
         roleCode: string | null;
         members: Array<{ name: string; email: string }>;
       }>
-    >(KEY_CONTACTS_QUERY, { roleCodes: KEY_CONTACT_ROLE_CODES }).pipe(
-      Effect.map(toKeyContactVMs),
-    ),
+    >(
+      KEY_CONTACTS_QUERY,
+      { roleCodes: KEY_CONTACT_ROLE_CODES },
+      // Tags only, no `revalidate` (#3483): a staff or organigram edit
+      // refreshes `/club/contact`; the segment's `revalidate` stays the bound.
+      { tags: [SANITY_TAGS.staff] },
+    ).pipe(Effect.map(toKeyContactVMs)),
 });

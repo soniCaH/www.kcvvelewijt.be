@@ -1,5 +1,7 @@
 import { describe, it, expect } from "vitest";
 import nextConfig from "./next.config";
+import { getPathMatch } from "next/dist/shared/lib/router/utils/path-match";
+import { BOARD_TEAM_SLUGS } from "./src/lib/utils/team-href";
 
 describe("next.config redirects", () => {
   it("redirects old Dutch URL renames with 308", async () => {
@@ -176,6 +178,77 @@ describe("next.config redirects", () => {
         `${source} must precede /news/:slug`,
       ).toBeLessThan(genericNews);
     }
+  });
+
+  describe("board teams live at /club/<slug> only (#3483)", () => {
+    const BOARD = [...BOARD_TEAM_SLUGS];
+
+    // Resolve a pathname the way Next does: walk EVERY redirect rule in order
+    // with Next's own matcher (`getPathMatch`, path-to-regexp) and take the
+    // first hit. A pathname no rule matches answers 200.
+    const resolve = async (pathname: string) => {
+      const redirects = await nextConfig.redirects!();
+      for (const r of redirects) {
+        const params = getPathMatch(r.source)(pathname);
+        if (params) {
+          return {
+            destination: r.destination.replace(/:(\w+)/g, (_, name: string) =>
+              String(params[name] ?? `:${name}`),
+            ),
+            permanent: r.permanent,
+          };
+        }
+      }
+      return null;
+    };
+
+    it("sends every /ploegen board URL, and its /wedstrijden, to /club/<slug> with 308", async () => {
+      for (const slug of BOARD) {
+        for (const from of [
+          `/ploegen/${slug}`,
+          `/ploegen/${slug}/wedstrijden`,
+        ]) {
+          expect(await resolve(from)).toEqual({
+            destination: `/club/${slug}`,
+            permanent: true,
+          });
+        }
+      }
+    });
+
+    it("sends legacy /team board URLs straight to /club/<slug> in one hop", async () => {
+      for (const slug of BOARD) {
+        const first = await resolve(`/team/${slug}`);
+        expect(first).toEqual({
+          destination: `/club/${slug}`,
+          permanent: true,
+        });
+        // One hop: the destination itself matches no rule.
+        expect(await resolve(first!.destination)).toBeNull();
+      }
+    });
+
+    it("keeps the board rules ahead of the generic /team/:slug", async () => {
+      const redirects = await nextConfig.redirects!();
+      const idx = (source: string) =>
+        redirects.findIndex((r) => r.source === source);
+      expect(idx(`/team/:slug(${BOARD.join("|")})`)).toBeGreaterThan(-1);
+      expect(idx(`/team/:slug(${BOARD.join("|")})`)).toBeLessThan(
+        idx("/team/:slug"),
+      );
+    });
+
+    it("leaves real teams alone, including the two with showInNavigation == false", async () => {
+      for (const slug of [
+        "kcvve-u5",
+        "fc-weitse-gans",
+        "eerste-elftallen-a",
+        "bestuurders",
+      ]) {
+        expect(await resolve(`/ploegen/${slug}`)).toBeNull();
+        expect(await resolve(`/ploegen/${slug}/wedstrijden`)).toBeNull();
+      }
+    });
   });
 
   it("routes the Gatsby category archives to the tag listing (#2963)", async () => {

@@ -579,6 +579,23 @@ describe("StaffRepository", () => {
   });
 
   describe("findKeyContacts", () => {
+    // A staff or organigram edit must refresh `/club/contact`. Tags only: no
+    // `revalidate`, so the read keeps inheriting its segment's (#3483).
+    it("tags the read with staff and sets no revalidate", async () => {
+      mockFetch.mockResolvedValueOnce([]);
+
+      await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* StaffRepository;
+          return yield* repo.findKeyContacts();
+        }),
+      );
+
+      const options = mockFetch.mock.calls.at(-1)![2];
+      expect(options.next.tags).toEqual(["staff"]);
+      expect(options.next.revalidate).toBeUndefined();
+    });
+
     it("returns key contacts with role, name, and email", async () => {
       mockFetch.mockResolvedValueOnce([
         {

@@ -1,4 +1,8 @@
 import type { NextConfig } from "next";
+import { BOARD_TEAM_SLUGS } from "./src/lib/utils/team-href";
+
+// `:slug(bestuur|jeugdbestuur|angels)` — see `BOARD_TEAM_SLUGS` (#3483).
+const BOARD_SLUG_PARAM = `:slug(${BOARD_TEAM_SLUGS.join("|")})`;
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -95,6 +99,26 @@ const nextConfig: NextConfig = {
       {
         source: "/team/veteranen",
         destination: "/ploegen",
+        permanent: true,
+      },
+      // #3483 — the three board teams live at `/club/<slug>` only. Listing them
+      // under `/ploegen` made a second public URL for the same page, and the
+      // generic `/team/:slug` rename would take two hops to reach it. Literal
+      // list on purpose: `showInNavigation` would also hide the real teams
+      // `kcvve-u5` and `fc-weitse-gans`. The list is `BOARD_TEAM_SLUGS`.
+      {
+        source: `/team/${BOARD_SLUG_PARAM}`,
+        destination: "/club/:slug",
+        permanent: true,
+      },
+      {
+        source: `/ploegen/${BOARD_SLUG_PARAM}`,
+        destination: "/club/:slug",
+        permanent: true,
+      },
+      {
+        source: `/ploegen/${BOARD_SLUG_PARAM}/wedstrijden`,
+        destination: "/club/:slug",
         permanent: true,
       },
       // Gatsby emitted directory-style URLs. Redirect to the extension-less

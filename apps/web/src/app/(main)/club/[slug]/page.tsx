@@ -24,7 +24,7 @@ import {
  * the nav link + /club/register redirect); promote to a CMS field if a second
  * page ever needs a form CTA.
  */
-const MEMBERSHIP_INFO_SLUG = "inschrijven";
+const MEMBERSHIP_INFO_SLUG = "praktische-informatie";
 
 interface Props {
   params: Promise<{ slug: string }>;

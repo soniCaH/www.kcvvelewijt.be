@@ -31,20 +31,16 @@ interface NewsPageProps {
   searchParams: Promise<{ categorie?: string }>;
 }
 
-export async function generateMetadata({
-  searchParams,
-}: NewsPageProps): Promise<Metadata> {
-  const { categorie } = await searchParams;
-  // Every ?categorie view canonicalizes to the unfiltered /nieuws listing so the
-  // filtered permutations don't compete as duplicate URLs (SEO-3).
-  return buildPageMetadata({
-    title: categorie ? `${categorie} - Nieuwsarchief` : "Nieuwsarchief",
-    description: categorie
-      ? `Bekijk al het ${categorie} nieuws van KCVV Elewijt.`
-      : "Bekijk al het nieuws van KCVV Elewijt. Filter op categorie of zoek naar specifieke artikelen.",
-    path: "/nieuws",
-  });
-}
+// `?categorie=` is deliberately not read: echoing a visitor-supplied value into
+// the title or description would make any string indexable page copy (#3483).
+// Every ?categorie view canonicalizes to the unfiltered /nieuws listing so the
+// filtered permutations don't compete as duplicate URLs (SEO-3).
+export const metadata: Metadata = buildPageMetadata({
+  title: "Nieuwsarchief",
+  description:
+    "Bekijk al het nieuws van KCVV Elewijt. Filter op categorie of zoek naar specifieke artikelen.",
+  path: "/nieuws",
+});
 
 export default async function NewsPage({ searchParams }: NewsPageProps) {
   const params = await searchParams;

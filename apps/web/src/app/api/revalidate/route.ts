@@ -124,9 +124,10 @@ function targets(
     case "responsibility":
       return { paths: [HULP], tags: [] };
     // An organigram edit also moves the org chart, and that read
-    // (ORGANIGRAM_NODES_QUERY, via StaffRepository.findAll) is the one thing
-    // carrying the `staff` tag — `/hulp`'s structuur panel and the search
-    // index both consume it.
+    // (ORGANIGRAM_NODES_QUERY, via StaffRepository.findAll) carries the
+    // `staff` tag — `/hulp`'s structuur panel and the search index consume it.
+    // So does `StaffRepository.findKeyContacts` (#3483), which is why `staff`
+    // alone also refreshes `/club/contact`: no path bust needed for it.
     case "organigramNode":
       return { paths: [HULP], tags: [SANITY_TAGS.staff] };
     default:

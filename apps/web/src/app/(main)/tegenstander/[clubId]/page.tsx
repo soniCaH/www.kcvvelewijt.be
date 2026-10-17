@@ -15,7 +15,7 @@
 
 import { cache } from "react";
 import { Effect } from "effect";
-import { notFound } from "next/navigation";
+import { notFound, unstable_rethrow } from "next/navigation";
 import { parsePsdId } from "@/lib/utils/psd-id";
 import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
@@ -113,7 +113,10 @@ export async function generateMetadata({
         images: [DEFAULT_OG_IMAGE],
       },
     };
-  } catch {
+  } catch (error) {
+    // Next control-flow throws (`notFound()`, the build-time
+    // `DYNAMIC_SERVER_USAGE` bailout) pass through (#3135).
+    unstable_rethrow(error);
     // Mirrors /wedstrijd/[matchId]'s generateMetadata: a genuine upstream
     // failure degrades metadata generation to the not-found title rather
     // than 500ing here. The page component awaits the same memoized read

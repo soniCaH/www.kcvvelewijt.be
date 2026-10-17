@@ -1,6 +1,10 @@
 import type { MetadataRoute } from "next";
 
 import { SITE_CONFIG } from "@/lib/constants";
+import { PAGES_QUERY } from "@/lib/repositories/page.repository";
+import type { PAGES_QUERY_RESULT } from "@/lib/sanity/sanity.types";
+import { isBoardTeamSlug } from "@/lib/utils/team-href";
+import nextConfig from "../../next.config";
 
 // Rendered per request, not prerendered (#3495). #3472 used `revalidate = 3600`
 // and Next honours it (`x-nextjs-cache: STALE` on `next start`), but on Vercel
@@ -48,6 +52,8 @@ interface EventSitemapRow {
   /** OG image URL (ogImage over coverImage), or null when the event has neither. */
   image: string | null;
 }
+
+type PageSitemapRow = PAGES_QUERY_RESULT[number];
 
 interface SlugRow {
   slug: string;
@@ -197,7 +203,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
-  const [articles, events, galleries, players, staff, teams] =
+  const [articles, events, galleries, pages, players, staff, allTeams] =
     await Promise.all([
       fetchFromSanity<ArticleSitemapRow>(
         ARTICLE_SITEMAP_QUERY,
@@ -210,10 +216,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         GALLERY_SITEMAP_QUERY,
         "fetchGallerySlugs",
       ),
+      fetchFromSanity<PageSitemapRow>(PAGES_QUERY, "fetchPageSlugs"),
       fetchFromSanity<SlugRow>(PLAYER_SITEMAP_QUERY, "fetchPlayerSlugs"),
       fetchFromSanity<SlugRow>(STAFF_SITEMAP_QUERY, "fetchStaffSlugs"),
       fetchFromSanity<TeamSitemapRow>(TEAM_SITEMAP_QUERY, "fetchTeamSlugs"),
     ]);
+
+  // The board teams are listed as `/club/<slug>` and `/ploegen/<slug>`
+  // redirects there, so a redirecting URL must not be in the sitemap (#3483).
+  const teams = allTeams.filter((t) => !isBoardTeamSlug(t.slug));
 
   const articleEntries = articles.map((article) => ({
     url: `${SITE_CONFIG.siteUrl}/nieuws/${article.slug}`,
@@ -241,6 +252,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Google image-sitemap extension — only when the cover image resolved.
     ...(gallery.image ? { images: [gallery.image] } : {}),
   }));
+
+  // A page document whose `/club/<slug>` next.config redirects away is not a
+  // canonical URL. (A hand-listed or folder route that shadows a document is
+  // caught by the URL de-duplication below.)
+  const redirectedSources = new Set(
+    (await nextConfig.redirects?.())?.map((r) => r.source),
+  );
+  const pageEntries = pages
+    .filter((page) => !redirectedSources.has(`/club/${page.slug}`))
+    .map((page) => ({
+      url: `${SITE_CONFIG.siteUrl}/club/${page.slug}`,
+      lastModified: new Date(page.updatedAt),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    }));
 
   const playerEntries = players.map((p) => ({
     url: `${SITE_CONFIG.siteUrl}/spelers/${p.slug}`,
@@ -274,14 +300,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
+  // A page document can share its slug with a hand-listed `/club/*` route
+  // (`word-lid`, the board pages): the first entry wins, so the static route's
+  // priority is kept and no `<loc>` appears twice.
+  const seen = new Set<string>();
   return [
     ...staticEntries,
     ...articleEntries,
     ...eventEntries,
     ...galleryEntries,
+    ...pageEntries,
     ...playerEntries,
     ...staffEntries,
     ...teamEntries,
     ...matchEntries,
-  ];
+  ].filter((entry) => !seen.has(entry.url) && seen.add(entry.url));
 }

@@ -34,9 +34,10 @@
  * capped list instead of one hero card plus a secondary inline link.
  */
 
+import { teamHref } from "@/lib/utils/team-href";
 import { Fragment, cache } from "react";
 import { Effect } from "effect";
-import { notFound } from "next/navigation";
+import { notFound, unstable_rethrow } from "next/navigation";
 import { parsePsdId } from "@/lib/utils/psd-id";
 import type { Metadata } from "next";
 import { runPromise } from "@/lib/effect/runtime";
@@ -132,7 +133,9 @@ export async function generateMetadata({
     return {
       title,
       description,
-      alternates: { canonical: `${SITE_CONFIG.siteUrl}/wedstrijd/${matchId}` },
+      alternates: {
+        canonical: `${SITE_CONFIG.siteUrl}/wedstrijd/${numericId}`,
+      },
       openGraph: {
         title,
         description,
@@ -140,13 +143,13 @@ export async function generateMetadata({
         images: [DEFAULT_OG_IMAGE],
       },
     };
-  } catch {
-    // Also swallows the `notFound()` sentinel for an unknown matchId, which is
-    // fine: the same-segment `layout.tsx` (#2968) awaits the same memoized
-    // promise ahead of this metadata read and is what actually turns it into
-    // the real 404 — this catch only needs a title to show while that
-    // happens, not to re-derive the outcome.
-    //
+  } catch (error) {
+    // Next control-flow throws (`notFound()` for an unknown matchId, the
+    // build-time `DYNAMIC_SERVER_USAGE` bailout) must not be swallowed into a
+    // baked-in generic title (#3135, as `createBoardPage` does); the
+    // same-segment `layout.tsx` (#2968) awaits the same memoized promise ahead
+    // of this read and is what turns the unknown id into the real 404.
+    unstable_rethrow(error);
     // #2963: deliberately NOT noindex. This `catch` cannot tell an unknown
     // match from a BFF read failure — an unknown PSD id returns 200 with an
     // empty body and dies at `response.json()`, exactly like a transient
@@ -496,7 +499,7 @@ export default async function MatchPage({ params }: MatchPageProps) {
     ? [
         {
           title: kcvvTeam.displayName,
-          href: `/ploegen/${kcvvTeam.slug}`,
+          href: teamHref(kcvvTeam.slug),
           imageUrl: kcvvTeam.teamImageUrl ?? undefined,
           artefact: kcvvTeam.teamImageUrl
             ? undefined

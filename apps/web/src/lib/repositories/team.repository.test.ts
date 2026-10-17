@@ -115,6 +115,42 @@ describe("TeamRepository", () => {
       expect(TEAM_BY_SLUG_QUERY).toContain("archived != true");
     });
 
+    // `findBySlug` forwards the caller's cache options and adds none of its
+    // own: only the board pages tag it (#3483), so a player save does not
+    // rebuild every `/ploegen/<slug>`.
+    it("leaves the read untagged when the caller passes no options", async () => {
+      mockFetch.mockResolvedValueOnce(null);
+
+      await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findBySlug("eerste-elftallen-a");
+        }),
+      );
+
+      const [query, params, options] = mockFetch.mock.calls.at(-1)!;
+      expect(query).toBe(TEAM_BY_SLUG_QUERY);
+      expect(params).toEqual({ slug: "eerste-elftallen-a" });
+      expect(options).toBeUndefined();
+    });
+
+    it("forwards tags-only options, with no revalidate", async () => {
+      mockFetch.mockResolvedValueOnce(null);
+
+      await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findBySlug("bestuur", {
+            tags: ["teams", "staff", "players"],
+          });
+        }),
+      );
+
+      const options = mockFetch.mock.calls.at(-1)![2];
+      expect(options.next.tags).toEqual(["teams", "staff", "players"]);
+      expect(options.next.revalidate).toBeUndefined();
+    });
+
     // The full-screen viewer shows the whole photo; the hero's own URL is a
     // 3:2 hotspot crop that cuts off the players at the edges (#3447).
     it("selects the team photo uncropped for the full-screen viewer", () => {

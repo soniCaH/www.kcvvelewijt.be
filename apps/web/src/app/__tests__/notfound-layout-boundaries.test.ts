@@ -43,6 +43,7 @@ const {
   mockFetchOpponentData,
   mockFetchMatchOrNotFound,
   mockFetchTeam,
+  mockRunPromise,
 } = vi.hoisted(() => ({
   mockFetchPlayer: vi.fn(),
   mockFetchStaffMember: vi.fn(),
@@ -53,6 +54,7 @@ const {
   mockFetchOpponentData: vi.fn(),
   mockFetchMatchOrNotFound: vi.fn(),
   mockFetchTeam: vi.fn(),
+  mockRunPromise: vi.fn(),
 }));
 
 vi.mock("@/app/(main)/spelers/[slug]/page", () => ({
@@ -96,6 +98,10 @@ vi.mock("@/app/(main)/ploegen/[slug]/team-data", () => ({
   fetchTeamOrNull: mockFetchTeam,
 }));
 
+// The three board layouts share `createBoardPage`'s one cached team read, which
+// goes through the Effect runtime rather than a per-route fetch export.
+vi.mock("@/lib/effect/runtime", () => ({ runPromise: mockRunPromise }));
+
 import PlayerLayout from "@/app/(main)/spelers/[slug]/layout";
 import StaffLayout from "@/app/(main)/staf/[slug]/layout";
 import ArticleLayout from "@/app/(main)/nieuws/[slug]/layout";
@@ -105,6 +111,9 @@ import EventLayout from "@/app/(main)/evenementen/[slug]/layout";
 import OpponentLayout from "@/app/(main)/tegenstander/[clubId]/layout";
 import MatchLayout from "@/app/(main)/wedstrijd/[matchId]/layout";
 import TeamSegmentLayout from "@/app/(main)/ploegen/[slug]/layout";
+import BestuurLayout from "@/app/(main)/club/bestuur/layout";
+import JeugdbestuurLayout from "@/app/(main)/club/jeugdbestuur/layout";
+import AngelsLayout from "@/app/(main)/club/angels/layout";
 import { MatchStripSlot } from "@/components/layout/MatchStrip";
 
 /** A stable, identity-checkable stand-in for `children` — proves a resolving
@@ -211,13 +220,34 @@ describe("(main)/club/[slug]/layout — #2968", () => {
   });
 
   it("passes children through for a known slug", async () => {
-    mockFetchClubPage.mockResolvedValue({ id: "page-1", title: "Inschrijven" });
+    mockFetchClubPage.mockResolvedValue({
+      id: "page-1",
+      title: "Praktische informatie",
+    });
     await expect(
       ClubPageLayout({
         children: CHILDREN,
-        params: Promise.resolve({ slug: "inschrijven" }),
+        params: Promise.resolve({ slug: "praktische-informatie" }),
       }),
     ).resolves.toBe(CHILDREN);
+  });
+});
+
+describe.each([
+  ["bestuur", BestuurLayout],
+  ["jeugdbestuur", JeugdbestuurLayout],
+  ["angels", AngelsLayout],
+])("(main)/club/%s/layout — #3483", (_slug, Layout) => {
+  it("throws notFound()'s digest when the board team does not exist", async () => {
+    mockRunPromise.mockResolvedValue(null);
+    await expect(Layout({ children: CHILDREN })).rejects.toMatchObject({
+      digest: expect.stringMatching(NOT_FOUND_DIGEST),
+    });
+  });
+
+  it("passes children through when the board team exists", async () => {
+    mockRunPromise.mockResolvedValue({ name: "Bestuur" });
+    await expect(Layout({ children: CHILDREN })).resolves.toBe(CHILDREN);
   });
 });
 
