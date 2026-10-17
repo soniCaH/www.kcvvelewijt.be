@@ -42,8 +42,9 @@ describe("UpLink", () => {
 
     await user.click(screen.getByRole("link", { name: "Kalender" }));
 
-    expect(window.dataLayer).toHaveLength(1);
-    expect(window.dataLayer![0]).toEqual({
+    // A reset function rides in front of every event (see `trackEvent`).
+    expect(window.dataLayer).toHaveLength(2);
+    expect(window.dataLayer![1]).toEqual({
       event: "nav_parent_click",
       // Reuses the already-registered `page_slug` dimension, not a new
       // `path` key (review round 2, #2570).

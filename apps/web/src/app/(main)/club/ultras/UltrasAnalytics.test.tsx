@@ -11,8 +11,11 @@ describe("UltrasAnalytics", () => {
     delete window.dataLayer;
   });
 
+  // `trackEvent` pushes a reset function in front of each event: skip those.
   const events = () =>
-    (window.dataLayer ?? []).map((e) => (e as Record<string, unknown>).event);
+    (window.dataLayer ?? [])
+      .filter((e) => typeof e !== "function")
+      .map((e) => (e as Record<string, unknown>).event);
 
   it("renders its children", () => {
     render(
