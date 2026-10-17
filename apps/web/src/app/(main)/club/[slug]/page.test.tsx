@@ -180,15 +180,18 @@ describe("/club/[slug] page", () => {
     ).toBeInTheDocument();
   });
 
-  it("adds a 'Schrijf je in' CTA to /club/word-lid on the inschrijven (Praktische Informatie) page", async () => {
+  it("adds a 'Schrijf je in' CTA to /club/word-lid on the praktische-informatie page", async () => {
     mockFindBySlug.mockReturnValue(
       Effect.succeed(
-        makePage({ slug: "inschrijven", title: "Praktische Informatie" }),
+        makePage({
+          slug: "praktische-informatie",
+          title: "Praktische Informatie",
+        }),
       ),
     );
 
     const page = await DynamicClubPage({
-      params: Promise.resolve({ slug: "inschrijven" }),
+      params: Promise.resolve({ slug: "praktische-informatie" }),
     });
     render(page);
 
