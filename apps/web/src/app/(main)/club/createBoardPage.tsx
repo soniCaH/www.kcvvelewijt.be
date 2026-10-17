@@ -16,6 +16,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { BestuurPage } from "@/components/club/BestuurPage/BestuurPage";
+import { SANITY_TAGS } from "@/lib/sanity/cache-tags";
 import { TeamRepository } from "@/lib/repositories/team.repository";
 import { PageViewTracker } from "@/components/analytics";
 
@@ -36,6 +37,8 @@ interface BoardPageConfig {
  * @param slug - The Sanity team slug (for example: "bestuur", "jeugdbestuur")
  * @returns The fetched team object from Sanity
  */
+const BOARD_TAGS = [SANITY_TAGS.teams, SANITY_TAGS.staff, SANITY_TAGS.players];
+
 const fetchBoardTeamOrNotFound = cache(async function fetchBoardTeamOrNotFound(
   slug: string,
 ) {
@@ -49,7 +52,11 @@ const fetchBoardTeamOrNotFound = cache(async function fetchBoardTeamOrNotFound(
   const team = await runPromise(
     Effect.gen(function* () {
       const repo = yield* TeamRepository;
-      return yield* repo.findBySlug(slug);
+      // Tags only, no `revalidate` (#3483): the board page derefs staff and
+      // players, so an edit to any of the three refreshes `/club/<slug>`; the
+      // segment's own `revalidate` stays the time bound. Scoped to this read —
+      // `/ploegen/<slug>` is untagged so a player save does not rebuild it.
+      return yield* repo.findBySlug(slug, { tags: BOARD_TAGS });
     }).pipe(Effect.orDie),
   );
 

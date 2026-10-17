@@ -46,9 +46,11 @@ export const fetchGroq = <T>(
   options?: GroqCacheOptions,
 ): Effect.Effect<T, SanityReadError> =>
   Effect.tryPromise({
-    // Only pass the 3rd arg when caching is requested, so untagged callers keep
-    // inheriting the route segment's `revalidate`. A tags-only call passes
-    // `revalidate: undefined`, which inherits it the same way (#3483).
+    // Pass the 3rd arg whenever the caller gives options: `revalidate` sets
+    // the fetch's own lifetime and `tags` attach it to `revalidateTag`. A
+    // tags-only call (`revalidate: undefined`, #3483) sets no lifetime of its
+    // own, so the route segment's `revalidate` still applies, exactly as for a
+    // call with no options.
     try: () =>
       options
         ? sanityClient.fetch<T>(query, params ?? {}, {
