@@ -27,6 +27,7 @@ export {
   organigramParentFilter,
   validateOrganigramParent,
 } from './validation/organigram-parent'
+export {validateContactEmail} from './validation/contact-email'
 export {validateLink} from './validation/link'
 export {validateEventDateEnd} from './validation/event-date-end'
 export type {EventDateEndContext} from './validation/event-date-end'

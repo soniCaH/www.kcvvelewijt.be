@@ -85,9 +85,16 @@ describe('organigramNode.parentNode validation (rule level)', () => {
     expect(await validateParent('A', 'B', withVersionRef)).toHaveLength(1)
   })
 
-  it('rejects a parent chain that loops without passing through the node', async () => {
-    const looped: Row[] = [{_id: 'X', parent: 'Y'}, {_id: 'Y', parent: 'X'}]
-    expect(await validateParent('A', 'X', looped)).toHaveLength(1)
+  it('passes when the chain runs into an existing loop that does not include the node', async () => {
+    // C → D → C already exists; A picks X, and X reports to C. Not this save's doing.
+    const rows: Row[] = [{_id: 'A'}, {_id: 'C', parent: 'D'}, {_id: 'D', parent: 'C'}, {_id: 'X', parent: 'C'}]
+    expect(await validateParent('A', 'X', rows)).toHaveLength(0)
+    expect(await validateParent('A', 'C', rows)).toHaveLength(0)
+  })
+
+  it('still rejects when the chain reaches the node before looping', async () => {
+    const rows: Row[] = [{_id: 'A', parent: 'D'}, {_id: 'C', parent: 'A'}, {_id: 'D', parent: 'C'}]
+    expect(await validateParent('A', 'C', rows)).toHaveLength(1)
   })
 
   it('only reads published nodes', async () => {

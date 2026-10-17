@@ -16,7 +16,7 @@ describe('validateLink', () => {
     },
   )
 
-  it.each(['www.example.be', '//evil.com', '/\\evil.com', 'javascript:alert(1)', 'example.be', 'ftp://example.be'])(
+  it.each(['www.example.be', '//evil.com', '/\\evil.com', '/\t/evil.com', '/\n/evil.com', '/\r/evil.com', '/ /evil.com', 'javascript:alert(1)', 'example.be', 'ftp://example.be'])(
     'rejects %s',
     (value) => {
       expect(typeof validateLink(value)).toBe('string')
@@ -26,6 +26,11 @@ describe('validateLink', () => {
   it('is case-insensitive on the scheme', () => {
     expect(validateLink('HTTPS://example.be')).toBe(true)
     expect(validateLink('MAILTO:a@b.be')).toBe(true)
+  })
+
+  it('names no scheme in its message (some fields reject mailto:/tel: via .uri())', () => {
+    const message = validateLink('www.example.be') as string
+    expect(message).not.toMatch(/mailto|tel:/i)
   })
 
   it('passes an empty or missing value (required-ness is the field’s job)', () => {
@@ -97,7 +102,7 @@ describe.each(LINK_FIELDS)('$label (rule level)', ({root, path, type}) => {
     expect(resolve(root as Node, path).type).toBe(type)
   })
 
-  it.each(['www.example.be', '//evil.com', '/\\evil.com'])('rejects %s', async (value) => {
+  it.each(['www.example.be', '//evil.com', '/\\evil.com', '/\t/evil.com'])('rejects %s', async (value) => {
     const markers = await markersFor(root, path, value)
     expect(markers.some((m) => m.level === 'error')).toBe(true)
   })
@@ -116,5 +121,22 @@ describe('mailto: and tel: stay rejected where .uri() is http/https only', () =>
       const markers = await markersFor(root, [...path], value)
       expect(markers.some((m) => m.level === 'error')).toBe(true)
     }
+  })
+})
+
+describe('jeugdLandingPage card href allows mailto: and tel: (scheme list matches the validator)', () => {
+  it.each(['mailto:a@b.be', 'tel:+32475123456', '#top'])('accepts %s', async (value) => {
+    expect(await markersFor(jeugdLandingPage, ['editorialCards', 'href'], value)).toHaveLength(0)
+  })
+})
+
+describe('no contradicting errors on the http/https-only fields', () => {
+  it.each([
+    ['responsibility step link', responsibility, ['steps', 'solutionStep', 'link']],
+    ['matchesSliderPlaceholder announcementHref', matchesSliderPlaceholder, ['announcementHref']],
+  ] as const)('%s: a mailto: link yields only the scheme error, never the shape message', async (_label, root, path) => {
+    const markers = await markersFor(root, [...path], 'mailto:a@b.be')
+    expect(markers.length).toBeGreaterThan(0)
+    expect(markers.some((m) => m.item?.message === validateLink('www.example.be'))).toBe(false)
   })
 })

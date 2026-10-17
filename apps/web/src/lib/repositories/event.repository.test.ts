@@ -242,28 +242,48 @@ describe("EventRepository", () => {
       });
     });
 
-    it("keeps an all-day event that starts at local midnight today", async () => {
-      vi.useFakeTimers({ toFake: ["Date"] });
-      vi.setSystemTime(new Date("2026-10-17T15:00:00Z"));
-      mockFetch.mockResolvedValueOnce([]);
+    it.each([
+      ["findAll", (repo: EventRepository["Type"]) => repo.findAll()],
+      [
+        "findUpcomingForList",
+        (repo: EventRepository["Type"]) => repo.findUpcomingForList(),
+      ],
+    ])(
+      "keeps an all-day event that starts at local midnight today (%s)",
+      async (_name, call) => {
+        vi.useFakeTimers({ toFake: ["Date"] });
+        vi.setSystemTime(new Date("2026-10-17T15:00:00Z"));
+        mockFetch.mockResolvedValue([]);
 
-      await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* EventRepository;
-          return yield* repo.findAll();
-        }),
-      );
+        await runWithRepo(
+          Effect.gen(function* () {
+            const repo = yield* EventRepository;
+            return yield* call(repo);
+          }),
+        );
 
-      const { dayStart } = mockFetch.mock.calls[0][1] as { dayStart: string };
-      // No dateEnd, start at Brussels midnight today: coalesce(...) is the
-      // start itself, and the query keeps rows with `>= dateTime($dayStart)`.
-      const allDayStart = "2026-10-16T22:00:00Z";
-      expect(Date.parse(allDayStart)).toBeGreaterThanOrEqual(
-        Date.parse(dayStart),
-      );
-      // ...whereas the same event under the old `>= now()` filter was gone.
-      expect(Date.parse(allDayStart)).toBeLessThan(Date.now());
-    });
+        // What actually reached Sanity: the live query text and its params.
+        const eventsCall = mockFetch.mock.calls.find(
+          ([query]) =>
+            typeof query === "string" && query.includes('_type == "event"'),
+        );
+        expect(eventsCall).toBeDefined();
+        const [query, params] = eventsCall as [string, { dayStart: string }];
+        expect(query).toContain(
+          "dateTime(coalesce(dateEnd, dateStart)) >= dateTime($dayStart)",
+        );
+        expect(query).not.toContain("now()");
+        expect(params.dayStart).toBe("2026-10-16T22:00:00.000Z");
+
+        // An all-day event without dateEnd, starting at Brussels midnight today,
+        // passes `>= $dayStart` — and the old `>= now()` would have dropped it.
+        const allDayStart = "2026-10-16T22:00:00Z";
+        expect(Date.parse(allDayStart)).toBeGreaterThanOrEqual(
+          Date.parse(params.dayStart),
+        );
+        expect(Date.parse(allDayStart)).toBeLessThan(Date.now());
+      },
+    );
   });
 
   describe("findNextFeatured", () => {

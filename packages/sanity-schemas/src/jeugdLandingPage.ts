@@ -53,7 +53,7 @@ export const jeugdLandingPage = defineType({
               title: 'Link URL',
               description:
                 'Bestemming wanneer een bezoeker op de kaart klikt (bijv. "/jeugd/visie" of een externe URL). Voor navigatiekaarten.',
-              validation: (Rule) => Rule.uri({allowRelative: true}).custom(validateLink),
+              validation: (Rule) => Rule.uri({allowRelative: true, scheme: ['http', 'https', 'mailto', 'tel']}).custom(validateLink),
             }),
             defineField({
               name: 'image',

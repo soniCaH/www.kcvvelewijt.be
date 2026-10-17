@@ -10,12 +10,21 @@
  * allowed schemes per field (some stay http/https only); this adds the shape
  * check `.uri({allowRelative: true})` lets through. Empty passes, so
  * `.required()` stays the field's own call.
+ *
+ * Whitespace and control characters are rejected anywhere: browsers strip
+ * tab, CR and LF from a URL, so `/<TAB>/evil.com` would become `//evil.com`.
+ * The message names no scheme list: some fields narrow `.uri()` to http/https,
+ * and one field must never tell the editor `mailto:` is fine while `.uri()`
+ * rejects it.
  */
+const hasUnsafeChar = (value: string): boolean =>
+  /\s/.test(value) || [...value].some((ch) => ch.charCodeAt(0) < 32 || ch.charCodeAt(0) === 127)
+
 const LINK_PATTERN = /^(\/(?![/\\])|#|https?:\/\/|mailto:|tel:)/i
 
 export function validateLink(value: unknown): true | string {
   if (typeof value !== 'string' || value.length === 0) return true
-  return LINK_PATTERN.test(value)
+  return LINK_PATTERN.test(value) && !hasUnsafeChar(value)
     ? true
-    : 'Gebruik een link die begint met https://, een pad dat begint met "/" (bijv. /jeugd/visie), een anker (#), mailto: of tel:.'
+    : 'Dit is geen geldige link. Gebruik een volledige link (https://…) of een pad dat met "/" begint (bijv. /jeugd/visie), zonder spaties.'
 }

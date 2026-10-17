@@ -47,14 +47,20 @@ function parentMap(rows: ParentRow[]): Map<string, string | undefined> {
 export function collectOrganigramExcludedIds(selfId: string, rows: ParentRow[]): string[] {
   const parents = parentMap(rows)
   const self = normalizeOrganigramId(selfId)
+  const childrenOf = new Map<string, string[]>()
+  for (const [id, parent] of parents) {
+    if (!parent) continue
+    const bucket = childrenOf.get(parent)
+    if (bucket) bucket.push(id)
+    else childrenOf.set(parent, [id])
+  }
   const excluded = new Set<string>([self])
-  let grew = true
-  while (grew) {
-    grew = false
-    for (const [id, parent] of parents) {
-      if (parent && excluded.has(parent) && !excluded.has(id)) {
-        excluded.add(id)
-        grew = true
+  const queue = [self]
+  for (let id = queue.shift(); id !== undefined; id = queue.shift()) {
+    for (const child of childrenOf.get(id) ?? []) {
+      if (!excluded.has(child)) {
+        excluded.add(child)
+        queue.push(child)
       }
     }
   }
@@ -78,9 +84,10 @@ export async function organigramParentFilter({
 
 /**
  * Walks the PUBLISHED parent chain upward from the picked parent. Fails when
- * the walk reaches this node (A→A, A→B→A, longer) or revisits any node (a loop
- * that does not include this node). Ids are compared with `drafts.` /
- * `versions.` stripped.
+ * the walk reaches this node (A→A, A→B→A, longer). A chain that runs into an
+ * existing loop NOT including this node is not this save's doing: the walk
+ * stops there and passes. Ids are compared with `drafts.` / `versions.`
+ * stripped.
  */
 export async function validateOrganigramParent(
   ref: {_ref?: string} | undefined,
@@ -96,9 +103,10 @@ export async function validateOrganigramParent(
   const seen = new Set<string>()
   let current: string | undefined = normalizeOrganigramId(ref._ref)
   while (current) {
-    if (current === self || seen.has(current)) {
+    if (current === self) {
       return 'Dit zou een kringverwijzing maken: een positie kan niet (indirect) aan zichzelf rapporteren.'
     }
+    if (seen.has(current)) return true
     seen.add(current)
     current = parents.get(current) || undefined
   }

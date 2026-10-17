@@ -1,6 +1,7 @@
 import {defineField, defineType} from 'sanity'
 import {responsibilityPreviewSelect, prepareResponsibilityPreview} from './preview/responsibility-preview'
 import {validateContactFields} from './validation/contact-fields'
+import {validateContactEmail} from './validation/contact-email'
 import {validateLink} from './validation/link'
 
 const contactFields = [
@@ -57,9 +58,12 @@ const contactFields = [
     name: 'email',
     title: 'Email',
     type: 'string',
-    // Runs on the hidden field too: a stale value left under another
-    // `contactType` still blocks publishing, so an editor can't miss it (#3478).
-    validation: (Rule) => Rule.email(),
+    // Only while visible (`contactType === 'manual'`): a stale value under
+    // another type must not block publishing unseen (#3478).
+    validation: (Rule) =>
+      Rule.custom((email, context) =>
+        validateContactEmail(email, context.parent as {contactType?: string} | undefined),
+      ),
     hidden: ({parent}) => parent?.contactType !== 'manual',
   }),
   defineField({
