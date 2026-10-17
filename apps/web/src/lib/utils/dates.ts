@@ -88,6 +88,16 @@ export function clubToday(): string {
 }
 
 /**
+ * Brussels midnight of today as a UTC ISO instant (`$dayStart` in the agenda
+ * query, #3478). GROQ compares `dateTime`s, so the cut-off is an instant, not
+ * the `clubToday()` date string: a date string loses to an all-day event that
+ * starts at local midnight.
+ */
+export function clubDayStart(): string {
+  return DateTime.now().setZone(CLUB_TIMEZONE).startOf("day").toUTC().toISO()!;
+}
+
+/**
  * Whether a BFF match date falls on the given reference calendar day —
  * the comparison `<MatchStrip>` needs to decide whether today is match day
  * (#2616). Composed from the two zone-aware primitives above rather than a

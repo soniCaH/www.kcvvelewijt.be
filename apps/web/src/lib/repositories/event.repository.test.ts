@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { Effect } from "effect";
 import type { SanityReadError } from "../sanity/fetch-groq";
 import { parseEventDateTime } from "../utils/event-datetime";
@@ -188,12 +188,81 @@ describe("EventRepository", () => {
 
     it("queries upcoming-only events ordered by start date", () => {
       // The filter runs in GROQ (fetch is mocked here), so guard the query
-      // shape directly: upcoming-only on coalesce(dateEnd, dateStart) keeps
-      // in-progress multi-day events visible through their final day.
-      expect(EVENTS_QUERY).toContain("coalesce(dateEnd, dateStart) >= now()");
+      // shape directly: upcoming-only on coalesce(dateEnd, dateStart) against
+      // Brussels midnight keeps in-progress multi-day events and single-moment
+      // events visible through the end of their last day (#3478).
+      expect(EVENTS_QUERY).toContain(
+        "dateTime(coalesce(dateEnd, dateStart)) >= dateTime($dayStart)",
+      );
+      expect(EVENTS_QUERY).not.toContain("now()");
       expect(EVENTS_QUERY).toContain("order(dateStart asc)");
       expect(EVENTS_QUERY).toContain("eventType");
       expect(EVENTS_QUERY).toContain("location");
+    });
+  });
+
+  describe("$dayStart (#3478)", () => {
+    afterEach(() => {
+      vi.useRealTimers();
+      mockFetch.mockReset();
+    });
+
+    it("findAll passes Brussels midnight as a UTC ISO $dayStart", async () => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      // 23:30 UTC on 16 Oct is 01:30 on 17 Oct in Brussels (CEST, +02:00).
+      vi.setSystemTime(new Date("2026-10-16T23:30:00Z"));
+      mockFetch.mockResolvedValueOnce([]);
+
+      await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* EventRepository;
+          return yield* repo.findAll();
+        }),
+      );
+
+      expect(mockFetch).toHaveBeenCalledWith(EVENTS_QUERY, {
+        dayStart: "2026-10-16T22:00:00.000Z",
+      });
+    });
+
+    it("findUpcomingForList passes $dayStart to the events query too", async () => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date("2026-10-17T12:00:00Z"));
+      mockFetch.mockResolvedValue([]);
+
+      await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* EventRepository;
+          return yield* repo.findUpcomingForList();
+        }),
+      );
+
+      expect(mockFetch).toHaveBeenCalledWith(EVENTS_QUERY, {
+        dayStart: "2026-10-16T22:00:00.000Z",
+      });
+    });
+
+    it("keeps an all-day event that starts at local midnight today", async () => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date("2026-10-17T15:00:00Z"));
+      mockFetch.mockResolvedValueOnce([]);
+
+      await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* EventRepository;
+          return yield* repo.findAll();
+        }),
+      );
+
+      const { dayStart } = mockFetch.mock.calls[0][1] as { dayStart: string };
+      // No dateEnd, start at Brussels midnight today: coalesce(...) is the
+      // start itself, and the query keeps rows with `>= dateTime($dayStart)`.
+      const allDayStart = "2026-10-16T22:00:00Z";
+      expect(Date.parse(allDayStart)).toBeGreaterThanOrEqual(
+        Date.parse(dayStart),
+      );
+      // ...whereas the same event under the old `>= now()` filter was gone.
+      expect(Date.parse(allDayStart)).toBeLessThan(Date.now());
     });
   });
 

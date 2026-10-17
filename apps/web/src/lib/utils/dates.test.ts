@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, describe, it, expect, vi } from "vitest";
 import {
   formatArticleDate,
   formatWidgetDate,
@@ -6,6 +6,7 @@ import {
   formatMatchWidgetDate,
   isMatchDay,
   kickoffMs,
+  clubDayStart,
   toDisplayZone,
   toMatchDisplayZone,
 } from "./dates";
@@ -202,5 +203,27 @@ describe("kickoffMs", () => {
   it("is the real instant of a Belgian 20:00 CEST kickoff, two hours after its raw UTC fields", () => {
     const date = new Date(Date.UTC(2026, 7, 3, 20, 0));
     expect(kickoffMs({ date })).toBe(Date.UTC(2026, 7, 3, 18, 0));
+  });
+});
+
+describe("clubDayStart", () => {
+  afterEach(() => vi.useRealTimers());
+
+  it("is Brussels midnight in CEST (UTC+2), rolled over at 22:00 UTC", () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-16T22:30:00Z")); // 00:30 on the 17th
+    expect(clubDayStart()).toBe("2026-10-16T22:00:00.000Z");
+  });
+
+  it("is Brussels midnight in CET (UTC+1)", () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-12-10T08:00:00Z"));
+    expect(clubDayStart()).toBe("2026-12-09T23:00:00.000Z");
+  });
+
+  it("follows the DST change day (25 Oct 2026, clocks go back at 03:00)", () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-25T12:00:00Z"));
+    expect(clubDayStart()).toBe("2026-10-24T22:00:00.000Z");
   });
 });
