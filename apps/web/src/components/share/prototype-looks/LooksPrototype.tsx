@@ -192,6 +192,13 @@ function Crest({ size = 96 }: { size?: number }) {
   );
 }
 
+/** A type colour that equals what sits behind it vanishes: flip to cream/ink. */
+function unclash(s: TypeStyle, behind: string): TypeStyle {
+  return s.fill === behind
+    ? { ...s, fill: TOKENS.cream, onFill: TOKENS.ink }
+    : s;
+}
+
 /** StampBadge: tilted mono tab, 1.5px ink border, hard paper shadow. */
 function Stamp({
   s,
@@ -620,7 +627,17 @@ function usePal(): Pal & { dark: boolean } {
 // ── A · Kaart — photo up top, a ClippedCard laid over its edge ─────────────
 function LookA({ it, f }: { it: LookItem; f: Format }) {
   const s = styleOf(it);
-  const p = usePal();
+  const pal = usePal();
+  // Donker = dark-green card on a cream ground (owner: ink card was ugly).
+  const p = pal.dark
+    ? {
+        ...pal,
+        ground: TOKENS.cream,
+        surface: TOKENS.jerseyDeepDark,
+        edge: TOKENS.ink,
+        shadow: TOKENS.ink,
+      }
+    : pal;
   const sq = f === "square";
   const photoH = sq ? 380 : 900;
   const bracket = (pos: "tl" | "br"): React.CSSProperties => ({
@@ -668,7 +685,7 @@ function LookA({ it, f }: { it: LookItem; f: Format }) {
           <span style={bracket("tl")} />
           <span style={bracket("br")} />
           <Stamp
-            s={s}
+            s={unclash(s, p.surface)}
             size={sq ? 28 : 34}
             style={{ position: "absolute", top: -30, right: 56 }}
           />
@@ -705,12 +722,12 @@ function LookA({ it, f }: { it: LookItem; f: Format }) {
               fontWeight: 700,
               fontSize: 28,
               letterSpacing: "0.16em",
-              color: p.muted,
+              color: pal.dark ? TOKENS.inkMuted : p.muted,
             }}
           >
             KCVV ELEWIJT
           </span>
-          <Cta color={p.text} size={sq ? 24 : 30} />
+          <Cta color={pal.dark ? TOKENS.ink : p.text} size={sq ? 24 : 30} />
         </div>
       </div>
     </Canvas>
@@ -722,14 +739,15 @@ function LookB({ it, f }: { it: LookItem; f: Format }) {
   const s = styleOf(it);
   const p = usePal();
   const sq = f === "square";
+  const cs = unclash(s, p.ground);
   const tapeChip = (
     <span
       style={{
         display: "inline-block",
-        background: s.fill === TOKENS.cream ? TOKENS.jersey : s.fill,
-        color: s.fill === TOKENS.cream ? TOKENS.ink : s.onFill,
+        background: cs.fill === TOKENS.cream ? TOKENS.jersey : cs.fill,
+        color: cs.fill === TOKENS.cream ? TOKENS.ink : cs.onFill,
         transform: "rotate(-1deg)",
-        boxShadow: `6px 6px 0 ${p.dark ? TOKENS.cream : TOKENS.ink}`,
+        boxShadow: `6px 6px 0 ${TOKENS.ink}`,
         padding: sq ? "10px 22px" : "14px 30px",
         fontFamily: MONO_FONT,
         fontWeight: 700,
@@ -1173,41 +1191,17 @@ function LookE({ it, f }: { it: LookItem; f: Format }) {
   const p = usePal();
   // Ticket and ground swap places in Donker so the ticket still stands out.
   const ground = p.dark ? TOKENS.cream : TOKENS.jerseyDeepDark;
-  const ticket = p.dark ? TOKENS.ink : TOKENS.cream;
+  const ticket = p.dark ? TOKENS.jerseyDeepDark : TOKENS.cream;
   const tText = p.dark ? TOKENS.cream : TOKENS.ink;
   const sq = f === "square";
   const { day, month } = dayMonth(it);
   const perf = (
     <div
       style={{
-        position: "relative",
         height: 0,
         borderTop: `5px dashed ${tText}`,
-        margin: "0 0",
       }}
-    >
-      {/* Square notches — the site has no rounded corners. */}
-      <span
-        style={{
-          position: "absolute",
-          left: -34,
-          top: -22,
-          width: 36,
-          height: 36,
-          background: ground,
-        }}
-      />
-      <span
-        style={{
-          position: "absolute",
-          right: -34,
-          top: -22,
-          width: 36,
-          height: 36,
-          background: ground,
-        }}
-      />
-    </div>
+    />
   );
   const stub = (
     <div
