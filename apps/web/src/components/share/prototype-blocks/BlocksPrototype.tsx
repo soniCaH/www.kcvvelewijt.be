@@ -45,7 +45,7 @@ const LOOK_NAME: Record<LookKey, string> = {
   W: "Wedstrijd",
 };
 // One #3518 keeper per look for match moments without a photo.
-const FALLBACK: Record<string, string> = {
+export const FALLBACK: Record<string, string> = {
   A: "/images/share-fallback/A-1.webp",
   B: "/images/share-fallback/B-2.webp",
   C: "/images/share-fallback/C-1.webp",
@@ -63,7 +63,7 @@ export interface Player {
   img: string | null;
 }
 
-type TKey =
+export type TKey =
   | "news"
   | "event"
   | "kickoff"
@@ -72,7 +72,7 @@ type TKey =
   | "goal"
   | "against"
   | "card";
-const TEMPLATES: { key: TKey; label: string }[] = [
+export const TEMPLATES: { key: TKey; label: string }[] = [
   { key: "news", label: "Nieuws" },
   { key: "event", label: "Evenement" },
   { key: "kickoff", label: "Aftrap" },
@@ -83,7 +83,7 @@ const TEMPLATES: { key: TKey; label: string }[] = [
   { key: "card", label: "Kaart" },
 ];
 
-function matchItem(t: TKey, player: Player): LookItem {
+export function matchItem(t: TKey, player: Player): LookItem {
   const bits: MatchBits = {
     moment: t as MatchBits["moment"],
     away: AWAY,
@@ -129,7 +129,15 @@ function matchItem(t: TKey, player: Player): LookItem {
 }
 
 /** Today's templates, unchanged. Square only exists for Aftrap and Einde. */
-function Wedstrijd({ t, f, player }: { t: TKey; f: Format; player: Player }) {
+export function Wedstrijd({
+  t,
+  f,
+  player,
+}: {
+  t: TKey;
+  f: Format;
+  player: Player;
+}) {
   const crest = { awayLogo: AWAY_LOGO };
   if (f === "square") {
     if (t === "kickoff")
@@ -225,7 +233,7 @@ function Wedstrijd({ t, f, player }: { t: TKey; f: Format; player: Player }) {
  * the `flex: 1 1 auto` column; its children are the groups (2), a child's
  * own children the pieces (1), ShareMid itself the frame (3).
  */
-function tagWedstrijd(root: HTMLElement) {
+export function tagWedstrijd(root: HTMLElement) {
   const mid = [...root.querySelectorAll<HTMLElement>("div")].find((d) =>
     d.style.flex.startsWith("1 1 auto"),
   );
