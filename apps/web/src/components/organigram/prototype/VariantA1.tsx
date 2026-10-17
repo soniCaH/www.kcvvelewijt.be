@@ -1,5 +1,7 @@
 // PROTOTYPE — throwaway. A1 "Clubboek": a typographic ledger like a printed club yearbook — dotted `functie …… naam` rows that unfold contact in place.
-import type { OrgChartNode } from "@/types/organigram";
+import type { OrgChartMember, OrgChartNode } from "@/types/organigram";
+import type { ResponsibilityPath } from "@/types/responsibility";
+import { findMemberResponsibilities } from "@/lib/responsibility-utils";
 import { RoundAvatar } from "@/components/design-system";
 import { BoardLink } from "./BoardLink";
 import Link from "next/link";
@@ -25,65 +27,159 @@ function Kicker({ children }: { children: React.ReactNode }) {
 }
 
 /** One ledger line: `functie ........ naam`, unfolding contact beneath. */
-function LedgerRow({ node, titles }: { node: OrgChartNode; titles: string[] }) {
-  const vacant = node.members.length === 0;
-  const emails = node.members.filter((m) => m.email);
-  // One step only: the name IS the profile link, an email shows inline.
+/** Unfolded under a ledger row: one card per holder, contact + what they handle. */
+function HolderCard({
+  m,
+  nodeId,
+  paths,
+}: {
+  m: OrgChartMember;
+  nodeId: string;
+  paths: ResponsibilityPath[];
+}) {
+  // Only what this person handles IN THIS ROLE (Shauni's GDPR stays off her kantine row).
+  const handles = findMemberResponsibilities(m.id, paths).filter(
+    (p) =>
+      p.primaryContact.contactType !== "position" ||
+      !p.primaryContact.nodeId ||
+      p.primaryContact.nodeId === nodeId,
+  );
   return (
-    <li className="border-ink/10 flex flex-col border-b py-2 last:border-b-0">
-      <span className="flex items-baseline gap-2">
-        <span className="text-body-md text-ink min-w-0">
-          {titles.join(" · ")}
-        </span>
-        <span
-          aria-hidden="true"
-          className="border-ink-muted mb-1 h-0 min-w-4 flex-1 border-b border-dotted"
-        />
-        {vacant ? (
+    <div className="border-ink bg-cream-soft shadow-paper-sm flex gap-3 border p-3">
+      <RoundAvatar
+        size={40}
+        name={m.name}
+        photoUrl={m.imageUrl}
+        className="shrink-0"
+      />
+      <div className="flex min-w-0 flex-col gap-1">
+        {m.href ? (
           <Link
-            href="/club/contact"
-            className="text-jersey-deep text-body-sm shrink-0 italic underline"
+            href={m.href}
+            className="text-ink text-base font-bold hover:underline"
           >
-            plek vrij — iets voor jou?
+            {m.name}
           </Link>
         ) : (
-          <span className="text-body-md text-ink min-w-0 text-right font-semibold">
-            {node.members.map((m, i) => (
-              <span key={m.id}>
-                {i > 0 && ", "}
-                {m.href ? (
-                  <Link
-                    href={m.href}
-                    className="hover:text-jersey-deep hover:underline"
-                  >
-                    {m.name}
-                  </Link>
-                ) : (
-                  m.name
-                )}
-              </span>
-            ))}
+          <span className="text-ink text-base font-bold">{m.name}</span>
+        )}
+        {m.email && (
+          <a
+            href={`mailto:${m.email}`}
+            className="text-jersey-deep text-body-sm break-all underline"
+          >
+            {m.email}
+          </a>
+        )}
+        {m.phone && (
+          <a
+            href={`tel:${m.phone.replace(/\s/g, "")}`}
+            className="text-ink text-body-sm underline"
+          >
+            {m.phone}
+          </a>
+        )}
+        {!m.email && !m.phone && (
+          <span className="text-ink-muted text-body-sm">
+            Contact via{" "}
+            <Link href="/club/contact" className="underline">
+              het secretariaat
+            </Link>
           </span>
         )}
+        {handles.length > 0 && (
+          <>
+            <span className="text-label text-ink-muted mt-2 font-mono uppercase">
+              Hier kan je terecht voor
+            </span>
+            <ul className="text-body-sm text-ink flex flex-col gap-1">
+              {handles.map((p) => (
+                <li key={p.id}>
+                  <a href={`#${p.id}`} className="hover:underline">
+                    Ik {p.question}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function LedgerRow({
+  node,
+  titles,
+  paths,
+}: {
+  node: OrgChartNode;
+  titles: string[];
+  paths: ResponsibilityPath[];
+}) {
+  const vacant = node.members.length === 0;
+  const row = (
+    <span className="group-open:text-jersey-deep flex items-baseline gap-2 py-2">
+      <span className="text-body-md text-ink min-w-0">
+        {titles.join(" · ")}
       </span>
-      {emails.map((m) => (
-        <a
-          key={m.id}
-          href={`mailto:${m.email}`}
-          className="text-jersey-deep text-body-sm self-end underline"
-        >
-          {m.email}
-        </a>
-      ))}
+      <span
+        aria-hidden="true"
+        className="border-ink-muted mb-1 h-0 min-w-4 flex-1 border-b border-dotted"
+      />
+      {vacant ? (
+        <span className="text-ink-muted text-body-sm shrink-0 italic">
+          plek vrij — iets voor jou?
+        </span>
+      ) : (
+        <span className="text-body-md text-ink min-w-0 text-right font-semibold">
+          {names(node)}
+        </span>
+      )}
+      <span
+        aria-hidden="true"
+        className="text-ink-muted text-mono-sm shrink-0 font-mono group-open:rotate-45"
+      >
+        +
+      </span>
+    </span>
+  );
+  return (
+    <li className="border-ink/10 border-b last:border-b-0">
+      <details className="group">
+        <summary className="hover:text-jersey-deep cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+          {row}
+        </summary>
+        <div className="mb-3 flex flex-col gap-3">
+          {vacant ? (
+            <p className="text-body-sm text-ink">
+              Deze plek is vrij.{" "}
+              <Link href="/club/contact" className="text-jersey-deep underline">
+                Iets voor jou? Laat het ons weten
+              </Link>
+            </p>
+          ) : (
+            node.members.map((m) => (
+              <HolderCard key={m.id} m={m} nodeId={node.id} paths={paths} />
+            ))
+          )}
+        </div>
+      </details>
     </li>
   );
 }
 
-function Ledger({ seats }: { seats: OrgChartNode[] }) {
+function Ledger({
+  seats,
+  paths,
+}: {
+  seats: OrgChartNode[];
+  paths: ResponsibilityPath[];
+}) {
   return (
     <ul className="flex flex-col">
       {mergeSolo(seats).map(({ node, titles }) => (
-        <LedgerRow key={node.id} node={node} titles={titles} />
+        <LedgerRow key={node.id} node={node} titles={titles} paths={paths} />
       ))}
     </ul>
   );
@@ -192,7 +288,13 @@ function Chapter({
 }
 
 /** The pillar chapters as ledgers; reused by A7. */
-export function ClubBook({ nodes }: { nodes: OrgChartNode[] }) {
+export function ClubBook({
+  nodes,
+  paths = [],
+}: {
+  nodes: OrgChartNode[];
+  paths?: ResponsibilityPath[];
+}) {
   const overig = seatsIn(nodes, "overig");
   return (
     <div className="flex flex-col gap-12">
@@ -210,15 +312,21 @@ export function ClubBook({ nodes }: { nodes: OrgChartNode[] }) {
               <>
                 <div>
                   <Kicker>Organisatie</Kicker>
-                  <Ledger seats={seatsIn(nodes, "jeugd-organisatie")} />
+                  <Ledger
+                    seats={seatsIn(nodes, "jeugd-organisatie")}
+                    paths={paths}
+                  />
                 </div>
                 <div>
                   <Kicker>Opleiding</Kicker>
-                  <Ledger seats={seatsIn(nodes, "jeugd-opleiding")} />
+                  <Ledger
+                    seats={seatsIn(nodes, "jeugd-opleiding")}
+                    paths={paths}
+                  />
                 </div>
               </>
             ) : (
-              <Ledger seats={pillarSeats(nodes, p.key)} />
+              <Ledger seats={pillarSeats(nodes, p.key)} paths={paths} />
             )}
           </Chapter>
         ))}
@@ -227,7 +335,7 @@ export function ClubBook({ nodes }: { nodes: OrgChartNode[] }) {
       {overig.length > 0 && (
         <section aria-label="Overige functies" className="flex flex-col">
           <Kicker>Overige functies</Kicker>
-          <Ledger seats={overig} />
+          <Ledger seats={overig} paths={paths} />
         </section>
       )}
     </div>

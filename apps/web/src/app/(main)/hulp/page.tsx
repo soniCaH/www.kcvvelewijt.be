@@ -213,7 +213,7 @@ export default async function HulpHubPage({
               ) : variant === "A6" ? (
                 <VariantA6 nodes={members} />
               ) : variant === "A7" ? (
-                <VariantA7 nodes={members} />
+                <VariantA7 nodes={members} paths={responsibilityPaths} />
               ) : variant === "A" ? (
                 <VariantPillars nodes={members} />
               ) : variant === "B" ? (
