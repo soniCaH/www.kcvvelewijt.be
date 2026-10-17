@@ -145,7 +145,7 @@ function LedgerRow({
     </span>
   );
   return (
-    <li className="border-ink/10 border-b last:border-b-0">
+    <li>
       <details className="group">
         <summary className="hover:text-jersey-deep cursor-pointer list-none [&::-webkit-details-marker]:hidden">
           {row}
