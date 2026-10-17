@@ -208,6 +208,43 @@ describe("/ploegen/[slug] classifies a failed ranking read against the real BFF 
     expect(document.getElementById("wedstrijden")).not.toBeNull();
   });
 
+  it("highlights KCVV's own ranking row: the page passes the club id, not the team's psdId (#3504)", async () => {
+    mockFindBySlug.mockReturnValue(Effect.succeed(teamFixture("9403")));
+    // The real feed's id spaces (measured 2026-10-17 on team 1): KCVV's
+    // ranking row carries a per-competition `team_id` (523923) next to
+    // `club_id` 1235 — neither is the psdId (9403 here) the page holds.
+    const row = (position: number, team_id: number, club_id: number) => ({
+      position,
+      team_id,
+      club_id,
+      team_name: club_id === 1235 ? "KCVV Elewijt" : "FC Perk",
+      played: 7,
+      won: 2,
+      drawn: 2,
+      lost: 3,
+      goals_for: 6,
+      goals_against: 9,
+      goal_difference: -3,
+      points: 8,
+    });
+    mockGetRanking.mockReturnValue(
+      Effect.succeed([
+        {
+          competition_id: 1,
+          competition_name: "3de Afdeling Voetb Vl A",
+          entries: [row(1, 525208, 70), row(2, 523923, 1235)],
+        },
+      ]),
+    );
+
+    const element = await TeamPage({
+      params: Promise.resolve({ slug: "kcvv-elewijt-u13" }),
+    });
+    render(element);
+
+    expect(screen.getAllByTestId("standings-kcvv-row")).toHaveLength(1);
+  });
+
   it("a genuine permanent ranking failure (decode error) renders the failure notice, not no-table — fixtures still render", async () => {
     mockFindBySlug.mockReturnValue(Effect.succeed(teamFixture("9402")));
     // A tag PSD can plausibly send that this deploy cannot decode — reserved

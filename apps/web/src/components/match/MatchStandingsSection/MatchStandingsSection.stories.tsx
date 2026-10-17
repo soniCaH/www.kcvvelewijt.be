@@ -18,7 +18,7 @@ function entry(
     position,
     team_id,
     // Mock: club_id mirrors team_id so the head-to-head filter (by club id) and
-    // the KCVV highlight (by team id) line up on the same numbers.
+    // the KCVV highlight (by club id) line up on the same numbers.
     club_id: team_id,
     team_name,
     played,
@@ -65,7 +65,7 @@ export const Default: Story = {
     entries: fullDivision,
     homeClubId: 1235,
     awayClubId: 103,
-    highlightTeamId: 1235,
+    highlightClubId: 1235,
   },
 };
 

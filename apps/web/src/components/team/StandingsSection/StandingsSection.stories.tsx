@@ -17,6 +17,8 @@ function entry(
   return {
     position,
     team_id,
+    // Mock: club_id mirrors team_id, as the highlight matches on the club.
+    club_id: team_id,
     team_name,
     played,
     won,
@@ -91,7 +93,7 @@ export const OneTable: Story = {
   args: {
     tables: [senior],
     divisionFull: "3e Nationale VV A",
-    highlightTeamId: 1235,
+    highlightClubId: 1235,
   },
 };
 
@@ -102,7 +104,7 @@ export const OneTable: Story = {
  * keeps its own provider name.
  */
 export const TwoTables: Story = {
-  args: { tables: [autumn, spring], highlightTeamId: 1235 },
+  args: { tables: [autumn, spring], highlightClubId: 1235 },
 };
 
 /**
@@ -110,7 +112,7 @@ export const TwoTables: Story = {
  * renders under the federation's own string.
  */
 export const ProviderNameFallback: Story = {
-  args: { tables: [senior], divisionFull: null, highlightTeamId: 1235 },
+  args: { tables: [senior], divisionFull: null, highlightClubId: 1235 },
 };
 
 // Every row published, none scored yet — before matchday 1 the reeks has
@@ -147,5 +149,5 @@ export const NoTables: Story = {
  * as a club list — never one verdict blanket-applied to both.
  */
 export const MixedTables: Story = {
-  args: { tables: [autumn, numberlessSeason], highlightTeamId: 1235 },
+  args: { tables: [autumn, numberlessSeason], highlightClubId: 1235 },
 };

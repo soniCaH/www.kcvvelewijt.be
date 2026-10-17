@@ -49,7 +49,7 @@ import type { Metadata } from "next";
 import type { PortableTextBlock } from "@portabletext/react";
 import { runPromise } from "@/lib/effect/runtime";
 import { degradeSection } from "@/lib/effect/degrade";
-import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
+import { SITE_CONFIG, DEFAULT_OG_IMAGE, KCVV_CLUB_ID } from "@/lib/constants";
 import { BffService } from "@/lib/effect/services/BffService";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
 import type { Match, RankingTable } from "@kcvv/api-contract";
@@ -651,7 +651,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
                 <StandingsSection
                   tables={standings}
                   divisionFull={team.divisionFull}
-                  highlightTeamId={bffTeamId}
+                  highlightClubId={KCVV_CLUB_ID}
                 />
               </PageContainer>
             </TrackInView>

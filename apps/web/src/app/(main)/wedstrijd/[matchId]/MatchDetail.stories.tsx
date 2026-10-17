@@ -280,7 +280,7 @@ function MatchDetailAssembly() {
         entries={standings}
         homeClubId={KCVV_CLUB_ID}
         awayClubId={AWAY_CLUB_ID}
-        highlightTeamId={KCVV_CLUB_ID}
+        highlightClubId={KCVV_CLUB_ID}
       />
 
       <StripedSeam colorPair="ink-cream" height="md" />

@@ -14,8 +14,8 @@ export interface StandingsSectionProps {
    * `3e Nationale VV A` where the provider files `3de Afdeling Voetb Vl A`
    * (#2589 decision 4). */
   divisionFull?: string | null;
-  /** PSD team_id of the KCVV team to highlight in every table. */
-  highlightTeamId?: number;
+  /** Club id of the KCVV row to highlight in every table. */
+  highlightClubId?: number;
   className?: string;
 }
 
@@ -45,7 +45,7 @@ export interface StandingsSectionProps {
 export function StandingsSection({
   tables,
   divisionFull,
-  highlightTeamId,
+  highlightClubId,
   className,
 }: StandingsSectionProps) {
   if (classifyStandingsTables(tables) === "no-table") {
@@ -70,7 +70,7 @@ export function StandingsSection({
             key={table.competition_id}
             entries={table.entries}
             caption={divisionFull ?? table.competition_name}
-            highlightTeamId={highlightTeamId}
+            highlightClubId={highlightClubId}
           />
         ))}
     </div>

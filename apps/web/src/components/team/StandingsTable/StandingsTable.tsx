@@ -6,8 +6,11 @@ import type { RankingEntry } from "@kcvv/api-contract";
 
 export interface StandingsTableProps {
   entries: readonly RankingEntry[];
-  /** PSD team_id of the KCVV team to highlight. */
-  highlightTeamId?: number;
+  /** Club id (`RankingEntry.club_id`) of the KCVV row to highlight. Not a
+   * team id: PSD's ranking `team_id` is a per-competition id (KCVV's is
+   * 523923 while the team page knows team 1), so no id the pages hold would
+   * ever match it (#3504). */
+  highlightClubId?: number;
   /** Name of the competition this table ranks. Also names the region, so a
    * team playing two phases gets two distinct landmark names instead of two
    * identical "Klassement" ones (#2631). */
@@ -47,6 +50,21 @@ const ANCHOR_DIVIDER_CLASSES = [
   "[&>table>tbody>tr>td:last-child]:shadow-[-2px_0_4px_-1px_rgba(0,0,0,0.12)]",
 ].join(" ");
 
+/** The one KCVV-row predicate. The `undefined` guard is load-bearing:
+ * `club_id` is optional on `RankingEntry`, so without it an absent prop
+ * would match every entry that lacks one (`undefined === undefined`).
+ *
+ * shortcut: matches the whole club, so two KCVV sides in one poule would
+ * both tint. Census 2026-10-17: all 8 published KCVV tables hold exactly one
+ * KCVV row, and PSD's ranking row carries no stable team-level id (`team_id`
+ * is per-competition). Upgrade when a poule with two KCVV sides appears. */
+function isHighlighted(
+  entry: RankingEntry,
+  highlightClubId: number | undefined,
+): boolean {
+  return highlightClubId !== undefined && entry.club_id === highlightClubId;
+}
+
 /** Crest + truncating team name, italic unless it's the KCVV row. The one
  * piece both the numbered table and the numberless list render identically.
  * `min-w-0` (not a positive floor) is what a flex item needs for `truncate`
@@ -80,11 +98,11 @@ function ClubIdentity({
 
 function NumberlessClubList({
   entries,
-  highlightTeamId,
+  highlightClubId,
   caption,
 }: {
   entries: readonly RankingEntry[];
-  highlightTeamId: number | undefined;
+  highlightClubId: number | undefined;
   caption: string | undefined;
 }) {
   return (
@@ -100,9 +118,9 @@ function NumberlessClubList({
           <MonoLabel tone="muted">{caption}</MonoLabel>
         </p>
       ) : null}
-      <ul className="font-mono text-xs">
+      <ul className="md:text-body-md font-mono text-xs">
         {entries.map((entry) => {
-          const isKcvv = entry.team_id === highlightTeamId;
+          const isKcvv = isHighlighted(entry, highlightClubId);
           return (
             <li
               key={entry.team_id}
@@ -127,7 +145,7 @@ function NumberlessClubList({
 
 export function StandingsTable({
   entries,
-  highlightTeamId,
+  highlightClubId,
   caption,
 }: StandingsTableProps) {
   if (entries.length === 0) return null;
@@ -141,7 +159,7 @@ export function StandingsTable({
     return (
       <NumberlessClubList
         entries={entries}
-        highlightTeamId={highlightTeamId}
+        highlightClubId={highlightClubId}
         caption={caption}
       />
     );
@@ -158,7 +176,7 @@ export function StandingsTable({
         // `w-14` below) so they no longer overlay it (#2582 review finding 3).
         chromeClassName="right-14"
       >
-        <table className="w-full border-collapse font-mono text-xs">
+        <table className="md:text-body-md w-full border-collapse font-mono text-xs">
           {caption ? (
             <caption className="pb-2 text-left">
               <MonoLabel tone="muted">{caption}</MonoLabel>
@@ -168,7 +186,7 @@ export function StandingsTable({
             <tr className="border-ink border-b-2">
               <th
                 scope="col"
-                className="text-ink-muted bg-cream sticky left-0 z-10 w-12 py-2 pr-2 pl-4 text-left font-normal tracking-wider uppercase"
+                className="text-ink-muted bg-cream sticky left-0 z-10 w-12 min-w-12 py-2 pr-2 pl-4 text-left font-normal tracking-wider uppercase"
               >
                 #
               </th>
@@ -210,7 +228,7 @@ export function StandingsTable({
               </th>
               <th
                 scope="col"
-                className="text-ink-muted bg-cream sticky right-0 z-10 w-14 py-2 pr-4 text-right font-normal tracking-wider uppercase"
+                className="text-ink-muted bg-cream sticky right-0 z-10 w-14 min-w-14 py-2 pr-4 text-right font-normal tracking-wider uppercase"
               >
                 Ptn
               </th>
@@ -218,7 +236,7 @@ export function StandingsTable({
           </thead>
           <tbody>
             {entries.map((entry) => {
-              const isKcvv = entry.team_id === highlightTeamId;
+              const isKcvv = isHighlighted(entry, highlightClubId);
               return (
                 <tr
                   key={entry.team_id}
@@ -231,7 +249,7 @@ export function StandingsTable({
                   {/* Position — pinned left (anchor group) */}
                   <td
                     className={cn(
-                      "text-ink-muted bg-cream sticky left-0 z-10 w-12 py-2 pr-2 pl-4",
+                      "text-ink-muted bg-cream sticky left-0 z-10 w-12 min-w-12 py-2 pr-2 pl-4",
                       isKcvv && cn(KCVV_TINT, KCVV_ACCENT_RULE),
                     )}
                   >
@@ -285,7 +303,7 @@ export function StandingsTable({
                       clamping to 700. */}
                   <td
                     className={cn(
-                      "text-ink bg-cream sticky right-0 z-10 w-14 py-2 pr-4 text-right font-bold",
+                      "text-ink bg-cream sticky right-0 z-10 w-14 min-w-14 py-2 pr-4 text-right font-bold",
                       isKcvv && KCVV_TINT,
                     )}
                   >

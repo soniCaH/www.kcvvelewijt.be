@@ -12,8 +12,8 @@ interface MatchStandingsSectionCommonProps {
   homeClubId: number;
   /** PSD club id of the away side (`match.away_team.id`). */
   awayClubId: number;
-  /** PSD team id of the KCVV side, so its row tints in the table. */
-  highlightTeamId?: number;
+  /** Club id of the KCVV side, so its row tints in the table. */
+  highlightClubId?: number;
   className?: string;
 }
 
@@ -59,7 +59,7 @@ export type MatchStandingsSectionProps =
  * Mirrors the `<MatchLineupSection>` / `<MatchEventsSection>` chrome: mono caps
  * kicker (`KLASSEMENT`) + display-md italic heading (`In de stand.`) + paper
  * container, around the already-redesigned `<StandingsTable>` (KCVV row tinted
- * via `highlightTeamId`).
+ * via `highlightClubId`).
  *
  * Three outcomes (#2576, resolving the gap #2778 deliberately left open —
  * "no new copy for this state" was that ticket's own call, not this one's):
@@ -76,7 +76,7 @@ export type MatchStandingsSectionProps =
  * - **Rows present** — the table, as before.
  */
 export function MatchStandingsSection(props: MatchStandingsSectionProps) {
-  const { homeClubId, awayClubId, highlightTeamId, className } = props;
+  const { homeClubId, awayClubId, highlightClubId, className } = props;
 
   // `.filter` returns a fresh array, so the in-place `.sort` never mutates the
   // caller's `entries`. The unavailable member carries no `entries` at all —
@@ -109,7 +109,7 @@ export function MatchStandingsSection(props: MatchStandingsSectionProps) {
           Het klassement is even niet beschikbaar. Probeer het later opnieuw.
         </EmptyState>
       ) : (
-        <StandingsTable entries={involved} highlightTeamId={highlightTeamId} />
+        <StandingsTable entries={involved} highlightClubId={highlightClubId} />
       )}
     </PageContainer>
   );

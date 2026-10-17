@@ -16,7 +16,7 @@
  */
 
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, act } from "@testing-library/react";
+import { render, screen, act, within } from "@testing-library/react";
 import type { RankingEntry } from "@kcvv/api-contract";
 import { StandingsTable } from "./StandingsTable";
 import { stubAnimationFrame } from "@/../tests/helpers/scroll-hint.helpers";
@@ -43,6 +43,7 @@ const DIVISION: RankingEntry[] = [
   entry({
     position: 2,
     team_id: 1235,
+    club_id: 1235,
     team_name: "KCVV Elewijt",
     points: 24,
     goal_difference: 5,
@@ -68,6 +69,7 @@ const NUMBERLESS_DIVISION: RankingEntry[] = [
   entry({
     position: 0,
     team_id: 1235,
+    club_id: 1235,
     team_name: "KCVV Elewijt",
     played: 0,
     points: 0,
@@ -100,6 +102,14 @@ describe("StandingsTable", () => {
     expect(container.firstChild).toBeNull();
   });
 
+  it("reads at 12px on a phone and steps up to body-md (16px) from md, table and list alike (#3504)", () => {
+    const { unmount } = render(<StandingsTable entries={DIVISION} />);
+    expect(screen.getByRole("table")).toHaveClass("text-xs", "md:text-body-md");
+    unmount();
+    render(<StandingsTable entries={NUMBERLESS_DIVISION} />);
+    expect(screen.getByRole("list")).toHaveClass("text-xs", "md:text-body-md");
+  });
+
   it("renders the standard column headers", () => {
     render(<StandingsTable entries={DIVISION} />);
     const headers = screen
@@ -108,22 +118,36 @@ describe("StandingsTable", () => {
     expect(headers).toEqual(["#", "Ploeg", "M", "W", "G", "V", "+/-", "Ptn"]);
   });
 
-  it("highlights the KCVV row when highlightTeamId matches", () => {
-    render(<StandingsTable entries={DIVISION} highlightTeamId={1235} />);
+  it("highlights the KCVV row when highlightClubId matches", () => {
+    render(<StandingsTable entries={DIVISION} highlightClubId={1235} />);
     const kcvvRow = screen.getByTestId("standings-kcvv-row");
     expect(kcvvRow).toBeInTheDocument();
     expect(kcvvRow.textContent).toContain("KCVV Elewijt");
   });
 
   it("renders the KCVV team name non-italic + bold", () => {
-    render(<StandingsTable entries={DIVISION} highlightTeamId={1235} />);
+    render(<StandingsTable entries={DIVISION} highlightClubId={1235} />);
     const kcvvRow = screen.getByTestId("standings-kcvv-row");
     const nameSpan = kcvvRow.querySelector('[title="KCVV Elewijt"]');
     expect(nameSpan?.className).toContain("not-italic");
     expect(nameSpan?.className).toContain("font-semibold");
   });
 
-  it("does not highlight any row when highlightTeamId is absent", () => {
+  it("highlights by club id: PSD's ranking team_id is a per-competition id, never the club's (#3504)", () => {
+    // Measured against the real feed: KCVV's ranking row carries
+    // team.id 523923 (club 1235) while the team page knows team 1.
+    const real = [
+      entry({ team_id: 523922, club_id: 70, team_name: "Leader FC" }),
+      entry({ team_id: 523923, club_id: 1235, team_name: "KCVV Elewijt" }),
+    ];
+    render(<StandingsTable entries={real} highlightClubId={1235} />);
+    expect(screen.getAllByTestId("standings-kcvv-row")).toHaveLength(1);
+    expect(screen.getByTestId("standings-kcvv-row").textContent).toContain(
+      "KCVV Elewijt",
+    );
+  });
+
+  it("does not highlight any row when highlightClubId is absent", () => {
     render(<StandingsTable entries={DIVISION} />);
     expect(screen.queryByTestId("standings-kcvv-row")).toBeNull();
   });
@@ -143,13 +167,31 @@ describe("StandingsTable", () => {
     expect(nameSpan).toHaveClass("min-w-0");
   });
 
+  it("floors the pinned # column at the width Ploeg's sticky offset assumes (#3504)", () => {
+    // `w-12` is only a preferred width: once the table overflows, the
+    // browser shrinks `#` to its content, while Ploeg stays pinned at
+    // `left-12` — so Ploeg's cell slid 10px over the `M` column at 320/375px.
+    // `min-w-12` keeps `#` as wide as the offset Ploeg sticks to.
+    render(<StandingsTable entries={DIVISION} />);
+    const headers = screen.getAllByRole("columnheader");
+    expect(headers.find((h) => h.textContent === "#")).toHaveClass("min-w-12");
+    expect(headers.find((h) => h.textContent === "Ptn")).toHaveClass(
+      "min-w-14",
+    );
+    for (const row of screen.getAllByRole("row").slice(1)) {
+      const cells = within(row).getAllByRole("cell");
+      expect(cells[0]).toHaveClass("min-w-12");
+      expect(cells[cells.length - 1]).toHaveClass("min-w-14");
+    }
+  });
+
   it("does not highlight a non-matching team", () => {
-    render(<StandingsTable entries={DIVISION} highlightTeamId={9999} />);
+    render(<StandingsTable entries={DIVISION} highlightClubId={9999} />);
     expect(screen.queryByTestId("standings-kcvv-row")).toBeNull();
   });
 
   it("formats positive goal difference with a leading +", () => {
-    render(<StandingsTable entries={DIVISION} highlightTeamId={1235} />);
+    render(<StandingsTable entries={DIVISION} highlightClubId={1235} />);
     expect(screen.getByText("+5")).toBeInTheDocument();
   });
 
@@ -181,7 +223,7 @@ describe("StandingsTable", () => {
     render(
       <StandingsTable
         entries={NUMBERLESS_DIVISION}
-        highlightTeamId={1235}
+        highlightClubId={1235}
         caption="3de Afdeling Voetb Vl A"
       />,
     );
@@ -198,7 +240,7 @@ describe("StandingsTable", () => {
 
   it("still highlights the KCVV row when numberless", () => {
     render(
-      <StandingsTable entries={NUMBERLESS_DIVISION} highlightTeamId={1235} />,
+      <StandingsTable entries={NUMBERLESS_DIVISION} highlightClubId={1235} />,
     );
 
     const kcvvRow = screen.getByTestId("standings-kcvv-row");
@@ -287,7 +329,7 @@ describe("StandingsTable", () => {
     });
 
     it("gives the KCVV row's pinned cells its own tint, never a flat bg-cream (review finding 2)", () => {
-      render(<StandingsTable entries={DIVISION} highlightTeamId={1235} />);
+      render(<StandingsTable entries={DIVISION} highlightClubId={1235} />);
       const kcvvRow = screen.getByTestId("standings-kcvv-row");
       const pinnedCells = kcvvRow.querySelectorAll("td.sticky");
       expect(pinnedCells).toHaveLength(3); // #, Ploeg, Ptn

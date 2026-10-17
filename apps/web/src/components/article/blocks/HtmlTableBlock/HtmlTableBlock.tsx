@@ -169,7 +169,7 @@ export function HtmlTableBlock({ html, className }: HtmlTableBlockProps) {
           // track (`[&>table]`), not a descendant: a nested table (an
           // editor's own, inside a cell) keeps its own plain markup rather
           // than inheriting the block-level skin a second time.
-          "[&>table]:w-full [&>table]:border-collapse [&>table]:font-mono [&>table]:text-xs",
+          "[&>table]:w-full [&>table]:border-collapse [&>table]:font-mono [&>table]:text-xs md:[&>table]:text-body-md",
           // th/td — descendant selectors, so every row container the
           // sanitizer allows (`thead`, `tbody`, `tfoot`) is styled by
           // construction rather than by enumerating each one (review M6).
