@@ -213,6 +213,7 @@ function TeamShieldFallback({ name }: { name: string }) {
   return (
     <span
       aria-hidden="true"
+      data-team-part="crest"
       className="border-ink bg-cream-soft text-ink font-display-big inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 text-[18px] leading-none font-black"
     >
       {initial}
@@ -220,12 +221,20 @@ function TeamShieldFallback({ name }: { name: string }) {
   );
 }
 
+/**
+ * `stacked` (the full hero only): below `md` the slot is a centred column —
+ * crest above name — and the name wraps (3 lines max) instead of truncating.
+ * From `md` up nothing changes (every mobile rule is `max-md:`). The
+ * reservation hero keeps the single-row layout.
+ */
 function TeamSlot({
   team,
   align,
+  stacked = false,
 }: {
   team: MatchHeroTeam;
   align: "start" | "end";
+  stacked?: boolean;
 }) {
   const isEnd = align === "end";
   return (
@@ -233,6 +242,7 @@ function TeamSlot({
       className={cn(
         "flex min-w-0 items-center gap-3",
         isEnd && "flex-row-reverse text-right",
+        stacked && "max-md:flex-col max-md:gap-2 max-md:text-center",
       )}
     >
       {team.logo ? (
@@ -242,14 +252,24 @@ function TeamSlot({
           width={40}
           height={40}
           unoptimized
+          data-team-part="crest"
           className="h-10 w-10 shrink-0 object-contain"
         />
       ) : (
         <TeamShieldFallback name={team.name} />
       )}
       <span
+        data-team-part="name"
         title={team.name.trim() || undefined}
-        className="font-display text-ink min-w-0 flex-1 truncate text-[18px] leading-tight italic md:text-[22px]"
+        className={cn(
+          "font-display text-ink min-w-0 flex-1 truncate text-[18px] leading-tight italic md:text-[22px]",
+          // `self-stretch` gives the name the slot's width to wrap in. A club
+          // name is unbounded free text, so it takes the Hyphenation Rule's
+          // `hyphens-auto` + `wrap-break-word` pair (DESIGN.md), capped at
+          // three lines.
+          stacked &&
+            "max-md:line-clamp-3 max-md:self-stretch max-md:wrap-break-word max-md:hyphens-auto max-md:whitespace-normal",
+        )}
       >
         {team.name}
       </span>
@@ -443,16 +463,20 @@ function FullHeroCard({
           {/* `font-normal` because the base `h1` rule is bold and the slots
               inside set their own weight — without it the two club names, which
               carry no explicit weight, would thicken on this one route. */}
-          <h1 className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 font-normal md:gap-6">
-            <TeamSlot team={homeTeam} align="start" />
-            <div className="flex items-center justify-center">
+          {/* Below `md` the slots stack crest over name: `items-start` keeps
+              both slots' top edges level (names wrap up to 3 lines), and the
+              score cell is as tall as a crest (`h-10`) so it centres on the
+              crest row whatever the names do. */}
+          <h1 className="grid grid-cols-[1fr_auto_1fr] items-start gap-3 font-normal md:items-center md:gap-6">
+            <TeamSlot team={homeTeam} align="start" stacked />
+            <div className="flex items-center justify-center max-md:h-10">
               <ScoreRegion
                 status={status}
                 homeScore={homeTeam.score}
                 awayScore={awayTeam.score}
               />
             </div>
-            <TeamSlot team={awayTeam} align="end" />
+            <TeamSlot team={awayTeam} align="end" stacked />
           </h1>
 
           <MetaLine parts={metaParts} />

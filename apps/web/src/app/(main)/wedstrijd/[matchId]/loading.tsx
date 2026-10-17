@@ -76,15 +76,18 @@ export default function MatchDetailLoading() {
           </div>
           <div className="flex flex-col gap-6 p-5 md:p-6">
             <Skeleton className="h-3 w-32" />
-            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
-              <div className="flex min-w-0 items-center gap-3">
+            {/* Mirrors <MatchHero>: below `md` each slot stacks crest over a
+                name block (~2 lines), tops level; the score's 4px top margin
+                centres it on the 40px crest row. */}
+            <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-3 md:items-center md:gap-4">
+              <div className="flex min-w-0 flex-col items-center gap-2 md:flex-row md:gap-3">
                 <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
-                <Skeleton className="h-5 max-w-32 min-w-0 flex-1" />
+                <Skeleton className="h-11 max-w-32 min-w-0 flex-1 max-md:w-full max-md:flex-none md:h-5" />
               </div>
-              <Skeleton className="h-8 w-16" />
-              <div className="flex min-w-0 flex-row-reverse items-center gap-3">
+              <Skeleton className="h-8 w-16 max-md:mt-1" />
+              <div className="flex min-w-0 flex-col items-center gap-2 md:flex-row-reverse md:gap-3">
                 <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
-                <Skeleton className="h-5 max-w-32 min-w-0 flex-1" />
+                <Skeleton className="h-11 max-w-32 min-w-0 flex-1 max-md:w-full max-md:flex-none md:h-5" />
               </div>
             </div>
             <div className="border-ink border-t pt-3">
