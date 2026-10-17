@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import type { ReactElement } from "react";
+import { render, screen, within } from "@testing-library/react";
 
 vi.mock("@/lib/server/match-data", () => ({
   getFirstTeamStripData: vi.fn(),
@@ -114,6 +115,50 @@ describe("MatchStrip (server component)", () => {
         fixture: todaysTournament,
       });
       expect(await matchDayProp()).toBe(false);
+    });
+  });
+
+  // #3480 — the strip's dates are formatted here, on the server, and handed to
+  // the view as strings. A BFF match date is Brussels wall-clock stored in UTC
+  // fields (`toMatchDisplayZone`), so a 22:30 kickoff stays on its own day; a
+  // plain instant parse would add 1-2 h and roll it onto the next one.
+  describe("date labels (#3480)", () => {
+    const lateFixture: ScheduleMatch = {
+      ...fixture,
+      date: new Date("2026-08-08T22:30:00Z"),
+      time: "22:30",
+      competition: "Beker van Vlaanderen",
+    };
+    const lateResult: ScheduleMatch = {
+      ...result,
+      date: new Date("2026-08-03T21:45:00Z"),
+      competition: "Tweede Provinciale A",
+    };
+
+    it("prints the wall-clock day and kickoff of a late fixture, unshifted", async () => {
+      mocked.mockResolvedValueOnce({ result: null, fixture: lateFixture });
+      render((await MatchStrip()) as ReactElement);
+
+      const row = screen.getByRole("link", { name: /^Volgende wedstrijd/ });
+      expect(row).toHaveAccessibleName(
+        "Volgende wedstrijd Za 8 augustus om 22:30: KCVV Elewijt tegen RC Mechelen",
+      );
+      // The mobile stub: day + abbreviated month, not "9 AUG".
+      expect(row.textContent).toContain("8 aug");
+      // The desktop slide's meta line.
+      expect(
+        document.querySelector('[aria-live="polite"]')?.textContent,
+      ).toContain("Za 8 augustus · 22:30 · Beker van Vlaanderen");
+    });
+
+    it("prints a late result on its own day too", async () => {
+      mocked.mockResolvedValueOnce({ result: lateResult, fixture: null });
+      render((await MatchStrip()) as ReactElement);
+
+      const row = screen.getByRole("link", { name: /^Winst/ });
+      expect(row).toHaveAccessibleName(/^Winst Ma 3 augustus: KCVV Elewijt 2/);
+      expect(within(row).getByText("aug")).toBeInTheDocument();
+      expect(row.textContent).toContain("3 aug");
     });
   });
 });

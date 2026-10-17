@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { MatchStripView } from "./MatchStripView";
+import { stripDates } from "./strip-dates";
 import { KCVV_CLUB_ID } from "@/lib/constants";
 import type { TeamNavVM } from "@/lib/repositories/team.repository";
 import { teamDisplayName } from "@/lib/utils/team-display-name";
@@ -14,7 +15,7 @@ import type { MatchStripData } from "@/lib/server/match-data";
  *
  * The async `<MatchStrip>` server component cannot run in Storybook (it
  * fetches via the BFF), so these stories compose `<MatchStripView>` directly
- * with synthetic data. The classes and JSX in `MatchStripView` are the same
+ * with synthetic data and the date labels `<MatchStrip>` would format. The classes and JSX in `MatchStripView` are the same
  * code path the deployed page renders — no inline reimplementation.
  */
 
@@ -76,7 +77,17 @@ function PageShell({
   return (
     <div className="bg-cream-soft min-h-screen">
       <SiteHeader seniorTeams={seniorTeams} />
-      {data ? <MatchStripView data={data} matchDay={matchDay} /> : null}
+      {data ? (
+        <MatchStripView
+          data={data}
+          matchDay={matchDay}
+          // `<MatchStrip>` formats these on the server (#3480).
+          dates={{
+            result: stripDates(data.result),
+            fixture: stripDates(data.fixture),
+          }}
+        />
+      ) : null}
       <main className="mx-auto max-w-[1200px] px-4 py-12 lg:px-8">
         <div className="border-paper-edge bg-cream rounded-none border p-8">
           <p className="font-display text-ink/60 text-[18px] italic">

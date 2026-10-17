@@ -92,6 +92,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { TeamAgendaRow } from "@/components/team/TeamMatchesSection/TeamAgendaRow";
 import { MatchStripView } from "@/components/layout/MatchStrip/MatchStripView";
+import { stripDates } from "@/components/layout/MatchStrip/strip-dates";
 import { CalendarWeek } from "@/components/calendar/CalendarWeek/CalendarWeek";
 import { CalendarAgenda } from "@/components/calendar/CalendarAgenda/CalendarAgenda";
 import { CalendarMonth } from "@/components/calendar/CalendarMonth/CalendarMonth";
@@ -240,6 +241,10 @@ const RESERVATION_RENDERERS: ReducedRenderer[] = [
       render(
         <MatchStripView
           data={{ result: null, fixture: scheduleReservation }}
+          dates={{
+            result: stripDates(null),
+            fixture: stripDates(scheduleReservation),
+          }}
         />,
       ),
   },
@@ -332,7 +337,13 @@ const RESERVATION_RENDERERS: ReducedRenderer[] = [
     name: "MatchStripView (reduced tournament branch)",
     render: () =>
       render(
-        <MatchStripView data={{ result: null, fixture: scheduleReduced }} />,
+        <MatchStripView
+          data={{ result: null, fixture: scheduleReduced }}
+          dates={{
+            result: stripDates(null),
+            fixture: stripDates(scheduleReduced),
+          }}
+        />,
       ),
   },
   {

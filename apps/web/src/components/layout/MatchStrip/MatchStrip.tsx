@@ -1,6 +1,7 @@
 import { getFirstTeamStripData } from "@/lib/server/match-data";
 import { clubToday, isMatchDay } from "@/lib/utils/dates";
 import { MatchStripView } from "./MatchStripView";
+import { stripDates } from "./strip-dates";
 
 /**
  * Server component. Fetches the first team's last result and next fixture via
@@ -16,15 +17,19 @@ import { MatchStripView } from "./MatchStripView";
  * not living documentation — read it for the strip's original design intent,
  * not for where it renders today.
  *
+ * Formats every date the strip prints (#3480) — `stripDates` reads each
+ * through `toMatchDisplayZone` — and hands them to `<MatchStripView>` as
+ * strings, so neither the view nor the browser loads Luxon. The view is a
+ * server component too; only its result/fixture switch is a client leaf.
+ *
  * Also computes `matchDay` (#2616) — whether the next fixture falls on
  * today's calendar day — and passes it down as a plain boolean prop rather
- * than letting `<MatchStripView>` (a client component) recompute it. That
- * matters here specifically: `clubToday()` reads the wall clock, and this
- * component renders once per ISR revalidation (`revalidate = 900` on the
- * landing route) while `<MatchStripView>` renders again on hydration in the
- * visitor's own browser, at whatever moment they load the page — recomputing
- * there risks the exact same server/client date disagreement `dates.ts`
- * documents for `toDisplayZone` (an unpinned parse rendering one calendar day
+ * than letting the view recompute it. That matters here specifically:
+ * `clubToday()` reads the wall clock, and this component renders once per ISR
+ * revalidation (`revalidate = 900` on the landing route) while the strip's
+ * client leaf (`<MatchStripSlider>`) hydrates in the visitor's own browser, at
+ * whatever moment they load the page — recomputing there would risk the
+ * exact same server/client date disagreement `dates.ts` documents for `toDisplayZone` (an unpinned parse rendering one calendar day
  * on the UTC server and the next after hydration). Baking the boolean into
  * the server-rendered props sidesteps it entirely.
  *
@@ -45,5 +50,14 @@ export async function MatchStrip() {
     fixture !== null && fixture.kind === "match"
       ? isMatchDay(fixture.date, clubToday())
       : false;
-  return <MatchStripView data={data} matchDay={matchDay} />;
+  return (
+    <MatchStripView
+      data={data}
+      matchDay={matchDay}
+      dates={{
+        result: stripDates(data.result),
+        fixture: stripDates(data.fixture),
+      }}
+    />
+  );
 }

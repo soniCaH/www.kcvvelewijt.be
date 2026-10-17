@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { render, screen, within, fireEvent } from "@testing-library/react";
-import { MatchStripView } from "./MatchStripView";
+import {
+  MatchStripView as MatchStripViewBase,
+  type MatchStripViewProps,
+} from "./MatchStripView";
+import { stripDates } from "./strip-dates";
 import { KCVV_CLUB_ID } from "@/lib/constants";
 import type {
   ScheduleMatch,
@@ -34,6 +38,23 @@ const fixture: ScheduleMatch = {
   awayTeam: { id: KCVV_CLUB_ID, name: "KCVV Elewijt" },
   isHome: false,
 };
+
+/**
+ * The view takes its date labels as props (#3480); the labels themselves are
+ * pinned in `MatchStrip.test.tsx`. These tests are about layout and wording, so
+ * they get the labels the server would hand over.
+ */
+function MatchStripView(props: Omit<MatchStripViewProps, "dates">) {
+  return (
+    <MatchStripViewBase
+      {...props}
+      dates={{
+        result: stripDates(props.data.result),
+        fixture: stripDates(props.data.fixture),
+      }}
+    />
+  );
+}
 
 describe("MatchStripView", () => {
   it("renders both matches as links to their own match-detail route", () => {

@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MatchStripView } from "./MatchStripView";
+import { stripDates } from "./strip-dates";
+import type { MatchStripData } from "@/lib/server/match-data";
 import type {
   ScheduleMatch,
   ScheduleReducedMatch,
@@ -16,6 +18,17 @@ const meta = {
 
 export default meta;
 type Story = StoryObj<typeof meta>;
+
+/**
+ * The view prints no date it did not receive (#3480): `<MatchStrip>` formats
+ * them on the server, so every story hands over the same labels through the
+ * same function. Keeps each story's baseline identical to what the deployed
+ * strip renders.
+ */
+const withDates = (data: MatchStripData) => ({
+  data,
+  dates: { result: stripDates(data.result), fixture: stripDates(data.fixture) },
+});
 
 const KCVV = { id: KCVV_CLUB_ID, name: "KCVV Elewijt" };
 const OPPONENT = {
@@ -50,7 +63,7 @@ const awayFixture: ScheduleMatch = {
 };
 
 export const ResultAndFixture: Story = {
-  args: { data: { result: homeWin, fixture: awayFixture } },
+  args: withDates({ result: homeWin, fixture: awayFixture }),
 };
 
 /**
@@ -78,17 +91,20 @@ const todaysFixture: ScheduleMatch = {
 };
 
 export const MatchDay: Story = {
-  args: { data: { result: homeWin, fixture: todaysFixture }, matchDay: true },
+  args: {
+    ...withDates({ result: homeWin, fixture: todaysFixture }),
+    matchDay: true,
+  },
 };
 
 /** Outside the 72h window, or at the start of a season — fixture only. */
 export const FixtureOnly: Story = {
-  args: { data: { result: null, fixture: awayFixture } },
+  args: withDates({ result: null, fixture: awayFixture }),
 };
 
 /** End of season, or a mid-week result with nothing scheduled yet. */
 export const ResultOnly: Story = {
-  args: { data: { result: homeWin, fixture: null } },
+  args: withDates({ result: homeWin, fixture: null }),
 };
 
 /**
@@ -96,29 +112,25 @@ export const ResultOnly: Story = {
  * unmarked — and the mobile ledger's stub reads "Gelijk" instead of "Uitslag".
  */
 export const Draw: Story = {
-  args: {
-    data: {
-      result: { ...homeWin, homeScore: 2, awayScore: 2 },
-      fixture: awayFixture,
-    },
-  },
+  args: withDates({
+    result: { ...homeWin, homeScore: 2, awayScore: 2 },
+    fixture: awayFixture,
+  }),
 };
 
 /** Away loss: scoreboard order puts the opponent's goals first. */
 export const AwayLoss: Story = {
-  args: {
-    data: {
-      result: {
-        ...homeWin,
-        homeTeam: { id: 8888, name: "KVC Sint-Pieters-Leeuw United" },
-        awayTeam: KCVV,
-        homeScore: 2,
-        awayScore: 0,
-        isHome: false,
-      },
-      fixture: awayFixture,
+  args: withDates({
+    result: {
+      ...homeWin,
+      homeTeam: { id: 8888, name: "KVC Sint-Pieters-Leeuw United" },
+      awayTeam: KCVV,
+      homeScore: 2,
+      awayScore: 0,
+      isHome: false,
     },
-  },
+    fixture: awayFixture,
+  }),
 };
 
 /**
@@ -131,21 +143,19 @@ export const AwayLoss: Story = {
  * empty for the hours after every kickoff.
  */
 export const AwaitingResult: Story = {
-  args: {
-    data: {
-      result: {
-        ...homeWin,
-        id: 12347,
-        date: new Date("2026-08-06T17:30:00Z"),
-        time: "19:30",
-        status: "scheduled",
-        homeScore: undefined,
-        awayScore: undefined,
-        awayTeam: { id: 7777, name: "FC Zemst Sportief" },
-      },
-      fixture: awayFixture,
+  args: withDates({
+    result: {
+      ...homeWin,
+      id: 12347,
+      date: new Date("2026-08-06T17:30:00Z"),
+      time: "19:30",
+      status: "scheduled",
+      homeScore: undefined,
+      awayScore: undefined,
+      awayTeam: { id: 7777, name: "FC Zemst Sportief" },
     },
-  },
+    fixture: awayFixture,
+  }),
 };
 
 /**
@@ -164,7 +174,7 @@ const reservation: ScheduleReservation = {
 };
 
 export const ReservationFixture: Story = {
-  args: { data: { result: homeWin, fixture: reservation } },
+  args: withDates({ result: homeWin, fixture: reservation }),
 };
 
 /**
@@ -187,20 +197,18 @@ const tournamentFixture: ScheduleReducedMatch = {
 };
 
 export const TournamentFixture: Story = {
-  args: { data: { result: homeWin, fixture: tournamentFixture } },
+  args: withDates({ result: homeWin, fixture: tournamentFixture }),
 };
 
 /** No opponent logo, no kickoff time, no competition — the fallback path. */
 export const WithoutOptionalFields: Story = {
-  args: {
-    data: {
-      result: null,
-      fixture: {
-        ...awayFixture,
-        time: undefined,
-        competition: undefined,
-        homeTeam: { id: 8888, name: "VK De Volharding" },
-      },
+  args: withDates({
+    result: null,
+    fixture: {
+      ...awayFixture,
+      time: undefined,
+      competition: undefined,
+      homeTeam: { id: 8888, name: "VK De Volharding" },
     },
-  },
+  }),
 };
