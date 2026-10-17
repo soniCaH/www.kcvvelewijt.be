@@ -460,6 +460,13 @@ const eslintConfig = [
     },
   },
   {
+    // The /share story looks (#3540) are rasterised by html-to-image, which
+    // needs a plain `<img>` with an exact, same-origin src — `next/image`'s
+    // lazy loading and srcset would capture blank or the wrong size.
+    files: ["src/components/share/looks/**/*.tsx"],
+    rules: { "@next/next/no-img-element": "off" },
+  },
+  {
     // Test-file rules: img rules off (we mock Next.js Image), plus the
     // module-scope import guard, the window-size ban and the fixed-port ban above.
     files: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],

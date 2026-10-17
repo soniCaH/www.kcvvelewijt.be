@@ -71,6 +71,7 @@ vi.mock("@/lib/repositories/event.repository", async (importOriginal) => {
   return {
     ...actual,
     EventRepositoryLive: Layer.succeed(actual.EventRepository, {
+      findForShare: () => Effect.die("not used by this suite"),
       findAll: () => Effect.succeed([]),
       findUpcomingForList: mockFindUpcomingForList,
       findNextFeatured: () => Effect.succeed(null),

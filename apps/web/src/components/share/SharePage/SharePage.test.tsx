@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CAPTURE_WIDTH, CAPTURE_HEIGHT, SQUARE_SIZE } from "../constants";
 import type { PlayerForShare, MatchOption } from "./SharePage";
+import type { ShareItem } from "../looks/share-content";
 
 // Mock html-to-image — browser canvas API not available in happy-dom
 vi.mock("html-to-image", () => ({
@@ -1022,5 +1023,261 @@ describe("SharePage", () => {
     expect(goalKcvvBtn).toHaveAttribute("aria-pressed", "true");
     // The guard returns early, so session fields are untouched.
     expect(screen.getByPlaceholderText(/2 - 0/i)).toHaveValue("3 - 1");
+  });
+
+  // ─── News and events in the four new looks (#3540) ─────────────────────
+
+  describe("news and events (#3540)", () => {
+    const INTERVIEW: ShareItem = {
+      kind: "article",
+      slug: "interview-jan",
+      type: "interview",
+      title: "Jan over zijn eerste seizoen",
+      spans: [
+        { text: "Jan over zijn ", accent: false },
+        { text: "eerste seizoen", accent: true },
+      ],
+      date: "vrijdag 17 oktober",
+      time: "",
+      location: "",
+      day: "17",
+      month: "okt",
+      cover: {
+        url: "https://cdn.sanity.io/images/p/d/cover.jpg",
+        hotspot: { x: 0.3, y: 0.2 },
+      },
+    };
+    const TRANSFER: ShareItem = {
+      ...INTERVIEW,
+      slug: "transfer-piet",
+      type: "transfer",
+      title: "Piet tekent bij",
+      spans: [{ text: "Piet tekent bij", accent: false }],
+    };
+    const QUIZ: ShareItem = {
+      kind: "event",
+      slug: "quiz",
+      type: "Supportersactiviteit",
+      title: "Supportersquiz",
+      spans: [{ text: "Supportersquiz", accent: false }],
+      date: "zaterdag 25 oktober",
+      time: "20:00",
+      location: "Kantine Driesstraat",
+      day: "25",
+      month: "okt",
+      cover: null,
+    };
+    const ARTICLES = [INTERVIEW, TRANSFER];
+    const EVENTS = [QUIZ];
+
+    const renderTool = (initial?: {
+      kind: "article" | "event";
+      item: ShareItem | null;
+    }) =>
+      render(
+        <SharePage
+          matches={MATCHES}
+          players={PLAYERS}
+          articles={ARTICLES}
+          events={EVENTS}
+          initial={initial}
+        />,
+      );
+    const preview = () => screen.getByTestId("share-preview");
+
+    it("starts on Wedstrijd and keeps the match form; Nieuws swaps in the article picker and the four looks", async () => {
+      const user = userEvent.setup();
+      renderTool();
+
+      expect(screen.getByRole("button", { name: "Wedstrijd" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      expect(screen.getByRole("button", { name: /goal kcvv/i })).toBeVisible();
+      expect(screen.queryByRole("button", { name: "Kaart" })).toBeNull();
+
+      await user.click(screen.getByRole("button", { name: "Nieuws" }));
+
+      expect(screen.queryByRole("button", { name: /goal kcvv/i })).toBeNull();
+      expect(screen.getByRole("listbox", { name: "Artikels" })).toBeVisible();
+      for (const look of ["Kaart", "Plakboek", "Affiche", "Ticket"]) {
+        expect(screen.getByRole("button", { name: look })).toBeVisible();
+      }
+    });
+
+    it("filters the article list as you type", async () => {
+      const user = userEvent.setup();
+      renderTool();
+      await user.click(screen.getByRole("button", { name: "Nieuws" }));
+
+      await user.type(screen.getByLabelText("Zoek artikel"), "tekent");
+
+      const list = screen.getByRole("listbox", { name: "Artikels" });
+      expect(within(list).getAllByRole("option")).toHaveLength(1);
+      expect(within(list).getByRole("option")).toHaveTextContent(
+        "Piet tekent bij",
+      );
+    });
+
+    it("picking an article prefills its title and draws its type, detail and italic accent", async () => {
+      const user = userEvent.setup();
+      renderTool();
+      await user.click(screen.getByRole("button", { name: "Nieuws" }));
+      await user.click(
+        screen.getByRole("option", { name: "Jan over zijn eerste seizoen" }),
+      );
+
+      expect(screen.getByLabelText("Titel")).toHaveValue(
+        "Jan over zijn eerste seizoen",
+      );
+      expect(within(preview()).getByText("Interview")).toBeInTheDocument();
+      expect(within(preview()).getByText("“")).toBeInTheDocument();
+      expect(within(preview()).getByText("eerste seizoen").tagName).toBe("EM");
+      expect(
+        within(preview()).getByText("Meer op kcvvelewijt.be"),
+      ).toBeInTheDocument();
+    });
+
+    it("an edited title reaches the preview", async () => {
+      const user = userEvent.setup();
+      renderTool({ kind: "article", item: TRANSFER });
+
+      const title = screen.getByLabelText("Titel");
+      await user.clear(title);
+      await user.type(title, "Welkom Piet");
+
+      expect(within(preview()).getByText("Welkom Piet")).toBeInTheDocument();
+      expect(within(preview()).getByText("Transfer")).toBeInTheDocument();
+      expect(within(preview()).getByText("→ KCVV ELEWIJT")).toBeInTheDocument();
+    });
+
+    it("an event shows its type label, the date block and <date · hour> / <location> on two lines", () => {
+      renderTool({ kind: "event", item: QUIZ });
+
+      expect(screen.getByRole("button", { name: "Evenement" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      expect(screen.getByLabelText("Locatie")).toHaveValue(
+        "Kantine Driesstraat",
+      );
+      expect(within(preview()).getByText("Supporters")).toBeInTheDocument();
+      expect(
+        within(preview()).getByText("zaterdag 25 oktober · 20:00"),
+      ).toBeInTheDocument();
+      expect(
+        within(preview()).getByText("Kantine Driesstraat"),
+      ).toBeInTheDocument();
+      expect(within(preview()).getByText("25")).toBeInTheDocument();
+    });
+
+    it("a deep-linked item preselects even when it is not in the list", () => {
+      const older: ShareItem = {
+        ...TRANSFER,
+        slug: "oud",
+        title: "Oud nieuws",
+        spans: [],
+      };
+      renderTool({ kind: "article", item: older });
+
+      expect(screen.getByRole("button", { name: "Nieuws" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      expect(screen.getByLabelText("Titel")).toHaveValue("Oud nieuws");
+    });
+
+    it("an unknown deep link opens the empty picker with no preview", () => {
+      renderTool({ kind: "event", item: null });
+
+      expect(
+        screen.getByRole("listbox", { name: "Evenementen" }),
+      ).toBeVisible();
+      expect(screen.queryByTestId("share-preview")).toBeNull();
+    });
+
+    it("Omslag starts on Affiche wazig; Foto crops the cover around its hotspot through the same-origin optimizer", async () => {
+      const user = userEvent.setup();
+      renderTool({ kind: "article", item: INTERVIEW });
+
+      expect(
+        screen.getByRole("button", { name: "Affiche wazig" }),
+      ).toHaveAttribute("aria-pressed", "true");
+
+      await user.click(screen.getByRole("button", { name: "Foto" }));
+
+      const src = preview()
+        .querySelector("img[src^='/_next/image']")!
+        .getAttribute("src")!;
+      expect(src).toContain("q=75");
+      const sanity = decodeURIComponent(src);
+      expect(sanity).toContain("crop=focalpoint&fp-x=0.3&fp-y=0.2");
+    });
+
+    it("an event without a cover draws the event fallback picture", () => {
+      renderTool({ kind: "event", item: QUIZ });
+
+      expect(
+        preview().querySelector("img[src='/images/event-fallback.jpg']"),
+      ).not.toBeNull();
+    });
+
+    it("Reservefoto swaps the cover for the look's own fallback picture", async () => {
+      const user = userEvent.setup();
+      renderTool({ kind: "article", item: INTERVIEW });
+
+      await user.click(screen.getByRole("button", { name: "Reservefoto" }));
+
+      expect(
+        preview().querySelector("img[src^='/images/share-fallback/A-']"),
+      ).not.toBeNull();
+    });
+
+    it("Licht / Donker show for every look, the wash steps for Affiche only, defaulting to Licht + Normaal", async () => {
+      const user = userEvent.setup();
+      renderTool({ kind: "article", item: INTERVIEW });
+
+      expect(screen.getByRole("button", { name: "Licht" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      expect(screen.queryByRole("button", { name: "Normaal" })).toBeNull();
+
+      await user.click(screen.getByRole("button", { name: "Affiche" }));
+
+      expect(screen.getByRole("button", { name: "Normaal" })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      expect(screen.getByRole("button", { name: "Zacht" })).toBeVisible();
+      expect(screen.getByRole("button", { name: "Sterk" })).toBeVisible();
+    });
+
+    it("the match flow has no theme, wash or Omslag controls", () => {
+      renderTool();
+
+      expect(screen.queryByRole("button", { name: "Licht" })).toBeNull();
+      expect(screen.queryByRole("button", { name: "Normaal" })).toBeNull();
+      expect(screen.queryByRole("button", { name: "Foto" })).toBeNull();
+    });
+
+    it("captures a news story twice with includeQueryParams at the square size", async () => {
+      const { toPng } = await import("html-to-image");
+      const user = userEvent.setup();
+      renderTool({ kind: "article", item: INTERVIEW });
+
+      await user.click(screen.getByRole("button", { name: /vierkant/i }));
+      await user.click(screen.getByRole("button", { name: /genereer/i }));
+
+      expect(toPng).toHaveBeenCalledTimes(2);
+      expect(toPng).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          width: SQUARE_SIZE,
+          height: SQUARE_SIZE,
+          includeQueryParams: true,
+        }),
+      );
+    });
   });
 });

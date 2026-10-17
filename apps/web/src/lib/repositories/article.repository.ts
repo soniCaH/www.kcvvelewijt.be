@@ -13,6 +13,7 @@ import type {
   RELATED_ARTICLES_QUERY_RESULT,
   MATCH_ARTICLES_QUERY_RESULT,
   RELATED_ARTICLES_BY_PERSON_QUERY_RESULT,
+  SHARE_ARTICLES_QUERY_RESULT,
 } from "../sanity/sanity.types";
 import { formatArticleDate } from "../utils/dates";
 
@@ -250,6 +251,27 @@ export const ARTICLE_BY_SLUG_QUERY =
   }
 }`);
 
+/**
+ * `/share` (#3540): the 20 newest published articles for the story picker,
+ * plus one deep-linked article by `$slug` (`""` = none) so a link to an older
+ * article still opens it. The cover stays the raw asset URL + hotspot: each
+ * story look crops it to its own photo slot (or shows it whole), so a
+ * pre-cropped 16:9 URL would lose the top and bottom of a portrait slot.
+ * `spans` are the title's text runs with the `accent` decorator flag.
+ */
+const SHARE_ARTICLE_PROJECTION = `{
+  "slug": coalesce(slug.current, ""), articleType, publishedAt,
+  "title": coalesce(pt::text(title), title, ""),
+  "spans": title[0].children[]{ "text": coalesce(text, ""), "accent": "accent" in coalesce(marks, []) },
+  "coverUrl": coverImage.asset->url, "hotspot": coverImage.hotspot{ x, y },
+  "eventFact": body[_type == "eventFact"][0]{ date, startTime, location }
+}`;
+
+export const SHARE_ARTICLES_QUERY = defineQuery(`{
+  "list": *[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishedAt desc) [0...20] ${SHARE_ARTICLE_PROJECTION},
+  "picked": *[_type == "article" && slug.current == $slug && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] ${SHARE_ARTICLE_PROJECTION}
+}`);
+
 // ─── View Models ─────────────────────────────────────────────────────────────
 
 /** GROQ projection now returns the final shape — ArticleVM is a type alias.
@@ -313,6 +335,9 @@ export type MatchArticleVM = Omit<
 export type RelatedArticleRef = NonNullable<
   ARTICLE_BY_SLUG_DETAIL["relatedArticles"]
 >[number];
+
+/** One `/share` picker row (#3540) — see `SHARE_ARTICLES_QUERY`. */
+export type ShareArticleRow = SHARE_ARTICLES_QUERY_RESULT["list"][number];
 
 export interface HomepageArticle {
   href: string;
@@ -499,6 +524,14 @@ export interface ArticleRepositoryInterface {
   readonly findByLinkedMatch: (
     matchId: string,
   ) => Effect.Effect<MatchArticleVM[], SanityReadError>;
+  /** `/share` story picker (#3540): the 20 newest published articles, plus
+   *  the deep-linked one by slug (`picked`, `null` for none or unknown). */
+  readonly findForShare: (
+    slug: string | undefined,
+  ) => Effect.Effect<
+    { list: ShareArticleRow[]; picked: ShareArticleRow | null },
+    SanityReadError
+  >;
 }
 
 export class ArticleRepository extends Context.Tag("ArticleRepository")<
@@ -517,6 +550,12 @@ const findRelated = (documentId: string) =>
   ).pipe(Effect.map((rows) => rows.map(widenToArticleVM)));
 
 export const ArticleRepositoryLive = Layer.succeed(ArticleRepository, {
+  // Untagged on purpose: `/share` is `force-dynamic`, an internal tool that
+  // must see an article the moment it is published.
+  findForShare: (slug) =>
+    fetchGroq<SHARE_ARTICLES_QUERY_RESULT>(SHARE_ARTICLES_QUERY, {
+      slug: slug ?? "",
+    }),
   findAll: () =>
     fetchGroq<ARTICLES_QUERY_RESULT>(ARTICLES_QUERY, undefined, {
       revalidate: SANITY_PUBLISH_WINDOW_REVALIDATE,
