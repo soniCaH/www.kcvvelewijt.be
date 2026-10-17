@@ -77,6 +77,15 @@ export const WithoutPillars: Story = {
   },
 };
 
+/** A phone: the ledger with a shared box unfolded — one card per holder, full width. */
+export const OnAPhone: Story = {
+  args: { nodes: onlyPillar("jeugd-organisatie") },
+  parameters: { vr: { viewports: ["mobile"] } },
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByText("Lid Jeugdbestuur"));
+  },
+};
+
 /**
  * 320px: the PDF button sits fully inside the viewport, and the page does not
  * scroll sideways. Geometry, so it lives in this play (not in VR, not in E2E).

@@ -268,11 +268,27 @@ describe("<ClubBook>", () => {
     window.location.hash = "";
   });
 
-  it("opens the row a ?member= link points at on arrival", async () => {
+  it("opens the row a ?member= link points at on arrival, and counts that open once", async () => {
     window.history.replaceState(null, "", "/hulp?member=gdpr");
     render(<ClubBook nodes={nodes} responsibilityPaths={paths} />);
 
     await waitFor(() => expect(row("GDPR")).toHaveProperty("open", true));
+    await waitFor(() => expect(trackEvent).toHaveBeenCalledTimes(1));
+    expect(trackEvent).toHaveBeenLastCalledWith("organigram_member_clicked", {
+      member_id: hashMemberId("shauni"),
+      view: "cards",
+    });
+    window.history.replaceState(null, "", "/");
+  });
+
+  it("does nothing, and throws nothing, for a ?member= id that matches no row", async () => {
+    window.history.replaceState(null, "", "/hulp?member=does-not-exist");
+    render(<ClubBook nodes={nodes} responsibilityPaths={paths} />);
+    // Let the arrival effect run.
+    await Promise.resolve();
+
+    expect(document.querySelectorAll("details[open]")).toHaveLength(0);
+    expect(trackEvent).not.toHaveBeenCalled();
     window.history.replaceState(null, "", "/");
   });
 });

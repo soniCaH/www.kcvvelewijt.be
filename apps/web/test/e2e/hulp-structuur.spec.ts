@@ -42,6 +42,32 @@ async function waitForAnswerSettled(page: Page, region: Locator) {
     .toBe(true);
 }
 
+/**
+ * The `expanded` state the browser exposes to assistive tech for the first
+ * row's summary (Chromium maps `<summary>` to a disclosure triangle). Read from
+ * the accessibility tree, so it is what a screen reader is told, not the DOM
+ * attribute it is derived from.
+ */
+async function announcedExpanded(page: Page): Promise<boolean | undefined> {
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await cdp.send("DOM.enable");
+    const { root } = await cdp.send("DOM.getDocument");
+    const { nodeId } = await cdp.send("DOM.querySelector", {
+      nodeId: root.nodeId,
+      selector: '[data-testid="club-book"] summary',
+    });
+    const { nodes } = await cdp.send("Accessibility.getPartialAXTree", {
+      nodeId,
+      fetchRelatives: false,
+    });
+    const expanded = nodes[0]?.properties?.find((p) => p.name === "expanded");
+    return expanded?.value.value as boolean | undefined;
+  } finally {
+    await cdp.detach();
+  }
+}
+
 /** Waits until the row sits inside the viewport. Polls the position, never the scroll animation. */
 async function expectInView(page: Page, row: Locator) {
   await expect
@@ -107,5 +133,76 @@ test.describe("/hulp structuur", () => {
 
     await gotoBounded(page, `/hulp?member=${encodeURIComponent(nodeId)}`);
     await expectRowOpenAndFocused(page, nodeId);
+  });
+
+  test("a hub-search member result opens the matching row, like the finder link", async ({
+    page,
+  }) => {
+    await gotoBounded(page, "/hulp");
+    const book = page.getByTestId("club-book");
+    await waitForHydrated(book.locator("summary").first());
+
+    // A row of a single box, so its title is the search term and one row answers.
+    const title = await book
+      .locator("details[data-node-ids]")
+      .evaluateAll((rows) => {
+        for (const row of rows) {
+          const text =
+            row.querySelector("summary > span > span")?.textContent ?? "";
+          if (text && !text.includes(" · ")) return text.trim();
+        }
+        return null;
+      });
+    if (!title) throw new Error("no single-box row on /hulp");
+
+    const search = page.locator('#hub-hero [role="combobox"]');
+    await waitForHydrated(search);
+    await search.fill(title);
+    await page
+      .locator('#hub-hero [role="option"]')
+      .filter({ hasText: title })
+      .first()
+      .click();
+
+    await expect(book.locator("details[open]").first()).toBeVisible();
+    await expect(book.locator("details[open] > summary")).toBeFocused();
+    await expectInView(page, book.locator("details[open]").first());
+  });
+
+  test("?member= with an unknown id opens nothing and throws nothing", async ({
+    page,
+  }) => {
+    const errors: string[] = [];
+    page.on("pageerror", (error) => errors.push(error.message));
+
+    await gotoBounded(page, "/hulp?member=does-not-exist");
+    const book = page.getByTestId("club-book");
+    await waitForHydrated(book.locator("summary").first());
+
+    await expect(book.locator("details[open]")).toHaveCount(0);
+    expect(errors).toEqual([]);
+  });
+
+  test("Enter and Space toggle a row, the focus ring shows and the open state is announced", async ({
+    page,
+  }) => {
+    await gotoBounded(page, "/hulp");
+    const book = page.getByTestId("club-book");
+    const summary = book.locator("summary").first();
+    await waitForHydrated(summary);
+    const row = book.locator("details").first();
+
+    await summary.focus();
+    await page.keyboard.press("Enter");
+    await expect(row).toHaveAttribute("open", "");
+    // The global ring: `:focus-visible` matches after a keyboard toggle.
+    expect(await summary.evaluate((el) => el.matches(":focus-visible"))).toBe(
+      true,
+    );
+    await expect.poll(() => announcedExpanded(page)).toBe(true);
+
+    await page.keyboard.press("Space");
+    await expect(row).not.toHaveAttribute("open", "");
+    await expect.poll(() => announcedExpanded(page)).toBe(false);
   });
 });

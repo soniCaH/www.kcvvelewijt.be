@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { deriveStructureIndex } from "./structure-index";
 import type { OrgChartNode } from "@/types/organigram";
+import { explorerFixture } from "../OrganigramExplorer/organigram-explorer.fixture";
 
 const nodes: OrgChartNode[] = [
   {
@@ -59,6 +60,19 @@ describe("deriveStructureIndex", () => {
     ];
 
     expect(deriveStructureIndex(withRoot)).toEqual(deriveStructureIndex(nodes));
+  });
+
+  it("counts the real boxes and distinct people of the explorer fixture, root excluded", () => {
+    const boxes = explorerFixture.filter((node) => node.id !== "club");
+    const people = new Set(
+      boxes.flatMap((node) => node.members.map((m) => m.id)),
+    );
+
+    const index = deriveStructureIndex(explorerFixture);
+
+    expect(index.posities).toBe(boxes.length);
+    expect(index.mensen).toBe(people.size);
+    expect(index.posities).toBe(explorerFixture.length - 1);
   });
 
   it("returns zeroes for an empty organigram", () => {

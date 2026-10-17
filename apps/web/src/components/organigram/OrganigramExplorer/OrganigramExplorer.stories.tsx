@@ -45,32 +45,39 @@ export const SharedNode: Story = {
 /**
  * A long holder name must not push the two-line title out of its card: with a
  * wrapping holder line, "Website & Communicatie" lost its second line. Geometry,
- * so it is a play assertion on the real layout, at a phone width.
+ * so these are play assertions on the real layout: at the narrowest phone the
+ * club supports (320px) and on desktop, the title reads in full — both lines
+ * inside the card, nothing clipped.
  */
-export const LongHolderNameKeepsTheTitle: Story = {
+const longHolderNodes = explorerFixture.map((node) =>
+  node.id === "website"
+    ? {
+        ...node,
+        members: [{ id: "long", name: "Kevin Van Ransbeeck-Vandenbroucke" }],
+      }
+    : node,
+);
+
+async function expectTitleReadsInFull(canvasElement: HTMLElement) {
+  const card = await within(canvasElement).findByTestId("spotlight-node-card");
+  const title = card.firstElementChild as HTMLElement;
+  await expect(title).toHaveTextContent("Website & Communicatie");
+  await expect(title.scrollHeight).toBeLessThanOrEqual(title.clientHeight);
+  await expect(card.scrollHeight).toBeLessThanOrEqual(card.clientHeight);
+}
+
+export const WebsiteTitleReadsInFullAt320: Story = {
   tags: ["!vr"],
-  args: {
-    initialFocusId: "website",
-    nodes: explorerFixture.map((node) =>
-      node.id === "website"
-        ? {
-            ...node,
-            members: [
-              { id: "long", name: "Kevin Van Ransbeeck-Vandenbroucke" },
-            ],
-          }
-        : node,
-    ),
-  },
-  globals: { viewport: { value: "kcvvMobile" } },
-  play: async ({ canvasElement }) => {
-    const card = await within(canvasElement).findByTestId(
-      "spotlight-node-card",
-    );
-    const title = card.firstElementChild as HTMLElement;
-    await expect(title.scrollHeight).toBeLessThanOrEqual(title.clientHeight);
-    await expect(card.scrollHeight).toBeLessThanOrEqual(card.clientHeight);
-  },
+  args: { initialFocusId: "website", nodes: longHolderNodes },
+  globals: { viewport: { value: "kcvvExplorerPhone" } },
+  play: ({ canvasElement }) => expectTitleReadsInFull(canvasElement),
+};
+
+export const WebsiteTitleReadsInFullOnDesktop: Story = {
+  tags: ["!vr"],
+  args: { initialFocusId: "website", nodes: longHolderNodes },
+  globals: { viewport: { value: "kcvvExplorerDesktop" } },
+  play: ({ canvasElement }) => expectTitleReadsInFull(canvasElement),
 };
 
 /**

@@ -28,25 +28,34 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 /**
- * The chart is far wider than a phone, and it used to open scrolled to the far
- * left of the tree. Geometry, so a play assertion on the real layout: the
- * root box sits in the middle of the scroll track on arrival.
+ * The chart is far wider than most viewports, and it used to open scrolled to
+ * the far left of the tree. Geometry, so a play assertion on the real layout:
+ * the root box sits in the middle of the scroll track on arrival, fully in view,
+ * with no sideways scrolling.
  */
-export const OpensCenteredOnTheRoot: Story = {
+async function expectRootInView(canvasElement: HTMLElement) {
+  const track = canvasElement.querySelector<HTMLElement>(".vo-chart");
+  const root = canvasElement.querySelector<HTMLElement>('[data-state="root"]');
+  if (!track || !root) throw new Error("chart track or root box missing");
+  // The track really overflows, or the assertion proves nothing.
+  await expect(track.scrollWidth).toBeGreaterThan(track.clientWidth);
+  const t = track.getBoundingClientRect();
+  const r = root.getBoundingClientRect();
+  await expect(r.left).toBeGreaterThanOrEqual(t.left);
+  await expect(r.right).toBeLessThanOrEqual(t.right);
+  await expect(
+    Math.abs(r.left + r.width / 2 - (t.left + t.width / 2)),
+  ).toBeLessThanOrEqual(2);
+}
+
+export const OpensWithTheRootInViewAt390: Story = {
   tags: ["!vr"],
-  globals: { viewport: { value: "kcvvMobile" } },
-  play: async ({ canvasElement }) => {
-    const track = canvasElement.querySelector<HTMLElement>(".vo-chart");
-    const root = canvasElement.querySelector<HTMLElement>(
-      '[data-state="root"]',
-    );
-    if (!track || !root) throw new Error("chart track or root box missing");
-    // The track really overflows, or the assertion proves nothing.
-    await expect(track.scrollWidth).toBeGreaterThan(track.clientWidth);
-    const t = track.getBoundingClientRect();
-    const r = root.getBoundingClientRect();
-    await expect(
-      Math.abs(r.left + r.width / 2 - (t.left + t.width / 2)),
-    ).toBeLessThanOrEqual(2);
-  },
+  globals: { viewport: { value: "kcvvPhone390" } },
+  play: ({ canvasElement }) => expectRootInView(canvasElement),
+};
+
+export const OpensWithTheRootInViewOnDesktop: Story = {
+  tags: ["!vr"],
+  globals: { viewport: { value: "kcvvExplorerDesktop" } },
+  play: ({ canvasElement }) => expectRootInView(canvasElement),
 };
