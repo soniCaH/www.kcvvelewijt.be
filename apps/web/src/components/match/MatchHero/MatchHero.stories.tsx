@@ -10,10 +10,11 @@ const meta = {
   parameters: { layout: "padded" },
   decorators: [
     (Story, { parameters }) => (
-      // `phoneFrame` mirrors the live page at phone width (16px gutters); the
-      // default frame's 40px would squeeze the card well below what ships.
+      // `phoneFrame` mirrors the live page at phone width (16px gutters, 40px
+      // from `md`); the default frame's 40px would squeeze the card well
+      // below what ships, and wrap names the page would not.
       <div
-        className={`bg-cream-soft min-h-[400px] ${parameters.phoneFrame ? "p-4" : "p-10"}`}
+        className={`bg-cream-soft min-h-[400px] ${parameters.phoneFrame ? "p-4 md:p-10" : "p-10"}`}
       >
         <div className="mx-auto max-w-[760px]">
           <Story />
@@ -114,6 +115,7 @@ export const Stopped: Story = {
 };
 
 export const LongTeamNames: Story = {
+  parameters: { phoneFrame: true },
   args: {
     match: {
       ...baseMatch,
@@ -136,6 +138,7 @@ export const LongTeamNames: Story = {
 };
 
 export const NoLogos: Story = {
+  parameters: { phoneFrame: true },
   args: {
     match: {
       ...baseMatch,
@@ -245,19 +248,11 @@ export const MobileCollapse: Story = {
     },
   },
   parameters: {
+    phoneFrame: true,
     // Locks the stacked-grid collapse, which only shows at narrow widths
     // (#2803).
     vr: { viewports: ["mobile"] },
   },
-  decorators: [
-    (Story) => (
-      <div className="bg-cream-soft min-h-[600px] p-4">
-        <div className="mx-auto max-w-[360px]">
-          <Story />
-        </div>
-      </div>
-    ),
-  ],
 };
 
 // ── Mobile stacked layout (#3503) ───────────────────────────────────────────
