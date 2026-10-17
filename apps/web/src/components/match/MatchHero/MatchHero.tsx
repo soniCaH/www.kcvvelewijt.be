@@ -208,31 +208,56 @@ function ScoreRegion({
   }
 }
 
-function TeamShieldFallback({ name }: { name: string }) {
+function TeamShieldFallback({
+  name,
+  className,
+}: {
+  name: string;
+  className?: string;
+}) {
   const initial = name.trim().charAt(0).toLocaleUpperCase("nl-BE") || "·";
   return (
     <span
       aria-hidden="true"
-      className="border-ink bg-cream-soft text-ink font-display-big inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 text-[18px] leading-none font-black"
+      data-team-part="crest"
+      className={cn(
+        "border-ink bg-cream-soft text-ink font-display-big inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 text-[18px] leading-none font-black",
+        className,
+      )}
     >
       {initial}
     </span>
   );
 }
 
+/**
+ * `stacked` (the full hero only): below `md` the wrapper vanishes
+ * (`contents`) and its crest and name become cells of the `<h1>`'s two-row
+ * grid — crests on row 1, names on row 2 — so both crests and both names
+ * start level whatever the line count of either name, and the score centres
+ * on row 1 (see `FullHeroCard`). From `md` up nothing changes. The
+ * reservation hero keeps the single-row layout.
+ */
 function TeamSlot({
   team,
   align,
+  stacked = false,
 }: {
   team: MatchHeroTeam;
   align: "start" | "end";
+  stacked?: boolean;
 }) {
   const isEnd = align === "end";
+  const col = isEnd ? "max-md:col-start-3" : "max-md:col-start-1";
+  const crestCell = stacked
+    ? cn(col, "max-md:row-start-1 max-md:justify-self-center")
+    : undefined;
   return (
     <div
       className={cn(
         "flex min-w-0 items-center gap-3",
         isEnd && "flex-row-reverse text-right",
+        stacked && "max-md:contents",
       )}
     >
       {team.logo ? (
@@ -242,14 +267,26 @@ function TeamSlot({
           width={40}
           height={40}
           unoptimized
-          className="h-10 w-10 shrink-0 object-contain"
+          data-team-part="crest"
+          className={cn("h-10 w-10 shrink-0 object-contain", crestCell)}
         />
       ) : (
-        <TeamShieldFallback name={team.name} />
+        <TeamShieldFallback name={team.name} className={crestCell} />
       )}
       <span
+        data-team-part="name"
         title={team.name.trim() || undefined}
-        className="font-display text-ink min-w-0 flex-1 truncate text-[18px] leading-tight italic md:text-[22px]"
+        className={cn(
+          "font-display text-ink min-w-0 flex-1 truncate text-[18px] leading-tight italic md:text-[22px]",
+          // `max-md:` keeps the desktop class list exactly as it was. A name
+          // wraps under its crest, capped at three lines; `wrap-break-word` stops
+          // a long hyphenated name poking out of its column.
+          stacked &&
+            cn(
+              col,
+              "max-md:row-start-2 max-md:line-clamp-3 max-md:text-center max-md:wrap-break-word max-md:whitespace-normal",
+            ),
+        )}
       >
         {team.name}
       </span>
@@ -443,16 +480,19 @@ function FullHeroCard({
           {/* `font-normal` because the base `h1` rule is bold and the slots
               inside set their own weight — without it the two club names, which
               carry no explicit weight, would thicken on this one route. */}
-          <h1 className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 font-normal md:gap-6">
-            <TeamSlot team={homeTeam} align="start" />
-            <div className="flex items-center justify-center">
+          {/* Below `md` it is a two-row grid (crests, then names): `items-start`
+              keeps both names on one line whatever their length, and the score
+              cell sits on row 1 only so it centres on the crest row. */}
+          <h1 className="grid grid-cols-[1fr_auto_1fr] items-start gap-x-3 gap-y-2 font-normal md:items-center md:gap-6">
+            <TeamSlot team={homeTeam} align="start" stacked />
+            <div className="flex items-center justify-center max-md:col-start-2 max-md:row-start-1 max-md:self-center">
               <ScoreRegion
                 status={status}
                 homeScore={homeTeam.score}
                 awayScore={awayTeam.score}
               />
             </div>
-            <TeamSlot team={awayTeam} align="end" />
+            <TeamSlot team={awayTeam} align="end" stacked />
           </h1>
 
           <MetaLine parts={metaParts} />

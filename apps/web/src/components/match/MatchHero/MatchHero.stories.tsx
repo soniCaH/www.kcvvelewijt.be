@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect } from "storybook/test";
 import { MatchHero } from "./MatchHero";
 import { fixtureImage } from "@test-fixtures/images";
 
@@ -8,8 +9,12 @@ const meta = {
   tags: ["autodocs", "vr"],
   parameters: { layout: "padded" },
   decorators: [
-    (Story) => (
-      <div className="bg-cream-soft min-h-[400px] p-10">
+    (Story, { parameters }) => (
+      // `phoneFrame` mirrors the live page at phone width (16px gutters); the
+      // default frame's 40px would squeeze the card well below what ships.
+      <div
+        className={`bg-cream-soft min-h-[400px] ${parameters.phoneFrame ? "p-4" : "p-10"}`}
+      >
         <div className="mx-auto max-w-[760px]">
           <Story />
         </div>
@@ -253,4 +258,167 @@ export const MobileCollapse: Story = {
       </div>
     ),
   ],
+};
+
+// ── Mobile stacked layout (#3503) ───────────────────────────────────────────
+// Below `md` each team stacks crest-over-name and the score centres on the
+// crest row. These are layout facts, so they are asserted at runtime in the
+// named viewports (`globals.viewport`, honoured by `pnpm test:storybook`) —
+// happy-dom has no layout. Names wrap, so the assertions compare the two
+// sides to each other rather than hard-code a line count a fallback font
+// could change.
+
+interface HeroGeometry {
+  crests: HTMLElement[];
+  names: HTMLElement[];
+  score: HTMLElement;
+}
+
+async function heroGeometry(canvasElement: HTMLElement): Promise<HeroGeometry> {
+  await document.fonts.ready;
+  const h1 = canvasElement.querySelector("h1") as HTMLElement;
+  const all = (part: string) =>
+    Array.from(h1.querySelectorAll<HTMLElement>(`[data-team-part="${part}"]`));
+  return {
+    crests: all("crest"),
+    names: all("name"),
+    score: h1.querySelector<HTMLElement>("[data-score-state]") as HTMLElement,
+  };
+}
+
+const mid = (r: DOMRect) => r.top + r.height / 2;
+
+function assertStackedHero({ crests, names, score }: HeroGeometry) {
+  expect(crests).toHaveLength(2);
+  expect(names).toHaveLength(2);
+  for (const name of names) {
+    expect(name.scrollWidth).toBeLessThanOrEqual(name.clientWidth);
+  }
+  const [c0, c1] = crests.map((el) => el.getBoundingClientRect());
+  expect(Math.abs(c0.top - c1.top)).toBeLessThanOrEqual(1);
+  const [n0, n1] = names.map((el) => el.getBoundingClientRect());
+  expect(Math.abs(n0.top - n1.top)).toBeLessThanOrEqual(1);
+  // Crest ABOVE name, not beside it.
+  expect(n0.top).toBeGreaterThanOrEqual(c0.bottom);
+  expect(
+    Math.abs(mid(score.getBoundingClientRect()) - mid(c0)),
+  ).toBeLessThanOrEqual(2);
+}
+
+// 6 + 8 + 6 letters: three lines at both 320px and 375px, 22 characters.
+const threeLineName = "Lierse Sporting Kempen";
+
+const stackedMatch = {
+  ...baseMatch,
+  date: finishedDate,
+  homeTeam: { ...defaultHomeTeam, score: 3 },
+  awayTeam: { ...defaultAwayTeam, name: threeLineName, score: 1 },
+  status: "finished",
+} as const;
+
+/**
+ * A short name beside a 22-character one at 320px, the narrowest phone the
+ * club supports: both crests and both names start on the same line, nothing
+ * overflows, the score sits on the crest row.
+ */
+export const MobileStacked320: Story = {
+  args: { match: stackedMatch },
+  globals: { viewport: { value: "mobile1" } },
+  parameters: { phoneFrame: true, vr: { viewports: ["mobile"] } },
+  play: async ({ canvasElement }) => {
+    const geometry = await heroGeometry(canvasElement);
+    assertStackedHero(geometry);
+    const [home, away] = geometry.names;
+    // The long name takes more lines than the short one.
+    expect(away.getBoundingClientRect().height).toBeGreaterThan(
+      home.getBoundingClientRect().height,
+    );
+  },
+};
+
+/** The same pair at 375px. Play-only: the VR mobile capture is 375 already. */
+export const MobileStacked375: Story = {
+  args: { match: stackedMatch },
+  globals: { viewport: { value: "kcvvMobile" } },
+  parameters: { phoneFrame: true },
+  tags: ["!vr"],
+  play: async ({ canvasElement }) => {
+    const geometry = await heroGeometry(canvasElement);
+    assertStackedHero(geometry);
+    const [home, away] = geometry.names;
+    expect(away.getBoundingClientRect().height).toBeGreaterThan(
+      home.getBoundingClientRect().height,
+    );
+  },
+};
+
+/**
+ * A club without a logo: `TeamShieldFallback` takes the same 40x40 slot as a
+ * crest, so the crest row stays level.
+ */
+export const MobileNoLogo: Story = {
+  args: {
+    match: {
+      ...stackedMatch,
+      homeTeam: { id: defaultHomeTeam.id, name: "KCVV Elewijt", score: 3 },
+    },
+  },
+  globals: { viewport: { value: "mobile1" } },
+  parameters: { phoneFrame: true, vr: { viewports: ["mobile"] } },
+  play: async ({ canvasElement }) => {
+    assertStackedHero(await heroGeometry(canvasElement));
+  },
+};
+
+/** The scheduled "vs" mark centres on the crest row, not on the name rows. */
+export const MobileScheduledVs: Story = {
+  args: {
+    match: {
+      ...baseMatch,
+      awayTeam: { ...defaultAwayTeam, name: threeLineName },
+      status: "scheduled",
+    },
+  },
+  globals: { viewport: { value: "mobile1" } },
+  parameters: { phoneFrame: true, vr: { viewports: ["mobile"] } },
+  play: async ({ canvasElement }) => {
+    const geometry = await heroGeometry(canvasElement);
+    assertStackedHero(geometry);
+    expect(geometry.score).toHaveAttribute("data-score-state", "vs");
+  },
+};
+
+/**
+ * A 30-character name at 320px caps at three lines; the full name stays in
+ * `title`.
+ */
+export const MobileThirtyCharName: Story = {
+  args: {
+    match: {
+      ...stackedMatch,
+      awayTeam: {
+        ...defaultAwayTeam,
+        name: "Boortmeerbeek-Hever-Schiplaken",
+        score: 1,
+      },
+    },
+  },
+  globals: { viewport: { value: "mobile1" } },
+  parameters: { phoneFrame: true, vr: { viewports: ["mobile"] } },
+  play: async ({ canvasElement }) => {
+    const { names, crests } = await heroGeometry(canvasElement);
+    const away = names[1];
+    expect(away).toHaveAttribute("title", "Boortmeerbeek-Hever-Schiplaken");
+    const lineHeight = parseFloat(getComputedStyle(away).lineHeight);
+    const height = away.getBoundingClientRect().height;
+    // Wraps (no ellipsis on one line) and stops at three lines.
+    expect(height).toBeGreaterThan(lineHeight * 1.5);
+    expect(height).toBeLessThanOrEqual(lineHeight * 3 + 1);
+    expect(
+      Math.abs(
+        crests[0].getBoundingClientRect().top -
+          crests[1].getBoundingClientRect().top,
+      ),
+    ).toBeLessThanOrEqual(1);
+  },
 };
