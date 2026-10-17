@@ -21,8 +21,10 @@ import {
 
 export interface LookItem {
   key: string;
-  kind: "article" | "event";
+  kind: "article" | "event" | "match";
   articleType?: string;
+  /** #3519: a match moment rendered in the look. */
+  match?: MatchBits;
   eventType?: string;
   title: string;
   /** Title split on the `accent` decorator; events have one plain span. */
@@ -38,7 +40,27 @@ export interface LookItem {
   draft?: number;
 }
 
-type Format = "story" | "square";
+export type Moment =
+  "kickoff" | "halftime" | "fulltime" | "goal" | "against" | "card";
+export interface MatchBits {
+  moment: Moment;
+  away: string;
+  awayLogo: string;
+  competition: string;
+  score?: string;
+  minute?: string;
+  player?: string;
+  card?: "yellow" | "red";
+}
+
+/** #3519 drag tags: `levels` = the variants (1 fine, 2 groups, 3 frame) in which it moves. */
+export const mv = (name: string, levels: string) => ({
+  "data-move": levels,
+  "data-name": name,
+});
+export const pin = (name: string) => ({ "data-pin": name });
+
+export type Format = "story" | "square";
 const W = 1080;
 const H: Record<Format, number> = { story: 1920, square: 1080 };
 const FALLBACK = "/images/event-fallback.jpg";
@@ -117,7 +139,48 @@ const EVENT_STYLE: Record<string, TypeStyle> = {
     accent: "dateblock",
   },
 };
+// #3519 placeholder: the real per-moment table is written in the spec (#3510).
+const MOMENT_STYLE: Record<Moment, TypeStyle> = {
+  kickoff: {
+    label: "Aftrap",
+    fill: TOKENS.jerseyDeep,
+    onFill: TOKENS.cream,
+    accent: "none",
+  },
+  halftime: {
+    label: "Rust",
+    fill: TOKENS.warm,
+    onFill: TOKENS.ink,
+    accent: "none",
+  },
+  fulltime: {
+    label: "Eindstand",
+    fill: TOKENS.ink,
+    onFill: TOKENS.cream,
+    accent: "none",
+  },
+  goal: {
+    label: "Goal",
+    fill: JERSEY_BRIGHT,
+    onFill: TOKENS.ink,
+    accent: "none",
+  },
+  against: {
+    label: "Tegengoal",
+    fill: TOKENS.inkSoft,
+    onFill: TOKENS.cream,
+    accent: "none",
+  },
+  card: { label: "Kaart", fill: "#f2c230", onFill: TOKENS.ink, accent: "none" },
+};
 function styleOf(it: LookItem): TypeStyle {
+  if (it.match) {
+    const m = MOMENT_STYLE[it.match.moment];
+    if (it.match.moment !== "card") return m;
+    return it.match.card === "red"
+      ? { ...m, label: "Rode kaart", fill: "#c0392b", onFill: TOKENS.cream }
+      : { ...m, label: "Gele kaart" };
+  }
   return it.kind === "event"
     ? (EVENT_STYLE[it.eventType ?? "Andere"] ?? EVENT_STYLE.Andere!)
     : (ARTICLE_STYLE[it.articleType ?? "announcement"] ??
@@ -132,7 +195,18 @@ function photo(it: LookItem, w: number, h: number): string {
   return `/_next/image?url=${encodeURIComponent(src)}&w=1080&q=75`;
 }
 const isEventish = (it: LookItem) =>
-  it.kind === "event" || it.articleType === "event";
+  it.kind === "event" ||
+  it.articleType === "event" ||
+  it.match?.moment === "kickoff";
+const hasMeta = (it: LookItem) => isEventish(it) || Boolean(it.match);
+/** Match kicker: moment + minute ("Goal · 67'"); else the date line. */
+function kickerText(it: LookItem, s: TypeStyle): string {
+  if (it.match)
+    return [s.label, it.match.minute && `${it.match.minute}'`]
+      .filter(Boolean)
+      .join(" · ");
+  return dateLine(it) || s.label;
+}
 function dateLine(it: LookItem): string {
   if (!it.date) return "";
   const d = new Date(it.date);
@@ -170,6 +244,7 @@ function dayMonth(it: LookItem): { day: string; month: string } {
   };
 }
 function metaParts(it: LookItem): string[] {
+  if (it.match && it.match.moment !== "kickoff") return [it.match.competition];
   // Owner: date + hour on one line, location on the next.
   const when = [dateLine(it), timeLine(it)].filter(Boolean).join(" · ");
   return [when, isEventish(it) ? it.location : null].filter((x): x is string =>
@@ -533,6 +608,66 @@ function Accent({
   }
 }
 
+/** #3519: the match block — crests for Aftrap, the score otherwise, a card for Kaart. */
+function Hero({
+  it,
+  color,
+  size = 1,
+}: {
+  it: LookItem;
+  color: string;
+  size?: number;
+}) {
+  const m = it.match;
+  if (!m) return null;
+  const num: React.CSSProperties = {
+    fontFamily: DISPLAY_FONT,
+    fontWeight: 900,
+    fontSize: 220 * size,
+    lineHeight: 0.85,
+    color,
+    letterSpacing: "-0.02em",
+  };
+  if (m.moment === "kickoff")
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: 36 * size }}>
+        <Crest size={170 * size} />
+        <span style={{ ...num, fontSize: 90 * size, fontStyle: "italic" }}>
+          vs.
+        </span>
+        <img
+          src={m.awayLogo}
+          alt=""
+          style={{ width: 170 * size, height: 170 * size, display: "block" }}
+        />
+      </div>
+    );
+  if (m.moment === "card")
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: 40 * size }}>
+        <span
+          style={{
+            width: 120 * size,
+            height: 170 * size,
+            background: m.card === "red" ? "#c0392b" : "#f2c230",
+            border: `4px solid ${TOKENS.ink}`,
+            transform: "rotate(-8deg)",
+            boxShadow: `8px 8px 0 ${TOKENS.ink}`,
+          }}
+        />
+        <span style={num}>{m.minute}&apos;</span>
+      </div>
+    );
+  const [h, a] = (m.score ?? "0-0").split("-");
+  return (
+    <div style={{ display: "flex", alignItems: "baseline", gap: 28 * size }}>
+      <span style={num}>{h}</span>
+      <span style={{ ...num, opacity: 0.5 }}>—</span>
+      <span style={num}>{a}</span>
+    </div>
+  );
+}
+
 function Canvas({
   f,
   bg,
@@ -588,8 +723,8 @@ function Grain() {
 }
 
 // ── Licht / Donker (#3511 switch, here tried on every look) ───────────────
-type Theme = "light" | "dark";
-const ThemeCtx = createContext<Theme>("light");
+export type Theme = "light" | "dark";
+export const ThemeCtx = createContext<Theme>("light");
 interface Pal {
   ground: string;
   surface: string;
@@ -665,13 +800,20 @@ function LookA({ it, f }: { it: LookItem; f: Format }) {
           zIndex: 2,
         }}
       >
-        <div style={{ flex: 1, minHeight: photoH, position: "relative" }}>
+        <div
+          {...pin("Foto")}
+          style={{ flex: 1, minHeight: photoH, position: "relative" }}
+        >
           <Img src={photo(it, W, H[f])} />
-          <div style={{ position: "absolute", top: 56, left: 64 }}>
+          <div
+            {...pin("Clublogo")}
+            style={{ position: "absolute", top: 56, left: 64 }}
+          >
             <Crest size={sq ? 84 : 104} />
           </div>
         </div>
         <div
+          {...mv("Kaart (alles erin)", "3")}
           style={{
             position: "relative",
             margin: sq ? "-170px 72px 0" : "-220px 72px 0",
@@ -687,30 +829,54 @@ function LookA({ it, f }: { it: LookItem; f: Format }) {
         >
           <span style={bracket("tl")} />
           <span style={bracket("br")} />
-          <Stamp
-            s={unclash(s, p.surface)}
-            size={sq ? 28 : 34}
-            style={{ position: "absolute", top: -30, right: 56 }}
-          />
-          {s.accent === "quote" && (
-            <Accent it={it} s={s} color={p.accent} size={sq ? 0.6 : 1} />
+          <div
+            {...mv("Stempel", "1 2")}
+            style={{ position: "absolute", top: -30, right: 56, zIndex: 3 }}
+          >
+            <Stamp s={unclash(s, p.surface)} size={sq ? 28 : 34} />
+          </div>
+          {it.match && (
+            <div {...mv("Uitslag / logo's", "1 2")}>
+              <Hero it={it} color={p.text} size={sq ? 0.55 : 0.8} />
+            </div>
           )}
-          <RuleKicker
-            text={dateLine(it) || s.label}
-            color={p.accent}
-            size={sq ? 26 : 30}
-          />
-          <Title
-            it={it}
-            size={sq ? 76 : 100}
-            color={p.text}
-            accent={p.accent}
-          />
-          {isEventish(it) && (
-            <Meta it={it} color={p.soft} size={sq ? 26 : 32} />
-          )}
+          <div
+            {...mv("Tekst", "2")}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: sq ? 24 : 36,
+            }}
+          >
+            {s.accent === "quote" && (
+              <div {...mv("Aanhalingsteken", "1")}>
+                <Accent it={it} s={s} color={p.accent} size={sq ? 0.6 : 1} />
+              </div>
+            )}
+            <div {...mv("Kicker", "1")}>
+              <RuleKicker
+                text={kickerText(it, s)}
+                color={p.accent}
+                size={sq ? 26 : 30}
+              />
+            </div>
+            <div {...mv("Titel", "1")}>
+              <Title
+                it={it}
+                size={sq ? 76 : 100}
+                color={p.text}
+                accent={p.accent}
+              />
+            </div>
+            {hasMeta(it) && (
+              <div {...mv("Info", "1")}>
+                <Meta it={it} color={p.soft} size={sq ? 26 : 32} />
+              </div>
+            )}
+          </div>
         </div>
         <div
+          {...pin("Voet")}
           style={{
             padding: sq ? "40px 72px 36px" : "64px 72px 64px",
             display: "flex",
@@ -765,6 +931,7 @@ function LookB({ it, f }: { it: LookItem; f: Format }) {
   );
   const print = (w: number, h: number | string, rot: number) => (
     <div
+      {...mv("Foto-print", "3")}
       style={{
         position: "relative",
         width: w,
@@ -811,11 +978,30 @@ function LookB({ it, f }: { it: LookItem; f: Format }) {
               justifyContent: "center",
             }}
           >
-            {tapeChip}
-            <Accent it={it} s={s} color={p.accent} size={0.55} />
-            <Title it={it} size={66} color={p.text} accent={p.accent} />
-            <Meta it={it} color={p.soft} size={24} />
             <div
+              {...mv("Tekst", "2")}
+              style={{ display: "flex", flexDirection: "column", gap: 28 }}
+            >
+              <div {...mv("Label", "1")} style={{ alignSelf: "flex-start" }}>
+                {tapeChip}
+              </div>
+              {it.match && (
+                <div {...mv("Uitslag / logo's", "1")}>
+                  <Hero it={it} color={p.text} size={0.45} />
+                </div>
+              )}
+              <div {...mv("Detail", "1")}>
+                <Accent it={it} s={s} color={p.accent} size={0.55} />
+              </div>
+              <div {...mv("Titel", "1")}>
+                <Title it={it} size={66} color={p.text} accent={p.accent} />
+              </div>
+              <div {...mv("Info", "1")}>
+                <Meta it={it} color={p.soft} size={24} />
+              </div>
+            </div>
+            <div
+              {...pin("Clublogo + website")}
               style={{
                 display: "flex",
                 alignItems: "center",
@@ -851,10 +1037,19 @@ function LookB({ it, f }: { it: LookItem; f: Format }) {
             alignItems: "center",
           }}
         >
-          {tapeChip}
-          <Crest size={104} />
+          <div {...mv("Label", "1 2")}>{tapeChip}</div>
+          <div {...pin("Clublogo")}>
+            <Crest size={104} />
+          </div>
         </div>
-        <Title it={it} size={112} color={p.text} accent={p.accent} />
+        <div {...mv("Titel", "1 2")}>
+          <Title it={it} size={112} color={p.text} accent={p.accent} />
+        </div>
+        {it.match && (
+          <div {...mv("Uitslag / logo's", "1 2")}>
+            <Hero it={it} color={p.text} size={0.8} />
+          </div>
+        )}
         <div
           style={{
             display: "flex",
@@ -875,6 +1070,7 @@ function LookB({ it, f }: { it: LookItem; f: Format }) {
           }}
         >
           <div
+            {...mv("Info + detail", "2")}
             style={{
               display: "flex",
               alignItems: "flex-end",
@@ -882,12 +1078,18 @@ function LookB({ it, f }: { it: LookItem; f: Format }) {
               gap: 24,
             }}
           >
-            <Meta it={it} color={p.soft} size={32} />
-            {s.accent !== "quote" && (
-              <Accent it={it} s={s} color={p.accent} size={0.7} />
+            <div {...mv("Info", "1")}>
+              <Meta it={it} color={p.soft} size={32} />
+            </div>
+            {s.accent !== "quote" && s.accent !== "none" && (
+              <div {...mv("Detail", "1")}>
+                <Accent it={it} s={s} color={p.accent} size={0.7} />
+              </div>
             )}
           </div>
-          <RuleKicker text="kcvvelewijt.be" color={p.accent} size={30} />
+          <div {...pin("Voet")}>
+            <RuleKicker text="kcvvelewijt.be" color={p.accent} size={30} />
+          </div>
         </div>
       </div>
     </Canvas>
@@ -904,7 +1106,10 @@ function LookC({ it, f }: { it: LookItem; f: Format }) {
   const footH = sq ? 88 : 120;
   return (
     <Canvas f={f} bg={TOKENS.jerseyDeepDark}>
-      <div style={{ position: "absolute", inset: 0, bottom: footH }}>
+      <div
+        {...pin("Foto")}
+        style={{ position: "absolute", inset: 0, bottom: footH }}
+      >
         <Img
           src={photo(it, W, H[f] - footH)}
           style={{ filter: "sepia(0.25) saturate(0.9) contrast(1.05)" }}
@@ -921,6 +1126,7 @@ function LookC({ it, f }: { it: LookItem; f: Format }) {
         }}
       />
       <div
+        {...pin("Clublogo")}
         style={{
           position: "absolute",
           top: sq ? 48 : 64,
@@ -932,6 +1138,7 @@ function LookC({ it, f }: { it: LookItem; f: Format }) {
       </div>
       {s.accent !== "quote" && s.accent !== "none" && (
         <div
+          {...mv("Detail", "1 2 3")}
           style={{
             position: "absolute",
             top: sq ? 56 : 72,
@@ -955,6 +1162,7 @@ function LookC({ it, f }: { it: LookItem; f: Format }) {
         </div>
       )}
       <div
+        {...mv("Hele tekstblok", "3")}
         style={{
           position: "absolute",
           left: sq ? 56 : 72,
@@ -966,39 +1174,65 @@ function LookC({ it, f }: { it: LookItem; f: Format }) {
           zIndex: 2,
         }}
       >
-        {s.accent === "quote" && (
-          <Accent it={it} s={s} color={p.accent} size={sq ? 0.6 : 1} />
+        {it.match && (
+          <div {...mv("Uitslag / logo's", "1 2")}>
+            <Hero
+              it={it}
+              color={p.dark ? TOKENS.cream : TOKENS.ink}
+              size={sq ? 0.55 : 0.85}
+            />
+          </div>
         )}
-        <span
+        <div
+          {...mv("Tekst", "2")}
           style={{
-            alignSelf: "flex-start",
-            background: s.fill,
-            color: s.onFill,
-            border:
-              s.fill === TOKENS.cream ? `4px solid ${TOKENS.ink}` : "none",
-            padding: sq ? "10px 20px" : "14px 28px",
-            fontFamily: MONO_FONT,
-            fontWeight: 700,
-            fontSize: sq ? 26 : 34,
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
+            display: "flex",
+            flexDirection: "column",
+            gap: sq ? 22 : 34,
           }}
         >
-          {s.label}
-        </span>
-        <Title
-          it={it}
-          size={sq ? 84 : 124}
-          color={p.dark ? TOKENS.cream : TOKENS.ink}
-          accent={p.accent}
-        />
-        <Meta
-          it={it}
-          color={p.dark ? "rgba(245,241,230,0.88)" : TOKENS.inkSoft}
-          size={sq ? 26 : 34}
-        />
+          {s.accent === "quote" && (
+            <div {...mv("Aanhalingsteken", "1")}>
+              <Accent it={it} s={s} color={p.accent} size={sq ? 0.6 : 1} />
+            </div>
+          )}
+          <span
+            {...mv("Label", "1")}
+            style={{
+              alignSelf: "flex-start",
+              background: s.fill,
+              color: s.onFill,
+              border:
+                s.fill === TOKENS.cream ? `4px solid ${TOKENS.ink}` : "none",
+              padding: sq ? "10px 20px" : "14px 28px",
+              fontFamily: MONO_FONT,
+              fontWeight: 700,
+              fontSize: sq ? 26 : 34,
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+            }}
+          >
+            {s.label}
+          </span>
+          <div {...mv("Titel", "1")}>
+            <Title
+              it={it}
+              size={sq ? 84 : 124}
+              color={p.dark ? TOKENS.cream : TOKENS.ink}
+              accent={p.accent}
+            />
+          </div>
+          <div {...mv("Info", "1")}>
+            <Meta
+              it={it}
+              color={p.dark ? "rgba(245,241,230,0.88)" : TOKENS.inkSoft}
+              size={sq ? 26 : 34}
+            />
+          </div>
+        </div>
       </div>
       <div
+        {...pin("Streep")}
         style={{
           position: "absolute",
           left: 0,
@@ -1010,6 +1244,7 @@ function LookC({ it, f }: { it: LookItem; f: Format }) {
         <Seam id={`c-seam-${it.key}-${f}`} h={sq ? 20 : 28} />
       </div>
       <div
+        {...pin("Voet")}
         style={{
           position: "absolute",
           left: 0,
@@ -1215,8 +1450,14 @@ function LookE({ it, f }: { it: LookItem; f: Format }) {
         alignItems: "flex-start",
       }}
     >
-      {isEventish(it) && (
+      {it.match && (
+        <div {...mv("Uitslag / logo's", "1 2")}>
+          <Hero it={it} color={tText} size={sq ? 0.42 : 0.6} />
+        </div>
+      )}
+      {isEventish(it) && !it.match && (
         <div
+          {...mv("Datumblok", "1 2")}
           style={{
             display: "flex",
             flexDirection: "column",
@@ -1252,6 +1493,7 @@ function LookE({ it, f }: { it: LookItem; f: Format }) {
         </div>
       )}
       <div
+        {...mv("Tekst", "2")}
         style={{
           display: "flex",
           flexDirection: "column",
@@ -1261,6 +1503,7 @@ function LookE({ it, f }: { it: LookItem; f: Format }) {
         }}
       >
         <span
+          {...mv("Kicker", "1")}
           style={{
             fontFamily: MONO_FONT,
             fontWeight: 700,
@@ -1270,16 +1513,20 @@ function LookE({ it, f }: { it: LookItem; f: Format }) {
             color: p.accent,
           }}
         >
-          {s.label}
+          {it.match ? kickerText(it, s) : s.label}
           {s.accent === "quote" ? " · “…”" : ""}
         </span>
-        <Title it={it} size={sq ? 54 : 84} color={tText} accent={p.accent} />
-        {isEventish(it) && (
-          <Meta
-            it={it}
-            color={p.dark ? p.soft : TOKENS.inkSoft}
-            size={sq ? 20 : 28}
-          />
+        <div {...mv("Titel", "1")}>
+          <Title it={it} size={sq ? 54 : 84} color={tText} accent={p.accent} />
+        </div>
+        {hasMeta(it) && (
+          <div {...mv("Info", "1")}>
+            <Meta
+              it={it}
+              color={p.dark ? p.soft : TOKENS.inkSoft}
+              size={sq ? 20 : 28}
+            />
+          </div>
         )}
       </div>
     </div>
@@ -1304,7 +1551,10 @@ function LookE({ it, f }: { it: LookItem; f: Format }) {
           gap: sq ? 24 : 48,
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+        <div
+          {...pin("Kop")}
+          style={{ display: "flex", alignItems: "center", gap: 20 }}
+        >
           <Crest size={sq ? 64 : 96} />
           <span
             style={{
@@ -1319,6 +1569,7 @@ function LookE({ it, f }: { it: LookItem; f: Format }) {
           </span>
         </div>
         <div
+          {...mv("Ticket (alles erin)", "3")}
           style={{
             width: "100%",
             background: ticket,
@@ -1332,6 +1583,7 @@ function LookE({ it, f }: { it: LookItem; f: Format }) {
           }}
         >
           <div
+            {...pin("Foto")}
             style={{
               flex: 1,
               minHeight: sq ? 300 : 700,
@@ -1344,6 +1596,7 @@ function LookE({ it, f }: { it: LookItem; f: Format }) {
           {stub}
           {perf}
           <div
+            {...pin("Ticketvoet")}
             style={{
               padding: sq ? "16px 36px" : "28px 48px",
               display: "flex",
@@ -1369,7 +1622,7 @@ function LookE({ it, f }: { it: LookItem; f: Format }) {
   );
 }
 
-const LOOKS: Record<
+export const LOOKS: Record<
   string,
   { name: string; C: (p: { it: LookItem; f: Format }) => React.ReactElement }
 > = {
