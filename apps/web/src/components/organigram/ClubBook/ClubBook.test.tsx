@@ -340,4 +340,100 @@ describe("<ClubBook>", () => {
     expect(document.querySelectorAll("details[open]")).toHaveLength(0);
     expect(trackEvent).not.toHaveBeenCalled();
   });
+
+  describe("small branches a visitor can see", () => {
+    const person = (id: string, name: string, over = {}) => ({
+      id,
+      name,
+      ...over,
+    });
+
+    it("names the Raad members who also hold a box in a chapter, under 'In het bestuur'", () => {
+      const raadMember = person("ann", "Ann Raad");
+      render(
+        <ClubBook
+          responsibilityPaths={[]}
+          nodes={[
+            {
+              id: "bst",
+              title: "Bestuursorgaan",
+              roleCode: "BST",
+              members: [raadMember],
+            },
+            {
+              id: "kle",
+              title: "Kledij",
+              pillar: "club",
+              members: [raadMember],
+            },
+          ]}
+        />,
+      );
+
+      const club = screen.getByRole("region", { name: "Club & werking" });
+      expect(within(club).getByText("In het bestuur:")).toBeInTheDocument();
+      expect(club).toHaveTextContent("In het bestuur: Ann Raad");
+    });
+
+    it("shows no 'Overige functies' when every box has its place", () => {
+      render(
+        <ClubBook
+          responsibilityPaths={[]}
+          nodes={[
+            {
+              id: "kle",
+              title: "Kledij",
+              pillar: "club",
+              members: [person("p", "Piet")],
+            },
+          ]}
+        />,
+      );
+
+      expect(
+        screen.queryByRole("region", { name: "Overige functies" }),
+      ).toBeNull();
+    });
+
+    it("invites volunteers on a key card whose box is vacant", () => {
+      render(
+        <ClubBook
+          responsibilityPaths={[]}
+          nodes={[
+            {
+              id: "pen",
+              title: "Penningmeester",
+              roleCode: "PEN",
+              members: [],
+            },
+          ]}
+        />,
+      );
+
+      const group = screen.getByRole("region", { name: "Dagelijks bestuur" });
+      expect(
+        within(group).getByRole("link", { name: "plek vrij — iets voor jou?" }),
+      ).toHaveAttribute("href", "/club/contact");
+    });
+
+    it("shows a holder's phone as a tel: link next to their name", () => {
+      render(
+        <ClubBook
+          responsibilityPaths={[]}
+          nodes={[
+            {
+              id: "vz",
+              title: "Voorzitter",
+              roleCode: "VZ",
+              members: [person("v", "Vera", { phone: "+32 470 12 34 56" })],
+            },
+          ]}
+        />,
+      );
+
+      expect(
+        screen.getByRole("link", { name: "+32 470 12 34 56" }),
+      ).toHaveAttribute("href", "tel:+32470123456");
+    });
+  });
 });

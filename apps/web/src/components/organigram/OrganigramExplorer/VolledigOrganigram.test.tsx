@@ -2,8 +2,8 @@
  * VolledigOrganigram unit tests — the full box-chart (#2054).
  */
 
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { afterEach, describe, it, expect, vi } from "vitest";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { VolledigOrganigram } from "./VolledigOrganigram";
 import { explorerFixture } from "./organigram-explorer.fixture";
@@ -80,5 +80,85 @@ describe("VolledigOrganigram — parent cycles (#3478)", () => {
     expect(chart).toHaveTextContent("Cyclus A");
     expect(chart).toHaveTextContent("Cyclus B");
     expect(chart).toHaveTextContent("Onder de cyclus");
+  });
+});
+
+describe("VolledigOrganigram — keeping the root centred", () => {
+  // happy-dom has no layout: stand in for it. The track is 300px wide, the root
+  // branch starts 1000px in and is 200px wide, so centring means scrollLeft 950.
+  // Every observer the chart mounts (the scroll arrows watch the track too).
+  let observers: Array<() => void> = [];
+  const resize = () => observers.forEach((callback) => callback());
+  let rootLeft = 1000;
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+    observers = [];
+    rootLeft = 1000;
+  });
+
+  function mountWithLayout() {
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        constructor(callback: () => void) {
+          observers.push(callback);
+        }
+        observe() {}
+        disconnect() {}
+      },
+    );
+    vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
+      function (this: HTMLElement) {
+        const isTrack = this.classList.contains("vo-chart");
+        const scrolled = isTrack
+          ? 0
+          : -this.closest<HTMLElement>(".vo-chart")!.scrollLeft;
+        return isTrack
+          ? ({ left: 0, width: 300 } as DOMRect)
+          : ({ left: rootLeft + scrolled, width: 200 } as DOMRect);
+      },
+    );
+    const scrollTo = vi
+      .spyOn(HTMLElement.prototype, "scrollTo")
+      .mockImplementation(function (this: HTMLElement, options?: unknown) {
+        this.scrollLeft = (options as ScrollToOptions).left ?? 0;
+      });
+    const view = render(<VolledigOrganigram nodes={explorerFixture} />);
+    const track = view.container.querySelector<HTMLElement>(".vo-chart");
+    if (!track) throw new Error("track missing");
+    return { scrollTo, track };
+  }
+
+  it("centres the root on arrival and again when the layout changes", () => {
+    const { scrollTo, track } = mountWithLayout();
+    expect(track.scrollLeft).toBe(950);
+
+    rootLeft = 1400; // e.g. a late font swap widened the chart
+    resize();
+
+    expect(scrollTo).toHaveBeenCalledTimes(2);
+    expect(track.scrollLeft).toBe(1350);
+  });
+
+  it("stops centring once the visitor has scrolled the chart themselves", () => {
+    const { scrollTo, track } = mountWithLayout();
+
+    track.scrollLeft = 120; // an arrow or a drag moved it
+    fireEvent.scroll(track);
+    resize();
+
+    expect(scrollTo).toHaveBeenCalledTimes(1);
+    expect(track.scrollLeft).toBe(120);
+  });
+
+  it("keeps centring when the scroll event is only our own", () => {
+    const { scrollTo, track } = mountWithLayout();
+
+    fireEvent.scroll(track); // scrollLeft still where we put it
+    resize();
+
+    expect(scrollTo).toHaveBeenCalledTimes(2);
   });
 });
