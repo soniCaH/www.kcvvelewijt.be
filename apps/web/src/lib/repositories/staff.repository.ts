@@ -6,7 +6,7 @@ import type {
   ORGANIGRAM_NODES_QUERY_RESULT,
   STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT,
 } from "../sanity/sanity.types";
-import type { OrgChartNode } from "@/types/organigram";
+import { ORG_PILLARS, type OrgChartNode } from "@/types/organigram";
 
 // ─── GROQ Queries ────────────────────────────────────────────────────────────
 
@@ -16,6 +16,7 @@ export const ORGANIGRAM_NODES_QUERY =
   title,
   description,
   roleCode,
+  pillar,
   department,
   "parentId": select(defined(parentNode) && parentNode->active == true => parentNode->_id, null),
   "members": members[@->archived != true]->{
@@ -140,6 +141,7 @@ export function toOrgChartNode(
     title: node.title ?? "",
     roleCode: node.roleCode ?? undefined,
     description: node.description ?? undefined,
+    pillar: ORG_PILLARS.find((p) => p === node.pillar),
     department: (node.department ?? undefined) as OrgChartNode["department"],
     parentId: node.parentId ?? "club",
     members: (node.members ?? [])

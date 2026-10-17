@@ -41,6 +41,7 @@ function makeNodeRow(overrides: Partial<NodeRow> = {}): NodeRow {
     title: "Voorzitter",
     description: "Algemene leiding",
     roleCode: "VZ",
+    pillar: "bestuur",
     department: "hoofdbestuur",
     parentId: null,
     members: [
@@ -68,6 +69,7 @@ describe("toOrgChartNode", () => {
       title: "Voorzitter",
       description: "Algemene leiding",
       roleCode: "VZ",
+      pillar: "bestuur",
       department: "hoofdbestuur",
       parentId: "club",
       members: [
@@ -81,6 +83,18 @@ describe("toOrgChartNode", () => {
         },
       ],
     });
+  });
+
+  it("leaves pillar undefined when the editor has not chosen one", () => {
+    expect(
+      toOrgChartNode(makeNodeRow({ pillar: null })).pillar,
+    ).toBeUndefined();
+  });
+
+  it("drops a pillar value the clubboek does not know instead of inventing a group", () => {
+    expect(
+      toOrgChartNode(makeNodeRow({ pillar: "kantine" as never })).pillar,
+    ).toBeUndefined();
   });
 
   it("null parentId defaults to 'club'", () => {
@@ -299,6 +313,7 @@ describe("StaffRepository", () => {
         title: "Voorzitter",
         description: "Algemene leiding",
         roleCode: "VZ",
+        pillar: "bestuur",
         department: "hoofdbestuur",
         parentId: "club",
         members: [

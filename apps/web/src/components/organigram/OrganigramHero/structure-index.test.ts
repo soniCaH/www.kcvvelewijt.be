@@ -47,6 +47,20 @@ describe("deriveStructureIndex", () => {
     expect(deriveStructureIndex(nodes).afdelingen).toBe(2);
   });
 
+  it("leaves the synthetic club root out of every count", () => {
+    const withRoot: OrgChartNode[] = [
+      {
+        id: "club",
+        title: "KCVV Elewijt",
+        department: "algemeen",
+        members: [{ id: "club", name: "KCVV Elewijt" }],
+      },
+      ...nodes,
+    ];
+
+    expect(deriveStructureIndex(withRoot)).toEqual(deriveStructureIndex(nodes));
+  });
+
   it("returns zeroes for an empty organigram", () => {
     expect(deriveStructureIndex([])).toEqual({
       posities: 0,

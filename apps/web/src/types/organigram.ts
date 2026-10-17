@@ -31,6 +31,22 @@ export interface OrgChartMember {
 }
 
 /**
+ * The pillar of the `/hulp` clubboek a box sits under — the Studio field
+ * `organigramNode.pillar`, written by editors. `jeugd-organisatie` and
+ * `jeugd-opleiding` render as the two sub-heads of the one Jeugd pillar.
+ */
+export const ORG_PILLARS = [
+  "bestuur",
+  "sportief",
+  "jeugd-organisatie",
+  "jeugd-opleiding",
+  "club",
+  "integriteit",
+] as const;
+
+export type OrgPillar = (typeof ORG_PILLARS)[number];
+
+/**
  * A single position/role in the organizational chart.
  * One node can be linked to zero (vacant), one, or multiple (shared) staff members.
  */
@@ -46,6 +62,9 @@ export interface OrgChartNode {
 
   /** Description of the position's responsibilities */
   description?: string;
+
+  /** Pillar of the clubboek this position sits under; undefined → "Overige functies" */
+  pillar?: OrgPillar;
 
   /** Department or section this position belongs to */
   department?: "hoofdbestuur" | "jeugdbestuur" | "algemeen";
