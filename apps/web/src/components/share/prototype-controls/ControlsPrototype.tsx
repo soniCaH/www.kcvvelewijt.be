@@ -75,6 +75,25 @@ const gradient =
     `rgba(${c},${(bottom! * 0.16).toFixed(2)}) ${ramp}%, ` +
     `rgba(${c},${(bottom! * 0.86).toFixed(2)}) ${plateau}%, rgba(${c},${bottom}) 100%)`;
 
+// The real tool lists the club's coming matches; the label carries the squad.
+const MATCHES = [
+  {
+    label: "A — FC Dummy · za 24/10",
+    away: "FC Dummy",
+    comp: "3de Provinciale B",
+  },
+  {
+    label: "B — SK Rouge · zo 25/10",
+    away: "SK Rouge",
+    comp: "4de Provinciale D",
+  },
+  {
+    label: "U17 — VC Groen · za 24/10",
+    away: "VC Groen",
+    comp: "U17 Gewestelijk",
+  },
+];
+
 const SEL = '[data-move~="2"]';
 type Pos = Record<string, { x: number; y: number }>;
 
@@ -130,6 +149,26 @@ function useShare(articles: LookItem[], events: LookItem[], player: Player) {
       },
     };
   if (item && edits.location) item = { ...item, location: edits.location };
+  if (item?.match) {
+    const m = MATCHES[Number(edits.match ?? 0)]!;
+    const swap = (t: string) => t.replace("FC Dummy", m.away);
+    item = {
+      ...item,
+      title: swap(item.title),
+      spans: item.spans.map((x) => ({ ...x, text: swap(x.text) })),
+      match: {
+        ...item.match,
+        away: m.away,
+        competition: edits.competition || m.comp,
+      },
+      date: edits.date
+        ? `${edits.date}T${edits.time || "15:00"}:00`
+        : item.date,
+      time: edits.time || item.time,
+    };
+  }
+  if (item && edits.photo)
+    item = { ...item, img: edits.photo, hx: 0.5, hy: 0.35 };
 
   const itemKey = mode === "match" ? moment : (base?.key ?? "none");
   // Positions are kept per format and cleared by another look/template/item (#3520/#3521).
@@ -309,7 +348,7 @@ function Story({
                       f={s.format}
                       player={{
                         name: s.edits.player || s.player.name,
-                        img: s.player.img,
+                        img: s.edits.photo || s.player.img,
                       }}
                     />
                   ) : (
@@ -487,6 +526,64 @@ function KindSwitch({ s }: { s: S }) {
 }
 
 function ItemPicker({ s }: { s: S }) {
+  const set = (k: string, v: string) => s.setEdits({ ...s.edits, [k]: v });
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+      {s.mode === "match" && (
+        <select
+          aria-label="Match"
+          value={s.edits.match ?? "0"}
+          onChange={(e) => set("match", e.target.value)}
+          style={{
+            fontSize: 16,
+            minHeight: 44,
+            padding: "0 10px",
+            border: `2px solid ${TOKENS.ink}`,
+            background: "#fff",
+            fontFamily: MONO_FONT,
+          }}
+        >
+          {MATCHES.map((m, i) => (
+            <option key={m.label} value={i}>
+              {m.label}
+            </option>
+          ))}
+        </select>
+      )}
+      <ItemList s={s} />
+      <label
+        style={{
+          ...btn(Boolean(s.edits.photo)),
+          textAlign: "center",
+          display: "grid",
+          placeItems: "center",
+        }}
+      >
+        {s.edits.photo ? "Andere foto…" : "Eigen foto…"}
+        <input
+          type="file"
+          accept="image/*"
+          style={{ display: "none" }}
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) set("photo", URL.createObjectURL(f));
+          }}
+        />
+      </label>
+      {s.edits.photo && (
+        <button
+          type="button"
+          onClick={() => set("photo", "")}
+          style={btn(false)}
+        >
+          Foto weghalen
+        </button>
+      )}
+    </div>
+  );
+}
+
+function ItemList({ s }: { s: S }) {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
   if (s.mode === "match")
@@ -680,10 +777,14 @@ function StyleControls({ s }: { s: S }) {
 }
 
 function Fields({ s }: { s: S }) {
-  const field = (k: string, l: string, ph: string) => (
-    <label key={k} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+  const field = (k: string, l: string, ph: string, type = "text") => (
+    <label
+      key={k}
+      style={{ display: "flex", flexDirection: "column", gap: 4, flex: 1 }}
+    >
       <span style={label}>{l}</span>
       <input
+        type={type}
         value={s.edits[k] ?? ""}
         placeholder={ph}
         onChange={(e) => s.setEdits({ ...s.edits, [k]: e.target.value })}
@@ -709,6 +810,26 @@ function Fields({ s }: { s: S }) {
           field("score", "Stand", it?.match?.score ?? "")}
         {s.moment === "kickoff" &&
           field("location", "Terrein", it?.location ?? "")}
+        {s.moment === "kickoff" && (
+          <div style={{ display: "flex", gap: 8 }}>
+            {field("date", "Datum", "2026-10-24", "date")}
+            {field("time", "Uur", "20:00", "time")}
+          </div>
+        )}
+        {field("competition", "Competitie", it?.match?.competition ?? "")}
+        {s.moment === "fulltime" && (
+          <Group title="Stemming">
+            <Seg
+              opts={[
+                { key: "win", label: "Gewonnen" },
+                { key: "draw", label: "Gelijk" },
+                { key: "loss", label: "Verloren" },
+              ]}
+              value={s.edits.mood ?? "win"}
+              onChange={(v) => s.setEdits({ ...s.edits, mood: v })}
+            />
+          </Group>
+        )}
       </>
     );
   return (

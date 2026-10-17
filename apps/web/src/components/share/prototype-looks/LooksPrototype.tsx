@@ -190,6 +190,8 @@ function styleOf(it: LookItem): TypeStyle {
 // ── Data helpers ───────────────────────────────────────────────────────────
 function photo(it: LookItem, w: number, h: number): string {
   if (!it.img) return it.fallback ?? FALLBACK;
+  // #3524: an uploaded photo is a local blob, shown as-is.
+  if (it.img.startsWith("blob:")) return it.img;
   const src = `${it.img}?w=${w}&h=${h}&q=80&fit=crop&crop=focalpoint&fp-x=${it.hx}&fp-y=${it.hy}`;
   // Same-origin via the Next image optimizer — what SharePage does for capture.
   return `/_next/image?url=${encodeURIComponent(src)}&w=1080&q=75`;
