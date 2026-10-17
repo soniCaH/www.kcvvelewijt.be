@@ -31,9 +31,9 @@ interface LegacyYouthProps {
  * `(home)` route group and `jeugd/loading.tsx` into `jeugd/(index)`: nothing
  * above `/jeugd/[slug]` is a Suspense boundary now, and neither layout in the
  * chain carries one, so an unknown age token returns a real **404** rather
- * than a 200. That is the outcome #2968 wants, arrived at sideways — it is
- * not a licence to assume the other `#2963` sites moved with it. Every one of
- * them still sits under its own `loading.tsx` and still soft-404s.
+ * than a 200. That is the outcome #2968 wants, arrived at sideways. The other
+ * `#2963` sites did not move; they got a same-segment `layout.tsx` instead
+ * (#2968), which is what gives them a real 404.
  */
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
