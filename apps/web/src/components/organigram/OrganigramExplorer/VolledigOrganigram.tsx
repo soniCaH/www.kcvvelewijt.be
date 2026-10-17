@@ -53,7 +53,7 @@ function OrgBranch({
     state === "vacant" ? "bg-warm" : "bg-cream",
     onNodeClick && `cursor-pointer ${PRESS_DOWN_CLASSES}`,
   );
-  // Deliberately below the 11px Label floor: this is a printable node-link
+  // Deliberately below the 11px Label floor: this is a node-link
   // diagram, not page chrome, and the type size is what makes the tree fit.
   // Measured at 11px: every holder label wraps to two lines, nodes inflate,
   // and the right-hand branch is pushed off-canvas. Raising these is a layout

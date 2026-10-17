@@ -21,9 +21,9 @@ export interface OrganigramOverviewProps {
   nodes: OrgChartNode[];
   /**
    * Render the full box chart behind a quiet "Bekijk het volledige organigram →"
-   * disclosure (7o9 · 2 = directory-first). The directory is the default; the
-   * chart (+ its spotlight verkenner / PDF) is one deliberate click away, rather
-   * than a co-equal always-on section.
+   * disclosure (7o9 · 2 = list-first). The clubboek list is the default; the
+   * chart (+ its spotlight verkenner) is one deliberate click away, rather than a
+   * co-equal always-on section. The PDF belongs to the clubboek, not to the chart.
    */
   collapsible?: boolean;
 }
