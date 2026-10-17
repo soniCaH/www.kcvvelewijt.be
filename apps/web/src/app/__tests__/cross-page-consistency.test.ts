@@ -86,8 +86,8 @@ const scannableSources = sourceFiles.filter((relPath) => relPath !== SELF);
  * runtime happens to ship, which differs between Node, the browser and CI — so
  * the same date renders differently depending on where it is rendered, and
  * surfaces as visual-regression drift. `@/lib/utils/dates` states the rule; this
- * holds it site-wide. There is no allowlist: the shared date module itself
- * complies, so nothing needs an exemption.
+ * holds it site-wide. The shared date module itself
+ * complies; the single exemption is named below.
  *
  * `toLocaleDateString` / `toLocaleTimeString` / `Intl.DateTimeFormat` are
  * unambiguously dates. Bare `.toLocaleString(` is not — it is also how a number
@@ -99,12 +99,23 @@ const ALWAYS_BANNED =
 const LUXON_IMPORT = /from\s+["']luxon["']/;
 const BARE_TO_LOCALE_STRING = /\.toLocaleString\s*\(/;
 
+/**
+ * The one exemption: `PrintDate` formats "today" on the client with
+ * `Intl.DateTimeFormat` so `/scheurkalender` does not ship Luxon for a single
+ * line (#3480). It reads the zone from `CLUB_TIMEZONE`, and a test
+ * (`PrintDate.test.tsx`) pins its output to `formatArticleDate`, so the
+ * ICU-drift this rule exists for is covered there, not by the ban.
+ */
+const INTL_DATE_EXEMPT = "components/scheurkalender/PrintDate.tsx";
+
 describe("dates format through Luxon `toFormat` (#2430)", () => {
   it.each(scannableSources)(
     "%s — no `toLocale*` date formatting",
     (relPath) => {
       const source = code.get(relPath)!;
-      expect(ALWAYS_BANNED.test(source)).toBe(false);
+      if (relPath !== INTL_DATE_EXEMPT) {
+        expect(ALWAYS_BANNED.test(source)).toBe(false);
+      }
 
       if (LUXON_IMPORT.test(source)) {
         expect(BARE_TO_LOCALE_STRING.test(source)).toBe(false);
@@ -120,7 +131,8 @@ describe("dates format through Luxon `toFormat` (#2430)", () => {
 /**
  * A second zone literal is how the site ended up with four date homes and half
  * of them unpinned: each new one looked local and harmless. The zone is
- * `CLUB_TIMEZONE` in `@/lib/utils/dates`, and it is club-scoped rather than
+ * `CLUB_TIMEZONE` in `@/lib/utils/club-timezone` (re-exported by
+ * `@/lib/utils/dates`), and it is club-scoped rather than
  * event-scoped precisely because the narrow name is why non-event formatters
  * kept assuming it did not apply to them.
  *
@@ -131,7 +143,7 @@ describe("dates format through Luxon `toFormat` (#2430)", () => {
  * `dates.ts` is the file later rules will most want to check hardest, and it
  * must not inherit a blanket pass it never asked for.
  */
-const CLUB_TIMEZONE_HOME = "lib/utils/dates.ts";
+const CLUB_TIMEZONE_HOME = "lib/utils/club-timezone.ts";
 const ZONE_LITERAL = /["']Europe\/Brussels["']/;
 
 /** Everything a rule about shipped behaviour should hold — no tests, no stories. */
