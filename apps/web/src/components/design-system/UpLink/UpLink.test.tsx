@@ -8,6 +8,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 import { UpLink } from "./UpLink";
+import { dataLayerEvents } from "@/lib/analytics/data-layer-events.mocks";
 
 describe("UpLink", () => {
   beforeEach(() => {
@@ -42,14 +43,15 @@ describe("UpLink", () => {
 
     await user.click(screen.getByRole("link", { name: "Kalender" }));
 
-    expect(window.dataLayer).toHaveLength(1);
-    expect(window.dataLayer![0]).toEqual({
-      event: "nav_parent_click",
-      // Reuses the already-registered `page_slug` dimension, not a new
-      // `path` key (review round 2, #2570).
-      page_slug: "/nieuws/een-artikel",
-      destination: "/kalender",
-    });
+    expect(dataLayerEvents()).toEqual([
+      {
+        event: "nav_parent_click",
+        // Reuses the already-registered `page_slug` dimension, not a new
+        // `path` key (review round 2, #2570).
+        page_slug: "/nieuws/een-artikel",
+        destination: "/kalender",
+      },
+    ]);
   });
 
   it("carries its own 48px/64px top air on the ink tone (#2877)", () => {

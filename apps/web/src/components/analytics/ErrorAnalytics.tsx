@@ -33,8 +33,8 @@ export function ErrorAnalytics({ code, children }: ErrorAnalyticsProps) {
     // `pathname` only (never `search`) — a page-path identifier, the same field
     // GA4 collects natively as `page_path` for every view. NOT user-authored
     // free text, so it is sent as-is: `sanitizeQuery` is the search-box helper
-    // (lowercase + truncate-50) and would corrupt long 404 URLs — the very data
-    // this event exists to capture — without redacting anything.
+    // (redacts emails and phone numbers, lowercases, truncates to 50) and would
+    // corrupt long 404 URLs — the very data this event exists to capture.
     const path = window.location.pathname;
     pathRef.current = path;
     trackEvent("error_view", { error_code: code, path });

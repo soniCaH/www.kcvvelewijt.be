@@ -1,3 +1,5 @@
+import { safeDecodeURIComponent } from "./safe-decode";
+
 /**
  * The shared-element names of a list item growing into its detail page: a
  * fixture row into the match hero (#3397), a news card's cover into the
@@ -18,18 +20,10 @@ export const TRAVEL_CLASS = "travel";
  * `id` may be a raw href segment or a Next route param: decode first so a
  * percent-encoded `caf%C3%A9` and a decoded `café` name the same pair.
  */
-const decode = (id: string): string => {
-  try {
-    return decodeURIComponent(id);
-  } catch {
-    return id; // a stray `%`: not an escape, keep it as it is
-  }
-};
-
 export const travelName = (kind: TravelKind, id: number | string): string =>
   // `view-transition-name` is a CSS identifier: a slug is safe, an id with a
   // dot or a space would drop the whole declaration and the end would not pair.
-  `${kind}-travel-${decode(String(id)).replace(/[^\w-]/g, "_")}`;
+  `${kind}-travel-${safeDecodeURIComponent(String(id)).replace(/[^\w-]/g, "_")}`;
 
 const DETAIL_ROUTE = {
   match: "/wedstrijd/",

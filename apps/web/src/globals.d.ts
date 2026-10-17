@@ -7,5 +7,7 @@ declare module "*.mdx" {
 }
 
 interface Window {
-  dataLayer?: (Record<string, unknown> | IArguments)[];
+  dataLayer?: (
+    Record<string, unknown> | IArguments | ((this: { reset(): void }) => void)
+  )[];
 }

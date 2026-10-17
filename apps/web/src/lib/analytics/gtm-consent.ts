@@ -5,13 +5,6 @@ function gtag(..._args: unknown[]) {
   window.dataLayer.push(arguments);
 }
 
-export function setDefaultConsent(): void {
-  gtag("consent", "default", {
-    analytics_storage: "denied",
-    wait_for_update: 500,
-  });
-}
-
 export function updateConsentState(analyticsGranted: boolean): void {
   gtag("consent", "update", {
     analytics_storage: analyticsGranted ? "granted" : "denied",

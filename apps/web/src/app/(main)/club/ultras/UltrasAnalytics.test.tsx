@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { UltrasAnalytics } from "./UltrasAnalytics";
+import { dataLayerEvents } from "@/lib/analytics/data-layer-events.mocks";
 
 describe("UltrasAnalytics", () => {
   beforeEach(() => {
@@ -12,7 +13,7 @@ describe("UltrasAnalytics", () => {
   });
 
   const events = () =>
-    (window.dataLayer ?? []).map((e) => (e as Record<string, unknown>).event);
+    dataLayerEvents().map((e) => (e as Record<string, unknown>).event);
 
   it("renders its children", () => {
     render(

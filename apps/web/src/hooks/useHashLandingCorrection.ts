@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef } from "react";
 import { useWebfontSwap } from "./useWebfontSwap";
+import { safeDecodeURIComponent } from "@/lib/utils/safe-decode";
 
 /** How long a hash navigation stays eligible for a corrective re-scroll
  *  after it fires — long enough to absorb a bar resize or a late webfont
@@ -65,7 +66,7 @@ export function useHashLandingCorrection(
 
   const correct = useCallback(() => {
     if (!armedRef.current) return;
-    const hash = decodeURIComponent(window.location.hash.slice(1));
+    const hash = safeDecodeURIComponent(window.location.hash.slice(1));
     if (!hash || !idListRef.current.includes(hash)) return;
     document.getElementById(hash)?.scrollIntoView({ block: "start" });
   }, []);

@@ -1,6 +1,5 @@
 import { useCallback } from "react";
 import { trackEvent } from "@/lib/analytics/track-event";
-import { sanitizeQuery } from "@/lib/analytics/sanitize-query";
 import { hashMemberId } from "@/lib/analytics/hash-member-id";
 import type { OrgChartNode } from "@/types/organigram";
 
@@ -36,12 +35,6 @@ export function useOrganigramAnalytics() {
     [],
   );
 
-  const trackSearchUsed = useCallback((queryText: string) => {
-    trackEvent("organigram_search_used", {
-      query_text: sanitizeQuery(queryText),
-    });
-  }, []);
-
   const trackDepartmentFiltered = useCallback((department: string) => {
     trackEvent("organigram_department_filtered", { department });
   }, []);
@@ -53,7 +46,6 @@ export function useOrganigramAnalytics() {
   return {
     trackViewChanged,
     trackMemberClicked,
-    trackSearchUsed,
     trackDepartmentFiltered,
     trackExportPng,
   };

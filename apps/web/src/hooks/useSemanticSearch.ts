@@ -113,6 +113,9 @@ export function useSemanticSearch(
           }
         } catch (err) {
           if ((err as Error).name === "AbortError") return;
+          // A superseded request (some engines reject it with a non-abort
+          // error) must not touch the newer request's state.
+          if (abortRef.current !== controller) return;
           console.warn("[useSemanticSearch] semantic search failed:", err);
           setError(true);
           setResults([]);
