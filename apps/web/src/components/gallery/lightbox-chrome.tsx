@@ -36,3 +36,26 @@ export const lightboxLoadingIcon = () => (
     <Spinner variant="compact" className="[--spinner-dot:var(--color-cream)]" />
   </div>
 );
+
+/**
+ * The first tap on a phone, while the viewer chunk is still loading (#3480):
+ * touch has no hover to warm it, so the visitor gets the same ink backdrop and
+ * waiting device the viewer itself uses, instead of nothing. A `Suspense`
+ * fallback for `<GalleryLightbox>` and `<TeamPhotoLightbox>`. Sits on the
+ * library portal's own layer (`--yarl__portal_zindex`, default 9999).
+ *
+ * `kcvv-lightbox-loading` carries its own delayed fade-in (globals.css),
+ * because the library's `yarl__slide_loading` fade lives in the chunk's CSS,
+ * which is what this is waiting for. The status text is on the overlay, since the icon is
+ * `aria-hidden`.
+ */
+export const LightboxLoading = () => (
+  <div
+    role="status"
+    style={LIGHTBOX_BACKDROP}
+    className="kcvv-lightbox-loading fixed inset-0 z-[9999] flex items-center justify-center"
+  >
+    <span className="sr-only">Foto laden…</span>
+    {lightboxLoadingIcon()}
+  </div>
+);

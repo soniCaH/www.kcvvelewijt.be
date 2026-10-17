@@ -1,10 +1,13 @@
 import type { ReactNode } from "react";
-import { render } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import type { LightboxProps } from "yet-another-react-lightbox";
 import { GalleryLightbox, galleryImageAlt } from "./GalleryLightbox";
+import { trackEvent } from "@/lib/analytics/track-event";
+// Warm the lazy chunk during collect, so the click-time import is a cache hit.
+import "./GalleryViewer";
 
 // The library draws on a portal and measures layout; what this component owns
 // is the props it hands over, so capture those at the module boundary.
@@ -15,6 +18,8 @@ vi.mock("yet-another-react-lightbox", () => ({
     return null;
   },
 }));
+
+vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
 /**
  * Rule 5 of #2548: a gallery photo is the site's one genuinely alone image, so
@@ -50,8 +55,13 @@ describe("galleryImageAlt", () => {
 
 const IMAGES = [{ url: "https://cdn.sanity.io/images/p/d/a.jpg" }];
 
-const renderLightbox = (): LightboxProps => {
+// The viewer is a lazy chunk (#3480): it mounts on the first thumbnail click
+// and arrives a tick later, so every read of its props waits for it.
+const renderLightbox = async (): Promise<LightboxProps> => {
+  lightboxProps.current = null;
   render(<GalleryLightbox gallerySlug="zemst-derby" images={IMAGES} />);
+  fireEvent.click(screen.getByRole("button", { name: /vergroten/ }));
+  await vi.waitFor(() => expect(lightboxProps.current).not.toBeNull());
   return lightboxProps.current as LightboxProps;
 };
 
@@ -59,8 +69,8 @@ const renderLightbox = (): LightboxProps => {
 const THE_CURVE = "cubic-bezier(0, 0, 0.58, 1)";
 
 describe("GalleryLightbox motion (#3383)", () => {
-  it("moves at Arrival speed on The Curve for open/close, swipe and navigation", () => {
-    const { animation } = renderLightbox();
+  it("moves at Arrival speed on The Curve for open/close, swipe and navigation", async () => {
+    const { animation } = await renderLightbox();
 
     expect(animation).toEqual({
       fade: 500,
@@ -70,7 +80,7 @@ describe("GalleryLightbox motion (#3383)", () => {
     });
   });
 
-  it("writes The Curve exactly as globals.css declares --ease-out", () => {
+  it("writes The Curve exactly as globals.css declares --ease-out", async () => {
     // Swipe and navigation easing go to `Element.animate()`, which rejects
     // `var()` — so the literal is repeated here and pinned to the token.
     const css = readFileSync(
@@ -79,7 +89,7 @@ describe("GalleryLightbox motion (#3383)", () => {
     ).replace(/\/\*[\s\S]*?\*\//g, "");
     const token = css.match(/--ease-out:\s*([^;]+);/)?.[1];
 
-    const { easing } = renderLightbox().animation ?? {};
+    const { easing } = (await renderLightbox()).animation ?? {};
 
     expect(token).toBeDefined();
     expect([easing?.fade, easing?.swipe, easing?.navigation]).toEqual([
@@ -89,8 +99,8 @@ describe("GalleryLightbox motion (#3383)", () => {
     ]);
   });
 
-  it("waits with the compact Spinner, not the library's own icon", () => {
-    const { render: slots } = renderLightbox();
+  it("waits with the compact Spinner, not the library's own icon", async () => {
+    const { render: slots } = await renderLightbox();
 
     const { container } = render(<>{slots?.iconLoading?.() as ReactNode}</>);
 
@@ -99,8 +109,8 @@ describe("GalleryLightbox motion (#3383)", () => {
     expect(container.querySelector(".kcvv-spinner-scarf")).toBeNull();
   });
 
-  it("shows the waiting device after the library's delay and announces nothing", () => {
-    const { render: slots } = renderLightbox();
+  it("shows the waiting device after the library's delay and announces nothing", async () => {
+    const { render: slots } = await renderLightbox();
 
     const { container } = render(<>{slots?.iconLoading?.() as ReactNode}</>);
     const wrapper = container.firstElementChild;
@@ -110,5 +120,18 @@ describe("GalleryLightbox motion (#3383)", () => {
     expect(wrapper).toHaveClass("yarl__slide_loading");
     expect(wrapper).toHaveAttribute("aria-hidden", "true");
     expect(wrapper?.querySelector(".kcvv-spinner-pulse")).not.toBeNull();
+  });
+});
+
+describe("GalleryLightbox analytics", () => {
+  it("fires gallery_image_view with the slug and the viewed index on navigation", async () => {
+    const { on } = await renderLightbox();
+
+    on?.view?.({ index: 1 });
+
+    expect(trackEvent).toHaveBeenCalledWith("gallery_image_view", {
+      gallery_slug: "zemst-derby",
+      image_index: 1,
+    });
   });
 });

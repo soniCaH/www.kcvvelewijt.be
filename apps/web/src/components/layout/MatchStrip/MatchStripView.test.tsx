@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { render, screen, within, fireEvent } from "@testing-library/react";
-import { MatchStripView } from "./MatchStripView";
+import {
+  MatchStripView as MatchStripViewBase,
+  type MatchStripViewProps,
+} from "./MatchStripView";
+import { stripDates } from "./strip-dates";
 import { KCVV_CLUB_ID } from "@/lib/constants";
 import type {
   ScheduleMatch,
@@ -34,6 +38,23 @@ const fixture: ScheduleMatch = {
   awayTeam: { id: KCVV_CLUB_ID, name: "KCVV Elewijt" },
   isHome: false,
 };
+
+/**
+ * The view takes its date labels as props (#3480); the labels themselves are
+ * pinned in `MatchStrip.test.tsx`. These tests are about layout and wording, so
+ * they get the labels the server would hand over.
+ */
+function MatchStripView(props: Omit<MatchStripViewProps, "dates">) {
+  return (
+    <MatchStripViewBase
+      {...props}
+      dates={{
+        result: stripDates(props.data.result),
+        fixture: stripDates(props.data.fixture),
+      }}
+    />
+  );
+}
 
 describe("MatchStripView", () => {
   it("renders both matches as links to their own match-detail route", () => {
@@ -109,6 +130,25 @@ describe("MatchStripView", () => {
     // KCVV is the home side by club id, so the opponent must be the away team
     // and the label must read KCVV 3 - RC Mechelen 1, not KCVV against itself.
     expect(row).toHaveAccessibleName(/KCVV Elewijt 3 - RC Mechelen 1/);
+  });
+
+  it("switches back to the result with the back arrow after moving to the fixture", () => {
+    render(<MatchStripView data={{ result, fixture }} />);
+    const slide = () => document.querySelector('[aria-live="polite"]');
+    fireEvent.click(
+      screen.getByRole("button", { name: "Toon de volgende wedstrijd" }),
+    );
+    expect(slide()?.textContent).toContain("vs.");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Toon de laatste uitslag" }),
+    );
+
+    expect(slide()?.textContent).toContain("3–1");
+    expect(slide()?.textContent).not.toContain("vs.");
+    expect(
+      screen.getByRole("button", { name: "Toon de laatste uitslag" }),
+    ).toBeDisabled();
   });
 
   it("labels the result slide correctly when the fixture disappears", () => {

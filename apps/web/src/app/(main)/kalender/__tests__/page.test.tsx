@@ -13,7 +13,19 @@ import { HttpBadGateway, type Match } from "@kcvv/api-contract";
 // The widget is a client island with its own tests; this suite is about what
 // sits above it, so a stub proves "the calendar still renders".
 vi.mock("@/components/calendar/CalendarWidget", () => ({
-  CalendarWidget: () => <div data-testid="calendar-widget" />,
+  CalendarWidget: ({ initialIsPhone }: { initialIsPhone?: boolean }) => (
+    <div
+      data-testid="calendar-widget"
+      data-initial-is-phone={String(initialIsPhone)}
+    />
+  ),
+}));
+
+const { mockRequestHeaders } = vi.hoisted(() => ({
+  mockRequestHeaders: vi.fn(),
+}));
+vi.mock("next/headers", () => ({
+  headers: async () => new Headers(mockRequestHeaders() as HeadersInit),
 }));
 
 const { mockGetNextMatches } = vi.hoisted(() => ({
@@ -70,8 +82,8 @@ vi.mock("@/lib/repositories/event.repository", async (importOriginal) => {
 
 const { default: CalendarPage } = await import("../page");
 
-const renderPage = async () =>
-  render(await CalendarPage({ searchParams: Promise.resolve({}) }));
+const renderPage = async (searchParams: { view?: string } = {}) =>
+  render(await CalendarPage({ searchParams: Promise.resolve(searchParams) }));
 
 const nextMatch = {
   id: 501,
@@ -86,6 +98,7 @@ const nextMatch = {
 describe("/kalender — upcoming matches on top (#3430)", () => {
   beforeEach(() => {
     vi.spyOn(console, "warn").mockImplementation(() => {});
+    mockRequestHeaders.mockReturnValue({});
   });
   afterEach(() => {
     vi.restoreAllMocks();
@@ -130,5 +143,45 @@ describe("/kalender — upcoming matches on top (#3430)", () => {
 
     expect(screen.getByText(/even niet beschikbaar/i)).toBeInTheDocument();
     expect(screen.getByTestId("calendar-widget")).toBeInTheDocument();
+  });
+});
+
+describe("/kalender — phone first paint (#3480)", () => {
+  beforeEach(() => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    mockGetNextMatches.mockReturnValue(Effect.succeed([]));
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("starts the widget on the phone layout for a mobile client hint", async () => {
+    mockRequestHeaders.mockReturnValue({ "sec-ch-ua-mobile": "?1" });
+    await renderPage();
+    expect(screen.getByTestId("calendar-widget")).toHaveAttribute(
+      "data-initial-is-phone",
+      "true",
+    );
+  });
+
+  it("starts the widget on the phone layout for a phone UA without a hint", async () => {
+    mockRequestHeaders.mockReturnValue({
+      "user-agent":
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1",
+    });
+    await renderPage();
+    expect(screen.getByTestId("calendar-widget")).toHaveAttribute(
+      "data-initial-is-phone",
+      "true",
+    );
+  });
+
+  it("starts the widget on the desktop layout for a desktop client", async () => {
+    mockRequestHeaders.mockReturnValue({ "sec-ch-ua-mobile": "?0" });
+    await renderPage();
+    expect(screen.getByTestId("calendar-widget")).toHaveAttribute(
+      "data-initial-is-phone",
+      "false",
+    );
   });
 });

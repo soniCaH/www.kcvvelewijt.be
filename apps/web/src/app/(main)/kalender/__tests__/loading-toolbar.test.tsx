@@ -76,4 +76,22 @@ describe("Calendar loading skeleton — toolbar chrome", () => {
     const contentWrapper = toolbarTop!.closest(".space-y-4");
     expect(contentWrapper).not.toBeNull();
   });
+
+  // #3480 — a phone paints the agenda (CalendarWidget's phone default), so the
+  // skeleton streamed before it must be the agenda there and the month grid
+  // from `md` up: two blocks, swapped by CSS, never both visible.
+  it("shows the agenda skeleton below md and the month-grid skeleton from md up", () => {
+    const { container } = render(<CalendarLoading />);
+
+    const agenda = container.querySelector(
+      "[data-testid='calendar-skeleton-agenda']",
+    );
+    const monthGrid = container.querySelector(
+      "[data-testid='calendar-skeleton-month-grid']",
+    );
+    expect(agenda).not.toBeNull();
+    expect(monthGrid).not.toBeNull();
+    expect(agenda).toHaveClass("md:hidden");
+    expect(monthGrid).toHaveClass("hidden", "md:block");
+  });
 });

@@ -3,8 +3,15 @@
 import { lazy, Suspense, useState, type ReactNode } from "react";
 
 import { trackEvent } from "@/lib/analytics/track-event";
+import { LightboxLoading } from "@/components/gallery/lightbox-chrome";
 
-const TeamPhotoViewer = lazy(() => import("./TeamPhotoViewer"));
+// A failed chunk load (deploy skew, flaky network) renders nothing instead of
+// throwing into the route's error boundary, so the hero photo stays usable. No
+// retry: `lazy()` caches its result, and after a deploy the old chunk is gone —
+// a reload is the real fix.
+const TeamPhotoViewer = lazy(() =>
+  import("./TeamPhotoViewer").catch(() => ({ default: () => <></> })),
+);
 
 export interface TeamPhotoLightboxProps {
   displayName: string;
@@ -49,7 +56,7 @@ export function TeamPhotoLightbox({
       </button>
 
       {requested ? (
-        <Suspense fallback={null}>
+        <Suspense fallback={<LightboxLoading />}>
           <TeamPhotoViewer
             open={open}
             close={() => setOpen(false)}

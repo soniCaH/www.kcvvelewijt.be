@@ -1,21 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import Image from "next/image";
-import Lightbox from "yet-another-react-lightbox";
-import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
-import Zoom from "yet-another-react-lightbox/plugins/zoom";
-import Captions from "yet-another-react-lightbox/plugins/captions";
-import "yet-another-react-lightbox/styles.css";
-import "yet-another-react-lightbox/plugins/thumbnails.css";
-import "yet-another-react-lightbox/plugins/captions.css";
+import { LightboxLoading } from "../lightbox-chrome";
 
-import { trackEvent } from "@/lib/analytics/track-event";
-import {
-  LIGHTBOX_ANIMATION,
-  LIGHTBOX_BACKDROP,
-  lightboxLoadingIcon,
-} from "../lightbox-chrome";
+// The viewer (library, plugins, CSS) is its own chunk (#3480). `loadViewer` is
+// shared by `lazy()` and the hover/focus preload, so both hit one import.
+const loadViewer = () => import("./GalleryViewer");
+// A failed chunk load (deploy skew, flaky network) renders nothing instead of
+// throwing into the route's error boundary, so the photo grid stays usable. No
+// retry: `lazy()` caches its result, and after a deploy the old chunk is gone —
+// a reload is the real fix.
+const GalleryViewer = lazy(() =>
+  loadViewer().catch(() => ({ default: () => <></> })),
+);
+// A hover/focus warm-up that fails (deploy skew, flaky network) must not be an
+// unhandled rejection; the click's own `lazy()` load handles a real failure.
+const preloadViewer = () => {
+  loadViewer().catch(() => {});
+};
 
 export interface GalleryLightboxImage {
   url: string | null;
@@ -65,6 +68,11 @@ export const galleryImageAlt = (
  * caption with the resolved credit as a small attribution under it. Each
  * lightbox navigation fires `gallery_image_view`. Chrome is themed to the
  * redesign — sharp corners (no thumbnail border radius), ink backdrop.
+ *
+ * The viewer is `<GalleryViewer>`, loaded on demand (#3480): the import starts
+ * on a thumbnail's hover or focus so the first click is rarely waiting, the
+ * viewer mounts on the first click and then stays mounted so it can animate
+ * closed.
  */
 export const GalleryLightbox = ({
   gallerySlug,
@@ -72,6 +80,7 @@ export const GalleryLightbox = ({
   className,
 }: GalleryLightboxProps) => {
   const [index, setIndex] = useState(-1);
+  const [requested, setRequested] = useState(false);
 
   // Drop any image whose asset URL failed to resolve — a slide with no src
   // would render an empty lightbox frame.
@@ -97,7 +106,12 @@ export const GalleryLightbox = ({
             <li key={`${img.url}-${i}`}>
               <button
                 type="button"
-                onClick={() => setIndex(i)}
+                onClick={() => {
+                  setIndex(i);
+                  setRequested(true);
+                }}
+                onPointerEnter={preloadViewer}
+                onFocus={preloadViewer}
                 aria-label={`${alt} vergroten`}
                 className="group relative block aspect-square w-full overflow-hidden"
               >
@@ -118,27 +132,17 @@ export const GalleryLightbox = ({
         })}
       </ul>
 
-      <Lightbox
-        open={index >= 0}
-        index={Math.max(index, 0)}
-        close={() => setIndex(-1)}
-        slides={slides}
-        plugins={[Thumbnails, Zoom, Captions]}
-        animation={LIGHTBOX_ANIMATION}
-        render={{ iconLoading: lightboxLoadingIcon }}
-        on={{
-          view: ({ index: i }) =>
-            trackEvent("gallery_image_view", {
-              gallery_slug: gallerySlug,
-              image_index: i,
-            }),
-        }}
-        // Sharp corners + ink backdrop to match the redesign chrome.
-        styles={{
-          container: LIGHTBOX_BACKDROP,
-          thumbnail: { borderRadius: 0 },
-        }}
-      />
+      {requested ? (
+        <Suspense fallback={<LightboxLoading />}>
+          <GalleryViewer
+            gallerySlug={gallerySlug}
+            slides={slides}
+            open={index >= 0}
+            index={Math.max(index, 0)}
+            close={() => setIndex(-1)}
+          />
+        </Suspense>
+      ) : null}
     </div>
   );
 };

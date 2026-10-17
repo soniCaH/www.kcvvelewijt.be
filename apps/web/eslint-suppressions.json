@@ -134,7 +134,7 @@
       "count": 2
     }
   },
-  "src/components/article/blocks/HtmlTableBlock/HtmlTableBlock.tsx": {
+  "src/components/article/blocks/HtmlTableBlock/HtmlTableView.tsx": {
     "kcvv/no-off-ramp-tracking": {
       "count": 1
     }

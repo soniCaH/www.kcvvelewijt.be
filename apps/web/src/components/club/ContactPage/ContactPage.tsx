@@ -43,7 +43,7 @@ import {
   TapedCard,
 } from "@/components/design-system";
 import { PageHero } from "@/components/layout";
-import { HtmlTableBlock } from "@/components/article/blocks/HtmlTableBlock/HtmlTableBlock";
+import { HtmlTableView } from "@/components/article/blocks/HtmlTableBlock/HtmlTableView";
 import { MapEmbed } from "./MapEmbed";
 import type { KeyContactVM } from "@/lib/repositories/staff.repository";
 import { CONTACT_HEADLINE, CONTACT_LEAD } from "./contact-copy";
@@ -81,11 +81,12 @@ const CONTACT_CATEGORIES: ContactCategory[] = [
   },
 ];
 
-/** Inkom prices rendered through the `<HtmlTableBlock>` idiom — the quiet
+/** Inkom prices rendered through the `<HtmlTableView>` idiom — the quiet
  *  skin (#2582), same register as `<StandingsTable>`. Never overflows at
  *  this 2×3 size, so it borrows the skin and none of the overflow/anchor
- *  machinery (#2476 rule 1 — correct reuse, not a defect). Sanitised on
- *  render; only structural table tags plus `<strong>` survive (#2481). */
+ *  machinery (#2476 rule 1 — correct reuse, not a defect). A static
+ *  literal of plain table tags, so it skips `sanitize-html` — which would
+ *  otherwise ship to the browser through this client component (#3480). */
 const PRICES_TABLE_HTML = `<table>
   <thead><tr><th>Wedstrijd</th><th>Prijs</th></tr></thead>
   <tbody>
@@ -364,9 +365,12 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
               />
               <span className={ICON_TITLE}>Inkom</span>
             </div>
-            {/* `mt-3!`/`mb-0!` override HtmlTableBlock's default `my-6` so the
+            {/* `mt-3!`/`mb-0!` override HtmlTableView's default `my-6` so the
                 prices table sits tight under the header inside the card. */}
-            <HtmlTableBlock html={PRICES_TABLE_HTML} className="mt-3! mb-0!" />
+            <HtmlTableView
+              trustedHtml={PRICES_TABLE_HTML}
+              className="mt-3! mb-0!"
+            />
           </TapedCard>
 
           {/* Kantine */}

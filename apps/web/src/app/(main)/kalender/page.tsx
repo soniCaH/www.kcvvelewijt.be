@@ -3,6 +3,7 @@
  * Full-season matches across all KCVV teams + events, with month/week views
  */
 
+import { headers } from "next/headers";
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
 import { degradeSection } from "@/lib/effect/degrade";
@@ -32,6 +33,7 @@ import {
   buildCalendarFeed,
   buildKalenderItemListEntries,
 } from "./utils";
+import { guessIsPhone } from "./guess-is-phone";
 import type {
   CalendarMatch,
   CalendarFeedItem,
@@ -172,6 +174,10 @@ export default async function CalendarPage({
   // flipped after hydration; the widget narrows both, and the URL stays the
   // source of truth after mount.
   const { type, view } = await searchParams;
+  // Likewise the phone guess (#3480): without an explicit `?view=` a phone's
+  // first paint is the agenda, not the month grid it flips away from after
+  // mount. Per-request is safe here — `force-dynamic`, never CDN-cached.
+  const initialIsPhone = guessIsPhone(await headers());
   const [data, upcoming] = await Promise.all([
     fetchCalendarData(),
     // The homepage agenda on top of the calendar (#3430): a section, so a
@@ -218,6 +224,7 @@ export default async function CalendarPage({
           teams={data.teams}
           initialType={typeof type === "string" ? type : undefined}
           initialView={typeof view === "string" ? view : undefined}
+          initialIsPhone={initialIsPhone}
         />
       </PageContainer>
     </div>

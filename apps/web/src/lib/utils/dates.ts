@@ -1,23 +1,15 @@
 import { DateTime } from "luxon";
 import { capitalize } from "./capitalize";
+import { CLUB_TIMEZONE } from "./club-timezone";
 
-/**
- * KCVV is in Belgium, and every date the site renders is Belgian wall-clock.
- *
- * The constant is **club**-scoped on purpose: it governs articles, galleries,
- * search and match metadata, not only events. Its previous event-scoped name
- * (`EVENT_TIMEZONE`, in `./event-datetime`) is precisely why every non-event
- * formatter kept assuming it did not apply to them and reached for the runtime
- * zone instead (#2430). Storage stays UTC; this is presentation only.
- */
-export const CLUB_TIMEZONE = "Europe/Brussels";
+export { CLUB_TIMEZONE };
 
 /**
  * The site's single date parse: a stored UTC instant → Belgian wall-clock, nl
  * locale. Every formatter goes through it — the shared ones below and the
  * route-local ones that render a shape with only one consumer — so a rendered
  * calendar date never depends on where the code runs. Vercel is UTC, the
- * browser is the visitor's own zone, and `<MatchStripView>` formats in both: an
+ * browser is the visitor's own zone, and a client component formats in both: an
  * unpinned late-evening kickoff renders one day on the server and the next
  * after hydration. Offset-less ISO input is read as UTC (the stored contract)
  * rather than the runtime zone.
@@ -111,8 +103,8 @@ export function clubDayStart(): string {
  * (#2616 review). The AC calls this "a pure function … over a Match date and
  * a reference calendar day" — a default that reads the wall clock would let
  * `isMatchDay(fixture.date)` compile anywhere, including inside
- * `<MatchStripView>`, the client component whose own docblock explains at
- * length why that exact read must stay server-side (a client/server date
+ * `<MatchStripView>`, whose switch is a client component and whose own docblock
+ * explains why that exact read must stay server-side (a client/server date
  * disagreement across a midnight boundary). A required parameter makes that
  * mistake unwritable instead of merely documented; the one extra argument at
  * the one real call site (`<MatchStrip>`) is the cost. The parse this
