@@ -48,10 +48,10 @@ type Raw = {
 export default async function ShareLooksPrototypeRoute({
   searchParams,
 }: {
-  searchParams: Promise<{ variant?: string }>;
+  searchParams: Promise<{ variant?: string; drafts?: string }>;
 }) {
   if (process.env.NODE_ENV === "production") notFound();
-  const { variant } = await searchParams;
+  const { variant, drafts } = await searchParams;
   // Real club photos live on production; staging holds seed images. Read-only.
   const prod = sanityClient.withConfig({ dataset: "production" });
   if (prod.config().dataset !== "production") throw new Error("not prod");
@@ -102,5 +102,19 @@ export default async function ShareLooksPrototypeRoute({
     });
   }
 
-  return <LooksPrototype variant={variant ?? "A"} items={items} />;
+  // #3518 round 1: `?drafts=1` shows the look's 8 AI fallback drafts on the bare event.
+  const bare = items.find((i) => i.key === "eventBare");
+  const v = variant ?? "A";
+  const shown =
+    drafts && bare
+      ? Array.from({ length: 8 }, (_, n) => ({
+          ...bare,
+          key: `draft-${n + 1}`,
+          img: null,
+          draft: n + 1,
+          fallback: `/images/share-fallback-drafts/${v}-${n + 1}.jpg`,
+        }))
+      : items;
+
+  return <LooksPrototype variant={v} items={shown} />;
 }

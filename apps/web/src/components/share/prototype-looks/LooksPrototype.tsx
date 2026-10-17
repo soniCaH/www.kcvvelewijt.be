@@ -33,6 +33,9 @@ export interface LookItem {
   img: string | null;
   hx: number;
   hy: number;
+  /** #3518: a round-1 AI fallback draft shown in place of FALLBACK. */
+  fallback?: string;
+  draft?: number;
 }
 
 type Format = "story" | "square";
@@ -123,7 +126,7 @@ function styleOf(it: LookItem): TypeStyle {
 
 // ── Data helpers ───────────────────────────────────────────────────────────
 function photo(it: LookItem, w: number, h: number): string {
-  if (!it.img) return FALLBACK;
+  if (!it.img) return it.fallback ?? FALLBACK;
   const src = `${it.img}?w=${w}&h=${h}&q=80&fit=crop&crop=focalpoint&fp-x=${it.hx}&fp-y=${it.hy}`;
   // Same-origin via the Next image optimizer — what SharePage does for capture.
   return `/_next/image?url=${encodeURIComponent(src)}&w=1080&q=75`;
@@ -1379,6 +1382,7 @@ const LOOKS: Record<
 const KEYS = Object.keys(LOOKS);
 
 function itemLabel(it: LookItem): string {
+  if (it.draft) return `Draft ${it.draft}`;
   if (it.kind === "event")
     return `Event (${it.eventType})${it.img ? "" : " — geen cover, fallback"}`;
   return ARTICLE_STYLE[it.articleType ?? ""]?.label ?? "Artikel";
@@ -1471,7 +1475,9 @@ export function LooksPrototype({
   const [theme, setTheme] = useState<Theme>("light");
   const go = (d: number) => {
     const next = KEYS[(KEYS.indexOf(v) + d + KEYS.length) % KEYS.length]!;
-    router.replace(`?variant=${next}`, { scroll: false });
+    const q = new URLSearchParams(window.location.search);
+    q.set("variant", next);
+    router.replace(`?${q}`, { scroll: false });
   };
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
