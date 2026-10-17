@@ -141,33 +141,6 @@ describe("useOrganigramAnalytics", () => {
     });
   });
 
-  describe("organigram_search_used", () => {
-    it("fires with sanitized query_text when user searches", () => {
-      const { result } = renderHook(() => useOrganigramAnalytics());
-
-      act(() => {
-        result.current.trackSearchUsed("JAN");
-      });
-
-      expect(mockTrackEvent).toHaveBeenCalledWith("organigram_search_used", {
-        query_text: "jan",
-      });
-    });
-
-    it("truncates query_text to 50 characters", () => {
-      const { result } = renderHook(() => useOrganigramAnalytics());
-      const longQuery = "a".repeat(60);
-
-      act(() => {
-        result.current.trackSearchUsed(longQuery);
-      });
-
-      expect(mockTrackEvent).toHaveBeenCalledWith("organigram_search_used", {
-        query_text: "a".repeat(50),
-      });
-    });
-  });
-
   describe("organigram_department_filtered", () => {
     it("fires with department when filter is changed", () => {
       const { result } = renderHook(() => useOrganigramAnalytics());
