@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { UltrasAnalytics } from "./UltrasAnalytics";
+import { dataLayerEvents } from "@/lib/analytics/data-layer-events.mocks";
 
 describe("UltrasAnalytics", () => {
   beforeEach(() => {
@@ -11,11 +12,8 @@ describe("UltrasAnalytics", () => {
     delete window.dataLayer;
   });
 
-  // `trackEvent` pushes a reset function in front of each event: skip those.
   const events = () =>
-    (window.dataLayer ?? [])
-      .filter((e) => typeof e !== "function")
-      .map((e) => (e as Record<string, unknown>).event);
+    dataLayerEvents().map((e) => (e as Record<string, unknown>).event);
 
   it("renders its children", () => {
     render(

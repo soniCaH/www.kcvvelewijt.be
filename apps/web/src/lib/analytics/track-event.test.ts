@@ -1,9 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { trackEvent } from "./track-event";
-
-/** The entries `trackEvent` pushes besides the reset function in front of each event. */
-const events = () =>
-  (window.dataLayer ?? []).filter((e) => typeof e !== "function");
+import { dataLayerEvents } from "./data-layer-events.mocks";
 
 describe("trackEvent", () => {
   beforeEach(() => {
@@ -13,13 +10,13 @@ describe("trackEvent", () => {
   it("pushes event with name to dataLayer", () => {
     trackEvent("test_event");
 
-    expect(events()).toEqual([{ event: "test_event" }]);
+    expect(dataLayerEvents()).toEqual([{ event: "test_event" }]);
   });
 
   it("pushes event with name and params to dataLayer", () => {
     trackEvent("search_submitted", { query_text: "voetbal", query_length: 7 });
 
-    expect(events()).toEqual([
+    expect(dataLayerEvents()).toEqual([
       { event: "search_submitted", query_text: "voetbal", query_length: 7 },
     ]);
   });

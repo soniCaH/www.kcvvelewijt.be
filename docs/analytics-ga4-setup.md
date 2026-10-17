@@ -106,6 +106,19 @@ as Custom Dimensions.
 
 You have 50 custom dimension slots. We will use 23.
 
+**Every event carries only its own parameters.** `trackEvent` pushes a function
+that calls GTM's `reset()` onto `window.dataLayer` before each event, because the
+GA4 tag maps every Data Layer Variable and GTM keeps a key until something
+overwrites it. Without the reset, an optional parameter an event omits (`tier`
+on `sponsor_click`, `event_date` on `event_cta_click`) would carry over from the
+previous event.
+
+**`query_text` is redacted.** `sanitizeQuery` replaces email addresses and phone
+numbers (9 or more digits) with `[redacted]`, then lowercases and truncates to 50
+characters. Names are not detected. The `?q=` in `page_location` and Enhanced
+Measurement's `search_term` are outside the code's reach: redact the `q` query
+parameter in GA4 Admin and turn off (or verify) Enhanced Measurement site search.
+
 ### How to add a custom dimension
 
 1. In GA4, go to **Configure** → **Custom definitions**.

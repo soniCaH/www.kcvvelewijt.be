@@ -11,6 +11,19 @@ describe("sanitizeQuery", () => {
     },
   );
 
+  it.each(["+32 (0)15 61 12 34", "(015) 61 12 34"])(
+    "redacts the phone number %s, parentheses included",
+    (phone) => {
+      expect(sanitizeQuery(`bel ${phone} nu`)).toBe("bel [redacted] nu");
+    },
+  );
+
+  it("returns fast for a very long query with no spaces (no quadratic backtracking)", () => {
+    const start = performance.now();
+    sanitizeQuery("a".repeat(50_000));
+    expect(performance.now() - start).toBeLessThan(250);
+  });
+
   it("redacts an email address", () => {
     const out = sanitizeQuery("mail jan.peeters@example.be graag");
     expect(out).not.toMatch(/@|jan|example/);

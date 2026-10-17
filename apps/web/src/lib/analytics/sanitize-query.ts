@@ -1,10 +1,14 @@
 const MAX_QUERY_LENGTH = 50;
+// Bounds the regex work: the EMAIL pattern backtracks quadratically (~660 ms
+// at 20 000 chars) and the query can arrive untruncated from `/zoeken?q=`.
+// Far above MAX_QUERY_LENGTH, so redaction still sees everything that survives.
+const MAX_SCAN_LENGTH = 256;
 const REDACTED = "[redacted]";
 
 const EMAIL = /[^\s@]+@[^\s@]+\.[^\s@]+/g;
-// 9+ digits with spaces, dots, dashes or slashes between them and an optional
-// leading `+`. 9, not 8, so a date like `05/10/2026` (8 digits) passes.
-const PHONE = /\+?\d(?:[\s.\-/]*\d){8,}/g;
+// 9+ digits with spaces, dots, dashes, slashes or parentheses between them
+// (`+32 (0)15 61 12 34`, `(015) 61 12 34`) and an optional leading `+` or `(`. 9, not 8, so a date like `05/10/2026` (8 digits) passes.
+const PHONE = /[+(]?\d(?:[\s.\-/()]*\d){8,}/g;
 
 /**
  * Redact email addresses and phone-shaped digit runs, then lowercase and
@@ -15,6 +19,7 @@ const PHONE = /\+?\d(?:[\s.\-/]*\d){8,}/g;
  */
 export function sanitizeQuery(query: string): string {
   return query
+    .slice(0, MAX_SCAN_LENGTH)
     .replace(EMAIL, REDACTED)
     .replace(PHONE, REDACTED)
     .toLowerCase()
