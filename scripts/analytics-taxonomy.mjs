@@ -68,6 +68,11 @@ export const prefixes = [
   // already-registered `cta` dimension (`word_lid` / `onze_club`) — no new
   // custom definitions.
   "identity_band_",
+  // `/share`, the story tool (#3539, spec #3535). `share_image_saved` only;
+  // reuses the registered `article_type` / `event_type` dimensions, the
+  // other params stay unregistered (DebugView only) — no new custom
+  // definitions.
+  "share_",
 ];
 
 /** The canonical GTM Custom-Event trigger RegEx (prefixes joined with `|`). */

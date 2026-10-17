@@ -491,6 +491,49 @@ Topic classification for responsibilities. User-facing, Dutch.
 
 ---
 
+## Share Tool (`/share`)
+
+The unlisted, `noindex` tool where the club makes Instagram stories (1080 × 1920) and squares (1080 × 1080) of a match moment, a news article or an event (spec #3535). It saves a PNG; nothing is published from it.
+
+### Share look
+
+One of the five visual styles a story is drawn in: **A Kaart**, **B Plakboek**, **C Affiche**, **E Ticket** and **W Wedstrijd**. A, B, C and E take one normalised view-model (`ShareContent`) and work for every content kind; W is the original match template set and only fits a match. News and events offer A, B, C, E; a match offers all five. After every saved PNG the tool moves on to the next fitting look (A → B → C → E → W, wrapping).
+
+| Code                     | Notes                                                                                   |
+| ------------------------ | --------------------------------------------------------------------------------------- |
+| `LookId` / `AnyLook`     | `kaart` · `plakboek` · `affiche` · `ticket` (+ `wedstrijd`) — also the analytics `look` |
+| `LOOKS`                  | `apps/web/src/components/share/looks/looks.ts`, in rotation order                       |
+| `ShareTheme`, `WashStep` | Licht / Donker per story (not for W); the wash (Zacht / Normaal / Sterk) is look C only |
+
+### Share moment
+
+The moment a match story tells: the `TemplateId` (`kickoff`, `halftime`, `full-time`, `goal-kcvv`, `goal-opponent`, the four card ids, `square-pre-game`, `square-result`). It picks the story's label, fill and detail from the `MOMENT_STYLE` table in `looks/share-content.ts`, in every look. A full-time moment also carries a mood (win / draw / loss).
+
+### Movable block
+
+A part of a look the editor can drag on the preview (Schik tab), stored as an offset in capture pixels plus a layer (`voor` = above everything, `achter` = below the pinned parts, above the photo). Each look names its own blocks (`data-block`); crest, footer and frame stay pinned. A tap only selects a block: a block counts as **moved** when its offset is non-zero or it sits `achter` — the rule behind the analytics field `blocks_moved`.
+
+| Code          | Notes                                                                            |
+| ------------- | -------------------------------------------------------------------------------- |
+| `BlockLayout` | `looks/block-layout.ts` — per block id `{ x, y, layer }`; key order = move order |
+| `moveBlock()` | The one pure offset + centre-snap function (pointer delta ÷ preview scale)       |
+
+### Omslag
+
+How a news or event cover fills a look's photo slot: **Foto** (the cover, cropped on its hotspot), **Affiche wazig** (the whole flyer, taped on, over a blurred copy of itself) or **Reservefoto** (the look's own fallback picture). News and events start on Affiche wazig; a match always uses Foto. The tool never detects a flyer — the editor picks.
+
+| Code        | Notes                                                                      |
+| ----------- | -------------------------------------------------------------------------- |
+| `CoverMode` | `foto` · `affiche_wazig` · `reservefoto` — also the analytics `cover_mode` |
+
+### Story session
+
+The one browser-storage record (`localStorage`, key `kcvv-share-session`) that lets a story survive a trip to Instagram and back: the story in progress (mode, picked item or match, moment, look, format, theme, wash, Omslag, edited text, block layout per format) plus, kept across days, the last-used look and each look's next fallback index. A saved PNG clears the layout and Omslag; another item clears everything item-specific; a new calendar day (Europe/Brussels) clears the story. A broken store means a fresh start. The uploaded own photo is never stored.
+
+| Code           | Notes                                                                                   |
+| -------------- | --------------------------------------------------------------------------------------- |
+| `StorySession` | `apps/web/src/components/share/SharePage/story-session.ts` — read validates every field |
+
 ## Statistics & Ranking
 
 ### Player Stats

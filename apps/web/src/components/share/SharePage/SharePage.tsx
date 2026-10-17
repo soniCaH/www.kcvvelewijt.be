@@ -39,10 +39,12 @@ import {
 import type { ComponentType } from "react";
 import { LOOKS } from "../looks/looks";
 import { ShareSkeleton } from "./ShareSkeleton";
+import { trackShareImageSaved } from "../share-analytics";
 import { clubToday } from "@/lib/utils/dates";
 import {
   fallbackCount,
   usesAiFallback,
+  usesFallback,
   type CoverMode,
   type ShareFormat,
   type ShareTheme,
@@ -925,9 +927,22 @@ function ShareTool({
   /**
    * A PNG left the tool (shared, or its download clicked): the next story
    * starts on the next fitting look, the next fallback picture of this look,
-   * and the default Omslag. The match details stay.
+   * and the default Omslag. The match details stay. It is also the one
+   * place `share_image_saved` fires (#3539).
    */
   const handleSaved = () => {
+    trackShareImageSaved({
+      mode,
+      itemType: item?.type ?? null,
+      template: selectedTemplateId,
+      look: activeLook,
+      theme,
+      wash,
+      format: aspect,
+      coverMode,
+      blocks: blocks[aspect],
+      fallbackUsed: !!content && !isW && usesFallback(content, coverMode),
+    });
     if (content && !isW && usesAiFallback(content, coverMode)) {
       setFallbackNext((prev) => ({
         ...prev,

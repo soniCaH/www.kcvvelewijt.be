@@ -22,7 +22,11 @@ globalThis.fetch = vi.fn().mockResolvedValue({
   blob: () => Promise.resolve(mockBlob),
 } as unknown as Response);
 
+// The analytics seam (#3539): the payload is asserted, nothing is sent.
+vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
+
 import { SharePage } from "./SharePage";
+import { trackEvent } from "@/lib/analytics/track-event";
 
 type User = ReturnType<typeof userEvent.setup>;
 type Tab = "Inhoud" | "Stijl" | "Tekst" | "Schik";
@@ -1659,6 +1663,250 @@ describe("SharePage", () => {
         story: { tekst: MOVED, odd: { x: 1, y: 2, layer: "voor" } },
         square: {},
       });
+    });
+  });
+
+  // ─── Analytics (#3539) ───────────────────────────────────────────────────
+
+  describe("share_image_saved (#3539)", () => {
+    const KEY = "kcvv-share-session";
+    const NEWS: ShareItem = {
+      kind: "article",
+      slug: "interview-jan",
+      type: "interview",
+      title: "Jan over zijn eerste seizoen",
+      spans: [{ text: "Jan over zijn eerste seizoen", accent: false }],
+      date: "vrijdag 17 oktober",
+      time: "",
+      location: "",
+      day: "17",
+      month: "okt",
+      cover: {
+        url: "https://cdn.sanity.io/images/p/d/cover.jpg",
+        hotspot: { x: 0.3, y: 0.2 },
+      },
+    };
+    const QUIZ: ShareItem = {
+      ...NEWS,
+      kind: "event",
+      slug: "quiz",
+      type: "Supportersactiviteit",
+      title: "Supportersquiz",
+      spans: [{ text: "Supportersquiz", accent: false }],
+      location: "Kantine Driesstraat",
+      cover: null,
+    };
+    const saved = () =>
+      vi
+        .mocked(trackEvent)
+        .mock.calls.filter(([name]) => name === "share_image_saved");
+    const payload = () => saved()[0]![1] as Record<string, unknown>;
+    /** The privacy rule: no ids, slugs, names or titles leave the tool. */
+    const expectNoIdentity = (...secrets: string[]) => {
+      const sent = JSON.stringify(saved());
+      for (const secret of secrets) expect(sent).not.toContain(secret);
+    };
+    /** A stored match story of today, with `blocks` as the story layout. */
+    const seed = (blocks: Record<string, unknown>) =>
+      localStorage.setItem(
+        KEY,
+        JSON.stringify({
+          look: "kaart",
+          fallbackNext: {},
+          story: {
+            day: clubToday(),
+            mode: "match",
+            template: "goal-kcvv",
+            format: "story",
+            theme: "licht",
+            wash: "normaal",
+            coverMode: "foto",
+            match: {},
+            itemSlug: null,
+            fields: null,
+            blocks: { story: blocks, square: {} },
+          },
+        }),
+      );
+
+    it("a download click sends the match story's fields, and nothing that names the match or a player", async () => {
+      const user = userEvent.setup();
+      render(<SharePage matches={MATCHES} players={PLAYERS} />);
+      await pickMatch(user, MATCHES[0]!);
+
+      await save(user);
+
+      expect(saved()).toHaveLength(1);
+      expect(payload()).toEqual({
+        content_type: "match",
+        template: "goal_kcvv",
+        look: "kaart",
+        theme: "licht",
+        format: "story",
+        blocks_moved: false,
+        fallback_used: true,
+      });
+      expectNoIdentity("KCVV Elewijt", "Opponent", "1001", "Jan", "Janssen");
+    });
+
+    it("a resolved share of an article sends its type and Omslag, never its title or slug", async () => {
+      const restore = stubShare(vi.fn().mockResolvedValue(undefined));
+      try {
+        const user = userEvent.setup();
+        render(
+          <SharePage
+            matches={MATCHES}
+            players={PLAYERS}
+            articles={[NEWS]}
+            initial={{ kind: "article", item: NEWS }}
+          />,
+        );
+        await openTab(user, "Stijl");
+        await user.click(screen.getByRole("button", { name: "Affiche" }));
+        await user.click(screen.getByRole("button", { name: "Donker" }));
+        await user.click(screen.getByRole("button", { name: "Sterk" }));
+
+        await save(user);
+
+        expect(payload()).toEqual({
+          content_type: "article",
+          article_type: "interview",
+          look: "affiche",
+          theme: "donker",
+          wash: "sterk",
+          format: "story",
+          cover_mode: "affiche_wazig",
+          blocks_moved: false,
+          fallback_used: false,
+        });
+        expectNoIdentity(NEWS.title, NEWS.slug, "cdn.sanity.io");
+      } finally {
+        restore();
+      }
+    });
+
+    it("an event without a cover sends event_type and counts its fallback picture", async () => {
+      const user = userEvent.setup();
+      render(
+        <SharePage
+          matches={MATCHES}
+          players={PLAYERS}
+          events={[QUIZ]}
+          initial={{ kind: "event", item: QUIZ }}
+        />,
+      );
+
+      await save(user);
+
+      expect(payload()).toMatchObject({
+        content_type: "event",
+        event_type: "Supportersactiviteit",
+        look: "kaart",
+        fallback_used: true,
+      });
+      expect(payload()).not.toHaveProperty("article_type");
+      expect(payload()).not.toHaveProperty("template");
+      expectNoIdentity(QUIZ.title, QUIZ.slug, QUIZ.location);
+    });
+
+    it("look W sends no theme and no wash", async () => {
+      const user = userEvent.setup();
+      render(<SharePage matches={MATCHES} players={PLAYERS} />);
+      await pickW(user);
+
+      await save(user);
+
+      expect(payload()).toEqual({
+        content_type: "match",
+        template: "goal_kcvv",
+        look: "wedstrijd",
+        format: "story",
+        blocks_moved: false,
+        fallback_used: false,
+      });
+    });
+
+    it("the square templates keep their spec names", async () => {
+      const user = userEvent.setup();
+      render(<SharePage matches={MATCHES} players={PLAYERS} />);
+      await pickW(user);
+      await openTab(user, "Stijl");
+      await user.click(screen.getByRole("button", { name: /vierkant · 1:1/i }));
+
+      await save(user);
+
+      expect(payload()).toMatchObject({
+        template: "square_pregame",
+        format: "square",
+      });
+    });
+
+    it.each([
+      {
+        what: "a tap that only selected a block",
+        layer: "voor",
+        x: 0,
+        moved: false,
+      },
+      { what: "a block moved", layer: "voor", x: 40, moved: true },
+      {
+        what: "a block sent back, in place",
+        layer: "achter",
+        x: 0,
+        moved: true,
+      },
+    ])("blocks_moved after $what is $moved", async ({ layer, x, moved }) => {
+      const blocks = { tekst: { x, y: 0, layer } };
+      seed(blocks);
+      const user = userEvent.setup();
+      render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+      await save(user);
+
+      expect(payload()).toMatchObject({ blocks_moved: moved });
+    });
+
+    it("sends nothing on a cancelled or refused share, then once when the kept PNG is shared", async () => {
+      const cancel = (name: string) => Object.assign(new Error(name), { name });
+      const share = vi
+        .fn()
+        .mockRejectedValueOnce(cancel("AbortError"))
+        .mockRejectedValueOnce(cancel("NotAllowedError"))
+        .mockResolvedValueOnce(undefined);
+      const restore = stubShare(share);
+      try {
+        const user = userEvent.setup();
+        render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+        await save(user);
+        await save(user);
+        expect(saved()).toHaveLength(0);
+
+        await save(user);
+        expect(share).toHaveBeenCalledTimes(3);
+        expect(saved()).toHaveLength(1);
+      } finally {
+        restore();
+      }
+    });
+
+    it("sends nothing when the PNG could not be made or the share failed", async () => {
+      const { toPng } = await import("html-to-image");
+      vi.mocked(toPng).mockRejectedValueOnce(new Error("canvas"));
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      const restore = stubShare(vi.fn().mockRejectedValue(new Error("boom")));
+      try {
+        const user = userEvent.setup();
+        render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+        await save(user);
+        await save(user);
+
+        expect(screen.getByRole("alert")).toBeVisible();
+        expect(saved()).toHaveLength(0);
+      } finally {
+        restore();
+      }
     });
   });
 });

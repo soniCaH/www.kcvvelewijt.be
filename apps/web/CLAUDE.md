@@ -12,12 +12,13 @@ This is the KCVV Elewijt club website. See root `.claude/CLAUDE.md` for monorepo
 
 Audit/spec generators sometimes flag features as "missing" because no top-level URL matches the obvious name. Cross-check this map before opening an issue:
 
-| Feature                                 | Where it lives                             | Component                                             |
-| --------------------------------------- | ------------------------------------------ | ----------------------------------------------------- |
-| League table / standings / `klassement` | `/ploegen/[slug]` (team detail page)       | `src/components/team/TeamStandings/TeamStandings.tsx` |
-| Match-day league table snapshot         | `/wedstrijd/[matchId]` (match detail page) | `src/components/team/TeamStandings/TeamStandings.tsx` |
-| Per-team match list                     | `/ploegen/[slug]`                          | `src/components/team/TeamMatches/`                    |
-| Club-wide calendar                      | `/kalender`                                | `src/app/(main)/kalender/`                            |
+| Feature                                  | Where it lives                                                                 | Component                                             |
+| ---------------------------------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------- |
+| League table / standings / `klassement`  | `/ploegen/[slug]` (team detail page)                                           | `src/components/team/TeamStandings/TeamStandings.tsx` |
+| Match-day league table snapshot          | `/wedstrijd/[matchId]` (match detail page)                                     | `src/components/team/TeamStandings/TeamStandings.tsx` |
+| Per-team match list                      | `/ploegen/[slug]`                                                              | `src/components/team/TeamMatches/`                    |
+| Club-wide calendar                       | `/kalender`                                                                    | `src/app/(main)/kalender/`                            |
+| Share stories for match, news and events | `/share` (unlisted, `noindex`; deep links `?article=<slug>` / `?event=<slug>`) | `src/components/share/SharePage/SharePage.tsx`        |
 
 ## Design System & Storybook (MANDATORY)
 
