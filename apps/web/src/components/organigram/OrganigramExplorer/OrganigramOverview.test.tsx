@@ -2,21 +2,21 @@
  * OrganigramOverview — ties the on-page chart to the fullscreen explorer (#2054).
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { OrganigramOverview } from "./OrganigramOverview";
 import { explorerFixture } from "./organigram-explorer.fixture";
-import { HubMemberPanel } from "@/components/organigram/HubMemberPanel";
 
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
 describe("OrganigramOverview", () => {
   beforeEach(() => {
-    // The B2 test mounts <HubMemberPanel>, which writes `?member=` to the URL on
-    // open (replaceMemberParams). Reset the URL so that state can't leak into a
-    // later test and auto-restore a panel (happy-dom shares one window per file).
-    window.history.replaceState(null, "", "/");
+    vi.spyOn(Element.prototype, "scrollIntoView").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("opens the explorer focused on a clicked chart node", async () => {
@@ -55,11 +55,14 @@ describe("OrganigramOverview", () => {
     expect(launcher).toHaveFocus();
   });
 
-  it("closes the verkenner when a member panel opens from it (B2 — no stacked dialogs)", async () => {
+  it("closes the verkenner and opens the person's clubboek row when 'Contactgegevens' is pressed", async () => {
     render(
-      <HubMemberPanel nodes={explorerFixture} responsibilityPaths={[]}>
+      <>
+        <details data-node-ids="voorzitter" data-testid="row">
+          <summary>Voorzitter</summary>
+        </details>
         <OrganigramOverview nodes={explorerFixture} />
-      </HubMemberPanel>,
+      </>,
     );
     await userEvent.click(
       screen.getByRole("button", { name: /Blader door het organigram/ }),
@@ -72,12 +75,34 @@ describe("OrganigramOverview", () => {
     await userEvent.click(
       screen.getByRole("button", { name: "Contactgegevens" }),
     );
-    // The person panel took over and the verkenner collapsed — never two
-    // stacked modal dialogs.
-    expect(screen.getByTestId("member-detail-panel")).toBeInTheDocument();
+    // The verkenner collapsed and the row took over, with focus on its summary.
     expect(
       screen.queryByRole("button", { current: true }),
     ).not.toBeInTheDocument();
+    expect(screen.getByTestId("row")).toHaveProperty("open", true);
+    expect(
+      screen.getByText("Voorzitter", { selector: "summary" }),
+    ).toHaveFocus();
+  });
+
+  it("offers 'Contactgegevens' only for a box that has a row or card, and keeps the explorer open otherwise", async () => {
+    render(
+      <>
+        <details data-node-ids="tvjo" data-testid="row">
+          <summary>TVJO</summary>
+        </details>
+        <OrganigramOverview nodes={explorerFixture} />
+      </>,
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: /Blader door het organigram/ }),
+    );
+    // Opens on the Voorzitter, who has no row on this page: no trigger.
+    await screen.findByRole("button", { current: true });
+    expect(
+      screen.queryByRole("button", { name: "Contactgegevens" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
   it("collapsible: hides the chart behind a disclosure until opened (7o9 · 2)", async () => {

@@ -41,6 +41,7 @@ function makeNodeRow(overrides: Partial<NodeRow> = {}): NodeRow {
     title: "Voorzitter",
     description: "Algemene leiding",
     roleCode: "VZ",
+    pillar: "bestuur",
     department: "hoofdbestuur",
     parentId: null,
     members: [
@@ -68,6 +69,7 @@ describe("toOrgChartNode", () => {
       title: "Voorzitter",
       description: "Algemene leiding",
       roleCode: "VZ",
+      pillar: "bestuur",
       department: "hoofdbestuur",
       parentId: "club",
       members: [
@@ -81,6 +83,18 @@ describe("toOrgChartNode", () => {
         },
       ],
     });
+  });
+
+  it("leaves pillar undefined when the editor has not chosen one", () => {
+    expect(
+      toOrgChartNode(makeNodeRow({ pillar: null })).pillar,
+    ).toBeUndefined();
+  });
+
+  it("drops a pillar value the clubboek does not know instead of inventing a group", () => {
+    expect(
+      toOrgChartNode(makeNodeRow({ pillar: "kantine" as never })).pillar,
+    ).toBeUndefined();
   });
 
   it("null parentId defaults to 'club'", () => {
@@ -276,29 +290,15 @@ describe("StaffRepository", () => {
         }),
       );
 
-      expect(nodes).toHaveLength(2);
+      // Only the boxes: the synthetic club root is not the repository's to return.
+      expect(nodes).toHaveLength(1);
 
-      // First element is the club root node
       expect(nodes[0]).toEqual<OrgChartNode>({
-        id: "club",
-        title: "KCVV Elewijt",
-        members: [
-          {
-            id: "club",
-            name: "KCVV Elewijt",
-            imageUrl: "/images/logo-flat.png",
-          },
-        ],
-        department: "algemeen",
-        parentId: null,
-      });
-
-      // Second element is the mapped organigram node
-      expect(nodes[1]).toEqual<OrgChartNode>({
         id: "node-1",
         title: "Voorzitter",
         description: "Algemene leiding",
         roleCode: "VZ",
+        pillar: "bestuur",
         department: "hoofdbestuur",
         parentId: "club",
         members: [
@@ -314,6 +314,19 @@ describe("StaffRepository", () => {
       });
     });
 
+    it("returns no synthetic club root, so nothing downstream has to filter it", async () => {
+      mockFetch.mockResolvedValueOnce([makeNodeRow({ _id: "only" })]);
+
+      const nodes = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* StaffRepository;
+          return yield* repo.findAll();
+        }),
+      );
+
+      expect(nodes.map((n) => n.id)).toEqual(["only"]);
+    });
+
     it("parentId null defaults to 'club'", async () => {
       mockFetch.mockResolvedValueOnce([makeNodeRow({ parentId: null })]);
 
@@ -324,7 +337,7 @@ describe("StaffRepository", () => {
         }),
       );
 
-      expect(nodes[1].parentId).toBe("club");
+      expect(nodes[0].parentId).toBe("club");
     });
 
     it("parentId set when parent node exists", async () => {

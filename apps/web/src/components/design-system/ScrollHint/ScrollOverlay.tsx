@@ -41,8 +41,8 @@ export interface ScrollOverlayProps {
    *  `<VolledigOrganigram>`'s chart or the organigram explorer's stage. */
   direction?: "right" | "both";
   /** Extra classes applied to both the arrow buttons AND the fades — e.g.
-   *  `"vo-no-print"` so the organigram chart's arrows don't appear in the
-   *  exported PDF (review finding #2577 part 7). */
+   *  `"print:hidden"` so a chart's arrows don't appear on paper (review
+   *  finding #2577 part 7). */
   chromeClassName?: string;
   /** The fade's gradient start colour — must match the track's own
    *  background. Defaults to `"from-cream"`; the organigram explorer's

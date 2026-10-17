@@ -235,15 +235,6 @@
       "@/components/match/MatchStatusBadge": [
         "../apps/web/src/components/match/MatchStatusBadge/index.ts"
       ],
-      "@/components/organigram/HubMemberPanel": [
-        "../apps/web/src/components/organigram/HubMemberPanel/index.ts"
-      ],
-      "@/components/organigram/MemberDetailPanel": [
-        "../apps/web/src/components/organigram/MemberDetailPanel/index.ts"
-      ],
-      "@/components/organigram/OrgPersonCard": [
-        "../apps/web/src/components/organigram/OrgPersonCard/index.ts"
-      ],
       "@/components/organigram/OrganigramExplorer": [
         "../apps/web/src/components/organigram/OrganigramExplorer/index.ts"
       ],
@@ -252,9 +243,6 @@
       ],
       "@/components/organigram/OrganigramSectionNav": [
         "../apps/web/src/components/organigram/OrganigramSectionNav/index.ts"
-      ],
-      "@/components/organigram/StructureDirectory": [
-        "../apps/web/src/components/organigram/StructureDirectory/index.ts"
       ],
       "@/components/player": ["../apps/web/src/components/player/index.ts"],
       "@/components/player/PlayerHero": [

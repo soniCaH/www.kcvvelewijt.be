@@ -384,18 +384,6 @@ describe("ScrollOverlay", () => {
     expect(scrollToMock).toHaveBeenCalled();
   });
 
-  it("merges chromeClassName onto both the arrow and its fade (e.g. print-hiding)", () => {
-    mockScrollDimensions(900, 400);
-    const { container } = render(
-      <ScrollOverlay chromeClassName="vo-no-print">
-        <span>Item</span>
-      </ScrollOverlay>,
-    );
-    expect(screen.getByLabelText("Scroll right")).toHaveClass("vo-no-print");
-    const fade = container.querySelector('[aria-hidden="true"]') as HTMLElement;
-    expect(fade).toHaveClass("vo-no-print");
-  });
-
   it("overrides the default overflow-x-auto via overflowClassName", () => {
     const { container } = render(
       <ScrollOverlay overflowClassName="overflow-auto">

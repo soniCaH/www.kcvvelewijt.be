@@ -32,7 +32,7 @@ export const organigramNode = defineType({
       rows: 3,
       group: 'rol',
       description:
-        'Korte beschrijving van de positie of taken. Getoond in het detail-venster wanneer een bezoeker op de node klikt.',
+        'Eén korte regel over waarvoor je bij deze positie terechtkunt (bijv. "Post, verslagen, de vzw"). Wordt als "waarvoor"-regel getoond op de sleutelkaarten bovenaan /hulp. Leeg = geen regel.',
     }),
     defineField({
       name: 'roleCode',
@@ -42,6 +42,28 @@ export const organigramNode = defineType({
       description:
         'Korte badge in het diagram (bijv. "T1", "VP", "JC"), max. 6 tekens. Optioneel — laat leeg voor geen badge.',
       validation: (Rule) => Rule.max(6),
+    }),
+    defineField({
+      name: 'pillar',
+      title: 'Pijler',
+      type: 'string',
+      group: 'rol',
+      description:
+        'Onder welke pijler van het clubboek op /hulp deze positie valt. Zonder pijler verschijnt de positie onder "Overige functies".',
+      options: {
+        list: [
+          {title: 'Bestuur', value: 'bestuur'},
+          {title: 'Sportief', value: 'sportief'},
+          {title: 'Jeugd: organisatie', value: 'jeugd-organisatie'},
+          {title: 'Jeugd: opleiding', value: 'jeugd-opleiding'},
+          {title: 'Club & werking', value: 'club'},
+          {title: 'Integriteit', value: 'integriteit'},
+        ],
+      },
+      validation: (Rule) =>
+        Rule.required().warning(
+          'Kies een pijler. Zonder pijler verschijnt deze positie onder "Overige functies" op /hulp.',
+        ),
     }),
     defineField({
       name: 'department',

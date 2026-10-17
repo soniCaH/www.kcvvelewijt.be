@@ -22,7 +22,6 @@ type Story = StoryObj<typeof meta>;
 
 /**
  * The full box chart wired to the explorer — click any node (or "Blader door het organigram
- * ⤢") to open the fullscreen spotlight focused there; "Download als PDF" prints
- * the whole tree on one A4.
+ * ⤢") to open the fullscreen spotlight focused there.
  */
 export const Default: Story = {};

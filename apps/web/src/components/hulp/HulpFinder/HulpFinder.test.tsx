@@ -25,14 +25,6 @@ function setUrl(url: string) {
 const lastUrl = (spy: MockInstance<History["pushState"]>) =>
   String(spy.mock.lastCall?.[2]);
 
-let mockPanel: {
-  openMemberById: ReturnType<typeof vi.fn>;
-  openMember: ReturnType<typeof vi.fn>;
-} | null = null;
-vi.mock("@/components/organigram/HubMemberPanel", () => ({
-  useHubMemberPanel: () => mockPanel,
-}));
-
 const trackView = vi.fn();
 const trackContactClicked = vi.fn();
 const trackOrganigramLink = vi.fn();
@@ -67,7 +59,6 @@ beforeEach(() => {
   trackOrganigramLink.mockClear();
   trackStepLinkClicked.mockClear();
   setUrl("/hulp");
-  mockPanel = null;
   pushState = vi.spyOn(window.history, "pushState");
   replaceState = vi.spyOn(window.history, "replaceState");
 });
@@ -176,21 +167,47 @@ describe("HulpFinder", () => {
     expect(trackOrganigramLink).toHaveBeenCalledWith("blessure", "node-gc");
   });
 
-  it("opens the member panel in-page when inside a HubMemberPanel provider", () => {
-    const openMemberById = vi.fn();
-    mockPanel = { openMemberById, openMember: vi.fn() };
+  it("opens the person's clubboek row in-page instead of navigating when the row exists", () => {
+    render(
+      <>
+        <details data-node-ids="node-gc" data-testid="row">
+          <summary>GC</summary>
+        </details>
+        <HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />
+      </>,
+    );
+    fireEvent.click(q(/mijn kind is geblesseerd/i));
+    const link = answerOf(/mijn kind is geblesseerd/i).getByRole("link", {
+      name: /toon in structuur/i,
+    });
+    // fireEvent returns false when the click's default (navigation) was cancelled.
+    expect(fireEvent.click(link)).toBe(false);
+    expect(screen.getByTestId("row")).toHaveProperty("open", true);
+  });
+
+  it("never soft-navigates 'Toon in structuur': without a row it scrolls to the structuur section", () => {
+    scrollIntoView.mockClear();
+    render(
+      <>
+        <section id="structuur" data-testid="structuur" />
+        <HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />
+      </>,
+    );
+    fireEvent.click(q(/mijn kind is geblesseerd/i));
+    const link = answerOf(/mijn kind is geblesseerd/i).getByRole("link", {
+      name: /toon in structuur/i,
+    });
+    expect(fireEvent.click(link)).toBe(false);
+    expect(scrollIntoView).toHaveBeenCalled();
+  });
+
+  it("leaves a modified click on 'Toon in structuur' to the browser", () => {
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
     fireEvent.click(q(/mijn kind is geblesseerd/i));
-    fireEvent.click(
-      answerOf(/mijn kind is geblesseerd/i).getByRole("link", {
-        name: /toon in structuur/i,
-      }),
-    );
-    expect(openMemberById).toHaveBeenCalledWith(
-      "node-gc",
-      expect.objectContaining({ view: "cards" }),
-    );
-    expect(trackOrganigramLink).toHaveBeenCalledWith("blessure", "node-gc");
+    const link = answerOf(/mijn kind is geblesseerd/i).getByRole("link", {
+      name: /toon in structuur/i,
+    });
+    expect(fireEvent.click(link, { metaKey: true })).toBe(true);
   });
 
   it("shows a per-category empty state when the active audience empties a category", () => {

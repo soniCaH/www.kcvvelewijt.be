@@ -6,7 +6,7 @@ import type {
   ORGANIGRAM_NODES_QUERY_RESULT,
   STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT,
 } from "../sanity/sanity.types";
-import type { OrgChartNode } from "@/types/organigram";
+import { ORG_PILLARS, type OrgChartNode } from "@/types/organigram";
 
 // ─── GROQ Queries ────────────────────────────────────────────────────────────
 
@@ -16,6 +16,7 @@ export const ORGANIGRAM_NODES_QUERY =
   title,
   description,
   roleCode,
+  pillar,
   department,
   "parentId": select(defined(parentNode) && parentNode->active == true => parentNode->_id, null),
   "members": members[@->archived != true]->{
@@ -61,20 +62,6 @@ const STAFF_MEMBER_BY_PSD_ID_QUERY =
 }`);
 
 // ─── View models ─────────────────────────────────────────────────────────────
-
-const CLUB_ROOT_NODE: OrgChartNode = {
-  id: "club",
-  title: "KCVV Elewijt",
-  members: [
-    {
-      id: "club",
-      name: "KCVV Elewijt",
-      imageUrl: "/images/logo-flat.png",
-    },
-  ],
-  department: "algemeen",
-  parentId: null,
-};
 
 export interface KeyContactVM {
   role: string;
@@ -140,6 +127,7 @@ export function toOrgChartNode(
     title: node.title ?? "",
     roleCode: node.roleCode ?? undefined,
     description: node.description ?? undefined,
+    pillar: ORG_PILLARS.find((p) => p === node.pillar),
     department: (node.department ?? undefined) as OrgChartNode["department"],
     parentId: node.parentId ?? "club",
     members: (node.members ?? [])
@@ -220,9 +208,7 @@ export const StaffRepositoryLive = Layer.succeed(StaffRepository, {
         revalidate: SANITY_LIST_REVALIDATE,
         tags: [SANITY_TAGS.staff],
       },
-    ).pipe(
-      Effect.map((nodes) => [CLUB_ROOT_NODE, ...nodes.map(toOrgChartNode)]),
-    ),
+    ).pipe(Effect.map((nodes) => nodes.map(toOrgChartNode))),
   findByPsdId: (psdId) =>
     fetchGroq<STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT>(
       STAFF_MEMBER_BY_PSD_ID_QUERY,
