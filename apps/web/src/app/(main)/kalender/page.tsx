@@ -32,8 +32,8 @@ import {
   transformMatchToCalendar,
   buildCalendarFeed,
   buildKalenderItemListEntries,
-  guessIsPhone,
 } from "./utils";
+import { guessIsPhone } from "./guess-is-phone";
 import type {
   CalendarMatch,
   CalendarFeedItem,
