@@ -82,6 +82,12 @@ describe("useHashLandingCorrection", () => {
     expect(scrollIntoView).toHaveBeenCalledWith({ block: "start" });
   });
 
+  it("does not throw on a malformed percent-escape in the hash (a cold load)", () => {
+    window.location.hash = "#100%";
+
+    expect(() => renderHook(["spelers"])).not.toThrow();
+  });
+
   it("corrects on a FontFaceSet loadingdone event, on a cold load", () => {
     // happy-dom has no `document.fonts` at all (unlike a real browser) —
     // stub the `addEventListener`/`removeEventListener` pair so the

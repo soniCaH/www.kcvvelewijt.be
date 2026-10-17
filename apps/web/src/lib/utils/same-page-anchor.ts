@@ -1,5 +1,6 @@
 import type { MouseEvent } from "react";
 import { scrollIntoViewMotionSafe } from "./scroll-into-view";
+import { safeDecodeURIComponent } from "./safe-decode";
 
 /**
  * Bypasses Next's App Router for in-page-anchor nav links that target the page
@@ -40,7 +41,7 @@ export function handleSamePageAnchorClick(
     return;
   }
 
-  const id = decodeURIComponent(target.hash.slice(1));
+  const id = safeDecodeURIComponent(target.hash.slice(1));
   const el = document.getElementById(id);
   if (!el) return;
 
@@ -82,7 +83,7 @@ export function handleSamePageAnchorClick(
  * only covers the repeat.
  */
 export function revealHash(id: string): void {
-  if (decodeURIComponent(window.location.hash).slice(1) === id) {
+  if (safeDecodeURIComponent(window.location.hash).slice(1) === id) {
     window.dispatchEvent(new HashChangeEvent("hashchange"));
     return;
   }

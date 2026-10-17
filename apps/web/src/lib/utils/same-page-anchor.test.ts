@@ -145,6 +145,15 @@ describe("handleSamePageAnchorClick", () => {
   });
 });
 
+describe("handleSamePageAnchorClick with a malformed hash", () => {
+  it("does not throw and leaves the click to the router", () => {
+    setUrl("/hulp#100%");
+    const event = clickEvent();
+    expect(() => handleSamePageAnchorClick(event, "/hulp#100%")).not.toThrow();
+    expect(event.preventDefault).not.toHaveBeenCalled();
+  });
+});
+
 describe("revealHash", () => {
   it("writes the hash when it points somewhere else", () => {
     window.location.hash = "";
@@ -171,5 +180,11 @@ describe("revealHash", () => {
     revealHash("café");
     window.removeEventListener("hashchange", seen);
     expect(seen).toHaveBeenCalled();
+  });
+
+  it("does not throw when the current hash is malformed", () => {
+    setUrl("/hulp#%E0");
+    expect(() => revealHash("blessure")).not.toThrow();
+    expect(window.location.hash).toBe("#blessure");
   });
 });

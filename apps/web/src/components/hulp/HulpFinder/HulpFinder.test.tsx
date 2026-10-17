@@ -446,6 +446,12 @@ describe("HulpFinder", () => {
     expect(window.location.hash).toBe("#blessure");
   });
 
+  it("renders on a malformed percent-escape in the hash", () => {
+    setUrl("/hulp#%E0");
+    render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
+    expect(q(/mijn kind is geblesseerd/i)).toBeInTheDocument();
+  });
+
   it("keeps the member panel's ?member= param on a filter press", () => {
     setUrl("/hulp?member=node-gc");
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);

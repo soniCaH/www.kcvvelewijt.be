@@ -60,6 +60,7 @@ import {
 import { QuestionCard } from "./QuestionCard";
 import { PRESS_DOWN_TRANSITION } from "@/components/design-system/press-down";
 import { scrollIntoViewMotionSafe } from "@/lib/utils/scroll-into-view";
+import { safeDecodeURIComponent } from "@/lib/utils/safe-decode";
 
 const AUDIENCE_PARAM = "audience";
 const CATEGORY_PARAM = "categorie";
@@ -236,7 +237,7 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
   useEffect(() => {
     const fromHash = () => {
       if (typeof window === "undefined" || !window.location.hash) return;
-      reveal(decodeURIComponent(window.location.hash));
+      reveal(safeDecodeURIComponent(window.location.hash));
     };
     fromHash();
     window.addEventListener("hashchange", fromHash);
