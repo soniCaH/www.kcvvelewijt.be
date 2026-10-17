@@ -36,7 +36,9 @@ const tabButton = (name: Tab) => screen.getByRole("button", { name });
 const panel = () => screen.getByRole("region");
 const preview = () => screen.getByTestId("share-preview");
 const lookStrip = () => screen.queryByRole("group", { name: "Look" });
-const saveButton = () => screen.getByRole("button", { name: "Bewaar PNG" });
+/** Bewaar PNG; "Deel PNG" while a PNG whose share did not go through is kept. */
+const saveButton = () =>
+  screen.getByRole("button", { name: /^(Bewaar|Deel) PNG$/ });
 const save = (user: User) => user.click(saveButton());
 
 /** Today's templates are look W; a fresh phone starts on A Kaart (#3536). */
@@ -51,8 +53,8 @@ const pickMoment = async (user: User, name: string | RegExp) => {
 const pickMatch = async (user: User, match: MatchOption) => {
   await openTab(user, "Inhoud");
   await user.click(
-    within(screen.getByRole("listbox", { name: "Wedstrijden" })).getByRole(
-      "option",
+    within(screen.getByRole("group", { name: "Wedstrijden" })).getByRole(
+      "button",
       { name: match.label },
     ),
   );
@@ -185,7 +187,7 @@ describe("SharePage", () => {
 
       const p = within(panel());
       expect(p.getByRole("button", { name: "Nieuws" })).toBeInTheDocument();
-      expect(p.getByRole("listbox", { name: "Wedstrijden" })).toBeVisible();
+      expect(p.getByRole("group", { name: "Wedstrijden" })).toBeVisible();
       expect(p.getByRole("button", { name: "Goal KCVV" })).toBeVisible();
       expect(p.getByLabelText("Foto uploaden")).toBeInTheDocument();
       expect(p.getByText("Eigen foto…")).toBeVisible();
@@ -379,6 +381,9 @@ describe("SharePage", () => {
 
         await save(user);
         expect(screen.queryByRole("alert")).toBeNull();
+        // Tapping the look already on screen changes nothing.
+        await user.click(screen.getByRole("button", { name: "Kaart" }));
+        expect(saveButton()).toHaveTextContent("Deel PNG");
         await save(user);
 
         expect(share).toHaveBeenCalledTimes(2);
@@ -386,6 +391,58 @@ describe("SharePage", () => {
       } finally {
         restore();
       }
+    });
+
+    // iOS refuses the share when the tap's user activation expired during the
+    // two captures: that is no failure, and the second tap shares the kept PNG.
+    it("a share refused for an expired tap shows no notice; the button reads Deel PNG and shares the kept PNG", async () => {
+      const { toPng } = await import("html-to-image");
+      const refused = Object.assign(new Error("Not allowed"), {
+        name: "NotAllowedError",
+      });
+      const share = vi
+        .fn()
+        .mockRejectedValueOnce(refused)
+        .mockResolvedValueOnce(undefined);
+      const restore = stubShare(share);
+      try {
+        const user = userEvent.setup();
+        render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+        await save(user);
+        expect(screen.queryByRole("alert")).toBeNull();
+        expect(saveButton()).toHaveTextContent("Deel PNG");
+
+        await save(user);
+        expect(share).toHaveBeenCalledTimes(2);
+        expect(toPng).toHaveBeenCalledTimes(2);
+        expect(saveButton()).toHaveTextContent("Bewaar PNG");
+      } finally {
+        restore();
+      }
+    });
+
+    it("the panel, look strip and preview are inert while the PNG is made", async () => {
+      const { toPng } = await import("html-to-image");
+      let resolveToPng!: (value: string) => void;
+      vi.mocked(toPng).mockImplementationOnce(
+        () =>
+          new Promise<string>((resolve) => {
+            resolveToPng = resolve;
+          }),
+      );
+      const user = userEvent.setup();
+      render(<SharePage matches={MATCHES} players={PLAYERS} />);
+      await openTab(user, "Tekst");
+
+      await save(user);
+      expect(panel()).toHaveAttribute("inert");
+      expect(lookStrip()).toHaveAttribute("inert");
+      expect(preview()).toHaveAttribute("inert");
+
+      resolveToPng("data:image/png;base64,ABC");
+      expect(await screen.findByText("Bewaar PNG")).toBeInTheDocument();
+      expect(panel()).not.toHaveAttribute("inert");
     });
 
     it("a change after a cancelled share drops the kept PNG and revokes its URL", async () => {
@@ -683,15 +740,15 @@ describe("SharePage", () => {
     const user = userEvent.setup();
     render(<SharePage matches={MATCHES} players={PLAYERS} />);
     await openTab(user, "Tekst");
-    const list = screen.getByRole("listbox", { name: "Spelers" });
-    expect(within(list).getAllByRole("option")).toHaveLength(3);
+    const list = screen.getByRole("group", { name: "Spelers" });
+    expect(within(list).getAllByRole("button")).toHaveLength(3);
 
     await user.type(screen.getByLabelText(/zoek speler/i), "jan");
 
-    expect(within(list).getAllByRole("option")).toHaveLength(1);
-    const jan = within(list).getByRole("option", { name: /Janssen/ });
+    expect(within(list).getAllByRole("button")).toHaveLength(1);
+    const jan = within(list).getByRole("button", { name: /Janssen/ });
     await user.click(jan);
-    expect(jan).toHaveAttribute("aria-selected", "true");
+    expect(jan).toHaveAttribute("aria-pressed", "true");
   });
 
   // ─── The match picker (Inhoud) ───────────────────────────────────────────
@@ -705,9 +762,9 @@ describe("SharePage", () => {
 
     await user.type(screen.getByLabelText("Zoek wedstrijd"), "home");
 
-    const list = screen.getByRole("listbox", { name: "Wedstrijden" });
-    expect(within(list).getAllByRole("option")).toHaveLength(1);
-    expect(within(list).getByRole("option")).toHaveTextContent(
+    const list = screen.getByRole("group", { name: "Wedstrijden" });
+    expect(within(list).getAllByRole("button")).toHaveLength(1);
+    expect(within(list).getByRole("button")).toHaveTextContent(
       MATCHES[1]!.label,
     );
   });
@@ -718,8 +775,8 @@ describe("SharePage", () => {
 
     await pickMatch(user, MATCHES[0]!);
     expect(
-      screen.getByRole("option", { name: MATCHES[0]!.label }),
-    ).toHaveAttribute("aria-selected", "true");
+      screen.getByRole("button", { name: MATCHES[0]!.label }),
+    ).toHaveAttribute("aria-pressed", "true");
     await openTab(user, "Tekst");
 
     expect(screen.getByPlaceholderText(/KCVV Elewijt/i)).toHaveValue(
@@ -886,7 +943,7 @@ describe("SharePage", () => {
         screen.queryByRole("button", { name: "W · Wedstrijd" }),
       ).toBeNull();
       expect(screen.queryByRole("button", { name: /goal kcvv/i })).toBeNull();
-      expect(screen.getByRole("listbox", { name: "Artikels" })).toBeVisible();
+      expect(screen.getByRole("group", { name: "Artikels" })).toBeVisible();
       // Nothing picked yet: no preview, nothing to save.
       expect(screen.queryByTestId("share-preview")).toBeNull();
       expect(saveButton()).toBeDisabled();
@@ -903,9 +960,9 @@ describe("SharePage", () => {
 
       await user.type(screen.getByLabelText("Zoek artikel"), "tekent");
 
-      const list = screen.getByRole("listbox", { name: "Artikels" });
-      expect(within(list).getAllByRole("option")).toHaveLength(1);
-      expect(within(list).getByRole("option")).toHaveTextContent(
+      const list = screen.getByRole("group", { name: "Artikels" });
+      expect(within(list).getAllByRole("button")).toHaveLength(1);
+      expect(within(list).getByRole("button")).toHaveTextContent(
         "Piet tekent bij",
       );
     });
@@ -916,7 +973,7 @@ describe("SharePage", () => {
       await openTab(user, "Inhoud");
       await user.click(screen.getByRole("button", { name: "Nieuws" }));
       await user.click(
-        screen.getByRole("option", { name: "Jan over zijn eerste seizoen" }),
+        screen.getByRole("button", { name: "Jan over zijn eerste seizoen" }),
       );
       await openTab(user, "Tekst");
 
@@ -929,6 +986,19 @@ describe("SharePage", () => {
       expect(
         within(preview()).getByText("Meer op kcvvelewijt.be"),
       ).toBeInTheDocument();
+    });
+
+    it("re-tapping the picked article keeps its edits", async () => {
+      const user = userEvent.setup();
+      renderTool({ kind: "article", item: TRANSFER });
+      await openTab(user, "Tekst");
+      await user.clear(screen.getByLabelText("Titel"));
+      await user.type(screen.getByLabelText("Titel"), "Welkom Piet");
+
+      await openTab(user, "Inhoud");
+      await user.click(screen.getByRole("button", { name: TRANSFER.title }));
+      await openTab(user, "Tekst");
+      expect(screen.getByLabelText("Titel")).toHaveValue("Welkom Piet");
     });
 
     it("an edited title reaches the preview", async () => {
@@ -979,8 +1049,8 @@ describe("SharePage", () => {
         "true",
       );
       expect(
-        screen.getByRole("option", { name: "Oud nieuws" }),
-      ).toHaveAttribute("aria-selected", "true");
+        screen.getByRole("button", { name: "Oud nieuws" }),
+      ).toHaveAttribute("aria-pressed", "true");
       await openTab(user, "Tekst");
       expect(screen.getByLabelText("Titel")).toHaveValue("Oud nieuws");
     });
@@ -989,9 +1059,7 @@ describe("SharePage", () => {
       renderTool({ kind: "event", item: null });
 
       expect(tabButton("Inhoud")).toHaveAttribute("aria-expanded", "true");
-      expect(
-        screen.getByRole("listbox", { name: "Evenementen" }),
-      ).toBeVisible();
+      expect(screen.getByRole("group", { name: "Evenementen" })).toBeVisible();
       expect(screen.queryByTestId("share-preview")).toBeNull();
     });
 
@@ -1160,7 +1228,7 @@ describe("SharePage", () => {
     const pickNews = async (user: User, item: ShareItem) => {
       await openTab(user, "Inhoud");
       await user.click(screen.getByRole("button", { name: "Nieuws" }));
-      await user.click(screen.getByRole("option", { name: item.title }));
+      await user.click(screen.getByRole("button", { name: item.title }));
     };
 
     it("a fresh phone starts a match on A Kaart: the moment's label, minute disc and score, the squad badge, the look's first fallback picture", async () => {
@@ -1220,7 +1288,7 @@ describe("SharePage", () => {
       await openTab(user, "Tekst");
       expect(screen.getByLabelText("Titel")).toHaveValue("Kantine open!");
       await openTab(user, "Inhoud");
-      await user.click(screen.getByRole("option", { name: OTHER_NEWS.title }));
+      await user.click(screen.getByRole("button", { name: OTHER_NEWS.title }));
       await openTab(user, "Tekst");
       expect(screen.getByLabelText("Titel")).toHaveValue("Ander nieuws");
     });
@@ -1342,7 +1410,7 @@ describe("SharePage", () => {
       );
       await openTab(user, "Inhoud");
       await user.click(screen.getByRole("button", { name: "Evenement" }));
-      await user.click(screen.getByRole("option", { name: "Quiz" }));
+      await user.click(screen.getByRole("button", { name: "Quiz" }));
       await save(user);
       expect(JSON.parse(localStorage.getItem(KEY)!).fallbackNext).toEqual({});
     });
@@ -1560,7 +1628,7 @@ describe("SharePage", () => {
       renderTool();
       expect(block("tekst").style.transform).toBe("translate(40px, -80px)");
       await openTab(user, "Inhoud");
-      await user.click(screen.getByRole("option", { name: OTHER_NEWS.title }));
+      await user.click(screen.getByRole("button", { name: OTHER_NEWS.title }));
       expect(storedBlocks()).toEqual(EMPTY);
     });
 

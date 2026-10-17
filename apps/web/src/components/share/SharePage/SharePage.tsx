@@ -959,10 +959,10 @@ function ShareTool({
   };
 
   const handlePickItem = (picked: ShareItem) => {
-    if (picked.slug !== item?.slug) {
-      setBlocks(NO_BLOCKS);
-      clearUpload();
-    }
+    // Re-tapping the picked item keeps its edits.
+    if (picked.slug === item?.slug) return;
+    setBlocks(NO_BLOCKS);
+    clearUpload();
     setItem(picked);
     setFields(fieldsOf(picked));
     setCoverMode("affiche_wazig");
@@ -978,8 +978,16 @@ function ShareTool({
       e.target instanceof Element
         ? e.target.closest<HTMLElement>("[data-block]")
         : null;
-    // One finger drags; a second one is ignored until the first lifts.
-    if (dragRef.current || !dragMode || !node || !el || !node.contains(el))
+    // One finger drags; a second one is ignored until the first lifts. No
+    // drag while a capture runs: the PNG would mix two layouts.
+    if (
+      isGeneratingRef.current ||
+      dragRef.current ||
+      !dragMode ||
+      !node ||
+      !el ||
+      !node.contains(el)
+    )
       return;
     e.preventDefault();
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -1103,9 +1111,10 @@ function ShareTool({
   /**
    * Bewaar PNG (#3538): make the PNG and open the share sheet in one tap, or
    * download it where sharing files is not possible. A PNG whose share was
-   * cancelled or failed is kept until the story changes, so the next tap
-   * reopens the sheet at once (and with a fresh tap, should iOS have let the
-   * first one expire while capturing).
+   * cancelled or refused is kept until the story changes, so the next tap
+   * ("Deel PNG") reopens the sheet at once, with a fresh tap. The panel,
+   * look strip and preview are inert while it runs, so the PNG is the story
+   * that was on screen when Bewaar PNG was tapped.
    */
   const handleSave = async () => {
     const node = templateRef.current;
@@ -1139,7 +1148,13 @@ function ShareTool({
       const shared = await navigator.share({ files: [file] }).then(
         () => true,
         (err: unknown) => {
-          if (!(err instanceof Error && err.name === "AbortError")) {
+          // Cancelled, or refused by iOS because the tap's user activation
+          // expired during the captures: no failure, the kept PNG and a
+          // fresh tap ("Deel PNG") share it.
+          const quiet =
+            err instanceof Error &&
+            (err.name === "AbortError" || err.name === "NotAllowedError");
+          if (!quiet) {
             console.error("[SharePage] Failed to share:", err);
             setExportFailure("share");
           }
@@ -1267,16 +1282,18 @@ function ShareTool({
               aria-label="Zoek wedstrijd"
               className="mb-2"
             />
-            <div className={listClass} role="listbox" aria-label="Wedstrijden">
+            <div className={listClass} role="group" aria-label="Wedstrijden">
               {filteredMatches.map((m) => (
                 <button
                   key={m.id}
                   type="button"
-                  role="option"
-                  aria-selected={selectedMatchId === m.id}
+                  aria-pressed={selectedMatchId === m.id}
                   // The unique label (it carries the squad suffix) resolves
-                  // back to the clean club-names-only matchup.
-                  onClick={() => handleMatchNameChange(m.label)}
+                  // back to the clean club-names-only matchup. Re-tapping
+                  // the picked match keeps its edits.
+                  onClick={() =>
+                    selectedMatchId !== m.id && handleMatchNameChange(m.label)
+                  }
                   className={optionClass(selectedMatchId === m.id)}
                 >
                   {m.label}
@@ -1329,15 +1346,14 @@ function ShareTool({
             />
             <div
               className={listClass}
-              role="listbox"
+              role="group"
               aria-label={mode === "article" ? "Artikels" : "Evenementen"}
             >
               {filteredItems.map((i) => (
                 <button
                   key={i.slug}
                   type="button"
-                  role="option"
-                  aria-selected={item?.slug === i.slug}
+                  aria-pressed={item?.slug === i.slug}
                   onClick={() => handlePickItem(i)}
                   className={optionClass(item?.slug === i.slug)}
                 >
@@ -1487,13 +1503,12 @@ function ShareTool({
               aria-label="Zoek speler"
               className="mb-2"
             />
-            <div className={listClass} role="listbox" aria-label="Spelers">
+            <div className={listClass} role="group" aria-label="Spelers">
               {filteredPlayers.map((p) => (
                 <button
                   key={p.id}
                   type="button"
-                  role="option"
-                  aria-selected={selectedPlayerId === p.id}
+                  aria-pressed={selectedPlayerId === p.id}
                   onClick={() => {
                     setSelectedPlayerId(p.id);
                     clearPreview();
@@ -1600,6 +1615,7 @@ function ShareTool({
               <div
                 aria-hidden="true"
                 data-testid="share-preview"
+                inert={isGenerating}
                 style={{
                   width: `${previewWidth}px`,
                   height: `${previewHeight}px`,
@@ -1663,6 +1679,7 @@ function ShareTool({
             id="share-panel"
             role="region"
             aria-label={tab}
+            inert={isGenerating}
             className="border-ink bg-cream-soft flex max-h-[44dvh] flex-col gap-4 overflow-y-auto border-t-2 p-4"
           >
             {tab === "Inhoud" && inhoud}
@@ -1678,6 +1695,7 @@ function ShareTool({
           <div
             role="group"
             aria-label="Look"
+            inert={isGenerating}
             className="border-paper-edge flex [scrollbar-width:none] gap-2 overflow-x-auto border-t px-2 pt-2"
           >
             {fittingLooks.map((l) => (
@@ -1685,7 +1703,9 @@ function ShareTool({
                 key={l.id}
                 type="button"
                 onClick={() => {
-                  if (l.id !== activeLook) setBlocks(NO_BLOCKS);
+                  // The active look: nothing changes, the kept PNG stays.
+                  if (l.id === activeLook) return;
+                  setBlocks(NO_BLOCKS);
                   setLook(l.id);
                   clearPreview();
                 }}
@@ -1741,7 +1761,11 @@ function ShareTool({
             disabled={isGenerating || !hasStory}
             className="bg-jersey-deep border-jersey-deep text-cream flex min-h-12 min-w-0 flex-[1.6] items-center justify-center rounded-none border-2 px-2 font-mono text-sm font-bold uppercase disabled:opacity-40"
           >
-            {isGenerating ? "Bezig…" : "Bewaar PNG"}
+            {isGenerating
+              ? "Bezig…"
+              : generatedBlob
+                ? "Deel PNG"
+                : "Bewaar PNG"}
           </button>
         </div>
       </div>
