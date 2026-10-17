@@ -40,10 +40,11 @@ import {
 } from "@/lib/icons.redesign";
 import type { ComponentType } from "react";
 import { LOOKS } from "../looks/looks";
+import { ShareSkeleton } from "./ShareSkeleton";
 import { clubToday } from "@/lib/utils/dates";
 import {
   fallbackCount,
-  usesFallback,
+  usesAiFallback,
   type CoverMode,
   type ShareFormat,
   type ShareTheme,
@@ -483,7 +484,7 @@ export function SharePage(props: SharePageProps) {
     () => true,
     () => false,
   );
-  return hydrated ? <ShareTool {...props} /> : null;
+  return hydrated ? <ShareTool {...props} /> : <ShareSkeleton />;
 }
 
 /**
@@ -542,6 +543,9 @@ function ShareTool({
   // the same opponent club, or "KCVV Elewijt — KCVV Elewijt" placeholders).
   // Set only on an unambiguous datalist pick (by label); cleared on a miss so
   // a stale id can never outlive its pick.
+  // The last match picked from the list: typing in the field nulls
+  // `selectedMatchId`, so re-picking the same match must not read as "another".
+  const lastPickedMatchIdRef = useRef<number | null>(saved?.match.id ?? null);
   const [selectedMatchId, setSelectedMatchId] = useState<number | null>(
     saved?.match.id ?? null,
   );
@@ -639,7 +643,12 @@ function ShareTool({
   // suffix never reaches the canvas.
   const handleMatchNameChange = (value: string) => {
     const pickedByLabel = matches.find((m) => m.label === value);
-    if (pickedByLabel && pickedByLabel.id !== selectedMatchId) {
+    const lastPicked = lastPickedMatchIdRef.current;
+    if (
+      pickedByLabel &&
+      lastPicked != null &&
+      pickedByLabel.id !== lastPicked
+    ) {
       // Another match is another story: drop the last one's moment details.
       setScore("");
       setMinute("");
@@ -647,6 +656,7 @@ function ShareTool({
       setMood("win");
     }
     if (pickedByLabel) {
+      lastPickedMatchIdRef.current = pickedByLabel.id;
       setMatchName(pickedByLabel.matchName);
       setSelectedMatchId(pickedByLabel.id);
       setCompetition(pickedByLabel.competition ?? "");
@@ -837,7 +847,7 @@ function ShareTool({
    * and the default Omslag. The match details stay.
    */
   const handleSaved = () => {
-    if (content && !isW && usesFallback(content, coverMode)) {
+    if (content && !isW && usesAiFallback(content, coverMode)) {
       setFallbackNext((prev) => ({
         ...prev,
         [activeLook]: ((prev[activeLook] ?? 0) + 1) % fallbackCount(activeLook),

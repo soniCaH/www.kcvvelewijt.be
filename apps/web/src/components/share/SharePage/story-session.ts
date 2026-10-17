@@ -1,9 +1,10 @@
-import type {
-  CoverMode,
-  LookId,
-  ShareFormat,
-  ShareTheme,
-  WashStep,
+import {
+  fallbackCount,
+  type CoverMode,
+  type LookId,
+  type ShareFormat,
+  type ShareTheme,
+  type WashStep,
 } from "../looks/look-parts";
 import type { ShareFields, TemplateId } from "../looks/share-content";
 import type { ResultMood } from "../shared/theme";
@@ -69,6 +70,9 @@ export const FRESH_SESSION: StorySession = {
   fallbackNext: {},
   story: null,
 };
+
+/** The looks with an AI fallback set (W draws its own poster). */
+const SET_LOOKS: readonly LookId[] = ["kaart", "plakboek", "affiche", "ticket"];
 
 const LOOK_IDS: readonly AnyLook[] = [
   "kaart",
@@ -142,7 +146,11 @@ function storyOf(s: Record<string, unknown>): StoryInProgress {
   };
 }
 
-/** Today's session: yesterday's story dropped, the per-phone parts kept. */
+/**
+ * Today's session: yesterday's story dropped, the per-phone parts kept. The
+ * day is checked here, at read: a tab left open across midnight keeps
+ * yesterday's story until it reloads.
+ */
 export function readSession(): StorySession {
   try {
     const raw: unknown = JSON.parse(
@@ -150,13 +158,14 @@ export function readSession(): StorySession {
     );
     if (!isObject(raw)) return FRESH_SESSION;
     const look = LOOK_IDS.find((l) => l === raw.look) ?? "kaart";
-    const fallbackNext = isObject(raw.fallbackNext)
-      ? Object.fromEntries(
-          Object.entries(raw.fallbackNext).filter(
-            ([, n]) => Number.isInteger(n) && (n as number) >= 0,
-          ),
-        )
-      : {};
+    const stored = isObject(raw.fallbackNext) ? raw.fallbackNext : {};
+    const fallbackNext: StorySession["fallbackNext"] = {};
+    for (const id of SET_LOOKS) {
+      const n = stored[id];
+      if (Number.isInteger(n) && (n as number) >= 0) {
+        fallbackNext[id] = (n as number) % fallbackCount(id);
+      }
+    }
     const story =
       isObject(raw.story) && raw.story.day === clubToday()
         ? storyOf(raw.story)

@@ -518,6 +518,8 @@ export function Detail({
       );
     case "minuteBall":
     case "minute":
+      // The spec's "minute disc" is a square box on purpose: sharp corners
+      // are a design-system rule (no radius anywhere on the site).
       return (
         <span
           style={{
@@ -580,7 +582,22 @@ export function Detail({
   }
 }
 
-/** True when the slot shows a fallback picture (AI set or event fallback). */
+/**
+ * True when the slot shows the look's own AI fallback set — the same branch
+ * `LookPhoto` takes. This, not `usesFallback`, drives the fallback rotation:
+ * the event fallback picture is not part of any set.
+ */
+export function usesAiFallback(content: ShareContent, coverMode: CoverMode) {
+  return (
+    !content.photo ||
+    (coverMode === "reservefoto" && content.photo.source === "cover")
+  );
+}
+
+/**
+ * True when the slot shows any fallback picture (AI set or event fallback) —
+ * the spec's `fallback_used` for analytics (#3539).
+ */
 export function usesFallback(content: ShareContent, coverMode: CoverMode) {
   return (
     !content.photo ||

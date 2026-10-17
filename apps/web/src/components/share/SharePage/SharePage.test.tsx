@@ -1534,6 +1534,52 @@ describe("SharePage", () => {
       expect(previewHtml()).toContain("share-fallback/A-1.webp");
     });
 
+    it("a coverless event shows the event fallback, so its save leaves the AI rotation alone", async () => {
+      const EVENT: ShareItem = {
+        ...NEWS,
+        kind: "event",
+        slug: "quiz",
+        type: "Andere",
+        title: "Quiz",
+      };
+      const user = userEvent.setup();
+      render(
+        <SharePage matches={MATCHES} players={PLAYERS} events={[EVENT]} />,
+      );
+      await user.click(screen.getByRole("button", { name: "Evenement" }));
+      await user.click(screen.getByRole("option", { name: "Quiz" }));
+      await save(user);
+      expect(JSON.parse(localStorage.getItem(KEY)!).fallbackNext).toEqual({});
+    });
+
+    it("re-picking the same match after typing keeps its score", async () => {
+      const user = userEvent.setup();
+      renderTool();
+      await fillMatch(user);
+      const input = screen.getByPlaceholderText(/fc tegenstander/i);
+      await user.type(input, "x");
+      await user.clear(input);
+      await user.type(input, STORED_MATCH);
+      expect(screen.getByPlaceholderText("2 - 0")).toHaveValue("2 - 1");
+    });
+
+    it("a stored fallback index past its set wraps on read; unknown looks are dropped", () => {
+      localStorage.setItem(
+        KEY,
+        JSON.stringify({
+          look: "kaart",
+          fallbackNext: { kaart: 9, bogus: 2 },
+          story: null,
+        }),
+      );
+      renderTool();
+      // Kaart's set has 5 pictures: 9 % 5 = 4 → A-8.
+      expect(previewHtml()).toContain("share-fallback/A-8.webp");
+      expect(JSON.parse(localStorage.getItem(KEY)!).fallbackNext).toEqual({
+        kaart: 4,
+      });
+    });
+
     it("a saved PNG resets Omslag for the next story", async () => {
       const COVERED = {
         ...NEWS,
