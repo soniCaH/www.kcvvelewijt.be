@@ -4,7 +4,7 @@
  * band (`<UpcomingMatchesSkeleton>`, shared with the homepage, #3430), then
  * the reskinned CalendarWidget (Phase 6.D): by-type chips on top, then a
  * paper/ink panel (toolbar = view toggle · shared period nav · subscribe)
- * over a month grid.
+ * over a month grid — or, below `md`, an agenda list (#3480).
  *
  * The hero's kicker/headline/lead and its `/images/kalender-matchday.jpg` photo
  * are all fixed copy/bundled assets, not data, so per #2432 §2 this reuses
@@ -83,8 +83,40 @@ export default function CalendarLoading() {
               </div>
             </div>
 
-            {/* Month grid skeleton — 7 columns */}
-            <div className="p-4">
+            {/* A phone paints the agenda (CalendarWidget's phone default, seeded
+                from the request, #3480), so it gets the agenda skeleton; from
+                `md` up the month grid. Two blocks swapped by CSS — the
+                skeleton streams before any viewport is known to the client. */}
+            <div
+              className="p-4 md:hidden"
+              data-testid="calendar-skeleton-agenda"
+            >
+              {/* Month heading + ink rule, as <CalendarAgenda> draws them */}
+              <Skeleton className="h-9 w-48" />
+              <div className="border-ink mt-1 mb-2 border-t-2" />
+              <div className="space-y-5">
+                {Array.from({ length: 3 }).map((_, group) => (
+                  <div key={group}>
+                    <Skeleton className="mb-2 h-4 w-32" />
+                    {Array.from({ length: 2 }).map((_, row) => (
+                      <div
+                        key={row}
+                        className="border-paper-edge grid grid-cols-[56px_1fr_auto] items-center gap-3 border-b border-dashed px-2 py-2 last:border-b-0"
+                      >
+                        <Skeleton className="h-3 w-10" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-8 w-8" />
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div
+              className="hidden p-4 md:block"
+              data-testid="calendar-skeleton-month-grid"
+            >
               <div className="border-paper-edge mb-1 grid grid-cols-7 border-b border-dashed">
                 {Array.from({ length: 7 }).map((_, i) => (
                   <div key={i} className="flex justify-center py-2">

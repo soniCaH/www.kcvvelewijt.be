@@ -723,3 +723,25 @@ export function buildMonthAgenda(
   }
   return groups;
 }
+
+// A phone UA carries "Mobile" (Android phones, iPhone Safari) or names the
+// device; a tablet (iPad, Android tablet) carries neither and gets the
+// desktop layout, as it does at the `md` breakpoint.
+const PHONE_UA = /Mobi|iPhone|iPod/i;
+
+/**
+ * Best guess, from the request alone, that the visitor is on a phone (#3480) —
+ * what `<CalendarWidget>` seeds `initialIsPhone` with so a phone's first paint
+ * is the agenda rather than the month grid it would only leave after its
+ * `matchMedia` effect. `sec-ch-ua-mobile` (`?1` / `?0`) wins when the browser
+ * sends it; Safari does not, so the user agent is the fallback. A wrong guess
+ * (a phone held in landscape) costs one flash, not a wrong page: the widget's
+ * `matchMedia` check still has the last word after mount.
+ */
+export function guessIsPhone(request: {
+  get(name: string): string | null;
+}): boolean {
+  const hint = request.get("sec-ch-ua-mobile");
+  if (hint !== null) return hint === "?1";
+  return PHONE_UA.test(request.get("user-agent") ?? "");
+}

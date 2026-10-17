@@ -86,6 +86,12 @@ export interface CalendarWidgetProps {
    */
   initialType?: string;
   initialView?: string;
+  /**
+   * The page's guess that the request came from a phone (`sec-ch-ua-mobile`,
+   * else the user agent — #3480). The starting value of the phone check, so
+   * the server HTML for a phone holds the agenda. Defaults to `false`.
+   */
+  initialIsPhone?: boolean;
 }
 
 type ViewMode = "month" | "week" | "agenda";
@@ -105,13 +111,16 @@ const VIEW_TABS: { value: ViewMode; label: string; mobileHidden?: boolean }[] =
 const VIEW_VALUES: readonly ViewMode[] = ["month", "week", "agenda"];
 
 /**
- * `true` once mounted on a sub-`md` (phone) viewport. Starts `false` so the
- * server and the first client render agree on the desktop default (month); a
- * phone corrects to the agenda default after mount (mirrors the Week tab's
- * `hidden md:inline-flex`). `addEventListener` keeps it live across rotation.
+ * `true` on a sub-`md` (phone) viewport. Starts at `initial` — the page's
+ * server-side guess from the request (#3480) — so the server and the first
+ * client render agree on it, and a phone's first paint is already the agenda;
+ * `false` (desktop, month) when there is no guess. After mount the real
+ * `matchMedia` answer takes over, so a wrong guess corrects itself
+ * (mirrors the Week tab's `hidden md:inline-flex`). `addEventListener` keeps it
+ * live across rotation.
  */
-function useIsPhoneViewport(): boolean {
-  const [isPhone, setIsPhone] = useState(false);
+function useIsPhoneViewport(initial: boolean): boolean {
+  const [isPhone, setIsPhone] = useState(initial);
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)");
     const sync = () => setIsPhone(mq.matches);
@@ -128,6 +137,7 @@ export function CalendarWidget({
   today,
   initialType,
   initialView,
+  initialIsPhone = false,
 }: CalendarWidgetProps) {
   // No explicit `?view=` → branch the default on the md breakpoint: agenda on
   // phones, month on tablet/desktop. An explicit choice (incl. tapping a tab,
@@ -137,7 +147,7 @@ export function CalendarWidget({
     VIEW_VALUES,
     { fallback: "default", route: "/kalender", initial: initialView },
   );
-  const isPhone = useIsPhoneViewport();
+  const isPhone = useIsPhoneViewport(initialIsPhone);
   const requestedView: ViewMode =
     rawView !== "default" ? rawView : isPhone ? "agenda" : "month";
   // The week grid is forced 7-col (~41px cells) and `?view=week` pins it on any

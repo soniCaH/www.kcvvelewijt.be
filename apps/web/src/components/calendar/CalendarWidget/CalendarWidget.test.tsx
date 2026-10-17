@@ -409,6 +409,65 @@ describe("CalendarWidget", () => {
       expect(html).toMatch(/aria-pressed="true"[^>]*><span>Alles</);
     });
 
+    // #3480 — the page guesses "phone" from the request's UA and passes it as
+    // `initialIsPhone`, so the server HTML already holds the agenda a phone
+    // would otherwise only reach after its `matchMedia` effect ran.
+    describe("initialIsPhone (#3480)", () => {
+      it("renders the agenda, not the month grid, in the server HTML for a phone", () => {
+        const html = renderToString(
+          <CalendarWidget {...defaultProps} initialIsPhone />,
+        );
+        expect(html).toContain('data-testid="calendar-agenda"');
+        expect(html).not.toContain('data-testid="month-grid"');
+      });
+
+      it("still renders the month grid in the server HTML for a desktop", () => {
+        const html = renderToString(
+          <CalendarWidget {...defaultProps} initialIsPhone={false} />,
+        );
+        expect(html).toContain('data-testid="month-grid"');
+        expect(html).not.toContain('data-testid="calendar-agenda"');
+      });
+
+      it("lets an explicit ?view=month win over the phone guess", () => {
+        const html = renderToString(
+          <CalendarWidget
+            {...defaultProps}
+            initialIsPhone
+            initialView="month"
+          />,
+        );
+        expect(html).toContain('data-testid="month-grid"');
+      });
+
+      it("coerces ?view=week to the agenda on a phone", () => {
+        const html = renderToString(
+          <CalendarWidget
+            {...defaultProps}
+            initialIsPhone
+            initialView="week"
+          />,
+        );
+        expect(html).toContain('data-testid="calendar-agenda"');
+        expect(html).not.toContain('data-testid="week-grid"');
+      });
+
+      it("corrects a wrong phone guess after mount (a phone held in landscape)", () => {
+        const original = window.matchMedia;
+        window.matchMedia = vi.fn().mockReturnValue({
+          matches: false,
+          addEventListener: vi.fn(),
+          removeEventListener: vi.fn(),
+        } as unknown as MediaQueryList);
+        try {
+          render(<CalendarWidget {...defaultProps} initialIsPhone />);
+          expect(screen.getByTestId("month-grid")).toBeInTheDocument();
+        } finally {
+          window.matchMedia = original;
+        }
+      });
+    });
+
     it("lets the phone default apply when the URL carries no view", () => {
       const original = window.matchMedia;
       window.matchMedia = vi.fn().mockReturnValue({
