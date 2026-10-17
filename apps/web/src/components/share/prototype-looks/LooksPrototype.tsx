@@ -692,7 +692,31 @@ function Canvas({
     </div>
   );
 }
+// #3522: the wash under test. `WashCtx` maps an "r,g,b" wash colour to a CSS
+// background; `PhotoWashCtx` also lays it over A/B/E's photo slot.
+export const WashCtx = createContext<((rgb: string) => string) | null>(null);
+export const PhotoWashCtx = createContext(false);
+const washRgb = (dark: boolean) => (dark ? "8,26,18" : "245,241,230");
 function Img({ src, style }: { src: string; style?: React.CSSProperties }) {
+  const wash = useContext(WashCtx);
+  const onPhoto = useContext(PhotoWashCtx);
+  const dark = useContext(ThemeCtx) === "dark";
+  if (wash && onPhoto)
+    return (
+      <div style={{ position: "relative", width: "100%", height: "100%" }}>
+        <ImgRaw src={src} style={style} />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: wash(washRgb(dark)),
+          }}
+        />
+      </div>
+    );
+  return <ImgRaw src={src} style={style} />;
+}
+function ImgRaw({ src, style }: { src: string; style?: React.CSSProperties }) {
   return (
     <img
       src={src}
@@ -1101,7 +1125,8 @@ function LookC({ it, f }: { it: LookItem; f: Format }) {
   const s = styleOf(it);
   const p = usePal();
   // #3511: Licht = cream wash + ink text, Donker = jersey-deep wash + cream.
-  const w = p.dark ? "8,26,18" : "245,241,230";
+  const w = washRgb(p.dark);
+  const wash = useContext(WashCtx);
   const sq = f === "square";
   const footH = sq ? 88 : 120;
   return (
@@ -1110,7 +1135,7 @@ function LookC({ it, f }: { it: LookItem; f: Format }) {
         {...pin("Foto")}
         style={{ position: "absolute", inset: 0, bottom: footH }}
       >
-        <Img
+        <ImgRaw
           src={photo(it, W, H[f] - footH)}
           style={{ filter: "sepia(0.25) saturate(0.9) contrast(1.05)" }}
         />
@@ -1121,7 +1146,9 @@ function LookC({ it, f }: { it: LookItem; f: Format }) {
           position: "absolute",
           inset: 0,
           bottom: footH,
-          background: `linear-gradient(180deg, rgba(${w},0.6) 0%, rgba(${w},0) 20%, rgba(${w},0.15) 45%, rgba(${w},0.82) 72%, rgba(${w},0.95) 100%)`,
+          background: wash
+            ? wash(w)
+            : `linear-gradient(180deg, rgba(${w},0.6) 0%, rgba(${w},0) 20%, rgba(${w},0.15) 45%, rgba(${w},0.82) 72%, rgba(${w},0.95) 100%)`,
           zIndex: 1,
         }}
       />
