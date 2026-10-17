@@ -50,6 +50,21 @@ const ANCHOR_DIVIDER_CLASSES = [
   "[&>table>tbody>tr>td:last-child]:shadow-[-2px_0_4px_-1px_rgba(0,0,0,0.12)]",
 ].join(" ");
 
+/** The one KCVV-row predicate. The `undefined` guard is load-bearing:
+ * `club_id` is optional on `RankingEntry`, so without it an absent prop
+ * would match every entry that lacks one (`undefined === undefined`).
+ *
+ * shortcut: matches the whole club, so two KCVV sides in one poule would
+ * both tint. Census 2026-10-17: all 9 published KCVV tables hold exactly one
+ * KCVV row, and PSD's ranking row carries no stable team-level id (`team_id`
+ * is per-competition). Upgrade when a poule with two KCVV sides appears. */
+function isHighlighted(
+  entry: RankingEntry,
+  highlightClubId: number | undefined,
+): boolean {
+  return highlightClubId !== undefined && entry.club_id === highlightClubId;
+}
+
 /** Crest + truncating team name, italic unless it's the KCVV row. The one
  * piece both the numbered table and the numberless list render identically.
  * `min-w-0` (not a positive floor) is what a flex item needs for `truncate`
@@ -105,8 +120,7 @@ function NumberlessClubList({
       ) : null}
       <ul className="md:text-body-md font-mono text-xs">
         {entries.map((entry) => {
-          const isKcvv =
-            highlightClubId !== undefined && entry.club_id === highlightClubId;
+          const isKcvv = isHighlighted(entry, highlightClubId);
           return (
             <li
               key={entry.team_id}
@@ -222,9 +236,7 @@ export function StandingsTable({
           </thead>
           <tbody>
             {entries.map((entry) => {
-              const isKcvv =
-                highlightClubId !== undefined &&
-                entry.club_id === highlightClubId;
+              const isKcvv = isHighlighted(entry, highlightClubId);
               return (
                 <tr
                   key={entry.team_id}

@@ -36,6 +36,7 @@ import { SquadGrid } from "@/components/team/SquadGrid";
 import { TeamStaff } from "@/components/team/TeamStaff";
 import type { TeamStaffMemberData } from "@/components/team/TeamStaff";
 import { TeamEditorial } from "@/components/team/TeamEditorial";
+import { KCVV_CLUB_ID } from "@/lib/constants";
 import {
   StripedSeam,
   PageContainer,
@@ -387,7 +388,7 @@ function TeamDetailAssembly({ competitive = "live" }: TeamDetailAssemblyProps) {
               <StandingsSection
                 tables={standings}
                 divisionFull="Eerste Elftal A – 3e Nat. A"
-                highlightClubId={KCVV_TEAM_ID}
+                highlightClubId={KCVV_CLUB_ID}
               />
             </PageContainer>
           )}

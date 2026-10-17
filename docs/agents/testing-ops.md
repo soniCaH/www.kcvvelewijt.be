@@ -859,7 +859,7 @@ story export, never a hard-coded story id in a `postVisit` conditional:
 
 ```typescript
 export const FullDivision: Story = {
-  args: { entries: fullDivision, highlightTeamId: 1235 },
+  args: { entries: fullDivision, highlightClubId: 1235 },
   tags: ["vr-assert-mobile-overflow"],
 };
 ```
