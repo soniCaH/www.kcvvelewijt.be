@@ -31,6 +31,7 @@ vi.mock("../lightbox-chrome", () => ({
   LIGHTBOX_ANIMATION: {},
   LIGHTBOX_BACKDROP: {},
   lightboxLoadingIcon: () => null,
+  LightboxLoading: () => null,
 }));
 vi.mock("yet-another-react-lightbox/plugins/thumbnails", () => ({
   default: {},

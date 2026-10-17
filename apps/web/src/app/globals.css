@@ -79,6 +79,32 @@
   }
 }
 
+/* The lightbox's waiting overlay (`LightboxLoading`) shows only after a visitor
+   click, while the viewer chunk is still loading. The library's own delayed
+   fade-in (`yarl__slide_loading`) lives in that chunk's CSS, which has not
+   arrived yet, so the overlay carries its own copy: nothing for the first 0.8 s
+   (a cached load never flashes), then a fade. Reduced motion shows it at once,
+   as the library does. */
+@keyframes kcvv-lightbox-delayed-fadein {
+  0%,
+  80% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.kcvv-lightbox-loading {
+  animation: kcvv-lightbox-delayed-fadein 1s linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kcvv-lightbox-loading {
+    animation: none;
+  }
+}
+
 .kcvv-spinner-scarf {
   position: relative;
   display: inline-block;

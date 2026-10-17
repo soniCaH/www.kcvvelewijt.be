@@ -2,11 +2,18 @@
 
 import { lazy, Suspense, useState } from "react";
 import Image from "next/image";
+import { LightboxLoading } from "../lightbox-chrome";
 
 // The viewer (library, plugins, CSS) is its own chunk (#3480). `loadViewer` is
 // shared by `lazy()` and the hover/focus preload, so both hit one import.
 const loadViewer = () => import("./GalleryViewer");
-const GalleryViewer = lazy(loadViewer);
+// A failed chunk load (deploy skew, flaky network) renders nothing instead of
+// throwing into the route's error boundary, so the photo grid stays usable. No
+// retry: `lazy()` caches its result, and after a deploy the old chunk is gone —
+// a reload is the real fix.
+const GalleryViewer = lazy(() =>
+  loadViewer().catch(() => ({ default: () => <></> })),
+);
 // A hover/focus warm-up that fails (deploy skew, flaky network) must not be an
 // unhandled rejection; the click's own `lazy()` load surfaces a real failure.
 const preloadViewer = () => {
@@ -126,7 +133,7 @@ export const GalleryLightbox = ({
       </ul>
 
       {requested ? (
-        <Suspense fallback={null}>
+        <Suspense fallback={<LightboxLoading />}>
           <GalleryViewer
             gallerySlug={gallerySlug}
             slides={slides}
