@@ -254,9 +254,10 @@ export const ARTICLE_BY_SLUG_QUERY =
 /**
  * `/share` (#3540): the 20 newest published articles for the story picker,
  * plus one deep-linked article by `$slug` (`""` = none) so a link to an older
- * article still opens it. The cover stays the raw asset URL + hotspot: each
- * story look crops it to its own photo slot (or shows it whole), so a
- * pre-cropped 16:9 URL would lose the top and bottom of a portrait slot.
+ * article still opens it. The cover stays the raw asset URL with the editor's
+ * crop, dimensions and hotspot: the route applies the crop (`rect=`) and each
+ * story look fits it to its own slot around the hotspot, so a pre-cropped
+ * 16:9 URL would lose the top and bottom of a portrait slot.
  * `spans` are the title's text runs with the `accent` decorator flag.
  */
 const SHARE_ARTICLE_PROJECTION = `{
@@ -264,11 +265,13 @@ const SHARE_ARTICLE_PROJECTION = `{
   "title": coalesce(pt::text(title), title, ""),
   "spans": title[0].children[]{ "text": coalesce(text, ""), "accent": "accent" in coalesce(marks, []) },
   "coverUrl": coverImage.asset->url, "hotspot": coverImage.hotspot{ x, y },
+  "crop": coverImage.crop{ top, bottom, left, right },
+  "dimensions": coverImage.asset->metadata.dimensions{ width, height },
   "eventFact": body[_type == "eventFact"][0]{ date, startTime, location }
 }`;
 
 export const SHARE_ARTICLES_QUERY = defineQuery(`{
-  "list": *[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishedAt desc) [0...20] ${SHARE_ARTICLE_PROJECTION},
+  "list": *[_type == "article" && defined(slug.current) && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishedAt desc) [0...20] ${SHARE_ARTICLE_PROJECTION},
   "picked": *[_type == "article" && slug.current == $slug && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] ${SHARE_ARTICLE_PROJECTION}
 }`);
 

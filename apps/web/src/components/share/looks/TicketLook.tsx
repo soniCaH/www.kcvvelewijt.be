@@ -92,8 +92,6 @@ export function TicketLook({
               content={content}
               coverMode={coverMode}
               fallbackIndex={fallbackIndex}
-              w={926}
-              h={sq ? 600 : 1200}
             />
           </div>
           <div

@@ -1196,7 +1196,7 @@ describe("SharePage", () => {
       expect(screen.queryByTestId("share-preview")).toBeNull();
     });
 
-    it("Omslag starts on Affiche wazig; Foto crops the cover around its hotspot through the same-origin optimizer", async () => {
+    it("Omslag starts on Affiche wazig; Foto fills the slot positioned on the hotspot, through the same-origin optimizer", async () => {
       const user = userEvent.setup();
       renderTool({ kind: "article", item: INTERVIEW });
 
@@ -1206,12 +1206,11 @@ describe("SharePage", () => {
 
       await user.click(screen.getByRole("button", { name: "Foto" }));
 
-      const src = preview()
-        .querySelector("img[src^='/_next/image']")!
-        .getAttribute("src")!;
-      expect(src).toContain("q=75");
-      const sanity = decodeURIComponent(src);
-      expect(sanity).toContain("crop=focalpoint&fp-x=0.3&fp-y=0.2");
+      const img = preview().querySelector<HTMLImageElement>(
+        "img[src^='/_next/image']",
+      )!;
+      expect(img.getAttribute("src")).toContain("q=75");
+      expect(img.style.objectPosition).toBe("30% 20%");
     });
 
     it("an event without a cover draws the event fallback picture", () => {
@@ -1220,6 +1219,17 @@ describe("SharePage", () => {
       expect(
         preview().querySelector("img[src='/images/event-fallback.jpg']"),
       ).not.toBeNull();
+    });
+
+    // Omslag only chooses how a cover is shown; without a cover every choice
+    // would draw the same fallback, so the row would be a control that does nothing.
+    it("hides Omslag for an item without a cover", () => {
+      renderTool({ kind: "event", item: QUIZ });
+
+      expect(screen.queryByRole("button", { name: "Reservefoto" })).toBeNull();
+      expect(
+        screen.queryByRole("button", { name: "Affiche wazig" }),
+      ).toBeNull();
     });
 
     it("Reservefoto swaps the cover for the look's own fallback picture", async () => {

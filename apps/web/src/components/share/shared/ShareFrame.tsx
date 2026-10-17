@@ -121,7 +121,6 @@ export function ShareFrame({
         >
           {register === "image" && photoUrl && (
             <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 // Route + sanitize at the sink: remote CDN images go through the
                 // same-origin Next optimizer (so html-to-image can read them),
@@ -216,7 +215,6 @@ export function ShareFrame({
 /** Round club crest (KCVV logo) used in the top bar. */
 function Crest({ size = 96 }: { size?: number }) {
   return (
-    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={KCVV_LOGO}
       alt="KCVV Elewijt"

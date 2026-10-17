@@ -23,7 +23,11 @@ import type {
   MatchOption,
   PlayerForShare,
 } from "@/components/share/SharePage/SharePage";
-import type { ShareItem } from "@/components/share/looks/share-content";
+import {
+  shareCover,
+  type ShareItem,
+} from "@/components/share/looks/share-content";
+import { DEFAULT_EVENT_TYPE } from "@/components/event/event-type-style";
 
 export const metadata: Metadata = {
   title: "Story Generator",
@@ -64,14 +68,6 @@ function dateParts(iso: string | null | undefined) {
   };
 }
 
-const coverOf = (row: ShareArticleRow | ShareEventRow): ShareItem["cover"] =>
-  row.coverUrl
-    ? {
-        url: row.coverUrl,
-        hotspot: { x: row.hotspot?.x ?? 0.5, y: row.hotspot?.y ?? 0.5 },
-      }
-    : null;
-
 function toArticleItem(row: ShareArticleRow): ShareItem {
   // An event article is dated by its event, every other one by publication.
   const fact = row.eventFact;
@@ -85,7 +81,7 @@ function toArticleItem(row: ShareArticleRow): ShareItem {
     ...date,
     time: fact?.startTime ?? "",
     location: fact?.location ?? "",
-    cover: coverOf(row),
+    cover: shareCover(row),
   };
 }
 
@@ -95,14 +91,15 @@ function toEventItem(row: ShareEventRow): ShareItem {
   return {
     kind: "event",
     slug: row.slug,
-    type: row.eventType ?? "Andere",
+    type: row.eventType ?? DEFAULT_EVENT_TYPE,
     title: row.title,
     spans: [],
     ...date,
-    // A local-midnight start is an all-day event: no hour on the story.
+    // The event schema has no all-day flag: a local-midnight start is read
+    // as all-day (no hour on the story), the same rule `<TicketStub>` uses.
     time: hour && hour !== "00:00" ? hour : "",
     location: row.location ?? "",
-    cover: coverOf(row),
+    cover: shareCover(row),
   };
 }
 

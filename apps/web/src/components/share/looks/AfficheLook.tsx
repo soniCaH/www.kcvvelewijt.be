@@ -6,11 +6,9 @@ import {
   Cta,
   Detail,
   Grain,
-  H,
   Info,
   LookPhoto,
   Title,
-  W,
   washGradient,
   washRgb,
   type LookProps,
@@ -43,8 +41,6 @@ export function AfficheLook({
           content={content}
           coverMode={coverMode}
           fallbackIndex={fallbackIndex}
-          w={W}
-          h={H[format] - footH}
           position={sq ? "top" : "center"}
           filter="sepia(0.25) saturate(0.9) contrast(1.05)"
         />

@@ -280,8 +280,8 @@ export function Info({
         flexDirection: "column",
       }}
     >
-      {lines.map((line) => (
-        <span key={line}>{line}</span>
+      {lines.map((line, i) => (
+        <span key={i}>{line}</span>
       ))}
     </div>
   );
@@ -449,8 +449,9 @@ export function usesFallback(content: ShareContent, coverMode: CoverMode) {
 }
 
 /**
- * The look's photo slot, filling its positioned parent (`w`×`h` capture px).
- * `Foto` crops the cover to the slot around its hotspot; `Affiche wazig` shows
+ * The look's photo slot, filling its positioned parent, whatever its size.
+ * `Foto` fills the slot with the cover, positioned on its hotspot (so the
+ * focus holds for any slot shape, no server crop); `Affiche wazig` shows
  * the whole flyer, taped on, over the same image blurred and scaled up so the
  * blur does not fade at the edges; `Reservefoto` swaps in the look's own
  * fallback picture. An empty slot always takes the fallback.
@@ -460,8 +461,6 @@ export function LookPhoto({
   content,
   coverMode,
   fallbackIndex,
-  w,
-  h,
   position = "center",
   filter,
 }: {
@@ -469,8 +468,7 @@ export function LookPhoto({
   content: ShareContent;
   coverMode: CoverMode;
   fallbackIndex: number;
-  w: number;
-  h: number;
+  /** Where a fallback or own picture anchors; a cover uses its hotspot. */
   position?: string;
   filter?: string;
 }) {
@@ -486,7 +484,15 @@ export function LookPhoto({
     filter,
   };
   const frame = (child: React.ReactNode) => (
-    <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
+    // A size container: the taped flyer below sizes itself to the slot (cq units).
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        overflow: "hidden",
+        containerType: "size",
+      }}
+    >
       {child}
     </div>
   );
@@ -506,15 +512,20 @@ export function LookPhoto({
     );
   }
 
-  const { x, y } = photo.focal;
+  // The cover URL may already carry the editor's crop (`?rect=…`).
+  const sep = photo.src.includes("?") ? "&" : "?";
+  const whole = toSameOriginImage(`${photo.src}${sep}w=1080&fit=max`, 1080);
   if (coverMode === "foto") {
-    const cropped = `${photo.src}?w=${w}&h=${h}&fit=crop&crop=focalpoint&fp-x=${x}&fp-y=${y}`;
+    const { x, y } = photo.focal;
     return frame(
-      <img src={toSameOriginImage(cropped, 1080)} alt="" style={fill} />,
+      <img
+        src={whole}
+        alt=""
+        style={{ ...fill, objectPosition: `${x * 100}% ${y * 100}%` }}
+      />,
     );
   }
 
-  const whole = toSameOriginImage(`${photo.src}?w=1080&fit=max`, 1080);
   return frame(
     <>
       <img
@@ -556,8 +567,8 @@ export function LookPhoto({
             alt=""
             style={{
               display: "block",
-              maxWidth: Math.round(w * 0.8),
-              maxHeight: Math.round(h * 0.8),
+              maxWidth: "80cqw",
+              maxHeight: "80cqh",
               width: "auto",
               height: "auto",
               border: `14px solid ${TOKENS.cream}`,

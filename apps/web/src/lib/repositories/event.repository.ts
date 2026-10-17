@@ -85,17 +85,20 @@ export const EVENT_ARTICLES_QUERY =
 /**
  * `/share` (#3540): events from `$since` (Brussels midnight 7 days ago) on,
  * soonest first, plus one deep-linked event by `$slug` (`""` = none) so a link
- * to an older event still opens it. Raw cover URL + hotspot — each story look
- * crops it to its own slot (see `SHARE_ARTICLES_QUERY`).
+ * to an older event still opens it. Raw cover URL + crop + hotspot, as in
+ * `SHARE_ARTICLES_QUERY`. The client reads the published perspective, so
+ * `picked` never returns a draft.
  */
 const SHARE_EVENT_PROJECTION = `{
   "slug": coalesce(slug.current, ""), "title": coalesce(title, ""), eventType,
   "dateStart": coalesce(dateStart, ""), location,
-  "coverUrl": coverImage.asset->url, "hotspot": coverImage.hotspot{ x, y }
+  "coverUrl": coverImage.asset->url, "hotspot": coverImage.hotspot{ x, y },
+  "crop": coverImage.crop{ top, bottom, left, right },
+  "dimensions": coverImage.asset->metadata.dimensions{ width, height }
 }`;
 
 export const SHARE_EVENTS_QUERY = defineQuery(`{
-  "list": *[_type == "event" && dateTime(coalesce(dateEnd, dateStart)) >= dateTime($since)] | order(dateStart asc) ${SHARE_EVENT_PROJECTION},
+  "list": *[_type == "event" && defined(slug.current) && dateTime(coalesce(dateEnd, dateStart)) >= dateTime($since)] | order(dateStart asc) ${SHARE_EVENT_PROJECTION},
   "picked": *[_type == "event" && slug.current == $slug][0] ${SHARE_EVENT_PROJECTION}
 }`);
 

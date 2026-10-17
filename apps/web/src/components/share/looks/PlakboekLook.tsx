@@ -56,7 +56,7 @@ export function PlakboekLook({
     </span>
   );
 
-  // `h` "100%" = the print takes the room the story's text leaves (≈ 1000 px).
+  // `h` "100%" = the print takes the room the story's text leaves.
   const print = (w: number, h: number | "100%", rotate: number) => (
     <div
       style={{
@@ -82,8 +82,6 @@ export function PlakboekLook({
           content={content}
           coverMode={coverMode}
           fallbackIndex={fallbackIndex}
-          w={w - 44}
-          h={h === "100%" ? 1000 : h - 44}
         />
       </div>
     </div>

@@ -1,4 +1,13 @@
+import type { Article } from "@/lib/sanity/sanity.types";
+import {
+  DEFAULT_EVENT_TYPE,
+  EVENT_TYPE_FILL,
+  type EventType,
+} from "@/components/event/event-type-style";
 import { TOKENS } from "../constants";
+
+/** Schema-derived, so a new article type is a compile error in the table below. */
+type ArticleType = NonNullable<Article["articleType"]>;
 
 /**
  * `ShareContent` — the one view-model every share look renders (#3535). Looks
@@ -93,7 +102,7 @@ interface TypeStyle {
 }
 
 /** Spec table "Article types" (#3509). */
-const ARTICLE_STYLE: Record<string, TypeStyle> = {
+const ARTICLE_STYLE = {
   interview: {
     label: "Interview",
     fill: TOKENS.ink,
@@ -130,35 +139,59 @@ const ARTICLE_STYLE: Record<string, TypeStyle> = {
     onFill: TOKENS.cream,
     detail: "whistle",
   },
+} satisfies Record<ArticleType, TypeStyle>;
+
+/**
+ * Tailwind colour names `EVENT_TYPE_FILL` uses, as capture-safe literals:
+ * html-to-image needs concrete values, not classes.
+ */
+const CLASS_COLOUR: Record<string, string> = {
+  "jersey-deep": TOKENS.jerseyDeep,
+  "jersey-bright": TOKENS.jerseyBright,
+  warm: TOKENS.warm,
+  ink: TOKENS.ink,
+  cream: TOKENS.cream,
+  white: "#ffffff",
 };
 
-/** The site's `EVENT_TYPE_FILL` as capture-safe literals; every event gets the date block. */
-const EVENT_STYLE: Record<string, TypeStyle> = {
+/**
+ * `"bg-warm text-ink"` → `{ fill, onFill }`, so the site's event colours have
+ * one source. A re-tint to a colour missing above throws at module load (and
+ * so in every test that imports this) instead of rendering a wrong story.
+ */
+function eventFill(fillClass: string): { fill: string; onFill: string } {
+  const colour = (prefix: "bg" | "text") => {
+    const name = fillClass.match(new RegExp(`\\b${prefix}-(\\S+)`))?.[1];
+    const hex = name && CLASS_COLOUR[name];
+    if (!hex) throw new Error(`share: no colour for "${fillClass}"`);
+    return hex;
+  };
+  return { fill: colour("bg"), onFill: colour("text") };
+}
+
+/** Label per event type; fill from `EVENT_TYPE_FILL`; every event gets the date block. */
+const EVENT_STYLE = {
   Clubevent: {
     label: "Clubevent",
-    fill: TOKENS.jerseyDeep,
-    onFill: "#ffffff",
+    ...eventFill(EVENT_TYPE_FILL.Clubevent),
     detail: "dateblock",
   },
   Supportersactiviteit: {
     label: "Supporters",
-    fill: TOKENS.warm,
-    onFill: TOKENS.ink,
+    ...eventFill(EVENT_TYPE_FILL.Supportersactiviteit),
     detail: "dateblock",
   },
   Jeugdwerking: {
     label: "Jeugdwerking",
-    fill: TOKENS.jerseyBright,
-    onFill: TOKENS.ink,
+    ...eventFill(EVENT_TYPE_FILL.Jeugdwerking),
     detail: "dateblock",
   },
   Andere: {
     label: "Evenement",
-    fill: TOKENS.ink,
-    onFill: TOKENS.cream,
+    ...eventFill(EVENT_TYPE_FILL.Andere),
     detail: "dateblock",
   },
-};
+} satisfies Record<EventType, TypeStyle>;
 
 /** A type colour on its own background vanishes: flip it to cream on ink text. */
 export function unclash<T extends { fill: string; onFill: string }>(
@@ -206,7 +239,8 @@ export function buildArticleContent(
   item: ShareItem,
   fields: ShareFields,
 ): ShareContent {
-  const style = ARTICLE_STYLE[item.type] ?? ARTICLE_STYLE.announcement!;
+  const style: TypeStyle =
+    ARTICLE_STYLE[item.type as ArticleType] ?? ARTICLE_STYLE.announcement;
   return build(item, fields, style, null);
 }
 
@@ -214,10 +248,49 @@ export function buildEventContent(
   item: ShareItem,
   fields: ShareFields,
 ): ShareContent {
-  const style = EVENT_STYLE[item.type] ?? EVENT_STYLE.Andere!;
+  const style: TypeStyle =
+    EVENT_STYLE[item.type as EventType] ?? EVENT_STYLE[DEFAULT_EVENT_TYPE];
   return build(item, fields, style, {
     src: EVENT_FALLBACK_IMAGE,
     source: "fallback",
     focal: { x: 0.5, y: 0.5 },
   });
+}
+
+type Maybe<T> = { [K in keyof T]: T[K] | null } | null;
+
+/**
+ * A Sanity cover as `ShareItem["cover"]`: the editor's crop applied as
+ * `rect=` (in source pixels), and the hotspot moved into the cropped frame so
+ * a look can position the picture on it. No URL → no cover.
+ */
+export function shareCover(row: {
+  coverUrl: string | null;
+  hotspot: Maybe<{ x: number; y: number }>;
+  crop: Maybe<{ top: number; bottom: number; left: number; right: number }>;
+  dimensions: Maybe<{ width: number; height: number }>;
+}): ShareItem["cover"] {
+  if (!row.coverUrl) return null;
+  const x = row.hotspot?.x ?? 0.5;
+  const y = row.hotspot?.y ?? 0.5;
+  const left = row.crop?.left ?? 0;
+  const right = row.crop?.right ?? 0;
+  const top = row.crop?.top ?? 0;
+  const bottom = row.crop?.bottom ?? 0;
+  const width = row.dimensions?.width;
+  const height = row.dimensions?.height;
+  const cropped = left + right + top + bottom > 0;
+  if (!cropped || !width || !height) {
+    return { url: row.coverUrl, hotspot: { x, y } };
+  }
+  const fw = 1 - left - right;
+  const fh = 1 - top - bottom;
+  const rect = [left * width, top * height, fw * width, fh * height]
+    .map(Math.round)
+    .join(",");
+  const clamp = (n: number) => Math.min(1, Math.max(0, n));
+  return {
+    url: `${row.coverUrl}?rect=${rect}`,
+    hotspot: { x: clamp((x - left) / fw), y: clamp((y - top) / fh) },
+  };
 }

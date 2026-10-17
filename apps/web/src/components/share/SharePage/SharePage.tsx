@@ -270,14 +270,14 @@ function Choice<T extends string>({
       >
         {label}
       </h2>
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         {options.map((opt) => (
           <button
             key={opt.value}
             type="button"
             onClick={() => onChange(opt.value)}
             aria-pressed={value === opt.value}
-            className={`flex-1 rounded-none border-2 px-3 py-3 font-mono text-sm font-semibold uppercase transition-colors duration-300 ${
+            className={`flex-1 basis-[6.5rem] rounded-none border-2 px-3 py-3 font-mono text-sm font-semibold uppercase transition-colors duration-300 ${
               value === opt.value
                 ? "border-ink bg-jersey-deep text-cream"
                 : "border-ink/30 text-ink hover:border-ink bg-cream"
@@ -1150,16 +1150,20 @@ export function SharePage({
             />
           )}
 
-          <Choice
-            id="cover-label"
-            label="Omslag"
-            options={COVER_MODES}
-            value={coverMode}
-            onChange={(next) => {
-              setCoverMode(next);
-              clearPreview();
-            }}
-          />
+          {/* Omslag only chooses how a cover is shown: an item without one
+              already fills its slot with the fallback picture. */}
+          {item?.cover && (
+            <Choice
+              id="cover-label"
+              label="Omslag"
+              options={COVER_MODES}
+              value={coverMode}
+              onChange={(next) => {
+                setCoverMode(next);
+                clearPreview();
+              }}
+            />
+          )}
 
           <section aria-labelledby="item-label">
             <h2 id="item-label" className={`${labelClass} mb-2`}>
@@ -1309,7 +1313,6 @@ export function SharePage({
 
           {previewUrl && (
             <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={previewUrl}
                 alt="Gegenereerde preview"

@@ -7,13 +7,10 @@ import {
   Cta,
   Detail,
   Grain,
-  H,
   Info,
   LookPhoto,
-  RuleKicker,
   Stamp,
   Title,
-  W,
   type LookProps,
 } from "./look-parts";
 import { unclash } from "./share-content";
@@ -67,8 +64,6 @@ export function KaartLook({
             content={content}
             coverMode={coverMode}
             fallbackIndex={fallbackIndex}
-            w={W}
-            h={H[format]}
           />
           <div style={{ position: "absolute", top: 56, left: 64 }}>
             <Crest size={sq ? 84 : 104} />
@@ -106,13 +101,6 @@ export function KaartLook({
                   size={sq ? 0.5 : 0.8}
                 />
               </div>
-            )}
-            {content.kicker !== content.label && (
-              <RuleKicker
-                text={content.kicker}
-                color={accent}
-                size={sq ? 26 : 30}
-              />
             )}
             <Title
               runs={content.title}
