@@ -7,6 +7,15 @@ const meta = {
   parameters: {
     layout: "fullscreen",
   },
+  // The tool is a fixed full-screen layer (#3538); the transform makes this
+  // box its containing block, so it stays inside its slot on the docs page.
+  decorators: [
+    (Story) => (
+      <div style={{ height: "100dvh", transform: "translateZ(0)" }}>
+        <Story />
+      </div>
+    ),
+  ],
   // Page-level composition for the /share route — not VR-tagged (page coverage
   // is the Playwright e2e suite's job). Its constituent Features/Share/* image
   // templates are each individually vr-tagged.

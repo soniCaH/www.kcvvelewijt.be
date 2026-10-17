@@ -269,7 +269,8 @@ describe("loading.tsx envelope drift guard", () => {
     {
       name: "/share",
       Loading: ShareLoading,
-      expectedRootClass: "bg-cream min-h-screen",
+      // The tool's own full-screen layer over the site chrome (#3538).
+      expectedRootClass: "bg-cream fixed inset-0 z-[55] flex flex-col",
       announcement: "Deelafbeelding-tool laden…",
     },
     {

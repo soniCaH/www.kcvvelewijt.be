@@ -24,9 +24,56 @@ globalThis.fetch = vi.fn().mockResolvedValue({
 
 import { SharePage } from "./SharePage";
 
+type User = ReturnType<typeof userEvent.setup>;
+type Tab = "Inhoud" | "Stijl" | "Tekst" | "Schik";
+
+/** Opens a tab of the bottom bar; a tap on the open tab would close it. */
+const openTab = async (user: User, name: Tab) => {
+  const tab = screen.getByRole("button", { name });
+  if (tab.getAttribute("aria-expanded") !== "true") await user.click(tab);
+};
+const tabButton = (name: Tab) => screen.getByRole("button", { name });
+const panel = () => screen.getByRole("region");
+const preview = () => screen.getByTestId("share-preview");
+const lookStrip = () => screen.queryByRole("group", { name: "Look" });
+const saveButton = () => screen.getByRole("button", { name: "Bewaar PNG" });
+const save = (user: User) => user.click(saveButton());
+
 /** Today's templates are look W; a fresh phone starts on A Kaart (#3536). */
-const pickW = (user: ReturnType<typeof userEvent.setup>) =>
+const pickW = (user: User) =>
   user.click(screen.getByRole("button", { name: "W · Wedstrijd" }));
+/** A moment chip in Inhoud. */
+const pickMoment = async (user: User, name: string | RegExp) => {
+  await openTab(user, "Inhoud");
+  await user.click(screen.getByRole("button", { name }));
+};
+/** The match list in Inhoud: type to search, tap a hit. */
+const pickMatch = async (user: User, match: MatchOption) => {
+  await openTab(user, "Inhoud");
+  await user.click(
+    within(screen.getByRole("listbox", { name: "Wedstrijden" })).getByRole(
+      "option",
+      { name: match.label },
+    ),
+  );
+};
+
+/** Swaps `navigator.share` / `canShare` for one test. */
+function stubShare(share?: (data: ShareData) => Promise<void>) {
+  const original = { share: navigator.share, canShare: navigator.canShare };
+  const define = (key: "share" | "canShare", value: unknown) =>
+    Object.defineProperty(navigator, key, {
+      value,
+      writable: true,
+      configurable: true,
+    });
+  define("canShare", () => true);
+  if (share) define("share", share);
+  return () => {
+    define("share", original.share);
+    define("canShare", original.canShare);
+  };
+}
 
 const PLAYERS: PlayerForShare[] = [
   {
@@ -66,7 +113,7 @@ const MATCHES: MatchOption[] = [
 ];
 
 // Two squads meeting the same opponent (or two pitch-reservation placeholders)
-// share an identical matchName — the datalist label is the only unique field.
+// share an identical matchName — the list label is the only unique field.
 const COLLIDING_MATCHES: MatchOption[] = [
   {
     id: 3001,
@@ -89,147 +136,419 @@ describe("SharePage", () => {
     vi.clearAllMocks();
     // The story session (#3536) lives in localStorage: every test starts on a fresh phone.
     localStorage.clear();
+    // happy-dom would navigate to the blob URL; the click itself is what counts.
+    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.useRealTimers();
   });
 
-  // ─── Existing Phase 1 tests (updated for Phase 4 generate flow) ──────────
+  // ─── The phone layout (#3538) ────────────────────────────────────────────
 
-  it("renders the Generate button", () => {
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-    expect(
-      screen.getByRole("button", { name: /genereer/i }),
-    ).toBeInTheDocument();
-  });
+  describe("phone layout (#3538)", () => {
+    it("is one full-screen layer over the site chrome, preview on top, tabs and Bewaar PNG at the bottom", () => {
+      render(<SharePage matches={MATCHES} players={PLAYERS} />);
 
-  // Two calls: iOS Safari drops nested images on the first rasterization, so
-  // the capture is warmed up once and only the second result is kept.
-  it("calls html-to-image toPng twice when Generate is clicked", async () => {
-    const { toPng } = await import("html-to-image");
-    const user = userEvent.setup();
+      const tool = document.getElementById("share-tool")!;
+      expect(tool.className).toMatch(/\bfixed\b/);
+      expect(tool.className).toMatch(/\binset-0\b/);
+      expect(within(tool).getByTestId("share-preview")).toBeInTheDocument();
+      for (const name of ["Inhoud", "Stijl", "Tekst", "Schik"] as const) {
+        expect(tabButton(name)).toHaveAttribute("aria-expanded", "false");
+      }
+      expect(saveButton()).toBeEnabled();
+      // No panel until a tab is tapped: the preview gets the room.
+      expect(screen.queryByRole("region")).toBeNull();
+    });
 
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-    await user.click(screen.getByRole("button", { name: /genereer/i }));
-
-    expect(toPng).toHaveBeenCalledTimes(2);
-  });
-
-  it("calls toPng with exactly 1080x1920 dimensions and pixelRatio 1", async () => {
-    const { toPng } = await import("html-to-image");
-    const user = userEvent.setup();
-
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-    await user.click(screen.getByRole("button", { name: /genereer/i }));
-
-    expect(toPng).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        width: CAPTURE_WIDTH,
-        height: CAPTURE_HEIGHT,
-        pixelRatio: 1,
-      }),
-    );
-  });
-
-  // Regression: without this, html-to-image keys its resource cache on the URL
-  // minus the query string, so every `/_next/image?url=…` shares one entry and
-  // later captures reuse the first image fetched (wrong player photo / crest).
-  it("captures with includeQueryParams so per-image cache keys stay distinct", async () => {
-    const { toPng } = await import("html-to-image");
-    const user = userEvent.setup();
-
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-    await user.click(screen.getByRole("button", { name: /genereer/i }));
-
-    expect(toPng).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({ includeQueryParams: true }),
-    );
-  });
-
-  it("shows an error message and re-enables the button when toPng rejects", async () => {
-    const { toPng } = await import("html-to-image");
-    vi.mocked(toPng).mockRejectedValueOnce(new Error("CORS error"));
-    const user = userEvent.setup();
-
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-    await user.click(screen.getByRole("button", { name: /genereer/i }));
-
-    expect(screen.getByRole("alert")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /genereer/i }),
-    ).not.toBeDisabled();
-  });
-
-  describe("generate failure (#2818)", () => {
-    it("shows the locked notice through <EmptyState>, logs the caught error to the console only, and never leaks its message into the DOM", async () => {
-      const { toPng } = await import("html-to-image");
-      const generateError = new Error("CORS error");
-      vi.mocked(toPng).mockRejectedValueOnce(generateError);
-      const consoleError = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
+    it("a tab opens its panel; tapping the open tab closes it; another tab swaps it", async () => {
       const user = userEvent.setup();
+      render(<SharePage matches={MATCHES} players={PLAYERS} />);
 
+      await user.click(tabButton("Stijl"));
+      expect(tabButton("Stijl")).toHaveAttribute("aria-expanded", "true");
+      expect(panel()).toHaveAccessibleName("Stijl");
+
+      await user.click(tabButton("Tekst"));
+      expect(tabButton("Stijl")).toHaveAttribute("aria-expanded", "false");
+      expect(panel()).toHaveAccessibleName("Tekst");
+
+      await user.click(tabButton("Tekst"));
+      expect(screen.queryByRole("region")).toBeNull();
+    });
+
+    it("Inhoud holds the mode switch, the match search, the moment chips and Eigen foto", async () => {
+      const user = userEvent.setup();
+      render(<SharePage matches={MATCHES} players={PLAYERS} />);
+      await openTab(user, "Inhoud");
+
+      const p = within(panel());
+      expect(p.getByRole("button", { name: "Nieuws" })).toBeInTheDocument();
+      expect(p.getByRole("listbox", { name: "Wedstrijden" })).toBeVisible();
+      expect(p.getByRole("button", { name: "Goal KCVV" })).toBeVisible();
+      expect(p.getByLabelText("Foto uploaden")).toBeInTheDocument();
+      expect(p.getByText("Eigen foto…")).toBeVisible();
+    });
+
+    it("Stijl holds Licht / Donker and Story / Vierkant", async () => {
+      const user = userEvent.setup();
+      render(<SharePage matches={MATCHES} players={PLAYERS} />);
+      await openTab(user, "Stijl");
+
+      const p = within(panel());
+      expect(p.getByRole("button", { name: "Licht" })).toBeVisible();
+      expect(p.getByRole("button", { name: /story · 9:16/i })).toBeVisible();
+      expect(p.getByRole("button", { name: /vierkant · 1:1/i })).toBeVisible();
+    });
+
+    it("Tekst holds the moment's fields", async () => {
+      const user = userEvent.setup();
+      render(<SharePage matches={MATCHES} players={PLAYERS} />);
+      await openTab(user, "Tekst");
+
+      const p = within(panel());
+      expect(
+        p.getByPlaceholderText("KCVV Elewijt — FC Tegenstander"),
+      ).toBeInTheDocument();
+      expect(p.getByPlaceholderText("A")).toBeInTheDocument();
+      expect(p.getByPlaceholderText("2 - 0")).toBeInTheDocument();
+      expect(p.getByPlaceholderText("45+2")).toBeInTheDocument();
+      expect(p.getByLabelText(/zoek speler/i)).toBeInTheDocument();
+    });
+
+    it("Schik turns drag mode on, holds Midden, Voor / Achter and Alles terugzetten, and hides the look strip", async () => {
+      const user = userEvent.setup();
+      render(<SharePage matches={MATCHES} players={PLAYERS} />);
+      expect(lookStrip()).not.toBeNull();
+      expect(preview().className).not.toContain("touch-none");
+
+      await openTab(user, "Schik");
+
+      const p = within(panel());
+      expect(p.getByRole("button", { name: "Midden" })).toBeVisible();
+      expect(p.getByRole("button", { name: "Voor" })).toBeDisabled();
+      expect(p.getByRole("button", { name: "Achter" })).toBeDisabled();
+      expect(
+        p.getByRole("button", { name: "Alles terugzetten" }),
+      ).toBeDisabled();
+      expect(preview().className).toContain("touch-none");
+      expect(lookStrip()).toBeNull();
+
+      await user.click(tabButton("Schik"));
+      expect(lookStrip()).not.toBeNull();
+      expect(preview().className).not.toContain("touch-none");
+    });
+
+    it("the look strip shows a live thumbnail of every fitting look", async () => {
+      const user = userEvent.setup();
+      render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+      const strip = within(lookStrip()!);
+      const names = ["Kaart", "Plakboek", "Affiche", "Ticket", "W · Wedstrijd"];
+      expect(strip.getAllByRole("button")).toHaveLength(names.length);
+      const looks = names.map((name) => strip.getByRole("button", { name }));
+      // Each thumbnail draws the story itself: Kaart's thumbnail carries the
+      // look's own fallback picture, W its own poster.
+      expect(looks[0]!.innerHTML).toContain("share-fallback/A-");
+      expect(looks[4]!.innerHTML).not.toContain("share-fallback");
+
+      // A typed score reaches every thumbnail live.
+      await openTab(user, "Tekst");
+      await user.type(screen.getByPlaceholderText("2 - 0"), "3 - 1");
+      for (const look of within(lookStrip()!).getAllByRole("button")) {
+        expect(look.textContent).toMatch(/3\s*(–|-)\s*1/);
+      }
+    });
+
+    it("the preview is fitted to the free space", () => {
+      const observed: ResizeObserverCallback[] = [];
+      vi.stubGlobal(
+        "ResizeObserver",
+        class {
+          constructor(cb: ResizeObserverCallback) {
+            observed.push(cb);
+          }
+          observe(el: Element) {
+            observed.at(-1)!(
+              [
+                {
+                  target: el,
+                  contentRect: { width: 343, height: 1000 },
+                } as unknown as ResizeObserverEntry,
+              ],
+              this as unknown as ResizeObserver,
+            );
+          }
+          disconnect() {}
+          unobserve() {}
+        },
+      );
       try {
         render(<SharePage matches={MATCHES} players={PLAYERS} />);
-        await user.click(screen.getByRole("button", { name: /genereer/i }));
+        // 343 px wide (a 375 px phone less its gutters) minus the 2 px border
+        // on each side: the canvas is drawn 339 px wide, at 339 / 1080.
+        expect(preview().style.width).toBe("339px");
+        expect(parseFloat(preview().style.height)).toBeCloseTo(
+          (339 / 1080) * 1920,
+          3,
+        );
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    });
+  });
+
+  // ─── Bewaar PNG (#3538) ──────────────────────────────────────────────────
+
+  describe("Bewaar PNG", () => {
+    // Two calls: iOS Safari drops nested images on the first rasterization, so
+    // the capture is warmed up once and only the second result is kept.
+    // includeQueryParams: without it html-to-image keys its resource cache on
+    // the URL minus the query string, so every `/_next/image?url=…` shares one
+    // entry and later captures reuse the first image fetched.
+    it("captures twice at 1080x1920, pixelRatio 1, with includeQueryParams, then downloads where sharing files is not possible", async () => {
+      const { toPng } = await import("html-to-image");
+      const user = userEvent.setup();
+      render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+      await save(user);
+
+      expect(toPng).toHaveBeenCalledTimes(2);
+      expect(toPng).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          width: CAPTURE_WIDTH,
+          height: CAPTURE_HEIGHT,
+          pixelRatio: 1,
+          includeQueryParams: true,
+        }),
+      );
+      expect(HTMLAnchorElement.prototype.click).toHaveBeenCalledTimes(1);
+    });
+
+    it("captures the square at 1080x1080", async () => {
+      const { toPng } = await import("html-to-image");
+      const user = userEvent.setup();
+      render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+      await openTab(user, "Stijl");
+      await user.click(screen.getByRole("button", { name: /vierkant · 1:1/i }));
+      await save(user);
+
+      expect(toPng).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ width: SQUARE_SIZE, height: SQUARE_SIZE }),
+      );
+    });
+
+    it("opens the share sheet with one PNG file in the same tap", async () => {
+      const share = vi.fn().mockResolvedValue(undefined);
+      const restore = stubShare(share);
+      try {
+        const user = userEvent.setup();
+        render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+        await save(user);
+
+        expect(share).toHaveBeenCalledTimes(1);
+        const { files } = share.mock.calls[0]![0] as { files: File[] };
+        expect(files).toHaveLength(1);
+        expect(files[0]).toBeInstanceOf(File);
+        expect(files[0]!.type).toBe("image/png");
+        expect(files[0]!.name).toMatch(/^kcvv-.*\.png$/);
+        expect(HTMLAnchorElement.prototype.click).not.toHaveBeenCalled();
+      } finally {
+        restore();
+      }
+    });
+
+    it("a cancelled share shows no notice and keeps the PNG: the next tap reopens the sheet without a new capture", async () => {
+      const { toPng } = await import("html-to-image");
+      const abort = Object.assign(new Error("Share cancelled"), {
+        name: "AbortError",
+      });
+      const share = vi
+        .fn()
+        .mockRejectedValueOnce(abort)
+        .mockResolvedValueOnce(undefined);
+      const restore = stubShare(share);
+      try {
+        const user = userEvent.setup();
+        render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+        await save(user);
+        expect(screen.queryByRole("alert")).toBeNull();
+        await save(user);
+
+        expect(share).toHaveBeenCalledTimes(2);
+        expect(toPng).toHaveBeenCalledTimes(2);
+      } finally {
+        restore();
+      }
+    });
+
+    it("a change after a cancelled share drops the kept PNG and revokes its URL", async () => {
+      const { toPng } = await import("html-to-image");
+      const abort = Object.assign(new Error("Share cancelled"), {
+        name: "AbortError",
+      });
+      const restore = stubShare(vi.fn().mockRejectedValue(abort));
+      try {
+        const user = userEvent.setup();
+        render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+        await save(user);
+        await openTab(user, "Tekst");
+        await user.type(screen.getByPlaceholderText("A"), "A");
+        expect(globalThis.URL.revokeObjectURL).toHaveBeenCalledWith(
+          mockObjectUrl,
+        );
+
+        await save(user);
+        expect(toPng).toHaveBeenCalledTimes(4);
+      } finally {
+        restore();
+      }
+    });
+
+    it("ignores a second tap while the first is still busy", async () => {
+      const { toPng } = await import("html-to-image");
+      let resolveToPng!: (value: string) => void;
+      vi.mocked(toPng).mockImplementationOnce(
+        () =>
+          new Promise<string>((resolve) => {
+            resolveToPng = resolve;
+          }),
+      );
+
+      const user = userEvent.setup();
+      render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+      const btn = saveButton();
+      await user.click(btn);
+      await user.click(btn);
+
+      expect(toPng).toHaveBeenCalledTimes(1);
+      resolveToPng("data:image/png;base64,ABC");
+    });
+
+    describe("generate failure (#2818)", () => {
+      it("shows the locked notice through <EmptyState>, logs the caught error to the console only, never leaks its message, and the button stays its own retry", async () => {
+        const { toPng } = await import("html-to-image");
+        const generateError = new Error("CORS error");
+        vi.mocked(toPng).mockRejectedValueOnce(generateError);
+        const consoleError = vi
+          .spyOn(console, "error")
+          .mockImplementation(() => {});
+        const user = userEvent.setup();
+
+        render(<SharePage matches={MATCHES} players={PLAYERS} />);
+        await save(user);
 
         // The accented substring splits the sentence across DOM nodes, so
-        // assert on the notice's own alert region's full text content, the
-        // same pattern #2580's CalendarSubscribePanel/MembershipForm tests
-        // use.
+        // assert on the notice's own alert region's full text content.
         const notice = await screen.findByRole("alert");
         expect(notice).toHaveTextContent(
           "Exporteren mislukt. Probeer opnieuw.",
         );
-        // The visitor never sees the caught error's own text — it must not
-        // be fed to `<EmptyState>` from `err.message` (#2818).
+        // `<EmptyState tier="slot" reason="unavailable">`'s frame, not the
+        // retired bespoke `text-card-red` paragraph.
+        expect(notice.className).not.toContain("text-card-red");
+        expect(notice.className).toContain("border-dashed");
         expect(screen.queryByText("CORS error")).not.toBeInTheDocument();
         expect(consoleError).toHaveBeenCalledWith(
           expect.stringContaining("generate"),
           generateError,
         );
-      } finally {
-        consoleError.mockRestore();
-      }
+        expect(saveButton()).toBeEnabled();
+        expect(HTMLAnchorElement.prototype.click).not.toHaveBeenCalled();
+      });
     });
 
-    it("no longer renders the pre-#2580 bespoke alert paragraph", async () => {
-      const { toPng } = await import("html-to-image");
-      vi.mocked(toPng).mockRejectedValueOnce(new Error("CORS error"));
-      const consoleError = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
-      const user = userEvent.setup();
+    describe("share failure (#2818)", () => {
+      it("shows the locked notice, logs the caught error to the console only and never leaks its message", async () => {
+        const shareError = new Error("Permission denied");
+        const restore = stubShare(vi.fn().mockRejectedValue(shareError));
+        const consoleError = vi
+          .spyOn(console, "error")
+          .mockImplementation(() => {});
+        try {
+          const user = userEvent.setup();
+          render(<SharePage matches={MATCHES} players={PLAYERS} />);
+          await save(user);
 
-      try {
-        render(<SharePage matches={MATCHES} players={PLAYERS} />);
-        await user.click(screen.getByRole("button", { name: /genereer/i }));
+          const notice = await screen.findByRole("alert");
+          expect(notice).toHaveTextContent("Delen mislukt. Probeer opnieuw.");
+          expect(screen.queryByText("Permission denied")).toBeNull();
+          expect(consoleError).toHaveBeenCalledWith(
+            expect.stringContaining("share"),
+            shareError,
+          );
+        } finally {
+          restore();
+        }
+      });
 
-        const notice = await screen.findByRole("alert");
-        // The retired idiom carried `text-card-red` (a bespoke bare-paragraph
-        // alert). `<EmptyState tier="slot" reason="unavailable">`'s own frame
-        // carries `border-dashed` instead — see EmptyState.tsx's
-        // `SlotNoticeEmptyState`.
-        expect(notice.className).not.toContain("text-card-red");
-        expect(notice.className).toContain("border-dashed");
-      } finally {
-        consoleError.mockRestore();
-      }
+      it("a retry that shares clears the notice (#2818 review finding 1)", async () => {
+        const restore = stubShare(
+          vi
+            .fn()
+            .mockRejectedValueOnce(new Error("Permission denied"))
+            .mockResolvedValueOnce(undefined),
+        );
+        vi.spyOn(console, "error").mockImplementation(() => {});
+        try {
+          const user = userEvent.setup();
+          render(<SharePage matches={MATCHES} players={PLAYERS} />);
+          await save(user);
+          await screen.findByRole("alert");
+
+          await save(user);
+
+          expect(screen.queryByRole("alert")).toBeNull();
+        } finally {
+          restore();
+        }
+      });
+
+      it("a change to the story clears the notice (#2818 review finding 1)", async () => {
+        const restore = stubShare(
+          vi.fn().mockRejectedValue(new Error("Permission denied")),
+        );
+        vi.spyOn(console, "error").mockImplementation(() => {});
+        try {
+          const user = userEvent.setup();
+          render(<SharePage matches={MATCHES} players={PLAYERS} />);
+          await save(user);
+          await screen.findByRole("alert");
+
+          await openTab(user, "Tekst");
+          await user.type(
+            screen.getByPlaceholderText("KCVV Elewijt — FC Tegenstander"),
+            "x",
+          );
+
+          expect(screen.queryByRole("alert")).toBeNull();
+        } finally {
+          restore();
+        }
+      });
     });
   });
 
-  // ─── Phase 3: Template picker ─────────────────────────────────────────────
+  // ─── Moments (Inhoud) and their fields (Tekst) ───────────────────────────
 
-  it("W renders its 9 story template buttons; A–E offer all 11 moments", async () => {
+  it("W offers its 9 story moments; A–E offer all 11", async () => {
     const user = userEvent.setup();
     render(<SharePage matches={MATCHES} players={PLAYERS} />);
+    await openTab(user, "Inhoud");
     expect(
       screen.getByRole("button", { name: "Eindstand 1:1" }),
     ).toBeInTheDocument();
     await pickW(user);
     expect(screen.queryByRole("button", { name: "Eindstand 1:1" })).toBeNull();
-    // All 9 templates should be present as buttons
-    const templateLabels = [
+    for (const label of [
       /goal kcvv/i,
       /goal teg/i,
       /aftrap/i,
@@ -239,809 +558,250 @@ describe("SharePage", () => {
       /rode kaart teg/i,
       /gele kaart kcvv/i,
       /gele kaart teg/i,
-    ];
-    for (const label of templateLabels) {
+    ]) {
       expect(screen.getByRole("button", { name: label })).toBeInTheDocument();
     }
   });
 
-  it("defaults to goal-kcvv template selected (aria-pressed=true)", () => {
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-    const goalKcvvBtn = screen.getByRole("button", { name: /goal kcvv/i });
-    expect(goalKcvvBtn).toHaveAttribute("aria-pressed", "true");
-  });
-
-  it("switching template updates aria-pressed state", async () => {
+  it("in W, Vierkant shows only the two square moments", async () => {
     const user = userEvent.setup();
     render(<SharePage matches={MATCHES} players={PLAYERS} />);
+    await pickW(user);
 
-    const kickoffBtn = screen.getByRole("button", { name: /aftrap/i });
-    await user.click(kickoffBtn);
+    await openTab(user, "Stijl");
+    await user.click(screen.getByRole("button", { name: /vierkant · 1:1/i }));
+    await openTab(user, "Inhoud");
 
-    expect(kickoffBtn).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: /goal kcvv/i })).toHaveAttribute(
-      "aria-pressed",
-      "false",
+    expect(screen.getByRole("button", { name: /pre-game/i })).toBeVisible();
+    expect(screen.queryByRole("button", { name: /goal kcvv/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /rust/i })).toBeNull();
+  });
+
+  it("starts on Goal KCVV and Story; tapping the active moment or format changes nothing", async () => {
+    const user = userEvent.setup();
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+    await openTab(user, "Tekst");
+    await user.type(screen.getByPlaceholderText("2 - 0"), "3 - 1");
+
+    await openTab(user, "Inhoud");
+    const goal = screen.getByRole("button", { name: /goal kcvv/i });
+    expect(goal).toHaveAttribute("aria-pressed", "true");
+    await user.click(goal);
+    expect(goal).toHaveAttribute("aria-pressed", "true");
+
+    await openTab(user, "Stijl");
+    const story = screen.getByRole("button", { name: /story · 9:16/i });
+    expect(story).toHaveAttribute("aria-pressed", "true");
+    await user.click(story);
+    expect(story).toHaveAttribute("aria-pressed", "true");
+
+    await openTab(user, "Tekst");
+    expect(screen.getByPlaceholderText("2 - 0")).toHaveValue("3 - 1");
+  });
+
+  it("each moment shows only its own fields in Tekst", async () => {
+    const user = userEvent.setup();
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+    const fields = async (moment: string | RegExp) => {
+      await pickMoment(user, moment);
+      expect(screen.getByRole("button", { name: moment })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      await openTab(user, "Tekst");
+      return {
+        score: screen.queryByPlaceholderText("2 - 0") !== null,
+        minute: screen.queryByPlaceholderText("45+2") !== null,
+        player: screen.queryByLabelText(/zoek speler/i) !== null,
+        competition: screen.queryByPlaceholderText(/2e provinciale/i) !== null,
+        mood: screen.queryByRole("button", { name: "Gewonnen" }) !== null,
+      };
+    };
+    const none = {
+      score: false,
+      minute: false,
+      player: false,
+      competition: false,
+      mood: false,
+    };
+
+    expect(await fields(/goal kcvv/i)).toEqual({
+      ...none,
+      score: true,
+      minute: true,
+      player: true,
+    });
+    expect(await fields(/goal teg/i)).toEqual({
+      ...none,
+      score: true,
+      minute: true,
+      competition: true,
+    });
+    expect(await fields(/aftrap/i)).toEqual({ ...none, competition: true });
+    expect(await fields(/rust/i)).toEqual({
+      ...none,
+      score: true,
+      competition: true,
+    });
+    expect(await fields("Eindstand")).toEqual({
+      ...none,
+      score: true,
+      competition: true,
+      mood: true,
+    });
+    expect(await fields(/rode kaart kcvv/i)).toEqual({
+      ...none,
+      minute: true,
+      player: true,
+    });
+    expect(await fields(/gele kaart teg/i)).toEqual({ ...none, minute: true });
+  });
+
+  it("the match name, the score and Ploeg survive a moment switch", async () => {
+    const user = userEvent.setup();
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+    await openTab(user, "Tekst");
+    await user.type(
+      screen.getByPlaceholderText(/KCVV Elewijt/i),
+      "KCVV Elewijt — Rapid Leest",
     );
-  });
+    await user.type(screen.getByPlaceholderText("2 - 0"), "3 - 1");
+    await user.type(screen.getByPlaceholderText("A"), "U15");
 
-  // ─── Phase 3: Dynamic fields ─────────────────────────────────────────────
-
-  it("match name input is always visible", () => {
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-    expect(screen.getByPlaceholderText(/KCVV Elewijt/i)).toBeInTheDocument();
-  });
-
-  it("score input is visible for goal-kcvv (default template)", () => {
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-    expect(screen.getByPlaceholderText(/2 - 0/i)).toBeInTheDocument();
-  });
-
-  it("score input is NOT visible for kickoff template", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    await user.click(screen.getByRole("button", { name: /aftrap/i }));
-
-    expect(screen.queryByPlaceholderText(/2 - 0/i)).not.toBeInTheDocument();
-  });
-
-  it("score input is visible for halftime template", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    await user.click(screen.getByRole("button", { name: /rust/i }));
-
-    expect(screen.getByPlaceholderText(/2 - 0/i)).toBeInTheDocument();
-  });
-
-  it("minute input is visible for goal-kcvv", () => {
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-    expect(screen.getByPlaceholderText(/45\+2/i)).toBeInTheDocument();
-  });
-
-  it("minute input is NOT visible for kickoff", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    await user.click(screen.getByRole("button", { name: /aftrap/i }));
-
-    expect(screen.queryByPlaceholderText(/45\+2/i)).not.toBeInTheDocument();
-  });
-
-  it("player search is visible for goal-kcvv (default template)", () => {
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-    expect(screen.getByLabelText(/zoek speler/i)).toBeInTheDocument();
-  });
-
-  it("player search is NOT visible for goal-opponent template", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    await user.click(screen.getByRole("button", { name: /goal teg/i }));
-
-    expect(screen.queryByLabelText(/zoek speler/i)).not.toBeInTheDocument();
-  });
-
-  it("player search is NOT visible for kickoff template", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    await user.click(screen.getByRole("button", { name: /aftrap/i }));
-
-    expect(screen.queryByLabelText(/zoek speler/i)).not.toBeInTheDocument();
-  });
-
-  it("mood select is visible for full-time template only", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    // Not visible by default (goal-kcvv)
-    expect(
-      screen.queryByRole("combobox", { name: /resultaat/i }),
-    ).not.toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Eindstand" }));
-
-    expect(
-      screen.getByRole("combobox", { name: /resultaat/i }),
-    ).toBeInTheDocument();
-  });
-
-  // ─── Phase 3: Session persistence ────────────────────────────────────────
-
-  it("score persists when switching from goal-kcvv to halftime", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    const scoreInput = screen.getByPlaceholderText(/2 - 0/i);
-    await user.clear(scoreInput);
-    await user.type(scoreInput, "3 - 1");
-
-    await user.click(screen.getByRole("button", { name: /rust/i }));
-
-    expect(screen.getByPlaceholderText(/2 - 0/i)).toHaveValue("3 - 1");
-  });
-
-  it("match name persists when switching templates", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    const matchInput = screen.getByPlaceholderText(/KCVV Elewijt/i);
-    await user.clear(matchInput);
-    await user.type(matchInput, "KCVV Elewijt — Rapid Leest");
-
-    await user.click(screen.getByRole("button", { name: /aftrap/i }));
-    await user.click(screen.getByRole("button", { name: /rust/i }));
+    await pickMoment(user, /aftrap/i);
+    await pickMoment(user, /rust/i);
+    await openTab(user, "Tekst");
 
     expect(screen.getByPlaceholderText(/KCVV Elewijt/i)).toHaveValue(
       "KCVV Elewijt — Rapid Leest",
     );
+    expect(screen.getByPlaceholderText("2 - 0")).toHaveValue("3 - 1");
+    expect(screen.getByPlaceholderText("A")).toHaveValue("U15");
   });
 
-  // ─── Phase 3: Player search ───────────────────────────────────────────────
-
-  it("shows all players initially", () => {
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-    expect(screen.getByText(/Janssen/i)).toBeInTheDocument();
-    expect(screen.getByText(/Pieters/i)).toBeInTheDocument();
-    expect(screen.getByText(/Zengin/i)).toBeInTheDocument();
-  });
-
-  it("filters players by search term", async () => {
+  it("the player picker is type-to-search; a pick is marked selected", async () => {
     const user = userEvent.setup();
     render(<SharePage matches={MATCHES} players={PLAYERS} />);
+    await openTab(user, "Tekst");
+    const list = screen.getByRole("listbox", { name: "Spelers" });
+    expect(within(list).getAllByRole("option")).toHaveLength(3);
 
-    const searchInput = screen.getByLabelText(/zoek speler/i);
-    await user.type(searchInput, "jan");
+    await user.type(screen.getByLabelText(/zoek speler/i), "jan");
 
-    expect(screen.getByText(/Janssen/i)).toBeInTheDocument();
-    expect(screen.queryByText(/Pieters/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/Zengin/i)).not.toBeInTheDocument();
+    expect(within(list).getAllByRole("option")).toHaveLength(1);
+    const jan = within(list).getByRole("option", { name: /Janssen/ });
+    await user.click(jan);
+    expect(jan).toHaveAttribute("aria-selected", "true");
   });
 
-  it("selecting a player marks it as aria-selected", async () => {
+  // ─── The match picker (Inhoud) ───────────────────────────────────────────
+
+  it("the match picker is type-to-search, never a bare dropdown", async () => {
     const user = userEvent.setup();
     render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    const playerBtn = screen.getByRole("option", { name: /Janssen/i });
-    await user.click(playerBtn);
-
-    expect(playerBtn).toHaveAttribute("aria-selected", "true");
-  });
-
-  // ─── Phase 3: Match combo-box ──────────────────────────────────────────────
-
-  it("match datalist contains the provided matches", () => {
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-    const datalist = document.getElementById(
-      "match-options",
-    ) as HTMLDataListElement;
-    expect(datalist).not.toBeNull();
-    // datalist <option> elements aren't exposed as ARIA options in happy-dom;
-    // query them directly via the DOM
-    const options = datalist.querySelectorAll("option");
-    expect(options).toHaveLength(2);
-  });
-
-  it("shows minute input for red-card-kcvv template", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    await user.click(screen.getByRole("button", { name: /rode kaart kcvv/i }));
-
-    expect(screen.getByPlaceholderText(/45\+2/i)).toBeInTheDocument();
-  });
-
-  it("shows player search for yellow-card-kcvv template", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    await user.click(screen.getByRole("button", { name: /gele kaart kcvv/i }));
-
-    expect(screen.getByLabelText(/zoek speler/i)).toBeInTheDocument();
-  });
-
-  it("does NOT show player search for yellow-card-opponent template", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    await user.click(screen.getByRole("button", { name: /gele kaart teg/i }));
-
-    expect(screen.queryByLabelText(/zoek speler/i)).not.toBeInTheDocument();
-  });
-
-  // ─── Phase 4: Image export and mobile UX ──────────────────────────────────
-
-  it("clicking Generate shows a preview image", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    await user.click(screen.getByRole("button", { name: /genereer/i }));
-
-    expect(screen.getByRole("img", { name: /preview/i })).toBeInTheDocument();
-  });
-
-  it("no Share or Download button visible before Generate", () => {
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    expect(
-      screen.queryByRole("button", { name: /delen/i }),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: /download/i }),
-    ).not.toBeInTheDocument();
-  });
-
-  it("shows Download button after Generate when canShare is not supported", async () => {
-    // Default: navigator.canShare is undefined → falls back to download
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    await user.click(screen.getByRole("button", { name: /genereer/i }));
-
-    expect(
-      screen.getByRole("button", { name: /download/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: /delen/i }),
-    ).not.toBeInTheDocument();
-  });
-
-  it("shows Share button after Generate when canShare supports files", async () => {
-    const originalCanShare = navigator.canShare;
-    Object.defineProperty(navigator, "canShare", {
-      value: () => true,
-      writable: true,
-      configurable: true,
-    });
-
-    try {
-      const user = userEvent.setup();
-      render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-      await user.click(screen.getByRole("button", { name: /genereer/i }));
-
-      expect(
-        screen.getByRole("button", { name: /delen/i }),
-      ).toBeInTheDocument();
-      expect(
-        screen.queryByRole("button", { name: /download/i }),
-      ).not.toBeInTheDocument();
-    } finally {
-      Object.defineProperty(navigator, "canShare", {
-        value: originalCanShare,
-        writable: true,
-        configurable: true,
-      });
-    }
-  });
-
-  it("Share button calls navigator.share with a PNG file", async () => {
-    const mockShare = vi.fn().mockResolvedValue(undefined);
-    const originalShare = navigator.share;
-    const originalCanShare = navigator.canShare;
-    Object.defineProperty(navigator, "canShare", {
-      value: () => true,
-      writable: true,
-      configurable: true,
-    });
-    Object.defineProperty(navigator, "share", {
-      value: mockShare,
-      writable: true,
-      configurable: true,
-    });
-
-    try {
-      const user = userEvent.setup();
-      render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-      await user.click(screen.getByRole("button", { name: /genereer/i }));
-      await user.click(screen.getByRole("button", { name: /delen/i }));
-
-      expect(mockShare).toHaveBeenCalledTimes(1);
-      const { files } = mockShare.mock.calls[0][0] as { files: File[] };
-      expect(files).toHaveLength(1);
-      expect(files[0]).toBeInstanceOf(File);
-      expect(files[0].type).toBe("image/png");
-      expect(files[0].name).toMatch(/^kcvv-.*\.png$/);
-    } finally {
-      Object.defineProperty(navigator, "share", {
-        value: originalShare,
-        writable: true,
-        configurable: true,
-      });
-      Object.defineProperty(navigator, "canShare", {
-        value: originalCanShare,
-        writable: true,
-        configurable: true,
-      });
-    }
-  });
-
-  describe("share failure (#2818)", () => {
-    it("shows the locked notice through <EmptyState>, logs the caught error to the console only, and never leaks its message into the DOM", async () => {
-      const shareError = new Error("Permission denied");
-      const mockShare = vi.fn().mockRejectedValue(shareError);
-      const originalShare = navigator.share;
-      const originalCanShare = navigator.canShare;
-      Object.defineProperty(navigator, "canShare", {
-        value: () => true,
-        writable: true,
-        configurable: true,
-      });
-      Object.defineProperty(navigator, "share", {
-        value: mockShare,
-        writable: true,
-        configurable: true,
-      });
-      const consoleError = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
-
-      try {
-        const user = userEvent.setup();
-        render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-        await user.click(screen.getByRole("button", { name: /genereer/i }));
-        await user.click(screen.getByRole("button", { name: /delen/i }));
-
-        const notice = await screen.findByRole("alert");
-        expect(notice).toHaveTextContent("Delen mislukt. Probeer opnieuw.");
-        expect(screen.queryByText("Permission denied")).not.toBeInTheDocument();
-        expect(consoleError).toHaveBeenCalledWith(
-          expect.stringContaining("share"),
-          shareError,
-        );
-      } finally {
-        consoleError.mockRestore();
-        Object.defineProperty(navigator, "share", {
-          value: originalShare,
-          writable: true,
-          configurable: true,
-        });
-        Object.defineProperty(navigator, "canShare", {
-          value: originalCanShare,
-          writable: true,
-          configurable: true,
-        });
-      }
-    });
-
-    it("clears the failure notice after a subsequent successful share (#2818 review finding 1)", async () => {
-      const mockShare = vi
-        .fn()
-        .mockRejectedValueOnce(new Error("Permission denied"))
-        .mockResolvedValueOnce(undefined);
-      const originalShare = navigator.share;
-      const originalCanShare = navigator.canShare;
-      Object.defineProperty(navigator, "canShare", {
-        value: () => true,
-        writable: true,
-        configurable: true,
-      });
-      Object.defineProperty(navigator, "share", {
-        value: mockShare,
-        writable: true,
-        configurable: true,
-      });
-      const consoleError = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
-
-      try {
-        const user = userEvent.setup();
-        render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-        await user.click(screen.getByRole("button", { name: /genereer/i }));
-        const shareButton = screen.getByRole("button", { name: /delen/i });
-        await user.click(shareButton);
-        await screen.findByRole("alert");
-
-        await user.click(shareButton);
-
-        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-      } finally {
-        consoleError.mockRestore();
-        Object.defineProperty(navigator, "share", {
-          value: originalShare,
-          writable: true,
-          configurable: true,
-        });
-        Object.defineProperty(navigator, "canShare", {
-          value: originalCanShare,
-          writable: true,
-          configurable: true,
-        });
-      }
-    });
-
-    it("clears the failure notice, along with the Delen button it described, when the form changes (#2818 review finding 1)", async () => {
-      const mockShare = vi
-        .fn()
-        .mockRejectedValue(new Error("Permission denied"));
-      const originalShare = navigator.share;
-      const originalCanShare = navigator.canShare;
-      Object.defineProperty(navigator, "canShare", {
-        value: () => true,
-        writable: true,
-        configurable: true,
-      });
-      Object.defineProperty(navigator, "share", {
-        value: mockShare,
-        writable: true,
-        configurable: true,
-      });
-      const consoleError = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
-
-      try {
-        const user = userEvent.setup();
-        render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-        await user.click(screen.getByRole("button", { name: /genereer/i }));
-        await user.click(screen.getByRole("button", { name: /delen/i }));
-        await screen.findByRole("alert");
-
-        // Any field change drops the stale preview/blob via `clearPreview`,
-        // which unmounts the Delen button — the notice must not outlive it.
-        // `getByLabelText` matches both the input and its labelled `<section>`
-        // here, so target the match input by its placeholder instead.
-        await user.type(
-          screen.getByPlaceholderText("KCVV Elewijt — FC Tegenstander"),
-          "x",
-        );
-
-        expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-        expect(
-          screen.queryByRole("button", { name: /delen/i }),
-        ).not.toBeInTheDocument();
-      } finally {
-        consoleError.mockRestore();
-        Object.defineProperty(navigator, "share", {
-          value: originalShare,
-          writable: true,
-          configurable: true,
-        });
-        Object.defineProperty(navigator, "canShare", {
-          value: originalCanShare,
-          writable: true,
-          configurable: true,
-        });
-      }
-    });
-  });
-
-  it("does not show an error when share is cancelled (AbortError)", async () => {
-    const abortError = new Error("Share cancelled");
-    abortError.name = "AbortError";
-    const mockShare = vi.fn().mockRejectedValue(abortError);
-    const originalShare = navigator.share;
-    const originalCanShare = navigator.canShare;
-    Object.defineProperty(navigator, "canShare", {
-      value: () => true,
-      writable: true,
-      configurable: true,
-    });
-    Object.defineProperty(navigator, "share", {
-      value: mockShare,
-      writable: true,
-      configurable: true,
-    });
-
-    try {
-      const user = userEvent.setup();
-      render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-      await user.click(screen.getByRole("button", { name: /genereer/i }));
-      await user.click(screen.getByRole("button", { name: /delen/i }));
-
-      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-    } finally {
-      Object.defineProperty(navigator, "share", {
-        value: originalShare,
-        writable: true,
-        configurable: true,
-      });
-      Object.defineProperty(navigator, "canShare", {
-        value: originalCanShare,
-        writable: true,
-        configurable: true,
-      });
-    }
-  });
-
-  it("revokes previous object URL when generating a new preview", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    await user.click(screen.getByRole("button", { name: /genereer/i }));
-    const firstUrl = vi.mocked(globalThis.URL.createObjectURL).mock.results[0]
-      ?.value as string;
-
-    await user.click(screen.getByRole("button", { name: /genereer/i }));
-
-    expect(globalThis.URL.revokeObjectURL).toHaveBeenCalledWith(firstUrl);
-  });
-
-  it("Download button triggers file download via anchor click", async () => {
-    const clickSpy = vi.fn();
-    const originalCreateElement = document.createElement.bind(document);
-    vi.spyOn(document, "createElement").mockImplementation((tag: string) => {
-      const el = originalCreateElement(tag);
-      if (tag === "a") {
-        Object.defineProperty(el, "click", { value: clickSpy });
-      }
-      return el;
-    });
-
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    await user.click(screen.getByRole("button", { name: /genereer/i }));
-    await user.click(screen.getByRole("button", { name: /download/i }));
-
-    expect(clickSpy).toHaveBeenCalledTimes(1);
-
-    vi.mocked(document.createElement).mockRestore();
-  });
-
-  it("ignores a second Generate click while the first is still in progress", async () => {
-    const { toPng } = await import("html-to-image");
-    let resolveToPng!: (value: string) => void;
-    vi.mocked(toPng).mockImplementationOnce(
-      () =>
-        new Promise<string>((resolve) => {
-          resolveToPng = resolve;
-        }),
-    );
-
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    const btn = screen.getByRole("button", { name: /genereer/i });
-    // First click starts generation
-    await user.click(btn);
-    // Second click should be ignored by the ref guard
-    await user.click(btn);
-
-    expect(toPng).toHaveBeenCalledTimes(1);
-
-    // Resolve to let the component settle
-    resolveToPng("data:image/png;base64,ABC");
-  });
-
-  // ─── Aspect toggle (Story / Square) ───────────────────────────────────────
-
-  it("defaults to the Story aspect with 9 story templates", () => {
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-    expect(
-      screen.getByRole("button", { name: /story · 9:16/i }),
-    ).toHaveAttribute("aria-pressed", "true");
-    expect(
-      screen.getByRole("button", { name: /goal kcvv/i }),
-    ).toBeInTheDocument();
-  });
-
-  it("in W, switching to Square shows only the two square templates", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-    await pickW(user);
-
-    await user.click(screen.getByRole("button", { name: /vierkant · 1:1/i }));
-
-    expect(
-      screen.getByRole("button", { name: /pre-game/i }),
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: /goal kcvv/i }),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: /rust/i }),
-    ).not.toBeInTheDocument();
-  });
-
-  it("captures the square at 1080x1080 in Square aspect", async () => {
-    const { toPng } = await import("html-to-image");
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    await user.click(screen.getByRole("button", { name: /vierkant · 1:1/i }));
-    await user.click(screen.getByRole("button", { name: /genereer/i }));
-
-    expect(toPng).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        width: SQUARE_SIZE,
-        height: SQUARE_SIZE,
-        pixelRatio: 1,
-      }),
+    await openTab(user, "Inhoud");
+    expect(screen.queryByRole("combobox")).toBeNull();
+    expect(document.querySelector("datalist, select")).toBeNull();
+
+    await user.type(screen.getByLabelText("Zoek wedstrijd"), "home");
+
+    const list = screen.getByRole("listbox", { name: "Wedstrijden" });
+    expect(within(list).getAllByRole("option")).toHaveLength(1);
+    expect(within(list).getByRole("option")).toHaveTextContent(
+      MATCHES[1]!.label,
     );
   });
 
-  // ─── Competition + photo upload ───────────────────────────────────────────
-
-  it("shows the competition field for eindstand but not goal-kcvv", async () => {
+  it("picking a match fills the club-names-only matchup and its short squad, badged in the preview", async () => {
     const user = userEvent.setup();
     render(<SharePage matches={MATCHES} players={PLAYERS} />);
 
+    await pickMatch(user, MATCHES[0]!);
     expect(
-      screen.queryByPlaceholderText(/2e provinciale/i),
-    ).not.toBeInTheDocument();
+      screen.getByRole("option", { name: MATCHES[0]!.label }),
+    ).toHaveAttribute("aria-selected", "true");
+    await openTab(user, "Tekst");
 
-    await user.click(screen.getByRole("button", { name: "Eindstand" }));
-
-    expect(screen.getByPlaceholderText(/2e provinciale/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/KCVV Elewijt/i)).toHaveValue(
+      MATCHES[0]!.matchName,
+    );
+    expect(screen.getByPlaceholderText("A")).toHaveValue("A");
+    expect(within(preview()).getByText("A")).toBeInTheDocument();
   });
 
-  it("A–E have a photo slot on every template; W only on its image-capable ones", async () => {
+  it("picking another known match replaces the badge; clearing Ploeg removes it", async () => {
     const user = userEvent.setup();
     render(<SharePage matches={MATCHES} players={PLAYERS} />);
 
-    await user.click(screen.getByRole("button", { name: /goal teg/i }));
+    await pickMatch(user, MATCHES[0]!);
+    await pickMatch(user, MATCHES[1]!);
+    expect(within(preview()).queryByText("A")).toBeNull();
+    expect(within(preview()).getByText("B")).toBeInTheDocument();
+
+    await openTab(user, "Tekst");
+    await user.clear(screen.getByPlaceholderText("A"));
+    expect(within(preview()).queryByText("B")).toBeNull();
+  });
+
+  it("picking the second of two matches that share a matchName badges the second squad", async () => {
+    const user = userEvent.setup();
+    render(<SharePage matches={COLLIDING_MATCHES} players={PLAYERS} />);
+
+    await pickMatch(user, COLLIDING_MATCHES[1]!);
+    await openTab(user, "Tekst");
+
+    expect(screen.getByPlaceholderText(/KCVV Elewijt/i)).toHaveValue(
+      COLLIDING_MATCHES[1]!.matchName,
+    );
+    expect(screen.getByPlaceholderText("A")).toHaveValue("U15");
+    expect(within(preview()).getByText("U15")).toBeInTheDocument();
+  });
+
+  it("typing a known matchup or a squad by hand still reaches the preview", async () => {
+    const user = userEvent.setup();
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+    await openTab(user, "Tekst");
+
+    await user.type(
+      screen.getByPlaceholderText(/KCVV Elewijt/i),
+      MATCHES[0]!.matchName,
+    );
+    expect(screen.getByPlaceholderText("A")).toHaveValue("A");
+
+    await user.clear(screen.getByPlaceholderText("A"));
+    await user.type(screen.getByPlaceholderText("A"), "U21");
+    expect(within(preview()).getByText("U21")).toBeInTheDocument();
+  });
+
+  // ─── Eigen foto (Inhoud) ─────────────────────────────────────────────────
+
+  it("A–E have a photo slot on every moment; W only on its image-capable ones", async () => {
+    const user = userEvent.setup();
+    render(<SharePage matches={MATCHES} players={PLAYERS} />);
+
+    await pickMoment(user, /goal teg/i);
     expect(screen.getByLabelText(/foto uploaden/i)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /goal kcvv/i }));
     await pickW(user);
-
-    // goal-kcvv is image-capable
     expect(screen.getByLabelText(/foto uploaden/i)).toBeInTheDocument();
 
-    // goal-opponent is not
     await user.click(screen.getByRole("button", { name: /goal teg/i }));
-    expect(screen.queryByLabelText(/foto uploaden/i)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/foto uploaden/i)).toBeNull();
   });
 
-  it("creates an object URL when a photo is uploaded", async () => {
+  it("an own photo reaches the preview; Foto weghalen takes it away", async () => {
     const user = userEvent.setup();
     render(<SharePage matches={MATCHES} players={PLAYERS} />);
+    await openTab(user, "Inhoud");
 
     const file = new File(["x"], "goal.png", { type: "image/png" });
     await user.upload(screen.getByLabelText(/foto uploaden/i), file);
 
     expect(globalThis.URL.createObjectURL).toHaveBeenCalledWith(file);
-    expect(
-      screen.getByRole("button", { name: /foto verwijderen/i }),
-    ).toBeInTheDocument();
-  });
-
-  // ─── No-op guards (re-selecting the active aspect / template) ──────────────
-
-  it("re-clicking the active Story aspect is a no-op (state stable)", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    const storyToggle = screen.getByRole("button", { name: /story · 9:16/i });
-    await user.click(storyToggle);
-
-    expect(storyToggle).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: /goal kcvv/i })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
-  });
-
-  // ─── Squad badge (Ploeg field) ──────────────────────────────────────────
-
-  it("picking a match with a known squad prefills Ploeg with its short form, and the badge appears in the live preview", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    const matchInput = screen.getByPlaceholderText(/KCVV Elewijt/i);
-    await user.type(matchInput, MATCHES[0]!.matchName);
-
-    expect(screen.getByPlaceholderText("A")).toHaveValue("A");
-    expect(screen.getByText("A")).toBeInTheDocument();
-  });
-
-  it("picking a different known match replaces the badge", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    const matchInput = screen.getByPlaceholderText(/KCVV Elewijt/i);
-    await user.type(matchInput, MATCHES[0]!.matchName);
-    expect(screen.getByPlaceholderText("A")).toHaveValue("A");
-
-    await user.clear(matchInput);
-    await user.type(matchInput, MATCHES[1]!.matchName);
-
-    expect(screen.getByPlaceholderText("A")).toHaveValue("B");
-    expect(screen.queryByText("A")).not.toBeInTheDocument();
-    expect(screen.getByText("B")).toBeInTheDocument();
-  });
-
-  it("clearing the Ploeg field removes the badge from the preview", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    const matchInput = screen.getByPlaceholderText(/KCVV Elewijt/i);
-    await user.type(matchInput, MATCHES[0]!.matchName);
-    expect(screen.getByText("A")).toBeInTheDocument();
-
-    await user.clear(screen.getByPlaceholderText("A"));
-
-    expect(screen.queryByText("A")).not.toBeInTheDocument();
-  });
-
-  it("typing a squad by hand puts it on the preview for a free-typed matchup", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    await user.type(
-      screen.getByPlaceholderText(/KCVV Elewijt/i),
-      "KCVV Elewijt — Rapid Leest",
-    );
-    await user.type(screen.getByPlaceholderText("A"), "U21");
-
-    expect(screen.getByText("U21")).toBeInTheDocument();
-  });
-
-  it("the Ploeg value survives a template switch (unlike Minuut / Speler / Resultaat)", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    await user.type(screen.getByPlaceholderText("A"), "U15");
-    await user.click(screen.getByRole("button", { name: /aftrap/i }));
-
-    expect(screen.getByPlaceholderText("A")).toHaveValue("U15");
-  });
-
-  it("editing the Ploeg field after Genereer clears the generated preview", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    await user.click(screen.getByRole("button", { name: /genereer/i }));
-    expect(screen.getByRole("img", { name: /preview/i })).toBeInTheDocument();
-
-    await user.type(screen.getByPlaceholderText("A"), "A");
-
-    expect(
-      screen.queryByRole("img", { name: /preview/i }),
-    ).not.toBeInTheDocument();
-  });
-
-  it("picking a match by its unique datalist label keeps the rendered matchup club-names-only", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    const matchInput = screen.getByPlaceholderText(/KCVV Elewijt/i);
-    await user.type(matchInput, MATCHES[0]!.label);
-
-    // The suffix-bearing label resolves to the clean club-names-only
-    // matchup — the suffix must never reach the input or the canvas.
-    expect(matchInput).toHaveValue(MATCHES[0]!.matchName);
-    expect((matchInput as HTMLInputElement).value).not.toContain("(");
-    expect(screen.getByPlaceholderText("A")).toHaveValue("A");
-  });
-
-  it("picking the second of two matches that share a matchName badges the second squad, not the first", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={COLLIDING_MATCHES} players={PLAYERS} />);
-
-    const matchInput = screen.getByPlaceholderText(/KCVV Elewijt/i);
-    await user.type(matchInput, COLLIDING_MATCHES[1]!.label);
-
-    expect(matchInput).toHaveValue(COLLIDING_MATCHES[1]!.matchName);
-    expect((matchInput as HTMLInputElement).value).not.toContain("(");
-    expect(screen.getByPlaceholderText("A")).toHaveValue("U15");
-    expect(screen.getByText("U15")).toBeInTheDocument();
-  });
-
-  it("re-clicking the active template keeps it selected without churn", async () => {
-    const user = userEvent.setup();
-    render(<SharePage matches={MATCHES} players={PLAYERS} />);
-
-    // Set a session field, then re-click the already-active template.
-    const scoreInput = screen.getByPlaceholderText(/2 - 0/i);
-    await user.clear(scoreInput);
-    await user.type(scoreInput, "3 - 1");
-
-    const goalKcvvBtn = screen.getByRole("button", { name: /goal kcvv/i });
-    await user.click(goalKcvvBtn);
-
-    expect(goalKcvvBtn).toHaveAttribute("aria-pressed", "true");
-    // The guard returns early, so session fields are untouched.
-    expect(screen.getByPlaceholderText(/2 - 0/i)).toHaveValue("3 - 1");
+    expect(preview().innerHTML).toContain("blob:");
+    await user.click(screen.getByRole("button", { name: "Foto weghalen" }));
+    expect(preview().innerHTML).not.toContain("blob:");
+    expect(screen.queryByRole("button", { name: "Foto weghalen" })).toBeNull();
   });
 
   // ─── News and events in the four new looks (#3540) ─────────────────────
@@ -1102,17 +862,16 @@ describe("SharePage", () => {
           initial={initial}
         />,
       );
-    const preview = () => screen.getByTestId("share-preview");
 
-    it("starts on Wedstrijd and keeps the match form; Nieuws swaps in the article picker and the four looks", async () => {
+    it("starts on Wedstrijd with W in the strip; Nieuws swaps in the article picker and the four looks", async () => {
       const user = userEvent.setup();
       renderTool();
+      await openTab(user, "Inhoud");
 
       expect(screen.getByRole("button", { name: "Wedstrijd" })).toHaveAttribute(
         "aria-pressed",
         "true",
       );
-      expect(screen.getByRole("button", { name: /goal kcvv/i })).toBeVisible();
       expect(screen.getByRole("button", { name: "Kaart" })).toHaveAttribute(
         "aria-pressed",
         "true",
@@ -1126,9 +885,11 @@ describe("SharePage", () => {
       expect(
         screen.queryByRole("button", { name: "W · Wedstrijd" }),
       ).toBeNull();
-
       expect(screen.queryByRole("button", { name: /goal kcvv/i })).toBeNull();
       expect(screen.getByRole("listbox", { name: "Artikels" })).toBeVisible();
+      // Nothing picked yet: no preview, nothing to save.
+      expect(screen.queryByTestId("share-preview")).toBeNull();
+      expect(saveButton()).toBeDisabled();
       for (const look of ["Kaart", "Plakboek", "Affiche", "Ticket"]) {
         expect(screen.getByRole("button", { name: look })).toBeVisible();
       }
@@ -1137,6 +898,7 @@ describe("SharePage", () => {
     it("filters the article list as you type", async () => {
       const user = userEvent.setup();
       renderTool();
+      await openTab(user, "Inhoud");
       await user.click(screen.getByRole("button", { name: "Nieuws" }));
 
       await user.type(screen.getByLabelText("Zoek artikel"), "tekent");
@@ -1151,10 +913,12 @@ describe("SharePage", () => {
     it("picking an article prefills its title and draws its type, detail and italic accent", async () => {
       const user = userEvent.setup();
       renderTool();
+      await openTab(user, "Inhoud");
       await user.click(screen.getByRole("button", { name: "Nieuws" }));
       await user.click(
         screen.getByRole("option", { name: "Jan over zijn eerste seizoen" }),
       );
+      await openTab(user, "Tekst");
 
       expect(screen.getByLabelText("Titel")).toHaveValue(
         "Jan over zijn eerste seizoen",
@@ -1170,6 +934,7 @@ describe("SharePage", () => {
     it("an edited title reaches the preview", async () => {
       const user = userEvent.setup();
       renderTool({ kind: "article", item: TRANSFER });
+      await openTab(user, "Tekst");
 
       const title = screen.getByLabelText("Titel");
       await user.clear(title);
@@ -1180,13 +945,11 @@ describe("SharePage", () => {
       expect(within(preview()).getByText("→ KCVV ELEWIJT")).toBeInTheDocument();
     });
 
-    it("an event shows its type label, the date block and <date · hour> / <location> on two lines", () => {
+    it("an event shows its type label, the date block and <date · hour> / <location> on two lines", async () => {
+      const user = userEvent.setup();
       renderTool({ kind: "event", item: QUIZ });
+      await openTab(user, "Tekst");
 
-      expect(screen.getByRole("button", { name: "Evenement" })).toHaveAttribute(
-        "aria-pressed",
-        "true",
-      );
       expect(screen.getByLabelText("Locatie")).toHaveValue(
         "Kantine Driesstraat",
       );
@@ -1200,7 +963,8 @@ describe("SharePage", () => {
       expect(within(preview()).getByText("25")).toBeInTheDocument();
     });
 
-    it("a deep-linked item preselects even when it is not in the list", () => {
+    it("a deep-linked item preselects its mode, even when it is not in the list", async () => {
+      const user = userEvent.setup();
       const older: ShareItem = {
         ...TRANSFER,
         slug: "oud",
@@ -1208,17 +972,23 @@ describe("SharePage", () => {
         spans: [],
       };
       renderTool({ kind: "article", item: older });
+      await openTab(user, "Inhoud");
 
       expect(screen.getByRole("button", { name: "Nieuws" })).toHaveAttribute(
         "aria-pressed",
         "true",
       );
+      expect(
+        screen.getByRole("option", { name: "Oud nieuws" }),
+      ).toHaveAttribute("aria-selected", "true");
+      await openTab(user, "Tekst");
       expect(screen.getByLabelText("Titel")).toHaveValue("Oud nieuws");
     });
 
-    it("an unknown deep link opens the empty picker with no preview", () => {
+    it("an unknown deep link opens Inhoud on the empty picker with no preview", () => {
       renderTool({ kind: "event", item: null });
 
+      expect(tabButton("Inhoud")).toHaveAttribute("aria-expanded", "true");
       expect(
         screen.getByRole("listbox", { name: "Evenementen" }),
       ).toBeVisible();
@@ -1228,6 +998,7 @@ describe("SharePage", () => {
     it("Omslag starts on Affiche wazig; Foto fills the slot positioned on the hotspot, through the same-origin optimizer", async () => {
       const user = userEvent.setup();
       renderTool({ kind: "article", item: INTERVIEW });
+      await openTab(user, "Inhoud");
 
       expect(
         screen.getByRole("button", { name: "Affiche wazig" }),
@@ -1242,19 +1013,35 @@ describe("SharePage", () => {
       expect(img.style.objectPosition).toBe("30% 20%");
     });
 
-    it("an event without a cover draws the event fallback picture", () => {
+    it("an own photo replaces the cover, and Omslag hides while it is on", async () => {
+      const user = userEvent.setup();
+      renderTool({ kind: "article", item: INTERVIEW });
+      await openTab(user, "Inhoud");
+
+      await user.upload(
+        screen.getByLabelText(/foto uploaden/i),
+        new File(["x"], "me.png", { type: "image/png" }),
+      );
+
+      expect(preview().innerHTML).toContain("blob:");
+      expect(
+        screen.queryByRole("button", { name: "Affiche wazig" }),
+      ).toBeNull();
+      await user.click(screen.getByRole("button", { name: "Foto weghalen" }));
+      expect(
+        screen.getByRole("button", { name: "Affiche wazig" }),
+      ).toBeVisible();
+    });
+
+    it("an event without a cover draws the event fallback picture and has no Omslag", async () => {
+      const user = userEvent.setup();
       renderTool({ kind: "event", item: QUIZ });
+      await openTab(user, "Inhoud");
 
       expect(
         preview().querySelector("img[src='/images/event-fallback.jpg']"),
       ).not.toBeNull();
-    });
-
-    // Omslag only chooses how a cover is shown; without a cover every choice
-    // would draw the same fallback, so the row would be a control that does nothing.
-    it("hides Omslag for an item without a cover", () => {
-      renderTool({ kind: "event", item: QUIZ });
-
+      // Without a cover every choice would draw the same fallback.
       expect(screen.queryByRole("button", { name: "Reservefoto" })).toBeNull();
       expect(
         screen.queryByRole("button", { name: "Affiche wazig" }),
@@ -1264,6 +1051,7 @@ describe("SharePage", () => {
     it("Reservefoto swaps the cover for the look's own fallback picture", async () => {
       const user = userEvent.setup();
       renderTool({ kind: "article", item: INTERVIEW });
+      await openTab(user, "Inhoud");
 
       await user.click(screen.getByRole("button", { name: "Reservefoto" }));
 
@@ -1275,6 +1063,7 @@ describe("SharePage", () => {
     it("Licht / Donker show for every look, the wash steps for Affiche only, defaulting to Licht + Normaal", async () => {
       const user = userEvent.setup();
       renderTool({ kind: "article", item: INTERVIEW });
+      await openTab(user, "Stijl");
 
       expect(screen.getByRole("button", { name: "Licht" })).toHaveAttribute(
         "aria-pressed",
@@ -1295,10 +1084,11 @@ describe("SharePage", () => {
     it("a match story has Licht / Donker in A–E, none in W, and never an Omslag row", async () => {
       const user = userEvent.setup();
       renderTool();
-
-      expect(screen.getByRole("button", { name: "Licht" })).toBeVisible();
+      await openTab(user, "Inhoud");
       expect(screen.queryByRole("button", { name: "Foto" })).toBeNull();
 
+      await openTab(user, "Stijl");
+      expect(screen.getByRole("button", { name: "Licht" })).toBeVisible();
       await user.click(screen.getByRole("button", { name: "Affiche" }));
       expect(screen.getByRole("button", { name: "Normaal" })).toBeVisible();
 
@@ -1312,8 +1102,9 @@ describe("SharePage", () => {
       const user = userEvent.setup();
       renderTool({ kind: "article", item: INTERVIEW });
 
+      await openTab(user, "Stijl");
       await user.click(screen.getByRole("button", { name: /vierkant/i }));
-      await user.click(screen.getByRole("button", { name: /genereer/i }));
+      await save(user);
 
       expect(toPng).toHaveBeenCalledTimes(2);
       expect(toPng).toHaveBeenCalledWith(
@@ -1329,7 +1120,6 @@ describe("SharePage", () => {
 
   describe("match moments and the story session (#3536)", () => {
     const KEY = "kcvv-share-session";
-    const STORED_MATCH = MATCHES[0]!.label;
     const NEWS: ShareItem = {
       kind: "article",
       slug: "nieuws-1",
@@ -1358,33 +1148,20 @@ describe("SharePage", () => {
           articles={[NEWS, OTHER_NEWS]}
         />,
       );
-    const preview = () => screen.getByTestId("share-preview");
     const previewHtml = () => preview().innerHTML;
     const pressed = (name: string) =>
       screen.getByRole("button", { name }).getAttribute("aria-pressed");
-    const save = async (user: ReturnType<typeof userEvent.setup>) => {
-      await user.click(screen.getByRole("button", { name: /genereer/i }));
-      await user.click(screen.getByRole("button", { name: /download png/i }));
-    };
-    const fillMatch = async (user: ReturnType<typeof userEvent.setup>) => {
-      await user.type(
-        screen.getByPlaceholderText(/fc tegenstander/i),
-        STORED_MATCH,
-      );
+    const fillMatch = async (user: User) => {
+      await pickMatch(user, MATCHES[0]!);
+      await openTab(user, "Tekst");
       await user.type(screen.getByPlaceholderText("2 - 0"), "2 - 1");
       await user.type(screen.getByPlaceholderText("45+2"), "67");
     };
-
-    beforeEach(() => {
-      // happy-dom would navigate to the blob URL; the click itself is what counts.
-      vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(
-        () => {},
-      );
-    });
-    afterEach(() => {
-      vi.restoreAllMocks();
-      vi.useRealTimers();
-    });
+    const pickNews = async (user: User, item: ShareItem) => {
+      await openTab(user, "Inhoud");
+      await user.click(screen.getByRole("button", { name: "Nieuws" }));
+      await user.click(screen.getByRole("option", { name: item.title }));
+    };
 
     it("a fresh phone starts a match on A Kaart: the moment's label, minute disc and score, the squad badge, the look's first fallback picture", async () => {
       const user = userEvent.setup();
@@ -1399,7 +1176,7 @@ describe("SharePage", () => {
       expect(p.getByText("A")).toBeInTheDocument();
       expect(previewHtml()).toContain("share-fallback/A-1.webp");
 
-      await user.click(screen.getByRole("button", { name: "Rust" }));
+      await pickMoment(user, "Rust");
       expect(within(preview()).getByText("45'")).toBeInTheDocument();
     });
 
@@ -1414,31 +1191,37 @@ describe("SharePage", () => {
       const user = userEvent.setup();
       const { unmount } = renderTool();
       await fillMatch(user);
+      await openTab(user, "Stijl");
       await user.click(screen.getByRole("button", { name: "Donker" }));
       unmount();
 
       renderTool();
+      await openTab(user, "Tekst");
       expect(screen.getByPlaceholderText(/fc tegenstander/i)).toHaveValue(
         MATCHES[0]!.matchName,
       );
       expect(screen.getByPlaceholderText("2 - 0")).toHaveValue("2 - 1");
       expect(screen.getByPlaceholderText("45+2")).toHaveValue("67");
       expect(screen.getByPlaceholderText("A")).toHaveValue("A");
+      await openTab(user, "Stijl");
       expect(pressed("Donker")).toBe("true");
     });
 
     it("a news story's edited fields come back after a reload; another article clears them", async () => {
       const user = userEvent.setup();
       const { unmount } = renderTool();
-      await user.click(screen.getByRole("button", { name: "Nieuws" }));
-      await user.click(screen.getByRole("option", { name: NEWS.title }));
+      await pickNews(user, NEWS);
+      await openTab(user, "Tekst");
       await user.clear(screen.getByLabelText("Titel"));
       await user.type(screen.getByLabelText("Titel"), "Kantine open!");
       unmount();
 
       renderTool();
+      await openTab(user, "Tekst");
       expect(screen.getByLabelText("Titel")).toHaveValue("Kantine open!");
+      await openTab(user, "Inhoud");
       await user.click(screen.getByRole("option", { name: OTHER_NEWS.title }));
+      await openTab(user, "Tekst");
       expect(screen.getByLabelText("Titel")).toHaveValue("Ander nieuws");
     });
 
@@ -1453,6 +1236,7 @@ describe("SharePage", () => {
 
       vi.setSystemTime(new Date("2026-10-17T22:30:00Z")); // 00:30, next day
       renderTool();
+      await openTab(user, "Tekst");
       expect(screen.getByPlaceholderText(/fc tegenstander/i)).toHaveValue("");
       expect(pressed("Ticket")).toBe("true");
     });
@@ -1461,12 +1245,21 @@ describe("SharePage", () => {
       const user = userEvent.setup();
       renderTool();
       await fillMatch(user);
-      const input = screen.getByPlaceholderText(/fc tegenstander/i);
-      await user.clear(input);
-      await user.type(input, MATCHES[1]!.label);
+      await pickMatch(user, MATCHES[1]!);
+      await openTab(user, "Tekst");
 
       expect(screen.getByPlaceholderText("2 - 0")).toHaveValue("");
       expect(screen.getByPlaceholderText("45+2")).toHaveValue("");
+    });
+
+    it("re-picking the same match after typing over its name keeps its score", async () => {
+      const user = userEvent.setup();
+      renderTool();
+      await fillMatch(user);
+      await user.type(screen.getByPlaceholderText(/fc tegenstander/i), "x");
+      await pickMatch(user, MATCHES[0]!);
+      await openTab(user, "Tekst");
+      expect(screen.getByPlaceholderText("2 - 0")).toHaveValue("2 - 1");
     });
 
     it("a store that throws, or holds junk, still renders a fresh tool", () => {
@@ -1488,6 +1281,7 @@ describe("SharePage", () => {
     it("an own photo is never stored", async () => {
       const user = userEvent.setup();
       renderTool();
+      await openTab(user, "Inhoud");
       await user.upload(
         screen.getByLabelText(/foto uploaden/i),
         new File(["x"], "me.png", { type: "image/png" }),
@@ -1510,8 +1304,7 @@ describe("SharePage", () => {
         expect(pressed(next)).toBe("true");
       }
 
-      await user.click(screen.getByRole("button", { name: "Nieuws" }));
-      await user.click(screen.getByRole("option", { name: NEWS.title }));
+      await pickNews(user, NEWS);
       await user.click(screen.getByRole("button", { name: "Ticket" }));
       await save(user);
       expect(pressed("Kaart")).toBe("true");
@@ -1547,21 +1340,11 @@ describe("SharePage", () => {
       render(
         <SharePage matches={MATCHES} players={PLAYERS} events={[EVENT]} />,
       );
+      await openTab(user, "Inhoud");
       await user.click(screen.getByRole("button", { name: "Evenement" }));
       await user.click(screen.getByRole("option", { name: "Quiz" }));
       await save(user);
       expect(JSON.parse(localStorage.getItem(KEY)!).fallbackNext).toEqual({});
-    });
-
-    it("re-picking the same match after typing keeps its score", async () => {
-      const user = userEvent.setup();
-      renderTool();
-      await fillMatch(user);
-      const input = screen.getByPlaceholderText(/fc tegenstander/i);
-      await user.type(input, "x");
-      await user.clear(input);
-      await user.type(input, STORED_MATCH);
-      expect(screen.getByPlaceholderText("2 - 0")).toHaveValue("2 - 1");
     });
 
     it("a stored fallback index past its set wraps on read; unknown looks are dropped", () => {
@@ -1593,8 +1376,7 @@ describe("SharePage", () => {
       render(
         <SharePage matches={MATCHES} players={PLAYERS} articles={[COVERED]} />,
       );
-      await user.click(screen.getByRole("button", { name: "Nieuws" }));
-      await user.click(screen.getByRole("option", { name: NEWS.title }));
+      await pickNews(user, COVERED);
       await user.click(screen.getByRole("button", { name: "Foto" }));
       await save(user);
       expect(pressed("Affiche wazig")).toBe("true");
@@ -1654,19 +1436,10 @@ describe("SharePage", () => {
         />,
       );
     const block = (id: string) =>
-      screen
-        .getByTestId("share-preview")
-        .querySelector<HTMLElement>(`[data-block="${id}"]`)!;
+      preview().querySelector<HTMLElement>(`[data-block="${id}"]`)!;
     const storedBlocks = () =>
       JSON.parse(localStorage.getItem(KEY)!).story.blocks;
     const EMPTY = { story: {}, square: {} };
-
-    beforeEach(() => {
-      vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(
-        () => {},
-      );
-    });
-    afterEach(() => vi.restoreAllMocks());
 
     it("a stored layout comes back after a reload, as a translate on the block", () => {
       seed();
@@ -1680,6 +1453,7 @@ describe("SharePage", () => {
       seed();
       const user = userEvent.setup();
       renderTool();
+      await openTab(user, "Stijl");
       await user.click(screen.getByRole("button", { name: /vierkant/i }));
       expect(block("tekst").style.transform).toBe("translate(0px, 12px)");
       await user.click(screen.getByRole("button", { name: /story/i }));
@@ -1712,6 +1486,7 @@ describe("SharePage", () => {
       expect(block("w1").textContent).toBe("Eindstand");
       expect(block("w1").style.translate).toBe("40px -80px");
 
+      await openTab(user, "Inhoud");
       await user.upload(
         screen.getByLabelText(/foto uploaden/i),
         new File(["x"], "me.png", { type: "image/png" }),
@@ -1725,7 +1500,7 @@ describe("SharePage", () => {
       seed();
       const user = userEvent.setup();
       renderTool();
-      await user.click(screen.getByRole("button", { name: "Schik" }));
+      await openTab(user, "Schik");
       await user.click(screen.getByRole("button", { name: "Achter" }));
       expect(Number(block("tekst").style.zIndex)).toBeLessThan(20);
       expect(storedBlocks().story.tekst.layer).toBe("achter");
@@ -1736,7 +1511,7 @@ describe("SharePage", () => {
     it("Midden can be switched off", async () => {
       const user = userEvent.setup();
       renderTool();
-      await user.click(screen.getByRole("button", { name: "Schik" }));
+      await openTab(user, "Schik");
       const midden = screen.getByRole("button", { name: "Midden" });
       expect(midden).toHaveAttribute("aria-pressed", "true");
       await user.click(midden);
@@ -1747,7 +1522,7 @@ describe("SharePage", () => {
       seed();
       const user = userEvent.setup();
       renderTool();
-      await user.click(screen.getByRole("button", { name: "Schik" }));
+      await openTab(user, "Schik");
       await user.click(
         screen.getByRole("button", { name: "Alles terugzetten" }),
       );
@@ -1759,8 +1534,7 @@ describe("SharePage", () => {
       seed();
       const user = userEvent.setup();
       renderTool();
-      await user.click(screen.getByRole("button", { name: /genereer/i }));
-      await user.click(screen.getByRole("button", { name: /download png/i }));
+      await save(user);
       expect(storedBlocks()).toEqual(EMPTY);
     });
 
@@ -1772,11 +1546,11 @@ describe("SharePage", () => {
       expect(storedBlocks()).toEqual(EMPTY);
     });
 
-    it("another template clears the layout", async () => {
+    it("another moment clears the layout", async () => {
       seed();
       const user = userEvent.setup();
       renderTool();
-      await user.click(screen.getByRole("button", { name: "Rust" }));
+      await pickMoment(user, "Rust");
       expect(storedBlocks()).toEqual(EMPTY);
     });
 
@@ -1785,18 +1559,19 @@ describe("SharePage", () => {
       const user = userEvent.setup();
       renderTool();
       expect(block("tekst").style.transform).toBe("translate(40px, -80px)");
+      await openTab(user, "Inhoud");
       await user.click(screen.getByRole("option", { name: OTHER_NEWS.title }));
       expect(storedBlocks()).toEqual(EMPTY);
     });
 
-    it("another match clears the layout", async () => {
+    it("another match clears the layout; clearing the name alone does not", async () => {
       seed({ match: { id: MATCHES[0]!.id, name: MATCHES[0]!.matchName } });
       const user = userEvent.setup();
       renderTool();
-      const input = screen.getByPlaceholderText(/fc tegenstander/i);
-      await user.clear(input);
+      await openTab(user, "Tekst");
+      await user.clear(screen.getByPlaceholderText(/fc tegenstander/i));
       expect(storedBlocks().story).toEqual({ tekst: MOVED });
-      await user.type(input, MATCHES[1]!.label);
+      await pickMatch(user, MATCHES[1]!);
       expect(storedBlocks()).toEqual(EMPTY);
     });
 

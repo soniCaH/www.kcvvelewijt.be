@@ -1890,3 +1890,11 @@ html {
   animation-duration: 300ms;
   animation-timing-function: var(--ease-out);
 }
+
+/* /share is a full-screen tool (#3538): its `#share-tool` layer covers the
+   viewport, and the site header and footer leave the page while it is there,
+   so they neither peek out nor reach a screen reader. No other route renders
+   `#share-tool`, so no other route is touched. */
+body:has(#share-tool) > :is(header, footer) {
+  display: none;
+}

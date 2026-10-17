@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -25,11 +26,8 @@ import {
 } from "../constants";
 import { ShareBadgeContext, ShareBlocksContext } from "../shared/ShareFrame";
 import { shortSquadLabel, type ResultMood } from "../shared/theme";
-import { Button } from "@/components/design-system/Button/Button";
 import { EmptyState } from "@/components/design-system/EmptyState";
 import { Input } from "@/components/design-system/Input/Input";
-import { Select } from "@/components/design-system/Select/Select";
-import { PageContainer } from "@/components/design-system/PageContainer";
 import {
   type RedesignIconProps,
   SoccerBall,
@@ -302,10 +300,10 @@ function Choice<T extends string>({
   disabled?: boolean;
 }) {
   return (
-    <section aria-labelledby={id}>
+    <div role="group" aria-labelledby={id}>
       <h2
         id={id}
-        className="text-ink mb-3 font-mono text-sm font-semibold uppercase"
+        className="text-ink mb-2 font-mono text-sm font-semibold uppercase"
       >
         {label}
       </h2>
@@ -327,14 +325,27 @@ function Choice<T extends string>({
           </button>
         ))}
       </div>
-    </section>
+    </div>
   );
 }
 
-const RESULT_MOODS: readonly ResultMood[] = ["win", "draw", "loss"];
-function isResultMood(value: string): value is ResultMood {
-  return (RESULT_MOODS as readonly string[]).includes(value);
-}
+const MOODS: { value: ResultMood; label: string }[] = [
+  { value: "win", label: "Gewonnen" },
+  { value: "draw", label: "Gelijkspel" },
+  { value: "loss", label: "Verloren" },
+];
+const FORMATS: { value: Aspect; label: string }[] = [
+  { value: "story", label: "Story · 9:16" },
+  { value: "square", label: "Vierkant · 1:1" },
+];
+
+/** The bottom tab bar (#3538); `Schik` is drag mode. */
+const TABS = ["Inhoud", "Stijl", "Tekst", "Schik"] as const;
+type Tab = (typeof TABS)[number];
+
+/** Width of a look-strip thumbnail, in screen pixels. */
+const THUMB_WIDTH = 48;
+const NO_LAYOUT: BlockLayout = {};
 
 const FALLBACK_MATCH_NAME = "KCVV Elewijt — FC Tegenstander";
 const FALLBACK_SCORE = "0 - 0";
@@ -544,7 +555,9 @@ function ShareTool({
     null,
   );
   const [generatedBlob, setGeneratedBlob] = useState<Blob | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  // The free space the preview is fitted into (#3538); null until measured.
+  const boxRef = useRef<HTMLDivElement>(null);
+  const [box, setBox] = useState<{ w: number; h: number } | null>(null);
 
   // Every initial value comes from the stored story in progress (#3536).
   const [aspect, setAspect] = useState<Aspect>(saved?.format ?? "story");
@@ -594,6 +607,12 @@ function ShareTool({
     item ? (saved?.fields ?? fieldsOf(item)) : null,
   );
   const [itemSearch, setItemSearch] = useState("");
+  const [matchSearch, setMatchSearch] = useState("");
+  // Nothing to preview yet (a news/event story without its item): start on
+  // the picker.
+  const [tab, setTab] = useState<Tab | null>(() =>
+    mode !== "match" && !item ? "Inhoud" : null,
+  );
   const [look, setLook] = useState<AnyLook>(boot.look);
   const [fallbackNext, setFallbackNext] = useState(boot.fallbackNext);
   const [theme, setTheme] = useState<ShareTheme>(saved?.theme ?? "licht");
@@ -607,7 +626,7 @@ function ShareTool({
 
   // Movable blocks (#3537): one layout per format.
   const [blocks, setBlocks] = useState(saved?.blocks ?? NO_BLOCKS);
-  const [dragMode, setDragMode] = useState(false);
+  const dragMode = tab === "Schik";
   const [snap, setSnap] = useState(true);
   const [snapping, setSnapping] = useState(false);
   // The layout while a finger is down: drawn live, written to the session
@@ -640,7 +659,6 @@ function ShareTool({
       previewUrlRef.current = null;
     }
     setGeneratedBlob(null);
-    setPreviewUrl(null);
     setExportFailure(null);
   }, []);
 
@@ -813,9 +831,9 @@ function ShareTool({
   const filteredItems = query
     ? items.filter((i) => i.title.toLowerCase().includes(query))
     : items;
-  const content = isW
-    ? null
-    : mode === "match"
+  // Built for W too: the look strip draws A–E beside it.
+  const storyContent =
+    mode === "match"
       ? buildMatchContent({
           template: selectedTemplateId,
           matchName: matchName || FALLBACK_MATCH_NAME,
@@ -838,8 +856,18 @@ function ShareTool({
             fields,
           )
         : null;
-  const Look = LOOKS.find((l) => l.id === activeLook)?.Component;
-  const fallbackIndex = isW ? 0 : (fallbackNext[activeLook] ?? 0);
+  // An own photo replaces a news or event cover.
+  const content =
+    storyContent && mode !== "match" && uploadedImageUrl
+      ? {
+          ...storyContent,
+          photo: {
+            src: uploadedImageUrl,
+            source: "own" as const,
+            focal: { x: 0.5, y: 0.5 },
+          },
+        }
+      : storyContent;
 
   // Keep the story in progress in the browser (#3536). The own photo is a
   // `blob:` URL that dies with the tab, so it is never stored.
@@ -915,13 +943,13 @@ function ShareTool({
     const url = previewUrlRef.current;
     previewUrlRef.current = null;
     setGeneratedBlob(null);
-    setPreviewUrl(null);
     if (url) setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
   const handleModeChange = (next: ShareMode) => {
     if (next === mode) return;
     setMode(next);
+    clearUpload();
     setItem(null);
     setBlocks(NO_BLOCKS);
     setFields(null);
@@ -931,7 +959,10 @@ function ShareTool({
   };
 
   const handlePickItem = (picked: ShareItem) => {
-    if (picked.slug !== item?.slug) setBlocks(NO_BLOCKS);
+    if (picked.slug !== item?.slug) {
+      setBlocks(NO_BLOCKS);
+      clearUpload();
+    }
     setItem(picked);
     setFields(fieldsOf(picked));
     setCoverMode("affiche_wazig");
@@ -954,7 +985,7 @@ function ShareTool({
     e.currentTarget.setPointerCapture(e.pointerId);
     const id = el.dataset.block!;
     const at = layout[id] ?? { x: 0, y: 0 };
-    const box = el.getBoundingClientRect();
+    const rect = el.getBoundingClientRect();
     const canvas = node.getBoundingClientRect();
     // Touching a block brings it on top, and Voor / Achter act on it.
     const start = placeBlock(layout, id, at);
@@ -966,7 +997,7 @@ function ShareTool({
       from: { x: at.x, y: at.y },
       cx: e.clientX,
       cy: e.clientY,
-      centre: (box.left + box.width / 2 - canvas.left) / TEMPLATE_SCALE,
+      centre: (rect.left + rect.width / 2 - canvas.left) / scale,
     };
     el.dataset.dragging = "";
     setDragLayout(start);
@@ -980,7 +1011,7 @@ function ShareTool({
       from: d.from,
       dx: e.clientX - d.cx,
       dy: e.clientY - d.cy,
-      scale: TEMPLATE_SCALE,
+      scale,
       centre: d.centre,
       width: captureWidth,
       snap,
@@ -1003,54 +1034,34 @@ function ShareTool({
   const fileName =
     mode === "match"
       ? `kcvv-${selectedTemplateId}.png`
-      : `kcvv-${look}-${item?.slug ?? mode}.png`;
+      : `kcvv-${activeLook}-${item?.slug ?? mode}.png`;
 
   const captureWidth = aspect === "square" ? SQUARE_SIZE : CAPTURE_WIDTH;
   const captureHeight = aspect === "square" ? SQUARE_SIZE : CAPTURE_HEIGHT;
 
-  const handleGenerate = async () => {
-    if (!templateRef.current || isGeneratingRef.current) return;
-    isGeneratingRef.current = true;
-    setIsGenerating(true);
-    setExportFailure(null);
-    clearPreview();
-    // The drag outline belongs to the screen, never to the PNG.
-    templateRef.current
-      .querySelectorAll<HTMLElement>("[data-dragging]")
-      .forEach((el) => delete el.dataset.dragging);
-    try {
-      const opts = {
-        width: captureWidth,
-        height: captureHeight,
-        pixelRatio: 1,
-        // html-to-image's resource cache strips the query string from its key
-        // by default, so every `/_next/image?url=…` collapses onto ONE entry —
-        // the first image captured then gets reused for every later one (the
-        // previous scorer's portrait, an opponent crest blown up fullscreen).
-        includeQueryParams: true,
-      };
-      // ponytail: iOS Safari rasterizes the foreignObject before the nested
-      // data-URL images finish decoding, so the first capture drops them (the
-      // crest comes out white). Throw the warm-up away, keep the second.
-      await toPng(templateRef.current, opts);
-      const dataUrl = await toPng(templateRef.current, opts);
-      const res = await fetch(dataUrl);
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      previewUrlRef.current = url;
-      setGeneratedBlob(blob);
-      setPreviewUrl(url);
-    } catch (err) {
-      // The caught error goes to the console only — the visitor sees the
-      // locked Dutch copy below, never the error's own text (#2818, mirrors
-      // #2580 rule 6).
-      console.error("[SharePage] Failed to generate:", err);
-      setExportFailure("generate");
-    } finally {
-      isGeneratingRef.current = false;
-      setIsGenerating(false);
-    }
-  };
+  // Fit the preview into the space the layout leaves it (#3538); the drag
+  // handlers divide by the same scale, so a finger moves a block 1:1.
+  useLayoutEffect(() => {
+    const el = boxRef.current;
+    if (!el) return;
+    // Measured once before paint, then on every resize (a tab opening, the
+    // look strip hiding, a rotation).
+    if (el.clientWidth > 0) setBox({ w: el.clientWidth, h: el.clientHeight });
+    if (typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(([entry]) => {
+      if (entry)
+        setBox({ w: entry.contentRect.width, h: entry.contentRect.height });
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  // The preview's 2 px border sits outside the canvas, on both sides.
+  const scale = box
+    ? Math.max(
+        0.05,
+        Math.min((box.w - 4) / captureWidth, (box.h - 4) / captureHeight),
+      )
+    : TEMPLATE_SCALE;
 
   const canShareFiles = useMemo(
     () =>
@@ -1062,51 +1073,177 @@ function ShareTool({
     [],
   );
 
-  const handleShare = async () => {
-    if (!generatedBlob) return;
-    // Clear any stale notice from a previous share attempt up front — the
-    // same "clear on entry" `handleGenerate` already does — so a retry that
-    // now succeeds doesn't leave the old failure notice on screen, and a
-    // repeat failure is a real null→"share" state transition (re-announced
-    // to assistive tech) rather than a same-value bailout (#2818 review
-    // finding 1).
-    setExportFailure(null);
-    const file = new File([generatedBlob], fileName, {
-      type: "image/png",
-    });
-    try {
-      await navigator.share({ files: [file] });
-      handleSaved();
-    } catch (err) {
-      if (err instanceof Error && err.name === "AbortError") return;
-      // The caught error goes to the console only — the visitor sees the
-      // locked Dutch copy below, never the error's own text (#2818, mirrors
-      // #2580 rule 6).
-      console.error("[SharePage] Failed to share:", err);
-      setExportFailure("share");
-    }
+  /** The PNG of the story on screen: two captures, the first thrown away. */
+  const capture = async (node: HTMLDivElement): Promise<Blob> => {
+    // The drag outline belongs to the screen, never to the PNG.
+    node
+      .querySelectorAll<HTMLElement>("[data-dragging]")
+      .forEach((el) => delete el.dataset.dragging);
+    const opts = {
+      width: captureWidth,
+      height: captureHeight,
+      pixelRatio: 1,
+      // html-to-image's resource cache strips the query string from its key
+      // by default, so every `/_next/image?url=…` collapses onto ONE entry —
+      // the first image captured then gets reused for every later one (the
+      // previous scorer's portrait, an opponent crest blown up fullscreen).
+      includeQueryParams: true,
+    };
+    // ponytail: iOS Safari rasterizes the foreignObject before the nested
+    // data-URL images finish decoding, so the first capture drops them (the
+    // crest comes out white). Throw the warm-up away, keep the second.
+    await toPng(node, opts);
+    const dataUrl = await toPng(node, opts);
+    const blob = await (await fetch(dataUrl)).blob();
+    previewUrlRef.current = URL.createObjectURL(blob);
+    setGeneratedBlob(blob);
+    return blob;
   };
 
-  const handleDownload = () => {
-    if (!previewUrl) return;
-    const link = document.createElement("a");
-    link.download = fileName;
-    link.href = previewUrl;
-    link.click();
-    handleSaved();
+  /**
+   * Bewaar PNG (#3538): make the PNG and open the share sheet in one tap, or
+   * download it where sharing files is not possible. A PNG whose share was
+   * cancelled or failed is kept until the story changes, so the next tap
+   * reopens the sheet at once (and with a fresh tap, should iOS have let the
+   * first one expire while capturing).
+   */
+  const handleSave = async () => {
+    const node = templateRef.current;
+    if (!node || isGeneratingRef.current) return;
+    isGeneratingRef.current = true;
+    setIsGenerating(true);
+    // Clear any stale notice up front, so a retry that now succeeds leaves
+    // none behind and a repeat failure is announced again (#2818).
+    setExportFailure(null);
+    try {
+      // The caught errors go to the console only — the visitor sees the
+      // locked Dutch copy, never the error's own text (#2818, mirrors #2580
+      // rule 6).
+      const blob =
+        generatedBlob ??
+        (await capture(node).catch((err: unknown) => {
+          console.error("[SharePage] Failed to generate:", err);
+          setExportFailure("generate");
+          return null;
+        }));
+      if (!blob) return;
+      if (!canShareFiles) {
+        const link = document.createElement("a");
+        link.download = fileName;
+        link.href = previewUrlRef.current ?? "";
+        link.click();
+        handleSaved();
+        return;
+      }
+      const file = new File([blob], fileName, { type: "image/png" });
+      const shared = await navigator.share({ files: [file] }).then(
+        () => true,
+        (err: unknown) => {
+          if (!(err instanceof Error && err.name === "AbortError")) {
+            console.error("[SharePage] Failed to share:", err);
+            setExportFailure("share");
+          }
+          return false;
+        },
+      );
+      if (shared) handleSaved();
+    } finally {
+      isGeneratingRef.current = false;
+      setIsGenerating(false);
+    }
   };
 
   const labelClass =
     "font-mono text-sm font-semibold uppercase tracking-wide text-ink";
-  const previewWidth = captureWidth * TEMPLATE_SCALE;
-  const previewHeight = captureHeight * TEMPLATE_SCALE;
+  // `tight`: the tab bar, five buttons across a 320 px phone.
+  const chipClass = (on: boolean, tight = false) =>
+    `flex min-h-12 items-center justify-center rounded-none border-2 font-mono font-semibold ${
+      tight ? "min-w-0 flex-1 px-0.5 text-xs" : "px-3 py-2 text-sm"
+    } uppercase transition-colors duration-300 disabled:opacity-40 ${
+      on
+        ? "border-ink bg-jersey-deep text-cream"
+        : "border-ink/30 text-ink hover:border-ink bg-cream"
+    }`;
+  const optionClass = (on: boolean) =>
+    `flex min-h-11 w-full items-center gap-3 px-4 py-2 text-left font-mono text-sm transition-colors ${
+      on ? "bg-jersey-deep/10 text-jersey-deep" : "text-ink hover:bg-cream-soft"
+    }`;
+  const listClass =
+    "border-ink/30 bg-cream max-h-48 overflow-y-auto rounded-none border-2";
+  const previewWidth = captureWidth * scale;
+  const previewHeight = captureHeight * scale;
+  const hasStory = mode === "match" || content !== null;
+  const matchQuery = matchSearch.trim().toLowerCase();
+  const filteredMatches = matchQuery
+    ? matches.filter((m) => m.label.toLowerCase().includes(matchQuery))
+    : matches;
 
-  return (
-    <PageContainer width="prose" className="flex flex-col gap-6 py-8">
-      <h1 className="font-display text-ink text-4xl font-black">
-        Story Generator
-      </h1>
+  /** One look drawn with this story: the preview and every thumbnail. */
+  const drawLook = (id: AnyLook, blockLayout: BlockLayout | null) => {
+    const look = LOOKS.find((l) => l.id === id);
+    if (look) {
+      return (
+        content && (
+          <look.Component
+            content={content}
+            format={aspect}
+            theme={theme}
+            wash={wash}
+            coverMode={coverMode}
+            blocks={blockLayout ?? NO_LAYOUT}
+            fallbackIndex={fallbackNext[look.id] ?? 0}
+          />
+        )
+      );
+    }
+    return (
+      <ShareBadgeContext.Provider value={shortSquadLabel(squad)}>
+        <ShareBlocksContext.Provider value={blockLayout}>
+          {renderTemplate(selectedTemplateId, {
+            matchName: matchName || FALLBACK_MATCH_NAME,
+            score: score || FALLBACK_SCORE,
+            minute: minute || FALLBACK_MINUTE,
+            player: selectedPlayer,
+            mood,
+            competition: competition.trim() || undefined,
+            dateTime: dateTime.trim() || undefined,
+            // Raw URLs — the templates route remote images through the
+            // same-origin optimizer + sanitize at the <img> sink.
+            homeLogo: selectedMatch?.homeLogo,
+            awayLogo: selectedMatch?.awayLogo,
+            imageUrl: resolvedImageUrl,
+          })}
+        </ShareBlocksContext.Provider>
+      </ShareBadgeContext.Provider>
+    );
+  };
 
+  /** A labelled text field of the Tekst tab. */
+  const field = (
+    id: string,
+    label: string,
+    value: string,
+    set: (value: string) => void,
+    extra: React.ComponentProps<typeof Input> = {},
+  ) => (
+    <div key={id}>
+      <label htmlFor={id} className={`${labelClass} mb-2 block`}>
+        {label}
+      </label>
+      <Input
+        id={id}
+        value={value}
+        onChange={(e) => {
+          set(e.target.value);
+          clearPreview();
+        }}
+        {...extra}
+      />
+    </div>
+  );
+
+  const inhoud = (
+    <>
       <Choice
         id="mode-label"
         label="Soort"
@@ -1115,41 +1252,42 @@ function ShareTool({
         onChange={handleModeChange}
       />
 
-      {/* ── Aspect toggle ───────────────────────────────────────────── */}
-      <section aria-labelledby="aspect-label">
-        <h2 id="aspect-label" className={`${labelClass} mb-3`}>
-          Formaat
-        </h2>
-        <div className="flex gap-2">
-          {(
-            [
-              { value: "story", label: "Story · 9:16" },
-              { value: "square", label: "Vierkant · 1:1" },
-            ] as const
-          ).map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => handleAspectChange(opt.value)}
-              aria-pressed={aspect === opt.value}
-              className={`flex-1 rounded-none border-2 px-4 py-3 font-mono text-sm font-semibold tracking-wide uppercase transition-colors duration-300 ${
-                aspect === opt.value
-                  ? "border-ink bg-jersey-deep text-cream"
-                  : "border-ink/30 text-ink hover:border-ink bg-cream"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {mode === "match" && (
+      {mode === "match" ? (
         <>
-          {/* ── Template Picker ─────────────────────────────────────────── */}
-          <section aria-labelledby="template-picker-label">
-            <h2 id="template-picker-label" className={`${labelClass} mb-3`}>
-              Template
+          {/* Type-to-search, never a bare dropdown: a datalist or a select
+              is a scroll wheel on an iPhone. */}
+          <div>
+            <h2 id="match-label" className={`${labelClass} mb-2`}>
+              Wedstrijd
+            </h2>
+            <Input
+              value={matchSearch}
+              onChange={(e) => setMatchSearch(e.target.value)}
+              placeholder="Zoek op ploeg…"
+              aria-label="Zoek wedstrijd"
+              className="mb-2"
+            />
+            <div className={listClass} role="listbox" aria-label="Wedstrijden">
+              {filteredMatches.map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  role="option"
+                  aria-selected={selectedMatchId === m.id}
+                  // The unique label (it carries the squad suffix) resolves
+                  // back to the clean club-names-only matchup.
+                  onClick={() => handleMatchNameChange(m.label)}
+                  className={optionClass(selectedMatchId === m.id)}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div role="group" aria-labelledby="template-picker-label">
+            <h2 id="template-picker-label" className={`${labelClass} mb-2`}>
+              Moment
             </h2>
             <div className="grid grid-cols-3 gap-2">
               {visibleTemplates.map((t) => (
@@ -1158,7 +1296,7 @@ function ShareTool({
                   type="button"
                   onClick={() => handleTemplateChange(t.id)}
                   aria-pressed={selectedTemplateId === t.id}
-                  className={`flex min-h-[72px] flex-col items-center gap-1 rounded-none border-2 p-3 font-mono text-sm font-semibold transition-colors duration-300 ${
+                  className={`flex min-h-[72px] flex-col items-center gap-1 rounded-none border-2 p-2 font-mono text-sm font-semibold transition-colors duration-300 ${
                     selectedTemplateId === t.id
                       ? "border-ink bg-jersey-deep/10 text-jersey-deep"
                       : "border-ink/30 text-ink hover:border-ink bg-cream"
@@ -1172,389 +1310,11 @@ function ShareTool({
                 </button>
               ))}
             </div>
-          </section>
-
-          {/* ── Match combo-box — always visible ────────────────────────── */}
-          <section aria-labelledby="match-label">
-            <label
-              id="match-label"
-              htmlFor="match-input"
-              className={`${labelClass} mb-2 block`}
-            >
-              Wedstrijd
-            </label>
-            <Input
-              id="match-input"
-              list="match-options"
-              value={matchName}
-              onChange={(e) => handleMatchNameChange(e.target.value)}
-              placeholder={FALLBACK_MATCH_NAME}
-            />
-            <datalist id="match-options">
-              {matches.map((m) => (
-                // value is the unique label (carries the squad suffix, e.g.
-                // "(A-Ploeg)") so two matches sharing a matchName never collide;
-                // handleMatchNameChange resolves it back to the clean matchup.
-                <option key={m.id} value={m.label}>
-                  {m.label}
-                </option>
-              ))}
-            </datalist>
-          </section>
-
-          {/* ── Ploeg — always visible ──────────────────────────────────── */}
-          <section aria-labelledby="squad-label">
-            <label
-              id="squad-label"
-              htmlFor="squad-input"
-              className={`${labelClass} mb-2 block`}
-            >
-              Ploeg
-            </label>
-            <Input
-              id="squad-input"
-              value={squad}
-              onChange={(e) => {
-                setSquad(e.target.value);
-                clearPreview();
-              }}
-              placeholder="A"
-              // The badge has no auto-fit (locked design — see #2700); the
-              // longest real label is 4 chars ("U13A"), so 6 leaves it room to
-              // spare while still bounding the canvas-width overflow risk.
-              maxLength={6}
-            />
-          </section>
-
-          {/* ── Score ───────────────────────────────────────────────────── */}
-          {currentTemplate.requiresScore && (
-            <section aria-labelledby="score-label">
-              <label
-                id="score-label"
-                htmlFor="score-input"
-                className={`${labelClass} mb-2 block`}
-              >
-                Score
-              </label>
-              <Input
-                id="score-input"
-                value={score}
-                onChange={(e) => {
-                  setScore(e.target.value);
-                  clearPreview();
-                }}
-                placeholder="2 - 0"
-              />
-            </section>
-          )}
-
-          {/* ── Minute ──────────────────────────────────────────────────── */}
-          {currentTemplate.requiresMinute && (
-            <section aria-labelledby="minute-label">
-              <label
-                id="minute-label"
-                htmlFor="minute-input"
-                className={`${labelClass} mb-2 block`}
-              >
-                Minuut
-              </label>
-              <Input
-                id="minute-input"
-                value={minute}
-                onChange={(e) => {
-                  setMinute(e.target.value);
-                  clearPreview();
-                }}
-                placeholder="45+2"
-              />
-            </section>
-          )}
-
-          {/* ── Competition ─────────────────────────────────────────────── */}
-          {currentTemplate.requiresCompetition && (
-            <section aria-labelledby="competition-label">
-              <label
-                id="competition-label"
-                htmlFor="competition-input"
-                className={`${labelClass} mb-2 block`}
-              >
-                Competitie
-              </label>
-              <Input
-                id="competition-input"
-                value={competition}
-                onChange={(e) => {
-                  setCompetition(e.target.value);
-                  clearPreview();
-                }}
-                placeholder="2e Provinciale"
-              />
-            </section>
-          )}
-
-          {/* ── Date / time ─────────────────────────────────────────────── */}
-          {currentTemplate.requiresDateTime && (
-            <section aria-labelledby="datetime-label">
-              <label
-                id="datetime-label"
-                htmlFor="datetime-input"
-                className={`${labelClass} mb-2 block`}
-              >
-                Datum &amp; uur
-              </label>
-              <Input
-                id="datetime-input"
-                value={dateTime}
-                onChange={(e) => {
-                  setDateTime(e.target.value);
-                  clearPreview();
-                }}
-                placeholder="Zaterdag · 20:00"
-              />
-            </section>
-          )}
-
-          {/* ── Player search ───────────────────────────────────────────── */}
-          {currentTemplate.requiresPlayer && (
-            <section aria-labelledby="player-label">
-              <h2 id="player-label" className={`${labelClass} mb-2`}>
-                Speler
-              </h2>
-              <Input
-                id="player-search-input"
-                value={playerSearch}
-                onChange={(e) => setPlayerSearch(e.target.value)}
-                placeholder="Zoek op naam…"
-                aria-label="Zoek speler"
-                className="mb-2"
-              />
-              <div
-                className="border-ink/30 max-h-48 overflow-y-auto rounded-none border-2"
-                role="listbox"
-                aria-label="Spelers"
-              >
-                {filteredPlayers.map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    role="option"
-                    aria-selected={selectedPlayerId === p.id}
-                    onClick={() => {
-                      setSelectedPlayerId(p.id);
-                      clearPreview();
-                    }}
-                    className={`flex w-full items-center gap-3 px-4 py-2 text-left font-mono text-sm transition-colors ${
-                      selectedPlayerId === p.id
-                        ? "bg-jersey-deep/10 text-jersey-deep"
-                        : "text-ink hover:bg-cream-soft"
-                    }`}
-                  >
-                    <span className="min-w-[2rem] text-center text-lg font-bold">
-                      {p.number ?? "—"}
-                    </span>
-                    <span>
-                      {p.lastName} {p.firstName}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* ── Mood ────────────────────────────────────────────────────── */}
-          {currentTemplate.requiresMood && (
-            <section aria-labelledby="mood-label">
-              <label
-                id="mood-label"
-                htmlFor="mood-select"
-                className={`${labelClass} mb-2 block`}
-              >
-                Resultaat
-              </label>
-              <Select
-                id="mood-select"
-                value={mood}
-                onChange={(e) => {
-                  if (isResultMood(e.target.value)) setMood(e.target.value);
-                  clearPreview();
-                }}
-                aria-labelledby="mood-label"
-              >
-                <option value="win">Gewonnen</option>
-                <option value="draw">Gelijkspel</option>
-                <option value="loss">Verloren</option>
-              </Select>
-            </section>
-          )}
-
-          {/* ── Photo upload — image-capable templates, every one in A–E ─── */}
-          {photoCapable && (
-            <section aria-labelledby="photo-label">
-              <label
-                id="photo-label"
-                htmlFor="photo-input"
-                className={`${labelClass} mb-2 block`}
-              >
-                Foto (optioneel)
-              </label>
-              {/* No `capture` attr → iOS/Android surface Photo Library / Camera / Files */}
-              <input
-                id="photo-input"
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                aria-label="Foto uploaden"
-                className="text-ink file:border-ink file:bg-cream file:text-ink block w-full font-mono text-sm file:mr-4 file:rounded-none file:border-2 file:px-4 file:py-2 file:font-semibold"
-              />
-              {uploadedImageUrl && (
-                <button
-                  type="button"
-                  onClick={clearUpload}
-                  className="text-card-red mt-2 font-mono text-sm underline"
-                >
-                  Foto verwijderen
-                </button>
-              )}
-            </section>
-          )}
+          </div>
         </>
-      )}
-
-      {/* ── Look, theme, wash (#3535) ───────────────────────────────── */}
-      <section aria-labelledby="look-label">
-        <h2 id="look-label" className={`${labelClass} mb-3`}>
-          Look
-        </h2>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-          {fittingLooks.map((l) => (
-            <button
-              key={l.id}
-              type="button"
-              onClick={() => {
-                if (l.id !== activeLook) setBlocks(NO_BLOCKS);
-                setLook(l.id);
-                clearPreview();
-              }}
-              aria-pressed={activeLook === l.id}
-              className={`rounded-none border-2 px-3 py-3 font-mono text-sm font-semibold uppercase transition-colors duration-300 ${
-                activeLook === l.id
-                  ? "border-ink bg-jersey-deep text-cream"
-                  : "border-ink/30 text-ink hover:border-ink bg-cream"
-              }`}
-            >
-              {l.name}
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {/* W keeps its own dark wash per moment: no theme or wash to choose. */}
-      {!isW && (
-        <Choice
-          id="theme-label"
-          label="Thema"
-          options={THEMES}
-          value={theme}
-          onChange={(next) => {
-            setTheme(next);
-            clearPreview();
-          }}
-        />
-      )}
-
-      {activeLook === "affiche" && (
-        <Choice
-          id="wash-label"
-          label="Waas"
-          options={WASH_STEPS}
-          value={wash}
-          onChange={(next) => {
-            setWash(next);
-            clearPreview();
-          }}
-        />
-      )}
-
-      {/* ── Schik: drag the text blocks (#3537) ───────────────────────── */}
-      <section aria-labelledby="arrange-label" className="flex flex-col gap-4">
-        <h2 id="arrange-label" className={labelClass}>
-          Blokken
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          {[
-            {
-              label: "Schik",
-              on: dragMode,
-              toggle: () => setDragMode(!dragMode),
-            },
-            ...(dragMode
-              ? [{ label: "Midden", on: snap, toggle: () => setSnap(!snap) }]
-              : []),
-          ].map((b) => (
-            <button
-              key={b.label}
-              type="button"
-              onClick={b.toggle}
-              aria-pressed={b.on}
-              className={`flex-1 basis-[6.5rem] rounded-none border-2 px-3 py-3 font-mono text-sm font-semibold uppercase transition-colors duration-300 ${
-                b.on
-                  ? "border-ink bg-jersey-deep text-cream"
-                  : "border-ink/30 text-ink hover:border-ink bg-cream"
-              }`}
-            >
-              {b.label}
-            </button>
-          ))}
-        </div>
-        {dragMode && (
-          <>
-            <p className="text-ink font-mono text-sm">
-              Sleep een tekstblok in de preview.
-            </p>
-            <Choice
-              id="layer-label"
-              label="Laatst verschoven blok"
-              options={LAYERS}
-              value={topBlock ? layout[topBlock]!.layer : "voor"}
-              disabled={!topBlock}
-              onChange={(layer) =>
-                topBlock &&
-                setLayout((prev) => ({
-                  ...prev,
-                  [topBlock]: { ...prev[topBlock]!, layer },
-                }))
-              }
-            />
-            <Button
-              variant="secondary"
-              onClick={() => setLayout(() => ({}))}
-              disabled={!topBlock}
-            >
-              Alles terugzetten
-            </Button>
-          </>
-        )}
-      </section>
-
-      {/* ── News / event story (#3540) ───────────────────────────────── */}
-      {mode !== "match" && (
+      ) : (
         <>
-          {/* Omslag only chooses how a cover is shown: an item without one
-              already fills its slot with the fallback picture. */}
-          {item?.cover && (
-            <Choice
-              id="cover-label"
-              label="Omslag"
-              options={COVER_MODES}
-              value={coverMode}
-              onChange={(next) => {
-                setCoverMode(next);
-                clearPreview();
-              }}
-            />
-          )}
-
-          <section aria-labelledby="item-label">
+          <div>
             <h2 id="item-label" className={`${labelClass} mb-2`}>
               {mode === "article" ? "Artikel" : "Evenement"}
             </h2>
@@ -1568,7 +1328,7 @@ function ShareTool({
               className="mb-2"
             />
             <div
-              className="border-ink/30 max-h-48 overflow-y-auto rounded-none border-2"
+              className={listClass}
               role="listbox"
               aria-label={mode === "article" ? "Artikels" : "Evenementen"}
             >
@@ -1579,131 +1339,314 @@ function ShareTool({
                   role="option"
                   aria-selected={item?.slug === i.slug}
                   onClick={() => handlePickItem(i)}
-                  className={`flex w-full px-4 py-2 text-left font-mono text-sm transition-colors ${
-                    item?.slug === i.slug
-                      ? "bg-jersey-deep/10 text-jersey-deep"
-                      : "text-ink hover:bg-cream-soft"
-                  }`}
+                  className={optionClass(item?.slug === i.slug)}
                 >
                   {i.title}
                 </button>
               ))}
             </div>
-          </section>
+          </div>
 
-          {fields &&
-            (
-              [
-                { key: "title", label: "Titel" },
-                { key: "date", label: "Datum" },
-                { key: "time", label: "Uur" },
-                { key: "location", label: "Locatie" },
-              ] as const
-            ).map((f) => (
-              <section key={f.key}>
-                <label
-                  htmlFor={`share-${f.key}`}
-                  className={`${labelClass} mb-2 block`}
-                >
-                  {f.label}
-                </label>
-                <Input
-                  id={`share-${f.key}`}
-                  value={fields[f.key]}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setFields((prev) => prev && { ...prev, [f.key]: value });
-                    clearPreview();
-                  }}
-                />
-              </section>
-            ))}
+          {/* Omslag only chooses how a cover is shown: an item without one
+              already fills its slot with the fallback picture, and an own
+              photo replaces the cover. */}
+          {item?.cover && !uploadedImageUrl && (
+            <Choice
+              id="cover-label"
+              label="Omslag"
+              options={COVER_MODES}
+              value={coverMode}
+              onChange={(next) => {
+                setCoverMode(next);
+                clearPreview();
+              }}
+            />
+          )}
         </>
       )}
 
-      {/* ── Template preview ─────────────────────────────────────────── */}
-      {/* aria-hidden: the live template is a visual artifact (it owns its own
-          <h1>/crest alts); the generated PNG <img> below is the a11y surface. */}
-      {(mode === "match" || content) && (
-        <>
-          <div
-            aria-hidden="true"
-            data-testid="share-preview"
-            style={{
-              width: `${previewWidth}px`,
-              height: `${previewHeight}px`,
-              overflow: "hidden",
-              position: "relative",
-            }}
-            className={`border-ink self-center border-2 ${dragMode ? DRAG_CLASSES : ""}`}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={endDrag}
-            onPointerCancel={endDrag}
-            onLostPointerCapture={endDrag}
-            onDragStart={(e) => e.preventDefault()}
-          >
-            <div
-              style={{
-                transform: `scale(${TEMPLATE_SCALE})`,
-                transformOrigin: "top left",
-              }}
+      {/* Own photo — every template in A–E, the image-capable ones in W. */}
+      {photoCapable && (
+        <div className="flex gap-2">
+          <label className={`${chipClass(false)} flex-1 cursor-pointer`}>
+            {uploadedImageUrl ? "Andere foto…" : "Eigen foto…"}
+            {/* No `capture` attr → iOS/Android surface Photo Library / Camera / Files */}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              aria-label="Foto uploaden"
+              className="sr-only"
+            />
+          </label>
+          {uploadedImageUrl && (
+            <button
+              type="button"
+              onClick={clearUpload}
+              className={`${chipClass(false)} flex-1`}
             >
-              <div ref={templateRef}>
-                {content && Look ? (
-                  <Look
-                    content={content}
-                    format={aspect}
-                    theme={theme}
-                    wash={wash}
-                    coverMode={coverMode}
-                    blocks={layout}
-                    fallbackIndex={fallbackIndex}
+              Foto weghalen
+            </button>
+          )}
+        </div>
+      )}
+    </>
+  );
+
+  const stijl = (
+    <>
+      {/* W keeps its own dark wash per moment: no theme or wash to choose. */}
+      {!isW && (
+        <Choice
+          id="theme-label"
+          label="Thema"
+          options={THEMES}
+          value={theme}
+          onChange={(next) => {
+            setTheme(next);
+            clearPreview();
+          }}
+        />
+      )}
+      {activeLook === "affiche" && (
+        <Choice
+          id="wash-label"
+          label="Waas"
+          options={WASH_STEPS}
+          value={wash}
+          onChange={(next) => {
+            setWash(next);
+            clearPreview();
+          }}
+        />
+      )}
+      <Choice
+        id="aspect-label"
+        label="Formaat"
+        options={FORMATS}
+        value={aspect}
+        onChange={handleAspectChange}
+      />
+    </>
+  );
+
+  const tekst =
+    mode === "match" ? (
+      <>
+        <div>
+          <label htmlFor="match-input" className={`${labelClass} mb-2 block`}>
+            Wedstrijd
+          </label>
+          {/* Typing a list label here still resolves to its match. */}
+          <Input
+            id="match-input"
+            value={matchName}
+            onChange={(e) => handleMatchNameChange(e.target.value)}
+            placeholder={FALLBACK_MATCH_NAME}
+          />
+        </div>
+        {field("squad-input", "Ploeg", squad, setSquad, {
+          placeholder: "A",
+          // The badge has no auto-fit (locked design — see #2700); the
+          // longest real label is 4 chars ("U13A"), so 6 leaves it room to
+          // spare while still bounding the canvas-width overflow risk.
+          maxLength: 6,
+        })}
+        {currentTemplate.requiresScore &&
+          field("score-input", "Stand", score, setScore, {
+            placeholder: "2 - 0",
+          })}
+        {currentTemplate.requiresMinute &&
+          field("minute-input", "Minuut", minute, setMinute, {
+            placeholder: "45+2",
+          })}
+        {currentTemplate.requiresCompetition &&
+          field(
+            "competition-input",
+            "Competitie",
+            competition,
+            setCompetition,
+            {
+              placeholder: "2e Provinciale",
+            },
+          )}
+        {currentTemplate.requiresDateTime &&
+          field("datetime-input", "Datum & uur", dateTime, setDateTime, {
+            placeholder: "Zaterdag · 20:00",
+          })}
+        {currentTemplate.requiresPlayer && (
+          <div>
+            <h2 id="player-label" className={`${labelClass} mb-2`}>
+              Speler
+            </h2>
+            <Input
+              id="player-search-input"
+              value={playerSearch}
+              onChange={(e) => setPlayerSearch(e.target.value)}
+              placeholder="Zoek op naam…"
+              aria-label="Zoek speler"
+              className="mb-2"
+            />
+            <div className={listClass} role="listbox" aria-label="Spelers">
+              {filteredPlayers.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  role="option"
+                  aria-selected={selectedPlayerId === p.id}
+                  onClick={() => {
+                    setSelectedPlayerId(p.id);
+                    clearPreview();
+                  }}
+                  className={optionClass(selectedPlayerId === p.id)}
+                >
+                  <span className="min-w-[2rem] text-center text-lg font-bold">
+                    {p.number ?? "—"}
+                  </span>
+                  <span>
+                    {p.lastName} {p.firstName}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        {currentTemplate.requiresMood && (
+          <Choice
+            id="mood-label"
+            label="Stemming"
+            options={MOODS}
+            value={mood}
+            onChange={(next) => {
+              setMood(next);
+              clearPreview();
+            }}
+          />
+        )}
+      </>
+    ) : (
+      fields &&
+      (
+        [
+          { key: "title", label: "Titel" },
+          { key: "date", label: "Datum" },
+          { key: "time", label: "Uur" },
+          { key: "location", label: "Locatie" },
+        ] as const
+      ).map((f) =>
+        field(`share-${f.key}`, f.label, fields[f.key], (value) =>
+          setFields((prev) => prev && { ...prev, [f.key]: value }),
+        ),
+      )
+    );
+
+  const schik = (
+    <>
+      <p className="text-ink font-mono text-sm">
+        Sleep een tekstblok in de preview.
+      </p>
+      <Choice
+        id="layer-label"
+        label="Laatst verschoven blok"
+        options={LAYERS}
+        value={topBlock ? layout[topBlock]!.layer : "voor"}
+        disabled={!topBlock}
+        onChange={(layer) =>
+          topBlock &&
+          setLayout((prev) => ({
+            ...prev,
+            [topBlock]: { ...prev[topBlock]!, layer },
+          }))
+        }
+      />
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => setSnap(!snap)}
+          aria-pressed={snap}
+          className={`${chipClass(snap)} flex-1`}
+        >
+          Midden
+        </button>
+        <button
+          type="button"
+          onClick={() => setLayout(() => ({}))}
+          disabled={!topBlock}
+          className={`${chipClass(false)} flex-1`}
+        >
+          Alles terugzetten
+        </button>
+      </div>
+    </>
+  );
+
+  return (
+    // A full-screen layer over the site chrome (#3538): at the pitch the tool
+    // is the whole screen. globals.css hides the site header and footer
+    // while `#share-tool` is on the page.
+    <div
+      id="share-tool"
+      className="bg-cream text-ink fixed inset-0 z-[55] flex flex-col"
+    >
+      <div className="mx-auto flex min-h-0 w-full max-w-xl flex-1 flex-col">
+        <div className="flex min-h-0 flex-1 flex-col px-4 pt-3 pb-2">
+          <div
+            ref={boxRef}
+            className="flex min-h-0 flex-1 items-center justify-center overflow-hidden"
+          >
+            {/* aria-hidden: the live template is a visual artifact (it owns
+                its own <h1>/crest alts). */}
+            {hasStory ? (
+              <div
+                aria-hidden="true"
+                data-testid="share-preview"
+                style={{
+                  width: `${previewWidth}px`,
+                  height: `${previewHeight}px`,
+                  overflow: "hidden",
+                  position: "relative",
+                  flex: "none",
+                }}
+                className={`border-ink box-content border-2 ${dragMode ? DRAG_CLASSES : ""}`}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={endDrag}
+                onPointerCancel={endDrag}
+                onLostPointerCapture={endDrag}
+                onDragStart={(e) => e.preventDefault()}
+              >
+                <div
+                  style={{
+                    transform: `scale(${scale})`,
+                    transformOrigin: "top left",
+                  }}
+                >
+                  <div ref={templateRef}>{drawLook(activeLook, layout)}</div>
+                </div>
+                {/* Outside the captured node: the centre guide never reaches the PNG. */}
+                {snapping && (
+                  <div
+                    className="bg-card-red absolute inset-y-0 w-px"
+                    // The canvas centre, measured from the padding edge.
+                    style={{ left: previewWidth / 2 - 0.5 }}
                   />
-                ) : (
-                  <ShareBadgeContext.Provider value={shortSquadLabel(squad)}>
-                    <ShareBlocksContext.Provider value={layout}>
-                      {renderTemplate(selectedTemplateId, {
-                        matchName: matchName || FALLBACK_MATCH_NAME,
-                        score: score || FALLBACK_SCORE,
-                        minute: minute || FALLBACK_MINUTE,
-                        player: selectedPlayer,
-                        mood,
-                        competition: competition.trim() || undefined,
-                        dateTime: dateTime.trim() || undefined,
-                        // Raw URLs — the templates route remote images through the
-                        // same-origin optimizer + sanitize at the <img> sink.
-                        homeLogo: selectedMatch?.homeLogo,
-                        awayLogo: selectedMatch?.awayLogo,
-                        imageUrl: resolvedImageUrl,
-                      })}
-                    </ShareBlocksContext.Provider>
-                  </ShareBadgeContext.Provider>
                 )}
               </div>
-            </div>
-            {/* Outside the captured node: the centre guide never reaches the PNG. */}
-            {snapping && (
-              <div
-                className="bg-card-red absolute inset-y-0 w-px"
-                // The canvas centre, measured from the padding edge (the
-                // border-2 box is narrower than the canvas, so not 50%).
-                style={{ left: previewWidth / 2 - 0.5 }}
-              />
+            ) : (
+              <p className="font-mono text-sm">
+                Kies een {mode === "article" ? "artikel" : "evenement"} in
+                Inhoud.
+              </p>
             )}
           </div>
+        </div>
 
-          {/* Tier 2, no action (#2818, mirrors #2580 rule 4): the Genereer/Delen
-          button below already survives this failure and is its own retry,
-          so a second control here would be redundant. True by construction,
-          not just by luck: Genereer is unconditional, and a "share" failure
-          only exists while `generatedBlob` is still set (`handleShare`
-          early-returns without one, and `clearPreview` nulls the failure in
-          the same call it nulls the blob) — so whenever this notice can
-          read `exportFailure === "share"`, the Delen/Download button is
-          still on screen too. Replaces the retired
-          `<p role="alert" className="text-card-red">` idiom. */}
-          {exportFailure && (
+        {/* Tier 2, no action (#2818, mirrors #2580 rule 4): Bewaar PNG
+            survives this failure and is its own retry, so a second control
+            here would be redundant. `clearPreview` nulls the failure on any
+            change, so the notice never outlives the story it describes. */}
+        {exportFailure && (
+          <div className="px-4 pb-2">
             <EmptyState
               tier="slot"
               reason="unavailable"
@@ -1712,33 +1655,96 @@ function ShareTool({
             >
               {EXPORT_FAILURE_COPY[exportFailure]}
             </EmptyState>
-          )}
+          </div>
+        )}
 
-          <Button onClick={handleGenerate} disabled={isGenerating} size="lg">
-            {isGenerating ? "Genereren…" : "Genereer"}
-          </Button>
+        {tab && (
+          <div
+            id="share-panel"
+            role="region"
+            aria-label={tab}
+            className="border-ink bg-cream-soft flex max-h-[44dvh] flex-col gap-4 overflow-y-auto border-t-2 p-4"
+          >
+            {tab === "Inhoud" && inhoud}
+            {tab === "Stijl" && stijl}
+            {tab === "Tekst" && tekst}
+            {tab === "Schik" && schik}
+          </div>
+        )}
 
-          {previewUrl && (
-            <>
-              <img
-                src={previewUrl}
-                alt="Gegenereerde preview"
-                className="border-ink self-center border-2"
-              />
+        {/* Drag mode gives the strip's room back to the preview; unmounted,
+            not hidden, so its thumbnails cost nothing while dragging. */}
+        {tab !== "Schik" && (
+          <div
+            role="group"
+            aria-label="Look"
+            className="border-paper-edge flex [scrollbar-width:none] gap-2 overflow-x-auto border-t px-2 pt-2"
+          >
+            {fittingLooks.map((l) => (
+              <button
+                key={l.id}
+                type="button"
+                onClick={() => {
+                  if (l.id !== activeLook) setBlocks(NO_BLOCKS);
+                  setLook(l.id);
+                  clearPreview();
+                }}
+                aria-pressed={activeLook === l.id}
+                className={`flex flex-none flex-col items-center gap-1 border-[3px] p-0.5 ${
+                  activeLook === l.id
+                    ? "border-jersey-deep"
+                    : "border-transparent"
+                }`}
+              >
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none overflow-hidden"
+                  style={{
+                    width: THUMB_WIDTH,
+                    height: (captureHeight * THUMB_WIDTH) / captureWidth,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: captureWidth,
+                      transform: `scale(${THUMB_WIDTH / captureWidth})`,
+                      transformOrigin: "top left",
+                    }}
+                  >
+                    {drawLook(l.id, l.id === activeLook ? layout : null)}
+                  </div>
+                </div>
+                <span className="font-mono text-xs font-semibold whitespace-nowrap uppercase">
+                  {l.name}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
 
-              {canShareFiles ? (
-                <Button onClick={handleShare} size="lg">
-                  Delen
-                </Button>
-              ) : (
-                <Button onClick={handleDownload} size="lg">
-                  Download PNG
-                </Button>
-              )}
-            </>
-          )}
-        </>
-      )}
-    </PageContainer>
+        <div className="flex gap-1.5 px-2 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+          {TABS.map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => setTab(tab === t ? null : t)}
+              aria-expanded={tab === t}
+              aria-controls={tab === t ? "share-panel" : undefined}
+              className={chipClass(tab === t, true)}
+            >
+              {t}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={isGenerating || !hasStory}
+            className="bg-jersey-deep border-jersey-deep text-cream flex min-h-12 min-w-0 flex-[1.6] items-center justify-center rounded-none border-2 px-2 font-mono text-sm font-bold uppercase disabled:opacity-40"
+          >
+            {isGenerating ? "Bezig…" : "Bewaar PNG"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
