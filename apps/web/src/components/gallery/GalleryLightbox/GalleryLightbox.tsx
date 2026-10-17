@@ -15,7 +15,7 @@ const GalleryViewer = lazy(() =>
   loadViewer().catch(() => ({ default: () => <></> })),
 );
 // A hover/focus warm-up that fails (deploy skew, flaky network) must not be an
-// unhandled rejection; the click's own `lazy()` load surfaces a real failure.
+// unhandled rejection; the click's own `lazy()` load handles a real failure.
 const preloadViewer = () => {
   loadViewer().catch(() => {});
 };
