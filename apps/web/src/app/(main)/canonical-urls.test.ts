@@ -208,9 +208,9 @@ describe("Static listing canonicals (#2228)", () => {
     );
   });
 
-  it("/nieuws canonicalizes to /nieuws for every ?categorie view", async () => {
-    // `generateMetadata` takes no `searchParams` (#3483): one canonical for all.
-    expect(nieuwsIndex.generateMetadata()).toHaveProperty(
+  it("/nieuws canonicalizes to /nieuws for every ?categorie view", () => {
+    // Static `metadata` (#3483): one canonical for all query strings.
+    expect(nieuwsIndex.metadata).toHaveProperty(
       "alternates.canonical",
       `${SITE_CONFIG.siteUrl}/nieuws`,
     );

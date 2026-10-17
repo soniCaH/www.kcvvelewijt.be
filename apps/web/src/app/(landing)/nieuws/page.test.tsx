@@ -42,7 +42,7 @@ vi.mock("./actions", () => ({
   ),
 }));
 
-import NewsPage, { generateMetadata } from "./page";
+import NewsPage, { metadata } from "./page";
 
 describe("/nieuws degrades on a failed tag-list read (#2863)", () => {
   beforeEach(() => {
@@ -62,14 +62,13 @@ describe("/nieuws degrades on a failed tag-list read (#2863)", () => {
 });
 
 describe("/nieuws metadata ignores ?categorie (#3483)", () => {
-  // `generateMetadata` takes no `searchParams`, so whatever `?categorie=` says
-  // can never reach <title> or the description (it used to be echoed into both).
-  it("is the default Nieuwsarchief title and description", () => {
-    expect(generateMetadata.length).toBe(0);
-    const metadata = generateMetadata();
+  // Static `metadata`, not `generateMetadata`: nothing in the query string can
+  // reach <title> or the description (it used to be echoed into both).
+  it("is the default Nieuwsarchief title, description and canonical", () => {
     expect(metadata.title).toBe("Nieuwsarchief");
     expect(metadata.description).toBe(
       "Bekijk al het nieuws van KCVV Elewijt. Filter op categorie of zoek naar specifieke artikelen.",
     );
+    expect(metadata.alternates?.canonical).toMatch(/\/nieuws$/);
   });
 });

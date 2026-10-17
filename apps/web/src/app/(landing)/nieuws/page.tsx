@@ -35,14 +35,12 @@ interface NewsPageProps {
 // the title or description would make any string indexable page copy (#3483).
 // Every ?categorie view canonicalizes to the unfiltered /nieuws listing so the
 // filtered permutations don't compete as duplicate URLs (SEO-3).
-export function generateMetadata(): Metadata {
-  return buildPageMetadata({
-    title: "Nieuwsarchief",
-    description:
-      "Bekijk al het nieuws van KCVV Elewijt. Filter op categorie of zoek naar specifieke artikelen.",
-    path: "/nieuws",
-  });
-}
+export const metadata: Metadata = buildPageMetadata({
+  title: "Nieuwsarchief",
+  description:
+    "Bekijk al het nieuws van KCVV Elewijt. Filter op categorie of zoek naar specifieke artikelen.",
+  path: "/nieuws",
+});
 
 export default async function NewsPage({ searchParams }: NewsPageProps) {
   const params = await searchParams;
