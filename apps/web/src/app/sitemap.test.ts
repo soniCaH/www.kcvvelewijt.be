@@ -46,7 +46,7 @@ vi.mock("@sanity/client", () => ({
 }));
 
 /** `sitemap()` issues exactly one Sanity query per `fetchFromSanity` call. */
-const SANITY_QUERY_COUNT = 6;
+const SANITY_QUERY_COUNT = 7;
 
 describe("sitemap.ts", () => {
   beforeEach(() => {
@@ -152,6 +152,50 @@ describe("sitemap.ts", () => {
     );
     expect(articleEntries[0].changeFrequency).toBe("monthly");
     expect(articleEntries[0].priority).toBe(0.7);
+  });
+
+  describe("CMS pages at /club/<slug> (#3483)", () => {
+    const clubUrl = (slug: string) => `https://www.kcvvelewijt.be/club/${slug}`;
+
+    /** Answers the `page` query with the given rows and every other query with []. */
+    function stubPages(...rows: Array<{ slug: string; updatedAt: string }>) {
+      mockFetch.mockImplementation(async (query: string) =>
+        query.includes('_type == "page"') ? rows : [],
+      );
+    }
+
+    it("emits every Sanity page document as /club/<slug>, with its own lastmod", async () => {
+      stubPages(
+        { slug: "vrijwilliger", updatedAt: "2026-03-15T10:00:00Z" },
+        { slug: "praktische-informatie", updatedAt: "2026-03-20T12:00:00Z" },
+      );
+
+      const result = await sitemap();
+
+      const vrijwilliger = result.find(
+        (e) => e.url === clubUrl("vrijwilliger"),
+      );
+      expect(vrijwilliger).toBeDefined();
+      expect(vrijwilliger!.lastModified).toEqual(
+        new Date("2026-03-15T10:00:00Z"),
+      );
+      expect(result.map((e) => e.url)).toContain(
+        clubUrl("praktische-informatie"),
+      );
+    });
+
+    it("lists no URL twice when a page document shares a slug with a static /club route", async () => {
+      stubPages(
+        { slug: "word-lid", updatedAt: "2026-03-15T10:00:00Z" },
+        { slug: "bestuur", updatedAt: "2026-03-15T10:00:00Z" },
+        { slug: "cashless", updatedAt: "2026-03-15T10:00:00Z" },
+      );
+
+      const urls = (await sitemap()).map((e) => e.url);
+
+      expect(new Set(urls).size).toBe(urls.length);
+      expect(urls).toContain(clubUrl("cashless"));
+    });
   });
 
   it("gracefully handles Sanity fetch failure", async () => {

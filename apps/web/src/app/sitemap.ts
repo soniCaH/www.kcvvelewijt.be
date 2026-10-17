@@ -88,6 +88,13 @@ const GALLERY_SITEMAP_QUERY = `*[_type == "photoGallery" && defined(slug.current
   "image": images[0].asset->url + "?w=1200&h=630&fit=crop&fm=webp&q=80"
 }`;
 
+// Every CMS `page` is live at `/club/<slug>` the moment it exists (the schema
+// has no visibility flag), the same set `PageRepository` lists for `/inhoud`.
+const PAGE_SITEMAP_QUERY = `*[_type == "page" && defined(slug.current)] {
+  "slug": slug.current,
+  "updatedAt": _updatedAt
+}`;
+
 const PLAYER_SITEMAP_QUERY = `*[_type == "player" && archived != true && defined(psdId) && psdId != ""] {
   "slug": psdId
 }`;
@@ -197,7 +204,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
-  const [articles, events, galleries, players, staff, teams] =
+  const [articles, events, galleries, pages, players, staff, teams] =
     await Promise.all([
       fetchFromSanity<ArticleSitemapRow>(
         ARTICLE_SITEMAP_QUERY,
@@ -210,6 +217,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         GALLERY_SITEMAP_QUERY,
         "fetchGallerySlugs",
       ),
+      fetchFromSanity<ArticleSitemapRow>(PAGE_SITEMAP_QUERY, "fetchPageSlugs"),
       fetchFromSanity<SlugRow>(PLAYER_SITEMAP_QUERY, "fetchPlayerSlugs"),
       fetchFromSanity<SlugRow>(STAFF_SITEMAP_QUERY, "fetchStaffSlugs"),
       fetchFromSanity<TeamSitemapRow>(TEAM_SITEMAP_QUERY, "fetchTeamSlugs"),
@@ -240,6 +248,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
     // Google image-sitemap extension — only when the cover image resolved.
     ...(gallery.image ? { images: [gallery.image] } : {}),
+  }));
+
+  const pageEntries = pages.map((page) => ({
+    url: `${SITE_CONFIG.siteUrl}/club/${page.slug}`,
+    lastModified: new Date(page.updatedAt),
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
   }));
 
   const playerEntries = players.map((p) => ({
@@ -274,14 +289,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
+  // A page document can share its slug with a hand-listed `/club/*` route
+  // (`word-lid`, the board pages): the first entry wins, so the static route's
+  // priority is kept and no `<loc>` appears twice.
+  const seen = new Set<string>();
   return [
     ...staticEntries,
     ...articleEntries,
     ...eventEntries,
     ...galleryEntries,
+    ...pageEntries,
     ...playerEntries,
     ...staffEntries,
     ...teamEntries,
     ...matchEntries,
-  ];
+  ].filter((entry) => !seen.has(entry.url) && seen.add(entry.url));
 }
