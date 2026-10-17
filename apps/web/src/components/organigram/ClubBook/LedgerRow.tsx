@@ -47,14 +47,22 @@ function HeldRow({ row }: { row: LedgerRowVM }) {
         }}
       >
         <summary className="hover:text-jersey-deep cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-          <span className={cn("group-open:text-jersey-deep", ROW_LINE)}>
+          <span
+            className={cn(
+              "group-open:text-jersey-deep print:flex-wrap",
+              ROW_LINE,
+            )}
+          >
             <span className={TITLE}>{row.titles.join(" · ")}</span>
             <LeaderFill />
             <span
               className={cn(
                 "text-body-md text-ink print:text-body-sm min-w-0 text-right font-semibold break-words hyphens-auto",
-                // On paper one or two names stay on one line; the title wraps instead.
-                row.holders.length < 3 && "print:whitespace-nowrap",
+                // On paper the names stay beside the title while they fit; when
+                // they do not, they drop to their own right-aligned line (the
+                // row wraps, the leader stays on the first line) and the title
+                // never shares a wrap with them.
+                "print:ml-auto print:max-w-full print:shrink-0",
               )}
             >
               {joinNames(row.holders)}

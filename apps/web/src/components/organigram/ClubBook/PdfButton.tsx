@@ -19,9 +19,18 @@ export function PdfButton({ className }: { className?: string }) {
     style.textContent = CLUB_BOOK_PRINT_CSS;
     document.head.appendChild(style);
 
+    // A fixed box prints only on a page-sized window scrolled to the top: scrolled
+    // down, Chromium dropped the sheet's lower band and footer (measured). So
+    // print from the top and put the visitor back afterwards.
+    const scrolledTo = window.scrollY;
+    window.scrollTo({ top: 0, behavior: "instant" });
+
     window.addEventListener(
       "afterprint",
-      () => document.getElementById(CLUB_BOOK_PRINT_STYLE_ID)?.remove(),
+      () => {
+        document.getElementById(CLUB_BOOK_PRINT_STYLE_ID)?.remove();
+        window.scrollTo({ top: scrolledTo, behavior: "instant" });
+      },
       { once: true },
     );
     window.print();

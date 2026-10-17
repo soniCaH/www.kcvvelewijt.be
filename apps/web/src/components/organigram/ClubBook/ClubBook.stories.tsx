@@ -109,8 +109,10 @@ export const PdfButtonFitsAt320: Story = {
  * `CLUB_BOOK_PRINT_CSS` the PDF button injects — applied by a decorator, so
  * everything outside the book is hidden and its ancestors stripped exactly as in
  * the PDF. Three key cards across, rows showing names only, no unfolded cards
- * and no button, even with a row open. The tablet viewport (768px) with the
- * page margin as padding stands in for an A4 column; `@page` itself only
+ * and no button, even with a row open. The tablet viewport (768px) stands in for an A4
+ * sheet (the print root carries the house padding itself, the fixed bands sit at
+ * the viewport's edges, and the content is clipped above the footer as a sheet
+ * would break it); `@page` itself only
  * applies to a real print, which the Playwright PDF check covers.
  */
 export const PrintSheet: Story = {
@@ -118,9 +120,8 @@ export const PrintSheet: Story = {
   decorators: [
     (Story) => (
       <>
-        <style media="print">
-          {`${CLUB_BOOK_PRINT_CSS} html { padding-inline: 17mm; }`}
-        </style>
+        <style media="print">{`${CLUB_BOOK_PRINT_CSS}
+          .club-book-print > div { max-height: calc(100vh - 44mm); overflow: hidden; }`}</style>
         <Story />
       </>
     ),

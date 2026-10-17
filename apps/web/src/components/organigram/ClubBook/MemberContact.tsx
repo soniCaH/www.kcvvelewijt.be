@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { CONTACT_HREF } from "./Vacant";
 import type { OrgChartMember } from "@/types/organigram";
@@ -7,6 +8,16 @@ import type { OrgChartMember } from "@/types/organigram";
  * holder has neither — the secretariaat. Most holders have no public email and
  * nobody has a phone, so the fallback line is the common case, not an error.
  */
+/** An email may break after "@" and "." and nowhere else — never inside a word. */
+function BreakableEmail({ email }: { email: string }) {
+  return email.split(/(?<=[@.])/).map((part, i) => (
+    <Fragment key={i}>
+      {i > 0 && <wbr />}
+      {part}
+    </Fragment>
+  ));
+}
+
 export function MemberContact({ member }: { member: OrgChartMember }) {
   if (!member.email && !member.phone) {
     return (
@@ -23,9 +34,9 @@ export function MemberContact({ member }: { member: OrgChartMember }) {
       {member.email && (
         <a
           href={`mailto:${member.email}`}
-          className="text-jersey-deep break-all underline"
+          className="text-jersey-deep underline"
         >
-          {member.email}
+          <BreakableEmail email={member.email} />
         </a>
       )}
       {member.phone && (

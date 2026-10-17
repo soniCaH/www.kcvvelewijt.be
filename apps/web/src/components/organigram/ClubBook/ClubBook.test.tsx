@@ -111,9 +111,23 @@ describe("<ClubBook>", () => {
 
     const group = screen.getByRole("region", { name: "Dagelijks bestuur" });
     expect(within(group).getByText("Post, verslagen, de vzw")).toBeVisible();
+    // Looked up by href: the address carries <wbr> break opportunities.
     expect(
-      within(group).getByRole("link", { name: "kevin@kcvv.be" }),
-    ).toHaveAttribute("href", "mailto:kevin@kcvv.be");
+      group.querySelector('a[href="mailto:kevin@kcvv.be"]'),
+    ).not.toBeNull();
+  });
+
+  it("lets an email break after the @ and the dots only, never inside a word", () => {
+    render(<ClubBook nodes={nodes} responsibilityPaths={paths} />);
+
+    const mail = document.querySelector<HTMLElement>(
+      'a[href="mailto:kevin@kcvv.be"]',
+    );
+    if (!mail) throw new Error("mail link missing");
+    // Text unchanged for the reader and for copy-paste…
+    expect(mail.textContent).toBe("kevin@kcvv.be");
+    // …with a break opportunity after "@" and after each ".", and nowhere else.
+    expect(mail.innerHTML).toBe("kevin@<wbr>kcvv.<wbr>be");
   });
 
   it("offers the secretariaat when a holder has no email or phone", () => {

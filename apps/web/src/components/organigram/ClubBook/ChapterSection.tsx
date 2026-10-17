@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils/cn";
 import { EditorialLink, SectionHeader } from "@/components/design-system";
 import {
   joinNames,
@@ -30,7 +31,7 @@ export function ChapterSection({ chapter }: { chapter: Chapter }) {
   return (
     <section
       aria-label={chapter.title}
-      className="flex min-w-0 flex-col print:mb-3"
+      className="flex min-w-0 flex-col print:mb-3 print:break-inside-avoid"
     >
       <div className="border-ink border-t-2 pt-3 print:break-after-avoid">
         <SectionHeader
@@ -72,10 +73,19 @@ export function ChapterSection({ chapter }: { chapter: Chapter }) {
 }
 
 /** Boxes with no chapter. Rendered last so a box an editor has not placed yet never vanishes. */
-export function OverigeFuncties({ rows }: { rows: LedgerRowVM[] }) {
+export function OverigeFuncties({
+  rows,
+  className,
+}: {
+  rows: LedgerRowVM[];
+  className?: string;
+}) {
   if (rows.length === 0) return null;
   return (
-    <section aria-label="Overige functies" className="flex flex-col">
+    <section
+      aria-label="Overige functies"
+      className={cn("flex flex-col print:break-inside-avoid", className)}
+    >
       <h3 className="text-jersey-deep text-label font-mono font-semibold uppercase">
         Overige functies
       </h3>

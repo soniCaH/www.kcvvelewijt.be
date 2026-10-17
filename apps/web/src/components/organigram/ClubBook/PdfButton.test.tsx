@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PdfButton } from "./PdfButton";
@@ -30,6 +30,25 @@ describe("<PdfButton>", () => {
 
     window.dispatchEvent(new Event("afterprint"));
     expect(document.getElementById(CLUB_BOOK_PRINT_STYLE_ID)).toBeNull();
+  });
+
+  it("prints from the top of the page and puts the visitor back afterwards", async () => {
+    const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+    onTestFinished(() => scrollTo.mockRestore());
+    vi.spyOn(window, "scrollY", "get").mockReturnValue(1800);
+    (window as { print?: () => void }).print = vi.fn();
+    render(<PdfButton />);
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Download als PDF" }),
+    );
+    expect(scrollTo).toHaveBeenLastCalledWith({ top: 0, behavior: "instant" });
+
+    window.dispatchEvent(new Event("afterprint"));
+    expect(scrollTo).toHaveBeenLastCalledWith({
+      top: 1800,
+      behavior: "instant",
+    });
   });
 
   it("replaces a sheet left behind by a cancelled print instead of stacking another", async () => {

@@ -5,7 +5,7 @@ import { buildClubBook, joinNames } from "./club-book";
 import { KeyFigureCards } from "./KeyFigureCards";
 import { ChapterSection, OverigeFuncties } from "./ChapterSection";
 import { PdfButton } from "./PdfButton";
-import { PrintFooter, PrintHeader } from "./PrintFrame";
+import { PrintHeader, PrintSheetFrame } from "./PrintFrame";
 import { CLUB_BOOK_PRINT_ROOT } from "./print-style";
 import { RowDeepLink } from "./RowDeepLink";
 
@@ -38,44 +38,45 @@ export function ClubBook({
   const book = buildClubBook(nodes, responsibilityPaths);
 
   return (
-    <div
-      data-testid="club-book"
-      className={`${CLUB_BOOK_PRINT_ROOT} flex flex-col gap-12 print:gap-3`}
-    >
-      <RowDeepLink />
-      <PrintHeader now={now} />
-      <div className="flex flex-col gap-8 print:gap-2">
-        <KeyFigureCards groups={book.keyGroups} />
-        <div className="flex flex-col items-start gap-2">
-          {book.raad && (
-            <p
-              // A target for `openStructureRow` — the Bestuursorgaan box has no
-              // ledger row, this line is where it lives.
-              data-key-node-id={book.raad.nodeId}
-              data-key-member-id={book.raad.members[0]?.id}
-              tabIndex={-1}
-              className="text-ink-muted text-body-sm"
-            >
-              <span className="text-ink font-semibold">Raad van bestuur: </span>
-              {joinNames(book.raad.members)}
-            </p>
-          )}
-          <EditorialLink href={book.boardLink.href} className="print:hidden">
-            {book.boardLink.label}
-          </EditorialLink>
+    <div data-testid="club-book" className={CLUB_BOOK_PRINT_ROOT}>
+      <div className="flex flex-col gap-12 print:gap-3">
+        <RowDeepLink />
+        <PrintSheetFrame />
+        <PrintHeader now={now} />
+        <div className="flex flex-col gap-8 print:gap-2">
+          <KeyFigureCards groups={book.keyGroups} />
+          <div className="flex flex-col items-start gap-2">
+            {book.raad && (
+              <p
+                // A target for `openStructureRow` — the Bestuursorgaan box has no
+                // ledger row, this line is where it lives.
+                data-key-node-id={book.raad.nodeId}
+                data-key-member-id={book.raad.members[0]?.id}
+                tabIndex={-1}
+                className="text-ink-muted text-body-sm"
+              >
+                <span className="text-ink font-semibold">
+                  Raad van bestuur:{" "}
+                </span>
+                {joinNames(book.raad.members)}
+              </p>
+            )}
+            <EditorialLink href={book.boardLink.href} className="print:hidden">
+              {book.boardLink.label}
+            </EditorialLink>
+          </div>
+        </div>
+
+        <PdfButton className="self-start" />
+
+        <div className="grid grid-cols-1 gap-x-12 gap-y-12 lg:grid-cols-2 print:block print:columns-2 print:break-before-page print:gap-x-6">
+          {book.chapters.map((chapter) => (
+            <ChapterSection key={chapter.key} chapter={chapter} />
+          ))}
+          {/* Inside the grid so that on paper it flows into the shorter column. */}
+          <OverigeFuncties rows={book.overige} className="lg:col-span-2" />
         </div>
       </div>
-
-      <PdfButton className="self-start" />
-
-      <div className="grid grid-cols-1 gap-x-12 gap-y-12 lg:grid-cols-2 print:block print:columns-2 print:gap-x-6">
-        {book.chapters.map((chapter) => (
-          <ChapterSection key={chapter.key} chapter={chapter} />
-        ))}
-      </div>
-
-      <OverigeFuncties rows={book.overige} />
-      <PrintFooter />
     </div>
   );
 }
