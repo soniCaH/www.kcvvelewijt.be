@@ -3,6 +3,7 @@
  * Handles search queries across multiple content types
  */
 
+import { teamHref } from "@/lib/utils/team-href";
 import { NextRequest, NextResponse } from "next/server";
 import { Effect } from "effect";
 import { unstable_cache } from "next/cache";
@@ -212,7 +213,7 @@ const searchTeams = (query: string) =>
         type: "team",
         title: team.displayName,
         description: team.divisionFull ?? team.division ?? undefined,
-        url: `/ploegen/${team.slug}`,
+        url: teamHref(team.slug),
         imageUrl: team.teamImageUrl ?? undefined,
       }));
   });

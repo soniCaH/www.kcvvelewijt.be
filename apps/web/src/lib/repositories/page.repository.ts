@@ -20,8 +20,11 @@ import type {
  * `/api/revalidate` webhook would have to grow one to match, so the read
  * inherits the consuming route's `revalidate` instead — the same shape
  * `TeamRepository.findAllForLanding` and the event lists use.
+ *
+ * Exported for `sitemap.ts` (#3483): the sitemap lists exactly the pages
+ * `/inhoud` lists, so both read the one query.
  */
-const PAGES_QUERY =
+export const PAGES_QUERY =
   defineQuery(`*[_type == "page" && defined(slug.current)] | order(title asc) {
   "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""),
   "updatedAt": _updatedAt

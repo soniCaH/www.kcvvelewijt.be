@@ -1,4 +1,8 @@
 import type { NextConfig } from "next";
+import { BOARD_TEAM_SLUGS } from "./src/lib/utils/team-href";
+
+// `:slug(bestuur|jeugdbestuur|angels)` — see `BOARD_TEAM_SLUGS` (#3483).
+const BOARD_SLUG_PARAM = `:slug(${BOARD_TEAM_SLUGS.join("|")})`;
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -101,20 +105,19 @@ const nextConfig: NextConfig = {
       // under `/ploegen` made a second public URL for the same page, and the
       // generic `/team/:slug` rename would take two hops to reach it. Literal
       // list on purpose: `showInNavigation` would also hide the real teams
-      // `kcvve-u5` and `fc-weitse-gans`. Keep in step with the `club/*` folders
-      // that call `createBoardPage`.
+      // `kcvve-u5` and `fc-weitse-gans`. The list is `BOARD_TEAM_SLUGS`.
       {
-        source: "/team/:slug(bestuur|jeugdbestuur|angels)",
+        source: `/team/${BOARD_SLUG_PARAM}`,
         destination: "/club/:slug",
         permanent: true,
       },
       {
-        source: "/ploegen/:slug(bestuur|jeugdbestuur|angels)",
+        source: `/ploegen/${BOARD_SLUG_PARAM}`,
         destination: "/club/:slug",
         permanent: true,
       },
       {
-        source: "/ploegen/:slug(bestuur|jeugdbestuur|angels)/wedstrijden",
+        source: `/ploegen/${BOARD_SLUG_PARAM}/wedstrijden`,
         destination: "/club/:slug",
         permanent: true,
       },

@@ -1,6 +1,10 @@
 import type { MetadataRoute } from "next";
 
 import { SITE_CONFIG } from "@/lib/constants";
+import { PAGES_QUERY } from "@/lib/repositories/page.repository";
+import type { PAGES_QUERY_RESULT } from "@/lib/sanity/sanity.types";
+import { isBoardTeamSlug } from "@/lib/utils/team-href";
+import nextConfig from "../../next.config";
 
 // Rendered per request, not prerendered (#3495). #3472 used `revalidate = 3600`
 // and Next honours it (`x-nextjs-cache: STALE` on `next start`), but on Vercel
@@ -49,6 +53,8 @@ interface EventSitemapRow {
   image: string | null;
 }
 
+type PageSitemapRow = PAGES_QUERY_RESULT[number];
+
 interface SlugRow {
   slug: string;
 }
@@ -86,13 +92,6 @@ const GALLERY_SITEMAP_QUERY = `*[_type == "photoGallery" && defined(slug.current
   "slug": slug.current,
   "publishedAt": publishedAt,
   "image": images[0].asset->url + "?w=1200&h=630&fit=crop&fm=webp&q=80"
-}`;
-
-// Every CMS `page` is live at `/club/<slug>` the moment it exists (the schema
-// has no visibility flag), the same set `PageRepository` lists for `/inhoud`.
-const PAGE_SITEMAP_QUERY = `*[_type == "page" && defined(slug.current)] {
-  "slug": slug.current,
-  "updatedAt": _updatedAt
 }`;
 
 const PLAYER_SITEMAP_QUERY = `*[_type == "player" && archived != true && defined(psdId) && psdId != ""] {
@@ -204,7 +203,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }),
   );
 
-  const [articles, events, galleries, pages, players, staff, teams] =
+  const [articles, events, galleries, pages, players, staff, allTeams] =
     await Promise.all([
       fetchFromSanity<ArticleSitemapRow>(
         ARTICLE_SITEMAP_QUERY,
@@ -217,11 +216,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         GALLERY_SITEMAP_QUERY,
         "fetchGallerySlugs",
       ),
-      fetchFromSanity<ArticleSitemapRow>(PAGE_SITEMAP_QUERY, "fetchPageSlugs"),
+      fetchFromSanity<PageSitemapRow>(PAGES_QUERY, "fetchPageSlugs"),
       fetchFromSanity<SlugRow>(PLAYER_SITEMAP_QUERY, "fetchPlayerSlugs"),
       fetchFromSanity<SlugRow>(STAFF_SITEMAP_QUERY, "fetchStaffSlugs"),
       fetchFromSanity<TeamSitemapRow>(TEAM_SITEMAP_QUERY, "fetchTeamSlugs"),
     ]);
+
+  // The board teams are listed as `/club/<slug>` and `/ploegen/<slug>`
+  // redirects there, so a redirecting URL must not be in the sitemap (#3483).
+  const teams = allTeams.filter((t) => !isBoardTeamSlug(t.slug));
 
   const articleEntries = articles.map((article) => ({
     url: `${SITE_CONFIG.siteUrl}/nieuws/${article.slug}`,
@@ -250,12 +253,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...(gallery.image ? { images: [gallery.image] } : {}),
   }));
 
-  const pageEntries = pages.map((page) => ({
-    url: `${SITE_CONFIG.siteUrl}/club/${page.slug}`,
-    lastModified: new Date(page.updatedAt),
-    changeFrequency: "monthly" as const,
-    priority: 0.6,
-  }));
+  // A page document whose `/club/<slug>` next.config redirects away is not a
+  // canonical URL. (A hand-listed or folder route that shadows a document is
+  // caught by the URL de-duplication below.)
+  const redirectedSources = new Set(
+    (await nextConfig.redirects?.())?.map((r) => r.source),
+  );
+  const pageEntries = pages
+    .filter((page) => !redirectedSources.has(`/club/${page.slug}`))
+    .map((page) => ({
+      url: `${SITE_CONFIG.siteUrl}/club/${page.slug}`,
+      lastModified: new Date(page.updatedAt),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    }));
 
   const playerEntries = players.map((p) => ({
     url: `${SITE_CONFIG.siteUrl}/spelers/${p.slug}`,

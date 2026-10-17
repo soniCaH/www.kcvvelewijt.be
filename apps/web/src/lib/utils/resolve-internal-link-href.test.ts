@@ -20,6 +20,15 @@ describe("resolveInternalLinkHref", () => {
     ).toBe("/ploegen/eerste-ploeg");
   });
 
+  it.each(["bestuur", "jeugdbestuur", "angels"])(
+    "resolves the board team %s to /club/%s, not the redirecting /ploegen URL (#3483)",
+    (slug) => {
+      expect(resolveInternalLinkHref({ _type: "team", slug })).toBe(
+        `/club/${slug}`,
+      );
+    },
+  );
+
   it("resolves an article by slug", () => {
     expect(
       resolveInternalLinkHref({ _type: "article", slug: "een-artikel" }),

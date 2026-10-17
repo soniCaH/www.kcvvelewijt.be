@@ -1,3 +1,4 @@
+import { teamHref } from "@/lib/utils/team-href";
 import type {
   RelatedArticleItem,
   RelatedPageItem,
@@ -437,7 +438,7 @@ function mapRelatedItem(item: RelatedContentItem): RelatedRowItem | null {
     case "team":
       return {
         title: item.name,
-        href: `/ploegen/${item.slug}`,
+        href: teamHref(item.slug),
         imageUrl: item.imageUrl ?? undefined,
         artefact: item.imageUrl ? undefined : { kind: "team" },
         badge: "PLOEG",

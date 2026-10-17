@@ -1,4 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { existsSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { Effect, Layer } from "effect";
 import { HttpNotFound, type Match } from "@kcvv/api-contract";
 
@@ -195,6 +197,75 @@ describe("sitemap.ts", () => {
 
       expect(new Set(urls).size).toBe(urls.length);
       expect(urls).toContain(clubUrl("cashless"));
+    });
+  });
+
+  describe("no redirecting or shadowed URLs (#3483)", () => {
+    const urls = (result: Array<{ url: string }>) => result.map((e) => e.url);
+
+    it("leaves out a page document whose /club/<slug> next.config redirects away", async () => {
+      // `/club/inschrijven`, `/club/register`, `/club/history` are redirect
+      // sources; none may be listed even if a document carried the slug.
+      mockFetch.mockImplementation(async (query: string) =>
+        query.includes('_type == "page"')
+          ? ["inschrijven", "register", "history", "vrijwilliger"].map(
+              (slug) => ({
+                id: slug,
+                title: slug,
+                slug,
+                updatedAt: "2026-03-15T10:00:00Z",
+              }),
+            )
+          : [],
+      );
+
+      const listed = urls(await sitemap());
+
+      expect(listed).toContain("https://www.kcvvelewijt.be/club/vrijwilliger");
+      for (const slug of ["inschrijven", "register", "history"]) {
+        expect(listed).not.toContain(`https://www.kcvvelewijt.be/club/${slug}`);
+      }
+    });
+
+    it("lists every static /club/<folder> route, so a folder always shadows a same-slug document", async () => {
+      mockFetch.mockResolvedValue([]);
+      const clubDir = join(__dirname, "(main)/club");
+      const folders = readdirSync(clubDir, { withFileTypes: true })
+        .filter(
+          (d) =>
+            d.isDirectory() &&
+            !/^[[(]/.test(d.name) &&
+            existsSync(join(clubDir, d.name, "page.tsx")),
+        )
+        .map((d) => d.name);
+      expect(folders).toContain("bestuur");
+
+      const listed = urls(await sitemap());
+
+      for (const folder of folders) {
+        expect(listed).toContain(`https://www.kcvvelewijt.be/club/${folder}`);
+      }
+    });
+
+    it("lists the board teams only as /club/<slug>, never as /ploegen/<slug>", async () => {
+      mockFetch.mockImplementation(async (query: string) =>
+        query.includes('_type == "team"')
+          ? ["bestuur", "jeugdbestuur", "angels", "kcvve-u5"].map((slug) => ({
+              slug,
+              psdId: null,
+            }))
+          : [],
+      );
+
+      const listed = urls(await sitemap());
+
+      for (const slug of ["bestuur", "jeugdbestuur", "angels"]) {
+        expect(listed).not.toContain(
+          `https://www.kcvvelewijt.be/ploegen/${slug}`,
+        );
+        expect(listed).toContain(`https://www.kcvvelewijt.be/club/${slug}`);
+      }
+      expect(listed).toContain("https://www.kcvvelewijt.be/ploegen/kcvve-u5");
     });
   });
 

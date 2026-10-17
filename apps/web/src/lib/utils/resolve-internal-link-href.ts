@@ -1,3 +1,5 @@
+import { teamHref } from "@/lib/utils/team-href";
+
 /**
  * The reference shape both the body's `internalLink` mark and
  * `article.callToAction.reference` project: `reference->{ _type, "slug":
@@ -32,7 +34,7 @@ export function resolveInternalLinkHref(
       return ref.psdId ? `/staf/${ref.psdId}` : null;
     case "team":
       if (ref.archived === true) return null;
-      return ref.slug ? `/ploegen/${ref.slug}` : null;
+      return ref.slug ? teamHref(ref.slug) : null;
     case "article":
       return ref.slug ? `/nieuws/${ref.slug}` : null;
     case "page":
