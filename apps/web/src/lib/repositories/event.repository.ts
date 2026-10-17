@@ -2,7 +2,7 @@ import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
 import { DateTime } from "luxon";
 import { fetchGroq, type SanityReadError } from "../sanity/fetch-groq";
-import { CLUB_TIMEZONE, clubToday } from "../utils/dates";
+import { CLUB_TIMEZONE, clubDayStart, clubToday } from "../utils/dates";
 import type { EventType } from "@/components/event/event-type-style";
 import type {
   EVENTS_QUERY_RESULT,
@@ -13,11 +13,14 @@ import type {
 
 // ─── GROQ Queries ────────────────────────────────────────────────────────────
 
-// Upcoming-only: an event stays in the list until its end (or start, when
-// single-day) is in the past. `coalesce(dateEnd, dateStart) >= now()` keeps
-// in-progress multi-day events visible through their final day.
+// Upcoming-only: an event stays in the list through the end of its last day in
+// Brussels time (#3478). `$dayStart` is Brussels midnight today as a UTC ISO
+// string (`clubDayStart()`), compared as `dateTime`s: a single-moment event
+// would otherwise leave at its own start time, and a `$today` date string would
+// hide an all-day event that starts at local midnight. A missing `$dayStart`
+// empties /inhoud, so every caller must pass it.
 export const EVENTS_QUERY =
-  defineQuery(`*[_type == "event" && coalesce(dateEnd, dateStart) >= now()] | order(dateStart asc) {
+  defineQuery(`*[_type == "event" && dateTime(coalesce(dateEnd, dateStart)) >= dateTime($dayStart)] | order(dateStart asc) {
   "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), eventType, "dateStart": coalesce(dateStart, ""), dateEnd, location, "featuredOnHome": false,
   "href": coalesce(externalLink.url, "#"),
   "coverImageUrl": coverImage.asset->url + "?w=1200&h=675&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5))
@@ -240,10 +243,13 @@ export class EventRepository extends Context.Tag("EventRepository")<
 >() {}
 
 export const EventRepositoryLive = Layer.succeed(EventRepository, {
-  findAll: () => fetchGroq<EVENTS_QUERY_RESULT>(EVENTS_QUERY),
+  findAll: () =>
+    fetchGroq<EVENTS_QUERY_RESULT>(EVENTS_QUERY, { dayStart: clubDayStart() }),
   findUpcomingForList: () =>
     Effect.all({
-      events: fetchGroq<EVENTS_QUERY_RESULT>(EVENTS_QUERY),
+      events: fetchGroq<EVENTS_QUERY_RESULT>(EVENTS_QUERY, {
+        dayStart: clubDayStart(),
+      }),
       articles: fetchGroq<EVENT_ARTICLES_QUERY_RESULT>(EVENT_ARTICLES_QUERY, {
         // Brussels-local calendar day — see EVENT_ARTICLES_QUERY's $today note.
         today: clubToday(),

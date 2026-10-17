@@ -1,6 +1,7 @@
 import {defineField, defineType} from 'sanity'
 import {organigramNodePreviewSelect, prepareOrganigramNodePreview} from './preview/organigramNode-preview'
 import {validateOrganigramMember} from './validation/organigram-members'
+import {organigramParentFilter, validateOrganigramParent} from './validation/organigram-parent'
 
 export const organigramNode = defineType({
   name: 'organigramNode',
@@ -64,7 +65,9 @@ export const organigramNode = defineType({
       weak: true,
       group: 'hierarchie',
       description:
-        'De hiërarchisch bovenliggende positie. Laat leeg voor een positie op het hoogste niveau (rootniveau).',
+        'De hiërarchisch bovenliggende positie. Laat leeg voor een positie op het hoogste niveau (rootniveau). De positie zelf en alle posities onder haar worden niet aangeboden: een kringverwijzing laat de hele tak uit het organigram verdwijnen.',
+      options: {filter: organigramParentFilter},
+      validation: (Rule) => Rule.custom((ref, context) => validateOrganigramParent(ref as {_ref?: string} | undefined, context)),
     }),
     defineField({
       name: 'members',

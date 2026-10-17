@@ -409,7 +409,6 @@ function buildAnnouncementSideTransfer() {
         position: "Middenvelder",
         age: 24,
         otherClubName: "KSC Lokeren-Temse",
-        otherClubContext: "Challenger Pro League",
         kcvvContext: "Derde Amateur · A-ploeg · #14",
       },
 

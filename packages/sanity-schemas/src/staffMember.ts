@@ -55,6 +55,7 @@ export const staffMember = defineType({
       type: 'string',
       group: 'identiteit',
       description: 'Optioneel contact-e-mailadres. Wordt enkel getoond waar het staflid als contactpersoon is gekoppeld.',
+      validation: (Rule) => Rule.email(),
     }),
     defineField({
       name: 'phone',

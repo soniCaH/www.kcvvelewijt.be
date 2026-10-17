@@ -1,4 +1,5 @@
 import {defineField, defineType} from 'sanity'
+import {validateLink} from './validation/link'
 
 export const matchesSliderPlaceholder = defineType({
   name: 'matchesSliderPlaceholder',
@@ -28,7 +29,7 @@ export const matchesSliderPlaceholder = defineType({
       title: 'Mededeling — link',
       type: 'url',
       description: 'Optionele link bij de mededeling.',
-      validation: (rule) => rule.uri({scheme: ['http', 'https'], allowRelative: true}),
+      validation: (rule) => rule.uri({scheme: ['http', 'https'], allowRelative: true}).custom(validateLink),
     }),
     defineField({
       name: 'highlightImage',

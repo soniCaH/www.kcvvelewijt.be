@@ -50,8 +50,10 @@ The strip morphs by `transferFact.direction`:
    shield (other club logo)        ★ Speler ★                              shield (KCVV crest)
    VAN                              Player Name                             NAAR
    Other Club Name                  Position · Age                          KCVV Elewijt
-   otherClubContext                 (dashed perforation bottom)             kcvvContext
+   (no sub-line)                    (dashed perforation bottom)             kcvvContext
 ```
+
+The other club carries no free-text sub-line: the R1.5 club row (#1749) superseded the old field and #3478 deleted it from the schema.
 
 - Each card composes `<TapedCard>` at a different rotation from the pool (`-1.2°` / `+0.6°` / `+1.2°`).
 - Each card has its own tape strip — green at corners on side cards, ochre centered on the player card.
@@ -175,7 +177,6 @@ When matchPreview / matchRecap land via #1470, they'll need a sibling `<MatchFac
 | Strip · KCVV side · sub        | `transferFact.kcvvContext`                                          | Mono caps muted                                                    |
 | Strip · other side · role      | static "Van" / "Naar" by direction                                  | Mono jersey-deep                                                   |
 | Strip · other side · club name | `transferFact.otherClubName`                                        | Display italic                                                     |
-| Strip · other side · sub       | `transferFact.otherClubContext`                                     | Mono caps muted                                                    |
 | Strip · shield (other club)    | `transferFact.otherClubLogo` (image) → fallback to text initial     | Shield clip-path; ink fill when text fallback                      |
 | Strip · shield (KCVV)          | static KCVV crest mark "K"                                          | Shield clip-path; jersey-deep fill                                 |
 | Strip · arrows                 | static "→" glyph; colour by `direction`                             | jersey-deep (incoming) / alert-red (outgoing) / hidden (extension) |

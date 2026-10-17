@@ -91,3 +91,19 @@ describe("VolledigOrganigram", () => {
     expect(document.getElementById("vo-print-style")).toBeNull();
   });
 });
+
+describe("VolledigOrganigram — parent cycles (#3478)", () => {
+  it("renders every node of a parent cycle and the subtree below it", () => {
+    const cyclic = [
+      { id: "club", title: "KCVV Elewijt", parentId: null, members: [] },
+      { id: "a", title: "Cyclus A", parentId: "b", members: [] },
+      { id: "b", title: "Cyclus B", parentId: "a", members: [] },
+      { id: "leaf", title: "Onder de cyclus", parentId: "b", members: [] },
+    ];
+    render(<VolledigOrganigram nodes={cyclic} />);
+    const chart = screen.getByTestId("volledig-organigram");
+    expect(chart).toHaveTextContent("Cyclus A");
+    expect(chart).toHaveTextContent("Cyclus B");
+    expect(chart).toHaveTextContent("Onder de cyclus");
+  });
+});

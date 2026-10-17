@@ -373,3 +373,41 @@ describe("announceFocus", () => {
     );
   });
 });
+
+describe("OrganigramExplorer — parent cycles (#3478)", () => {
+  const cyclic = [
+    { id: "club", title: "KCVV Elewijt", parentId: null, members: [] },
+    { id: "a", title: "Cyclus A", parentId: "b", members: [] },
+    { id: "b", title: "Cyclus B", parentId: "a", members: [] },
+    { id: "leaf", title: "Onder de cyclus", parentId: "b", members: [] },
+  ];
+
+  it.each(["a", "b", "leaf"])(
+    "deep-links to %s and shows a breadcrumb from the club root",
+    (id) => {
+      open({ nodes: cyclic, initialFocusId: id });
+      const crumb = screen.getByRole("navigation", {
+        name: "Rapporteringslijn",
+      });
+      expect(crumb).toHaveTextContent("KCVV Elewijt");
+      expect(screen.getByRole("button", { current: true })).toBeInTheDocument();
+    },
+  );
+
+  it("reaches every node of the cycle by navigating down from the root", async () => {
+    const user = userEvent.setup();
+    open({ nodes: cyclic, initialFocusId: "club" });
+    const visited = new Set<string>();
+    for (let i = 0; i < cyclic.length; i++) {
+      const down = screen.queryAllByRole("button", { name: /^Naar / });
+      if (down.length === 0) break;
+      await user.click(down[0]);
+      visited.add(
+        screen.getByRole("button", { current: true }).textContent ?? "",
+      );
+    }
+    expect([...visited].join(" ")).toContain("Cyclus A");
+    expect([...visited].join(" ")).toContain("Cyclus B");
+    expect([...visited].join(" ")).toContain("Onder de cyclus");
+  });
+});

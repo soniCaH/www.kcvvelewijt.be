@@ -5,6 +5,7 @@ import {accentTitleOf} from './blocks/editorial-marks'
 import {articlePreviewSelect, prepareArticlePreview} from './preview/article-preview'
 import {validateSubjectsCount} from './validation/subjects-count'
 import {validateUnpublishAt} from './validation/unpublish-at'
+import {validateLink} from './validation/link'
 import {
   type CallToActionValue,
   validateCallToActionRequiredField,
@@ -317,7 +318,8 @@ export const article = defineType({
                         .uri({
                           allowRelative: true,
                           scheme: ["http", "https", "mailto", "tel"],
-                        }),
+                        })
+                        .custom(validateLink),
                   },
                 ],
               },
@@ -552,6 +554,7 @@ export const article = defineType({
                 allowRelative: true,
                 scheme: ["http", "https", "mailto", "tel"],
               })
+              .custom(validateLink)
               .custom((_value, ctx) =>
                 validateCallToActionLink(
                   ctx.parent as CallToActionValue | undefined,
