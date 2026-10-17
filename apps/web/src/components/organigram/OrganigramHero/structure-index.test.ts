@@ -48,31 +48,15 @@ describe("deriveStructureIndex", () => {
     expect(deriveStructureIndex(nodes).afdelingen).toBe(2);
   });
 
-  it("leaves the synthetic club root out of every count", () => {
-    const withRoot: OrgChartNode[] = [
-      {
-        id: "club",
-        title: "KCVV Elewijt",
-        department: "algemeen",
-        members: [{ id: "club", name: "KCVV Elewijt" }],
-      },
-      ...nodes,
-    ];
-
-    expect(deriveStructureIndex(withRoot)).toEqual(deriveStructureIndex(nodes));
-  });
-
-  it("counts the real boxes and distinct people of the explorer fixture, root excluded", () => {
-    const boxes = explorerFixture.filter((node) => node.id !== "club");
+  it("counts the real boxes and distinct people of the explorer fixture", () => {
     const people = new Set(
-      boxes.flatMap((node) => node.members.map((m) => m.id)),
+      explorerFixture.flatMap((node) => node.members.map((m) => m.id)),
     );
 
     const index = deriveStructureIndex(explorerFixture);
 
-    expect(index.posities).toBe(boxes.length);
+    expect(index.posities).toBe(explorerFixture.length);
     expect(index.mensen).toBe(people.size);
-    expect(index.posities).toBe(explorerFixture.length - 1);
   });
 
   it("returns zeroes for an empty organigram", () => {

@@ -12,7 +12,11 @@ import { describe, it, expect, vi, afterEach } from "vitest";
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { OrganigramExplorer, announceFocus } from "./OrganigramExplorer";
-import { buildSpotlightTree, getSpotlightView } from "./spotlight-tree";
+import {
+  buildSpotlightTree,
+  getSpotlightView,
+  withClubRoot,
+} from "./spotlight-tree";
 import { explorerFixture } from "./organigram-explorer.fixture";
 import { mockLayoutProps } from "@/../tests/helpers/scroll-hint.helpers";
 
@@ -351,7 +355,7 @@ describe("OrganigramExplorer — Esc", () => {
 });
 
 describe("announceFocus", () => {
-  const tree = buildSpotlightTree(explorerFixture);
+  const tree = buildSpotlightTree(withClubRoot(explorerFixture));
 
   it("names the node, level, parent, holders and child count in Dutch", () => {
     const msg = announceFocus(getSpotlightView(tree, "sportief"));

@@ -37,8 +37,9 @@ const question = (
 };
 
 const rowsOf = (book: ReturnType<typeof buildClubBook>, pillar: string) =>
-  book.pillars.find((p) => p.key === pillar)?.sections.flatMap((s) => s.rows) ??
-  [];
+  book.chapters
+    .find((c) => c.key === pillar)
+    ?.sections.flatMap((s) => s.rows) ?? [];
 
 describe("buildClubBook", () => {
   describe("key figures", () => {
@@ -55,7 +56,7 @@ describe("buildClubBook", () => {
             "Sportief Verantwoordelijke",
             "Jeugdvoorzitter",
             "TVJO",
-            "Gerechtelijk Correspondent",
+            "Gerechtigd Correspondent",
             "API (Aanspreekpunt Integriteit)",
           ],
         ],
@@ -176,23 +177,23 @@ describe("buildClubBook", () => {
     });
   });
 
-  describe("pillars", () => {
-    it("renders the four pillars in order, Jeugd with its two sub-heads", () => {
-      const { pillars } = buildClubBook(explorerFixture, []);
+  describe("chapters", () => {
+    it("renders the four chapters in order, Jeugd with its two sub-heads", () => {
+      const { chapters } = buildClubBook(explorerFixture, []);
 
-      expect(pillars.map((p) => p.title)).toEqual([
+      expect(chapters.map((c) => c.title)).toEqual([
         "Sportief",
         "Jeugd",
         "Club & werking",
         "Integriteit",
       ]);
-      expect(pillars.map((p) => p.sections.map((s) => s.heading))).toEqual([
+      expect(chapters.map((c) => c.sections.map((s) => s.heading))).toEqual([
         [undefined],
         ["Organisatie", "Opleiding"],
         [undefined],
         [undefined],
       ]);
-      expect(pillars.every((p) => p.purpose.length > 0)).toBe(true);
+      expect(chapters.every((c) => c.purpose.length > 0)).toBe(true);
     });
 
     it("places each box under the pillar an editor chose", () => {
@@ -206,7 +207,7 @@ describe("buildClubBook", () => {
         "API (Aanspreekpunt Integriteit)",
         "Lid Ethische Commissie",
       ]);
-      const jeugd = book.pillars.find((p) => p.key === "jeugd");
+      const jeugd = book.chapters.find((c) => c.key === "jeugd");
       expect(jeugd?.sections[0]?.rows.flatMap((r) => r.titles)).toContain(
         "Jeugdsecretaris & Afgevaardigden",
       );
@@ -238,20 +239,11 @@ describe("buildClubBook", () => {
       );
     });
 
-    it("never lists the synthetic club root", () => {
-      const book = buildClubBook(explorerFixture, []);
-      const all = [
-        ...book.pillars.flatMap((p) => p.sections.flatMap((s) => s.rows)),
-        ...book.overige,
-      ];
+    it("links Jeugd to the jeugdbestuur page and no other chapter, and the key cards to the hoofdbestuur page", () => {
+      const { chapters, boardLink } = buildClubBook(explorerFixture, []);
 
-      expect(all.flatMap((r) => r.nodeIds)).not.toContain("club");
-    });
-
-    it("links Jeugd to the jeugdbestuur page and no other pillar", () => {
-      const { pillars } = buildClubBook(explorerFixture, []);
-
-      expect(pillars.map((p) => p.boardLink?.href)).toEqual([
+      expect(boardLink.href).toBe("/club/bestuur");
+      expect(chapters.map((c) => c.boardLink?.href)).toEqual([
         undefined,
         "/club/jeugdbestuur",
         undefined,
@@ -309,7 +301,7 @@ describe("buildClubBook", () => {
       ];
 
       const [organisatie, opleiding] =
-        buildClubBook(nodes, []).pillars.find((p) => p.key === "jeugd")
+        buildClubBook(nodes, []).chapters.find((c) => c.key === "jeugd")
           ?.sections ?? [];
       expect(organisatie?.rows).toHaveLength(1);
       expect(opleiding?.rows).toHaveLength(1);
@@ -357,8 +349,8 @@ describe("buildClubBook", () => {
         box("t1", "T1", [person("bob", "Bob")], { pillar: "sportief" }),
       ];
 
-      const { pillars } = buildClubBook(nodes, []);
-      expect(pillars.map((p) => [p.key, p.board.map((m) => m.name)])).toEqual([
+      const { chapters } = buildClubBook(nodes, []);
+      expect(chapters.map((c) => [c.key, c.board.map((m) => m.name)])).toEqual([
         ["sportief", ["Bob"]],
         ["jeugd", []],
         ["club", ["Ann"]],
@@ -377,7 +369,7 @@ describe("buildClubBook", () => {
         }),
       ];
 
-      const jeugd = buildClubBook(nodes, []).pillars.find(
+      const jeugd = buildClubBook(nodes, []).chapters.find(
         (p) => p.key === "jeugd",
       );
       expect(jeugd?.board.map((m) => m.name)).toEqual(["Ann"]);

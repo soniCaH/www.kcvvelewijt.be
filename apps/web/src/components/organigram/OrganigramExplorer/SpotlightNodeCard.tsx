@@ -34,9 +34,11 @@ export function holderLabel(node: OrgChartNode): string {
 }
 
 /**
- * Every spotlight card has the SAME footprint and type scale (a uniform 144×64
- * box, 2-line-clamped title) so a 1-line and a 2-line title never differ in
- * size. The centre is distinguished only by its warm offset shadow, never by a
+ * Every spotlight card has the SAME footprint and type scale (a 144px-wide box,
+ * at least 64px tall, 2-line-clamped title) so a 1-line and a 2-line title never
+ * differ in size. A long holder name wraps instead of being cut, and the card
+ * grows by that line — the same card grows the same way wherever it is drawn,
+ * so the FLIP travel stays a pure translate. The centre is distinguished only by its warm offset shadow, never by a
  * larger box or font — which also keeps the FLIP travel a pure translate (no
  * scale distortion) since source and destination cards are identical in size.
  */
@@ -56,7 +58,7 @@ export function SpotlightNodeCard({
       data-state={state}
       data-variant={variant}
       className={cn(
-        "border-ink flex h-16 w-36 flex-col items-center justify-center border-2 px-2.5 text-center",
+        "border-ink flex min-h-16 w-36 flex-col items-center justify-center border-2 px-2.5 py-1 text-center",
         state === "vacant" ? "bg-warm" : "bg-cream",
         isCenter
           ? "shadow-[4px_4px_0_0_var(--color-warm)]"
@@ -67,10 +69,11 @@ export function SpotlightNodeCard({
       <span className="font-display text-ink line-clamp-2 text-xs leading-[1.15] font-semibold">
         {node.title}
       </span>
-      {/* One line, ellipsised: a long holder name ("Kevin Van Ransbeeck")
-          wrapped to two, pushed the clamped title out of the fixed-height box
-          and clipped its second line ("Website & Communicatie" read "Website &"). */}
-      <span className="text-ink-muted mt-1 block max-w-full truncate font-mono text-[11px] tracking-[0.06em] uppercase">
+      {/* Wraps, and the card grows with it. A fixed-height box used to push the
+          clamped title out when a long holder name ("Kevin Van Ransbeeck")
+          wrapped, clipping its second line ("Website & Communicatie" read
+          "Website &"); truncating the name instead only moved the clip. */}
+      <span className="text-ink-muted mt-1 block max-w-full font-mono text-[11px] tracking-[0.06em] break-words uppercase">
         {sublabel}
       </span>
     </span>

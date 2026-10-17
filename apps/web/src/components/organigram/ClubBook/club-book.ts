@@ -4,7 +4,6 @@ import type {
   OrgPillar,
 } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
-import { CLUB_ROOT_ID } from "../OrganigramExplorer/spotlight-tree";
 
 /**
  * The `/hulp` clubboek view model: turns the organigram nodes and the hulp
@@ -52,28 +51,35 @@ export interface KeyGroup {
   figures: KeyFigure[];
 }
 
-export interface PillarSection {
+export interface ChapterSubsection {
   heading: string | undefined;
   rows: LedgerRow[];
 }
 
-export type PillarKey = "sportief" | "jeugd" | "club" | "integriteit";
+export type ChapterKey = "sportief" | "jeugd" | "club" | "integriteit";
 
-export interface Pillar {
-  key: PillarKey;
+export interface Chapter {
+  key: ChapterKey;
   title: string;
   purpose: string;
   /** Raad van bestuur members who hold a box in this pillar. */
   board: OrgChartMember[];
-  sections: PillarSection[];
-  boardLink: { href: string; label: string } | undefined;
+  sections: ChapterSubsection[];
+  boardLink: BoardLink | undefined;
+}
+
+export interface BoardLink {
+  href: string;
+  label: string;
 }
 
 export interface ClubBookVM {
   keyGroups: KeyGroup[];
+  /** The hoofdbestuur page, linked under the key cards. */
+  boardLink: BoardLink;
   /** The Bestuursorgaan box and its members; undefined when there is none or it has no named member. */
   raad: { nodeId: string; members: OrgChartMember[] } | undefined;
-  pillars: Pillar[];
+  chapters: Chapter[];
   /** Boxes with no pillar — shown last so nothing silently disappears. */
   overige: LedgerRow[];
 }
@@ -89,12 +95,21 @@ const KEY_GROUPS: ReadonlyArray<{ title: string; roleCodes: string[] }> = [
 
 const RAAD_ROLE_CODE = "BST";
 
-const PILLARS: ReadonlyArray<{
-  key: PillarKey;
+/** The board team pages: the board on paper, linked from here and never merged into it. */
+const BOARD_LINKS = {
+  hoofdbestuur: { href: "/club/bestuur", label: "Bekijk het hoofdbestuur" },
+  jeugdbestuur: {
+    href: "/club/jeugdbestuur",
+    label: "Bekijk het jeugdbestuur",
+  },
+} as const satisfies Record<string, BoardLink>;
+
+const CHAPTERS: ReadonlyArray<{
+  key: ChapterKey;
   title: string;
   purpose: string;
   sections: ReadonlyArray<{ heading?: string; pillars: OrgPillar[] }>;
-  boardLink?: { href: string; label: string };
+  boardLink?: BoardLink;
 }> = [
   {
     key: "sportief",
@@ -110,7 +125,7 @@ const PILLARS: ReadonlyArray<{
       { heading: "Organisatie", pillars: ["jeugd-organisatie"] },
       { heading: "Opleiding", pillars: ["jeugd-opleiding"] },
     ],
-    boardLink: { href: "/club/jeugdbestuur", label: "Bekijk het jeugdbestuur" },
+    boardLink: BOARD_LINKS.jeugdbestuur,
   },
   {
     key: "club",
@@ -200,11 +215,9 @@ function toRows(
 }
 
 export function buildClubBook(
-  allNodes: OrgChartNode[],
+  nodes: OrgChartNode[],
   paths: ResponsibilityPath[],
 ): ClubBookVM {
-  // The synthetic club root is the organisation, not a box.
-  const nodes = allNodes.filter((n) => n.id !== CLUB_ROOT_ID);
   const byCode = (code: string) => nodes.find((n) => n.roleCode === code);
 
   // Boxes a card or the Raad line already shows. Any other box lands in a
@@ -239,7 +252,7 @@ export function buildClubBook(
   const inPillars = (wanted: OrgPillar[]) =>
     nodes.filter((n) => n.pillar !== undefined && wanted.includes(n.pillar));
 
-  const pillars = PILLARS.map((def) => {
+  const chapters = CHAPTERS.map((def) => {
     const sections = def.sections.map((s) => ({
       heading: s.heading,
       rows: toRows(inPillars(s.pillars), paths),
@@ -261,15 +274,16 @@ export function buildClubBook(
   // Not in a ledger (no pillar, or `bestuur`, which has none) and not on a
   // card or the Raad line: shown last so nothing silently disappears.
   const inLedger = new Set<OrgPillar>(
-    PILLARS.flatMap((p) => p.sections.flatMap((s) => s.pillars)),
+    CHAPTERS.flatMap((p) => p.sections.flatMap((s) => s.pillars)),
   );
   const isLeftover = (n: OrgChartNode) =>
     !consumed.has(n.id) && !(n.pillar !== undefined && inLedger.has(n.pillar));
 
   return {
     keyGroups,
+    boardLink: BOARD_LINKS.hoofdbestuur,
     raad,
-    pillars,
+    chapters,
     overige: toRows(nodes.filter(isLeftover), paths),
   };
 }

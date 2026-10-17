@@ -33,6 +33,7 @@ import { ScrollOverlay } from "@/components/design-system/ScrollHint/ScrollOverl
 import { SpotlightNodeCard } from "./SpotlightNodeCard";
 import {
   buildSpotlightTree,
+  withClubRoot,
   getSpotlightView,
   primaryFocusId,
   siblingTarget,
@@ -75,7 +76,7 @@ import {
  */
 
 export interface OrganigramExplorerProps {
-  /** Flat nodes (`StaffRepository.findAll()` shape, incl. the synthetic root). */
+  /** Flat nodes (`StaffRepository.findAll()` shape); the explorer adds the club root. */
   nodes: OrgChartNode[];
   open: boolean;
   onClose: () => void;
@@ -149,7 +150,7 @@ export function OrganigramExplorer({
   onOpenMember,
   canOpenMember,
 }: OrganigramExplorerProps) {
-  const tree = useMemo(() => buildSpotlightTree(nodes), [nodes]);
+  const tree = useMemo(() => buildSpotlightTree(withClubRoot(nodes)), [nodes]);
   // Open on the deep-linked node when valid, else the primary top node
   // (Voorzitter-equivalent) rather than the thin synthetic club root.
   const landingId = useMemo(
@@ -304,7 +305,7 @@ export function OrganigramExplorer({
     navigate(targetForKey(tree, focusId, e.key as SpotlightNavKey));
   };
 
-  const memberTarget = useSyncExternalStore(
+  const hasMemberTarget = useSyncExternalStore(
     subscribeNever,
     () => (canOpenMember ? canOpenMember(view.focus) : true),
     () => !canOpenMember,
@@ -491,7 +492,7 @@ export function OrganigramExplorer({
                   </button>
                 )}
                 {onOpenMember &&
-                memberTarget &&
+                hasMemberTarget &&
                 view.focus.id !== CLUB_ROOT_ID ? (
                   <button
                     type="button"

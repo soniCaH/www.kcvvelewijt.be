@@ -23,6 +23,8 @@ import {
   targetForKey,
   splitFan,
   CLUB_ROOT_ID,
+  CLUB_ROOT_NODE,
+  withClubRoot,
 } from "./spotlight-tree";
 
 function node(
@@ -286,5 +288,30 @@ describe("splitFan (count-then-expand)", () => {
       visible: [1, 2, 3],
       hidden: 0,
     });
+  });
+});
+
+describe("withClubRoot", () => {
+  it("puts the club root in front of the boxes", () => {
+    const boxes = [node("voorzitter", "club")];
+
+    expect(withClubRoot(boxes).map((n) => n.id)).toEqual([
+      "club",
+      "voorzitter",
+    ]);
+    expect(withClubRoot(boxes)[0]).toBe(CLUB_ROOT_NODE);
+  });
+
+  it("leaves a list that already has a root alone", () => {
+    const own = [{ id: "club", title: "Eigen", parentId: null, members: [] }];
+
+    expect(withClubRoot(own)).toBe(own);
+  });
+
+  it("makes a list of boxes a tree the explorer can walk, with the root on top", () => {
+    const tree = buildSpotlightTree(withClubRoot([node("voorzitter", null)]));
+
+    expect(tree.rootId).toBe(CLUB_ROOT_ID);
+    expect(tree.parentOf.get("voorzitter")).toBe(CLUB_ROOT_ID);
   });
 });

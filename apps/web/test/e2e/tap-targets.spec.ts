@@ -356,25 +356,3 @@ for (const viewport of VIEWPORTS) {
     });
   });
 }
-
-// The clubboek's "Download als PDF" used to be cut off by the chart toolbar on
-// a phone. Fully visible is the bar: inside the viewport, no sideways scroll.
-test.describe("PDF button at 320px", () => {
-  test.beforeEach(async ({ page }) => {
-    await page.setViewportSize({ width: 320, height: 568 });
-  });
-
-  test('"Download als PDF" on /hulp is fully visible', async ({ page }) => {
-    await gotoBounded(page, "/hulp");
-    const button = page.getByRole("button", { name: "Download als PDF" });
-    await button.scrollIntoViewIfNeeded();
-    const box = await button.boundingBox();
-    if (!box) throw new Error("the PDF button has no box");
-    expect(box.x, "left edge").toBeGreaterThanOrEqual(0);
-    expect(box.x + box.width, "right edge").toBeLessThanOrEqual(320);
-    const overflow = await page.evaluate(
-      () => document.documentElement.scrollWidth - window.innerWidth,
-    );
-    expect(overflow, "horizontal page overflow").toBeLessThanOrEqual(0);
-  });
-});

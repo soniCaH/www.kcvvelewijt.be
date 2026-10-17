@@ -1,7 +1,15 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+  type MockInstance,
+} from "vitest";
 import { openStructureRow } from "./open-row";
 
-const scrollIntoView = vi.fn();
+let scrollIntoView: MockInstance<Element["scrollIntoView"]>;
 
 function mountRows() {
   document.body.innerHTML = `
@@ -13,12 +21,14 @@ function mountRows() {
 }
 
 beforeEach(() => {
-  scrollIntoView.mockClear();
-  Element.prototype.scrollIntoView = scrollIntoView;
+  scrollIntoView = vi
+    .spyOn(Element.prototype, "scrollIntoView")
+    .mockImplementation(() => {});
   mountRows();
 });
 
 afterEach(() => {
+  scrollIntoView.mockRestore();
   document.body.innerHTML = "";
 });
 

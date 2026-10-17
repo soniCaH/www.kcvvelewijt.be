@@ -3,7 +3,7 @@ import Link from "next/link";
 export const CONTACT_HREF = "/club/contact";
 
 /** What an empty box says. A key card and a ledger row both carry it. */
-export const VACANT_LABEL = "plek vrij — iets voor jou?";
+const VACANT_LABEL = "plek vrij — iets voor jou?";
 
 /** The vacancy as a link to the contact page. */
 export function VacantLink({ className }: { className?: string }) {

@@ -3,8 +3,9 @@ import type { OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
 import { buildClubBook, joinNames } from "./club-book";
 import { KeyFigureCards } from "./KeyFigureCards";
-import { OverigeFuncties, PillarChapter } from "./PillarChapter";
+import { ChapterSection, OverigeFuncties } from "./ChapterSection";
 import { PdfButton } from "./PdfButton";
+import { PrintFooter, PrintHeader } from "./PrintFrame";
 import { CLUB_BOOK_PRINT_ROOT } from "./print-style";
 import { RowDeepLink } from "./RowDeepLink";
 
@@ -13,6 +14,8 @@ export interface ClubBookProps {
   nodes: OrgChartNode[];
   /** Responsibility paths — the questions each holder answers. */
   responsibilityPaths: ResponsibilityPath[];
+  /** "Now", for the season in the PDF's header. Defaults to the render time. */
+  now?: Date;
 }
 
 /**
@@ -27,16 +30,21 @@ export interface ClubBookProps {
  *
  * The root carries `club-book-print`: the PDF prints this and nothing else.
  */
-export function ClubBook({ nodes, responsibilityPaths }: ClubBookProps) {
+export function ClubBook({
+  nodes,
+  responsibilityPaths,
+  now = new Date(),
+}: ClubBookProps) {
   const book = buildClubBook(nodes, responsibilityPaths);
 
   return (
     <div
       data-testid="club-book"
-      className={`${CLUB_BOOK_PRINT_ROOT} flex flex-col gap-12 print:gap-6`}
+      className={`${CLUB_BOOK_PRINT_ROOT} flex flex-col gap-12 print:gap-3`}
     >
       <RowDeepLink />
-      <div className="flex flex-col gap-8 print:gap-4">
+      <PrintHeader now={now} />
+      <div className="flex flex-col gap-8 print:gap-2">
         <KeyFigureCards groups={book.keyGroups} />
         <div className="flex flex-col items-start gap-2">
           {book.raad && (
@@ -52,8 +60,8 @@ export function ClubBook({ nodes, responsibilityPaths }: ClubBookProps) {
               {joinNames(book.raad.members)}
             </p>
           )}
-          <EditorialLink href="/club/bestuur" className="print:hidden">
-            Bekijk het hoofdbestuur
+          <EditorialLink href={book.boardLink.href} className="print:hidden">
+            {book.boardLink.label}
           </EditorialLink>
         </div>
       </div>
@@ -61,12 +69,13 @@ export function ClubBook({ nodes, responsibilityPaths }: ClubBookProps) {
       <PdfButton className="self-start" />
 
       <div className="grid grid-cols-1 gap-x-12 gap-y-12 lg:grid-cols-2 print:block print:columns-2 print:gap-x-6">
-        {book.pillars.map((pillar) => (
-          <PillarChapter key={pillar.key} pillar={pillar} />
+        {book.chapters.map((chapter) => (
+          <ChapterSection key={chapter.key} chapter={chapter} />
         ))}
       </div>
 
       <OverigeFuncties rows={book.overige} />
+      <PrintFooter />
     </div>
   );
 }

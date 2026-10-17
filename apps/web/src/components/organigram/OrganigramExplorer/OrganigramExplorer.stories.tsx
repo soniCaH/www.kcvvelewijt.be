@@ -43,41 +43,50 @@ export const SharedNode: Story = {
 };
 
 /**
- * A long holder name must not push the two-line title out of its card: with a
- * wrapping holder line, "Website & Communicatie" lost its second line. Geometry,
- * so these are play assertions on the real layout: at the narrowest phone the
- * club supports (320px) and on desktop, the title reads in full — both lines
- * inside the card, nothing clipped.
+ * A long title AND a long holder name: neither may be clipped. A wrapping holder
+ * line used to push "Website & Communicatie" out of its fixed-height card, and
+ * truncating the name only moved the clip onto it. Geometry, so these are play
+ * assertions on the real layout, at the narrowest phone the club supports
+ * (320px) and on desktop: the title and the name both read in full, the card
+ * growing by the extra line.
  */
+const LONG_HOLDER = "Kevin Van Ransbeeck-Vandenbroucke";
 const longHolderNodes = explorerFixture.map((node) =>
   node.id === "website"
-    ? {
-        ...node,
-        members: [{ id: "long", name: "Kevin Van Ransbeeck-Vandenbroucke" }],
-      }
+    ? { ...node, members: [{ id: "long", name: LONG_HOLDER }] }
     : node,
 );
 
-async function expectTitleReadsInFull(canvasElement: HTMLElement) {
+async function expectTitleAndNameRead(canvasElement: HTMLElement) {
   const card = await within(canvasElement).findByTestId("spotlight-node-card");
   const title = card.firstElementChild as HTMLElement;
+  const holder = card.lastElementChild as HTMLElement;
   await expect(title).toHaveTextContent("Website & Communicatie");
+  // The label is upper-cased by CSS; the DOM text is the name as written.
+  await expect(holder).toHaveTextContent(LONG_HOLDER);
+  // Nothing cut: no ellipsis, no clamped overflow, nothing outside the card.
   await expect(title.scrollHeight).toBeLessThanOrEqual(title.clientHeight);
+  await expect(holder.scrollWidth).toBeLessThanOrEqual(holder.clientWidth);
+  await expect(holder.scrollHeight).toBeLessThanOrEqual(holder.clientHeight);
   await expect(card.scrollHeight).toBeLessThanOrEqual(card.clientHeight);
+  const box = card.getBoundingClientRect();
+  const label = holder.getBoundingClientRect();
+  await expect(label.bottom).toBeLessThanOrEqual(box.bottom);
+  await expect(label.top).toBeGreaterThanOrEqual(box.top);
 }
 
-export const WebsiteTitleReadsInFullAt320: Story = {
+export const LongTitleAndLongNameAt320: Story = {
   tags: ["!vr"],
   args: { initialFocusId: "website", nodes: longHolderNodes },
   globals: { viewport: { value: "kcvvExplorerPhone" } },
-  play: ({ canvasElement }) => expectTitleReadsInFull(canvasElement),
+  play: ({ canvasElement }) => expectTitleAndNameRead(canvasElement),
 };
 
-export const WebsiteTitleReadsInFullOnDesktop: Story = {
+export const LongTitleAndLongNameOnDesktop: Story = {
   tags: ["!vr"],
   args: { initialFocusId: "website", nodes: longHolderNodes },
   globals: { viewport: { value: "kcvvExplorerDesktop" } },
-  play: ({ canvasElement }) => expectTitleReadsInFull(canvasElement),
+  play: ({ canvasElement }) => expectTitleAndNameRead(canvasElement),
 };
 
 /**

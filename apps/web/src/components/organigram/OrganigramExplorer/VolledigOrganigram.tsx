@@ -8,7 +8,12 @@ import { deriveCardState } from "./card-state";
 import { ArrowsOut } from "@/lib/icons.redesign";
 import { ScrollOverlay } from "@/components/design-system/ScrollHint/ScrollOverlay";
 import { holderLabel } from "./SpotlightNodeCard";
-import { buildSpotlightTree, childrenOf, CLUB_ROOT_ID } from "./spotlight-tree";
+import {
+  buildSpotlightTree,
+  childrenOf,
+  CLUB_ROOT_ID,
+  withClubRoot,
+} from "./spotlight-tree";
 
 /**
  * `<VolledigOrganigram>` — the full reporting tree as a pure-CSS DOM box chart
@@ -103,29 +108,62 @@ export function VolledigOrganigram({
   onOpenExplorer,
   className,
 }: VolledigOrganigramProps) {
-  const tree = useMemo(() => buildSpotlightTree(nodes), [nodes]);
+  const tree = useMemo(() => buildSpotlightTree(withClubRoot(nodes)), [nodes]);
   const childrenByParent = (id: string) => childrenOf(tree, id);
-  const root = tree.byId.get(CLUB_ROOT_ID) ?? nodes[0];
+  const root = tree.byId.get(CLUB_ROOT_ID);
 
   // The chart is wider than most viewports and the track opens at scrollLeft 0,
-  // which is the far left of the tree — not the root. Centre the root once.
+  // which is the far left of the tree — not the root. Keep the root centred
+  // while the layout settles (a late font swap, a resize or a rotation), and
+  // stop at the first scroll the visitor makes themselves.
   const rootRef = useRef<HTMLLIElement>(null);
   // Before paint, so the chart never shows its far-left start first.
   useLayoutEffect(() => {
     const rootBranch = rootRef.current;
     const track = rootBranch?.closest<HTMLElement>(".vo-chart");
     if (!rootBranch || !track) return;
-    const trackBox = track.getBoundingClientRect();
-    const rootBox = rootBranch.getBoundingClientRect();
-    // `instant`: the site's smooth-scroll default would animate this jump.
-    track.scrollTo({
-      left:
-        track.scrollLeft +
-        rootBox.left +
-        rootBox.width / 2 -
-        (trackBox.left + trackBox.width / 2),
-      behavior: "instant",
-    });
+
+    let visitorScrolled = false;
+    let centredAt = Number.NaN;
+    const centre = () => {
+      if (visitorScrolled) return;
+      const trackBox = track.getBoundingClientRect();
+      const rootBox = rootBranch.getBoundingClientRect();
+      // `instant`: the site's smooth-scroll default would animate this jump.
+      track.scrollTo({
+        left:
+          track.scrollLeft +
+          rootBox.left +
+          rootBox.width / 2 -
+          (trackBox.left + trackBox.width / 2),
+        behavior: "instant",
+      });
+      // What the browser settled on (it clamps), so our own scroll event is
+      // told apart from the visitor's.
+      centredAt = track.scrollLeft;
+    };
+    const stop = () => {
+      visitorScrolled = true;
+    };
+    // The track's arrows scroll it too, without a pointer event on the track.
+    const onScroll = () => {
+      if (Math.abs(track.scrollLeft - centredAt) > 2) stop();
+    };
+
+    centre();
+    const events = ["wheel", "touchstart", "pointerdown", "keydown"] as const;
+    for (const type of events)
+      track.addEventListener(type, stop, { passive: true });
+    track.addEventListener("scroll", onScroll, { passive: true });
+    const observer =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(centre);
+    observer?.observe(track);
+    observer?.observe(rootBranch);
+    return () => {
+      for (const type of events) track.removeEventListener(type, stop);
+      track.removeEventListener("scroll", onScroll);
+      observer?.disconnect();
+    };
   }, []);
 
   if (!root) return null;

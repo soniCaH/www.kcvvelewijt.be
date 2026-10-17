@@ -1,4 +1,12 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  onTestFinished,
+  vi,
+} from "vitest";
 import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { OrgChartNode } from "@/types/organigram";
@@ -87,7 +95,14 @@ const row = (title: string) =>
 
 beforeEach(() => {
   vi.mocked(trackEvent).mockClear();
-  Element.prototype.scrollIntoView = vi.fn();
+  vi.spyOn(Element.prototype, "scrollIntoView").mockImplementation(() => {});
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  // URL and hash state some tests set, reset even when the test failed.
+  window.history.replaceState(null, "", "/");
+  window.location.hash = "";
 });
 
 describe("<ClubBook>", () => {
@@ -144,6 +159,27 @@ describe("<ClubBook>", () => {
 
     const overige = screen.getByRole("region", { name: "Overige functies" });
     expect(within(overige).getByText("Losse functie")).toBeInTheDocument();
+  });
+
+  it("links a vacant row to the contact page from the row itself, with nothing to unfold", () => {
+    render(<ClubBook nodes={nodes} responsibilityPaths={paths} />);
+
+    const sportief = screen.getByRole("region", { name: "Sportief" });
+    expect(
+      within(sportief).getByRole("link", {
+        name: "plek vrij — iets voor jou?",
+      }),
+    ).toHaveAttribute("href", "/club/contact");
+    expect(
+      within(sportief).queryByText("Scouting", { selector: "summary *" }),
+    ).toBeNull();
+  });
+
+  it("brings a vacant row into focus when something points at its box", () => {
+    render(<ClubBook nodes={nodes} responsibilityPaths={paths} />);
+
+    expect(openStructureRow("sco")).toBe(true);
+    expect(document.activeElement).toHaveTextContent("Scouting");
   });
 
   it("starts every row closed and shows vacant rows as an invitation", () => {
@@ -255,6 +291,9 @@ describe("<ClubBook>", () => {
     window.location.hash = "privacy";
     const onHashChange = vi.fn();
     window.addEventListener("hashchange", onHashChange);
+    onTestFinished(() =>
+      window.removeEventListener("hashchange", onHashChange),
+    );
     render(<ClubBook nodes={nodes} responsibilityPaths={paths} />);
     await userEvent.click(screen.getByText("GDPR", { selector: "summary *" }));
     onHashChange.mockClear();
@@ -264,8 +303,6 @@ describe("<ClubBook>", () => {
     );
 
     expect(onHashChange).toHaveBeenCalled();
-    window.removeEventListener("hashchange", onHashChange);
-    window.location.hash = "";
   });
 
   it("opens the row a ?member= link points at on arrival, and counts that open once", async () => {
@@ -278,7 +315,6 @@ describe("<ClubBook>", () => {
       member_id: hashMemberId("shauni"),
       view: "cards",
     });
-    window.history.replaceState(null, "", "/");
   });
 
   it("does nothing, and throws nothing, for a ?member= id that matches no row", async () => {
@@ -289,6 +325,5 @@ describe("<ClubBook>", () => {
 
     expect(document.querySelectorAll("details[open]")).toHaveLength(0);
     expect(trackEvent).not.toHaveBeenCalled();
-    window.history.replaceState(null, "", "/");
   });
 });

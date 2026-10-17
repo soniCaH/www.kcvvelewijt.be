@@ -1,4 +1,12 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  onTestFinished,
+} from "vitest";
 import {
   render,
   screen,
@@ -105,7 +113,13 @@ describe("HubSearch", () => {
   });
 
   it("opens the person's clubboek row when a person is chosen and the row exists (F5)", async () => {
-    Element.prototype.scrollIntoView = vi.fn();
+    const scrollIntoView = vi
+      .spyOn(Element.prototype, "scrollIntoView")
+      .mockImplementation(() => {});
+    onTestFinished(() => {
+      scrollIntoView.mockRestore();
+      document.querySelector("[data-testid=row]")?.remove();
+    });
     document.body.insertAdjacentHTML(
       "beforeend",
       '<details data-node-ids="secretaris" data-testid="row"><summary>Secretaris</summary></details>',
@@ -115,7 +129,6 @@ describe("HubSearch", () => {
     fireEvent.click(await screen.findByText("Inge De Wit"));
     expect(screen.getByTestId("row")).toHaveProperty("open", true);
     expect(window.location.hash).toBe("");
-    document.querySelector("[data-testid=row]")?.remove();
   });
 
   it("jumps to the structuur section when a person is chosen and no row exists (Storybook)", async () => {

@@ -191,6 +191,46 @@ describe("QuestionCard", () => {
       },
     );
 
+    it("stands down when the visitor leaves for the structuur while it grows", () => {
+      top = 20;
+      const onShowInStructure = vi.fn();
+      const withNode = {
+        ...path,
+        primaryContact: {
+          contactType: "position" as const,
+          position: "Jeugdsecretaris",
+          nodeId: "node-jsec",
+          members: [{ id: "m1", name: "Els Vos" }],
+        },
+      };
+      const view = render(
+        <QuestionCard
+          path={withNode}
+          open={false}
+          onToggle={noop}
+          onShowInStructure={onShowInStructure}
+        />,
+      );
+      fireEvent.click(header());
+      view.rerender(
+        <QuestionCard
+          path={withNode}
+          open
+          onToggle={noop}
+          onShowInStructure={onShowInStructure}
+        />,
+      );
+
+      fireEvent.click(screen.getByRole("link", { name: /toon in structuur/i }));
+      heightEnded(growOf(panelOf(/inschrijven kan het hele seizoen/i)));
+
+      expect(onShowInStructure).toHaveBeenCalledWith(
+        expect.anything(),
+        "node-jsec",
+      );
+      expect(scrollIntoView).not.toHaveBeenCalled();
+    });
+
     it("a key that does not scroll leaves the guard armed", () => {
       top = 20;
       const grow = tapOpen();

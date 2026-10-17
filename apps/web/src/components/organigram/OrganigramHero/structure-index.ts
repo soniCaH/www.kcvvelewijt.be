@@ -1,5 +1,4 @@
 import type { OrgChartNode } from "@/types/organigram";
-import { CLUB_ROOT_ID } from "../OrganigramExplorer/spotlight-tree";
 
 /**
  * The hero's structure-index artefact: three derivable counts, no individual
@@ -27,9 +26,6 @@ export function deriveStructureIndex(members: OrgChartNode[]): StructureIndex {
   const departments = new Set<string>();
 
   for (const node of members) {
-    // The synthetic club root is the organisation, not a position — counting
-    // it (and its stand-in "person") made every figure one too high.
-    if (node.id === CLUB_ROOT_ID) continue;
     for (const person of node.members) {
       if (person.id) peopleIds.add(person.id);
     }
@@ -37,7 +33,7 @@ export function deriveStructureIndex(members: OrgChartNode[]): StructureIndex {
   }
 
   return {
-    posities: members.filter((node) => node.id !== CLUB_ROOT_ID).length,
+    posities: members.length,
     mensen: peopleIds.size,
     afdelingen: departments.size,
   };

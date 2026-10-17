@@ -10,7 +10,7 @@ function KeyFigureCard({ figure }: { figure: KeyFigure }) {
       data-key-node-id={figure.nodeId}
       data-key-member-id={figure.holders[0]?.id}
       tabIndex={-1}
-      className={`${KAARTENBAK} break-inside-avoid p-4 print:p-3`}
+      className={`${KAARTENBAK} break-inside-avoid p-4 print:p-2`}
     >
       <h4 className="text-label text-jersey-deep font-mono uppercase">
         {figure.title}
@@ -55,7 +55,7 @@ export function KeyFigureCards({ groups }: { groups: KeyGroup[] }) {
           <section
             key={group.title}
             aria-label={group.title}
-            className="flex flex-col gap-4"
+            className="flex flex-col gap-4 print:gap-2"
           >
             <div className="border-ink border-b pb-1">
               <SectionHeader

@@ -22,27 +22,6 @@ async function rowNodeIds(page: Page): Promise<string[]> {
 }
 
 /**
- * Waits until the answer's grow (`<HeightGrow>`, 500ms) and the scroll-back
- * guard that may follow it have finished: the region's clip and `scrollY` both
- * read the same on two consecutive polls. A click that lands mid-grow has its
- * own scroll overridden by the card's.
- */
-async function waitForAnswerSettled(page: Page, region: Locator) {
-  const clip = region.locator("xpath=..");
-  let previous = "";
-  await expect
-    .poll(async () => {
-      const height = (await clip.boundingBox())?.height ?? 0;
-      const scrollY = await page.evaluate(() => window.scrollY);
-      const state = `${height}:${scrollY}`;
-      const settled = height > 0 && state === previous;
-      previous = state;
-      return settled;
-    })
-    .toBe(true);
-}
-
-/**
  * The `expanded` state the browser exposes to assistive tech for the first
  * row's summary (Chromium maps `<summary>` to a disclosure triangle). Read from
  * the accessibility tree, so it is what a screen reader is told, not the DOM
@@ -68,24 +47,11 @@ async function announcedExpanded(page: Page): Promise<boolean | undefined> {
   }
 }
 
-/** Waits until the row sits inside the viewport. Polls the position, never the scroll animation. */
-async function expectInView(page: Page, row: Locator) {
-  await expect
-    .poll(async () => {
-      const box = await row.boundingBox();
-      const viewport = page.viewportSize();
-      return box && viewport
-        ? box.y >= 0 && box.y + Math.min(box.height, 40) <= viewport.height
-        : false;
-    })
-    .toBe(true);
-}
-
 async function expectRowOpenAndFocused(page: Page, nodeId: string) {
   const row = rowFor(page, nodeId);
   await expect(row).toHaveAttribute("open", "");
   await expect(row.locator("summary")).toBeFocused();
-  await expectInView(page, row);
+  await expect(row).toBeInViewport();
 }
 
 test.describe("/hulp structuur", () => {
@@ -118,7 +84,6 @@ test.describe("/hulp structuur", () => {
     await waitForHydrated(toggle);
     await toggle.click();
     const openRegion = page.locator('#hulp [role="region"]:not([inert])');
-    await waitForAnswerSettled(page, openRegion);
     await openRegion
       .locator(`a[href^="/hulp?member=${encodeURIComponent(target.nodeId)}"]`)
       .click();
@@ -166,7 +131,7 @@ test.describe("/hulp structuur", () => {
 
     await expect(book.locator("details[open]").first()).toBeVisible();
     await expect(book.locator("details[open] > summary")).toBeFocused();
-    await expectInView(page, book.locator("details[open]").first());
+    await expect(book.locator("details[open]").first()).toBeInViewport();
   });
 
   test("?member= with an unknown id opens nothing and throws nothing", async ({

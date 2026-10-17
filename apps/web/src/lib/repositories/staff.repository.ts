@@ -63,20 +63,6 @@ const STAFF_MEMBER_BY_PSD_ID_QUERY =
 
 // ─── View models ─────────────────────────────────────────────────────────────
 
-const CLUB_ROOT_NODE: OrgChartNode = {
-  id: "club",
-  title: "KCVV Elewijt",
-  members: [
-    {
-      id: "club",
-      name: "KCVV Elewijt",
-      imageUrl: "/images/logo-flat.png",
-    },
-  ],
-  department: "algemeen",
-  parentId: null,
-};
-
 export interface KeyContactVM {
   role: string;
   name: string;
@@ -222,9 +208,7 @@ export const StaffRepositoryLive = Layer.succeed(StaffRepository, {
         revalidate: SANITY_LIST_REVALIDATE,
         tags: [SANITY_TAGS.staff],
       },
-    ).pipe(
-      Effect.map((nodes) => [CLUB_ROOT_NODE, ...nodes.map(toOrgChartNode)]),
-    ),
+    ).pipe(Effect.map((nodes) => nodes.map(toOrgChartNode))),
   findByPsdId: (psdId) =>
     fetchGroq<STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT>(
       STAFF_MEMBER_BY_PSD_ID_QUERY,

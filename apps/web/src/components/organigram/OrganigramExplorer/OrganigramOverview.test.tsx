@@ -2,7 +2,7 @@
  * OrganigramOverview — ties the on-page chart to the fullscreen explorer (#2054).
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { OrganigramOverview } from "./OrganigramOverview";
@@ -12,7 +12,11 @@ vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
 describe("OrganigramOverview", () => {
   beforeEach(() => {
-    Element.prototype.scrollIntoView = vi.fn();
+    vi.spyOn(Element.prototype, "scrollIntoView").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it("opens the explorer focused on a clicked chart node", async () => {

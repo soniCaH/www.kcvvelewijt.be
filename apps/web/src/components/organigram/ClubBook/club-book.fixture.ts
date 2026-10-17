@@ -37,9 +37,8 @@ const RAAD: OrgChartMember[] = [
   ...firstHolder("jeugdvoorzitter"),
 ];
 
-export const clubBookNodes: OrgChartNode[] = explorerFixture
-  .filter((n) => n.id !== "club")
-  .map((node, index) => {
+export const clubBookNodes: OrgChartNode[] = explorerFixture.map(
+  (node, index) => {
     const description = node.roleCode ? WHY[node.roleCode] : undefined;
     // A person holding two boxes in the same list: TVJO's holder also runs the
     // Onderbouw — they merge into one row ("TVJO · Jeugdcoördinator Onderbouw").
@@ -55,7 +54,8 @@ export const clubBookNodes: OrgChartNode[] = explorerFixture
                 : member,
             );
     return { ...node, members, ...(description ? { description } : {}) };
-  });
+  },
+);
 
 const question = (
   id: string,

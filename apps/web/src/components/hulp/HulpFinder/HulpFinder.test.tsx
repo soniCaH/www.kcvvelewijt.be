@@ -168,7 +168,6 @@ describe("HulpFinder", () => {
   });
 
   it("opens the person's clubboek row in-page instead of navigating when the row exists", () => {
-    Element.prototype.scrollIntoView = vi.fn();
     render(
       <>
         <details data-node-ids="node-gc" data-testid="row">
@@ -187,7 +186,7 @@ describe("HulpFinder", () => {
   });
 
   it("never soft-navigates 'Toon in structuur': without a row it scrolls to the structuur section", () => {
-    Element.prototype.scrollIntoView = vi.fn();
+    scrollIntoView.mockClear();
     render(
       <>
         <section id="structuur" data-testid="structuur" />
@@ -199,7 +198,7 @@ describe("HulpFinder", () => {
       name: /toon in structuur/i,
     });
     expect(fireEvent.click(link)).toBe(false);
-    expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
+    expect(scrollIntoView).toHaveBeenCalled();
   });
 
   it("leaves a modified click on 'Toon in structuur' to the browser", () => {

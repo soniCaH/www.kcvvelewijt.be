@@ -2,7 +2,7 @@ import { EditorialLink, SectionHeader } from "@/components/design-system";
 import {
   joinNames,
   type LedgerRow as LedgerRowVM,
-  type Pillar,
+  type Chapter,
 } from "./club-book";
 import { LedgerRow } from "./LedgerRow";
 
@@ -25,42 +25,42 @@ function SubHead({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** One pillar of the clubboek: title, purpose, who sits on the board there, then the ledger. */
-export function PillarChapter({ pillar }: { pillar: Pillar }) {
+/** One chapter of the clubboek: title, purpose, who sits on the board there, then the ledger. */
+export function ChapterSection({ chapter }: { chapter: Chapter }) {
   return (
     <section
-      aria-label={pillar.title}
-      className="flex min-w-0 flex-col print:mb-4"
+      aria-label={chapter.title}
+      className="flex min-w-0 flex-col print:mb-3"
     >
       <div className="border-ink border-t-2 pt-3 print:break-after-avoid">
         <SectionHeader
           as="h3"
           size="display-sm"
-          title={pillar.title}
+          title={chapter.title}
           className="mb-0 sm:mb-0"
         />
       </div>
-      <p className="text-ink-muted text-body-sm mt-1 italic print:break-after-avoid">
-        {pillar.purpose}
+      <p className="text-ink-muted text-body-sm mt-1 italic print:break-inside-avoid print:break-after-avoid">
+        {chapter.purpose}
       </p>
-      {pillar.board.length > 0 && (
-        <p className="text-body-sm text-ink mt-2">
+      {chapter.board.length > 0 && (
+        <p className="text-body-sm text-ink mt-2 print:mt-1 print:break-inside-avoid">
           <span className="text-jersey-deep font-semibold">
             In het bestuur:
           </span>{" "}
-          {joinNames(pillar.board)}
+          {joinNames(chapter.board)}
         </p>
       )}
-      {pillar.boardLink && (
+      {chapter.boardLink && (
         <EditorialLink
-          href={pillar.boardLink.href}
+          href={chapter.boardLink.href}
           className="mt-2 self-start print:hidden"
         >
-          {pillar.boardLink.label}
+          {chapter.boardLink.label}
         </EditorialLink>
       )}
-      <div className="mt-5 flex flex-col gap-4">
-        {pillar.sections.map((section) => (
+      <div className="mt-5 flex flex-col gap-4 print:mt-2 print:gap-2">
+        {chapter.sections.map((section) => (
           <div key={section.heading ?? "all"}>
             {section.heading && <SubHead>{section.heading}</SubHead>}
             <Ledger rows={section.rows} />
@@ -71,7 +71,7 @@ export function PillarChapter({ pillar }: { pillar: Pillar }) {
   );
 }
 
-/** Boxes with no pillar. Rendered last so a box an editor has not placed yet never vanishes. */
+/** Boxes with no chapter. Rendered last so a box an editor has not placed yet never vanishes. */
 export function OverigeFuncties({ rows }: { rows: LedgerRowVM[] }) {
   if (rows.length === 0) return null;
   return (

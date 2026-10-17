@@ -99,9 +99,9 @@ export function OrganigramOverview({
         canOpenMember={(node) => hasStructureTarget(node.id)}
         onOpenMember={(node) => {
           // Collapse the verkenner and show the person where the structuur
-          // lists them: their row in the clubboek, unfolded. A box with no row
-          // or card keeps the explorer open instead of closing onto nothing.
-          if (!hasStructureTarget(node.id)) return;
+          // lists them: their row in the clubboek, unfolded. The explorer offers
+          // this only for a box that has one (`canOpenMember`), so there is
+          // always somewhere to land.
           rowAfterClose.current = node.id;
           setOpen(false);
         }}

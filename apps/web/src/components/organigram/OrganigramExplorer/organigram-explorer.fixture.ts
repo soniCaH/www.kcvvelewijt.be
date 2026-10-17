@@ -9,7 +9,6 @@ import type { OrgChartNode, OrgPillar } from "@/types/organigram";
  * Spec rows: [id, title, parentId, memberCount].
  */
 const SPEC: Array<[string, string, string | null, number]> = [
-  ["club", "KCVV Elewijt", null, 0],
   ["gc", "Gedelegeerd Commissaris", "club", 2],
   ["voorzitter", "Voorzitter", "club", 1],
   // Voorzitter → 11
@@ -23,7 +22,7 @@ const SPEC: Array<[string, string, string | null, number]> = [
   ["kantine-evt", "Kantine & Evenementen", "voorzitter", 1],
   ["website", "Website & Communicatie", "voorzitter", 1],
   ["bestuursorgaan", "Bestuursorgaan", "voorzitter", 6],
-  ["gerechtelijk-corr", "Gerechtelijk Correspondent", "voorzitter", 1],
+  ["gerechtelijk-corr", "Gerechtigd Correspondent", "voorzitter", 1],
   // Jeugdvoorzitter → 7
   ["jeugdsecr", "Jeugdsecretaris & Afgevaardigden", "jeugdvoorzitter", 1],
   ["scheidsrechters", "Interne Scheidsrechters", "jeugdvoorzitter", 1],
@@ -139,14 +138,13 @@ export const explorerFixture: OrgChartNode[] = SPEC.map(
     parentId,
     department: "algemeen",
     ...META[id],
-    members:
-      id === "club"
-        ? []
-        : Array.from({ length: count }, (_, i) => ({
-            id: `${id}-m${i}`,
-            name: holderName(idx, i),
-            // Single holders get a profile href so "Volledig profiel →" shows.
-            ...(count === 1 ? { href: `/staf/${id}` } : {}),
-          })),
+    // `idx + 1`: the club root used to sit at index 0 of this list. Holder
+    // names (and so every baseline that shows them) keep their old values.
+    members: Array.from({ length: count }, (_, i) => ({
+      id: `${id}-m${i}`,
+      name: holderName(idx + 1, i),
+      // Single holders get a profile href so "Volledig profiel →" shows.
+      ...(count === 1 ? { href: `/staf/${id}` } : {}),
+    })),
   }),
 );

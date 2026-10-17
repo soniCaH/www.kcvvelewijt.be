@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect, userEvent, within } from "storybook/test";
 import { ClubBook } from "./ClubBook";
 import { clubBookNodes, clubBookPaths } from "./club-book.fixture";
+import { CLUB_BOOK_PRINT_CSS } from "./print-style";
 
 const meta = {
   title: "Features/Organigram/ClubBook",
@@ -57,13 +58,9 @@ export const RowOpenSharedBox: Story = {
   },
 };
 
-/** A vacant box invites, and opens onto a link to the contact page. */
-export const VacantRowOpen: Story = {
+/** Vacant boxes invite with a link to the contact page; there is nothing to unfold. */
+export const VacantRows: Story = {
   args: { nodes: onlyPillar("sportief") },
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByText("Scouting"));
-  },
 };
 
 /** Boxes an editor has not placed in a pillar yet still show, last. */
@@ -108,17 +105,24 @@ export const PdfButtonFitsAt320: Story = {
 
 /**
  * What goes on paper: the book under `print` media (the test runner emulates it
- * for `parameters.emulateMedia`), in a column the width of an A4 page between
- * its margins. Three key cards across, rows showing names only, no unfolded
- * cards and no button — even with a row open.
+ * for `parameters.emulateMedia`) with the real print sheet — the same
+ * `CLUB_BOOK_PRINT_CSS` the PDF button injects — applied by a decorator, so
+ * everything outside the book is hidden and its ancestors stripped exactly as in
+ * the PDF. Three key cards across, rows showing names only, no unfolded cards
+ * and no button, even with a row open. The tablet viewport (768px) with the
+ * page margin as padding stands in for an A4 column; `@page` itself only
+ * applies to a real print, which the Playwright PDF check covers.
  */
 export const PrintSheet: Story = {
-  parameters: { emulateMedia: "print", vr: { viewports: ["desktop"] } },
+  parameters: { emulateMedia: "print", vr: { viewports: ["tablet"] } },
   decorators: [
     (Story) => (
-      <div className="w-[186mm] bg-white">
+      <>
+        <style media="print">
+          {`${CLUB_BOOK_PRINT_CSS} html { padding-inline: 17mm; }`}
+        </style>
         <Story />
-      </div>
+      </>
     ),
   ],
   play: async ({ canvasElement }) => {
