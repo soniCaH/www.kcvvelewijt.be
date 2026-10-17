@@ -9,7 +9,7 @@ export { CLUB_TIMEZONE };
  * locale. Every formatter goes through it — the shared ones below and the
  * route-local ones that render a shape with only one consumer — so a rendered
  * calendar date never depends on where the code runs. Vercel is UTC, the
- * browser is the visitor's own zone, and `<MatchStripView>` formats in both: an
+ * browser is the visitor's own zone, and a client component formats in both: an
  * unpinned late-evening kickoff renders one day on the server and the next
  * after hydration. Offset-less ISO input is read as UTC (the stored contract)
  * rather than the runtime zone.
@@ -103,8 +103,8 @@ export function clubDayStart(): string {
  * (#2616 review). The AC calls this "a pure function … over a Match date and
  * a reference calendar day" — a default that reads the wall clock would let
  * `isMatchDay(fixture.date)` compile anywhere, including inside
- * `<MatchStripView>`, the client component whose own docblock explains at
- * length why that exact read must stay server-side (a client/server date
+ * `<MatchStripView>`, whose switch is a client component and whose own docblock
+ * explains why that exact read must stay server-side (a client/server date
  * disagreement across a midnight boundary). A required parameter makes that
  * mistake unwritable instead of merely documented; the one extra argument at
  * the one real call site (`<MatchStrip>`) is the cost. The parse this
