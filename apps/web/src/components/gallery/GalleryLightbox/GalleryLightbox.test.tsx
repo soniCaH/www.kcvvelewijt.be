@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import type { LightboxProps } from "yet-another-react-lightbox";
 import { GalleryLightbox, galleryImageAlt } from "./GalleryLightbox";
+import { trackEvent } from "@/lib/analytics/track-event";
 // Warm the lazy chunk during collect, so the click-time import is a cache hit.
 import "./GalleryViewer";
 
@@ -17,6 +18,8 @@ vi.mock("yet-another-react-lightbox", () => ({
     return null;
   },
 }));
+
+vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
 /**
  * Rule 5 of #2548: a gallery photo is the site's one genuinely alone image, so
@@ -117,5 +120,18 @@ describe("GalleryLightbox motion (#3383)", () => {
     expect(wrapper).toHaveClass("yarl__slide_loading");
     expect(wrapper).toHaveAttribute("aria-hidden", "true");
     expect(wrapper?.querySelector(".kcvv-spinner-pulse")).not.toBeNull();
+  });
+});
+
+describe("GalleryLightbox analytics", () => {
+  it("fires gallery_image_view with the slug and the viewed index on navigation", async () => {
+    const { on } = await renderLightbox();
+
+    on?.view?.({ index: 1 });
+
+    expect(trackEvent).toHaveBeenCalledWith("gallery_image_view", {
+      gallery_slug: "zemst-derby",
+      image_index: 1,
+    });
   });
 });

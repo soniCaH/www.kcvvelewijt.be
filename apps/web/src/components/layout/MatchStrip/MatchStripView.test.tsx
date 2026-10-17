@@ -132,6 +132,25 @@ describe("MatchStripView", () => {
     expect(row).toHaveAccessibleName(/KCVV Elewijt 3 - RC Mechelen 1/);
   });
 
+  it("switches back to the result with the back arrow after moving to the fixture", () => {
+    render(<MatchStripView data={{ result, fixture }} />);
+    const slide = () => document.querySelector('[aria-live="polite"]');
+    fireEvent.click(
+      screen.getByRole("button", { name: "Toon de volgende wedstrijd" }),
+    );
+    expect(slide()?.textContent).toContain("vs.");
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Toon de laatste uitslag" }),
+    );
+
+    expect(slide()?.textContent).toContain("3–1");
+    expect(slide()?.textContent).not.toContain("vs.");
+    expect(
+      screen.getByRole("button", { name: "Toon de laatste uitslag" }),
+    ).toBeDisabled();
+  });
+
   it("labels the result slide correctly when the fixture disappears", () => {
     // The switch starts on the result. Move it to the fixture, then re-render
     // without one: the fallback must still render as the result slide rather
