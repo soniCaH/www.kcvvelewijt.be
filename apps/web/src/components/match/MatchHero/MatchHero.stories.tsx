@@ -266,7 +266,9 @@ export const MobileCollapse: Story = {
 // named viewports (`globals.viewport`, honoured by `pnpm test:storybook`) —
 // happy-dom has no layout. Names wrap, so the assertions compare the two
 // sides to each other rather than hard-code a line count a fallback font
-// could change.
+// could change. `!vr`: assertion-only — the VR runner screenshots at its own
+// 375px mobile width whatever `globals.viewport` says, and the refreshed
+// mobile baselines of the stories above already show the stacked look.
 
 interface HeroGeometry {
   crests: HTMLElement[];
@@ -298,12 +300,24 @@ function assertStackedHero({ crests, names, score }: HeroGeometry) {
   expect(Math.abs(c0.top - c1.top)).toBeLessThanOrEqual(1);
   const [n0, n1] = names.map((el) => el.getBoundingClientRect());
   expect(Math.abs(n0.top - n1.top)).toBeLessThanOrEqual(1);
-  // Crest ABOVE name, not beside it.
+  // Crest ABOVE name, not beside it — on both sides.
   expect(n0.top).toBeGreaterThanOrEqual(c0.bottom);
+  expect(n1.top).toBeGreaterThanOrEqual(c1.bottom);
   expect(
     Math.abs(mid(score.getBoundingClientRect()) - mid(c0)),
   ).toBeLessThanOrEqual(2);
 }
+
+/** The shared check for the short-name-beside-long-name pair. */
+const playShortBesideLong: Story["play"] = async ({ canvasElement }) => {
+  const geometry = await heroGeometry(canvasElement);
+  assertStackedHero(geometry);
+  const [home, away] = geometry.names;
+  // The long name takes more lines than the short one.
+  expect(away.getBoundingClientRect().height).toBeGreaterThan(
+    home.getBoundingClientRect().height,
+  );
+};
 
 // 6 + 8 + 6 letters: three lines at both 320px and 375px, 22 characters.
 const threeLineName = "Lierse Sporting Kempen";
@@ -324,32 +338,18 @@ const stackedMatch = {
 export const MobileStacked320: Story = {
   args: { match: stackedMatch },
   globals: { viewport: { value: "mobile1" } },
-  parameters: { phoneFrame: true, vr: { viewports: ["mobile"] } },
-  play: async ({ canvasElement }) => {
-    const geometry = await heroGeometry(canvasElement);
-    assertStackedHero(geometry);
-    const [home, away] = geometry.names;
-    // The long name takes more lines than the short one.
-    expect(away.getBoundingClientRect().height).toBeGreaterThan(
-      home.getBoundingClientRect().height,
-    );
-  },
+  parameters: { phoneFrame: true },
+  tags: ["!vr"],
+  play: playShortBesideLong,
 };
 
-/** The same pair at 375px. Play-only: the VR mobile capture is 375 already. */
+/** The same pair at 375px. */
 export const MobileStacked375: Story = {
   args: { match: stackedMatch },
   globals: { viewport: { value: "kcvvMobile" } },
   parameters: { phoneFrame: true },
   tags: ["!vr"],
-  play: async ({ canvasElement }) => {
-    const geometry = await heroGeometry(canvasElement);
-    assertStackedHero(geometry);
-    const [home, away] = geometry.names;
-    expect(away.getBoundingClientRect().height).toBeGreaterThan(
-      home.getBoundingClientRect().height,
-    );
-  },
+  play: playShortBesideLong,
 };
 
 /**
@@ -364,7 +364,8 @@ export const MobileNoLogo: Story = {
     },
   },
   globals: { viewport: { value: "mobile1" } },
-  parameters: { phoneFrame: true, vr: { viewports: ["mobile"] } },
+  parameters: { phoneFrame: true },
+  tags: ["!vr"],
   play: async ({ canvasElement }) => {
     assertStackedHero(await heroGeometry(canvasElement));
   },
@@ -380,7 +381,8 @@ export const MobileScheduledVs: Story = {
     },
   },
   globals: { viewport: { value: "mobile1" } },
-  parameters: { phoneFrame: true, vr: { viewports: ["mobile"] } },
+  parameters: { phoneFrame: true },
+  tags: ["!vr"],
   play: async ({ canvasElement }) => {
     const geometry = await heroGeometry(canvasElement);
     assertStackedHero(geometry);
@@ -404,21 +406,17 @@ export const MobileThirtyCharName: Story = {
     },
   },
   globals: { viewport: { value: "mobile1" } },
-  parameters: { phoneFrame: true, vr: { viewports: ["mobile"] } },
+  parameters: { phoneFrame: true },
+  tags: ["!vr"],
   play: async ({ canvasElement }) => {
-    const { names, crests } = await heroGeometry(canvasElement);
-    const away = names[1];
+    const geometry = await heroGeometry(canvasElement);
+    assertStackedHero(geometry);
+    const away = geometry.names[1];
     expect(away).toHaveAttribute("title", "Boortmeerbeek-Hever-Schiplaken");
     const lineHeight = parseFloat(getComputedStyle(away).lineHeight);
     const height = away.getBoundingClientRect().height;
     // Wraps (no ellipsis on one line) and stops at three lines.
     expect(height).toBeGreaterThan(lineHeight * 1.5);
     expect(height).toBeLessThanOrEqual(lineHeight * 3 + 1);
-    expect(
-      Math.abs(
-        crests[0].getBoundingClientRect().top -
-          crests[1].getBoundingClientRect().top,
-      ),
-    ).toBeLessThanOrEqual(1);
   },
 };
