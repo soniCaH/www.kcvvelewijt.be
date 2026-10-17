@@ -69,6 +69,15 @@ describe("<HtmlTableBlock>", () => {
     expect(region.className).not.toContain("rgba(0,0,0,0.025)");
   });
 
+  it("reads at 12px on a phone and steps up to body-md (16px) from md — the one table skin (#3504)", () => {
+    render(<HtmlTableBlock html={SIMPLE_TABLE_HTML} />);
+    const region = screen.getByRole("region");
+    expect(region).toHaveClass(
+      "[&>table]:text-xs",
+      "md:[&>table]:text-body-md",
+    );
+  });
+
   it("does not anchor any column — an authored table simply scrolls (#2582 rule 3)", () => {
     // No scroll-dimension mock: HtmlTableBlock never passes
     // `overflowsClassName` at all, so "sticky" cannot appear regardless of

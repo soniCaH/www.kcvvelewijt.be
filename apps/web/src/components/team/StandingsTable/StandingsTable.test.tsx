@@ -16,7 +16,7 @@
  */
 
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, screen, act } from "@testing-library/react";
+import { render, screen, act, within } from "@testing-library/react";
 import type { RankingEntry } from "@kcvv/api-contract";
 import { StandingsTable } from "./StandingsTable";
 import { stubAnimationFrame } from "@/../tests/helpers/scroll-hint.helpers";
@@ -102,6 +102,14 @@ describe("StandingsTable", () => {
     expect(container.firstChild).toBeNull();
   });
 
+  it("reads at 12px on a phone and steps up to body-md (16px) from md, table and list alike (#3504)", () => {
+    const { unmount } = render(<StandingsTable entries={DIVISION} />);
+    expect(screen.getByRole("table")).toHaveClass("text-xs", "md:text-body-md");
+    unmount();
+    render(<StandingsTable entries={NUMBERLESS_DIVISION} />);
+    expect(screen.getByRole("list")).toHaveClass("text-xs", "md:text-body-md");
+  });
+
   it("renders the standard column headers", () => {
     render(<StandingsTable entries={DIVISION} />);
     const headers = screen
@@ -157,6 +165,24 @@ describe("StandingsTable", () => {
 
     const nameSpan = screen.getByTitle("Leader FC");
     expect(nameSpan).toHaveClass("min-w-0");
+  });
+
+  it("floors the pinned # column at the width Ploeg's sticky offset assumes (#3504)", () => {
+    // `w-12` is only a preferred width: once the table overflows, the
+    // browser shrinks `#` to its content, while Ploeg stays pinned at
+    // `left-12` — so Ploeg's cell slid 10px over the `M` column at 320/375px.
+    // `min-w-12` keeps `#` as wide as the offset Ploeg sticks to.
+    render(<StandingsTable entries={DIVISION} />);
+    const headers = screen.getAllByRole("columnheader");
+    expect(headers.find((h) => h.textContent === "#")).toHaveClass("min-w-12");
+    expect(headers.find((h) => h.textContent === "Ptn")).toHaveClass(
+      "min-w-14",
+    );
+    for (const row of screen.getAllByRole("row").slice(1)) {
+      const cells = within(row).getAllByRole("cell");
+      expect(cells[0]).toHaveClass("min-w-12");
+      expect(cells[cells.length - 1]).toHaveClass("min-w-14");
+    }
   });
 
   it("does not highlight a non-matching team", () => {

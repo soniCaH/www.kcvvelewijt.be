@@ -103,7 +103,7 @@ function NumberlessClubList({
           <MonoLabel tone="muted">{caption}</MonoLabel>
         </p>
       ) : null}
-      <ul className="font-mono text-xs">
+      <ul className="md:text-body-md font-mono text-xs">
         {entries.map((entry) => {
           const isKcvv =
             highlightClubId !== undefined && entry.club_id === highlightClubId;
@@ -162,7 +162,7 @@ export function StandingsTable({
         // `w-14` below) so they no longer overlay it (#2582 review finding 3).
         chromeClassName="right-14"
       >
-        <table className="w-full border-collapse font-mono text-xs">
+        <table className="md:text-body-md w-full border-collapse font-mono text-xs">
           {caption ? (
             <caption className="pb-2 text-left">
               <MonoLabel tone="muted">{caption}</MonoLabel>
@@ -172,7 +172,7 @@ export function StandingsTable({
             <tr className="border-ink border-b-2">
               <th
                 scope="col"
-                className="text-ink-muted bg-cream sticky left-0 z-10 w-12 py-2 pr-2 pl-4 text-left font-normal tracking-wider uppercase"
+                className="text-ink-muted bg-cream sticky left-0 z-10 w-12 min-w-12 py-2 pr-2 pl-4 text-left font-normal tracking-wider uppercase"
               >
                 #
               </th>
@@ -214,7 +214,7 @@ export function StandingsTable({
               </th>
               <th
                 scope="col"
-                className="text-ink-muted bg-cream sticky right-0 z-10 w-14 py-2 pr-4 text-right font-normal tracking-wider uppercase"
+                className="text-ink-muted bg-cream sticky right-0 z-10 w-14 min-w-14 py-2 pr-4 text-right font-normal tracking-wider uppercase"
               >
                 Ptn
               </th>
@@ -237,7 +237,7 @@ export function StandingsTable({
                   {/* Position — pinned left (anchor group) */}
                   <td
                     className={cn(
-                      "text-ink-muted bg-cream sticky left-0 z-10 w-12 py-2 pr-2 pl-4",
+                      "text-ink-muted bg-cream sticky left-0 z-10 w-12 min-w-12 py-2 pr-2 pl-4",
                       isKcvv && cn(KCVV_TINT, KCVV_ACCENT_RULE),
                     )}
                   >
@@ -291,7 +291,7 @@ export function StandingsTable({
                       clamping to 700. */}
                   <td
                     className={cn(
-                      "text-ink bg-cream sticky right-0 z-10 w-14 py-2 pr-4 text-right font-bold",
+                      "text-ink bg-cream sticky right-0 z-10 w-14 min-w-14 py-2 pr-4 text-right font-bold",
                       isKcvv && KCVV_TINT,
                     )}
                   >
