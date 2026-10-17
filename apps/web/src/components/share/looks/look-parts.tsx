@@ -7,6 +7,8 @@ import {
   MONO_FONT,
   TOKENS,
 } from "../constants";
+import { SoccerBall } from "@/lib/icons.redesign";
+import { CardGraphic, CrestMatchup } from "../shared/ShareElements";
 import { toSameOriginImage } from "../shared/theme";
 import type { ShareContent, TitleRun } from "./share-content";
 
@@ -49,6 +51,9 @@ const FALLBACK_SET: Record<LookId, { letter: string; picks: number[] }> = {
   affiche: { letter: "C", picks: [1, 3, 5, 7, 8] },
   ticket: { letter: "E", picks: [1, 3, 7, 8] },
 };
+
+/** How many pictures a look's fallback set holds (the rotation wraps there). */
+export const fallbackCount = (look: LookId) => FALLBACK_SET[look].picks.length;
 
 export function fallbackPicture(look: LookId, index: number): string {
   const { letter, picks } = FALLBACK_SET[look];
@@ -135,13 +140,75 @@ export function Grain() {
   );
 }
 
-export function Crest({ size }: { size: number }) {
-  return (
+/** The club crest; a match story adds its squad badge (`A`, `U17`) beside it. */
+export function Crest({ size, squad }: { size: number; squad?: string }) {
+  const crest = (
     <img
       src={KCVV_LOGO}
       alt="KCVV Elewijt"
       style={{ width: size, height: size, display: "block" }}
     />
+  );
+  if (!squad) return crest;
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: size * 0.2 }}>
+      {crest}
+      <span
+        style={{
+          background: TOKENS.ink,
+          color: TOKENS.cream,
+          padding: `${size * 0.08}px ${size * 0.2}px`,
+          fontFamily: MONO_FONT,
+          fontWeight: 700,
+          fontSize: size * 0.42,
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          whiteSpace: "nowrap",
+          lineHeight: 1.2,
+        }}
+      >
+        {squad}
+      </span>
+    </div>
+  );
+}
+
+/** The match block: both crests before kick-off, the score after. */
+export function Hero({
+  content,
+  color,
+  size,
+}: {
+  content: ShareContent;
+  color: string;
+  size: number;
+}) {
+  const hero = content.hero;
+  if (!hero) return null;
+  if (hero.kind === "crests")
+    return (
+      <CrestMatchup
+        crests={hero.crests}
+        size={Math.round(220 * size)}
+        gap={Math.round(56 * size)}
+        style={{ justifyContent: "flex-start" }}
+      />
+    );
+  return (
+    <span
+      style={{
+        display: "block",
+        fontFamily: DISPLAY_FONT,
+        fontWeight: 900,
+        fontSize: 220 * size,
+        lineHeight: 0.85,
+        letterSpacing: "-0.02em",
+        whiteSpace: "nowrap",
+        color,
+      }}
+    >
+      {hero.score}
+    </span>
   );
 }
 
@@ -434,6 +501,80 @@ export function Detail({
       );
     case "dateblock":
       return <DateBlock content={content} color={color} size={size} />;
+    case "halftime":
+      return (
+        <span
+          style={{
+            ...mono,
+            display: "inline-block",
+            fontSize: 72 * size,
+            border: `4px solid ${color}`,
+            padding: `${8 * size}px ${22 * size}px`,
+            transform: "rotate(-3deg)",
+          }}
+        >
+          45&apos;
+        </span>
+      );
+    case "minuteBall":
+    case "minute":
+      return (
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 16 * size,
+            border: `4px solid ${color}`,
+            padding: `${10 * size}px ${26 * size}px`,
+            fontFamily: DISPLAY_FONT,
+            fontWeight: 900,
+            fontSize: 96 * size,
+            lineHeight: 1,
+            color,
+          }}
+        >
+          {content.detail === "minuteBall" && (
+            <SoccerBall
+              aria-hidden="true"
+              style={{ width: 80 * size, height: 80 * size, flexShrink: 0 }}
+            />
+          )}
+          {content.minute}&apos;
+        </span>
+      );
+    case "card": {
+      // The card graphic the W disciplinary templates draw, scaled down.
+      const k = 0.3 * size;
+      return (
+        <span
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 28 * size,
+            ...mono,
+            fontFamily: DISPLAY_FONT,
+            fontSize: 96 * size,
+            lineHeight: 1,
+          }}
+        >
+          <span style={{ width: 460 * k, height: 656 * k, flexShrink: 0 }}>
+            <span
+              style={{
+                display: "block",
+                transform: `scale(${k})`,
+                transformOrigin: "top left",
+              }}
+            >
+              <CardGraphic
+                color={content.card === "red" ? TOKENS.brick : TOKENS.warm}
+                rotate={-6}
+              />
+            </span>
+          </span>
+          {content.minute}&apos;
+        </span>
+      );
+    }
     case "none":
       return null;
   }

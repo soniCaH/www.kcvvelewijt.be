@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { toPng } from "html-to-image";
 import { GoalKcvvTemplate } from "../GoalKcvvTemplate/GoalKcvvTemplate";
 import { GoalOpponentTemplate } from "../GoalOpponentTemplate/GoalOpponentTemplate";
@@ -33,34 +40,34 @@ import {
 } from "@/lib/icons.redesign";
 import type { ComponentType } from "react";
 import { LOOKS } from "../looks/looks";
-import type {
-  CoverMode,
-  LookId,
-  ShareTheme,
-  WashStep,
+import { clubToday } from "@/lib/utils/dates";
+import {
+  fallbackCount,
+  usesFallback,
+  type CoverMode,
+  type ShareFormat,
+  type ShareTheme,
+  type WashStep,
 } from "../looks/look-parts";
 import {
   buildArticleContent,
   buildEventContent,
+  buildMatchContent,
   fieldsOf,
   type ShareFields,
   type ShareItem,
+  type TemplateId,
 } from "../looks/share-content";
+import {
+  readSession,
+  writeSession,
+  type AnyLook,
+  type ShareMode,
+  type StorySession,
+} from "./story-session";
 
-export type Aspect = "story" | "square";
-
-export type TemplateId =
-  | "goal-kcvv"
-  | "goal-opponent"
-  | "kickoff"
-  | "halftime"
-  | "full-time"
-  | "red-card-kcvv"
-  | "red-card-opponent"
-  | "yellow-card-kcvv"
-  | "yellow-card-opponent"
-  | "square-pre-game"
-  | "square-result";
+export type Aspect = ShareFormat;
+export type { ShareMode, TemplateId };
 
 export interface PlayerForShare {
   id: string;
@@ -204,15 +211,13 @@ const TEMPLATES: TemplateMeta[] = [
     dateTime: true,
     image: true,
   }),
-  meta("square-result", "Eindstand", Flag, "square", {
+  meta("square-result", "Eindstand 1:1", Flag, "square", {
     score: true,
     mood: true,
     competition: true,
     image: true,
   }),
 ];
-
-export type ShareMode = "match" | "article" | "event";
 
 export interface SharePageProps {
   matches: MatchOption[];
@@ -242,6 +247,19 @@ const WASH_STEPS: { value: WashStep; label: string }[] = [
   { value: "normaal", label: "Normaal" },
   { value: "sterk", label: "Sterk" },
 ];
+/** Where a story starts: a match photo is used as is, a news/event cover is
+ *  usually a flyer. */
+const defaultCover = (mode: ShareMode): CoverMode =>
+  mode === "match" ? "foto" : "affiche_wazig";
+
+/** Every look in rotation order; W draws matches only (#3535). */
+const ALL_LOOKS: { id: AnyLook; name: string }[] = [
+  ...LOOKS.map(({ id, name }) => ({ id, name })),
+  { id: "wedstrijd", name: "W · Wedstrijd" },
+];
+
+const noSubscribe = () => () => {};
+
 const COVER_MODES: { value: CoverMode; label: string }[] = [
   { value: "foto", label: "Foto" },
   { value: "affiche_wazig", label: "Affiche wazig" },
@@ -454,13 +472,47 @@ function renderTemplate(id: TemplateId, o: RenderOpts): React.ReactNode {
   }
 }
 
-export function SharePage({
+/**
+ * The tool restores the story in progress from browser storage, which the
+ * server cannot see: render it only after hydration, so the first client
+ * render already starts from the stored story instead of flashing defaults.
+ */
+export function SharePage(props: SharePageProps) {
+  const hydrated = useSyncExternalStore(
+    noSubscribe,
+    () => true,
+    () => false,
+  );
+  return hydrated ? <ShareTool {...props} /> : null;
+}
+
+/**
+ * The stored session for this render: a deep link to another item than the
+ * stored one starts a new story (the per-phone look and fallback indexes
+ * stay).
+ */
+function bootSession(initial: SharePageProps["initial"]): StorySession {
+  const session = readSession();
+  const story = session.story;
+  if (
+    initial &&
+    story &&
+    (story.mode !== initial.kind || story.itemSlug !== initial.item?.slug)
+  ) {
+    return { ...session, story: null };
+  }
+  return session;
+}
+
+function ShareTool({
   matches,
   players,
   articles = NO_ITEMS,
   events = NO_ITEMS,
   initial,
 }: SharePageProps) {
+  const [boot] = useState(() => bootSession(initial));
+  const saved = boot.story;
   const templateRef = useRef<HTMLDivElement>(null);
   const previewUrlRef = useRef<string | null>(null);
   const uploadUrlRef = useRef<string | null>(null);
@@ -472,39 +524,58 @@ export function SharePage({
   const [generatedBlob, setGeneratedBlob] = useState<Blob | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const [aspect, setAspect] = useState<Aspect>("story");
-  const [selectedTemplateId, setSelectedTemplateId] =
-    useState<TemplateId>("goal-kcvv");
+  // Every initial value comes from the stored story in progress (#3536).
+  const [aspect, setAspect] = useState<Aspect>(saved?.format ?? "story");
+  const [selectedTemplateId, setSelectedTemplateId] = useState<TemplateId>(
+    saved?.template ?? "goal-kcvv",
+  );
 
   // Session-persistent fields (survive template switches)
-  const [matchName, setMatchName] = useState("");
-  const [score, setScore] = useState("");
-  const [competition, setCompetition] = useState("");
-  const [dateTime, setDateTime] = useState("");
-  const [squad, setSquad] = useState("");
+  const [matchName, setMatchName] = useState(saved?.match.name ?? "");
+  const [score, setScore] = useState(saved?.match.score ?? "");
+  const [competition, setCompetition] = useState(
+    saved?.match.competition ?? "",
+  );
+  const [dateTime, setDateTime] = useState(saved?.match.dateTime ?? "");
+  const [squad, setSquad] = useState(saved?.match.squad ?? "");
   // Disambiguates two matches that share a matchName (e.g. two KCVV squads vs
   // the same opponent club, or "KCVV Elewijt — KCVV Elewijt" placeholders).
   // Set only on an unambiguous datalist pick (by label); cleared on a miss so
   // a stale id can never outlive its pick.
-  const [selectedMatchId, setSelectedMatchId] = useState<number | null>(null);
+  const [selectedMatchId, setSelectedMatchId] = useState<number | null>(
+    saved?.match.id ?? null,
+  );
 
   // Template-specific fields (reset on template switch)
-  const [minute, setMinute] = useState("");
-  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
-  const [mood, setMood] = useState<ResultMood>("win");
+  const [minute, setMinute] = useState(saved?.match.minute ?? "");
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(
+    saved?.match.playerId ?? null,
+  );
+  const [mood, setMood] = useState<ResultMood>(saved?.match.mood ?? "win");
   const [playerSearch, setPlayerSearch] = useState("");
 
   // News and events (#3540)
-  const [mode, setMode] = useState<ShareMode>(initial?.kind ?? "match");
-  const [item, setItem] = useState<ShareItem | null>(initial?.item ?? null);
-  const [fields, setFields] = useState<ShareFields | null>(
-    initial?.item ? fieldsOf(initial.item) : null,
+  const [mode, setMode] = useState<ShareMode>(
+    initial?.kind ?? saved?.mode ?? "match",
+  );
+  const [item, setItem] = useState<ShareItem | null>(() => {
+    if (initial) return initial.item;
+    if (!saved?.itemSlug) return null;
+    const pool = saved.mode === "event" ? events : articles;
+    return pool.find((i) => i.slug === saved.itemSlug) ?? null;
+  });
+  const [fields, setFields] = useState<ShareFields | null>(() =>
+    // A stored item that is no longer listed takes its edits with it.
+    item ? (saved?.fields ?? fieldsOf(item)) : null,
   );
   const [itemSearch, setItemSearch] = useState("");
-  const [look, setLook] = useState<LookId>("kaart");
-  const [theme, setTheme] = useState<ShareTheme>("licht");
-  const [wash, setWash] = useState<WashStep>("normaal");
-  const [coverMode, setCoverMode] = useState<CoverMode>("affiche_wazig");
+  const [look, setLook] = useState<AnyLook>(boot.look);
+  const [fallbackNext, setFallbackNext] = useState(boot.fallbackNext);
+  const [theme, setTheme] = useState<ShareTheme>(saved?.theme ?? "licht");
+  const [wash, setWash] = useState<WashStep>(saved?.wash ?? "normaal");
+  const [coverMode, setCoverMode] = useState<CoverMode>(
+    saved?.coverMode ?? defaultCover(mode),
+  );
 
   // Manual photo upload (object URL)
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
@@ -536,7 +607,20 @@ export function SharePage({
   }, [clearPreview]);
 
   const currentTemplate = TEMPLATES.find((t) => t.id === selectedTemplateId)!;
-  const visibleTemplates = TEMPLATES.filter((t) => t.aspect === aspect);
+  // Looks that can draw the story: A–E draw everything; W only matches, and
+  // only in its own format (9 story templates, 2 square ones).
+  const fittingLooks = ALL_LOOKS.filter(
+    (l) =>
+      l.id !== "wedstrijd" ||
+      (mode === "match" && currentTemplate.aspect === aspect),
+  );
+  const activeLook = fittingLooks.some((l) => l.id === look)
+    ? look
+    : fittingLooks[0]!.id;
+  const isW = activeLook === "wedstrijd";
+  const visibleTemplates = isW
+    ? TEMPLATES.filter((t) => t.aspect === aspect)
+    : TEMPLATES;
   const selectedPlayer = players.find((p) => p.id === selectedPlayerId);
   // An id from an unambiguous datalist pick wins over the (possibly
   // colliding) matchName lookup; free-typed input has no id, so it falls
@@ -555,6 +639,13 @@ export function SharePage({
   // suffix never reaches the canvas.
   const handleMatchNameChange = (value: string) => {
     const pickedByLabel = matches.find((m) => m.label === value);
+    if (pickedByLabel && pickedByLabel.id !== selectedMatchId) {
+      // Another match is another story: drop the last one's moment details.
+      setScore("");
+      setMinute("");
+      setSelectedPlayerId(null);
+      setMood("win");
+    }
     if (pickedByLabel) {
       setMatchName(pickedByLabel.matchName);
       setSelectedMatchId(pickedByLabel.id);
@@ -602,8 +693,15 @@ export function SharePage({
   const handleAspectChange = (next: Aspect) => {
     if (next === aspect) return;
     setAspect(next);
-    setSelectedTemplateId(next === "square" ? "square-pre-game" : "goal-kcvv");
-    resetTemplateFields();
+    // A–E draw every template in both formats; W keeps today's swap.
+    if (isW) {
+      setSelectedTemplateId(
+        next === "square" ? "square-pre-game" : "goal-kcvv",
+      );
+      resetTemplateFields();
+    } else {
+      clearPreview();
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -626,9 +724,11 @@ export function SharePage({
   }, []);
 
   // Resolve the image for the current template. Goal KCVV walks the full chain;
-  // other image-capable templates use only the manual upload.
+  // other image-capable templates use only the manual upload. Looks A–E have
+  // a photo slot on every template.
+  const photoCapable = currentTemplate.imageCapable || !isW;
   const resolvedImageUrl = useMemo(() => {
-    if (!currentTemplate.imageCapable) return undefined;
+    if (!photoCapable) return undefined;
     if (selectedTemplateId === "goal-kcvv") {
       return (
         uploadedImageUrl ??
@@ -638,12 +738,7 @@ export function SharePage({
       );
     }
     return uploadedImageUrl ?? undefined;
-  }, [
-    currentTemplate.imageCapable,
-    selectedTemplateId,
-    uploadedImageUrl,
-    selectedPlayer,
-  ]);
+  }, [photoCapable, selectedTemplateId, uploadedImageUrl, selectedPlayer]);
 
   // A deep-linked item outside the list still shows up in its picker.
   const pool = mode === "article" ? articles : events;
@@ -657,14 +752,108 @@ export function SharePage({
   const filteredItems = query
     ? items.filter((i) => i.title.toLowerCase().includes(query))
     : items;
-  const content =
-    mode !== "match" && item && fields
-      ? (item.kind === "article" ? buildArticleContent : buildEventContent)(
-          item,
-          fields,
-        )
-      : null;
-  const Look = LOOKS.find((l) => l.id === look)!.Component;
+  const content = isW
+    ? null
+    : mode === "match"
+      ? buildMatchContent({
+          template: selectedTemplateId,
+          matchName: matchName || FALLBACK_MATCH_NAME,
+          score: score || FALLBACK_SCORE,
+          minute: minute || FALLBACK_MINUTE,
+          mood,
+          competition: competition.trim() || undefined,
+          dateTime: dateTime.trim() || undefined,
+          homeLogo: selectedMatch?.homeLogo,
+          awayLogo: selectedMatch?.awayLogo,
+          squad: shortSquadLabel(squad),
+          playerName: selectedPlayer
+            ? `${selectedPlayer.firstName} ${selectedPlayer.lastName}`
+            : undefined,
+          photo: resolvedImageUrl,
+        })
+      : item && fields
+        ? (item.kind === "article" ? buildArticleContent : buildEventContent)(
+            item,
+            fields,
+          )
+        : null;
+  const Look = LOOKS.find((l) => l.id === activeLook)?.Component;
+  const fallbackIndex = isW ? 0 : (fallbackNext[activeLook] ?? 0);
+
+  // Keep the story in progress in the browser (#3536). The own photo is a
+  // `blob:` URL that dies with the tab, so it is never stored.
+  useEffect(() => {
+    writeSession({
+      look,
+      fallbackNext,
+      story: {
+        day: clubToday(),
+        mode,
+        template: selectedTemplateId,
+        format: aspect,
+        theme,
+        wash,
+        coverMode,
+        match: {
+          id: selectedMatchId,
+          name: matchName,
+          score,
+          competition,
+          dateTime,
+          squad,
+          minute,
+          playerId: selectedPlayerId,
+          mood,
+        },
+        itemSlug: item?.slug ?? null,
+        fields,
+      },
+    });
+  }, [
+    look,
+    fallbackNext,
+    mode,
+    selectedTemplateId,
+    aspect,
+    theme,
+    wash,
+    coverMode,
+    selectedMatchId,
+    matchName,
+    score,
+    competition,
+    dateTime,
+    squad,
+    minute,
+    selectedPlayerId,
+    mood,
+    item,
+    fields,
+  ]);
+
+  /**
+   * A PNG left the tool (shared, or its download clicked): the next story
+   * starts on the next fitting look, the next fallback picture of this look,
+   * and the default Omslag. The match details stay.
+   */
+  const handleSaved = () => {
+    if (content && !isW && usesFallback(content, coverMode)) {
+      setFallbackNext((prev) => ({
+        ...prev,
+        [activeLook]: ((prev[activeLook] ?? 0) + 1) % fallbackCount(activeLook),
+      }));
+    }
+    const at = fittingLooks.findIndex((l) => l.id === activeLook);
+    setLook(fittingLooks[(at + 1) % fittingLooks.length]!.id);
+    setCoverMode(defaultCover(mode));
+    // The PNG on screen is the saved story, not the next one. Its object
+    // URL is revoked a beat later: a download may still be reading it.
+    const url = previewUrlRef.current;
+    previewUrlRef.current = null;
+    setGeneratedBlob(null);
+    setPreviewUrl(null);
+    if (url) setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
 
   const handleModeChange = (next: ShareMode) => {
     if (next === mode) return;
@@ -672,7 +861,7 @@ export function SharePage({
     setItem(null);
     setFields(null);
     setItemSearch("");
-    setCoverMode("affiche_wazig");
+    setCoverMode(defaultCover(next));
     clearPreview();
   };
 
@@ -755,6 +944,7 @@ export function SharePage({
     });
     try {
       await navigator.share({ files: [file] });
+      handleSaved();
     } catch (err) {
       if (err instanceof Error && err.name === "AbortError") return;
       // The caught error goes to the console only — the visitor sees the
@@ -771,6 +961,7 @@ export function SharePage({
     link.download = fileName;
     link.href = previewUrl;
     link.click();
+    handleSaved();
   };
 
   const labelClass =
@@ -1064,8 +1255,8 @@ export function SharePage({
             </section>
           )}
 
-          {/* ── Photo upload — image-capable templates ──────────────────── */}
-          {currentTemplate.imageCapable && (
+          {/* ── Photo upload — image-capable templates, every one in A–E ─── */}
+          {photoCapable && (
             <section aria-labelledby="photo-label">
               <label
                 id="photo-label"
@@ -1097,59 +1288,63 @@ export function SharePage({
         </>
       )}
 
+      {/* ── Look, theme, wash (#3535) ───────────────────────────────── */}
+      <section aria-labelledby="look-label">
+        <h2 id="look-label" className={`${labelClass} mb-3`}>
+          Look
+        </h2>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+          {fittingLooks.map((l) => (
+            <button
+              key={l.id}
+              type="button"
+              onClick={() => {
+                setLook(l.id);
+                clearPreview();
+              }}
+              aria-pressed={activeLook === l.id}
+              className={`rounded-none border-2 px-3 py-3 font-mono text-sm font-semibold uppercase transition-colors duration-300 ${
+                activeLook === l.id
+                  ? "border-ink bg-jersey-deep text-cream"
+                  : "border-ink/30 text-ink hover:border-ink bg-cream"
+              }`}
+            >
+              {l.name}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* W keeps its own dark wash per moment: no theme or wash to choose. */}
+      {!isW && (
+        <Choice
+          id="theme-label"
+          label="Thema"
+          options={THEMES}
+          value={theme}
+          onChange={(next) => {
+            setTheme(next);
+            clearPreview();
+          }}
+        />
+      )}
+
+      {activeLook === "affiche" && (
+        <Choice
+          id="wash-label"
+          label="Waas"
+          options={WASH_STEPS}
+          value={wash}
+          onChange={(next) => {
+            setWash(next);
+            clearPreview();
+          }}
+        />
+      )}
+
       {/* ── News / event story (#3540) ───────────────────────────────── */}
       {mode !== "match" && (
         <>
-          <section aria-labelledby="look-label">
-            <h2 id="look-label" className={`${labelClass} mb-3`}>
-              Look
-            </h2>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {LOOKS.map((l) => (
-                <button
-                  key={l.id}
-                  type="button"
-                  onClick={() => {
-                    setLook(l.id);
-                    clearPreview();
-                  }}
-                  aria-pressed={look === l.id}
-                  className={`rounded-none border-2 px-3 py-3 font-mono text-sm font-semibold uppercase transition-colors duration-300 ${
-                    look === l.id
-                      ? "border-ink bg-jersey-deep text-cream"
-                      : "border-ink/30 text-ink hover:border-ink bg-cream"
-                  }`}
-                >
-                  {l.name}
-                </button>
-              ))}
-            </div>
-          </section>
-
-          <Choice
-            id="theme-label"
-            label="Thema"
-            options={THEMES}
-            value={theme}
-            onChange={(next) => {
-              setTheme(next);
-              clearPreview();
-            }}
-          />
-
-          {look === "affiche" && (
-            <Choice
-              id="wash-label"
-              label="Waas"
-              options={WASH_STEPS}
-              value={wash}
-              onChange={(next) => {
-                setWash(next);
-                clearPreview();
-              }}
-            />
-          )}
-
           {/* Omslag only chooses how a cover is shown: an item without one
               already fills its slot with the fallback picture. */}
           {item?.cover && (
@@ -1254,7 +1449,7 @@ export function SharePage({
               }}
             >
               <div ref={templateRef}>
-                {content ? (
+                {content && Look ? (
                   <Look
                     content={content}
                     format={aspect}
@@ -1262,7 +1457,7 @@ export function SharePage({
                     wash={wash}
                     coverMode={coverMode}
                     blocks={{}}
-                    fallbackIndex={0}
+                    fallbackIndex={fallbackIndex}
                   />
                 ) : (
                   <ShareBadgeContext.Provider value={shortSquadLabel(squad)}>

@@ -5,6 +5,14 @@ import {
   type EventType,
 } from "@/components/event/event-type-style";
 import { TOKENS } from "../constants";
+import {
+  formatScore,
+  opponentName,
+  resolveCrests,
+  splitMatchName,
+  type CrestEntry,
+  type ResultMood,
+} from "../shared/theme";
 
 /** Schema-derived, so a new article type is a compile error in the table below. */
 type ArticleType = NonNullable<Article["articleType"]>;
@@ -12,14 +20,43 @@ type ArticleType = NonNullable<Article["articleType"]>;
 /**
  * `ShareContent` — the one view-model every share look renders (#3535). Looks
  * never read an article, an event or a match option; a builder turns each
- * source into this shape. Match moments get their builder in #3536.
+ * source into this shape.
  */
+
+/** A match moment: today's 11 templates, the key of every match story. */
+export type TemplateId =
+  | "goal-kcvv"
+  | "goal-opponent"
+  | "kickoff"
+  | "halftime"
+  | "full-time"
+  | "red-card-kcvv"
+  | "red-card-opponent"
+  | "yellow-card-kcvv"
+  | "yellow-card-opponent"
+  | "square-pre-game"
+  | "square-result";
 
 export type ShareContentKind = "match" | "article" | "event";
 
 /** The one detail a type carries in every look (spec colour + detail tables). */
 export type ShareDetail =
-  "quote" | "none" | "arrow" | "dateblock" | "vs" | "whistle";
+  | "quote"
+  | "none"
+  | "arrow"
+  | "dateblock"
+  | "vs"
+  | "whistle"
+  /** Match moments (#3536): the `45'` stamp, the minute disc (with or
+   *  without the ball) and the disciplinary card with its minute. */
+  | "halftime"
+  | "minuteBall"
+  | "minute"
+  | "card";
+
+/** The match block: both crests before kick-off, the score after. */
+export type MatchHero =
+  { kind: "crests"; crests: CrestEntry[] } | { kind: "score"; score: string };
 
 export interface TitleRun {
   text: string;
@@ -51,8 +88,12 @@ export interface ShareContent {
   info: string[];
   /** Day + short month for the date block. */
   dateBlock: { day: string; month: string };
-  /** Squad badge (`A`, `U17`) — match stories only (#3536). */
+  /** Squad badge (`A`, `U17`) — match stories only. */
   squad?: string;
+  /** Match stories only: the hero block, the minute, the card colour. */
+  hero?: MatchHero;
+  minute?: string;
+  card?: "yellow" | "red";
   /** `null` = no picture of its own: the look fills the slot from its fallback set. */
   photo: SharePhoto | null;
 }
@@ -292,5 +333,155 @@ export function shareCover(row: {
   return {
     url: `${row.coverUrl}?rect=${rect}`,
     hotspot: { x: clamp((x - left) / fw), y: clamp((y - top) / fh) },
+  };
+}
+
+/** What a match story is made of: the form's fields, already resolved. */
+export interface MatchMomentInput {
+  template: TemplateId;
+  matchName: string;
+  score: string;
+  minute: string;
+  mood: ResultMood;
+  competition?: string;
+  /** Free text, e.g. `Zaterdag · 20:00`. */
+  dateTime?: string;
+  homeLogo?: string;
+  awayLogo?: string;
+  squad?: string;
+  playerName?: string;
+  /** The editor's own upload or the scorer's photo; none → the look's fallback. */
+  photo?: string;
+}
+
+/** Spec table "Match moments" — a first pass, the owner tunes it in Storybook. */
+const MOMENT_STYLE = {
+  kickoff: {
+    label: "Aftrap",
+    fill: TOKENS.jerseyDeepDark,
+    onFill: TOKENS.cream,
+    detail: "dateblock",
+  },
+  halftime: {
+    label: "Rust",
+    fill: TOKENS.inkSoft,
+    onFill: TOKENS.cream,
+    detail: "halftime",
+  },
+  win: {
+    label: "Eindstand",
+    fill: TOKENS.warm,
+    onFill: TOKENS.ink,
+    detail: "whistle",
+  },
+  result: {
+    label: "Eindstand",
+    fill: TOKENS.ink,
+    onFill: TOKENS.cream,
+    detail: "whistle",
+  },
+  goal: {
+    label: "Goal",
+    fill: TOKENS.jerseyDeep,
+    onFill: TOKENS.cream,
+    detail: "minuteBall",
+  },
+  against: {
+    label: "Tegengoal",
+    fill: TOKENS.cream,
+    onFill: TOKENS.ink,
+    detail: "minute",
+  },
+  yellow: {
+    label: "Gele kaart",
+    fill: TOKENS.warm,
+    onFill: TOKENS.ink,
+    detail: "card",
+  },
+  red: {
+    label: "Rode kaart",
+    fill: TOKENS.brick,
+    onFill: TOKENS.cream,
+    detail: "card",
+  },
+} satisfies Record<string, TypeStyle>;
+
+const MOMENT_OF: Record<
+  TemplateId,
+  (mood: ResultMood) => keyof typeof MOMENT_STYLE
+> = {
+  kickoff: () => "kickoff",
+  "square-pre-game": () => "kickoff",
+  halftime: () => "halftime",
+  "full-time": (mood) => (mood === "win" ? "win" : "result"),
+  "square-result": (mood) => (mood === "win" ? "win" : "result"),
+  "goal-kcvv": () => "goal",
+  "goal-opponent": () => "against",
+  "yellow-card-kcvv": () => "yellow",
+  "yellow-card-opponent": () => "yellow",
+  "red-card-kcvv": () => "red",
+  "red-card-opponent": () => "red",
+};
+
+const isKcvv = (name: string) => /kcvv/i.test(name);
+
+export function buildMatchContent(m: MatchMomentInput): ShareContent {
+  const moment = MOMENT_OF[m.template](m.mood);
+  const style: TypeStyle = MOMENT_STYLE[moment];
+  const kickoff = moment === "kickoff";
+  // `Zaterdag · 20:00` → block `20:00` over `Zaterdag`; no hour → no block.
+  const hour = m.dateTime?.match(/(\d{1,2})[:.hu](\d{2})/);
+  const day = m.dateTime?.split("·")[0]?.trim();
+  const detail = kickoff && !hour ? "none" : style.detail;
+
+  const ours = m.template.endsWith("-kcvv");
+  const theirs = m.template.endsWith("-opponent");
+  const { home, away } = splitMatchName(m.matchName);
+  const title: TitleRun[] = ours
+    ? [{ text: m.playerName || "KCVV Elewijt", accent: false }]
+    : theirs
+      ? [{ text: opponentName(m.matchName), accent: false }]
+      : [
+          { text: home, accent: isKcvv(home) },
+          ...(away
+            ? [
+                { text: " — ", accent: false },
+                { text: away, accent: isKcvv(away) },
+              ]
+            : []),
+        ];
+
+  return {
+    kind: "match",
+    typeKey: m.template,
+    ...style,
+    detail,
+    kicker: style.label,
+    title,
+    info: [
+      ours || theirs ? m.matchName : "",
+      kickoff ? (m.dateTime ?? "") : "",
+      m.competition ?? "",
+    ].filter(Boolean),
+    dateBlock: hour
+      ? {
+          day: `${hour[1]!.padStart(2, "0")}:${hour[2]}`,
+          month: day || "Aftrap",
+        }
+      : { day: "", month: "" },
+    squad: m.squad,
+    hero: kickoff
+      ? {
+          kind: "crests",
+          crests: resolveCrests(m.matchName, m.homeLogo, m.awayLogo),
+        }
+      : moment === "yellow" || moment === "red"
+        ? undefined
+        : { kind: "score", score: formatScore(m.score) },
+    minute: m.minute,
+    card: moment === "yellow" || moment === "red" ? moment : undefined,
+    photo: m.photo
+      ? { src: m.photo, source: "own", focal: { x: 0.5, y: 0.5 } }
+      : null,
   };
 }

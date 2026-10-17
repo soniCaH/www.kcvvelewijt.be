@@ -7,6 +7,7 @@ import {
   Cta,
   Detail,
   Grain,
+  Hero,
   Info,
   LookPhoto,
   Stamp,
@@ -66,7 +67,7 @@ export function KaartLook({
             fallbackIndex={fallbackIndex}
           />
           <div style={{ position: "absolute", top: 56, left: 64 }}>
-            <Crest size={sq ? 84 : 104} />
+            <Crest size={sq ? 84 : 104} squad={content.squad} />
           </div>
         </div>
         <div
@@ -92,6 +93,9 @@ export function KaartLook({
               size={sq ? 28 : 34}
             />
           </div>
+          {content.hero && (
+            <Hero content={content} color={text} size={sq ? 0.55 : 0.8} />
+          )}
           <div style={{ display: "flex", flexDirection: "column", gap }}>
             {content.detail !== "none" && (
               <div style={{ alignSelf: "flex-start" }}>

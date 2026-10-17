@@ -6,6 +6,7 @@ import {
   Cta,
   Detail,
   Grain,
+  Hero,
   Info,
   LookPhoto,
   Title,
@@ -63,7 +64,7 @@ export function AfficheLook({
           zIndex: 2,
         }}
       >
-        <Crest size={sq ? 84 : 112} />
+        <Crest size={sq ? 84 : 112} squad={content.squad} />
       </div>
       {showDetail && (
         <div
@@ -91,6 +92,9 @@ export function AfficheLook({
           zIndex: 2,
         }}
       >
+        {content.hero && (
+          <Hero content={content} color={text} size={sq ? 0.55 : 0.85} />
+        )}
         {content.detail === "quote" && (
           <Detail
             content={content}

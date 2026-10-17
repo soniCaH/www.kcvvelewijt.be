@@ -6,6 +6,7 @@ import {
   Cta,
   Detail,
   Grain,
+  Hero,
   Info,
   LookPhoto,
   RuleKicker,
@@ -114,6 +115,9 @@ export function PlakboekLook({
             }}
           >
             <div style={{ alignSelf: "flex-start" }}>{label}</div>
+            {content.hero && (
+              <Hero content={content} color={text} size={0.45} />
+            )}
             {content.detail !== "none" && (
               <div style={{ alignSelf: "flex-start" }}>
                 <Detail content={content} color={accent} size={0.55} />
@@ -134,7 +138,7 @@ export function PlakboekLook({
                 marginTop: 12,
               }}
             >
-              <Crest size={64} />
+              <Crest size={64} squad={content.squad} />
               <Cta color={accent} size={20} />
             </div>
           </div>
@@ -164,9 +168,10 @@ export function PlakboekLook({
           }}
         >
           {label}
-          <Crest size={104} />
+          <Crest size={104} squad={content.squad} />
         </div>
         <Title runs={content.title} size={112} color={text} accent={accent} />
+        {content.hero && <Hero content={content} color={text} size={0.8} />}
         <div
           style={{
             display: "flex",

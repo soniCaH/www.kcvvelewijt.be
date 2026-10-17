@@ -6,6 +6,7 @@ import {
   Cta,
   DateBlock,
   Detail,
+  Hero,
   Info,
   LookPhoto,
   Title,
@@ -53,7 +54,7 @@ export function TicketLook({
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <Crest size={sq ? 64 : 96} />
+          <Crest size={sq ? 64 : 96} squad={content.squad} />
           <span
             style={{
               fontFamily: MONO_FONT,
@@ -127,6 +128,9 @@ export function TicketLook({
                 minWidth: 0,
               }}
             >
+              {content.hero && (
+                <Hero content={content} color={tText} size={sq ? 0.42 : 0.6} />
+              )}
               <span
                 style={{
                   fontFamily: MONO_FONT,
