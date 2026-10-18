@@ -18,6 +18,22 @@ export interface LeaderDotRowProps {
 }
 
 /**
+ * The leader on its own: a dotted rule that expands between two things on one
+ * baseline. `<LeaderDotRow>` is its first user; the `/hulp` clubboek's
+ * unfolding rows (`<summary>`: title, leader, names, "+") reuse it. Hidden from
+ * assistive tech — read aloud, a run of dots is noise.
+ */
+export function LeaderFill() {
+  return (
+    <span
+      aria-hidden="true"
+      data-leader-fill="true"
+      className="border-ink-muted mx-1.5 mb-1 h-0 min-w-3 flex-1 border-b border-dotted"
+    />
+  );
+}
+
+/**
  * `label · · · · · value` — the printed contents-page row (#2622, decision D11
  * · S5 in `docs/research/decision-sheet.md`).
  *
@@ -51,14 +67,10 @@ export function LeaderDotRow({
   const contents = (
     <>
       <span className="min-w-0 truncate">{label}</span>
-      {/* The leader. Hidden from assistive tech — see the docblock. `mb-1`
+      {/* The leader. Hidden from assistive tech — see `<LeaderFill>`. `mb-1`
           drops the rule just under the shared baseline, which is what makes it
           read as a leader rather than a strikethrough. */}
-      <span
-        aria-hidden="true"
-        data-leader-fill="true"
-        className="border-ink-muted mx-1.5 mb-1 h-0 min-w-3 flex-1 border-b border-dotted"
-      />
+      <LeaderFill />
       {value ? (
         <span className="text-ink-muted text-label shrink-0 font-mono whitespace-nowrap">
           {value}

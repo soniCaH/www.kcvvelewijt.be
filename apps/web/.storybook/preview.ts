@@ -58,6 +58,12 @@ const preview: Preview = {
           name: "Organigram Explorer Desktop (1440x900)",
           styles: { width: "1440px", height: "900px" },
         },
+        // `VolledigOrganigram.stories.tsx`'s root-in-view play fixture (#3527):
+        // the 390px phone the AC names, which no entry above matches.
+        kcvvPhone390: {
+          name: "KCVV Phone (390)",
+          styles: { width: "390px", height: "844px" },
+        },
         // `OrganigramSectionNav.stories.tsx`'s `SlotHeightMatchesTheChip*`
         // play fixtures need the exact 1280px the #3248 production
         // measurement used — no `MINIMAL_VIEWPORTS` entry reaches it.

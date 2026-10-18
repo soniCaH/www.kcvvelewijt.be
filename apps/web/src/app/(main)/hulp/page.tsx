@@ -5,13 +5,14 @@
  * Hulp-first page on the cream / fanzine vocabulary: a sticky two-door section
  * nav (Hulp / Structuur) + the unified `<HubSearch>`, the jersey-deep-dark
  * `<OrganigramHero>` with the structure index, the `#hulp` finder section, a
- * `<StripedSeam>`, the `#structuur` directory section, and a closing
+ * `<StripedSeam>`, the `#structuur` clubboek section, and a closing
  * `<CtaBand>`.
  *
  * Phase 1 (#2052) stands up this spine: the hero + nav + unified search are
- * live; the `#hulp` finder (#2056) and `#structuur` directory (#2053) sections
- * are skeletons filled in by their own phases. Both repos are read server-side
- * (Sanity, ISR 3600).
+ * live; the `#hulp` finder (#2056) and the `#structuur` section are filled in
+ * by their own phases. #3525 replaced the department directory and its side
+ * panel with the `<ClubBook>`: key-figure cards plus a ledger per pillar, a row
+ * unfolding in place. Both repos are read server-side (Sanity, ISR 3600).
  */
 
 import type { Metadata } from "next";
@@ -39,9 +40,8 @@ import {
   OrganigramHero,
   deriveStructureIndex,
 } from "@/components/organigram/OrganigramHero";
-import { HubMemberPanel } from "@/components/organigram/HubMemberPanel";
 import { HubSearchQueryProvider } from "@/components/organigram/HubSearch";
-import { StructureDirectory } from "@/components/organigram/StructureDirectory";
+import { ClubBook } from "@/components/organigram/ClubBook";
 import { OrganigramOverview } from "@/components/organigram/OrganigramExplorer";
 import { HulpFinder } from "@/components/hulp/HulpFinder";
 
@@ -115,99 +115,94 @@ export default async function HulpHubPage() {
         <JsonLd data={buildFAQPageJsonLd(faqEntries)} />
       )}
 
-      {/* One `<HubMemberPanel>` (7o5 / #2055) spans the nav + BOTH halves: the
-          directory cards open it by click-delegation, the verkenner via context,
-          the finder's "Toon in structuur →" via `openMemberById` (7o6c · 4), and
-          a person picked in either `<HubSearch>` opens it too (7o9 / F5) — so the
-          sticky-nav search needs the provider as well. */}
-      <HubMemberPanel nodes={members} responsibilityPaths={responsibilityPaths}>
-        <OrganigramSectionNav
-          members={members}
-          responsibilityPaths={responsibilityPaths}
-        />
-        {/* Top under the sticky nav + hero keeps the plain step (an opening,
+      <OrganigramSectionNav
+        members={members}
+        responsibilityPaths={responsibilityPaths}
+      />
+      {/* Top under the sticky nav + hero keeps the plain step (an opening,
             #3306); the bottom sits above the `<CtaBand>` seam, so it gives one
             step back. The in-column seam below keeps its own `my-*` margin. */}
-        <PageContainer width="index" className="pt-12 pb-10 sm:pt-16 sm:pb-14">
-          <OrganigramHero
-            members={members}
-            responsibilityPaths={responsibilityPaths}
-            structureIndex={structureIndex}
+      <PageContainer width="index" className="pt-12 pb-10 sm:pt-16 sm:pb-14">
+        <OrganigramHero
+          members={members}
+          responsibilityPaths={responsibilityPaths}
+          structureIndex={structureIndex}
+        />
+
+        {/* ① Hulp-first — the responsibility finder (#2056). */}
+        <section
+          id="hulp"
+          aria-label="Hulp"
+          tabIndex={-1}
+          className="mt-12 focus:outline-none sm:mt-16"
+        >
+          <SectionHeader
+            title="Veelgestelde vragen"
+            size="display-md"
+            emphasis={{ text: "vragen" }}
           />
+          <p className="text-ink max-w-[var(--container-prose)] text-base leading-relaxed">
+            Kies je rol of een categorie en blader door de antwoorden — elk
+            antwoord geeft je de stappen én de juiste contactpersoon. Of zoek
+            hierboven op een naam, functie of vraag.
+          </p>
 
-          {/* ① Hulp-first — the responsibility finder (#2056). */}
-          <section
-            id="hulp"
-            aria-label="Hulp"
-            tabIndex={-1}
-            className="mt-12 focus:outline-none sm:mt-16"
-          >
-            <SectionHeader
-              title="Veelgestelde vragen"
-              size="display-md"
-              emphasis={{ text: "vragen" }}
-            />
-            <p className="text-ink max-w-[var(--container-prose)] text-base leading-relaxed">
-              Kies je rol of een categorie en blader door de antwoorden — elk
-              antwoord geeft je de stappen én de juiste contactpersoon. Of zoek
-              hierboven op een naam, functie of vraag.
-            </p>
-
-            {/* Prerendered with the page: the finder keeps its facets in the
+          {/* Prerendered with the page: the finder keeps its facets in the
                 URL without `useSearchParams()`, so it ships in the HTML instead
                 of a placeholder that the hydrated finder would push ~1900px
                 down the page. */}
-            <div className="mt-8">
-              <HulpFinder responsibilityPaths={responsibilityPaths} />
-            </div>
-          </section>
+          <div className="mt-8">
+            <HulpFinder responsibilityPaths={responsibilityPaths} />
+          </div>
+        </section>
 
-          <div className="my-10 sm:my-12">
-            <StripedSeam colorPair="ink-cream" height="md" />
+        <div className="my-10 sm:my-12">
+          <StripedSeam colorPair="ink-cream" height="md" />
+        </div>
+
+        {/* ② Structuur — the clubboek + verkenner (#2053–#2055, #3525). */}
+        <section
+          id="structuur"
+          aria-label="Structuur"
+          tabIndex={-1}
+          className="pb-4 focus:outline-none"
+        >
+          <SectionHeader
+            kicker={[{ label: "De structuur" }]}
+            title="Het organigram — wie-is-wie"
+            size="display-md"
+            emphasis={{ text: "wie-is-wie" }}
+          />
+          <p className="text-ink max-w-[var(--container-prose)] text-base leading-relaxed">
+            Wie doet wat bij de club: de mensen die je het vaakst nodig hebt
+            bovenaan, daarna alle functies per pijler.
+          </p>
+
+          <div className="mt-8">
+            <ClubBook
+              nodes={members}
+              responsibilityPaths={responsibilityPaths}
+            />
           </div>
 
-          {/* ② Structuur — the people directory + verkenner (#2053–#2055). */}
-          <section
-            id="structuur"
-            aria-label="Structuur"
-            tabIndex={-1}
-            className="pb-4 focus:outline-none"
-          >
-            <SectionHeader
-              kicker={[{ label: "De structuur" }]}
-              title="Het organigram — wie-is-wie"
-              size="display-md"
-              emphasis={{ text: "wie-is-wie" }}
-            />
-            <p className="text-ink max-w-[var(--container-prose)] text-base leading-relaxed">
-              Het bestuur, de jeugdwerking en alle vrijwilligers per afdeling.
-            </p>
+          {/* Volledig organigram — demoted behind a quiet disclosure (7o9 · 2):
+                the clubboek leads; the full chart (+ its spotlight verkenner) is
+                one deliberate click away. */}
+          <div className="mt-10">
+            <OrganigramOverview nodes={members} collapsible />
+          </div>
+        </section>
+      </PageContainer>
 
-            <div className="mt-8">
-              <StructureDirectory nodes={members} interactive />
-            </div>
-
-            {/* Volledig organigram — demoted behind a quiet disclosure (7o9 · 2):
-                the directory leads; the full chart (+ its spotlight verkenner and
-                one-A4 PDF) is one deliberate click away. */}
-            <div className="mt-10">
-              <OrganigramOverview nodes={members} collapsible />
-            </div>
-          </section>
-        </PageContainer>
-
-        {/* Inside <HubMemberPanel> so it joins the page's `inert` subtree while a
-            member panel is open (B1) — the CTA must not stay focusable behind the
-            modal. Full-width: a sibling of the max-w content div, not inside it. */}
-        <CtaBand
-          ariaLabel="Contacteer de club"
-          heading="Niemand gevonden?"
-          emphasis={{ text: "gevonden", tone: "warm" }}
-          lead="Vind je niet meteen de juiste persoon? Stuur ons een bericht — we helpen je verder."
-          buttonLabel="Contacteer de club →"
-          href="/club/contact"
-        />
-      </HubMemberPanel>
+      {/* Full-width: a sibling of the max-w content div, not inside it. */}
+      <CtaBand
+        ariaLabel="Contacteer de club"
+        heading="Niemand gevonden?"
+        emphasis={{ text: "gevonden", tone: "warm" }}
+        lead="Vind je niet meteen de juiste persoon? Stuur ons een bericht — we helpen je verder."
+        buttonLabel="Contacteer de club →"
+        href="/club/contact"
+      />
     </HubSearchQueryProvider>
   );
 }

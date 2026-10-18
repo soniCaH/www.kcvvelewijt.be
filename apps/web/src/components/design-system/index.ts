@@ -289,7 +289,7 @@ export type {
 } from "./TapedFigure";
 
 // LeaderDotRow
-export { LeaderDotRow } from "./LeaderDotRow";
+export { LeaderDotRow, LeaderFill } from "./LeaderDotRow";
 export type { LeaderDotRowProps } from "./LeaderDotRow";
 
 // MonoLabelRow

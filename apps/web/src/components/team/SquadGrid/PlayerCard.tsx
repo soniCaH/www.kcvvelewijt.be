@@ -139,8 +139,7 @@ export function PlayerCard({
           italic `<em>` surname's ascender/descender range — even the
           one-line common case was clipping glyph tops/tails against that
           hard edge. Scoped to this clamped instance only; `leading-[1.05]`
-          stays everywhere else the rhythm is unclamped (e.g.
-          `<OrgPersonCard>`'s `<NameRhythm>`). */}
+          stays everywhere else the rhythm is unclamped. */}
       <p className="font-display text-ink mt-2 line-clamp-3 leading-[1.2]">
         <span className="font-semibold">{firstName}</span>{" "}
         <em className="font-normal italic">{lastName}</em>

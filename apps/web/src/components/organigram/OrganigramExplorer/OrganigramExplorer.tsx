@@ -7,6 +7,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type KeyboardEvent as ReactKeyboardEvent,
   type RefObject,
 } from "react";
@@ -14,7 +15,7 @@ import Link from "next/link";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import type { OrgChartNode } from "@/types/organigram";
 import { cn } from "@/lib/utils/cn";
-import { deriveCardState } from "@/components/organigram/OrgPersonCard";
+import { deriveCardState } from "./card-state";
 import {
   ArrowRight,
   CaretDown,
@@ -32,6 +33,7 @@ import { ScrollOverlay } from "@/components/design-system/ScrollHint/ScrollOverl
 import { SpotlightNodeCard } from "./SpotlightNodeCard";
 import {
   buildSpotlightTree,
+  withClubRoot,
   getSpotlightView,
   primaryFocusId,
   siblingTarget,
@@ -74,7 +76,7 @@ import {
  */
 
 export interface OrganigramExplorerProps {
-  /** Flat nodes (`StaffRepository.findAll()` shape, incl. the synthetic root). */
+  /** Flat nodes (`StaffRepository.findAll()` shape); the explorer adds the club root. */
   nodes: OrgChartNode[];
   open: boolean;
   onClose: () => void;
@@ -85,12 +87,20 @@ export interface OrganigramExplorerProps {
   /** Element focus returns to on close (typically the launcher button). */
   returnFocusRef?: RefObject<HTMLElement | null>;
   /**
-   * Phase 4 (#2055): open the person-first `<MemberDetailPanel>` for the centred
-   * node (the verkenner entry point, 7o5 "trigger + consolidate"). When set, the
-   * centre shows a "Contactgegevens" trigger instead of the inline profile link +
-   * shared-member list — the panel becomes the single person-first surface.
+   * Open the centred node's row in the `/hulp` clubboek (the verkenner entry
+   * point, 7o5 "trigger + consolidate"). When set, the centre shows a
+   * "Contactgegevens" trigger instead of the inline profile link + shared-member
+   * list — the row becomes the single person-first surface.
    */
   onOpenMember?: (node: OrgChartNode, trigger: HTMLElement) => void;
+  /**
+   * Whether `node` has somewhere for `onOpenMember` to go. The trigger shows
+   * only for a node that does — pressing it closes the explorer, so it must
+   * never lead nowhere. Unset → every node qualifies. Read on the client only
+   * (the server renders no trigger), so a page-dependent answer cannot mismatch
+   * hydration.
+   */
+  canOpenMember?: (node: OrgChartNode) => boolean;
 }
 
 const NAV_KEYS = new Set<string>([
@@ -128,6 +138,8 @@ export function announceFocus(view: SpotlightView): string {
   return `${focus.title}. Niveau ${depth}${under}. ${holders}. ${kids}${pos}.`;
 }
 
+const subscribeNever = () => () => {};
+
 export function OrganigramExplorer({
   nodes,
   open,
@@ -136,8 +148,9 @@ export function OrganigramExplorer({
   childrenCap = 7,
   returnFocusRef,
   onOpenMember,
+  canOpenMember,
 }: OrganigramExplorerProps) {
-  const tree = useMemo(() => buildSpotlightTree(nodes), [nodes]);
+  const tree = useMemo(() => buildSpotlightTree(withClubRoot(nodes)), [nodes]);
   // Open on the deep-linked node when valid, else the primary top node
   // (Voorzitter-equivalent) rather than the thin synthetic club root.
   const landingId = useMemo(
@@ -292,6 +305,11 @@ export function OrganigramExplorer({
     navigate(targetForKey(tree, focusId, e.key as SpotlightNavKey));
   };
 
+  const hasMemberTarget = useSyncExternalStore(
+    subscribeNever,
+    () => (canOpenMember ? canOpenMember(view.focus) : true),
+    () => !canOpenMember,
+  );
   const focusState = deriveCardState(view.focus.members.length);
   const profileHref =
     focusState === "single" ? (view.focus.members[0]?.href ?? null) : null;
@@ -473,11 +491,12 @@ export function OrganigramExplorer({
                     {siblingsOpen ? "verberg" : "alle functies"}
                   </button>
                 )}
-                {onOpenMember && view.focus.id !== CLUB_ROOT_ID ? (
+                {onOpenMember &&
+                hasMemberTarget &&
+                view.focus.id !== CLUB_ROOT_ID ? (
                   <button
                     type="button"
                     onClick={(e) => onOpenMember(view.focus, e.currentTarget)}
-                    aria-haspopup="dialog"
                     className="border-warm bg-warm text-ink hover:bg-cream flex items-center gap-1.5 border-2 px-3 py-1.5 font-mono text-[11px] font-bold tracking-[0.04em] uppercase transition-colors"
                   >
                     <Envelope size={12} aria-hidden />

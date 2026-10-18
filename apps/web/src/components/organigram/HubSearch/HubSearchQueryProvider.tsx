@@ -71,8 +71,8 @@ export interface HubSearchQuery {
  * unconditionally; only which pair is returned is a branch, so the hook order
  * is stable either way.
  *
- * Unlike its peer `useHubMemberPanel`, this never returns `null`: a lone
- * `<HubSearch>` is a working search box, not a degraded one.
+ * This never returns `null`: a lone `<HubSearch>` is a working search box,
+ * not a degraded one.
  */
 export function useHubSearchQuery(): HubSearchQuery {
   const shared = useContext(HubSearchQueryContext);

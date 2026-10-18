@@ -1,4 +1,12 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  onTestFinished,
+} from "vitest";
 import {
   render,
   screen,
@@ -44,11 +52,6 @@ const mockSemantic: {
 };
 vi.mock("@/hooks/useSemanticSearch", () => ({
   useSemanticSearch: () => mockSemantic,
-}));
-
-let mockPanel: { openMember: ReturnType<typeof vi.fn> } | null = null;
-vi.mock("@/components/organigram/HubMemberPanel", () => ({
-  useHubMemberPanel: () => mockPanel,
 }));
 
 function setSemantic(
@@ -101,7 +104,6 @@ describe("HubSearch", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     window.location.hash = "";
-    mockPanel = null;
     setSemantic({
       results: [],
       loading: false,
@@ -110,16 +112,29 @@ describe("HubSearch", () => {
     });
   });
 
-  it("opens the member panel when a person is chosen and a provider is present (F5)", async () => {
-    const openMember = vi.fn();
-    mockPanel = { openMember };
+  it("opens the person's clubboek row when a person is chosen and the row exists (F5)", async () => {
+    const scrollIntoView = vi
+      .spyOn(Element.prototype, "scrollIntoView")
+      .mockImplementation(() => {});
+    onTestFinished(() => {
+      scrollIntoView.mockRestore();
+      document.querySelector("[data-testid=row]")?.remove();
+    });
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      '<details data-node-ids="secretaris" data-testid="row"><summary>Secretaris</summary></details>',
+    );
     renderSearch();
     typeQuery("in");
     fireEvent.click(await screen.findByText("Inge De Wit"));
-    expect(openMember).toHaveBeenCalledWith(
-      expect.objectContaining({ id: "secretaris" }),
-      expect.objectContaining({ view: "cards" }),
-    );
+    expect(screen.getByTestId("row")).toHaveProperty("open", true);
+    expect(window.location.hash).toBe("");
+  });
+
+  it("jumps to the structuur section when a person is chosen and no row exists (Storybook)", async () => {
+    renderSearch();
+    typeQuery("in");
+    fireEvent.click(await screen.findByText("Inge De Wit"));
     expect(window.location.hash).toBe("#structuur");
   });
 

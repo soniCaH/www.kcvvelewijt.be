@@ -1,8 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { OrgChartNode } from "@/types/organigram";
-import { useHubMemberPanel } from "@/components/organigram/HubMemberPanel";
+import {
+  hasStructureTarget,
+  openStructureRow,
+} from "@/components/organigram/ClubBook";
 import { PRESS_DOWN_CLASSES } from "@/components/design-system/press-down";
 import { OrganigramExplorer } from "./OrganigramExplorer";
 import { VolledigOrganigram } from "./VolledigOrganigram";
@@ -18,9 +21,9 @@ export interface OrganigramOverviewProps {
   nodes: OrgChartNode[];
   /**
    * Render the full box chart behind a quiet "Bekijk het volledige organigram →"
-   * disclosure (7o9 · 2 = directory-first). The directory is the default; the
-   * chart (+ its spotlight verkenner / PDF) is one deliberate click away, rather
-   * than a co-equal always-on section.
+   * disclosure (7o9 · 2 = list-first). The clubboek list is the default; the
+   * chart (+ its spotlight verkenner) is one deliberate click away, rather than a
+   * co-equal always-on section. The PDF belongs to the clubboek, not to the chart.
    */
   collapsible?: boolean;
 }
@@ -29,7 +32,6 @@ export function OrganigramOverview({
   nodes,
   collapsible = false,
 }: OrganigramOverviewProps) {
-  const hubPanel = useHubMemberPanel();
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(!collapsible);
   const [focusId, setFocusId] = useState<string | undefined>(undefined);
@@ -37,6 +39,15 @@ export function OrganigramOverview({
   // at the target node — no flash of the default node before it re-centres.
   const [openKey, setOpenKey] = useState(0);
   const returnFocusRef = useRef<HTMLElement | null>(null);
+  // The row to open once the explorer has closed and handed focus back to its
+  // launcher — opening it sooner would lose the focus to that hand-back.
+  const rowAfterClose = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (open || !rowAfterClose.current) return;
+    openStructureRow(rowAfterClose.current, "chart");
+    rowAfterClose.current = null;
+  }, [open]);
 
   const openAt = (id: string | undefined, trigger: HTMLElement) => {
     // Dedup: re-triggering the exact same open (already open, same node + same
@@ -85,22 +96,15 @@ export function OrganigramOverview({
         onClose={() => setOpen(false)}
         {...(focusId ? { initialFocusId: focusId } : {})}
         returnFocusRef={returnFocusRef}
-        {...(hubPanel
-          ? {
-              onOpenMember: (node) => {
-                // B2 — never stack two modal dialogs: collapse the verkenner as
-                // the person panel takes over. Return focus to the verkenner's
-                // own launcher (a live page element) rather than the now-
-                // unmounting in-chart node, so closing the panel lands the user
-                // back on the page.
-                setOpen(false);
-                hubPanel.openMember(node, {
-                  trigger: returnFocusRef.current,
-                  view: "chart",
-                });
-              },
-            }
-          : {})}
+        canOpenMember={(node) => hasStructureTarget(node.id)}
+        onOpenMember={(node) => {
+          // Collapse the verkenner and show the person where the structuur
+          // lists them: their row in the clubboek, unfolded. The explorer offers
+          // this only for a box that has one (`canOpenMember`), so there is
+          // always somewhere to land.
+          rowAfterClose.current = node.id;
+          setOpen(false);
+        }}
       />
     </>
   );

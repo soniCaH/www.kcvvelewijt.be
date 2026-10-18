@@ -18,6 +18,7 @@ Audit/spec generators sometimes flag features as "missing" because no top-level 
 | Match-day league table snapshot         | `/wedstrijd/[matchId]` (match detail page) | `src/components/team/TeamStandings/TeamStandings.tsx` |
 | Per-team match list                     | `/ploegen/[slug]`                          | `src/components/team/TeamMatches/`                    |
 | Club-wide calendar                      | `/kalender`                                | `src/app/(main)/kalender/`                            |
+| Organigram / wie-is-wie / structuur     | `/hulp#structuur` (no `/club/organigram`)  | `src/components/organigram/ClubBook/`                 |
 
 ## Design System & Storybook (MANDATORY)
 

@@ -331,7 +331,17 @@ Organisational grouping for staff members.
 
 ### Organigram
 
-The hierarchical org chart of staff members. Built from `parentMember` references. Visualised at `/club/organigram`.
+Who does the work day to day: the club's **boxes** (`organigramNode` documents — a position such as Secretaris or Kantinedienst, held by zero, one or several staff members) and who holds them. A box has a `parentNode` (the reporting line, drawn as the full chart and the spotlight explorer) and a **Pillar** (where it sits in the clubboek list). It lives on `/hulp#structuur`; the old `/club/organigram` route is gone.
+
+The board team documents on `/club/bestuur` and `/club/jeugdbestuur` are a different truth on purpose: the board as it stands on paper (the vzw and the youth board). The organigram never syncs to them, and they never sync to it.
+
+### Pillar
+
+The group a box sits under in the `/hulp` clubboek: `bestuur`, `sportief`, `jeugd-organisatie`, `jeugd-opleiding`, `club` or `integriteit` (Studio field `organigramNode.pillar`, label "Pijler"). Written by editors, never by a sync. The page shows one **chapter** per group of pillars: Sportief, Jeugd, Club & werking and Integriteit. `jeugd-organisatie` and `jeugd-opleiding` are two pillars that render as the sub-heads Organisatie and Opleiding of the one Jeugd chapter, so "pillar" means the stored value and "chapter" the rendered section (`Chapter` in `ClubBook/club-book.ts`). `bestuur` boxes show in the key-figure cards and the Raad van bestuur line instead of a ledger. A box with no pillar shows under "Overige functies" and gets a Studio warning, so nothing disappears. Unlike `department` (hoofdbestuur, jeugdbestuur, algemeen), which stays for hulp manual contacts and the explorer, a pillar says what the box is for.
+
+### Key figure
+
+One of the eight boxes shown as a card at the top of the clubboek: Voorzitter, Secretaris and Penningmeester under "Dagelijks bestuur"; Sportief Verantwoordelijke, Jeugdvoorzitter, TVJO, Gerechtigd Correspondent and API under "Aanspreekpunten" (the boxes' titles in Studio). Which boxes form the top row is a design decision and lives in code (`ClubBook/club-book.ts`). The one-line "why" on a card is the box's `description`, written by an editor; a key box with an empty `description` shows no why-line and never borrows another field's text (the Writer Rule). The row of a clubboek ledger is not a key figure: it is `box title ······ name(s)`, and one person holding several boxes in the same list shares one row.
 
 ### Monogram
 
