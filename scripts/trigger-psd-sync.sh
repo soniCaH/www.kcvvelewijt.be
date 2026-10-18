@@ -206,7 +206,8 @@ for _ in $(seq 1 "${SYNC_TIMEOUT_S}"); do
     break
   fi
   if grep -q "cursor advanced to" "${LOG}"; then
-    finished=1
+    # Both lines can land between the two greps: look for a failure again.
+    if grep -q "Sync failed:" "${LOG}"; then failed=1; else finished=1; fi
     break
   fi
   # Same liveness guard the readiness loop has: a crashed worker should
