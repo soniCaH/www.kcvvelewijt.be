@@ -282,3 +282,92 @@ describe("getActiveTeamPsdIds", () => {
     expect(result).toEqual([]);
   });
 });
+
+// ─── getStaffGaps ────────────────────────────────────────────────────────────
+
+describe("getStaffGaps", () => {
+  const read = () =>
+    run(
+      Effect.gen(function* () {
+        const projection = yield* SanityProjection;
+        return yield* projection.getStaffGaps();
+      }),
+    );
+
+  it("reads all three groups in ONE query and flattens empty roles per team", async () => {
+    mockFetch.mockResolvedValueOnce({
+      emptyRoles: [
+        {
+          teamId: "team-a",
+          teamName: "U13 A",
+          entries: [
+            { firstName: "Jan", lastName: "Peeters" },
+            { firstName: null, lastName: null },
+          ],
+        },
+      ],
+      noPhoto: [{ id: "s1", firstName: "An", lastName: "Smet" }],
+      coordinators: [
+        {
+          id: "n1",
+          roleCode: "TVJO",
+          title: "TVJO",
+          active: false,
+          memberCount: 2,
+        },
+      ],
+    });
+
+    const result = await read();
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      emptyRoles: [
+        { teamId: "team-a", teamName: "U13 A", memberName: "Jan Peeters" },
+        { teamId: "team-a", teamName: "U13 A", memberName: null },
+      ],
+      noPhoto: [{ id: "s1", name: "An Smet" }],
+      coordinators: [
+        {
+          id: "n1",
+          roleCode: "TVJO",
+          title: "TVJO",
+          active: false,
+          memberCount: 2,
+        },
+      ],
+    });
+  });
+
+  it("reports only an EMPTY role — never 'andere' — on active PSD teams", async () => {
+    mockFetch.mockResolvedValueOnce({
+      emptyRoles: [],
+      noPhoto: [],
+      coordinators: [],
+    });
+    await read();
+    const [query, params] = mockFetch.mock.calls[0] as [string, unknown];
+    expect(query).toContain(`staff[!defined(role) || role == ""]`);
+    expect(query).not.toContain("andere");
+    expect(query).toContain(
+      `archived != true && defined(psdId) && psdId != ""`,
+    );
+    expect(query).toContain("!defined(photo) && !defined(psdImage)");
+    expect(params).toEqual({
+      coordinatorCodes: ["TVJO", "JC-OB", "JC-MB", "JC-BB"],
+    });
+  });
+
+  it("fails with SanityQueryError on client error", async () => {
+    mockFetch.mockRejectedValueOnce(new Error("boom"));
+    const result = await Effect.runPromise(
+      Effect.either(
+        Effect.gen(function* () {
+          const projection = yield* SanityProjection;
+          return yield* projection.getStaffGaps();
+        }).pipe(Effect.provide(makeTestLayer())),
+      ),
+    );
+    expect(result._tag).toBe("Left");
+  });
+});
