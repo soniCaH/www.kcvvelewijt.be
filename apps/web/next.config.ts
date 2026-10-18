@@ -313,6 +313,20 @@ const nextConfig: NextConfig = {
         destination: "/hulp#sportongeval",
         permanent: false,
       },
+      // #3562 — the old Gatsby site's vanity links that printed flyers carry.
+      // Stopgap for the www flip; #3573 replaces both with board-editable
+      // short links and must delete these two in the PR that seeds them. 307:
+      // the targets change every season.
+      {
+        source: "/stage",
+        destination: "/nieuws/herfststage-2026",
+        permanent: false,
+      },
+      {
+        source: "/tornooi",
+        destination: "https://www.tournify.nl/live/kcvvelewijt2025",
+        permanent: false,
+      },
       // #2227 (SEO-9) — retired Gatsby routes with no direct equivalent →
       // nearest live page (owner decision on the issue). `/club/cashless` and
       // `/club/downloads` are NOT retired: both render their CMS page (#3014).
