@@ -46,13 +46,15 @@ export const NOT_FOUND_TTL = 60 * 60; // 1 hour
  * (KV's minimum expirationTtl is 60 s.) */
 const NEG_MARKER_TTL = 120; // 2 min
 
-/** Time (seconds) a value may sit PAST ITS SOFT TTL before we escalate logs
- * WARN→ERROR and emit a slow-drift Slack nudge — refreshes are not landing and
- * the value is creeping toward the hard-expiry cliff.
+/** Time (seconds) stale reads may go without a refresh landing before we
+ * escalate logs WARN→ERROR and emit a slow-drift Slack nudge — refreshes are not
+ * landing and the value is creeping toward the hard-expiry cliff.
  *
- * Measured relative to the soft TTL, not as absolute age (#2335): a healthy
- * 24 h-softTtl key (`MATCHES_TEAM`, `RANKING`) is stale by design between
- * refreshes, so an absolute rule would nudge on every normal cycle. */
+ * Measured from the `stale-since:{key}` marker — the first stale read that no
+ * successful write has cleared since (#3566) — not from the soft TTL (#2335) and
+ * not as absolute age. A page nobody opened for days is "days past its soft TTL"
+ * on its first read, but that read's refresh lands and clears the marker: that
+ * is idleness, not drift. */
 const DRIFT_NUDGE_THRESHOLD = 60 * 60 * 24; // 24 h (#2329)
 
 /** Ceiling on a background (SWR) refresh fetch, so a slow one takes the normal
@@ -272,6 +274,7 @@ const decodeNotFound = S.decodeUnknownOption(NotFoundMarker);
 export const isNotFoundMarker = (raw: string): boolean =>
   Option.isSome(decodeNotFound(raw));
 const nudgeKey = (key: string): string => `nudge:${key}`;
+const staleSinceKey = (key: string): string => `stale-since:${key}`;
 
 /** Best-effort HTTP status off an upstream error (UpstreamUnavailable carries one). */
 const statusOf = (e: unknown): number | undefined => {
@@ -388,13 +391,11 @@ export const TypedKvCache = <A, I>(
           options?.backgroundTimeoutMs ?? BG_REFRESH_TIMEOUT_MS;
         const fetchTimeoutMs = options?.fetchTimeoutMs ?? MISS_FETCH_TIMEOUT_MS;
 
-        /** Time (ms) a value has spent PAST its soft TTL — the drift measure.
+        /** Drift = stale reads that no successful write has fixed for longer
+         * than the threshold. `staleSince` is the `stale-since:{key}` marker.
          * The single place this arithmetic lives. See DRIFT_NUDGE_THRESHOLD. */
-        const staleFor = (fetchedAt: number, softTtlSec: number) =>
-          Date.now() - fetchedAt - softTtlSec * 1000;
-
-        const isDrifting = (staleForMs: number) =>
-          staleForMs > DRIFT_NUDGE_THRESHOLD * 1000;
+        const isDrifting = (staleSince: number) =>
+          Date.now() - staleSince > DRIFT_NUDGE_THRESHOLD * 1000;
 
         // The ONLY way this cache reports to the gate: a non-PSD cache
         // instance never does (see the `psdBacked` option doc above), on
@@ -404,7 +405,8 @@ export const TypedKvCache = <A, I>(
             ? gate.reportOutcome(outcome)
             : Effect.succeed({ incidentOpen: false });
 
-        // Persist a fresh value and clear any negative marker.
+        // Persist a fresh value and clear the negative and stale-since markers:
+        // every successful write (refresh or cold fetch) ends the drift clock.
         const persist = (value: A) =>
           Effect.zipRight(
             cache.set(
@@ -412,12 +414,19 @@ export const TypedKvCache = <A, I>(
               wrap(value, options?.isPartial?.(value) ?? false),
               effectiveHardTtl,
             ),
-            cache.delete(negKey(key)),
+            Effect.zipRight(
+              cache.delete(negKey(key)),
+              cache.delete(staleSinceKey(key)),
+            ),
           );
 
         // Slow-drift Slack ping, once per day per key. Reports ABSOLUTE age +
-        // time-to-cliff — only the decision to call this is soft-TTL-relative.
-        const nudge = (staleAgeMs: number, status?: number) =>
+        // time-to-cliff, and how long refreshes have been failing to land.
+        const nudge = (
+          staleAgeMs: number,
+          failingForMs: number,
+          status?: number,
+        ) =>
           Effect.gen(function* () {
             // Once/day/key: skip if we already pinged within the marker window.
             if ((yield* cache.get(nudgeKey(key))) !== null) return;
@@ -428,6 +437,8 @@ export const TypedKvCache = <A, I>(
                 buildDriftMessage({
                   key,
                   staleAgeMs,
+                  failingForMs,
+                  psdBacked,
                   hardTtlMs: effectiveHardTtl * 1000,
                   status,
                 }),
@@ -444,15 +455,13 @@ export const TypedKvCache = <A, I>(
           reason: string,
           alert?: {
             readonly fetchedAt: number;
-            readonly softTtlSec: number;
+            readonly staleSince: number;
             readonly incidentOpen: boolean;
             readonly status?: number;
           },
         ) =>
           Effect.gen(function* () {
-            const drifting =
-              !!alert &&
-              isDrifting(staleFor(alert.fetchedAt, alert.softTtlSec));
+            const drifting = !!alert && isDrifting(alert.staleSince);
             const escalate = !!alert && (alert.incidentOpen || drifting);
             const line = `TypedKvCache "${key}": ${reason}`;
             yield* escalate ? Effect.logError(line) : Effect.logWarning(line);
@@ -462,7 +471,11 @@ export const TypedKvCache = <A, I>(
             // the case where its KV write did not land. It carries `status`,
             // which the read path has no access to.
             if (alert && drifting)
-              yield* nudge(Date.now() - alert.fetchedAt, alert.status);
+              yield* nudge(
+                Date.now() - alert.fetchedAt,
+                Date.now() - alert.staleSince,
+                alert.status,
+              );
           });
 
         // Report a transient-outage refresh failure to the gate (incident
@@ -471,7 +484,7 @@ export const TypedKvCache = <A, I>(
         const failAndKeepStale = (
           err: unknown,
           fetchedAt: number,
-          softTtlSec: number,
+          staleSince: number,
           label: string,
         ) =>
           Effect.gen(function* () {
@@ -488,7 +501,7 @@ export const TypedKvCache = <A, I>(
             });
             yield* keepStale(`${label} (${String(err)})`, {
               fetchedAt,
-              softTtlSec,
+              staleSince,
               incidentOpen,
               status,
             });
@@ -504,7 +517,7 @@ export const TypedKvCache = <A, I>(
         // Background (SWR) refresh: single-flight leader fetches and updates KV;
         // any failure (or schema-invalid data) keeps stale + marks. Never throws
         // — it runs detached via the background runner.
-        const backgroundRefresh = (fetchedAt: number, softTtlSec: number) =>
+        const backgroundRefresh = (fetchedAt: number, staleSince: number) =>
           Effect.gen(function* () {
             const token = yield* gate.beginFlight(key);
             if (token === null) return; // another isolate/fiber is already refreshing
@@ -525,7 +538,7 @@ export const TypedKvCache = <A, I>(
                 // surface through the drift nudge instead.
                 return yield* keepStale(
                   `background refresh timed out after ${backgroundTimeoutMs}ms`,
-                  { fetchedAt, softTtlSec, incidentOpen: false },
+                  { fetchedAt, staleSince, incidentOpen: false },
                 );
               }
               const result = outcome.value;
@@ -539,7 +552,7 @@ export const TypedKvCache = <A, I>(
                 return yield* failAndKeepStale(
                   result.left,
                   fetchedAt,
-                  softTtlSec,
+                  staleSince,
                   "background refresh failed",
                 );
               }
@@ -551,7 +564,7 @@ export const TypedKvCache = <A, I>(
                   // drifts toward the cliff — nudge if it's aged past threshold.
                   keepStale("background refresh returned schema-invalid data", {
                     fetchedAt,
-                    softTtlSec,
+                    staleSince,
                     incidentOpen: false,
                   });
             }).pipe(Effect.ensuring(gate.endFlight(key, token)));
@@ -616,9 +629,9 @@ export const TypedKvCache = <A, I>(
             const resolvedSoftTtl = partial
               ? Math.min(fullSoftTtl, TTL.PARTIAL_FANOUT)
               : fullSoftTtl;
-            const staleForMs = staleFor(fetchedAt, resolvedSoftTtl);
+            const softExpiry = fetchedAt + resolvedSoftTtl * 1000;
 
-            if (staleForMs <= 0) return value; // fresh
+            if (Date.now() <= softExpiry) return value; // fresh
 
             // ── Stale ────────────────────────────────────────────────────────
             // Drift check FIRST (#2335). Every other drift signal hangs off a
@@ -626,17 +639,34 @@ export const TypedKvCache = <A, I>(
             // killed reports nothing — so this read-path check is the only one
             // that fires regardless of whether any refresh ever ran. It also
             // sits above the negative-marker early-return below, so a key whose
-            // marker keeps being re-set still nudges. Pure arithmetic: the
-            // once/day dedup read only happens on a genuinely drifting key, so
-            // the normal stale path costs no extra KV I/O.
-            if (isDrifting(staleForMs)) {
+            // marker keeps being re-set still nudges. Drift is measured from the
+            // `stale-since` marker (#3566): the first stale read no successful
+            // write has cleared since. Its read sits on the stale path only, next
+            // to the negative-marker read; the fresh path stays I/O-free.
+            const rawSince = yield* cache.get(staleSinceKey(key));
+            const recorded = rawSince === null ? NaN : Number(rawSince);
+            if (!Number.isFinite(recorded))
+              yield* cache.set(
+                staleSinceKey(key),
+                String(Date.now()),
+                effectiveHardTtl,
+              );
+            // Never older than this value's own soft expiry: a marker left behind
+            // by a failed delete must not make a fresh stale spell look drifted.
+            const staleSince = Number.isFinite(recorded)
+              ? Math.max(recorded, softExpiry)
+              : Date.now();
+            if (isDrifting(staleSince)) {
               yield* Effect.logError(
-                `TypedKvCache "${key}": serving stale ${formatDuration(staleForMs)} past its soft TTL — refreshes are not landing`,
+                `TypedKvCache "${key}": serving stale, refreshes have not landed for ${formatDuration(Date.now() - staleSince)}`,
               );
               // Detached: the nudge does a KV get + set + an unbounded Slack
               // POST, and this is the serve-stale-INSTANTLY path. Inline only
               // when no runner is wired (no `waitUntil` to hand it to).
-              const ping = nudge(Date.now() - fetchedAt);
+              const ping = nudge(
+                Date.now() - fetchedAt,
+                Date.now() - staleSince,
+              );
               yield* Option.isSome(runnerOpt)
                 ? runnerOpt.value.fork(`drift:${key}`, ping)
                 : ping;
@@ -657,7 +687,7 @@ export const TypedKvCache = <A, I>(
             // what the runner's layer provides. No runner (tests only) → the
             // same single-flight, bounded refresh runs inline. Either way there
             // is no unguarded foreground fan-out (#3467).
-            const refresh = backgroundRefresh(fetchedAt, resolvedSoftTtl);
+            const refresh = backgroundRefresh(fetchedAt, staleSince);
             yield* Option.isSome(runnerOpt)
               ? runnerOpt.value.fork(`refresh:${key}`, refresh)
               : refresh;

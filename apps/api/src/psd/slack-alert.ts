@@ -55,8 +55,12 @@ export function buildIncidentMessage(
 export interface DriftContext {
   /** Cache key / endpoint serving stale. */
   readonly key: string;
-  /** How long the served value has been stale. */
+  /** Absolute age of the served value. */
   readonly staleAgeMs: number;
+  /** How long stale reads have gone without a refresh landing (#3566). */
+  readonly failingForMs: number;
+  /** False for caches that do not hold PSD data (`related:*`). */
+  readonly psdBacked: boolean;
   /** Hard TTL — the value is evicted (the "cliff") once stale age reaches this. */
   readonly hardTtlMs: number;
   /** HTTP status of the failing refresh, when known. */
@@ -67,9 +71,12 @@ export interface DriftContext {
 export function buildDriftMessage(ctx: DriftContext): string {
   const timeToCliff = Math.max(0, ctx.hardTtlMs - ctx.staleAgeMs);
   const status = ctx.status ? ` (last refresh: HTTP ${ctx.status})` : "";
-  return `:warning: *PSD data drifting stale* — \`${ctx.key}\` is ${formatDuration(
+  const what = ctx.psdBacked ? "PSD data" : "Cached data";
+  return `:warning: *${what} drifting stale* — \`${ctx.key}\` is ${formatDuration(
     ctx.staleAgeMs,
-  )} old${status}; ${formatDuration(timeToCliff)} until it drops off the hard-expiry cliff.`;
+  )} old${status}, not refreshed for ${formatDuration(
+    ctx.failingForMs,
+  )} of reads; ${formatDuration(timeToCliff)} until it drops off the hard-expiry cliff.`;
 }
 
 /** Message for the PSD on-demand daily budget being reached (#3468). */

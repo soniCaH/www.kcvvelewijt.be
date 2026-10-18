@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import { Effect, Layer, Logger, LogLevel, Schema as S } from "effect";
 import { IncidentTracker } from "../psd/incident";
 import {
@@ -136,6 +136,12 @@ function spyGate() {
 }
 
 const dayMs = 24 * 60 * 60 * 1000;
+
+/** Plant the `stale-since:{key}` marker as if the first unfixed stale read
+ * happened `ageMs` ago (#3566) — drift is measured from it, not the soft TTL. */
+function seedStaleSince(mockKv: ReturnType<typeof makeMockKv>, ageMs: number) {
+  mockKv.store.set("stale-since:test-key", String(Date.now() - ageMs));
+}
 
 /** Collect every log entry emitted while the returned layer is provided. */
 function captureLogs() {
@@ -299,8 +305,10 @@ describe("TypedKvCache", () => {
     // gets the stale value (#3467).
     expect(result).toEqual({ name: "old", value: 1 });
     // Cache should be updated with new wrapper
-    const stored = JSON.parse(mockKv.put.mock.calls[0]![1]);
-    expect(stored.value).toEqual({ name: "fresh", value: 42 });
+    expect(JSON.parse(mockKv.store.get("test-key")!).value).toEqual({
+      name: "fresh",
+      value: 42,
+    });
   });
 
   it("stale-on-error: fetch fails, returns stale value", async () => {
@@ -917,6 +925,7 @@ describe("TypedKvCache — PSD incident alerting (#2329)", () => {
       "test-key",
       makeWrapper({ name: "stale", value: 1 }, 3 * dayMs), // 3 days stale
     );
+    seedStaleSince(mockKv, 3 * dayMs);
     const fetchEffect = Effect.fail(new Error("PSD 429") as never);
     const { entries, layer: capture } = captureLogs();
 
@@ -950,6 +959,7 @@ describe("TypedKvCache — PSD incident alerting (#2329)", () => {
       "test-key",
       makeWrapper({ name: "stale", value: 1 }, 3 * dayMs),
     );
+    seedStaleSince(mockKv, 3 * dayMs);
     mockKv.store.set("nudge:test-key", "1"); // already pinged today
     const fetchEffect = Effect.fail(new Error("PSD 429") as never);
 
@@ -1202,6 +1212,7 @@ describe("TypedKvCache — silent-drift observability (#2335)", () => {
       "test-key",
       makeWrapper({ name: "stale", value: 1 }, 3 * dayMs),
     );
+    seedStaleSince(mockKv, 3 * dayMs);
     const { layer: gate, reportOutcome } = spyGate();
     const { entries, layer: capture } = captureLogs();
     const { runnerLayer, settle } = withRunner(
@@ -1244,6 +1255,7 @@ describe("TypedKvCache — silent-drift observability (#2335)", () => {
       "test-key",
       makeWrapper({ name: "stale", value: 1 }, 3 * dayMs),
     );
+    seedStaleSince(mockKv, 3 * dayMs);
     const { runnerLayer, settle } = withRunner(mockKv, PsdGateTest);
     const { entries, layer: capture } = captureLogs();
 
@@ -1269,7 +1281,7 @@ describe("TypedKvCache — silent-drift observability (#2335)", () => {
     expect(mockKv.store.get("nudge:test-key")).toBe("1");
     expect(
       entries.some(
-        (e) => e.level === "ERROR" && e.message.includes("past its soft TTL"),
+        (e) => e.level === "ERROR" && e.message.includes("have not landed"),
       ),
     ).toBe(true);
   });
@@ -1280,6 +1292,7 @@ describe("TypedKvCache — silent-drift observability (#2335)", () => {
       "test-key",
       makeWrapper({ name: "stale", value: 1 }, 3 * dayMs),
     );
+    seedStaleSince(mockKv, 3 * dayMs);
     const { layer: gate } = spyGate();
     const { runnerLayer, settle } = withRunner(mockKv, gate);
 
@@ -1347,6 +1360,7 @@ describe("TypedKvCache — silent-drift observability (#2335)", () => {
       "test-key",
       makeWrapper({ name: "stale", value: 1 }, 3 * dayMs),
     );
+    seedStaleSince(mockKv, 3 * dayMs);
     mockKv.store.set("neg:test-key", "1");
 
     let fetchCalled = false;
@@ -1369,6 +1383,221 @@ describe("TypedKvCache — silent-drift observability (#2335)", () => {
     expect(fetchCalled).toBe(false);
     // The marker short-circuits the refresh — the nudge must not depend on it.
     expect(mockKv.store.get("nudge:test-key")).toBe("1");
+  });
+});
+
+describe("TypedKvCache — drift is measured from the first unfixed stale read (#3566)", () => {
+  const hourMs = 60 * 60 * 1000;
+  const nudgePuts = (mockKv: ReturnType<typeof makeMockKv>) =>
+    mockKv.put.mock.calls.filter(([k]) => k === "nudge:test-key");
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
+
+  /** Only `Date` is faked: Effect's timeouts keep their real timers. */
+  const startClock = () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-10-01T12:00:00Z"));
+  };
+
+  /** A runner that drops the refresh fork — a `waitUntil` killed before it
+   * reports anything — but still runs the drift ping. */
+  function killedRefreshRunner(mockKv: ReturnType<typeof makeMockKv>) {
+    const pending: Promise<void>[] = [];
+    const layer = Layer.mergeAll(KvCacheLive, PsdGateTest).pipe(
+      Layer.provideMerge(makeEnvLayer(mockKv)),
+    );
+    const runnerLayer = Layer.succeed(BackgroundRunnerService, {
+      fork: (label, effect) =>
+        Effect.sync(() => {
+          if (label.startsWith("refresh:")) return;
+          pending.push(
+            Effect.runPromise(
+              Effect.provide(effect, layer) as unknown as Effect.Effect<void>,
+            ),
+          );
+        }),
+    });
+    return { runnerLayer, settle: () => Promise.all(pending) };
+  }
+
+  const read = (
+    mockKv: ReturnType<typeof makeMockKv>,
+    runnerLayer: Layer.Layer<BackgroundRunnerService>,
+    fetch: Effect.Effect<{ name: string; value: number }>,
+    gate: Layer.Layer<PsdGateService> = PsdGateTest,
+  ) =>
+    Effect.runPromise(
+      TypedKvCache(TestSchema)
+        .getOrFetch("test-key", fetch, 60)
+        .pipe(
+          Effect.provide(runnerLayer),
+          Effect.provide(KvCacheLive),
+          Effect.provide(gate),
+          Effect.provide(makeEnvLayer(mockKv)),
+        ),
+    );
+
+  it("a value read for the first time 3 days past its soft TTL, whose refresh lands, does not nudge", async () => {
+    startClock();
+    const mockKv = makeMockKv();
+    mockKv.store.set(
+      "test-key",
+      makeWrapper({ name: "stale", value: 1 }, 3 * dayMs),
+    );
+    const { runnerLayer, settle } = withRunner(mockKv, PsdGateTest);
+
+    const result = await read(
+      mockKv,
+      runnerLayer,
+      Effect.succeed({ name: "fresh", value: 2 }),
+    );
+    await settle();
+
+    expect(result).toEqual({ name: "stale", value: 1 });
+    // The read started the clock; the landed refresh stopped it again.
+    expect(mockKv.put).toHaveBeenCalledWith(
+      "stale-since:test-key",
+      String(Date.now()),
+      { expirationTtl: HARD_TTL_DEFAULT },
+    );
+    expect(mockKv.store.has("stale-since:test-key")).toBe(false);
+    expect(mockKv.store.has("nudge:test-key")).toBe(false);
+  });
+
+  it("a cold fetch clears the stale-since marker too", async () => {
+    startClock();
+    const mockKv = makeMockKv();
+    mockKv.store.set("stale-since:test-key", String(Date.now() - 2 * dayMs));
+    const { runnerLayer } = withRunner(mockKv, PsdGateTest);
+
+    await read(mockKv, runnerLayer, Effect.succeed({ name: "cold", value: 3 }));
+
+    expect(mockKv.store.has("stale-since:test-key")).toBe(false);
+  });
+
+  it("a fresh read does no stale-since I/O", async () => {
+    startClock();
+    const mockKv = makeMockKv();
+    mockKv.store.set("test-key", makeWrapper({ name: "ok", value: 1 }, 1_000));
+    const { runnerLayer } = withRunner(mockKv, PsdGateTest);
+
+    await read(mockKv, runnerLayer, Effect.succeed({ name: "x", value: 2 }));
+
+    expect(mockKv.get.mock.calls.map(([k]) => k)).toEqual(["test-key"]);
+    expect(mockKv.put).not.toHaveBeenCalled();
+  });
+
+  it("a refresh that keeps failing nudges once, after 24 h of stale reads", async () => {
+    startClock();
+    const mockKv = makeMockKv();
+    mockKv.store.set(
+      "test-key",
+      makeWrapper({ name: "stale", value: 1 }, 3 * dayMs),
+    );
+    const { layer: gate } = spyGate();
+    const { runnerLayer, settle } = withRunner(mockKv, gate);
+    const failing = Effect.fail(new Error("PSD 429") as never);
+    const readFailing = async () => {
+      mockKv.store.delete("neg:test-key"); // the 2 min marker has lapsed
+      await read(mockKv, runnerLayer, failing, gate);
+      await settle();
+    };
+
+    await readFailing(); // first stale read: starts the clock
+    expect(nudgePuts(mockKv)).toHaveLength(0);
+
+    vi.setSystemTime(Date.now() + 23 * hourMs);
+    await readFailing();
+    expect(nudgePuts(mockKv)).toHaveLength(0);
+
+    vi.setSystemTime(Date.now() + 2 * hourMs); // 25 h after the first stale read
+    await readFailing();
+    expect(nudgePuts(mockKv)).toHaveLength(1);
+
+    await readFailing(); // same day: deduped
+    expect(nudgePuts(mockKv)).toHaveLength(1);
+  });
+
+  it("a killed refresh (no outcome ever reported) nudges after 24 h", async () => {
+    startClock();
+    const mockKv = makeMockKv();
+    mockKv.store.set(
+      "test-key",
+      makeWrapper({ name: "stale", value: 1 }, 3 * dayMs),
+    );
+    const { runnerLayer, settle } = killedRefreshRunner(mockKv);
+    const readKilled = async () => {
+      await read(mockKv, runnerLayer, Effect.never);
+      await settle();
+    };
+
+    await readKilled();
+    expect(nudgePuts(mockKv)).toHaveLength(0);
+
+    vi.setSystemTime(Date.now() + 25 * hourMs);
+    await readKilled();
+    expect(nudgePuts(mockKv)).toHaveLength(1);
+  });
+
+  it("ignores a marker older than the value's own soft expiry (failed delete)", async () => {
+    startClock();
+    const mockKv = makeMockKv();
+    // The marker survives from an earlier spell; the value was rewritten since.
+    mockKv.store.set("stale-since:test-key", String(Date.now() - 10 * dayMs));
+    mockKv.store.set(
+      "test-key",
+      makeWrapper({ name: "stale", value: 1 }, 60_000 + 1_000),
+    );
+    const { runnerLayer, settle } = killedRefreshRunner(mockKv);
+
+    await read(mockKv, runnerLayer, Effect.never);
+    await settle();
+
+    expect(nudgePuts(mockKv)).toHaveLength(0);
+  });
+
+  it("a related:* drift message says 'Cached data', a PSD-backed one 'PSD data'", async () => {
+    startClock();
+    const slack = vi.fn(async () => new Response("ok"));
+    vi.stubGlobal("fetch", slack);
+    const run = async (psdBacked: boolean) => {
+      const mockKv = makeMockKv();
+      mockKv.store.set(
+        "test-key",
+        makeWrapper({ name: "stale", value: 1 }, 3 * dayMs),
+      );
+      seedStaleSince(mockKv, 26 * hourMs);
+      const { runnerLayer, settle } = killedRefreshRunner(mockKv);
+      await Effect.runPromise(
+        TypedKvCache(TestSchema, { psdBacked })
+          .getOrFetch("test-key", Effect.never, 60)
+          .pipe(
+            Effect.provide(runnerLayer),
+            Effect.provide(KvCacheLive),
+            Effect.provide(PsdGateTest),
+            Effect.provide(
+              makeEnvLayer(mockKv, {
+                SLACK_ALERT_WEBHOOK_URL: "https://hooks.slack.test/x",
+              }),
+            ),
+          ),
+      );
+      await settle();
+    };
+    const lastText = () => {
+      const calls = slack.mock.calls as unknown as [string, RequestInit][];
+      return JSON.parse(String(calls[calls.length - 1]?.[1].body)).text;
+    };
+
+    await run(false);
+    expect(lastText()).toContain("Cached data drifting stale");
+    expect(lastText()).toContain("not refreshed for 1d 2h of reads");
+
+    await run(true);
+    expect(lastText()).toContain("PSD data drifting stale");
   });
 });
 
