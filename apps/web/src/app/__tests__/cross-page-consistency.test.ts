@@ -2088,15 +2088,9 @@ describe("rule 12 catches what it claims to (#2865)", () => {
  * re-introduce the fault the rule exists to catch. Rule 9 makes the same
  * kind of judgement call when it drops barrels rather than following them.
  *
- * **The one caller-level exemption: `/club/ultras` (`UltrasHero.tsx`).**
- * #2877's own issue text puts this route out of scope by name — 96→128px,
- * "a marketing hero... ruled by the dark-band family's own air rule, not by
- * this decision" — and its `<UpLink tone="cream">` genuinely sits inside a
- * `py-24 sm:py-32` container the way this rule would otherwise forbid.
- * Pinned by declaration, Rule 8's shape: naming the file alone is not
- * enough, since a *second*, unrelated up-link fault landing in the same
- * file later would then pass silently too if the file were dropped from the
- * scan outright instead of held to its one known occurrence.
+ * **No caller-level exemption.** `/club/ultras` (`UltrasHero.tsx`) held
+ * the only one, for its dark poster band's `py-24 sm:py-32`; its cream
+ * opening no longer pads above the chip, so every route is scanned.
  */
 const UP_LINK_JSX_TAG = /<\/?([A-Za-z][\w.]*)\b([^>]*)>/g;
 const UP_LINK_SITE = /<UpLink\b|\bupLink=\{/g;
@@ -2149,14 +2143,6 @@ function enclosingPaddingViolations(source: string): number[] {
   return violations;
 }
 
-/** The exact count of up-link occurrences the exempt file is pinned to —
- *  Rule 8's shape: a file dropped from the scan by name alone could grow a
- *  second, undocumented occurrence with a real fault and no test would see
- *  it. */
-const UP_LINK_PADDING_EXEMPT_DECLARATIONS: Record<string, number> = {
-  "app/(main)/club/ultras/UltrasHero.tsx": 1,
-};
-
 /** The shared opening's own defining files — excluded as files (see the
  *  docblock above), not matched-and-exempted. */
 const UP_LINK_PADDING_DEFINING_FILES = new Set([
@@ -2165,11 +2151,10 @@ const UP_LINK_PADDING_DEFINING_FILES = new Set([
 ]);
 
 /** Every production file that renders an up-link at all, minus the defining
- *  files and the one pinned exemption. */
+ *  files. */
 const upLinkSiteFiles = productionSources.filter(
   (relPath) =>
     !UP_LINK_PADDING_DEFINING_FILES.has(relPath) &&
-    !(relPath in UP_LINK_PADDING_EXEMPT_DECLARATIONS) &&
     UP_LINK_SITE_TEST.test(code.get(relPath)!),
 );
 
@@ -2178,20 +2163,6 @@ describe("the up-link's top air is not doubled by its own container (#2877)", ()
     "%s — no pt-*/py-* on the up-link's enclosing container",
     (relPath) => {
       expect(enclosingPaddingViolations(code.get(relPath)!)).toEqual([]);
-    },
-  );
-});
-
-/**
- * Held to its exact pinned count, the same shape rule 8's exemptions use —
- * see `UP_LINK_PADDING_EXEMPT_DECLARATIONS`'s own docblock for why.
- */
-describe("rule 13's exemption is pinned to its exact occurrence count (#2877)", () => {
-  it.each(Object.entries(UP_LINK_PADDING_EXEMPT_DECLARATIONS))(
-    "%s — matches the up-link site pattern exactly %i time(s)",
-    (relPath, count) => {
-      const occurrences = [...code.get(relPath)!.matchAll(UP_LINK_SITE)].length;
-      expect(occurrences).toBe(count);
     },
   );
 });
@@ -2877,8 +2848,6 @@ function hasAnyRetiredPair(source: string): boolean {
  * a *second*, undocumented retired pair landing in the same file later
  * still fails.
  *
- * - `UltrasHero.tsx` — the marketing hero's own `py-24 sm:py-32` (#2877:
- *   "ruled by the dark-band family's own air rule, not by this decision").
  * - `ploegen/[slug]/(detail)/page.tsx` + its `loading.tsx` — `<TeamHero>`'s
  *   own `py-8 sm:py-12` (#2876) and the skeleton that mirrors it exactly.
  * - `PageHero.tsx` + `PageHeroSkeleton.tsx` — the dark-band register's own
@@ -2887,7 +2856,6 @@ function hasAnyRetiredPair(source: string): boolean {
  * - `ErrorState.tsx` — excluded outright by #2433, untouched by #2479.
  */
 const RETIRED_PAIR_EXEMPTIONS: Record<string, readonly [string, string]> = {
-  "app/(main)/club/ultras/UltrasHero.tsx": ["py-24", "sm:py-32"],
   "app/(main)/ploegen/[slug]/(detail)/page.tsx": ["py-8", "sm:py-12"],
   "app/(main)/ploegen/[slug]/(detail)/loading.tsx": ["py-8", "sm:py-12"],
   "components/layout/PageHero/PageHero.tsx": ["py-14", "sm:py-20"],

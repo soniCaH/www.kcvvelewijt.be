@@ -9,20 +9,20 @@ import { PullQuote } from "@/components/design-system/PullQuote";
 import { PageContainer } from "@/components/design-system/PageContainer";
 import { ULTRAS_KAMPIOEN, ULTRAS_SJR } from "@/lib/sanity/images";
 import { UltrasAnalytics } from "./UltrasAnalytics";
-import { UltrasHero } from "./UltrasHero";
 import { UltrasSection } from "./UltrasSection";
 import { RaffleCallout } from "./RaffleCallout";
 import { FACEBOOK_URL } from "./copy";
+import { UltrasHero } from "./UltrasHero";
 
 const PHOTO_SIZES = "(min-width: 768px) 640px, 100vw";
 
 export const metadata = buildPageMetadata({
   title: "KCVV Ultras",
   description:
-    "Supportersclub van KCVV Elewijt: De Ultra's! Positief aanmoedigen van onze ploeg.",
+    "Ultra's 55, de sfeergroep van KCVV Elewijt. Thuis langs de lijn, naar elke uitmatch met de bus.",
   path: "/club/ultras",
   ogTitle: "KCVV Ultra's 55 - KCVV Elewijt",
-  ogDescription: "Supportersclub van KCVV Elewijt: De Ultra's!",
+  ogDescription: "De sfeergroep van KCVV Elewijt, thuis en op verplaatsing.",
   keywords: ["ultras", "supporters", "KCVV Elewijt", "sfeeracties"],
 });
 
@@ -38,10 +38,7 @@ export default function UltrasPage() {
       />
 
       <UltrasAnalytics>
-        <UltrasHero
-          joinHref={FACEBOOK_URL}
-          upLink={{ href: "/club", label: "De club" }}
-        />
+        <UltrasHero upLink={{ href: "/club", label: "De club" }} />
 
         <PageContainer as="article" className="py-12 sm:py-16">
           <UltrasSection kicker="Ons verhaal" heading="Wie zijn we" accent=".">
@@ -88,7 +85,7 @@ export default function UltrasPage() {
               aanstekelijk en de bende groeide al snel. De sfeeracties volgden
               in de tweede helft van het seizoen elkaar dan ook snel op en
               kregen uitbreiding op verplaatsing: met de bierfiets de ploeg over
-              de streep gaan trekken op FC Zemst, met de bus naar Mollem enz...
+              de streep gaan trekken op FC Zemst, met de bus naar Mollem.
             </p>
             <p>
               Of het nu aan de steun van de Ultras lag of niet, het seizoen werd
@@ -100,30 +97,31 @@ export default function UltrasPage() {
 
           <UltrasSection kicker="Onze missie" heading="Wat doen we" accent=".">
             <PullQuote attribution={{ name: "KCVV Ultra's 55" }}>
-              Positief aanmoedigen van de eigen ploeg; vocaal, met trommels, met
-              sfeermateriaal, met bussen enz...
+              Negentig minuten zingen. En op de bus naar huis nog wat langer.
             </PullQuote>
             <p>
-              Het doel van de KCVV Ultras is om onze eigen ploeg positief aan te
-              moedigen! Agressie of negatief gedrag naar de
-              tegenstanders/wedstrijdleiding zal op geen enkel moment
-              getolereerd worden!
+              De Ultra&apos;s zijn een sfeergroep. We staan er om onze eigen
+              ploeg te steunen, met trommels, vlaggen, spandoeken en vooral veel
+              stem. Respect voor de tegenstander, hun supporters en de
+              scheidsrechter spreekt voor ons vanzelf. Agressie hoort er bij ons
+              niet bij.
             </p>
             <p>
-              Met sfeermateriaal (bengaals vuur, rookpotten, trommels) en vocale
-              steun proberen we zo vaak mogelijk aanwezig te zijn op
-              wedstrijden.
+              We proberen naar elke uitwedstrijd een bus in te leggen, hoe klein
+              de groep ook is. Met vijftig of met vijftien: als de ploeg op
+              verplaatsing speelt, willen wij erbij zijn.
             </p>
             <p>
-              We volgen de ploeg naar bijna elke uitwedstrijd, meestal met de
-              bus.
+              Ook naast het veld steken we de handen uit de mouwen. Op het
+              jeugdtornooi en op andere clubevenementen staan we achter de
+              bakplaat en de friteuse. Hamburgers, frietjes en alles wat er
+              verder moet gebeuren: als de club volk nodig heeft, zijn we er.
             </p>
             <p>
-              Op het einde van het seizoen 2018-2019 werd ook voor het eerst een
-              volledig eigen evenement georganiseerd: een afterwork party
-              gecombineerd met een &quot;Schijt je rijk&quot;, waarbij maar
-              liefst ALLE 500 lotjes verkocht werden aan sympathisanten! De
-              winnaar kreeg een cheque uitgereikt van 750 euro!
+              Op het einde van het seizoen 2018-2019 organiseerden we ons eerste
+              eigen evenement: een afterwork party met een &quot;Schijt je
+              rijk&quot;. Alle 500 lotjes gingen de deur uit, en de winnaar ging
+              naar huis met een cheque van 750 euro.
             </p>
 
             {/* Pull-stat highlight of the two figures above (the legacy inline
@@ -154,8 +152,9 @@ export default function UltrasPage() {
 
           <UltrasSection kicker="Doe mee" heading="Lid worden" accent=".">
             <p>
-              De makkelijkste manier om op de hoogte te blijven van acties,
-              busritten, evenementen... is via onze facebookpagina:
+              Een keer mee met de bus, of gewoon weten wanneer we waar staan?
+              Busritten, acties en evenementen kondigen we aan op onze
+              Facebookpagina:
             </p>
             <div>
               <a

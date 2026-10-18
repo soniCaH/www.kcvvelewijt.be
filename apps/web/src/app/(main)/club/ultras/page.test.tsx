@@ -1,20 +1,23 @@
 import { describe, it, expect } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import UltrasPage from "./page";
+import { ULTRAS_HERO } from "./copy";
 
 describe("/club/ultras page", () => {
-  it("renders the terrace-poster hero", () => {
+  it("renders the photo-led opening", () => {
     render(<UltrasPage />);
 
-    expect(
-      screen.getByText(/Supporters · KCVV Ultra's 55/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Supportersclub · Ultra's 55/)).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { level: 1, name: /de luidste hoek/i }),
     ).toBeInTheDocument();
+    // Decorative (alt=""), so it has no img role to query by.
+    expect(
+      screen.getByTestId("ultras-hero").querySelector("img"),
+    ).toHaveAttribute("alt", "");
   });
 
-  it("renders the up-link to /club inside the band", () => {
+  it("renders the up-link to /club", () => {
     render(<UltrasPage />);
 
     const upLink = screen.getByTestId("up-link");
@@ -52,6 +55,21 @@ describe("/club/ultras page", () => {
       name: /facebook\.com\/kcvv\.ultras\.55/i,
     });
     expect(cta.textContent).not.toContain("↗");
+  });
+
+  it("opens the Facebook join link in a new tab and tags it for ultras_join_click", () => {
+    render(<UltrasPage />);
+    const cta = screen.getByRole("link", {
+      name: /facebook\.com\/kcvv\.ultras\.55/i,
+    });
+    expect(cta).toHaveAttribute("target", "_blank");
+    expect(cta).toHaveAttribute("rel", "noopener noreferrer");
+    expect(cta).toHaveAttribute("data-ultras-join");
+  });
+
+  // EditorialHeading drops an emphasis it cannot find, silently.
+  it("accents a word the headline actually contains", () => {
+    expect(ULTRAS_HERO.headline).toContain(ULTRAS_HERO.accent);
   });
 
   it("renders the raffle callout stats", () => {

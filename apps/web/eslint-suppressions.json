@@ -22,11 +22,6 @@
       "count": 1
     }
   },
-  "src/app/(main)/club/ultras/UltrasHero.tsx": {
-    "kcvv/no-off-ramp-leading": {
-      "count": 1
-    }
-  },
   "src/app/(main)/evenementen/[slug]/EventDetailCtas.tsx": {
     "kcvv/no-off-ramp-font-size": {
       "count": 1

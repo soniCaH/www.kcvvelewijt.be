@@ -10,9 +10,8 @@ export interface UltrasAnalyticsProps {
 
 /**
  * Client analytics shell for `/club/ultras`. Fires `ultras_view` once on mount
- * and delegates clicks on any `[data-ultras-join]` element (the hero stamp +
- * the "Lid worden" Facebook link) to `ultras_join_click` — so the hero and
- * body stay server-rendered. A native listener on the container catches the
+ * and delegates clicks on any `[data-ultras-join]` element (the "Lid worden"
+ * Facebook link) to `ultras_join_click` — so the body stays server-rendered. A native listener on the container catches the
  * bubbled click from mouse and keyboard activation alike.
  */
 export function UltrasAnalytics({ children }: UltrasAnalyticsProps) {
