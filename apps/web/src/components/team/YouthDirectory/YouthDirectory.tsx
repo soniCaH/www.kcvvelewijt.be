@@ -166,6 +166,7 @@ export function YouthDirectory({
               // The team's own age, not the group it renders inside — see
               // `toneFor`'s doc comment for why that distinction matters.
               const cardTone = toneFor(team.age);
+              const band = getYouthDivision(team.age);
               const slot = index % CARD_ROTATIONS.length;
               return (
                 <Link
@@ -231,6 +232,23 @@ export function YouthDirectory({
                     >
                       {caption}
                     </p>
+                    {/* The band as text (#3556) — the mock's outlined chip, in
+                      the caption's tone. None for U5 or Reserven. A `<span>`,
+                      not a `<p>`: the sub-line tests count paragraphs. */}
+                    {band ? (
+                      <span className="mt-1.5 flex justify-center">
+                        <span
+                          data-testid="youth-team-band"
+                          data-tone={cardTone}
+                          className={cn(
+                            TONE_CLASS[cardTone],
+                            "text-label-sm border-[1.5px] border-current px-[7px] py-[5px] font-mono font-semibold uppercase",
+                          )}
+                        >
+                          {band}
+                        </span>
+                      </span>
+                    ) : null}
                     {/* The reeks this team plays in, when the club has
                       published one — and nothing at all when it has not
                       (#2641). The slot used to fall back to `team.name`, which
