@@ -1,5 +1,7 @@
+import { execFileSync } from "child_process";
 import { describe, expect, it } from "vitest";
 import {
+  applyScript,
   buildMutations,
   classifyEmptyRoles,
   isTrainerOrDelegateTitle,
@@ -117,5 +119,16 @@ describe("buildMutations", () => {
         },
       },
     ]);
+  });
+});
+
+describe("applyScript", () => {
+  it("stays valid bash when the --out path holds an apostrophe", () => {
+    const script = applyScript("/tmp/kevin's dir/mutations.json", "production");
+    // `bash -n` parses without running: a broken quote is a syntax error.
+    expect(() =>
+      execFileSync("bash", ["-n"], { input: script, stdio: "pipe" }),
+    ).not.toThrow();
+    expect(script).toContain(`@'/tmp/kevin'\\''s dir/mutations.json'`);
   });
 });
