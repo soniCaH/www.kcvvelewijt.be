@@ -1,2 +1,2 @@
-export { TeamCard } from "./TeamCard";
-export type { TeamCardProps } from "./TeamCard";
+export { TeamCard, TeamGuessCard } from "./TeamCard";
+export type { TeamCardProps, TeamGuessCardProps } from "./TeamCard";

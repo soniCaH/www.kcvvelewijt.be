@@ -8,7 +8,8 @@
  * the finder's `<ContactCard>` person vocabulary; no trainer names.
  *
  * Renders from a match result alone (plus the organigram nodes), so the AI
- * "Bedoel je …?" step (#3559) can open the same card after a confirm.
+ * "Bedoel je …?" step (`<TeamGuessCard>`, #3559) opens the same card after a
+ * confirm.
  */
 
 import { useId } from "react";
@@ -219,6 +220,60 @@ export function TeamCard({ result, nodes }: TeamCardProps) {
           ))}
         </>
       )}
+    </section>
+  );
+}
+
+export interface TeamGuessCardProps {
+  /** The card the pick would open — `aiTeamResult()` for the AI's age. */
+  result: YouthTeamMatchResult;
+  onAnswer: (answer: "yes" | "no") => void;
+}
+
+const ASK =
+  "border-ink border-2 px-3.5 py-2 font-mono text-label-sm font-semibold uppercase transition-colors";
+
+/**
+ * The AI fallback asks first (#3559): "Bedoel je deze ploeg?" with the pick's
+ * band title. "Ja" opens `<TeamCard>` for it; "Nee" removes it.
+ */
+export function TeamGuessCard({ result, onAnswer }: TeamGuessCardProps) {
+  const headingId = useId();
+  const first = result.bands[0]?.matches[0];
+  if (!first) return null;
+  return (
+    <section
+      aria-labelledby={headingId}
+      className="border-ink bg-cream border-2 p-3.5 shadow-[var(--shadow-paper-sm)]"
+    >
+      <p className="text-jersey-deep text-label-sm mb-1.5 font-mono font-semibold uppercase">
+        Bedoel je deze ploeg?
+      </p>
+      <h2
+        id={headingId}
+        className="font-display text-ink text-display-sm mb-3 font-semibold"
+      >
+        <BandTitle match={first} label={code(first.category)} />
+      </h2>
+      <div className="mt-1 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => onAnswer("yes")}
+          className={`${ASK} bg-ink text-cream hover:bg-jersey-deep`}
+        >
+          Ja, toon contact
+        </button>
+        <button
+          type="button"
+          onClick={() => onAnswer("no")}
+          className={`${ASK} text-ink hover:bg-ink hover:text-cream bg-transparent`}
+        >
+          Nee
+        </button>
+      </div>
+      <p className="text-ink-muted mt-2 text-sm">
+        Niet zeker? Zoek op leeftijd, bv. “U9” of “geboren in 2018”.
+      </p>
     </section>
   );
 }

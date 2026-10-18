@@ -4,7 +4,8 @@ import { teamDisplayName } from "./team-display-name";
 /**
  * Recognise a youth team in what a parent types into `/hulp` (#3557, rules
  * decided in #3420). Pure: the team list and the season come in, nothing is read.
- * Rules only — the AI fallback for what they miss is #3559.
+ * Rules only — the AI fallback for what they miss (#3559) asks the BFF to pick
+ * from `youthTeamAges()`, and a confirmed pick becomes `aiTeamResult()`.
  */
 
 /** The fields the matcher reads. Callers pass their own view-model and get it back. */
@@ -19,8 +20,9 @@ export interface YouthTeamSource {
   archived?: boolean | null;
 }
 
-/** Which rule found the team — also the GA4 "found by" value. */
-export type YouthTeamMatchKind = "u-code" | "old-name" | "age" | "birth-year";
+/** Which rule found the team — also the GA4 "found by" value. `ai` is a pick the parent confirmed (#3559). */
+export type YouthTeamMatchKind =
+  "u-code" | "old-name" | "age" | "birth-year" | "ai";
 
 /** The teams one category lower a late-born player (01.07–31.12) may also play in. */
 export interface LateBornAlternative<
@@ -237,4 +239,41 @@ export function matchYouthTeams<T extends YouthTeamSource>(
   })).filter((g) => g.matches.length > 0);
 
   return { bands, unmatchedNumber: bands.length === 0 && /\d/.test(query) };
+}
+
+/** The U-codes the club fields, youngest first — the only answers the AI may give (#3559). */
+export function youthTeamAges(teams: readonly YouthTeamSource[]): string[] {
+  const categories = new Set(
+    teams
+      .filter((t) => t.archived !== true)
+      .map(parseTeam)
+      .flatMap((p) => (p ? [p.category] : [])),
+  );
+  return [...categories].sort((a, b) => a - b).map((c) => `U${c}`);
+}
+
+/**
+ * Whether a query the rules missed is worth one AI try (#3559): it speaks of a
+ * child or a youth team. Prefixes, so `dochtertje` and `ploegen` count too.
+ */
+export function hasYouthHint(query: string): boolean {
+  return /\b(?:zoon|dochter|kind|ploeg|jeugd|pupil|kadet|nieuweling|belofte|debutant)/i.test(
+    query,
+  );
+}
+
+/** The card for an AI pick the parent confirmed: the U-code rule's card, found by `ai`. */
+export function aiTeamResult<T extends YouthTeamSource>(
+  age: string,
+  teams: readonly T[],
+  seasonYear: number,
+): YouthTeamMatchResult<T> {
+  const result = matchYouthTeams(age, teams, seasonYear);
+  return {
+    ...result,
+    bands: result.bands.map((band) => ({
+      ...band,
+      matches: band.matches.map((m) => ({ ...m, kind: "ai" as const })),
+    })),
+  };
 }

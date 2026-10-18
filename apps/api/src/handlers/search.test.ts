@@ -5,8 +5,13 @@
  */
 import { describe, expect, it, vi } from "vitest";
 import { Effect, Layer } from "effect";
-import type { SearchRequest } from "@kcvv/api-contract";
-import { searchCacheKey, searchWithCeilings } from "./search";
+import type { SearchRequest, TeamGuessRequest } from "@kcvv/api-contract";
+import {
+  searchCacheKey,
+  searchWithCeilings,
+  teamGuessCacheKey,
+  teamGuessWithCeilings,
+} from "./search";
 import { KvCacheLive } from "../cache/kv-cache";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
 import { EmbeddingService, EmbeddingError } from "../search/embedding";
@@ -50,6 +55,8 @@ function setup(
     score?: number;
     /** What generateAnswer yields — undefined is a dropped answer. */
     answer?: string | undefined;
+    /** What guessTeam yields — undefined is "not asked" (cap or AI error). */
+    guess?: string | null | undefined;
   } = {},
 ) {
   const ipLimiter = stubLimiter(opts.ipLimit ?? 10);
@@ -75,6 +82,8 @@ function setup(
   );
   const answer = "answer" in opts ? opts.answer : "Een antwoord.";
   const generateAnswer = vi.fn(() => Effect.succeed(answer));
+  const guessValue = "guess" in opts ? opts.guess : "U9";
+  const guessTeam = vi.fn(() => Effect.succeed(guessValue));
   const kv = makeKv();
   const layer = Layer.mergeAll(
     KvCacheLive,
@@ -85,7 +94,7 @@ function setup(
       getByIds: () => Effect.succeed([]),
       deleteByIds: () => Effect.void,
     }),
-    Layer.succeed(AiAnswerService, { generateAnswer }),
+    Layer.succeed(AiAnswerService, { generateAnswer, guessTeam }),
   ).pipe(
     Layer.provideMerge(
       makeTestEnvLayer({
@@ -105,7 +114,30 @@ function setup(
         ip ?? undefined,
       ).pipe(Effect.either, Effect.provide(layer)),
     );
-  return { search, embed, query, generateAnswer, ipLimiter, globalLimiter };
+  const guess = (
+    payload: Partial<typeof TeamGuessRequest.Type> = {},
+    ip = "203.0.113.7",
+  ) =>
+    Effect.runPromise(
+      teamGuessWithCeilings(
+        {
+          query: "mijn zoon speelt bij de pupillen",
+          ages: ["U8", "U9", "U10"],
+          ...payload,
+        },
+        ip,
+      ).pipe(Effect.either, Effect.provide(layer)),
+    );
+  return {
+    search,
+    guess,
+    embed,
+    query,
+    generateAnswer,
+    guessTeam,
+    ipLimiter,
+    globalLimiter,
+  };
 }
 
 describe("searchCacheKey", () => {
@@ -238,5 +270,66 @@ describe("searchWithCeilings — 503 (#3468)", () => {
     });
     if (result._tag === "Left")
       expect(result.left.error).toBe("Search service unavailable");
+  });
+});
+
+describe("teamGuessWithCeilings (#3559)", () => {
+  it("answers the age the AI picked", async () => {
+    const { guess } = setup({ guess: "U9" });
+    expect(await guess()).toMatchObject({ right: { age: "U9" } });
+  });
+
+  it("cap reached or AI error → age null, never an error", async () => {
+    const { guess } = setup({ guess: undefined });
+    expect(await guess()).toMatchObject({ right: { age: null } });
+  });
+
+  it("caches a pick and a none under its own prefix, never a not-asked", async () => {
+    const picked = setup({ guess: "U9" });
+    await picked.guess();
+    await picked.guess({ query: "  Mijn zoon speelt bij de PUPILLEN " });
+    expect(picked.guessTeam).toHaveBeenCalledTimes(1);
+
+    const none = setup({ guess: null });
+    await none.guess();
+    await none.guess();
+    expect(none.guessTeam).toHaveBeenCalledTimes(1);
+
+    const notAsked = setup({ guess: undefined });
+    await notAsked.guess();
+    await notAsked.guess();
+    expect(notAsked.guessTeam).toHaveBeenCalledTimes(2);
+  });
+
+  it("a different team list is a different entry", async () => {
+    const { guess, guessTeam } = setup();
+    await guess({ ages: ["U8", "U9"] });
+    await guess({ ages: ["U9", "U10"] });
+    expect(guessTeam).toHaveBeenCalledTimes(2);
+  });
+
+  it("keys on teamguess:v1: plus a SHA-256 hex digest", async () => {
+    expect(
+      await Effect.runPromise(
+        teamGuessCacheKey({ query: "pupillen", ages: ["U9"] }),
+      ),
+    ).toMatch(/^teamguess:v1:[0-9a-f]{64}$/);
+  });
+
+  it("shares the per-visitor limit with /search: 429 and no AI call", async () => {
+    const { search, guess, guessTeam } = setup({ ipLimit: 1 });
+    await search({});
+    expect(await guess()).toMatchObject({
+      left: { _tag: "HttpTooManyRequests" },
+    });
+    expect(guessTeam).not.toHaveBeenCalled();
+  });
+
+  it("over the global limit → 429 and no AI call", async () => {
+    const { guess, guessTeam } = setup({ globalLimit: 0 });
+    expect(await guess()).toMatchObject({
+      left: { _tag: "HttpTooManyRequests" },
+    });
+    expect(guessTeam).not.toHaveBeenCalled();
   });
 });

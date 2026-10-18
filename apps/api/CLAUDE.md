@@ -243,6 +243,19 @@ that throws fails **open** (logged): search stays up and the AI cap is the
 backstop. A search failure is `503` with the fixed text
 `Search service unavailable`; the real message goes to `Effect.logError` only.
 
+### `/search/team-guess` (`teamGuessWithCeilings`, `AiAnswerService.guessTeam`)
+
+The `/hulp` team card's AI fallback (#3559): `{ query, ages }` →
+`{ age: one of ages | null }`. Same order and the same four ceilings as
+`/search` — the two limiters (one shared budget per visitor), the cache under
+its own prefix `teamguess:v1:{sha256(ages joined "," + "|" + q)}` for
+`TTL.SEARCH`, and the same `ai:answers:{day}` counter against
+`AI_ANSWER_DAILY_CAP` (`max_tokens: 8`). The model's reply counts only as a
+bare code on the list (`allowedAge`); anything else is `null`. The cap or an
+AI failure is `age: null` too — never a 5xx — and is not cached; a pick and
+a "none" are. The web calls it only when the rules matched no team and the
+query holds a youth hint word.
+
 **Namespace ids are account-wide** and both workers share one account:
 production uses `1001`/`1002`, staging `2001`/`2002`. Named envs do not
 inherit `[[ratelimits]]`, so both blocks are declared twice

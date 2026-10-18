@@ -187,6 +187,23 @@ export const params = [
   // keeps `create-ga4-dimensions.mjs` from minting a dimension while the
   // 50-dimension cap is already exceeded.
   { parameterName: "has_remark", displayName: "Has remark", registered: false },
+  // ── /hulp team card (#3558, #3559) ─────────────────────────────────────
+  // `organigram_team_card_shown`, `organigram_team_not_found`,
+  // `organigram_team_guess_answered`. Forwarded unregistered (DebugView
+  // only) while the 50-dimension cap is full.
+  {
+    parameterName: "match_kind",
+    displayName: "Team match kind",
+    registered: false,
+  },
+  { parameterName: "team_ages", displayName: "Team ages", registered: false },
+  { parameterName: "query_kind", displayName: "Query kind", registered: false },
+  { parameterName: "answer", displayName: "Guess answer", registered: false },
+  {
+    parameterName: "team_age",
+    displayName: "Guessed team age",
+    registered: false,
+  },
   // ── Share tool (#3539) ──────────────────────────────────────────────────
   // `share_image_saved`. Reuses `article_type` / `event_type` above (registered
   // dimensions); the other nine are forwarded by the GA4 tag as unregistered

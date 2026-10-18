@@ -41,3 +41,24 @@ export class SearchResponse extends S.Class<SearchResponse>("SearchResponse")({
   results: S.Array(SearchResult),
   answer: S.optional(S.String.pipe(S.pattern(/\S/))),
 }) {}
+
+/** A youth team's U-code as the club names it: `U9`, `U17`. */
+const TeamAge = S.String.pipe(S.pattern(/^U\d{1,2}$/));
+
+/**
+ * The AI fallback of the `/hulp` team card (#3559): the query the rules found
+ * no team for, and the U-codes the club fields — the only answers allowed.
+ */
+export class TeamGuessRequest extends S.Class<TeamGuessRequest>(
+  "TeamGuessRequest",
+)({
+  query: S.Trim.pipe(S.minLength(1), S.maxLength(1024)),
+  ages: S.Array(TeamAge).pipe(S.minItems(1), S.maxItems(30)),
+}) {}
+
+/** One of the request's `ages`, or `null` — the AI found none, or was not asked. */
+export class TeamGuessResponse extends S.Class<TeamGuessResponse>(
+  "TeamGuessResponse",
+)({
+  age: S.NullOr(TeamAge),
+}) {}

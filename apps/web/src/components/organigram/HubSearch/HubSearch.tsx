@@ -55,9 +55,13 @@ import {
   SECTION_NAV_CHIP_SHADOW_CLASS,
   SECTION_NAV_TRAILING_SLOT_CLASSES,
 } from "@/components/design-system/section-nav";
-import { TeamCard } from "@/components/hulp/TeamCard";
+import { TeamCard, TeamGuessCard } from "@/components/hulp/TeamCard";
+import { useTeamGuess } from "@/hooks/useTeamGuess";
 import {
+  aiTeamResult,
+  hasYouthHint,
   matchYouthTeams,
+  youthTeamAges,
   type YouthTeamSource,
 } from "@/lib/utils/match-youth-team";
 import type { OrgChartNode } from "@/types/organigram";
@@ -392,15 +396,57 @@ export function HubSearch({
     ],
   );
 
-  // Youth team card (#3558) — rules only, on the debounced query like the
+  // Youth team card (#3558) — rules first, on the debounced query like the
   // people lane. Members carry the coordinator and TVJO boxes already.
-  const teamMatch = useMemo(
+  const debouncedTrimmed = debouncedValue.trim();
+  const rulesMatch = useMemo(
     () =>
-      youthTeams && seasonYear && debouncedValue.trim()
-        ? matchYouthTeams(debouncedValue, youthTeams, seasonYear)
+      youthTeams && seasonYear && debouncedTrimmed
+        ? matchYouthTeams(debouncedTrimmed, youthTeams, seasonYear)
         : null,
-    [debouncedValue, youthTeams, seasonYear],
+    [debouncedTrimmed, youthTeams, seasonYear],
   );
+  // The AI gets one try when the rules found nothing and the query speaks of
+  // a child or a youth team (#3559) — on the debounced query, so never per
+  // keystroke, and only from the on-screen instance.
+  const teamAges = useMemo(() => youthTeamAges(youthTeams ?? []), [youthTeams]);
+  const guessQuery =
+    visible &&
+    seasonYear &&
+    rulesMatch?.bands.length === 0 &&
+    hasYouthHint(debouncedTrimmed)
+      ? debouncedTrimmed
+      : null;
+  const guess = useTeamGuess(guessQuery, teamAges);
+  const [guessAnswer, setGuessAnswer] = useState<{
+    query: string;
+    answer: "yes" | "no";
+  } | null>(null);
+  const liveGuess =
+    guess && guessQuery && guess.query === guessQuery ? guess : null;
+  const guessResult = useMemo(
+    () =>
+      liveGuess && youthTeams && seasonYear
+        ? aiTeamResult(liveGuess.age, youthTeams, seasonYear)
+        : null,
+    [liveGuess, youthTeams, seasonYear],
+  );
+  const answered =
+    guessAnswer && liveGuess && guessAnswer.query === liveGuess.query
+      ? guessAnswer.answer
+      : null;
+  const answerGuess = (answer: "yes" | "no") => {
+    if (!liveGuess) return;
+    setGuessAnswer({ query: liveGuess.query, answer });
+    trackEvent("organigram_team_guess_answered", {
+      answer,
+      team_age: liveGuess.age,
+    });
+    // The button just pressed unmounts; keep the caret in the search.
+    inputRef.current?.focus();
+  };
+  const teamMatch = answered === "yes" ? guessResult : rulesMatch;
+  const askGuess = answered === null ? guessResult : null;
   const teamCardMatches =
     teamMatch?.bands.flatMap((band) => band.matches) ?? [];
 
@@ -777,6 +823,11 @@ export function HubSearch({
           {teamMatch && teamCardMatches.length > 0 && (
             <div className="border-ink border-b-2 p-3">
               <TeamCard result={teamMatch} nodes={members} />
+            </div>
+          )}
+          {askGuess && (
+            <div className="border-ink border-b-2 p-3">
+              <TeamGuessCard result={askGuess} onAnswer={answerGuess} />
             </div>
           )}
           {/* `role="listbox"`'s owned children must all be `option`/`group`

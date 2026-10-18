@@ -1,6 +1,9 @@
 import { describe, it, expect } from "vitest";
 import {
+  aiTeamResult,
+  hasYouthHint,
   matchYouthTeams,
+  youthTeamAges,
   type YouthTeamMatchResult,
   type YouthTeamSource,
 } from "./match-youth-team";
@@ -232,5 +235,60 @@ describe("matchYouthTeams", () => {
     const result = run("U5");
     expect(result.bands.map((b) => b.band)).toEqual(["Onderbouw"]);
     expect(summary(result)).toEqual(["U5: kcvve-u5"]);
+  });
+});
+
+describe("the AI fallback's inputs (#3559)", () => {
+  it("lists every live U-code once, youngest first — the AI's only allowed answers", () => {
+    expect(youthTeamAges(TEAMS)).toEqual([
+      "U5",
+      "U6",
+      "U7",
+      "U8",
+      "U9",
+      "U10",
+      "U11",
+      "U12",
+      "U13",
+      "U14",
+      "U15",
+      "U16",
+      "U17",
+      "U19",
+      "U21",
+    ]);
+  });
+
+  it.each([
+    "mijn zoon speelt bij de pupillen",
+    "Mijn dochtertje wil voetballen",
+    "welke ploeg voor de kadetten",
+    "Nieuwelingen trainer",
+    "beloften",
+    "debutantjes",
+    "jeugdwerking",
+    "ons kind",
+  ])("hears a youth hint in %j", (query) => {
+    expect(hasYouthHint(query)).toBe(true);
+  });
+
+  it.each(["kantine", "wie is de voorzitter", "lidgeld betalen"])(
+    "hears no youth hint in %j",
+    (query) => {
+      expect(hasYouthHint(query)).toBe(false);
+    },
+  );
+
+  it('builds the card for a confirmed pick, found by "ai"', () => {
+    const result = aiTeamResult("U9", TEAMS, seasonStartYear(NOW));
+    expect(result.bands).toHaveLength(1);
+    expect(result.bands[0].band).toBe("Onderbouw");
+    expect(result.bands[0].matches).toEqual([
+      expect.objectContaining({
+        kind: "ai",
+        category: 9,
+        teams: [expect.objectContaining({ slug: "kcvve-u9" })],
+      }),
+    ]);
   });
 });
