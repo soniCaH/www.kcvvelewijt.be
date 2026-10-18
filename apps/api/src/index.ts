@@ -39,6 +39,7 @@ import {
 import { pruneJobOutcome, type JobOutcome } from "./search/prune-outcome";
 import { SanityMutationLive } from "./sanity/mutation";
 import { SanityProjectionLive } from "./sanity/projection";
+import { cleanupJobOutcome } from "./sync/cleanup-outcome";
 import { runSync } from "./sync/psd-sanity-sync";
 import {
   runStaffGapsCheck,
@@ -290,6 +291,15 @@ export default {
       // "wall-clock" number #2900 measures against the 15-minute Cron
       // Trigger ceiling (#2870 review).
       await reportJobOutcome("psd-sanity-sync", outcome);
+      // Own job name (#3564): a skipped cycle-end cleanup does not fail the
+      // sync, which did its work. Null (reported nothing) on a failed sync, a
+      // night with no cycle end and a manual run — see cleanupJobOutcome.
+      const cleanupOutcome = cleanupJobOutcome(
+        outcome.ok ? outcome.value.cleanup : undefined,
+      );
+      if (cleanupOutcome !== null) {
+        await reportJobOutcome("psd-sanity-sync-cleanup", cleanupOutcome);
+      }
       if (!outcome.ok) throw outcome.error;
     } else if (event.cron === STAFF_GAPS_CRON) {
       // Weekly staff-gaps nudge (#3561) — one Sanity read and at most one
