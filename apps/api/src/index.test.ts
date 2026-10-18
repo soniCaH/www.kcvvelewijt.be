@@ -180,6 +180,46 @@ describe("worker fetch — /webhooks/index is exempt and keeps its HMAC", () => 
   });
 });
 
+describe("worker fetch — /calendar redirects old subscribers (#3578)", () => {
+  const calendar = (query: string, method = "GET") =>
+    new Request(`https://footbalisto.be/calendar${query}`, { method });
+
+  it("renames teams to teamIds, keeps side, needs no BFF key", async () => {
+    const res = await worker.fetch(
+      calendar("?teams=1,2&side=home&x=y"),
+      env(),
+      ctx,
+    );
+    expect(res.status).toBe(308);
+    expect(res.headers.get("location")).toBe(
+      "https://www.kcvvelewijt.be/api/calendar.ics?teamIds=1%2C2&side=home",
+    );
+    expect(handlerSpy).not.toHaveBeenCalled();
+  });
+
+  it("sends no teamIds without teams (the all-teams feed)", async () => {
+    const res = await worker.fetch(calendar(""), env(), ctx);
+    expect(res.status).toBe(308);
+    expect(res.headers.get("location")).toBe(
+      "https://www.kcvvelewijt.be/api/calendar.ics",
+    );
+  });
+
+  it("redirects HEAD too", async () => {
+    const res = await worker.fetch(calendar("?side=away", "HEAD"), env(), ctx);
+    expect(res.status).toBe(308);
+    expect(res.headers.get("location")).toBe(
+      "https://www.kcvvelewijt.be/api/calendar.ics?side=away",
+    );
+  });
+
+  it("does not redirect a POST: the BFF key check still applies", async () => {
+    const res = await worker.fetch(calendar("?teams=1", "POST"), env(), ctx);
+    expect(res.status).not.toBe(308);
+    expect(res.headers.get("location")).toBeNull();
+  });
+});
+
 describe("worker fetch — /webhooks/index catch-all (#3477)", () => {
   it("answers internal_error without echoing the exception message", async () => {
     webhookOverride.fail = new Error("secret internal detail");

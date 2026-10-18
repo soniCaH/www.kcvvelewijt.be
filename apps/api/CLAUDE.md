@@ -186,6 +186,11 @@ KV, DO, PSD, Sanity or AI work. The comparison is constant-time
 - **Webhook exemption.** `POST /webhooks/index` is routed before the check and
   keeps its own Sanity HMAC (`SANITY_WEBHOOK_SECRET`). The `scheduled()` crons
   are not requests and are unaffected.
+- **Calendar redirect exemption.** `GET`/`HEAD /calendar` is also answered
+  before the check, with a `308` to `https://www.kcvvelewijt.be/api/calendar.ics`
+  (`teams` → `teamIds`, `side` kept, other params dropped), because old
+  `footbalisto.be/calendar` subscribers' calendar apps hold no BFF key (#3578).
+  No service is built for it.
 - **No CORS.** `HttpMiddleware.cors()` is gone on purpose — do not add it back.
 - **The web side.** `BffService` (every `HttpApiClient` request) and the
   `api/search` / `api/membership` route handlers send the header from the
