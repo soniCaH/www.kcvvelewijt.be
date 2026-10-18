@@ -11,7 +11,8 @@
     "board:audit": "tsx src/board-cleanup/audit-board-docs.ts",
     "psd-privacy:cleanup": "tsx src/psd-privacy-cleanup/apply-psd-privacy-cleanup.ts",
     "staff-role:fill": "tsx src/staff-role-fill/fill-staff-roles.ts",
-    "team-image:backfill": "tsx src/team-image-backfill/backfill-team-images.ts"
+    "team-image:backfill": "tsx src/team-image-backfill/backfill-team-images.ts",
+    "cashless-terms": "tsx src/cashless-terms-3569/apply-cashless-terms.ts"
   },
   "dependencies": {
     "@sanity/client": "8.6.2"
