@@ -182,7 +182,7 @@ describe("buildClubBook", () => {
       const { chapters } = buildClubBook(explorerFixture, []);
 
       expect(chapters.map((c) => c.title)).toEqual([
-        "Sportief",
+        "Sportief fanion",
         "Jeugd",
         "Club & werking",
         "Integriteit",
@@ -239,14 +239,14 @@ describe("buildClubBook", () => {
       );
     });
 
-    it("links Jeugd to the jeugdbestuur page and no other chapter, and the key cards to the hoofdbestuur page", () => {
+    it("links Jeugd to the jeugdbestuur page, Club & werking and the key cards to the hoofdbestuur page", () => {
       const { chapters, boardLink } = buildClubBook(explorerFixture, []);
 
       expect(boardLink.href).toBe("/club/bestuur");
       expect(chapters.map((c) => c.boardLink?.href)).toEqual([
         undefined,
         "/club/jeugdbestuur",
-        undefined,
+        "/club/bestuur",
         undefined,
       ]);
     });
