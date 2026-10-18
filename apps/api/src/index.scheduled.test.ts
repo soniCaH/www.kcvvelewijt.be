@@ -44,6 +44,7 @@ describe("scheduled() — weekly staff-gaps check", () => {
       emptyRoles: [],
       noPhoto: [],
       coordinators: [],
+      missingRoleCodes: [],
     });
     const slack = vi.fn();
     vi.stubGlobal("fetch", slack);
@@ -64,6 +65,7 @@ describe("scheduled() — weekly staff-gaps check", () => {
       emptyRoles: [],
       noPhoto: [{ id: "s1", firstName: "An", lastName: "Smet" }],
       coordinators: [],
+      missingRoleCodes: [],
     });
     const slack = vi.fn(async () => new Response("ok", { status: 200 }));
     vi.stubGlobal("fetch", slack);

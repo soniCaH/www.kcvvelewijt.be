@@ -43,14 +43,17 @@ export interface StaffGaps {
     readonly id: string;
     readonly name: string | null;
   }>;
-  /** Coordinator organigram nodes that are inactive or have no member. */
+  /** Coordinator organigram nodes that are inactive or have no live member. */
   readonly coordinators: ReadonlyArray<{
     readonly id: string;
     readonly roleCode: string;
     readonly title: string | null;
     readonly active: boolean;
+    /** Live members only — an archived or dangling reference does not count. */
     readonly memberCount: number;
   }>;
+  /** Coordinator role codes no organigram node carries at all. */
+  readonly missingRoleCodes: ReadonlyArray<string>;
 }
 
 /** Organigram role codes the weekly nudge expects to be filled (#3420 Q9). */
@@ -60,6 +63,9 @@ export const COORDINATOR_ROLE_CODES = [
 ];
 
 const ACTIVE_PSD_TEAM = `_type == "team" && archived != true && defined(psdId) && psdId != ""`;
+
+/** A node's members the web shows (`members[@->archived != true]->`, minus dangling refs). */
+const LIVE_MEMBERS = `coalesce(members[defined(@->_id) && @->archived != true], [])`;
 
 const STAFF_GAPS_QUERY = `{
   "emptyRoles": *[${ACTIVE_PSD_TEAM}] | order(name asc) {
@@ -72,9 +78,10 @@ const STAFF_GAPS_QUERY = `{
     "id": _id, firstName, lastName
   },
   "coordinators": *[_type == "organigramNode" && roleCode in $coordinatorCodes
-    && (active != true || count(coalesce(members, [])) == 0)] | order(roleCode asc) {
-    "id": _id, roleCode, title, "active": active == true, "memberCount": count(coalesce(members, []))
-  }
+    && (active != true || count(${LIVE_MEMBERS}) == 0)] | order(roleCode asc) {
+    "id": _id, roleCode, title, "active": active == true, "memberCount": count(${LIVE_MEMBERS})
+  },
+  "missingRoleCodes": $coordinatorCodes[!(@ in *[_type == "organigramNode"].roleCode)]
 }`;
 
 const fullName = (p: {
@@ -300,6 +307,7 @@ export const SanityProjectionLive = Layer.effect(
               }>;
               noPhoto: Array<Name & { id: string }>;
               coordinators: StaffGaps["coordinators"];
+              missingRoleCodes: string[];
             }>(STAFF_GAPS_QUERY, { coordinatorCodes: COORDINATOR_ROLE_CODES });
             return {
               emptyRoles: rows.emptyRoles.flatMap((t) =>
@@ -314,6 +322,7 @@ export const SanityProjectionLive = Layer.effect(
                 name: fullName(s),
               })),
               coordinators: rows.coordinators,
+              missingRoleCodes: rows.missingRoleCodes,
             };
           },
           catch: (cause) =>

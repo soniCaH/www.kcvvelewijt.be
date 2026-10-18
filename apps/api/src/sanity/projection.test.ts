@@ -316,6 +316,7 @@ describe("getStaffGaps", () => {
           memberCount: 2,
         },
       ],
+      missingRoleCodes: ["JC-BB"],
     });
 
     const result = await read();
@@ -336,6 +337,7 @@ describe("getStaffGaps", () => {
           memberCount: 2,
         },
       ],
+      missingRoleCodes: ["JC-BB"],
     });
   });
 
@@ -344,6 +346,7 @@ describe("getStaffGaps", () => {
       emptyRoles: [],
       noPhoto: [],
       coordinators: [],
+      missingRoleCodes: [],
     });
     await read();
     const [query, params] = mockFetch.mock.calls[0] as [string, unknown];
@@ -353,6 +356,12 @@ describe("getStaffGaps", () => {
       `archived != true && defined(psdId) && psdId != ""`,
     );
     expect(query).toContain("!defined(photo) && !defined(psdImage)");
+    // A coordinator counts only live members — an archived or dangling
+    // reference leaves the box as empty as the web's TeamCard sees it.
+    expect(query).toContain("members[defined(@->_id) && @->archived != true]");
+    expect(query).toContain(
+      `$coordinatorCodes[!(@ in *[_type == "organigramNode"].roleCode)]`,
+    );
     expect(params).toEqual({
       coordinatorCodes: ["TVJO", "JC-OB", "JC-MB", "JC-BB"],
     });

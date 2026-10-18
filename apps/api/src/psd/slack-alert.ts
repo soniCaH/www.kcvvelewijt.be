@@ -147,15 +147,22 @@ export function buildStaffGapsMessage(gaps: StaffGaps): string | null {
     ],
     [
       "Coordinator positions not filled",
-      gaps.coordinators.map((c) => {
-        const why = [
-          c.active ? null : "inactive",
-          c.memberCount === 0 ? "no member" : null,
-        ]
-          .filter(Boolean)
-          .join(", ");
-        return `• ${escapeSlack(c.roleCode)} — ${name(c.title, "(no title)")} (${why}) ${studioLink(c.id, "organigramNode")}`;
-      }),
+      gaps.coordinators
+        .map((c) => {
+          const why = [
+            c.active ? null : "inactive",
+            c.memberCount === 0 ? "no member" : null,
+          ]
+            .filter(Boolean)
+            .join(", ");
+          return `• ${escapeSlack(c.roleCode)} — ${name(c.title, "(no title)")} (${why}) ${studioLink(c.id, "organigramNode")}`;
+        })
+        .concat(
+          gaps.missingRoleCodes.map(
+            (code) =>
+              `• ${escapeSlack(code)} — no organigram node with this role code`,
+          ),
+        ),
     ],
   ];
   const filled = sections.filter(([, lines]) => lines.length > 0);

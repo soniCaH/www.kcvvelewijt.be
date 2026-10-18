@@ -165,9 +165,9 @@ Cron `0 6 * * 1` (Monday 06:00 UTC, production only — staging keeps `crons = [
 
 - **Staff without a role** — a `team.staff[]` entry with an **empty** role on a non-archived team with a `psdId`. `andere` is a real answer and is never reported; empty means "not done yet" (#3560).
 - **Staff without a photo** — a `staffMember` on those teams with neither `photo` nor `psdImage`.
-- **Coordinator positions not filled** — an `organigramNode` with roleCode `TVJO`, `JC-OB`, `JC-MB` or `JC-BB` that is not `active == true` or has no member.
+- **Coordinator positions not filled** — an `organigramNode` with roleCode `TVJO`, `JC-OB`, `JC-MB` or `JC-BB` that is not `active == true` or has no **live** member (an archived or dangling member reference does not count — the web's TeamCard hides that box too), and any of those role codes that no organigram node carries at all.
 
-Nothing to report → no message. `SLACK_ALERT_WEBHOOK_URL` unset → the job returns before the read. A failed read, or a Slack POST that is not confirmed, fails the run, which reports through `reportScheduledJobOutcome` under the job name **`staff-gaps-check`** — never through `gate.reportOutcome`. Its job-alert state TTL is the shared 3 days, shorter than the weekly interval, so a failure alerts every week it recurs instead of once per streak.
+Nothing to report → no message. `SLACK_ALERT_WEBHOOK_URL` unset → the job returns before the read. A failed read, or a Slack POST that is not confirmed, fails the run, which reports through `reportScheduledJobOutcome` under the job name **`staff-gaps-check`** — never through `gate.reportOutcome`. Its job-alert state TTL is the shared 3 days, shorter than the weekly interval, so a failure alerts every week it recurs instead of once per streak — and it **never sends a "recovered" ping**: by the next run the failure state has expired, so a success finds nothing to recover from. A missing Monday message after a failure alert therefore means either "fixed" or "nothing to report"; check the run log.
 
 ## Only the website may call the worker (#3485)
 

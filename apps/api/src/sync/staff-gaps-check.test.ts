@@ -6,7 +6,12 @@ import { makeTestEnvLayer } from "../test-helpers/env-layer";
 import { runStaffGapsCheck } from "./staff-gaps-check";
 
 const WEBHOOK = "https://hooks.slack.test/abc";
-const NONE: StaffGaps = { emptyRoles: [], noPhoto: [], coordinators: [] };
+const NONE: StaffGaps = {
+  emptyRoles: [],
+  noPhoto: [],
+  coordinators: [],
+  missingRoleCodes: [],
+};
 
 const run = (
   gaps: StaffGaps,

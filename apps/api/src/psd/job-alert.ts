@@ -1,8 +1,8 @@
 /**
  * Scheduled-job failure signal (#2870).
  *
- * Debounced Slack alerting for the two nightly crons (`runSync`,
- * `runSanityIndexSync`) — entirely independent of PsdGate's IncidentTracker.
+ * Debounced Slack alerting for the scheduled jobs — the two nightly crons
+ * (`runSync`, `runSanityIndexSync`) and the weekly `staff-gaps-check` — entirely independent of PsdGate's IncidentTracker.
  * A failed 02:00 sync is not the same event as PSD being down for visitors:
  * the read path reads `incidentOpen` back to escalate its serve-stale logs
  * WARN→ERROR (`cache/kv-cache.ts`), so routing a job failure through
@@ -67,8 +67,9 @@ export function decideJobAlert(
 
 export const jobAlertKey = (job: string): string => `job-alert:${job}`;
 
-/** Comfortably longer than the daily cron interval, so one delayed/missed
- * invocation doesn't silently reset a streak. */
+/** Comfortably longer than the nightly crons' interval, so one delayed/missed
+ * invocation doesn't silently reset a streak. Shorter than the weekly
+ * `staff-gaps-check`'s, so that job never streaks: see `apps/api/CLAUDE.md`. */
 export const JOB_ALERT_STATE_TTL = 60 * 60 * 24 * 3; // 3 days
 
 /** Parse the persisted state, guarding against a malformed value the same

@@ -172,7 +172,12 @@ describe("postSlack", () => {
 });
 
 describe("buildStaffGapsMessage", () => {
-  const none = { emptyRoles: [], noPhoto: [], coordinators: [] };
+  const none = {
+    emptyRoles: [],
+    noPhoto: [],
+    coordinators: [],
+    missingRoleCodes: [],
+  };
   const studio = "https://kcvvelewijt.sanity.studio/intent/edit";
 
   it("returns null when there is nothing to report", () => {
@@ -242,11 +247,30 @@ describe("buildStaffGapsMessage", () => {
     expect(msg).toContain("• JC-BB — (no title) (inactive, no member)");
   });
 
+  it("lists a coordinator role code with no organigram node at all", () => {
+    const msg = buildStaffGapsMessage({
+      ...none,
+      coordinators: [
+        {
+          id: "n2",
+          roleCode: "JC-OB",
+          title: "Coördinator onderbouw",
+          active: true,
+          memberCount: 0,
+        },
+      ],
+      missingRoleCodes: ["JC-BB"],
+    });
+    expect(msg).toContain("*Coordinator positions not filled* (2)");
+    expect(msg).toContain("• JC-BB — no organigram node with this role code");
+  });
+
   it("opens with the total count across groups", () => {
     const msg = buildStaffGapsMessage({
       emptyRoles: [{ teamId: "t", teamName: "U7", memberName: "X" }],
       noPhoto: [{ id: "s", name: "Y" }],
       coordinators: [],
+      missingRoleCodes: [],
     });
     expect(msg?.split("\n")[0]).toBe(
       ":clipboard: *Weekly staff check* — 2 gaps to fill in Studio.",
