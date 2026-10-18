@@ -2,12 +2,12 @@
  * Ultras Page — Loading Skeleton.
  *
  * Mirrors `UltrasPage` (`/club/ultras`):
- *   <UltrasHero> (full-bleed jersey-deep-dark terrace band: kicker + heavy
- *     headline + lead + CTA — fixed copy, a static bundled photo, no fetch)
+ *   <UltrasHero> (cream opening, large taped group photo —
+ *     fixed copy, a static bundled photo, no fetch)
  *     → <PageContainer> article: <UltrasSection> blocks (kicker + heading +
  *       paragraph bars) with embedded taped image figures
  *
- * `<UltrasHero>` has no data dependency, so per #2432 §2 this reuses it
+ * The opening has no data dependency, so per #2432 §2 this reuses it
  * directly, unshimmered — the real `<h1>` ships from the first byte.
  *
  * Default width (1040). Canonical paper-register chrome only — `border-2
@@ -20,7 +20,6 @@ import {
   LoadingAnnouncement,
 } from "@/components/design-system";
 import { UltrasHero } from "./UltrasHero";
-import { FACEBOOK_URL } from "./copy";
 
 /** An editorial section footprint: kicker + heading + paragraph bars. */
 function SectionSkeleton({ withImage = false }: { withImage?: boolean }) {
@@ -50,10 +49,7 @@ export default function UltrasLoading() {
     <div className="min-h-screen">
       <LoadingAnnouncement label="Ultras laden…" />
 
-      <UltrasHero
-        joinHref={FACEBOOK_URL}
-        upLink={{ href: "/club", label: "De club" }}
-      />
+      <UltrasHero upLink={{ href: "/club", label: "De club" }} />
 
       {/* Editorial sections — kicker + heading + paragraph bars + figures. */}
       <PageContainer as="article" className="py-12 sm:py-16">

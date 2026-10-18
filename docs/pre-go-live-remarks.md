@@ -228,7 +228,7 @@ breakpoints — relevant to sticky offsets.)
 
 ### Low
 
-- ☐ **MOB-10** `[layout]` Copy-fragility / minor squeeze: UltrasHero h1 needs `break-words`/`hyphens-auto` (`UltrasHero.tsx:55`); HeroMatchScoreBar `min-w-0`/`max-w-full` (`_variant-parts.tsx:411`); MemberDetailPanel name `break-words` (`:262`); MatchEvents name columns very short at 360px (`:407`); CalendarWidget toolbar wraps loosely (`CalendarWidget.tsx:198`).
+- ☐ **MOB-10** `[layout]` Copy-fragility / minor squeeze: ~~UltrasHero h1 needs `break-words`/`hyphens-auto`~~ (no longer needed: the hero was rebuilt and its headline is a bounded literal, per DESIGN.md's Hyphenation Rule); HeroMatchScoreBar `min-w-0`/`max-w-full` (`_variant-parts.tsx:411`); MemberDetailPanel name `break-words` (`:262`); MatchEvents name columns very short at 360px (`:407`); CalendarWidget toolbar wraps loosely (`CalendarWidget.tsx:198`).
 
 **Verified clean (no action):** StandingsTable, MatchHero, TeamAgendaRow, MatchLineup, PlayerHero/TeamHero/TeamFlagship/SquadGrid/YouthDirectory, HtmlTableBlock, VideoBlock, gallery/lightbox, sponsors/jeugd grids, history timeline, MemberDetailPanel bottom sheet — all collapse/scroll correctly. (`Scheurkalender` fixed-width table is out of scope — private print source.)
 

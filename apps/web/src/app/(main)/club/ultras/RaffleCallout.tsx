@@ -27,7 +27,7 @@ export function RaffleCallout() {
           value={500}
           tone="cream"
           size="display-xl"
-          label="lotjes — allemaal verkocht"
+          label="lotjes, allemaal verkocht"
           className="items-center text-center"
         />
         <span
