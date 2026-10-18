@@ -8,6 +8,7 @@ import { SanityProjection } from "../sanity/projection";
 import type { PsdTeamClientInterface } from "./psd-team-client";
 import { PsdTeamClient, PsdTeamClientError } from "./psd-team-client";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
+import { makeSanityProjectionStub } from "../test-helpers/sanity-projection-stub";
 import type { WorkerEnv } from "../env";
 import {
   KvCacheService,
@@ -112,6 +113,7 @@ function makeSanityMocks() {
     getTeamPlayerPsdIds,
     getProtectedStaffPsdIds,
     getFormRoutingConfig,
+    getStaffGaps: makeSanityProjectionStub().getStaffGaps,
   };
 
   return {
@@ -528,6 +530,7 @@ describe("runSync", () => {
       getTeamPlayerPsdIds: vi.fn(() => Effect.succeed([] as string[])),
       getProtectedStaffPsdIds: vi.fn(() => Effect.succeed([] as string[])),
       getFormRoutingConfig: vi.fn(() => Effect.succeed(null)),
+      getStaffGaps: makeSanityProjectionStub().getStaffGaps,
     };
     const psdMock = makePsdTeamClientMock(
       [ONE_TEAM],

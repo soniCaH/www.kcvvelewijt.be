@@ -41,7 +41,8 @@ src/
 │   └── search.ts             ← SearchApi HttpApiGroup + searchWithCeilings (rate limits, response cache, #3468)
 └── sync/
     ├── psd-team-client.ts    ← PsdTeamClient (teams/members/staff fetch for sync)
-    └── psd-sanity-sync.ts    ← PSD → Sanity player/team/staff sync
+    ├── psd-sanity-sync.ts    ← PSD → Sanity player/team/staff sync
+    └── staff-gaps-check.ts   ← weekly Slack nudge for staff/coordinator gaps (#3561)
 ```
 
 ## Local development
@@ -157,6 +158,16 @@ wrangler kv key put "sync:orphan-cap-override" "all" --binding=PSD_CACHE --env s
 ```
 
 Only set this after confirming the refusal is a false positive (a genuine mass roster change, not a truncated/regressed PSD fetch) — see the WARN log `reconciliation: SKIPPED — …` for the counts that tripped it, and `reconciliation: orphan-cap override consumed — …` for confirmation of what the key actually bypassed.
+
+## Weekly staff-gaps nudge (#3561)
+
+Cron `0 6 * * 1` (Monday 06:00 UTC, production only — staging keeps `crons = []`) runs `runStaffGapsCheck` (`sync/staff-gaps-check.ts`) from its own `scheduled()` branch, never inside the `0 2 * * *` sync and its 15-minute ceiling. One GROQ read, `SanityProjection.getStaffGaps()`, returns three groups, and `buildStaffGapsMessage` (`psd/slack-alert.ts`) turns them into one Slack message with a count per group and a Studio link per item:
+
+- **Staff without a role** — a `team.staff[]` entry with an **empty** role on a non-archived team with a `psdId`. `andere` is a real answer and is never reported; empty means "not done yet" (#3560).
+- **Staff without a photo** — a `staffMember` on those teams with neither `photo` nor `psdImage`.
+- **Coordinator positions not filled** — an `organigramNode` with roleCode `TVJO`, `JC-OB`, `JC-MB` or `JC-BB` that is not `active == true` or has no member.
+
+Nothing to report → no message. `SLACK_ALERT_WEBHOOK_URL` unset → the job returns before the read. A failed read, or a Slack POST that is not confirmed, fails the run, which reports through `reportScheduledJobOutcome` under the job name **`staff-gaps-check`** — never through `gate.reportOutcome`. Its job-alert state TTL is the shared 3 days, shorter than the weekly interval, so a failure alerts every week it recurs instead of once per streak.
 
 ## Only the website may call the worker (#3485)
 

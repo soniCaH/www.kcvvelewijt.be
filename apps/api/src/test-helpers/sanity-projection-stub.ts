@@ -18,5 +18,7 @@ export const makeSanityProjectionStub = (
   getVisibleTeamPsdIds: () => Effect.succeed([]),
   getProtectedStaffPsdIds: () => Effect.succeed([]),
   getFormRoutingConfig: () => Effect.succeed(null),
+  getStaffGaps: () =>
+    Effect.succeed({ emptyRoles: [], noPhoto: [], coordinators: [] }),
   ...overrides,
 });
