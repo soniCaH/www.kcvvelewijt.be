@@ -582,7 +582,8 @@ export const runSync = Effect.gen(function* () {
 
   if (teams.length === 0) {
     yield* Effect.log("no teams found — skipping sync");
-    return { cleanup: { kind: "not-run" } as CleanupOutcome };
+    const cleanup: CleanupOutcome = { kind: "not-run" };
+    return { cleanup };
   }
 
   const teamIndex = cursor % teams.length;
