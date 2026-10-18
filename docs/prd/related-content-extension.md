@@ -82,8 +82,8 @@ Phase 3 is blocked-by Phase 2 (needs the extended `relatedContent` field landed)
 - [ ] `relatedContent` accepts references to `article`, `player`, `team`, `staffMember`.
 - [ ] Self-reference filter on `article` type (`_id != ^._id`) so an article can't relate to itself.
 - [ ] Validation: `max(8)` on `relatedContent` array (soft cap to discourage grab-bag use).
-- [ ] Migration script copies existing `relatedArticles` values into `relatedContent` preserving order; run on staging then production per `feedback_sanity_migrations.md`.
-- [ ] `relatedArticles` field removed from schema after migration verified.
+- [x] Migration script copies existing `relatedArticles` values into `relatedContent` preserving order; run on staging then production per `feedback_sanity_migrations.md`. (Ran on both datasets 2026-10-17, see #1457.)
+- [x] `relatedArticles` field removed from schema after migration verified. (#1457)
 - [ ] Dedupe tested for all three auto-derived sources (players, teams, staff) against curated entries.
 - [ ] Storybook story updated: `Features/Related/` shows curated + auto mix (no new variant yet).
 - [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
