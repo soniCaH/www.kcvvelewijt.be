@@ -2,8 +2,11 @@
  * `scheduled()` dispatch for the weekly staff-gaps nudge (#3561): its own
  * cron, its own job name in the job-alert state, never the nightly sync.
  */
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { makeTestEnv } from "./test-helpers/env-layer";
+import { STAFF_GAPS_CRON } from "./sync/staff-gaps-check";
 
 // gate-do.ts imports `cloudflare:workers`, which only workerd can load.
 vi.mock("./psd/gate-do", () => ({ PsdGate: class {} }));
@@ -29,7 +32,7 @@ const kv = {
   put: async () => {},
   delete: async () => {},
 } as unknown as KVNamespace;
-const weekly = { cron: "0 6 * * 1" } as ScheduledEvent;
+const weekly = { cron: STAFF_GAPS_CRON } as ScheduledEvent;
 
 afterEach(() => {
   sanityFetch.mockReset();
@@ -39,6 +42,12 @@ afterEach(() => {
 });
 
 describe("scheduled() — weekly staff-gaps check", () => {
+  it("wrangler.toml schedules the exact cron string the handler matches", () => {
+    // Cloudflare numbers weekdays 1 = Sunday, so the cron names its day.
+    const toml = readFileSync(join(__dirname, "../wrangler.toml"), "utf8");
+    expect(toml).toContain(`"${STAFF_GAPS_CRON}"`);
+  });
+
   it("runs the check and skips Slack when there is nothing to report", async () => {
     sanityFetch.mockResolvedValueOnce({
       emptyRoles: [],

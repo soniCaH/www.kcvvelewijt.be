@@ -161,7 +161,7 @@ Only set this after confirming the refusal is a false positive (a genuine mass r
 
 ## Weekly staff-gaps nudge (#3561)
 
-Cron `0 6 * * 1` (Monday 06:00 UTC, production only — staging keeps `crons = []`) runs `runStaffGapsCheck` (`sync/staff-gaps-check.ts`) from its own `scheduled()` branch, never inside the `0 2 * * *` sync and its 15-minute ceiling. One GROQ read, `SanityProjection.getStaffGaps()`, returns three groups, and `buildStaffGapsMessage` (`psd/slack-alert.ts`) turns them into one Slack message with a count per group and a Studio link per item:
+Cron `0 6 * * MON` (Monday 06:00 UTC — named, because Cloudflare numbers weekdays `1` = Sunday; the string is `STAFF_GAPS_CRON`, and `index.scheduled.test.ts` asserts `wrangler.toml` carries it; production only — staging keeps `crons = []`) runs `runStaffGapsCheck` (`sync/staff-gaps-check.ts`) from its own `scheduled()` branch, never inside the `0 2 * * *` sync and its 15-minute ceiling. One GROQ read, `SanityProjection.getStaffGaps()`, returns three groups, and `buildStaffGapsMessage` (`psd/slack-alert.ts`) turns them into one Slack message with a count per group and a Studio link per item:
 
 - **Staff without a role** — a `team.staff[]` entry with an **empty** role on a non-archived team with a `psdId`. `andere` is a real answer and is never reported; empty means "not done yet" (#3560).
 - **Staff without a photo** — a `staffMember` on those teams with neither `photo` nor `psdImage`.

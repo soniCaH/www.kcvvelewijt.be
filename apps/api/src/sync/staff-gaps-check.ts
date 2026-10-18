@@ -12,6 +12,9 @@ import { buildStaffGapsMessage, postSlack } from "../psd/slack-alert";
 
 export const STAFF_GAPS_JOB = "staff-gaps-check";
 
+/** Cloudflare numbers weekdays 1 = Sunday, so name the day. Must match wrangler.toml. */
+export const STAFF_GAPS_CRON = "0 6 * * MON";
+
 export class StaffGapsSlackError extends Error {
   readonly _tag = "StaffGapsSlackError" as const;
   constructor() {
