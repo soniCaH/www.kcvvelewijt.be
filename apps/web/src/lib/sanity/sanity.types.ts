@@ -641,11 +641,6 @@ export type Article = {
         _key: string;
       } & PullQuote)
   >;
-  relatedArticles?: Array<
-    {
-      _key: string;
-    } & ArticleReference
-  >;
   metaDescription?: string;
   ogImage?: {
     asset?: SanityImageAssetReference;
@@ -1742,14 +1737,7 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
         markDefs: null;
       }
   > | null;
-  relatedArticles: Array<{
-    id: string;
-    title: string;
-    slug: string | "";
-    publishedAt: string | null;
-    unpublishAt: string | null;
-    coverImageUrl: string | null;
-  }> | null;
+  relatedArticles: null;
   relatedContent: Array<
     | {
         _type: "article";
