@@ -60,7 +60,7 @@ export function ChapterSection({ chapter }: { chapter: Chapter }) {
       {chapter.board.length > 0 && (
         <p className="text-body-sm text-ink mt-2 print:mt-1 print:break-inside-avoid">
           <span className="text-jersey-deep font-semibold">
-            In het bestuur:
+            Uit de raad van bestuur:
           </span>{" "}
           {joinNames(chapter.board)}
         </p>

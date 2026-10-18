@@ -352,7 +352,7 @@ describe("<ClubBook>", () => {
       ...over,
     });
 
-    it("names the Raad members who also hold a box in a chapter, under 'In het bestuur'", () => {
+    it("names the Raad members who also hold a box in a chapter, under 'Uit de raad van bestuur'", () => {
       const raadMember = person("ann", "Ann Raad");
       render(
         <ClubBook
@@ -375,8 +375,10 @@ describe("<ClubBook>", () => {
       );
 
       const club = screen.getByRole("region", { name: "Club & werking" });
-      expect(within(club).getByText("In het bestuur:")).toBeInTheDocument();
-      expect(club).toHaveTextContent("In het bestuur: Ann Raad");
+      expect(
+        within(club).getByText("Uit de raad van bestuur:"),
+      ).toBeInTheDocument();
+      expect(club).toHaveTextContent("Uit de raad van bestuur: Ann Raad");
     });
 
     it("shows no 'Overige functies' when every box has its place", () => {
