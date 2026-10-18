@@ -360,9 +360,7 @@ export interface HomepageArticle {
 
 // ─── Transforms ──────────────────────────────────────────────────────────────
 
-function filterPublishedRelatedArticles(
-  row: ARTICLE_BY_SLUG_DETAIL,
-): ArticleDetailVM {
+function filterUnpublishedRefs(row: ARTICLE_BY_SLUG_DETAIL): ArticleDetailVM {
   const now = new Date().toISOString();
   // Mirrors the ARTICLE_BY_SLUG_QUERY publish gate: a related ref without a
   // `publishedAt` is treated as unpublished (it would not appear on the news
@@ -572,9 +570,7 @@ export const ArticleRepositoryLive = Layer.succeed(ArticleRepository, {
         revalidate: SANITY_PUBLISH_WINDOW_REVALIDATE,
         tags: [SANITY_TAGS.articles, SANITY_TAGS.players, SANITY_TAGS.staff],
       },
-    ).pipe(
-      Effect.map((row) => (row ? filterPublishedRelatedArticles(row) : null)),
-    ),
+    ).pipe(Effect.map((row) => (row ? filterUnpublishedRefs(row) : null))),
   findPaginated: ({ offset, limit, category }) =>
     fetchGroq<ARTICLES_PAGINATED_QUERY_RESULT>(ARTICLES_PAGINATED_QUERY, {
       offset,

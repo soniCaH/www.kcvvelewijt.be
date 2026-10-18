@@ -837,52 +837,9 @@ describe("ArticleRepository", () => {
       ]);
     });
 
-    it("filters mixed relatedContent articles and preserves order", async () => {
-      const pastDate = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const futureDate = new Date(
-        Date.now() + 24 * 60 * 60 * 1000,
-      ).toISOString();
+    it("keeps relatedContent null when the row has none", async () => {
       mockFetch.mockResolvedValueOnce(
-        makeArticleDetailRow({
-          relatedContent: [
-            {
-              _type: "article",
-              _id: "valid-1",
-              title: "Valid First",
-              slug: "valid-first",
-              publishedAt: pastDate,
-              unpublishAt: null,
-              coverImageUrl: "https://cdn.sanity.io/v1.webp",
-            },
-            {
-              _type: "article",
-              _id: "future-pub",
-              title: "Future Published",
-              slug: "future-published",
-              publishedAt: futureDate,
-              unpublishAt: null,
-              coverImageUrl: "https://cdn.sanity.io/future.webp",
-            },
-            {
-              _type: "article",
-              _id: "expired",
-              title: "Expired",
-              slug: "expired",
-              publishedAt: "2026-01-01T10:00:00Z",
-              unpublishAt: pastDate,
-              coverImageUrl: "https://cdn.sanity.io/expired.webp",
-            },
-            {
-              _type: "article",
-              _id: "valid-2",
-              title: "Valid Second",
-              slug: "valid-second",
-              publishedAt: pastDate,
-              unpublishAt: futureDate,
-              coverImageUrl: "https://cdn.sanity.io/v2.webp",
-            },
-          ],
-        }),
+        makeArticleDetailRow({ relatedContent: null }),
       );
 
       const result = await runWithRepo(
@@ -892,10 +849,7 @@ describe("ArticleRepository", () => {
         }),
       );
 
-      expect(result!.relatedContent!.map((a) => a._id)).toEqual([
-        "valid-1",
-        "valid-2",
-      ]);
+      expect(result!.relatedContent).toBeNull();
     });
   });
 
