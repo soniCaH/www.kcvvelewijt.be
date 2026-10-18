@@ -1,7 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { CAPTURE_WIDTH, CAPTURE_HEIGHT, SQUARE_SIZE } from "../constants";
+import {
+  CAPTURE_WIDTH,
+  CAPTURE_HEIGHT,
+  SQUARE_SIZE,
+  TEMPLATE_SCALE,
+} from "../constants";
 import type { PlayerForShare, MatchOption } from "./SharePage";
 import type { ShareItem } from "../looks/share-content";
 import { clubToday } from "@/lib/utils/dates";
@@ -1647,6 +1652,109 @@ describe("SharePage", () => {
       expect(block("w1").textContent).toBe("Eindstand");
       expect(block("w1").style.translate).toBe("40px -80px");
       expect(block("w0")).toBeNull();
+    });
+
+    describe("dragging", () => {
+      // happy-dom has no pointer capture; restored with the file's other stubs.
+      beforeEach(() => {
+        vi.spyOn(HTMLElement.prototype, "setPointerCapture").mockImplementation(
+          () => {},
+        );
+      });
+      /** One finger on the block, moved by (dx, dy) screen px, then lifted. */
+      const drag = (id: string, dx: number, dy: number, pointerId = 1) => {
+        fireEvent.pointerDown(block(id), { pointerId, clientX: 0, clientY: 0 });
+        fireEvent.pointerMove(preview(), {
+          pointerId,
+          clientX: dx,
+          clientY: dy,
+        });
+        fireEvent.pointerUp(preview(), { pointerId });
+      };
+
+      it("moves a block by the pointer delta over the preview scale and stores it", async () => {
+        const user = userEvent.setup();
+        renderTool();
+        await openTab(user, "Schik");
+        drag("tekst", 10, -20);
+        const at = { x: 10 / TEMPLATE_SCALE, y: -20 / TEMPLATE_SCALE };
+        expect(block("tekst").style.transform).toBe(
+          `translate(${at.x}px, ${at.y}px)`,
+        );
+        expect(storedBlocks().story.tekst).toMatchObject(at);
+      });
+
+      it("shows the centre guide while a block snaps, never after the finger lifts", async () => {
+        const user = userEvent.setup();
+        renderTool();
+        await openTab(user, "Schik");
+        // The block's centre on the canvas centre (happy-dom lays out nothing).
+        vi.spyOn(block("tekst"), "getBoundingClientRect").mockReturnValue({
+          left: (CAPTURE_WIDTH / 2) * TEMPLATE_SCALE,
+          width: 0,
+        } as DOMRect);
+        fireEvent.pointerDown(block("tekst"), {
+          pointerId: 1,
+          clientX: 0,
+          clientY: 0,
+        });
+        expect(block("tekst")).toHaveAttribute("data-dragging");
+        fireEvent.pointerMove(preview(), {
+          pointerId: 1,
+          clientX: 0,
+          clientY: 5,
+        });
+        expect(screen.getByTestId("share-centre-guide")).toBeInTheDocument();
+        fireEvent.pointerUp(preview(), { pointerId: 1 });
+        expect(screen.queryByTestId("share-centre-guide")).toBeNull();
+        expect(block("tekst")).not.toHaveAttribute("data-dragging");
+      });
+
+      it("ignores a second finger and moves nothing outside Schik", async () => {
+        const user = userEvent.setup();
+        renderTool();
+        drag("tekst", 40, 40);
+        expect(block("tekst").style.transform).toBe("");
+
+        await openTab(user, "Schik");
+        fireEvent.pointerDown(block("tekst"), {
+          pointerId: 1,
+          clientX: 0,
+          clientY: 0,
+        });
+        fireEvent.pointerDown(block("hero"), {
+          pointerId: 2,
+          clientX: 0,
+          clientY: 0,
+        });
+        fireEvent.pointerMove(preview(), {
+          pointerId: 2,
+          clientX: 80,
+          clientY: 80,
+        });
+        fireEvent.pointerUp(preview(), { pointerId: 2 });
+        fireEvent.pointerUp(preview(), { pointerId: 1 });
+        expect(block("hero").style.transform).toBe("");
+      });
+
+      it("Bewaar PNG waits while a finger is still on a block", async () => {
+        const user = userEvent.setup();
+        renderTool();
+        await openTab(user, "Schik");
+        fireEvent.pointerDown(block("tekst"), {
+          pointerId: 1,
+          clientX: 0,
+          clientY: 0,
+        });
+        const { toPng } = await import("html-to-image");
+        vi.mocked(toPng).mockClear();
+        await save(user);
+        expect(toPng).not.toHaveBeenCalled();
+
+        fireEvent.pointerUp(preview(), { pointerId: 1 });
+        await save(user);
+        expect(toPng).toHaveBeenCalled();
+      });
     });
 
     it("Achter puts the last moved block under the pinned parts; Voor back on top", async () => {

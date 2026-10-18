@@ -3,7 +3,10 @@ import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import type { DateTime } from "luxon";
 import { MonoLabel } from "@/components/design-system";
 import { cn } from "@/lib/utils/cn";
-import { parseEventDateTime } from "@/lib/utils/event-datetime";
+import {
+  isMultiDayEvent,
+  parseEventDateTime,
+} from "@/lib/utils/event-datetime";
 import {
   EVENT_TYPE_FILL,
   DEFAULT_EVENT_TYPE,
@@ -71,13 +74,7 @@ function buildMeta(
 
   // Only a genuine multi-day span (end on a later day) shows a range; a missing,
   // same-day, or mistakenly-reversed end falls back to the single-day start time.
-  const isMultiDay =
-    start.isValid &&
-    !!end?.isValid &&
-    end.toMillis() > start.toMillis() &&
-    !start.hasSame(end, "day");
-
-  if (isMultiDay && end) {
+  if (isMultiDayEvent(start, end)) {
     const sd = start.toFormat("d");
     const ed = end.toFormat("d");
     const em = stripMonthDot(end.toFormat("MMM"));

@@ -1683,6 +1683,7 @@ function ShareTool({
                 {/* Outside the captured node: the centre guide never reaches the PNG. */}
                 {snapping && (
                   <div
+                    data-testid="share-centre-guide"
                     className="bg-card-red absolute inset-y-0 w-px"
                     // The canvas centre, measured from the padding edge.
                     style={{ left: previewWidth / 2 - 0.5 }}

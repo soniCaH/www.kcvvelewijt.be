@@ -267,7 +267,7 @@ const SHARE_ARTICLE_PROJECTION = `{
   "coverUrl": coverImage.asset->url, "hotspot": coverImage.hotspot{ x, y },
   "crop": coverImage.crop{ top, bottom, left, right },
   "dimensions": coverImage.asset->metadata.dimensions{ width, height },
-  "eventFact": body[_type == "eventFact"][0]{ date, startTime, location }
+  "eventFact": body[_type == "eventFact"][0]{ date, endDate, startTime, location }
 }`;
 
 export const SHARE_ARTICLES_QUERY = defineQuery(`{

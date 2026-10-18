@@ -734,7 +734,8 @@ export function LookPhoto({
           ...fill,
           objectPosition: "center",
           // ≈ 16 px at 1080 wide; scaled 1.06 so the blur keeps its edges.
-          filter: "blur(16px)",
+          // The look's grade tints the blur only; the taped flyer stays true.
+          filter: filter ? `${filter} blur(16px)` : "blur(16px)",
           transform: "scale(1.06)",
         }}
       />

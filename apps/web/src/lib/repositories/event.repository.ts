@@ -91,7 +91,7 @@ export const EVENT_ARTICLES_QUERY =
  */
 const SHARE_EVENT_PROJECTION = `{
   "slug": coalesce(slug.current, ""), "title": coalesce(title, ""), eventType,
-  "dateStart": coalesce(dateStart, ""), location,
+  "dateStart": coalesce(dateStart, ""), dateEnd, location,
   "coverUrl": coverImage.asset->url, "hotspot": coverImage.hotspot{ x, y },
   "crop": coverImage.crop{ top, bottom, left, right },
   "dimensions": coverImage.asset->metadata.dimensions{ width, height }

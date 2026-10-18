@@ -18,6 +18,7 @@ import { degradeSection } from "@/lib/effect/degrade";
 import type { Match } from "@/lib/effect/schemas/match.schema";
 import { toDisplayZone, toMatchDisplayZone } from "@/lib/utils/dates";
 import { capitalize } from "@/lib/utils/capitalize";
+import { formatEventDays, isMultiDayEvent } from "@/lib/utils/event-datetime";
 import { SharePage } from "@/components/share/SharePage/SharePage";
 import type {
   MatchOption,
@@ -56,13 +57,22 @@ function toMatchOption(match: Match): MatchOption {
   };
 }
 
-/** `zaterdag 18 oktober` + the date block's `18` / `okt`, in the club's zone. */
-function dateParts(iso: string | null | undefined) {
+/**
+ * `zaterdag 18 oktober` (or a multi-day `zaterdag 12 – zondag 13 oktober`) +
+ * the date block's `18` / `okt` for the first day, in the club's zone.
+ */
+function dateParts(
+  iso: string | null | undefined,
+  endIso?: string | null | undefined,
+) {
   const dt = iso ? toDisplayZone(iso) : null;
-  if (!dt?.isValid) return { dt: null, date: "", day: "", month: "" };
+  if (!dt?.isValid)
+    return { dt: null, multiDay: false, date: "", day: "", month: "" };
+  const end = endIso ? toDisplayZone(endIso) : null;
   return {
     dt,
-    date: dt.toFormat("cccc d MMMM"),
+    multiDay: isMultiDayEvent(dt, end),
+    date: formatEventDays(dt, end),
     day: dt.toFormat("d"),
     month: dt.toFormat("MMM").replace(".", ""),
   };
@@ -71,7 +81,13 @@ function dateParts(iso: string | null | undefined) {
 function toArticleItem(row: ShareArticleRow): ShareItem {
   // An event article is dated by its event, every other one by publication.
   const fact = row.eventFact;
-  const { dt: _dt, ...date } = dateParts(fact?.date ?? row.publishedAt);
+  const {
+    dt: _dt,
+    multiDay,
+    ...date
+  } = fact?.date
+    ? dateParts(fact.date, fact.endDate)
+    : dateParts(row.publishedAt);
   return {
     kind: "article",
     slug: row.slug,
@@ -79,14 +95,15 @@ function toArticleItem(row: ShareArticleRow): ShareItem {
     title: row.title,
     spans: (row.spans ?? []).filter((s) => s.text),
     ...date,
-    time: fact?.startTime ?? "",
+    // A span's hour belongs to its first day only; the editor can type one.
+    time: multiDay ? "" : (fact?.startTime ?? ""),
     location: fact?.location ?? "",
     cover: shareCover(row),
   };
 }
 
 function toEventItem(row: ShareEventRow): ShareItem {
-  const { dt, ...date } = dateParts(row.dateStart);
+  const { dt, multiDay, ...date } = dateParts(row.dateStart, row.dateEnd);
   const hour = dt?.toFormat("HH:mm");
   return {
     kind: "event",
@@ -97,7 +114,7 @@ function toEventItem(row: ShareEventRow): ShareItem {
     ...date,
     // The event schema has no all-day flag: a local-midnight start is read
     // as all-day (no hour on the story), the same rule `<TicketStub>` uses.
-    time: hour && hour !== "00:00" ? hour : "",
+    time: !multiDay && hour && hour !== "00:00" ? hour : "",
     location: row.location ?? "",
     cover: shareCover(row),
   };
