@@ -142,6 +142,8 @@ describe("SharePage", () => {
     vi.clearAllMocks();
     // The story session (#3536) lives in localStorage: every test starts on a fresh phone.
     localStorage.clear();
+    // Item picks rewrite the URL (a reload restores the story on screen).
+    window.history.replaceState(null, "", "/");
     // happy-dom would navigate to the blob URL; the click itself is what counts.
     vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
   });
@@ -256,7 +258,7 @@ describe("SharePage", () => {
       const looks = names.map((name) => strip.getByRole("button", { name }));
       // Each thumbnail draws the story itself: Kaart's thumbnail carries the
       // look's own fallback picture, W its own poster.
-      expect(looks[0]!.innerHTML).toContain("share-fallback/A-");
+      expect(looks[0]!.innerHTML).toContain("share-fallback%2FA-");
       expect(looks[4]!.innerHTML).not.toContain("share-fallback");
 
       // A typed score reaches every thumbnail live.
@@ -399,6 +401,25 @@ describe("SharePage", () => {
 
     // iOS refuses the share when the tap's user activation expired during the
     // two captures: that is no failure, and the second tap shares the kept PNG.
+    it("re-tapping the pressed Thema keeps the kept PNG", async () => {
+      const cancel = Object.assign(new Error("AbortError"), {
+        name: "AbortError",
+      });
+      const restore = stubShare(vi.fn().mockRejectedValue(cancel));
+      try {
+        const user = userEvent.setup();
+        render(<SharePage matches={MATCHES} players={PLAYERS} />);
+        await save(user);
+        expect(saveButton()).toHaveTextContent("Deel PNG");
+
+        await openTab(user, "Stijl");
+        await user.click(screen.getByRole("button", { name: "Licht" }));
+        expect(saveButton()).toHaveTextContent("Deel PNG");
+      } finally {
+        restore();
+      }
+    });
+
     it("a share refused for an expired tap shows no notice; the button reads Deel PNG and shares the kept PNG", async () => {
       const { toPng } = await import("html-to-image");
       const refused = Object.assign(new Error("Not allowed"), {
@@ -956,6 +977,33 @@ describe("SharePage", () => {
       }
     });
 
+    it("picking an item or a mode rewrites the URL, so a reload restores the story on screen", async () => {
+      const user = userEvent.setup();
+      const { unmount } = renderTool({ kind: "article", item: INTERVIEW });
+      await openTab(user, "Inhoud");
+      await user.click(screen.getByRole("button", { name: TRANSFER.title }));
+      expect(window.location.pathname + window.location.search).toBe(
+        "/share?article=transfer-piet",
+      );
+      await openTab(user, "Tekst");
+      await user.clear(screen.getByLabelText("Titel"));
+      await user.type(screen.getByLabelText("Titel"), "Piet blijft");
+      unmount();
+
+      // iOS reloads the URL the tool left behind.
+      renderTool({ kind: "article", item: TRANSFER });
+      await openTab(user, "Tekst");
+      expect(screen.getByLabelText("Titel")).toHaveValue("Piet blijft");
+
+      await openTab(user, "Inhoud");
+      await user.click(screen.getByRole("button", { name: "Evenement" }));
+      expect(window.location.pathname + window.location.search).toBe("/share");
+      await user.click(screen.getByRole("button", { name: QUIZ.title }));
+      expect(window.location.search).toBe("?event=quiz");
+      await user.click(screen.getByRole("button", { name: "Wedstrijd" }));
+      expect(window.location.pathname + window.location.search).toBe("/share");
+    });
+
     it("filters the article list as you type", async () => {
       const user = userEvent.setup();
       renderTool();
@@ -1311,6 +1359,39 @@ describe("SharePage", () => {
       await openTab(user, "Tekst");
       expect(screen.getByPlaceholderText(/fc tegenstander/i)).toHaveValue("");
       expect(pressed("Ticket")).toBe("true");
+    });
+
+    it("an edit after midnight in a tab left open starts a new story instead of re-dating yesterday's", async () => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date("2026-10-17T21:30:00Z")); // 23:30 in Brussels
+      const user = userEvent.setup();
+      renderTool();
+      await fillMatch(user);
+      await user.click(screen.getByRole("button", { name: "Ticket" }));
+
+      vi.setSystemTime(new Date("2026-10-17T22:30:00Z")); // 00:30, next day
+      await user.type(screen.getByPlaceholderText("45+2"), "8");
+
+      const stored = JSON.parse(localStorage.getItem(KEY)!).story;
+      expect(stored.day).toBe("2026-10-18");
+      expect(stored.match).toMatchObject({ score: "", minute: "" });
+      await openTab(user, "Tekst");
+      expect(screen.getByPlaceholderText("2 - 0")).toHaveValue("");
+      expect(pressed("Ticket")).toBe("true");
+    });
+
+    it("the look strip asks the optimizer for a small fallback picture; the preview keeps the full one", () => {
+      renderTool();
+      const srcs = [...lookStrip()!.querySelectorAll("img")]
+        .map((img) => img.getAttribute("src") ?? "")
+        .filter((src) => src.includes("share-fallback"));
+      expect(srcs).toHaveLength(4);
+      for (const src of srcs) {
+        expect(src).toMatch(
+          /^\/_next\/image\?url=%2Fimages%2Fshare-fallback%2F[A-E]-\d\.webp&w=256&q=75$/,
+        );
+      }
+      expect(previewHtml()).toContain('src="/images/share-fallback/A-1.webp"');
     });
 
     it("picking another match clears the last one's score and minute", async () => {
@@ -1785,7 +1866,7 @@ describe("SharePage", () => {
       }
     });
 
-    it("an event without a cover sends event_type and counts its fallback picture", async () => {
+    it("an event without a cover sends event_type and counts its fallback picture; no Omslag row, no cover_mode", async () => {
       const user = userEvent.setup();
       render(
         <SharePage
@@ -1804,7 +1885,6 @@ describe("SharePage", () => {
         look: "kaart",
         theme: "licht",
         format: "story",
-        cover_mode: "affiche_wazig",
         blocks_moved: false,
         fallback_used: true,
       });

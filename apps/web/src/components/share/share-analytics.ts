@@ -49,7 +49,9 @@ export interface ShareImageSaved {
   theme: ShareTheme;
   wash: WashStep;
   format: ShareFormat;
-  coverMode: CoverMode;
+  /** The Omslag choice; `null` when the Omslag row is not shown (a match,
+   *  an item without a cover, or an own photo). */
+  coverMode: CoverMode | null;
   /** The saved format's layout. */
   blocks: BlockLayout;
   /** An AI picture or the event fallback filled the photo slot. */
@@ -67,7 +69,7 @@ export function trackShareImageSaved(saved: ShareImageSaved): void {
     ...(look !== "wedstrijd" && { theme: saved.theme }),
     ...(look === "affiche" && { wash: saved.wash }),
     format: saved.format,
-    ...(mode !== "match" && { cover_mode: saved.coverMode }),
+    ...(saved.coverMode && { cover_mode: saved.coverMode }),
     // A tap selects a block and writes {0, 0, voor}: only an offset or
     // Achter means the editor moved it.
     blocks_moved: Object.values(saved.blocks).some(

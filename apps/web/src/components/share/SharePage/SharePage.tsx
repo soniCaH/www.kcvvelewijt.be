@@ -45,6 +45,7 @@ import {
   fallbackCount,
   usesAiFallback,
   usesFallback,
+  ShareThumbContext,
   type CoverMode,
   type ShareFormat,
   type ShareTheme,
@@ -314,7 +315,8 @@ function Choice<T extends string>({
           <button
             key={opt.value}
             type="button"
-            onClick={() => onChange(opt.value)}
+            // The pressed option changes nothing (and keeps the kept PNG).
+            onClick={() => opt.value !== value && onChange(opt.value)}
             disabled={disabled}
             aria-pressed={value === opt.value}
             className={`flex-1 basis-[6.5rem] rounded-none border-2 px-3 py-3 font-mono text-sm font-semibold uppercase transition-colors duration-300 disabled:opacity-40 ${
@@ -518,7 +520,14 @@ export function SharePage(props: SharePageProps) {
     () => true,
     () => false,
   );
-  return hydrated ? <ShareTool {...props} /> : <ShareSkeleton />;
+  // A tab left open past midnight starts a new story on its next edit: a
+  // fresh ShareTool reads the session again, which drops yesterday's story.
+  const [day, setDay] = useState(0);
+  return hydrated ? (
+    <ShareTool key={day} {...props} onNewDay={() => setDay((d) => d + 1)} />
+  ) : (
+    <ShareSkeleton />
+  );
 }
 
 /**
@@ -545,9 +554,12 @@ function ShareTool({
   articles = NO_ITEMS,
   events = NO_ITEMS,
   initial,
-}: SharePageProps) {
+  onNewDay,
+}: SharePageProps & { onNewDay: () => void }) {
   const [boot] = useState(() => bootSession(initial));
   const saved = boot.story;
+  // The Brussels day this story belongs to: written as is, never re-dated.
+  const storyDay = useRef(saved?.day ?? clubToday());
   const templateRef = useRef<HTMLDivElement>(null);
   const previewUrlRef = useRef<string | null>(null);
   const uploadUrlRef = useRef<string | null>(null);
@@ -858,6 +870,9 @@ function ShareTool({
             fields,
           )
         : null;
+  // Omslag only chooses how a cover is shown: an item without one already
+  // fills its slot with the fallback picture, and an own photo replaces it.
+  const showOmslag = !!item?.cover && !uploadedImageUrl;
   // An own photo replaces a news or event cover.
   const content =
     storyContent && mode !== "match" && uploadedImageUrl
@@ -874,11 +889,15 @@ function ShareTool({
   // Keep the story in progress in the browser (#3536). The own photo is a
   // `blob:` URL that dies with the tab, so it is never stored.
   useEffect(() => {
+    if (clubToday() !== storyDay.current) {
+      onNewDay();
+      return;
+    }
     writeSession({
       look,
       fallbackNext,
       story: {
-        day: clubToday(),
+        day: storyDay.current,
         mode,
         template: selectedTemplateId,
         format: aspect,
@@ -922,6 +941,7 @@ function ShareTool({
     item,
     fields,
     blocks,
+    onNewDay,
   ]);
 
   /**
@@ -939,7 +959,7 @@ function ShareTool({
       theme,
       wash,
       format: aspect,
-      coverMode,
+      coverMode: showOmslag ? coverMode : null,
       blocks: blocks[aspect],
       fallbackUsed: !!content && !isW && usesFallback(content, coverMode),
     });
@@ -961,8 +981,14 @@ function ShareTool({
     if (url) setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
+  /** The URL names the story on screen, so a reload (iOS, back from
+   *  Instagram) restores it instead of the link the tool opened with. */
+  const keepUrl = (search: string) =>
+    window.history.replaceState(window.history.state, "", `/share${search}`);
+
   const handleModeChange = (next: ShareMode) => {
     if (next === mode) return;
+    keepUrl("");
     setMode(next);
     clearUpload();
     setItem(null);
@@ -976,6 +1002,7 @@ function ShareTool({
   const handlePickItem = (picked: ShareItem) => {
     // Re-tapping the picked item keeps its edits.
     if (picked.slug === item?.slug) return;
+    keepUrl(`?${picked.kind}=${encodeURIComponent(picked.slug)}`);
     setBlocks(NO_BLOCKS);
     clearUpload();
     setItem(picked);
@@ -1133,7 +1160,8 @@ function ShareTool({
    */
   const handleSave = async () => {
     const node = templateRef.current;
-    if (!node || isGeneratingRef.current) return;
+    // Mid-drag the layout is not committed yet: the PNG would mix two.
+    if (!node || isGeneratingRef.current || dragRef.current) return;
     isGeneratingRef.current = true;
     setIsGenerating(true);
     // Clear any stale notice up front, so a retry that now succeeds leaves
@@ -1378,10 +1406,7 @@ function ShareTool({
             </div>
           </div>
 
-          {/* Omslag only chooses how a cover is shown: an item without one
-              already fills its slot with the fallback picture, and an own
-              photo replaces the cover. */}
-          {item?.cover && !uploadedImageUrl && (
+          {showOmslag && (
             <Choice
               id="cover-label"
               label="Omslag"
@@ -1525,6 +1550,7 @@ function ShareTool({
                   type="button"
                   aria-pressed={selectedPlayerId === p.id}
                   onClick={() => {
+                    if (p.id === selectedPlayerId) return;
                     setSelectedPlayerId(p.id);
                     clearPreview();
                   }}
@@ -1746,7 +1772,9 @@ function ShareTool({
                       transformOrigin: "top left",
                     }}
                   >
-                    {drawLook(l.id, l.id === activeLook ? layout : null)}
+                    <ShareThumbContext.Provider value={true}>
+                      {drawLook(l.id, l.id === activeLook ? layout : null)}
+                    </ShareThumbContext.Provider>
                   </div>
                 </div>
                 <span className="font-mono text-xs font-semibold whitespace-nowrap uppercase">

@@ -24,18 +24,20 @@ type ArticleType = NonNullable<Article["articleType"]>;
  */
 
 /** A match moment: today's 11 templates, the key of every match story. */
-export type TemplateId =
-  | "goal-kcvv"
-  | "goal-opponent"
-  | "kickoff"
-  | "halftime"
-  | "full-time"
-  | "red-card-kcvv"
-  | "red-card-opponent"
-  | "yellow-card-kcvv"
-  | "yellow-card-opponent"
-  | "square-pre-game"
-  | "square-result";
+export const TEMPLATE_IDS = [
+  "goal-kcvv",
+  "goal-opponent",
+  "kickoff",
+  "halftime",
+  "full-time",
+  "red-card-kcvv",
+  "red-card-opponent",
+  "yellow-card-kcvv",
+  "yellow-card-opponent",
+  "square-pre-game",
+  "square-result",
+] as const;
+export type TemplateId = (typeof TEMPLATE_IDS)[number];
 
 export type ShareContentKind = "match" | "article" | "event";
 
@@ -195,19 +197,25 @@ const CLASS_COLOUR: Record<string, string> = {
   white: "#ffffff",
 };
 
+/** The literal for `"bg-warm text-ink"`'s `bg` or `text` colour, if listed above. */
+export function eventColour(
+  fillClass: string,
+  prefix: "bg" | "text",
+): string | undefined {
+  const name = fillClass.match(new RegExp(`\\b${prefix}-(\\S+)`))?.[1];
+  return name ? CLASS_COLOUR[name] : undefined;
+}
+
 /**
  * `"bg-warm text-ink"` → `{ fill, onFill }`, so the site's event colours have
- * one source. A re-tint to a colour missing above throws at module load (and
- * so in every test that imports this) instead of rendering a wrong story.
+ * one source. A re-tint to a colour missing above draws ink on cream; a test
+ * asserts every `EVENT_TYPE_FILL` value resolves.
  */
 function eventFill(fillClass: string): { fill: string; onFill: string } {
-  const colour = (prefix: "bg" | "text") => {
-    const name = fillClass.match(new RegExp(`\\b${prefix}-(\\S+)`))?.[1];
-    const hex = name && CLASS_COLOUR[name];
-    if (!hex) throw new Error(`share: no colour for "${fillClass}"`);
-    return hex;
+  return {
+    fill: eventColour(fillClass, "bg") ?? TOKENS.ink,
+    onFill: eventColour(fillClass, "text") ?? TOKENS.cream,
   };
-  return { fill: colour("bg"), onFill: colour("text") };
 }
 
 /** Label per event type; fill from `EVENT_TYPE_FILL`; every event gets the date block. */
@@ -430,8 +438,13 @@ export function buildMatchContent(m: MatchMomentInput): ShareContent {
   const style: TypeStyle = MOMENT_STYLE[moment];
   const kickoff = moment === "kickoff";
   // `Zaterdag · 20:00` → block `20:00` over `Zaterdag`; no hour → no block.
-  const hour = m.dateTime?.match(/(\d{1,2})[:.hu](\d{2})/);
-  const day = m.dateTime?.split("·")[0]?.trim();
+  // The hour is the last one after the `·` (`Za 18.10 · 20:00` is not 18:10);
+  // without a `·` there is no day part.
+  const parts = m.dateTime?.split("·") ?? [];
+  const hour = [...(parts.at(-1) ?? "").matchAll(/(\d{1,2})[:.hu](\d{2})/g)].at(
+    -1,
+  );
+  const day = parts.length > 1 ? parts[0]!.trim() : undefined;
   const detail = kickoff && !hour ? "none" : style.detail;
 
   const ours = m.template.endsWith("-kcvv");

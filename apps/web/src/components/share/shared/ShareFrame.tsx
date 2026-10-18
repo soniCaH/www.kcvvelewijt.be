@@ -330,8 +330,19 @@ export function ShareMid({
   // z-index applies without a `position`. Should an element ever render no
   // DOM node, the counts differ and nothing is tagged: never a wrong block.
   useLayoutEffect(() => {
-    if (!blocks || !ref.current) return;
+    if (!ref.current) return;
     const els = [...ref.current.children];
+    if (!blocks) {
+      // The layout went away (a thumbnail of a look no longer active): undo
+      // only what this effect tagged, never a child's own style.
+      els.forEach((child) => {
+        if (!(child instanceof HTMLElement) || !child.dataset.block) return;
+        delete child.dataset.block;
+        child.style.translate = "";
+        child.style.zIndex = "";
+      });
+      return;
+    }
     const tag = els.length === ids.length;
     els.forEach((child, i) => {
       if (!(child instanceof HTMLElement)) return;

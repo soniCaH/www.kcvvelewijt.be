@@ -1,4 +1,5 @@
 import type React from "react";
+import { createContext, useContext } from "react";
 import {
   BODY_FONT,
   DISPLAY_FONT,
@@ -56,6 +57,13 @@ export function fallbackPicture(look: LookId, index: number): string {
   const { letter, picks } = FALLBACK_SET[look];
   return `/images/share-fallback/${letter}-${picks[index % picks.length]}.webp`;
 }
+
+/**
+ * True inside a look-strip thumbnail: a 48 px thumbnail asks the optimizer
+ * for a 256 px fallback picture instead of downloading the full 1080 px webp
+ * (~400 KB each). The preview and the PNG keep the full picture.
+ */
+export const ShareThumbContext = createContext(false);
 
 // ── Wash (#3522), look C only ──────────────────────────────────────────────
 const WASH: Record<
@@ -659,6 +667,7 @@ export function LookPhoto({
   filter?: string;
 }) {
   const photo = content.photo;
+  const thumb = useContext(ShareThumbContext);
   const fill: React.CSSProperties = {
     position: "absolute",
     inset: 0,
@@ -686,7 +695,11 @@ export function LookPhoto({
   if (!photo || (coverMode === "reservefoto" && photo.source === "cover")) {
     return frame(
       <img
-        src={toSameOriginImage(fallbackPicture(look, fallbackIndex), 1080)}
+        src={
+          thumb
+            ? `/_next/image?url=${encodeURIComponent(fallbackPicture(look, fallbackIndex))}&w=256&q=75`
+            : toSameOriginImage(fallbackPicture(look, fallbackIndex), 1080)
+        }
         alt=""
         style={fill}
       />,

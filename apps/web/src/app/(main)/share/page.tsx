@@ -227,7 +227,13 @@ export default async function ShareRoute({
     // A new key per deep link: client navigation between two links starts
     // the tool afresh instead of keeping the first link's state.
     <SharePage
-      key={articleSlug ?? eventSlug ?? "share"}
+      key={
+        articleSlug
+          ? `a:${articleSlug}`
+          : eventSlug
+            ? `e:${eventSlug}`
+            : "share"
+      }
       matches={matches}
       players={players}
       articles={share.articles}

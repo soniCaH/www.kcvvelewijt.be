@@ -6,7 +6,11 @@ import {
   type ShareTheme,
   type WashStep,
 } from "../looks/look-parts";
-import type { ShareFields, TemplateId } from "../looks/share-content";
+import {
+  TEMPLATE_IDS,
+  type ShareFields,
+  type TemplateId,
+} from "../looks/share-content";
 import type { BlockLayout } from "../looks/block-layout";
 import type { ResultMood } from "../shared/theme";
 import { clubToday } from "@/lib/utils/dates";
@@ -91,20 +95,6 @@ const LOOK_IDS: readonly AnyLook[] = [
 
 const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
-
-const TEMPLATE_IDS: readonly TemplateId[] = [
-  "goal-kcvv",
-  "goal-opponent",
-  "kickoff",
-  "halftime",
-  "full-time",
-  "red-card-kcvv",
-  "red-card-opponent",
-  "yellow-card-kcvv",
-  "yellow-card-opponent",
-  "square-pre-game",
-  "square-result",
-];
 
 /** `v` when it is one of `allowed`, else `fallback`. */
 function oneOf<T extends string>(

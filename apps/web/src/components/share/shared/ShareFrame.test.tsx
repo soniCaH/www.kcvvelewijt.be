@@ -389,6 +389,23 @@ describe("ShareMid movable blocks (#3537)", () => {
     expect(blocks[0]!.style.translate).toBe("");
   });
 
+  it("clears its tags when the layout goes away (a thumbnail of another look)", () => {
+    const layout = (
+      value: { w1: { x: number; y: number; layer: "voor" } } | null,
+    ) => (
+      <ShareBlocksContext.Provider value={value}>
+        {mid()}
+      </ShareBlocksContext.Provider>
+    );
+    const { container, rerender } = render(
+      layout({ w1: { x: 40, y: -12, layer: "voor" } }),
+    );
+    rerender(layout(null));
+    expect(container.querySelectorAll("[data-block]")).toHaveLength(0);
+    const moved = container.querySelector<HTMLElement>("[style*='translate']");
+    expect(moved).toBeNull();
+  });
+
   it("puts an achter block below the pinned top row and footer", () => {
     const { container } = render(
       <ShareBlocksContext.Provider

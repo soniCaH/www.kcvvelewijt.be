@@ -98,7 +98,7 @@ const SHARE_EVENT_PROJECTION = `{
 }`;
 
 export const SHARE_EVENTS_QUERY = defineQuery(`{
-  "list": *[_type == "event" && defined(slug.current) && dateTime(coalesce(dateEnd, dateStart)) >= dateTime($since)] | order(dateStart asc) ${SHARE_EVENT_PROJECTION},
+  "list": *[_type == "event" && defined(slug.current) && dateTime(coalesce(dateEnd, dateStart)) >= dateTime($since)] | order(dateStart asc) [0...30] ${SHARE_EVENT_PROJECTION},
   "picked": *[_type == "event" && slug.current == $slug][0] ${SHARE_EVENT_PROJECTION}
 }`);
 
@@ -299,13 +299,7 @@ export const EventRepositoryLive = Layer.succeed(EventRepository, {
     ),
   findForShare: (slug) =>
     fetchGroq<SHARE_EVENTS_QUERY_RESULT>(SHARE_EVENTS_QUERY, {
-      // Minus 7 club days (not 7×24 h), so a DST change keeps it at midnight.
-      since: DateTime.now()
-        .setZone(CLUB_TIMEZONE)
-        .startOf("day")
-        .minus({ days: 7 })
-        .toUTC()
-        .toISO(),
+      since: clubDayStart(7),
       slug: slug ?? "",
     }),
 });

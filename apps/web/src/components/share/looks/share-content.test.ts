@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { TOKENS } from "../constants";
-import { buildMatchContent, shareCover } from "./share-content";
+import { EVENT_TYPE_FILL } from "@/components/event/event-type-style";
+import { buildMatchContent, eventColour, shareCover } from "./share-content";
 
 const URL = "https://cdn.sanity.io/images/p/d/cover-2000x1000.jpg";
 
@@ -105,6 +106,17 @@ describe("buildMatchContent", () => {
     expect(against.title).toEqual([{ text: "FC Opponent", accent: false }]);
   });
 
+  it.each([
+    ["Za 18.10 · 20:00", { day: "20:00", month: "Za 18.10" }],
+    ["20:00", { day: "20:00", month: "Aftrap" }],
+    ["Zaterdag 20u00", { day: "20:00", month: "Aftrap" }],
+    ["Zaterdag · 9.30", { day: "09:30", month: "Zaterdag" }],
+  ])("kickoff block for %j", (dateTime, block) => {
+    expect(
+      buildMatchContent({ ...base, template: "kickoff", dateTime }).dateBlock,
+    ).toEqual(block);
+  });
+
   it("a kickoff with no hour has no block; no photo is null, an own photo is kept", () => {
     const c = buildMatchContent({ ...base, template: "kickoff", dateTime: "" });
     expect(c.detail).toBe("none");
@@ -113,5 +125,14 @@ describe("buildMatchContent", () => {
       buildMatchContent({ ...base, template: "halftime", photo: "blob:x" })
         .photo,
     ).toMatchObject({ src: "blob:x", source: "own" });
+  });
+});
+
+describe("event colours", () => {
+  it("every EVENT_TYPE_FILL class resolves to a capture-safe colour", () => {
+    for (const fillClass of Object.values(EVENT_TYPE_FILL)) {
+      expect(eventColour(fillClass, "bg"), fillClass).toBeDefined();
+      expect(eventColour(fillClass, "text"), fillClass).toBeDefined();
+    }
   });
 });
