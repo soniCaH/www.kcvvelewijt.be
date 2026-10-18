@@ -12,7 +12,6 @@ import type {
 } from "@/components/related/types";
 import { formatArticleDate } from "@/lib/utils/dates";
 import type {
-  RelatedArticleRef,
   ArticleDetailVM,
   ArticleVM,
   MatchArticleVM,
@@ -28,22 +27,6 @@ function deduplicateById<T extends { _id: string }>(items: T[]): T[] {
     seen.add(item._id);
     return true;
   });
-}
-
-export function mapEditorialArticles(
-  articles?: RelatedArticleRef[],
-): RelatedArticleItem[] {
-  if (!articles?.length) return [];
-  return articles.map((a) => ({
-    type: "article" as const,
-    source: "editorial" as const,
-    id: a.id,
-    title: a.title,
-    slug: a.slug,
-    imageUrl: a.coverImageUrl,
-    date: a.publishedAt,
-    excerpt: null,
-  }));
 }
 
 export function mapBffRelatedItems(

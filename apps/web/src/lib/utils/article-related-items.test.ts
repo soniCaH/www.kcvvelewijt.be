@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
 import {
-  mapEditorialArticles,
   mapBffRelatedItems,
   mapRelatedToRelatedRow,
   mapMentionedPlayers,
@@ -22,39 +21,6 @@ import type {
 import type { ArticleVM } from "@/lib/repositories/article.repository";
 import type { EventVM } from "@/lib/repositories/event.repository";
 import { formatArticleDate } from "@/lib/utils/dates";
-
-describe("mapEditorialArticles", () => {
-  it("maps RelatedArticleRef[] to RelatedArticleItem[]", () => {
-    const result = mapEditorialArticles([
-      {
-        id: "art-1",
-        title: "Test Article",
-        slug: "test-article",
-        publishedAt: "2025-03-01T12:00:00Z",
-        unpublishAt: null,
-        coverImageUrl: "https://cdn.example.com/img.jpg",
-      },
-    ]);
-
-    expect(result).toEqual([
-      {
-        type: "article",
-        source: "editorial",
-        id: "art-1",
-        title: "Test Article",
-        slug: "test-article",
-        imageUrl: "https://cdn.example.com/img.jpg",
-        date: "2025-03-01T12:00:00Z",
-        excerpt: null,
-      },
-    ]);
-  });
-
-  it("handles empty/undefined input", () => {
-    expect(mapEditorialArticles(undefined)).toEqual([]);
-    expect(mapEditorialArticles([])).toEqual([]);
-  });
-});
 
 describe("mapBffRelatedItems", () => {
   it("maps BFF RelatedItem[] to RelatedContentItem[]", () => {
