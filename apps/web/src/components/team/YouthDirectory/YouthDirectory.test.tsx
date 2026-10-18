@@ -19,9 +19,9 @@ import { YouthDirectory } from "./YouthDirectory";
 import { reservenTeam, youthTeam as team } from "./youth-directory.fixtures";
 
 const divisions: YouthDivisionGroup[] = [
-  { label: "Bovenbouw", range: "U17–U21", teams: [team("U17")] },
-  { label: "Middenbouw", range: "U12–U16", teams: [] },
-  { label: "Onderbouw", range: "U6–U11", teams: [team("U9"), team("U6")] },
+  { label: "Bovenbouw", range: "U14–U21", teams: [team("U17")] },
+  { label: "Middenbouw", range: "U10–U13", teams: [] },
+  { label: "Onderbouw", range: "U6–U9", teams: [team("U9"), team("U6")] },
 ];
 
 /** The heading `/jeugd` passes — the directory no longer hard-codes one. */
@@ -36,8 +36,8 @@ const paragraphsIn = (card: HTMLElement) => card.querySelectorAll("p").length;
 describe("YouthDirectory", () => {
   it("returns null when no division has teams", () => {
     const { container } = renderDirectory([
-      { label: "Bovenbouw", range: "U17–U21", teams: [] },
-      { label: "Middenbouw", range: "U12–U16", teams: [] },
+      { label: "Bovenbouw", range: "U14–U21", teams: [] },
+      { label: "Middenbouw", range: "U10–U13", teams: [] },
     ]);
     expect(container.firstChild).toBeNull();
   });
@@ -59,14 +59,14 @@ describe("YouthDirectory", () => {
   it("renders the group's range beside its label", () => {
     renderDirectory(divisions);
     const [bovenbouw] = screen.getAllByRole("heading", { level: 3 });
-    expect(bovenbouw).toHaveTextContent("Bovenbouw · U17–U21");
+    expect(bovenbouw).toHaveTextContent("Bovenbouw · U14–U21");
   });
 
   it("renders the squad photo when a team has one", () => {
     renderDirectory([
       {
         label: "Bovenbouw",
-        range: "U17–U21",
+        range: "U14–U21",
         teams: [team("U17", "/images/ploeg.jpg")],
       },
     ]);
@@ -77,7 +77,7 @@ describe("YouthDirectory", () => {
 
   it("falls back to the JerseyShirt illustration when a team has no photo", () => {
     renderDirectory([
-      { label: "Bovenbouw", range: "U17–U21", teams: [team("U17")] },
+      { label: "Bovenbouw", range: "U14–U21", teams: [team("U17")] },
     ]);
     // No squad <img>; the JerseyShirt fallback renders in its place and is
     // silent (#2559 rule 4) — the artefact answers to the same rule as the
@@ -118,7 +118,7 @@ describe("YouthDirectory", () => {
       renderDirectory([
         {
           label: "Onderbouw",
-          range: "U6–U11",
+          range: "U6–U9",
           teams: [team("U9", null, { name: "KCVVE  U9" })],
         },
       ]);
@@ -174,9 +174,9 @@ describe("YouthDirectory", () => {
     // the resolved tone via `data-tone`, never a class string, per the AC.
     const oneOfEach: YouthDivisionGroup[] = [
       { label: "Reserven", teams: [reservenTeam()] },
-      { label: "Bovenbouw", range: "U17–U21", teams: [team("U17")] },
-      { label: "Middenbouw", range: "U12–U16", teams: [team("U13")] },
-      { label: "Onderbouw", range: "U6–U11", teams: [team("U9")] },
+      { label: "Bovenbouw", range: "U14–U21", teams: [team("U17")] },
+      { label: "Middenbouw", range: "U10–U13", teams: [team("U13")] },
+      { label: "Onderbouw", range: "U6–U9", teams: [team("U9")] },
     ];
 
     it("colours each card by its own division, not the group it renders inside", () => {
@@ -209,7 +209,7 @@ describe("YouthDirectory", () => {
 
   describe("the tilt scale (#3330)", () => {
     const cardsOf = (teams: ReturnType<typeof team>[]) => {
-      renderDirectory([{ label: "Onderbouw", range: "U6–U11", teams }]);
+      renderDirectory([{ label: "Onderbouw", range: "U6–U9", teams }]);
       return screen.getAllByTestId("youth-team-card");
     };
     const lean = (card: HTMLElement) =>

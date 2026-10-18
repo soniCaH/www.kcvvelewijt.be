@@ -64,22 +64,22 @@ describe("groupTeamsForLanding", () => {
       "Bovenbouw",
     ]);
 
-    expect(divisionGroup(teams, "Bovenbouw").range).toBe("U17–U21");
+    expect(divisionGroup(teams, "Bovenbouw").range).toBe("U14–U21");
     expect(divisionGroup(teams, "Bovenbouw").teams.map((t) => t.age)).toEqual([
       "U17",
       "U21",
     ]);
 
-    expect(divisionGroup(teams, "Middenbouw").range).toBe("U12–U16");
+    expect(divisionGroup(teams, "Middenbouw").range).toBe("U10–U13");
     expect(divisionGroup(teams, "Middenbouw").teams.map((t) => t.age)).toEqual([
+      "U10",
       "U13",
     ]);
 
-    expect(divisionGroup(teams, "Onderbouw").range).toBe("U6–U11");
+    expect(divisionGroup(teams, "Onderbouw").range).toBe("U6–U9");
     expect(divisionGroup(teams, "Onderbouw").teams.map((t) => t.age)).toEqual([
       "U6",
       "U9",
-      "U10",
     ]);
   });
 
@@ -130,13 +130,11 @@ describe("groupTeamsForLanding", () => {
     ];
 
     expect(divisionGroup(teams, "Bovenbouw").teams.map((t) => t.age)).toEqual([
-      "U17",
-      "U21",
-    ]);
-    expect(divisionGroup(teams, "Middenbouw").teams.map((t) => t.age)).toEqual([
       "U14",
       "U15",
       "U15",
+      "U17",
+      "U21",
     ]);
   });
 
@@ -145,8 +143,8 @@ describe("groupTeamsForLanding", () => {
       makeTeam({ age: "A", name: "Eerste Elftallen A" }),
       makeTeam({ age: "U15", name: "KCVV Elewijt U15" }),
     ];
-    expect(divisionGroup(teams, "Bovenbouw").teams).toHaveLength(0);
-    expect(divisionGroup(teams, "Middenbouw").teams).toHaveLength(1); // U15
+    expect(divisionGroup(teams, "Bovenbouw").teams).toHaveLength(1); // U15
+    expect(divisionGroup(teams, "Middenbouw").teams).toHaveLength(0);
     expect(divisionGroup(teams, "Onderbouw").teams).toHaveLength(0);
   });
 
@@ -179,7 +177,7 @@ describe("isAgeCode", () => {
     expect(isAgeCode("U21")).toBe(true);
     expect(isAgeCode("U6")).toBe(true);
     // Deliberately broader than getYouthDivision — U5 is a real age code that
-    // falls outside Onderbouw's U6–U11 band. Callers that render the age want
+    // falls outside Onderbouw's U6–U9 band. Callers that render the age want
     // it; callers that place a team in a band must use getYouthDivision.
     expect(isAgeCode("U5")).toBe(true);
     expect(getYouthDivision("U5")).toBeNull();
@@ -193,31 +191,22 @@ describe("isAgeCode", () => {
 });
 
 describe("getYouthDivision", () => {
-  it("should return Bovenbouw for U17–U21", () => {
-    expect(getYouthDivision("U21")).toBe("Bovenbouw");
-    expect(getYouthDivision("U19")).toBe("Bovenbouw");
-    expect(getYouthDivision("U17")).toBe("Bovenbouw");
-  });
-
-  it("should return Middenbouw for U12–U16", () => {
-    expect(getYouthDivision("U16")).toBe("Middenbouw");
-    expect(getYouthDivision("U15")).toBe("Middenbouw");
-    expect(getYouthDivision("U14")).toBe("Middenbouw");
-    expect(getYouthDivision("U13")).toBe("Middenbouw");
-    expect(getYouthDivision("U12")).toBe("Middenbouw");
-  });
-
-  it("should return Onderbouw for U6–U11", () => {
-    expect(getYouthDivision("U11")).toBe("Onderbouw");
-    expect(getYouthDivision("U10")).toBe("Onderbouw");
-    expect(getYouthDivision("U9")).toBe("Onderbouw");
-    expect(getYouthDivision("U6")).toBe("Onderbouw");
-  });
-
-  it("should handle age groups not in the standard roster via numeric parsing", () => {
-    expect(getYouthDivision("U18")).toBe("Bovenbouw");
-    expect(getYouthDivision("U5")).toBeNull();
-    expect(getYouthDivision("U22")).toBeNull();
+  // Bands follow the federation's match formats (#3555): Onderbouw 2v2 → 5v5,
+  // Middenbouw 8v8, Bovenbouw 11v11. One assertion per edge.
+  it.each([
+    ["U5", null],
+    ["U6", "Onderbouw"],
+    ["U9", "Onderbouw"],
+    ["U10", "Middenbouw"],
+    ["U13", "Middenbouw"],
+    ["U14", "Bovenbouw"],
+    ["U16", "Bovenbouw"],
+    // PSD sends KCVVE U16 as age "U17" — Bovenbouw either way.
+    ["U17", "Bovenbouw"],
+    ["U21", "Bovenbouw"],
+    ["U22", null],
+  ])("should place %s in %s", (age, division) => {
+    expect(getYouthDivision(age)).toBe(division);
   });
 
   it("should return null for non-youth age groups", () => {
