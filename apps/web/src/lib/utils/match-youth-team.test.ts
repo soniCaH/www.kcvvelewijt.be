@@ -4,6 +4,7 @@ import {
   type YouthTeamMatchResult,
   type YouthTeamSource,
 } from "./match-youth-team";
+import { seasonStartYear } from "./season";
 
 const team = (
   slug: string,
@@ -39,7 +40,8 @@ const TEAMS: YouthTeamSource[] = [
 /** Mid-season 2026–27, so Y = 2026. */
 const NOW = new Date("2026-10-18T12:00:00Z");
 
-const run = (query: string, now = NOW) => matchYouthTeams(query, TEAMS, now);
+const run = (query: string, now = NOW) =>
+  matchYouthTeams(query, TEAMS, seasonStartYear(now));
 
 /** Flatten to `code: slug, slug` lines — readable in a failure diff. */
 const summary = (result: YouthTeamMatchResult) =>
@@ -102,6 +104,10 @@ describe("matchYouthTeams", () => {
       "old-name",
       "old-name",
     ]);
+    expect(result.bands[0].matches.map((m) => m.oldName)).toEqual([
+      "miniemen",
+      "miniemen",
+    ]);
   });
 
   it('"preminiemen" is not read as "miniemen"', () => {
@@ -120,6 +126,7 @@ describe("matchYouthTeams", () => {
       [9, 2018, "age", "Onderbouw"],
       [10, 2017, "age", "Middenbouw"],
     ]);
+    expect(matches.map((m) => m.age)).toEqual([8, 8]);
     // Late-born is a birth-year rule only.
     expect(matches.every((m) => m.lateBornAlternative === null)).toBe(true);
   });
@@ -168,8 +175,19 @@ describe("matchYouthTeams", () => {
       birthYear: 2009,
       band: "Bovenbouw",
       nextTeamUp: true,
+      requestedCategory: 18,
     });
     expect(match.teams.map((t) => t.slug)).toEqual(["kcvve-u19"]);
+  });
+
+  it('"U18" → the U19, still naming the asked U18', () => {
+    expect(onlyMatch(run("U18"))).toMatchObject({
+      category: 19,
+      requestedCategory: 18,
+      nextTeamUp: true,
+      age: null,
+      oldName: null,
+    });
   });
 
   it('"A-ploeg" → no team, and no number to report', () => {

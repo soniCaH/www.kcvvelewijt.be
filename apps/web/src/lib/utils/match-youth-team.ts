@@ -1,10 +1,9 @@
-import { toDisplayZone } from "./dates";
 import { getYouthDivision, type YouthDivisionName } from "./group-teams";
 import { teamDisplayName } from "./team-display-name";
 
 /**
  * Recognise a youth team in what a parent types into `/hulp` (#3557, rules
- * decided in #3420). Pure: the team list and `now` come in, nothing is read.
+ * decided in #3420). Pure: the team list and the season come in, nothing is read.
  * Rules only — the AI fallback for what they miss is #3559.
  */
 
@@ -43,6 +42,12 @@ export interface YouthTeamMatch<T extends YouthTeamSource = YouthTeamSource> {
   birthYear: number | null;
   /** No team at the asked category (U18, U20), so these are the next one up. */
   nextTeamUp: boolean;
+  /** The category the query asked for — differs from `category` only when `nextTeamUp`. */
+  requestedCategory: number;
+  /** The age the query named, for `age` matches; `null` otherwise. */
+  age: number | null;
+  /** The old name the query used (`miniemen`), lowercase, for `old-name` matches; `null` otherwise. */
+  oldName: string | null;
   /** `birth-year` matches up to U17 only; `null` otherwise. */
   lateBornAlternative: LateBornAlternative<T> | null;
 }
@@ -109,16 +114,14 @@ function parseTeam<T extends YouthTeamSource>(team: T): ParsedTeam<T> | null {
   };
 }
 
-/** Start year of the season `now` falls in; a season starts 1 July, Belgian time. */
-function seasonStartYear(now: Date): number {
-  const { year, month } = toDisplayZone(now);
-  return month >= 7 ? year : year - 1;
-}
-
 export function matchYouthTeams<T extends YouthTeamSource>(
   query: string,
   teams: readonly T[],
-  now: Date,
+  /**
+   * `seasonStartYear(now)` from `./season` — a number, not a date, so the
+   * client bundle that runs this matcher never ships Luxon (#3558).
+   */
+  seasonYear: number,
 ): YouthTeamMatchResult<T> {
   const parsed = teams
     .filter((t) => t.archived !== true)
@@ -126,7 +129,6 @@ export function matchYouthTeams<T extends YouthTeamSource>(
     .filter((p): p is ParsedTeam<T> => p != null);
   const at = (category: number) =>
     parsed.filter((p) => p.category === category);
-  const seasonYear = seasonStartYear(now);
 
   type Draft = Omit<YouthTeamMatch<T>, "band" | "teams"> & {
     teams: ParsedTeam<T>[];
@@ -136,6 +138,7 @@ export function matchYouthTeams<T extends YouthTeamSource>(
     kind: YouthTeamMatchKind,
     category: number,
     birthYear: number | null,
+    extra: Pick<Draft, "age" | "oldName"> = { age: null, oldName: null },
   ): Draft | null => {
     if (category < MIN_CATEGORY || category > MAX_CATEGORY) return null;
     let found = category;
@@ -151,6 +154,8 @@ export function matchYouthTeams<T extends YouthTeamSource>(
       teams: at(found),
       birthYear,
       nextTeamUp: found !== category,
+      requestedCategory: category,
+      ...extra,
       lateBornAlternative:
         lower.length > 0
           ? { category: category - 1, teams: lower.map((p) => p.team) }
@@ -176,11 +181,15 @@ export function matchYouthTeams<T extends YouthTeamSource>(
     });
 
   const byOldName = (): Draft[] =>
-    OLD_NAMES.filter(([re]) => re.test(query)).flatMap(([, from, to]) =>
-      Array.from({ length: to - from + 1 }, (_, i) => from + i)
+    OLD_NAMES.flatMap(([re, from, to]) => {
+      const oldName = query.match(re)?.[0].toLowerCase();
+      if (!oldName) return [];
+      return Array.from({ length: to - from + 1 }, (_, i) => from + i)
         .filter((c) => at(c).length > 0)
-        .flatMap((c) => draft("old-name", c, null) ?? []),
-    );
+        .flatMap(
+          (c) => draft("old-name", c, null, { age: null, oldName }) ?? [],
+        );
+    });
 
   const byBirthYear = (): Draft[] =>
     [...query.matchAll(/\b((?:19|20)\d{2})\b/g)].flatMap((m) => {
@@ -197,7 +206,9 @@ export function matchYouthTeams<T extends YouthTeamSource>(
     ].flatMap((m) => {
       const age = Number(m[1] ?? m[2]);
       return [seasonYear - age, seasonYear - age - 1].flatMap(
-        (born) => draft("age", seasonYear - born + 1, born) ?? [],
+        (born) =>
+          draft("age", seasonYear - born + 1, born, { age, oldName: null }) ??
+          [],
       );
     });
 

@@ -55,6 +55,11 @@ import {
   SECTION_NAV_CHIP_SHADOW_CLASS,
   SECTION_NAV_TRAILING_SLOT_CLASSES,
 } from "@/components/design-system/section-nav";
+import { TeamCard } from "@/components/hulp/TeamCard";
+import {
+  matchYouthTeams,
+  type YouthTeamSource,
+} from "@/lib/utils/match-youth-team";
 import type { OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
 import {
@@ -90,6 +95,13 @@ export interface HubSearchProps {
   maxResults?: number;
   /** Extra classes on the root (e.g. `max-w-[480px]`). */
   className?: string;
+  /**
+   * Youth teams for the team card (#3558): a query that names one shows
+   * `<TeamCard>` above the results. Omitted → no card.
+   */
+  youthTeams?: YouthTeamSource[];
+  /** Start year of the current season (`seasonStartYear`), from the server. */
+  seasonYear?: number;
 }
 
 /** A light contact label for the answer-forward card (no resolveContact dep). */
@@ -241,6 +253,8 @@ export function HubSearch({
   placeholder = "Zoek een naam, functie of vraag…",
   maxResults = 5,
   className = "",
+  youthTeams,
+  seasonYear,
 }: HubSearchProps) {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [debouncedValue, setDebouncedValue] = useState("");
@@ -377,6 +391,18 @@ export function HubSearch({
       maxResults,
     ],
   );
+
+  // Youth team card (#3558) — rules only, on the debounced query like the
+  // people lane. Members carry the coordinator and TVJO boxes already.
+  const teamMatch = useMemo(
+    () =>
+      youthTeams && seasonYear && debouncedValue.trim()
+        ? matchYouthTeams(debouncedValue, youthTeams, seasonYear)
+        : null,
+    [debouncedValue, youthTeams, seasonYear],
+  );
+  const teamCardMatches =
+    teamMatch?.bands.flatMap((band) => band.matches) ?? [];
 
   const rows: HubSearchResult[] = interleaveResults(
     memberResults,
@@ -531,6 +557,29 @@ export function HubSearch({
         break;
     }
   };
+
+  // `organigram_` events (#3558) — kind and U-codes only, never the query or a
+  // birth year. Keyed on what is shown, so each distinct card fires once; the
+  // hidden instance's `showResults` is false, so the two mounts never both fire.
+  const teamCardKey =
+    showResults && teamCardMatches.length > 0
+      ? `${teamCardMatches[0].kind}|${teamCardMatches
+          .map((m) => `U${m.category}`)
+          .join(",")}`
+      : null;
+  useEffect(() => {
+    if (!teamCardKey) return;
+    const [matchKind, teamAges] = teamCardKey.split("|");
+    trackEvent("organigram_team_card_shown", {
+      match_kind: matchKind,
+      team_ages: teamAges,
+    });
+  }, [teamCardKey]);
+  const teamNotFound = showResults && teamMatch?.unmatchedNumber === true;
+  useEffect(() => {
+    if (teamNotFound)
+      trackEvent("organigram_team_not_found", { query_kind: "number" });
+  }, [teamNotFound, debouncedValue]);
 
   // Announce result state to screen readers when the listbox is open (S1).
   const statusMessage = !showResults
@@ -723,6 +772,13 @@ export function HubSearch({
           // the section bar's own `z-30` stacking context either way.
           className={`border-ink bg-cream absolute z-40 mt-2 max-h-96 ${dropdownWidth} overflow-y-auto border-2 shadow-[var(--shadow-paper-sm)]`}
         >
+          {/* Above the results and outside the listbox: the card holds links,
+              not options, so arrow-key navigation of the rows is unchanged. */}
+          {teamMatch && teamCardMatches.length > 0 && (
+            <div className="border-ink border-b-2 p-3">
+              <TeamCard result={teamMatch} nodes={members} />
+            </div>
+          )}
           {/* `role="listbox"`'s owned children must all be `option`/`group`
               (#3188 — axe `aria-required-children`); the smart-hint banner
               and the "geen resultaten" message are real (non-`aria-hidden`)

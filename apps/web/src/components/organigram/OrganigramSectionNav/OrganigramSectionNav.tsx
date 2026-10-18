@@ -22,7 +22,7 @@ import {
   SectionNavChip,
   SECTION_NAV_BAR_CLASSES,
 } from "@/components/design-system";
-import { HubSearch } from "../HubSearch";
+import { HubSearch, type HubSearchProps } from "../HubSearch";
 import { useHubSearchTopInsetPublisher } from "../HubSearch/HubSearchQueryProvider";
 import { useSectionNav } from "@/hooks/useSectionNav";
 import type { OrgChartNode } from "@/types/organigram";
@@ -38,12 +38,17 @@ const SECTION_IDS = SECTIONS.map((s) => s.id);
 export interface OrganigramSectionNavProps {
   members: OrgChartNode[];
   responsibilityPaths: ResponsibilityPath[];
+  /** Forwarded to `<HubSearch>` for the youth team card (#3558). */
+  youthTeams?: HubSearchProps["youthTeams"];
+  seasonYear?: HubSearchProps["seasonYear"];
   className?: string;
 }
 
 export function OrganigramSectionNav({
   members,
   responsibilityPaths,
+  youthTeams,
+  seasonYear,
   className,
 }: OrganigramSectionNavProps) {
   const { navRef, activeId, topInset } = useSectionNav(SECTION_IDS);
@@ -109,6 +114,8 @@ export function OrganigramSectionNav({
           <HubSearch
             members={members}
             responsibilityPaths={responsibilityPaths}
+            youthTeams={youthTeams}
+            seasonYear={seasonYear}
             variant="nav"
             placeholder="Zoek…"
             className="ml-auto w-full max-w-[240px] min-w-0"

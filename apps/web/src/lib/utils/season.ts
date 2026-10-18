@@ -1,4 +1,4 @@
-import { toMatchDisplayZone } from "./dates";
+import { toDisplayZone, toMatchDisplayZone } from "./dates";
 
 /** A football season spanning roughly Aug→May (e.g. 2025–2026). */
 export interface Season {
@@ -50,6 +50,16 @@ export function deriveSeason(date: Date | string): Season {
     key: `${startYear}-${endYear}`,
     label: `’${twoDigit(startYear)}/’${twoDigit(endYear)}`,
   };
+}
+
+/**
+ * Start year of the season a true instant (`new Date()`) falls in: a season
+ * starts 1 July, Belgian time. Not for match dates — those go through
+ * `deriveSeason`, which reads their wall-clock UTC fields.
+ */
+export function seasonStartYear(now: Date): number {
+  const { year, month } = toDisplayZone(now);
+  return month >= 7 ? year : year - 1;
 }
 
 /**
