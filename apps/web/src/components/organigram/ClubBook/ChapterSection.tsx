@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils/cn";
-import { EditorialLink, SectionHeader } from "@/components/design-system";
+import { SectionHeader } from "@/components/design-system";
 import {
   joinNames,
   type LedgerRow as LedgerRowVM,
@@ -26,6 +26,17 @@ function SubHead({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** The chapter's board link as `<SectionHeader>`'s CTA, which takes both fields or neither. */
+function boardCta(
+  chapter: Chapter,
+):
+  | { linkText: string; linkHref: string }
+  | { linkText?: never; linkHref?: never } {
+  return chapter.boardLink
+    ? { linkText: chapter.boardLink.label, linkHref: chapter.boardLink.href }
+    : {};
+}
+
 /** One chapter of the clubboek: title, purpose, who sits on the board there, then the ledger. */
 export function ChapterSection({ chapter }: { chapter: Chapter }) {
   return (
@@ -33,12 +44,14 @@ export function ChapterSection({ chapter }: { chapter: Chapter }) {
       aria-label={chapter.title}
       className="flex min-w-0 flex-col print:mb-3 print:break-inside-avoid"
     >
-      <div className="border-ink border-t-2 pt-3 print:break-after-avoid">
+      {/* The board link sits right of the title on screen; paper has no use for it. */}
+      <div className="border-ink border-t-2 pt-3 print:break-after-avoid print:[&_a]:hidden">
         <SectionHeader
           as="h3"
           size="display-sm"
           title={chapter.title}
           className="mb-0 sm:mb-0"
+          {...boardCta(chapter)}
         />
       </div>
       <p className="text-ink-muted text-body-sm mt-1 italic print:break-inside-avoid print:break-after-avoid">
@@ -51,14 +64,6 @@ export function ChapterSection({ chapter }: { chapter: Chapter }) {
           </span>{" "}
           {joinNames(chapter.board)}
         </p>
-      )}
-      {chapter.boardLink && (
-        <EditorialLink
-          href={chapter.boardLink.href}
-          className="mt-2 self-start print:hidden"
-        >
-          {chapter.boardLink.label}
-        </EditorialLink>
       )}
       <div className="mt-5 flex flex-col gap-4 print:mt-2 print:gap-2">
         {chapter.sections.map((section) => (

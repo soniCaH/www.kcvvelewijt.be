@@ -32,17 +32,14 @@ export function MemberContact({ member }: { member: OrgChartMember }) {
   return (
     <p className="text-body-sm flex flex-col">
       {member.email && (
-        <a
-          href={`mailto:${member.email}`}
-          className="text-jersey-deep underline"
-        >
+        <a href={`mailto:${member.email}`} className="prose-link self-start">
           <BreakableEmail email={member.email} />
         </a>
       )}
       {member.phone && (
         <a
           href={`tel:${member.phone.replace(/\s/g, "")}`}
-          className="text-ink underline"
+          className="prose-link self-start"
         >
           {member.phone}
         </a>
@@ -61,7 +58,10 @@ export function MemberName({
 }) {
   const classes = `${className} hyphens-auto break-words`;
   return member.href ? (
-    <Link href={member.href} className={`${classes} hover:underline`}>
+    <Link
+      href={member.href}
+      className={`${classes} prose-link prose-link-quiet self-start`}
+    >
       {member.name}
     </Link>
   ) : (

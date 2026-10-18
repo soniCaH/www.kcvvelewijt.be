@@ -1113,6 +1113,15 @@
   }
 }
 
+/* A linked name (clubboek holder): the same marker sweep, but the name keeps
+   its own colour and weight utilities — it is a name first, a link second.
+   `revert-layer` hands both back to the layered utilities `.prose-link`
+   (unlayered) would otherwise beat. */
+.prose-link-quiet {
+  color: revert-layer;
+  font-weight: revert-layer;
+}
+
 /* ===== Reserved hover borders (#2610, decision-sheet §8 D0 — S8) =====
    Pure discipline, not a utility class: wherever a hover swaps a border's
    colour, the resting state already carries the same border WIDTH (`border`,

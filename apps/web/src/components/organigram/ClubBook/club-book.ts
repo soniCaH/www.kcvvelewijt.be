@@ -113,14 +113,14 @@ const CHAPTERS: ReadonlyArray<{
 }> = [
   {
     key: "sportief",
-    title: "Sportief",
+    title: "Sportief fanion",
     purpose: "Het A- en B-elftal: trainers, keepers en doorstroom.",
     sections: [{ pillars: ["sportief"] }],
   },
   {
     key: "jeugd",
     title: "Jeugd",
-    purpose: "Van de kleinsten tot de beloften: organisatie en opleiding.",
+    purpose: "Van de kleinsten tot de U21: organisatie en opleiding.",
     sections: [
       { heading: "Organisatie", pillars: ["jeugd-organisatie"] },
       { heading: "Opleiding", pillars: ["jeugd-opleiding"] },
@@ -130,8 +130,10 @@ const CHAPTERS: ReadonlyArray<{
   {
     key: "club",
     title: "Club & werking",
-    purpose: "Alles naast het veld: sponsors, gebouw, kantine, kledij.",
+    purpose:
+      "Alles naast het veld: dagelijkse werking, vzw, sponsors, gebouw, kantine, kledij.",
     sections: [{ pillars: ["club"] }],
+    boardLink: BOARD_LINKS.hoofdbestuur,
   },
   {
     key: "integriteit",

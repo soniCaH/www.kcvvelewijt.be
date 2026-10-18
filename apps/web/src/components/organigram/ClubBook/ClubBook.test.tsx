@@ -155,17 +155,21 @@ describe("<ClubBook>", () => {
       screen.getByText(/Raad van bestuur:/).parentElement,
     ).toHaveTextContent("Raad van bestuur: Kevin Van Ransbeeck, Koen");
     expect(
-      screen.getByRole("link", { name: /Bekijk het hoofdbestuur/ }),
+      screen.getAllByRole("link", { name: /Bekijk het hoofdbestuur/ })[0],
     ).toHaveAttribute("href", "/club/bestuur");
   });
 
-  it("links the Jeugd pillar to the jeugdbestuur", () => {
+  it("links the Jeugd pillar to the jeugdbestuur and Club & werking to the hoofdbestuur", () => {
     render(<ClubBook nodes={nodes} responsibilityPaths={paths} />);
 
     const jeugd = screen.getByRole("region", { name: "Jeugd" });
     expect(
       within(jeugd).getByRole("link", { name: /Bekijk het jeugdbestuur/ }),
     ).toHaveAttribute("href", "/club/jeugdbestuur");
+    const club = screen.getByRole("region", { name: "Club & werking" });
+    expect(
+      within(club).getByRole("link", { name: /Bekijk het hoofdbestuur/ }),
+    ).toHaveAttribute("href", "/club/bestuur");
   });
 
   it("lists a box with no pillar under Overige functies", () => {
@@ -178,7 +182,7 @@ describe("<ClubBook>", () => {
   it("links a vacant row to the contact page from the row itself, with nothing to unfold", () => {
     render(<ClubBook nodes={nodes} responsibilityPaths={paths} />);
 
-    const sportief = screen.getByRole("region", { name: "Sportief" });
+    const sportief = screen.getByRole("region", { name: "Sportief fanion" });
     expect(
       within(sportief).getByRole("link", {
         name: "plek vrij — iets voor jou?",
@@ -200,7 +204,7 @@ describe("<ClubBook>", () => {
     render(<ClubBook nodes={nodes} responsibilityPaths={paths} />);
 
     expect(document.querySelectorAll("details[open]")).toHaveLength(0);
-    const sportief = screen.getByRole("region", { name: "Sportief" });
+    const sportief = screen.getByRole("region", { name: "Sportief fanion" });
     expect(
       within(sportief).getByText("plek vrij — iets voor jou?"),
     ).toBeInTheDocument();
