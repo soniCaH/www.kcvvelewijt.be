@@ -645,17 +645,25 @@ export const TypedKvCache = <A, I>(
             // to the negative-marker read; the fresh path stays I/O-free.
             const rawSince = yield* cache.get(staleSinceKey(key));
             const recorded = rawSince === null ? NaN : Number(rawSince);
-            if (!Number.isFinite(recorded))
-              yield* cache.set(
+            // A marker dated before this value was written belongs to a previous
+            // stale spell (a successful write came after it; its delete failed or
+            // was raced) → treat as absent. Strict `>`: the marker is written by a
+            // read, which always comes after the value's own write.
+            const valid = Number.isFinite(recorded) && recorded > fetchedAt;
+            const staleSince = valid ? recorded : Date.now();
+            if (!valid) {
+              // Detached like the ping below: the serve-stale-instantly path must
+              // not wait on a KV write. A write that lands after the refresh's
+              // delete is older than the new `fetchedAt`, so it is ignored.
+              const mark = cache.set(
                 staleSinceKey(key),
-                String(Date.now()),
+                String(staleSince),
                 effectiveHardTtl,
               );
-            // Never older than this value's own soft expiry: a marker left behind
-            // by a failed delete must not make a fresh stale spell look drifted.
-            const staleSince = Number.isFinite(recorded)
-              ? Math.max(recorded, softExpiry)
-              : Date.now();
+              yield* Option.isSome(runnerOpt)
+                ? runnerOpt.value.fork(`stale-since:${key}`, mark)
+                : mark;
+            }
             if (isDrifting(staleSince)) {
               yield* Effect.logError(
                 `TypedKvCache "${key}": serving stale, refreshes have not landed for ${formatDuration(Date.now() - staleSince)}`,

@@ -925,7 +925,7 @@ describe("TypedKvCache — PSD incident alerting (#2329)", () => {
       "test-key",
       makeWrapper({ name: "stale", value: 1 }, 3 * dayMs), // 3 days stale
     );
-    seedStaleSince(mockKv, 3 * dayMs);
+    seedStaleSince(mockKv, 2 * dayMs);
     const fetchEffect = Effect.fail(new Error("PSD 429") as never);
     const { entries, layer: capture } = captureLogs();
 
@@ -959,7 +959,7 @@ describe("TypedKvCache — PSD incident alerting (#2329)", () => {
       "test-key",
       makeWrapper({ name: "stale", value: 1 }, 3 * dayMs),
     );
-    seedStaleSince(mockKv, 3 * dayMs);
+    seedStaleSince(mockKv, 2 * dayMs);
     mockKv.store.set("nudge:test-key", "1"); // already pinged today
     const fetchEffect = Effect.fail(new Error("PSD 429") as never);
 
@@ -1212,7 +1212,7 @@ describe("TypedKvCache — silent-drift observability (#2335)", () => {
       "test-key",
       makeWrapper({ name: "stale", value: 1 }, 3 * dayMs),
     );
-    seedStaleSince(mockKv, 3 * dayMs);
+    seedStaleSince(mockKv, 2 * dayMs);
     const { layer: gate, reportOutcome } = spyGate();
     const { entries, layer: capture } = captureLogs();
     const { runnerLayer, settle } = withRunner(
@@ -1255,7 +1255,7 @@ describe("TypedKvCache — silent-drift observability (#2335)", () => {
       "test-key",
       makeWrapper({ name: "stale", value: 1 }, 3 * dayMs),
     );
-    seedStaleSince(mockKv, 3 * dayMs);
+    seedStaleSince(mockKv, 2 * dayMs);
     const { runnerLayer, settle } = withRunner(mockKv, PsdGateTest);
     const { entries, layer: capture } = captureLogs();
 
@@ -1292,7 +1292,7 @@ describe("TypedKvCache — silent-drift observability (#2335)", () => {
       "test-key",
       makeWrapper({ name: "stale", value: 1 }, 3 * dayMs),
     );
-    seedStaleSince(mockKv, 3 * dayMs);
+    seedStaleSince(mockKv, 2 * dayMs);
     const { layer: gate } = spyGate();
     const { runnerLayer, settle } = withRunner(mockKv, gate);
 
@@ -1360,7 +1360,7 @@ describe("TypedKvCache — silent-drift observability (#2335)", () => {
       "test-key",
       makeWrapper({ name: "stale", value: 1 }, 3 * dayMs),
     );
-    seedStaleSince(mockKv, 3 * dayMs);
+    seedStaleSince(mockKv, 2 * dayMs);
     mockKv.store.set("neg:test-key", "1");
 
     let fetchCalled = false;
@@ -1542,14 +1542,15 @@ describe("TypedKvCache — drift is measured from the first unfixed stale read (
     expect(nudgePuts(mockKv)).toHaveLength(1);
   });
 
-  it("ignores a marker older than the value's own soft expiry (failed delete)", async () => {
+  it("treats a marker dated before the value's fetchedAt as absent and rewrites it", async () => {
     startClock();
     const mockKv = makeMockKv();
-    // The marker survives from an earlier spell; the value was rewritten since.
+    // Left behind by an earlier spell whose delete failed; the value was
+    // rewritten since, then sat idle for 3 days.
     mockKv.store.set("stale-since:test-key", String(Date.now() - 10 * dayMs));
     mockKv.store.set(
       "test-key",
-      makeWrapper({ name: "stale", value: 1 }, 60_000 + 1_000),
+      makeWrapper({ name: "stale", value: 1 }, 3 * dayMs),
     );
     const { runnerLayer, settle } = killedRefreshRunner(mockKv);
 
@@ -1557,6 +1558,7 @@ describe("TypedKvCache — drift is measured from the first unfixed stale read (
     await settle();
 
     expect(nudgePuts(mockKv)).toHaveLength(0);
+    expect(mockKv.store.get("stale-since:test-key")).toBe(String(Date.now()));
   });
 
   it("a related:* drift message says 'Cached data', a PSD-backed one 'PSD data'", async () => {

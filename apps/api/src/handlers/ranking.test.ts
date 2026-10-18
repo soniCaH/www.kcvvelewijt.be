@@ -188,9 +188,11 @@ describe("getRankingHandler", () => {
       testEnvLayer,
     );
     const pending: Promise<unknown>[] = [];
+    const labels: string[] = [];
     const runner = Layer.succeed(BackgroundRunnerService, {
-      fork: (_label, effect) =>
+      fork: (label, effect) =>
         Effect.sync(() => {
+          labels.push(label);
           // The refresh only needs what `layers` provides; the fork's
           // declared env is wider (same cast as kv-cache.test.ts).
           pending.push(
@@ -214,7 +216,8 @@ describe("getRankingHandler", () => {
     answer = [];
     vi.setSystemTime(Date.now() + 25 * 60 * 60 * 1000); // past TTL.RANKING
     const stale = await read();
-    expect(pending).toHaveLength(1); // the refresh really ran
+    // The refresh really ran (the first stale read also forks its stale-since write).
+    expect(labels.filter((l) => l.startsWith("refresh:"))).toHaveLength(1);
     await Promise.all(pending);
     const after = await read();
 
