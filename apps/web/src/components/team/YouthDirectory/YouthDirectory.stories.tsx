@@ -101,3 +101,21 @@ export const BovenbouwFocus: Story = {
     ],
   },
 };
+
+/**
+ * One team per band, plus U5 — the band label as text (#3556). U5 is an age
+ * code with no band, so its card prints none. Production never groups U5 here
+ * (`groupTeamsForLanding` places only banded ages); the card is placed by hand
+ * to pin the no-band case. Phone-first, so every card is in frame on mobile.
+ */
+export const EveryBand: Story = {
+  args: {
+    heading: "Andere",
+    divisions: [
+      { label: "Reserven", teams: [] },
+      { label: "Onderbouw", range: "U6–U9", teams: [team("U5"), team("U9")] },
+      { label: "Middenbouw", range: "U10–U13", teams: [team("U12")] },
+      { label: "Bovenbouw", range: "U14–U21", teams: [team("U16")] },
+    ],
+  },
+};

@@ -207,6 +207,41 @@ describe("YouthDirectory", () => {
     });
   });
 
+  describe("the band label (#3556)", () => {
+    const band = (card: HTMLElement) =>
+      card.querySelector("[data-testid='youth-team-band']");
+
+    it("names each card's own band, in that band's tone", () => {
+      renderDirectory([
+        { label: "Bovenbouw", range: "U14–U21", teams: [team("U17")] },
+        { label: "Middenbouw", range: "U10–U13", teams: [team("U12")] },
+        { label: "Onderbouw", range: "U6–U9", teams: [team("U9")] },
+      ]);
+      const cards = screen.getAllByTestId("youth-team-card");
+
+      expect(cards.map((c) => band(c)?.textContent)).toEqual([
+        "Bovenbouw",
+        "Middenbouw",
+        "Onderbouw",
+      ]);
+      expect(cards.map((c) => band(c)?.getAttribute("data-tone"))).toEqual([
+        "jersey-deep",
+        "alert",
+        "warning",
+      ]);
+    });
+
+    it("prints no band on a team that has none (U5, Reserven)", () => {
+      renderDirectory([
+        { label: "Reserven", teams: [reservenTeam()] },
+        { label: "Onderbouw", range: "U6–U9", teams: [team("U5")] },
+      ]);
+      for (const card of screen.getAllByTestId("youth-team-card")) {
+        expect(band(card)).toBeNull();
+      }
+    });
+  });
+
   describe("the tilt scale (#3330)", () => {
     const cardsOf = (teams: ReturnType<typeof team>[]) => {
       renderDirectory([{ label: "Onderbouw", range: "U6–U9", teams }]);

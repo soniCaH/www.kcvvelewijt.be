@@ -50,10 +50,14 @@ export function TeamHero({
 }: TeamHeroProps) {
   const kicker = teamType === "youth" ? "KCVV Elewijt · Jeugd" : "KCVV Elewijt";
 
-  // Meta pill: senior = division; youth = youth band.
+  // Meta pill: senior = division; youth = "U12 · Middenbouw" (#3556). The
+  // prefix is the team's own name, not `ageGroup` — U16 competes as "U17".
   const divisionLabel = divisionFull ?? division ?? null;
+  const youthBand = getYouthDivision(ageGroup);
   const bandLabel =
-    teamType === "youth" ? getYouthDivision(ageGroup) : divisionLabel;
+    teamType === "youth"
+      ? youthBand && `${displayName} · ${youthBand}`
+      : divisionLabel;
 
   const showBandPill = bandLabel !== null && bandLabel !== "";
 

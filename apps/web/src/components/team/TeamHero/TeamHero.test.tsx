@@ -94,24 +94,30 @@ describe("TeamHero", () => {
       expect(meta.textContent).toContain("3NA");
     });
 
-    it("shows the youth band for a youth team", () => {
-      render(<TeamHero displayName="U13" teamType="youth" ageGroup="U13" />);
-      const meta = screen.getByTestId("team-hero-meta");
-      expect(meta.textContent).toContain("Middenbouw");
+    it("shows the age, then the youth band, for a youth team (#3556)", () => {
+      render(<TeamHero displayName="U12" teamType="youth" ageGroup="U12" />);
+      expect(screen.getByTestId("team-hero-meta").textContent).toBe(
+        "U12 · Middenbouw",
+      );
     });
 
-    it("shows Bovenbouw band for U17", () => {
-      render(<TeamHero displayName="U17" teamType="youth" ageGroup="U17" />);
-      expect(screen.getByTestId("team-hero-meta").textContent).toContain(
-        "Bovenbouw",
+    it("prefixes the team's own name, not its competition age (U16 plays as U17)", () => {
+      render(<TeamHero displayName="U16" teamType="youth" ageGroup="U17" />);
+      expect(screen.getByTestId("team-hero-meta").textContent).toBe(
+        "U16 · Bovenbouw",
       );
     });
 
     it("shows Onderbouw band for U9", () => {
       render(<TeamHero displayName="U9" teamType="youth" ageGroup="U9" />);
-      expect(screen.getByTestId("team-hero-meta").textContent).toContain(
-        "Onderbouw",
+      expect(screen.getByTestId("team-hero-meta").textContent).toBe(
+        "U9 · Onderbouw",
       );
+    });
+
+    it("hides the pill for a youth age with no band (U5)", () => {
+      render(<TeamHero displayName="U5" teamType="youth" ageGroup="U5" />);
+      expect(screen.queryByTestId("team-hero-meta")).toBeNull();
     });
 
     it("auto-hides meta row when no division and no youth band", () => {

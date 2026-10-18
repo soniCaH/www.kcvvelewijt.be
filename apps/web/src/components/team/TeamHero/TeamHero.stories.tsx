@@ -57,7 +57,7 @@ export const ATeamNoPhoto: Story = {
   },
 };
 
-/** Youth U13 — degraded meta (youth band only; no division), JerseyShirt fallback. */
+/** Youth U13 — the pill reads "U13 · Middenbouw" (#3556); no division, JerseyShirt fallback. */
 export const YouthU13: Story = {
   args: {
     displayName: "U13",
