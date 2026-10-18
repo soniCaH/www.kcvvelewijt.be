@@ -64,3 +64,35 @@ export function resolveEventDateRange(
     allDayEndExclusive: lastDay.plus({ days: 1 }),
   };
 }
+
+/**
+ * A genuine multi-day span: the end falls on a later Brussels day. A missing,
+ * same-day or reversed end reads as a single-day event, and so does a timed
+ * evening that ends at midnight (an all-day end at midnight is its last day,
+ * as in `resolveEventDateRange`).
+ */
+export function isMultiDayEvent(
+  start: DateTime,
+  end: DateTime | null,
+): end is DateTime {
+  if (!start.isValid || !end?.isValid || end <= start) return false;
+  const endsAtMidnight = end.toFormat("HH:mm:ss.SSS") === "00:00:00.000";
+  const timedStart = start.toFormat("HH:mm") !== "00:00";
+  const last =
+    endsAtMidnight && timedStart ? end.minus({ milliseconds: 1 }) : end;
+  return !start.hasSame(last, "day");
+}
+
+/**
+ * The day line of a `/share` story (#3535): `zaterdag 18 oktober`, or for a
+ * multi-day event `zaterdag 12 – zondag 13 oktober` (month named once when
+ * both days share it).
+ */
+export function formatEventDays(start: DateTime, end: DateTime | null): string {
+  if (!start.isValid) return "";
+  if (!isMultiDayEvent(start, end)) return start.toFormat("cccc d MMMM");
+  const head = start.toFormat(
+    start.hasSame(end, "month") ? "cccc d" : "cccc d MMMM",
+  );
+  return `${head} – ${end.toFormat("cccc d MMMM")}`;
+}

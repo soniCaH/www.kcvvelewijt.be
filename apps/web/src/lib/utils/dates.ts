@@ -83,10 +83,16 @@ export function clubToday(): string {
  * Brussels midnight of today as a UTC ISO instant (`$dayStart` in the agenda
  * query, #3478). GROQ compares `dateTime`s, so the cut-off is an instant, not
  * the `clubToday()` date string: a date string loses to an all-day event that
- * starts at local midnight.
+ * starts at local midnight. `daysBack` counts club days (not 24 h blocks),
+ * so a DST change in between keeps it at midnight.
  */
-export function clubDayStart(): string {
-  return DateTime.now().setZone(CLUB_TIMEZONE).startOf("day").toUTC().toISO()!;
+export function clubDayStart(daysBack = 0): string {
+  return DateTime.now()
+    .setZone(CLUB_TIMEZONE)
+    .startOf("day")
+    .minus({ days: daysBack })
+    .toUTC()
+    .toISO()!;
 }
 
 /**

@@ -72,6 +72,7 @@ vi.mock("@/lib/repositories/event.repository", async (importOriginal) => {
   return {
     ...mod,
     EventRepositoryLive: Layer.succeed(mod.EventRepository, {
+      findForShare: () => Effect.die("not used by this suite"),
       findAll: () => Effect.die("not used by this suite"),
       findUpcomingForList: () => Effect.succeed([]),
       findNextFeatured: () => Effect.die("not used by this suite"),

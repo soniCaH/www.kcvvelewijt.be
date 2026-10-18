@@ -1,6 +1,15 @@
 "use client";
 
-import React, { createContext, useContext } from "react";
+import React, {
+  Children,
+  Fragment,
+  createContext,
+  isValidElement,
+  useContext,
+  useLayoutEffect,
+  useRef,
+} from "react";
+import { wedstrijdZ, type BlockLayout } from "../looks/block-layout";
 import {
   BODY_FONT,
   GRAIN_DATA_URL,
@@ -47,6 +56,13 @@ export function useSharePalette(): SharePalette {
  * unless it is wrapped in this provider.
  */
 export const ShareBadgeContext = createContext<string | undefined>(undefined);
+
+/**
+ * The block layout of the story being composed in `/share` (#3537). With
+ * one, {@link ShareMid} makes each of its direct children a movable block;
+ * without one (Storybook, VR, unit tests) it renders exactly as before.
+ */
+export const ShareBlocksContext = createContext<BlockLayout | null>(null);
 
 export interface ShareFrameProps {
   /** Canvas width in px (1080 for both Story and Square). */
@@ -121,7 +137,6 @@ export function ShareFrame({
         >
           {register === "image" && photoUrl && (
             <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 // Route + sanitize at the sink: remote CDN images go through the
                 // same-origin Next optimizer (so html-to-image can read them),
@@ -216,7 +231,6 @@ export function ShareFrame({
 /** Round club crest (KCVV logo) used in the top bar. */
 function Crest({ size = 96 }: { size?: number }) {
   return (
-    // eslint-disable-next-line @next/next/no-img-element
     <img
       src={KCVV_LOGO}
       alt="KCVV Elewijt"
@@ -276,6 +290,26 @@ export function ShareTop({ crestSize }: { crestSize?: number }) {
   );
 }
 
+/**
+ * One block id per element the middle zone renders, from its JSX slot: a
+ * conditional child that renders nothing keeps its index, so a photo that
+ * drops the crest matchup does not shift the ids after it. A fragment's
+ * children get `w<slot>.<index>`.
+ */
+function slotIds(children: React.ReactNode, prefix = "w"): string[] {
+  const ids: string[] = [];
+  Children.forEach(children, (child, i) => {
+    if (!isValidElement(child)) return; // null, false, text: no element of its own
+    if (child.type === Fragment) {
+      const inner = (child.props as { children?: React.ReactNode }).children;
+      ids.push(...slotIds(inner, `${prefix}${i}.`));
+    } else {
+      ids.push(`${prefix}${i}`);
+    }
+  });
+  return ids;
+}
+
 /** Flexible middle zone (the per-event content area). */
 export function ShareMid({
   center = false,
@@ -287,8 +321,42 @@ export function ShareMid({
   style?: React.CSSProperties;
 }) {
   const photoLayout = useContext(SharePhotoContext);
+  const blocks = useContext(ShareBlocksContext);
+  const ref = useRef<HTMLDivElement>(null);
+  const ids = blocks ? slotIds(children) : [];
+  // The templates stay as they are: their middle-zone children are tagged
+  // here, in the DOM. The standalone `translate` property keeps a child's
+  // own `transform` (a rotated card). Each child is a flex item, so its
+  // z-index applies without a `position`. Should an element ever render no
+  // DOM node, the counts differ and nothing is tagged: never a wrong block.
+  useLayoutEffect(() => {
+    if (!ref.current) return;
+    const els = [...ref.current.children];
+    if (!blocks) {
+      // The layout went away (a thumbnail of a look no longer active): undo
+      // only what this effect tagged, never a child's own style.
+      els.forEach((child) => {
+        if (!(child instanceof HTMLElement) || !child.dataset.block) return;
+        delete child.dataset.block;
+        child.style.translate = "";
+        child.style.zIndex = "";
+      });
+      return;
+    }
+    const tag = els.length === ids.length;
+    els.forEach((child, i) => {
+      if (!(child instanceof HTMLElement)) return;
+      const id = tag ? ids[i] : undefined;
+      const at = id ? blocks[id] : undefined;
+      if (id) child.dataset.block = id;
+      else delete child.dataset.block;
+      child.style.translate = at ? `${at.x}px ${at.y}px` : "";
+      child.style.zIndex = at && id ? String(wedstrijdZ(blocks, id)) : "";
+    });
+  });
   return (
     <div
+      ref={ref}
       style={{
         flex: "1 1 auto",
         minHeight: 0,

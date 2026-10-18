@@ -334,6 +334,30 @@ describe("ArticleRepository", () => {
     });
   });
 
+  describe("findForShare (#3540)", () => {
+    it("passes the deep-linked slug, or an empty one when there is none", async () => {
+      mockFetch
+        .mockResolvedValueOnce({ list: [], picked: null })
+        .mockResolvedValueOnce({ list: [], picked: null });
+      const read = (slug: string | undefined) =>
+        runWithRepo(
+          Effect.gen(function* () {
+            const repo = yield* ArticleRepository;
+            return yield* repo.findForShare(slug);
+          }),
+        );
+
+      await read("nieuwe-kantine");
+      expect(mockFetch).toHaveBeenLastCalledWith(expect.any(String), {
+        slug: "nieuwe-kantine",
+      });
+      await read(undefined);
+      expect(mockFetch).toHaveBeenLastCalledWith(expect.any(String), {
+        slug: "",
+      });
+    });
+  });
+
   describe("toHomepageArticle", () => {
     it("maps fields correctly", async () => {
       mockFetch.mockResolvedValueOnce([makeArticleListRow()]);

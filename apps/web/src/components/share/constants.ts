@@ -20,6 +20,8 @@ export const TOKENS = {
   jersey: "#4acf52",
   jerseyDeep: "#007c46",
   jerseyDeepDark: "#133d28",
+  /** `--color-jersey-bright` — the Jeugdwerking event fill. */
+  jerseyBright: "#22c55e",
   warm: "#f0c264",
   /** `--color-card-red` — the "brick" accent for negative sentiment. */
   brick: "#c93f1c",

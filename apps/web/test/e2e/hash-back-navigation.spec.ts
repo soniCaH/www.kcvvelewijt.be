@@ -23,7 +23,10 @@ test("Back after a section chip and a player returns to the team page", async ({
   await expect(page).toHaveURL(/#spelers$/);
 
   await page.locator('#spelers a[href^="/spelers/"]').first().click();
-  await expect(page).toHaveURL(/\/spelers\//);
+  // The URL changes when the player page's server render lands. Cold in CI,
+  // behind the roster's own prefetches, that render took 2.6 s and the 5 s
+  // default ran out (run 39105365923).
+  await expect(page).toHaveURL(/\/spelers\//, { timeout: 15_000 });
   await expect(teamHeading).not.toHaveText(teamTitle);
 
   await page.goBack();

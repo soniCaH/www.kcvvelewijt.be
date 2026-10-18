@@ -226,4 +226,10 @@ describe("clubDayStart", () => {
     vi.setSystemTime(new Date("2026-10-25T12:00:00Z"));
     expect(clubDayStart()).toBe("2026-10-24T22:00:00.000Z");
   });
+
+  it("counts days back in club days: 7 days before 1 Nov is CEST midnight", () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-11-01T12:00:00Z"));
+    expect(clubDayStart(7)).toBe("2026-10-24T22:00:00.000Z");
+  });
 });
