@@ -215,8 +215,9 @@ describe("worker fetch — /calendar redirects old subscribers (#3578)", () => {
 
   it("does not redirect a POST: the BFF key check still applies", async () => {
     const res = await worker.fetch(calendar("?teams=1", "POST"), env(), ctx);
-    expect(res.status).not.toBe(308);
+    expect(res.status).toBe(401);
     expect(res.headers.get("location")).toBeNull();
+    expect(handlerSpy).not.toHaveBeenCalled();
   });
 });
 
