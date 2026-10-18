@@ -13,7 +13,6 @@ import { ArticleRepository } from "@/lib/repositories/article.repository";
 import { formatArticleDate } from "@/lib/utils/dates";
 import { computeReadingTime } from "@/lib/utils/reading-time";
 import {
-  mapEditorialArticles,
   mapBffRelatedItems,
   mapMentionedPlayers,
   mapMentionedTeams,
@@ -363,8 +362,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     article.articleType === "matchPreview" ||
     article.articleType === "matchRecap";
   const matchId = isMatchArticle ? parsePsdMatchId(article.linkedMatch) : null;
-  const hasEditorialArticles =
-    article.relatedArticles && article.relatedArticles.length > 0;
 
   // The linked match and the related-items block are independent of each
   // other, so they run as one wave rather than two serialized round-trips
@@ -380,26 +377,21 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           ),
         )
       : null,
-    // Semantic (AI/vector-scored) tier — skipped entirely when the editor
-    // already curated `relatedArticles` (the legacy field, now folded into
-    // the curated tier below): querying the BFF for a suggestion nobody will
-    // see is wasted rate-limited quota.
-    hasEditorialArticles
-      ? []
-      : runPromise(
-          Effect.gen(function* () {
-            const bff = yield* BffService;
-            return yield* bff.getRelated(article.id);
-          }).pipe(
-            Effect.map(mapBffRelatedItems),
-            // Broad catch is intentional: any BFF failure here (a transport
-            // error as much as a 404) must still render the article without
-            // a related-items block. Related content is editorial polish, not
-            // load-bearing — falling back to [] is preferable to failing the
-            // article page render.
-            Effect.catchAll(() => Effect.succeed<RelatedContentItem[]>([])),
-          ),
-        ),
+    // Semantic (AI/vector-scored) tier.
+    runPromise(
+      Effect.gen(function* () {
+        const bff = yield* BffService;
+        return yield* bff.getRelated(article.id);
+      }).pipe(
+        Effect.map(mapBffRelatedItems),
+        // Broad catch is intentional: any BFF failure here (a transport
+        // error as much as a 404) must still render the article without
+        // a related-items block. Related content is editorial polish, not
+        // load-bearing — falling back to [] is preferable to failing the
+        // article page render.
+        Effect.catchAll(() => Effect.succeed<RelatedContentItem[]>([])),
+      ),
+    ),
   ]);
   const heroMatch = matchDetail ? toHeroMatchData(matchDetail) : null;
 
@@ -452,10 +444,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
     });
   }
 
-  const curatedItems = [
-    ...mapCuratedRelatedContent(article.relatedContent),
-    ...mapEditorialArticles(article.relatedArticles ?? undefined),
-  ];
+  const curatedItems = mapCuratedRelatedContent(article.relatedContent);
   const referenceItems = [
     ...mapMentionedPlayers(article.mentionedPlayers ?? undefined),
     ...mapMentionedStaff(article.mentionedStaffMembers ?? undefined),

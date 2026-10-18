@@ -182,7 +182,6 @@ export const ARTICLE_BY_SLUG_QUERY =
     "customPhotoUrl": customPhoto.asset->url + "?w=600&q=80&fm=webp&fit=max"
   },
   body[]{ ..., "fileUrl": file.asset->url, "fileSize": file.asset->size, "fileMimeType": file.asset->mimeType, "fileOriginalFilename": file.asset->originalFilename, "asset": select(_type == "image" => asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }, _type == "articleImage" => image.asset->{ "url": url + "?w=800&q=80&fm=webp&fit=max", title, description, creditLine, metadata{dimensions, lqip} }), "videoAsset": select(_type == "videoBlock" => uploadedFile.asset->{ url, size, mimeType, originalFilename }, null), "videoPosterUrl": select(_type == "videoBlock" => poster.asset->url + "?w=1200&q=80&fm=webp&fit=max", null), "otherClubLogoUrl": select(_type == "transferFact" => otherClubLogo.asset->url + "?w=200&q=80&fm=webp&fit=max", null), ${PULL_QUOTE_SPEAKER_PROJECTION}, markDefs[]{ ..., _type == "internalLink" => { ..., "reference": reference->{ _type, "slug": slug.current, psdId, archived } } } },
-  relatedArticles[]-> { "id": _id, "title": coalesce(pt::text(title), title, ""), "slug": coalesce(slug.current, ""), publishedAt, unpublishAt, "coverImageUrl": coverImage.asset->url + "?w=800&h=450&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5)) },
   relatedContent[]->{
     _type,
     _id,
@@ -335,10 +334,6 @@ export type MatchArticleVM = Omit<
   articleType: "matchPreview" | "matchRecap";
 };
 
-export type RelatedArticleRef = NonNullable<
-  ARTICLE_BY_SLUG_DETAIL["relatedArticles"]
->[number];
-
 /** One `/share` picker row (#3540) — see `SHARE_ARTICLES_QUERY`. */
 export type ShareArticleRow = SHARE_ARTICLES_QUERY_RESULT["list"][number];
 
@@ -365,9 +360,7 @@ export interface HomepageArticle {
 
 // ─── Transforms ──────────────────────────────────────────────────────────────
 
-function filterPublishedRelatedArticles(
-  row: ARTICLE_BY_SLUG_DETAIL,
-): ArticleDetailVM {
+function filterUnpublishedRefs(row: ARTICLE_BY_SLUG_DETAIL): ArticleDetailVM {
   const now = new Date().toISOString();
   // Mirrors the ARTICLE_BY_SLUG_QUERY publish gate: a related ref without a
   // `publishedAt` is treated as unpublished (it would not appear on the news
@@ -382,7 +375,6 @@ function filterPublishedRelatedArticles(
   };
   return {
     ...row,
-    relatedArticles: row.relatedArticles?.filter(isPublished) ?? null,
     // Only article entries carry a publish window; non-article curated
     // refs (player, future team/staff/event) pass through unconditionally.
     relatedContent:
@@ -578,9 +570,7 @@ export const ArticleRepositoryLive = Layer.succeed(ArticleRepository, {
         revalidate: SANITY_PUBLISH_WINDOW_REVALIDATE,
         tags: [SANITY_TAGS.articles, SANITY_TAGS.players, SANITY_TAGS.staff],
       },
-    ).pipe(
-      Effect.map((row) => (row ? filterPublishedRelatedArticles(row) : null)),
-    ),
+    ).pipe(Effect.map((row) => (row ? filterUnpublishedRefs(row) : null))),
   findPaginated: ({ offset, limit, category }) =>
     fetchGroq<ARTICLES_PAGINATED_QUERY_RESULT>(ARTICLES_PAGINATED_QUERY, {
       offset,

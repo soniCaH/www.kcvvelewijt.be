@@ -41,7 +41,6 @@ Every EditorialHero variant has access to these. Two rows reflect **post-migrati
 | `body`            | Portable Text                                                                                | optional                                                   | first paragraph candidate for dek (see "Owner ask 1")                 |
 | `metaDescription` | string (160 max)                                                                             | optional                                                   | SEO only, NOT on-page                                                 |
 | `relatedContent`  | array of refs                                                                                | optional                                                   | page body, not hero                                                   |
-| `relatedArticles` | array of refs                                                                                | optional                                                   | page body, not hero                                                   |
 
 ## NOT available on the article schema
 

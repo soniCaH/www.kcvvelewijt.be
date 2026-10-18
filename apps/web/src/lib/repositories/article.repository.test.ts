@@ -116,16 +116,6 @@ function makeArticleDetailRow(
         speaker: null,
       },
     ],
-    relatedArticles: [
-      {
-        id: "article-2",
-        title: "Related Article",
-        slug: "related-article",
-        publishedAt: "2026-03-19T10:00:00Z",
-        unpublishAt: null,
-        coverImageUrl: "https://cdn.sanity.io/related.webp",
-      },
-    ],
     relatedContent: null,
     mentionedPlayers: [
       {
@@ -615,27 +605,6 @@ describe("ArticleRepository", () => {
       expect(result!.linkedMatch).toBe("67890");
     });
 
-    it("maps related articles on detail VM", async () => {
-      const row = makeArticleDetailRow();
-      mockFetch.mockResolvedValueOnce(row);
-
-      const result = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* ArticleRepository;
-          return yield* repo.findBySlug("test");
-        }),
-      );
-
-      expect(result!.relatedArticles).toHaveLength(1);
-      expect(result!.relatedArticles![0]).toMatchObject({
-        id: "article-2",
-        title: "Related Article",
-        slug: "related-article",
-        publishedAt: "2026-03-19T10:00:00Z",
-        coverImageUrl: "https://cdn.sanity.io/related.webp",
-      });
-    });
-
     it("maps mentioned players, teams, and staff", async () => {
       const row = makeArticleDetailRow();
       mockFetch.mockResolvedValueOnce(row);
@@ -689,108 +658,6 @@ describe("ArticleRepository", () => {
       );
 
       expect(result).toBeNull();
-    });
-
-    it("handles null relatedArticles", async () => {
-      mockFetch.mockResolvedValueOnce(
-        makeArticleDetailRow({ relatedArticles: null }),
-      );
-
-      const result = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* ArticleRepository;
-          return yield* repo.findBySlug("test");
-        }),
-      );
-
-      expect(result!.relatedArticles).toBeNull();
-    });
-
-    it("filters out related articles with publishedAt in the future", async () => {
-      const futureDate = new Date(
-        Date.now() + 24 * 60 * 60 * 1000,
-      ).toISOString();
-      mockFetch.mockResolvedValueOnce(
-        makeArticleDetailRow({
-          relatedArticles: [
-            {
-              id: "future-article",
-              title: "Future Article",
-              slug: "future-article",
-              publishedAt: futureDate,
-              unpublishAt: null,
-              coverImageUrl: "https://cdn.sanity.io/future.webp",
-            },
-          ],
-        }),
-      );
-
-      const result = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* ArticleRepository;
-          return yield* repo.findBySlug("test");
-        }),
-      );
-
-      expect(result!.relatedArticles).toEqual([]);
-    });
-
-    it("filters out related articles with unpublishAt in the past", async () => {
-      const pastDate = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      mockFetch.mockResolvedValueOnce(
-        makeArticleDetailRow({
-          relatedArticles: [
-            {
-              id: "expired-article",
-              title: "Expired Article",
-              slug: "expired-article",
-              publishedAt: "2026-01-01T10:00:00Z",
-              unpublishAt: pastDate,
-              coverImageUrl: "https://cdn.sanity.io/expired.webp",
-            },
-          ],
-        }),
-      );
-
-      const result = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* ArticleRepository;
-          return yield* repo.findBySlug("test");
-        }),
-      );
-
-      expect(result!.relatedArticles).toEqual([]);
-    });
-
-    it("keeps related articles within a valid published window", async () => {
-      const pastDate = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const futureDate = new Date(
-        Date.now() + 24 * 60 * 60 * 1000,
-      ).toISOString();
-      mockFetch.mockResolvedValueOnce(
-        makeArticleDetailRow({
-          relatedArticles: [
-            {
-              id: "valid-article",
-              title: "Valid Article",
-              slug: "valid-article",
-              publishedAt: pastDate,
-              unpublishAt: futureDate,
-              coverImageUrl: "https://cdn.sanity.io/valid.webp",
-            },
-          ],
-        }),
-      );
-
-      const result = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* ArticleRepository;
-          return yield* repo.findBySlug("test");
-        }),
-      );
-
-      expect(result!.relatedArticles).toHaveLength(1);
-      expect(result!.relatedArticles![0].id).toBe("valid-article");
     });
 
     it("drops a callToAction reference pointing at an article scheduled for the future", async () => {
@@ -970,48 +837,9 @@ describe("ArticleRepository", () => {
       ]);
     });
 
-    it("filters mixed related articles and preserves order", async () => {
-      const pastDate = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const futureDate = new Date(
-        Date.now() + 24 * 60 * 60 * 1000,
-      ).toISOString();
+    it("keeps relatedContent null when the row has none", async () => {
       mockFetch.mockResolvedValueOnce(
-        makeArticleDetailRow({
-          relatedArticles: [
-            {
-              id: "valid-1",
-              title: "Valid First",
-              slug: "valid-first",
-              publishedAt: pastDate,
-              unpublishAt: null,
-              coverImageUrl: "https://cdn.sanity.io/v1.webp",
-            },
-            {
-              id: "future-pub",
-              title: "Future Published",
-              slug: "future-published",
-              publishedAt: futureDate,
-              unpublishAt: null,
-              coverImageUrl: "https://cdn.sanity.io/future.webp",
-            },
-            {
-              id: "expired",
-              title: "Expired",
-              slug: "expired",
-              publishedAt: "2026-01-01T10:00:00Z",
-              unpublishAt: pastDate,
-              coverImageUrl: "https://cdn.sanity.io/expired.webp",
-            },
-            {
-              id: "valid-2",
-              title: "Valid Second",
-              slug: "valid-second",
-              publishedAt: pastDate,
-              unpublishAt: futureDate,
-              coverImageUrl: "https://cdn.sanity.io/v2.webp",
-            },
-          ],
-        }),
+        makeArticleDetailRow({ relatedContent: null }),
       );
 
       const result = await runWithRepo(
@@ -1021,11 +849,7 @@ describe("ArticleRepository", () => {
         }),
       );
 
-      expect(result!.relatedArticles).toHaveLength(2);
-      expect(result!.relatedArticles!.map((a) => a.id)).toEqual([
-        "valid-1",
-        "valid-2",
-      ]);
+      expect(result!.relatedContent).toBeNull();
     });
   });
 

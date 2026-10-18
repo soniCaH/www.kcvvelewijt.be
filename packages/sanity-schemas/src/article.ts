@@ -363,15 +363,6 @@ export const article = defineType({
       ],
     }),
     defineField({
-      name: "relatedArticles",
-      title: "Related articles",
-      type: "array",
-      group: "gerelateerd",
-      description:
-        "Optioneel: artikels die je expliciet onderaan wil tonen als 'lees ook'. Voor een bredere mix (spelers, teams, evenementen) gebruik je 'Related content' hieronder.",
-      of: [{ type: "reference", to: [{ type: "article" }] }],
-    }),
-    defineField({
       name: "metaDescription",
       title: "Meta description",
       type: "string",
