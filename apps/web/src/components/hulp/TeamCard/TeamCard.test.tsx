@@ -43,4 +43,40 @@ describe("TeamCard", () => {
       screen.getByRole("link", { name: "Staf van U8 Groen" }),
     ).toHaveAttribute("href", "/ploegen/kcvve-u8-groen");
   });
+
+  it("explains a birth year with no team of its own and offers the next one up", () => {
+    render(
+      <TeamCard result={forQuery("geboren in 2009")} nodes={TEAM_CARD_NODES} />,
+    );
+    expect(document.body).toHaveTextContent("Geboren in 2009 = U18");
+    expect(document.body).toHaveTextContent(
+      "We hebben geen U18. Spelers van die leeftijd spelen bij de U19.",
+    );
+  });
+
+  it("adds the late-born note under a birth year with a regional team below", () => {
+    render(
+      <TeamCard result={forQuery("geboren in 2018")} nodes={TEAM_CARD_NODES} />,
+    );
+    expect(document.body).toHaveTextContent("Geboren in 2018");
+    expect(document.body).not.toHaveTextContent("We hebben geen");
+    expect(document.body).toHaveTextContent(
+      "Geboren tussen juli en december? Dan mag je kind ook in de U8 spelen",
+    );
+    expect(
+      screen.getByRole("link", { name: "Staf van U8 Wit" }),
+    ).toBeInTheDocument();
+  });
+
+  it("keeps one plain section when both birth years of an age land on one team", () => {
+    // 17: born 2009 (U18, so the U19) or 2008 (U19) — one match.
+    render(<TeamCard result={forQuery("17 jaar")} nodes={TEAM_CARD_NODES} />);
+    expect(document.body).toHaveTextContent("17 jaar");
+    expect(document.body).not.toHaveTextContent(
+      "hangt af van het geboortejaar",
+    );
+    expect(
+      screen.getByRole("link", { name: "Staf van U19" }),
+    ).toBeInTheDocument();
+  });
 });

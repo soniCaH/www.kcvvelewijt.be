@@ -239,6 +239,13 @@ describe("matchYouthTeams", () => {
     expect(run("pupillen")).toEqual({ bands: [], unmatchedNumber: false });
   });
 
+  it("an age past the youth fields matches nothing and is reported", () => {
+    expect(run("mijn zoon is 30 jaar")).toEqual({
+      bands: [],
+      unmatchedNumber: true,
+    });
+  });
+
   it("a number that matches nothing is reported", () => {
     expect(run("geboren in 1980")).toEqual({
       bands: [],
