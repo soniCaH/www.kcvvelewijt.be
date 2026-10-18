@@ -1080,6 +1080,23 @@ describe("HubSearch — the youth team card (#3558)", () => {
       expect.anything(),
     );
   });
+
+  it("fires organigram_team_not_found once per query, across a reopen and a trailing space", async () => {
+    renderWithTeams();
+    const input = typeQuery("geboren in 1980");
+    const notFound = () =>
+      vi
+        .mocked(trackEvent)
+        .mock.calls.filter(([name]) => name === "organigram_team_not_found");
+    await waitFor(() => expect(notFound()).toHaveLength(1));
+
+    fireEvent.keyDown(input, { key: "Escape" });
+    fireEvent.focus(input);
+    typeQuery("geboren in 1980 ");
+    await act(() => new Promise((r) => setTimeout(r, 250)));
+
+    expect(notFound()).toHaveLength(1);
+  });
 });
 
 describe('HubSearch — the AI "Bedoel je …?" fallback (#3559)', () => {

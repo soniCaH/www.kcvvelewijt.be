@@ -645,10 +645,14 @@ export function HubSearch({
     });
   }, [shownCardKey, shownCardKind, shownCardAges]);
   const teamNotFound = showResults && teamMatch?.unmatchedNumber === true;
+  // Keyed on the trimmed query like the card event: a reopen or a trailing
+  // space on the same query does not fire again.
+  const firedNotFoundRef = useRef<string | null>(null);
   useEffect(() => {
-    if (teamNotFound)
-      trackEvent("organigram_team_not_found", { query_kind: "number" });
-  }, [teamNotFound, debouncedValue]);
+    if (!teamNotFound || firedNotFoundRef.current === debouncedTrimmed) return;
+    firedNotFoundRef.current = debouncedTrimmed;
+    trackEvent("organigram_team_not_found", { query_kind: "number" });
+  }, [teamNotFound, debouncedTrimmed]);
 
   // Announce result state to screen readers when the listbox is open (S1).
   const statusMessage = !showResults
