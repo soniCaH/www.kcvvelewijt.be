@@ -18,6 +18,7 @@ import {
   TVJO_ROLE_CODE,
   YOUTH_COORDINATOR_ROLE_CODES,
 } from "@kcvv/api-contract";
+import { Button } from "@/components/design-system/Button";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { ArrowRight } from "@/lib/icons.redesign";
 import { ContactCard } from "@/components/hulp/HulpFinder/ContactCard";
@@ -55,6 +56,13 @@ function BandTitle({ label, match }: { label: string; match: YouthTeamMatch }) {
   );
 }
 
+/** The box for `roleCode` and its named holders; `null` when it is missing or vacant. */
+function filledBox(nodes: OrgChartNode[], roleCode: string) {
+  const node = nodes.find((n) => n.roleCode === roleCode);
+  const holders = node?.members.filter((m) => m.name?.trim()) ?? [];
+  return node && holders.length > 0 ? { node, holders } : null;
+}
+
 /** The holders of one box, as `<ContactCard>` rows; nothing when it is vacant. */
 function People({
   nodes,
@@ -63,9 +71,9 @@ function People({
   nodes: OrgChartNode[];
   roleCode: string;
 }) {
-  const node = nodes.find((n) => n.roleCode === roleCode);
-  const holders = node?.members.filter((m) => m.name?.trim()) ?? [];
-  if (!node || holders.length === 0) return null;
+  const box = filledBox(nodes, roleCode);
+  if (!box) return null;
+  const { node, holders } = box;
   return (
     <div className="mb-2 flex flex-col gap-2">
       {holders.map((m) => (
@@ -90,7 +98,8 @@ function StaffLinks({ teams }: { teams: YouthTeamSource[] }) {
       {teams.map((team) => (
         <Link
           key={team._id}
-          href={`/ploegen/${team.slug}#staf`}
+          // `#staf` exists only on a team page that lists staff.
+          href={`/ploegen/${team.slug}${team.hasStaff ? "#staf" : ""}`}
           className={STAFF_LINK_CLASS}
         >
           Staf van {teamDisplayName(team)}
@@ -105,7 +114,7 @@ function StaffLinks({ teams }: { teams: YouthTeamSource[] }) {
 function NextTeamUpHint({ match }: { match: YouthTeamMatch }) {
   if (!match.nextTeamUp) return null;
   return (
-    <p className="text-ink-muted mb-2.5 text-sm">
+    <p className="text-ink mb-2.5 text-sm">
       We hebben geen {code(match.requestedCategory)}. Spelers van die leeftijd
       spelen bij de {code(match.category)}.
     </p>
@@ -116,7 +125,9 @@ function LateBornNote({ match }: { match: YouthTeamMatch }) {
   const alt = match.lateBornAlternative;
   if (!alt) return null;
   return (
-    <div className="bg-warning-soft border-warm text-body-sm mt-3 border-l-4 px-3 py-2.5">
+    // A cream step, not `warning-soft`: the soft status tints belong to the
+    // Alert variants, and this is a note, not a warning (DESIGN.md → Manila).
+    <div className="bg-cream-soft text-ink text-body-sm mt-3 px-3 py-2.5">
       <p>
         Geboren tussen juli en december? Dan mag je kind ook in de{" "}
         <b>{code(alt.category)}</b> spelen — de coördinator beslist.
@@ -229,10 +240,14 @@ export function TeamCard({ result, nodes }: TeamCardProps) {
               <LateBornNote match={m} />
             </div>
           ))}
-          <h3 className={`${SECTION_HEADING_CLASS} border-ink-muted`}>
-            Voor alle jeugd
-          </h3>
-          <People nodes={nodes} roleCode={TVJO_ROLE_CODE} />
+          {filledBox(nodes, TVJO_ROLE_CODE) && (
+            <>
+              <h3 className={`${SECTION_HEADING_CLASS} border-ink-muted`}>
+                Voor alle jeugd
+              </h3>
+              <People nodes={nodes} roleCode={TVJO_ROLE_CODE} />
+            </>
+          )}
         </>
       ) : (
         <>
@@ -258,9 +273,6 @@ export interface TeamGuessCardProps {
   onAnswer: (answer: "yes" | "no") => void;
 }
 
-const ANSWER_BUTTON_CLASS =
-  "border-ink border-2 px-3.5 py-2 font-mono text-label-sm font-semibold uppercase transition-colors";
-
 /**
  * The AI fallback asks first (#3559): "Bedoel je deze ploeg?" with the pick's
  * band title. "Ja" opens `<TeamCard>` for it; "Nee" removes it.
@@ -274,22 +286,19 @@ export function TeamGuessCard({ result, onAnswer }: TeamGuessCardProps) {
       title={<BandTitle match={first} label={code(first.category)} />}
     >
       <div className="mt-1 flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => onAnswer("yes")}
-          className={`${ANSWER_BUTTON_CLASS} bg-ink text-cream hover:bg-jersey-deep`}
-        >
+        <Button type="button" size="sm" onClick={() => onAnswer("yes")}>
           Ja, toon contact
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          size="sm"
+          variant="ghost"
           onClick={() => onAnswer("no")}
-          className={`${ANSWER_BUTTON_CLASS} text-ink hover:bg-ink hover:text-cream bg-transparent`}
         >
           Nee
-        </button>
+        </Button>
       </div>
-      <p className="text-ink-muted mt-2 text-sm">
+      <p className="text-ink mt-2 text-sm">
         Niet zeker? Zoek op leeftijd, bv. “U9” of “geboren in 2018”.
       </p>
     </CardFrame>

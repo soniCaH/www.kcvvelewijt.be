@@ -18,6 +18,8 @@ export interface YouthTeamSource {
   /** PSD competition band (`kcvve-u16` carries `U17`) — read only for the band. */
   age: string;
   archived?: boolean | null;
+  /** The team page lists staff, so its `#staf` anchor exists. Read by `<TeamCard>` only. */
+  hasStaff?: boolean;
 }
 
 /** Which rule found the team — also the GA4 "found by" value. `ai` is a pick the parent confirmed (#3559). */
@@ -124,6 +126,11 @@ export function matchYouthTeams<T extends YouthTeamSource>(
    * client bundle that runs this matcher never ships Luxon (#3558).
    */
   seasonYear: number,
+  /**
+   * The calendar year now — an age names a birth year from it, not from the
+   * season: 8 in March 2027 is born 2019 or 2018, though the season is 2026.
+   */
+  calendarYear: number,
 ): YouthTeamMatchResult<T> {
   const parsed = teams
     .filter((t) => t.archived !== true)
@@ -167,7 +174,12 @@ export function matchYouthTeams<T extends YouthTeamSource>(
   };
 
   const byUCode = (): Draft[] =>
-    [...query.matchAll(/\bu\s?(\d{1,2})([a-z]*)\b/gi)].flatMap((m) => {
+    // A spaced `u 12` counts only at the end — else it is the polite "u" ("kan ik u 15 minuten bellen").
+    [
+      ...query.matchAll(
+        /\bu(?:|\s+(?=\d{1,2}[a-z]*[\s?!.]*$))(\d{1,2})([a-z]*)\b/gi,
+      ),
+    ].flatMap((m) => {
       const d = matchCategory("u-code", Number(m[1]), null);
       if (!d || d.nextTeamUp) return d ? [d] : [];
       // Narrow to `U10P` / `U8 wit` only when such a team exists; else keep the whole category.
@@ -201,15 +213,16 @@ export function matchYouthTeams<T extends YouthTeamSource>(
       return matchCategory("birth-year", seasonYear - born + 1, born) ?? [];
     });
 
-  // An age fits two birth years: 8 in 2026–27 is born 2018 (U9) or 2017 (U10).
+  // An age fits two birth years: 8 in October 2026 is born 2018 (U9) or 2017 (U10).
+  // A bare `is 8` counts only where the clause ends — "het is 10 uur" is a time.
   const byAge = (): Draft[] =>
     [
       ...query.matchAll(
-        /\b(\d{1,2})\s*-?\s*(?:jaar|jarige?)\b|\bis\s+(\d{1,2})\b/gi,
+        /\b(\d{1,2})\s*-?\s*(?:jaar|jarige?)\b|\bis\s+(\d{1,2})(?=\s*(?:$|[,;!?]|\.(?!\d)|(?:en|of|maar)\b))/gi,
       ),
     ].flatMap((m) => {
       const age = Number(m[1] ?? m[2]);
-      return [seasonYear - age, seasonYear - age - 1].flatMap(
+      return [calendarYear - age, calendarYear - age - 1].flatMap(
         (born) =>
           matchCategory("age", seasonYear - born + 1, born, {
             age,
@@ -278,8 +291,9 @@ export function aiTeamResult<T extends YouthTeamSource>(
   age: string,
   teams: readonly T[],
   seasonYear: number,
+  calendarYear: number,
 ): YouthTeamMatchResult<T> {
-  const result = matchYouthTeams(age, teams, seasonYear);
+  const result = matchYouthTeams(age, teams, seasonYear, calendarYear);
   return {
     ...result,
     bands: result.bands.map((band) => ({

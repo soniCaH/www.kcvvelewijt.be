@@ -44,7 +44,7 @@ const TEAMS: YouthTeamSource[] = [
 const NOW = new Date("2026-10-18T12:00:00Z");
 
 const run = (query: string, now = NOW) =>
-  matchYouthTeams(query, TEAMS, seasonStartYear(now));
+  matchYouthTeams(query, TEAMS, seasonStartYear(now), now.getFullYear());
 
 /** Flatten to `code: slug, slug` lines — readable in a failure diff. */
 const summary = (result: YouthTeamMatchResult) =>
@@ -132,6 +132,44 @@ describe("matchYouthTeams", () => {
     expect(matches.map((m) => m.age)).toEqual([8, 8]);
     // Late-born is a birth-year rule only.
     expect(matches.every((m) => m.lateBornAlternative === null)).toBe(true);
+  });
+
+  it("an age in spring reads the calendar year: 8 in March 2027 is born 2019 (U8) or 2018 (U9)", () => {
+    const result = run(
+      "mijn zoon is 8 jaar",
+      new Date("2027-03-15T12:00:00+01:00"),
+    );
+    expect(
+      result.bands.flatMap((b) =>
+        b.matches.map((m) => [m.category, m.birthYear]),
+      ),
+    ).toEqual([
+      [8, 2019],
+      [9, 2018],
+    ]);
+  });
+
+  it.each(["kan ik u 15 minuten bellen", "mag ik u 12 vragen stellen?"])(
+    'the polite "u" is no U-code: %j',
+    (query) => {
+      expect(run(query).bands).toEqual([]);
+    },
+  );
+
+  it('a spaced "u 12" still counts when it ends the query', () => {
+    expect(summary(run("vraag over de u 12?"))).toEqual(["U12: kcvve-u12"]);
+  });
+
+  it('"is <n>" is no age when a time or unit follows: "het is 10 uur"', () => {
+    expect(run("het is 10 uur").bands).toEqual([]);
+    expect(run("de training is 10.30").bands).toEqual([]);
+  });
+
+  it('"is <n>" still reads as an age when the clause ends: "mijn zoon is 8, wie..."', () => {
+    expect(summary(run("mijn zoon is 8, wie moet ik bellen?"))).toEqual([
+      "U9: kcvve-u9",
+      "U10: kcvve-u10, kcvve-u10p",
+    ]);
   });
 
   it('"8-jarige" reads as an age too', () => {
@@ -288,7 +326,12 @@ describe("the AI fallback's inputs (#3559)", () => {
   });
 
   it('builds the card for a confirmed pick, found by "ai"', () => {
-    const result = aiTeamResult("U9", TEAMS, seasonStartYear(NOW));
+    const result = aiTeamResult(
+      "U9",
+      TEAMS,
+      seasonStartYear(NOW),
+      NOW.getFullYear(),
+    );
     expect(result.bands).toHaveLength(1);
     expect(result.bands[0].band).toBe("Onderbouw");
     expect(result.bands[0].matches).toEqual([

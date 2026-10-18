@@ -30,6 +30,7 @@ import {
 import type { SemanticSearchResult } from "@/hooks/useSemanticSearch";
 import {
   TEAM_CARD_NODES,
+  TEAM_CARD_CALENDAR_YEAR,
   TEAM_CARD_SEASON_YEAR,
   TEAM_CARD_TEAMS,
   withoutHolder,
@@ -952,6 +953,7 @@ describe("HubSearch — the youth team card (#3558)", () => {
         youthTeamCard={{
           teams: TEAM_CARD_TEAMS,
           seasonYear: TEAM_CARD_SEASON_YEAR,
+          calendarYear: TEAM_CARD_CALENDAR_YEAR,
         }}
       />,
     );
@@ -996,8 +998,8 @@ describe("HubSearch — the youth team card (#3558)", () => {
       renderWithTeams();
       typeQuery(query);
 
-      // Past the 200ms people debounce and the 300ms team-guess one.
-      await act(() => new Promise((r) => setTimeout(r, 600)));
+      // Past the 200ms debounce the card and the team guess run on.
+      await act(() => new Promise((r) => setTimeout(r, 250)));
       expect(screen.getByTestId("hub-search-popup")).toBeInTheDocument();
       expect(screen.queryByRole("link", { name: /^Staf van/ })).toBeNull();
       expect(fetch).not.toHaveBeenCalled();
@@ -1034,6 +1036,34 @@ describe("HubSearch — the youth team card (#3558)", () => {
         { match_kind: "old-name", team_ages: "U12,U13" },
       ],
     ]);
+  });
+
+  it('shows no "Geen resultaten" under a card when no row matches, and the status names the card', async () => {
+    // The semantic lane has settled on this query, with no rows.
+    setSemantic({ results: [], executedQuery: "U12" });
+    renderWithTeams();
+    typeQuery("U12");
+
+    await screen.findByRole("heading", { name: "U12 · Middenbouw" });
+    expect(screen.queryByRole("option")).toBeNull();
+    expect(screen.queryByText(/Geen resultaten/)).toBeNull();
+    expect(screen.getByRole("status")).toHaveTextContent("Ploeg gevonden: U12");
+  });
+
+  it("fires organigram_team_card_shown once when the popup closes and reopens on the same card", async () => {
+    renderWithTeams();
+    const input = typeQuery("U12");
+    await screen.findByRole("heading", { name: "U12 · Middenbouw" });
+
+    fireEvent.keyDown(input, { key: "Escape" });
+    expect(screen.queryByTestId("hub-search-popup")).toBeNull();
+    fireEvent.focus(input);
+    await screen.findByRole("heading", { name: "U12 · Middenbouw" });
+
+    const shown = vi
+      .mocked(trackEvent)
+      .mock.calls.filter(([name]) => name === "organigram_team_card_shown");
+    expect(shown).toHaveLength(1);
   });
 
   it("fires organigram_team_not_found when the query held a number but matched nothing", async () => {
@@ -1083,13 +1113,13 @@ describe('HubSearch — the AI "Bedoel je …?" fallback (#3559)', () => {
         youthTeamCard={{
           teams: TEAM_CARD_TEAMS,
           seasonYear: TEAM_CARD_SEASON_YEAR,
+          calendarYear: TEAM_CARD_CALENDAR_YEAR,
         }}
       />,
     );
   }
 
-  // Past the 200ms people debounce plus the 300ms team-guess one.
-  const settle = () => act(() => new Promise((r) => setTimeout(r, 550)));
+  const settle = () => act(() => new Promise((r) => setTimeout(r, 250)));
 
   it("makes no BFF call when the rules already found the team", async () => {
     renderWithTeams();
@@ -1128,14 +1158,16 @@ describe('HubSearch — the AI "Bedoel je …?" fallback (#3559)', () => {
     );
   });
 
-  it("waits the semantic-search debounce before asking", async () => {
+  it('shows no "Geen resultaten" under the question, and the status asks it', async () => {
+    setSemantic({ executedQuery: "mijn zoon speelt bij de pupillen" });
     renderWithTeams();
     typeQuery("mijn zoon speelt bij de pupillen");
 
-    // The people debounce (200ms) has passed; the 300ms guess one has not.
-    await act(() => new Promise((r) => setTimeout(r, 300)));
-    expect(guessCalls()).toHaveLength(0);
-    await waitFor(() => expect(guessCalls()).toHaveLength(1));
+    await screen.findByRole("button", { name: "Nee" });
+    expect(screen.queryByText(/Geen resultaten/)).toBeNull();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Bedoel je deze ploeg?",
+    );
   });
 
   it("fires organigram_team_guess_answered once on a double tap", async () => {

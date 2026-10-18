@@ -111,6 +111,8 @@ export interface YouthTeamCardData {
   teams: YouthTeamSource[];
   /** Start year of the current season (`seasonStartYear`). */
   seasonYear: number;
+  /** The calendar year now — ages read birth years from it, not from the season. */
+  calendarYear: number;
 }
 
 /** A light contact label for the answer-forward card (no resolveContact dep). */
@@ -410,6 +412,7 @@ export function HubSearch({
             debouncedTrimmed,
             youthTeamCard.teams,
             youthTeamCard.seasonYear,
+            youthTeamCard.calendarYear,
           )
         : null,
     [debouncedTrimmed, youthTeamCard],
@@ -440,6 +443,7 @@ export function HubSearch({
             liveGuess.age,
             youthTeamCard.teams,
             youthTeamCard.seasonYear,
+            youthTeamCard.calendarYear,
           )
         : null,
     [liveGuess, youthTeamCard],
@@ -464,10 +468,8 @@ export function HubSearch({
   };
   const teamMatch = answered === "yes" ? guessResult : rulesMatch;
   const askGuess = answered === null ? guessResult : null;
-  const teamCardMatches = useMemo(
-    () => teamMatch?.bands.flatMap((band) => band.matches) ?? [],
-    [teamMatch],
-  );
+  const teamCardMatches =
+    teamMatch?.bands.flatMap((band) => band.matches) ?? [];
 
   const rows: HubSearchResult[] = interleaveResults(
     memberResults,
@@ -624,21 +626,24 @@ export function HubSearch({
   };
 
   // `organigram_` events (#3558) — kind and U-codes only, never the query or a
-  // birth year. Keyed on what is shown, so each distinct card fires once; the
+  // birth year. Keyed on the query and the card, so each distinct card fires
+  // once — closing and reopening the popup on it does not fire again; the
   // hidden instance's `showResults` is false, so the two mounts never both fire.
   const shownCardKind =
     showResults && teamCardMatches.length > 0 ? teamCardMatches[0].kind : null;
-  const shownCardAges = useMemo(
-    () => teamCardMatches.map((m) => `U${m.category}`).join(","),
-    [teamCardMatches],
-  );
+  const shownCardAges = teamCardMatches.map((m) => `U${m.category}`).join(",");
+  const shownCardKey = shownCardKind
+    ? `${debouncedTrimmed}|${shownCardKind}|${shownCardAges}`
+    : null;
+  const firedCardKeyRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!shownCardKind) return;
+    if (!shownCardKind || firedCardKeyRef.current === shownCardKey) return;
+    firedCardKeyRef.current = shownCardKey;
     trackEvent("organigram_team_card_shown", {
       match_kind: shownCardKind,
       team_ages: shownCardAges,
     });
-  }, [shownCardKind, shownCardAges]);
+  }, [shownCardKey, shownCardKind, shownCardAges]);
   const teamNotFound = showResults && teamMatch?.unmatchedNumber === true;
   useEffect(() => {
     if (teamNotFound)
@@ -654,7 +659,11 @@ export function HubSearch({
         "Bezig met zoeken…"
       : items.length > 0
         ? `${items.length} ${items.length === 1 ? "resultaat" : "resultaten"}`
-        : "Geen resultaten";
+        : teamCardMatches.length > 0
+          ? `Ploeg gevonden: ${shownCardAges.replaceAll(",", ", ")}`
+          : askGuess
+            ? "Bedoel je deze ploeg?"
+            : "Geen resultaten";
 
   // #2478 rule 5 addendum: the `nav` instance sits in a section nav's chip
   // row (<OrganigramSectionNav>) and takes the light chip's exact paper
@@ -959,7 +968,8 @@ export function HubSearch({
                 )}
               </div>
             </>
-          ) : (
+          ) : teamCardMatches.length > 0 || askGuess ? null : (
+            // The card (or its question) above is the answer — no dead end under it.
             <>
               <div className="px-4 py-6 text-center">
                 <p className="text-ink text-sm">

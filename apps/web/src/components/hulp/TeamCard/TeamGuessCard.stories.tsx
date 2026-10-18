@@ -2,7 +2,11 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fn } from "storybook/test";
 import { aiTeamResult } from "@/lib/utils/match-youth-team";
 import { TeamGuessCard } from "./TeamCard";
-import { TEAM_CARD_SEASON_YEAR, TEAM_CARD_TEAMS } from "./team-card.fixture";
+import {
+  TEAM_CARD_CALENDAR_YEAR,
+  TEAM_CARD_SEASON_YEAR,
+  TEAM_CARD_TEAMS,
+} from "./team-card.fixture";
 
 /**
  * The AI fallback asks first (#3559): "mijn zoon speelt bij de pupillen" — the
@@ -13,12 +17,17 @@ const meta = {
   component: TeamGuessCard,
   parameters: { layout: "centered" },
   args: {
-    result: aiTeamResult("U9", TEAM_CARD_TEAMS, TEAM_CARD_SEASON_YEAR),
+    result: aiTeamResult(
+      "U9",
+      TEAM_CARD_TEAMS,
+      TEAM_CARD_SEASON_YEAR,
+      TEAM_CARD_CALENDAR_YEAR,
+    ),
     onAnswer: fn(),
   },
   decorators: [
     (Story) => (
-      <div className="bg-cream w-[420px] max-w-full p-4">
+      <div className="bg-cream w-[min(420px,calc(100vw-2rem))] p-4">
         <Story />
       </div>
     ),

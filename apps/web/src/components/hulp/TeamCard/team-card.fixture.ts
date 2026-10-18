@@ -8,6 +8,7 @@ const team = (slug: string, age: string): YouthTeamSource => ({
   slug,
   name: slug,
   age,
+  hasStaff: true,
 });
 
 /** A roster shaped like production (2026–27). `kcvve-u16` carries PSD age U17. */
@@ -34,6 +35,8 @@ export const TEAM_CARD_TEAMS: YouthTeamSource[] = [
 
 /** Season 2026–27. */
 export const TEAM_CARD_SEASON_YEAR = 2026;
+/** Autumn 2026, so an age reads the same birth years as the season. */
+export const TEAM_CARD_CALENDAR_YEAR = 2026;
 
 const node = (
   roleCode: string,

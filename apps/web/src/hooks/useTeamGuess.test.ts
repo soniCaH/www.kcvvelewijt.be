@@ -1,13 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useTeamGuess } from "./useTeamGuess";
-import { SEMANTIC_SEARCH_DEBOUNCE_MS } from "./useSemanticSearch";
 
 const AGES = ["U8", "U9", "U10"];
 
-/** Past the debounce, then let the fetch promise chain settle. */
-const pastDebounce = () =>
-  act(() => vi.advanceTimersByTimeAsync(SEMANTIC_SEARCH_DEBOUNCE_MS));
+/** Let the fetch promise chain settle. */
+const settle = () => act(() => vi.advanceTimersByTimeAsync(0));
 
 const guessCalls = () =>
   vi
@@ -32,47 +30,27 @@ describe("useTeamGuess", () => {
 
   it("returns no guess initially, and asks nothing for a null query", async () => {
     const { result } = renderHook(() => useTeamGuess(null, AGES));
-    await pastDebounce();
+    await settle();
     expect(result.current).toBeNull();
     expect(fetch).not.toHaveBeenCalled();
   });
 
   it("asks nothing without ages", async () => {
     renderHook(() => useTeamGuess("mijn zoon", []));
-    await pastDebounce();
+    await settle();
     expect(fetch).not.toHaveBeenCalled();
   });
 
-  it("asks with the query and the ages after the semantic-search debounce", async () => {
+  it("asks with the query and the ages", async () => {
     const { result } = renderHook(() => useTeamGuess("mijn zoon", AGES));
 
-    await act(() =>
-      vi.advanceTimersByTimeAsync(SEMANTIC_SEARCH_DEBOUNCE_MS - 1),
-    );
-    expect(fetch).not.toHaveBeenCalled();
-
-    await act(() => vi.advanceTimersByTimeAsync(1));
+    await settle();
     expect(guessCalls()).toHaveLength(1);
     expect(JSON.parse(String(guessCalls()[0][1]?.body))).toEqual({
       query: "mijn zoon",
       ages: AGES,
     });
     expect(result.current).toEqual({ query: "mijn zoon", age: "U9" });
-  });
-
-  it("asks once for the last query when it changes inside the debounce", async () => {
-    const { rerender } = renderHook(
-      ({ query }: { query: string }) => useTeamGuess(query, AGES),
-      { initialProps: { query: "mijn" } },
-    );
-    await act(() => vi.advanceTimersByTimeAsync(100));
-    rerender({ query: "mijn zoon" });
-    await pastDebounce();
-
-    expect(guessCalls()).toHaveLength(1);
-    expect(JSON.parse(String(guessCalls()[0][1]?.body)).query).toBe(
-      "mijn zoon",
-    );
   });
 
   it("aborts the request in flight when the query changes", async () => {
@@ -91,9 +69,9 @@ describe("useTeamGuess", () => {
       ({ query }: { query: string }) => useTeamGuess(query, AGES),
       { initialProps: { query: "mijn zoon" } },
     );
-    await pastDebounce();
+    await settle();
     rerender({ query: "mijn dochter" });
-    await pastDebounce();
+    await settle();
 
     expect(firstSignal?.aborted).toBe(true);
     expect(warn).not.toHaveBeenCalled();
@@ -103,7 +81,7 @@ describe("useTeamGuess", () => {
   it("leaves no guess when the AI found none", async () => {
     vi.mocked(fetch).mockResolvedValueOnce(Response.json({ age: null }));
     const { result } = renderHook(() => useTeamGuess("mijn zoon", AGES));
-    await pastDebounce();
+    await settle();
     expect(guessCalls()).toHaveLength(1);
     expect(result.current).toBeNull();
   });
@@ -113,7 +91,7 @@ describe("useTeamGuess", () => {
       Response.json({ error: "Too many searches" }, { status: 429 }),
     );
     const { result } = renderHook(() => useTeamGuess("mijn zoon", AGES));
-    await pastDebounce();
+    await settle();
     expect(result.current).toBeNull();
   });
 
@@ -124,7 +102,7 @@ describe("useTeamGuess", () => {
     vi.mocked(fetch).mockRejectedValueOnce(networkError);
 
     const { result } = renderHook(() => useTeamGuess("mijn zoon", AGES));
-    await pastDebounce();
+    await settle();
 
     expect(result.current).toBeNull();
     expect(warn).toHaveBeenCalledWith(
@@ -132,12 +110,5 @@ describe("useTeamGuess", () => {
       networkError,
     );
     expect(error).not.toHaveBeenCalled();
-  });
-
-  it("asks nothing after unmount inside the debounce", async () => {
-    const { unmount } = renderHook(() => useTeamGuess("mijn zoon", AGES));
-    unmount();
-    await pastDebounce();
-    expect(fetch).not.toHaveBeenCalled();
   });
 });

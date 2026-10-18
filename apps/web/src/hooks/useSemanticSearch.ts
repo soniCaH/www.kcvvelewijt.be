@@ -11,9 +11,6 @@ export interface SemanticSearchResult {
   excerpt: string;
 }
 
-/** The search box's debounce before a BFF call — also the team guess's (#3559). */
-export const SEMANTIC_SEARCH_DEBOUNCE_MS = 300;
-
 interface UseSemanticSearchOptions {
   type?: "responsibility" | "article" | "general";
   limit?: number;
@@ -64,7 +61,7 @@ export interface UseSemanticSearchReturn {
 export function useSemanticSearch(
   options: UseSemanticSearchOptions = {},
 ): UseSemanticSearchReturn {
-  const { type, limit = 5, debounceMs = SEMANTIC_SEARCH_DEBOUNCE_MS } = options;
+  const { type, limit = 5, debounceMs = 300 } = options;
   const [results, setResults] = useState<SemanticSearchResult[]>([]);
   const [answer, setAnswer] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(false);

@@ -94,32 +94,37 @@ export default async function HulpHubPage() {
 
   // Context read: the youth team card (#3558) is an extra above the search
   // results, so a failed read only drops the card. The coordinator and TVJO
-  // boxes it shows are already in `members` (by `roleCode`).
+  // boxes it shows are already in `members` (by `roleCode`). The landing read
+  // carries each team's staff, so a "Staf van …" link only aims at `#staf`
+  // where the team page renders that section.
   const teams = await runPromise(
     degradeSection(
       Effect.gen(function* () {
         const teamRepo = yield* TeamRepository;
-        return yield* teamRepo.findAll();
+        return yield* teamRepo.findAllForLanding();
       }),
       [],
       "[HulpHubPage] failed to load youth teams — no team card",
     ),
   );
+  const now = new Date();
   const youthTeamCard = {
     teams: teams.flatMap((t) =>
       t.age && isAgeCode(t.age)
         ? [
             {
-              _id: t.id,
+              _id: t._id,
               slug: t.slug,
               name: t.name,
               displayName: t.displayName,
               age: t.age,
+              hasStaff: (t.staff?.length ?? 0) > 0,
             },
           ]
         : [],
     ),
-    seasonYear: seasonStartYear(new Date()),
+    seasonYear: seasonStartYear(now),
+    calendarYear: now.getFullYear(),
   };
 
   const structureIndex = deriveStructureIndex(members);
