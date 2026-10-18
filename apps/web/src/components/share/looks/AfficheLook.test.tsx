@@ -21,10 +21,10 @@ const RECAP: ShareItem = {
   },
 };
 
-const draw = (coverMode: CoverMode) =>
+const draw = (coverMode: CoverMode, item: ShareItem = RECAP) =>
   render(
     <AfficheLook
-      content={buildArticleContent(RECAP, fieldsOf(RECAP))}
+      content={buildArticleContent(item, fieldsOf(item))}
       format="story"
       theme="licht"
       wash="normaal"
@@ -50,7 +50,24 @@ describe("AfficheLook", () => {
     expect(cover!.style.filter).not.toContain("blur");
   });
 
-  it("a match report draws the final-whistle detail", () => {
+  it("a match report draws the final-whistle detail; a preview draws vs.", () => {
     expect(draw("foto").textContent).toContain("Eindsignaal");
+    expect(
+      draw("foto", { ...RECAP, type: "matchPreview" }).textContent,
+    ).toContain("vs.");
+  });
+
+  it("a longer title steps down in size, so it never runs off the canvas", () => {
+    const titleSize = (length: number) => {
+      const text = "x".repeat(length);
+      const item = { ...RECAP, title: text, spans: [{ text, accent: false }] };
+      const el = Array.from(
+        draw("foto", item).querySelectorAll<HTMLElement>("[style]"),
+      ).find((n) => n.style.fontSize && n.textContent === text)!;
+      return parseFloat(el.style.fontSize);
+    };
+    const sizes = [20, 40, 60, 90].map(titleSize);
+    expect(sizes).toEqual([...sizes].sort((a, b) => b - a));
+    expect(new Set(sizes).size).toBe(4);
   });
 });

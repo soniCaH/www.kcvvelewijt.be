@@ -1350,6 +1350,38 @@ describe("SharePage", () => {
       expect(screen.getByLabelText("Titel")).toHaveValue("Ander nieuws");
     });
 
+    it("a deep link to another article than the stored one starts a new story", async () => {
+      const user = userEvent.setup();
+      const { unmount } = renderTool();
+      await pickNews(user, NEWS);
+      await openTab(user, "Tekst");
+      await user.type(screen.getByLabelText("Titel"), "!");
+      unmount();
+
+      render(
+        <SharePage
+          matches={MATCHES}
+          players={PLAYERS}
+          articles={[NEWS, OTHER_NEWS]}
+          initial={{ kind: "article", item: OTHER_NEWS }}
+        />,
+      );
+      await openTab(user, "Tekst");
+      expect(screen.getByLabelText("Titel")).toHaveValue("Ander nieuws");
+    });
+
+    it("Stemming reaches the stored story", async () => {
+      const user = userEvent.setup();
+      renderTool();
+      await pickMoment(user, "Eindstand");
+      await openTab(user, "Tekst");
+      await user.click(screen.getByRole("button", { name: "Verloren" }));
+      expect(pressed("Verloren")).toBe("true");
+      expect(JSON.parse(localStorage.getItem(KEY)!).story.match.mood).toBe(
+        "loss",
+      );
+    });
+
     it("the next Brussels day starts a new story but keeps the look", async () => {
       vi.useFakeTimers({ toFake: ["Date"] });
       vi.setSystemTime(new Date("2026-10-17T21:30:00Z")); // 23:30 in Brussels

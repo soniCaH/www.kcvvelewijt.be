@@ -1125,10 +1125,6 @@ function ShareTool({
 
   /** The PNG of the story on screen: two captures, the first thrown away. */
   const capture = async (node: HTMLDivElement): Promise<Blob> => {
-    // The drag outline belongs to the screen, never to the PNG.
-    node
-      .querySelectorAll<HTMLElement>("[data-dragging]")
-      .forEach((el) => delete el.dataset.dragging);
     const opts = {
       width: captureWidth,
       height: captureHeight,
