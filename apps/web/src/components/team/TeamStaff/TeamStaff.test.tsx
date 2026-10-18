@@ -62,6 +62,12 @@ describe("resolveFunctionLabel", () => {
     expect(resolveFunctionLabel(null, null)).toBeNull();
   });
 
+  it("treats the 'andere' role like an empty one (#3560)", () => {
+    expect(resolveFunctionLabel("Verzorger", "andere")).toBe("Verzorger");
+    expect(resolveFunctionLabel(null, "andere")).toBeNull();
+    expect(resolveFunctionLabel(undefined, "Andere")).toBeNull();
+  });
+
   it("prefers functionTitle over role bucket", () => {
     expect(resolveFunctionLabel("T1", "afgevaardigde")).toBe("T1");
   });
