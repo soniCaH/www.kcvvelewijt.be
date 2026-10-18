@@ -1,5 +1,4 @@
 import { describe, it, expect } from "vitest";
-import { getYouthDivision } from "./group-teams";
 import {
   matchYouthTeams,
   type YouthTeamMatchResult,
@@ -87,11 +86,13 @@ describe("matchYouthTeams", () => {
   it('"U10P" → only U10P; a bare "U10" → U10 and U10P', () => {
     expect(summary(run("U10P"))).toEqual(["U10: kcvve-u10p"]);
     expect(summary(run("u10"))).toEqual(["U10: kcvve-u10, kcvve-u10p"]);
-    expect(run("U10P").bands[0].band).toBe(getYouthDivision("U10"));
+    expect(run("U10P").bands[0].band).toBe("Middenbouw");
   });
 
   it('"U16" hits the U16 team by its slug, though PSD gives it age U17', () => {
-    expect(summary(run("U16"))).toEqual(["U16: kcvve-u16"]);
+    const result = run("U16");
+    expect(summary(result)).toEqual(["U16: kcvve-u16"]);
+    expect(result.bands[0].band).toBe("Bovenbouw");
   });
 
   it('"miniemen" → U12 and U13 by old name', () => {
@@ -117,7 +118,7 @@ describe("matchYouthTeams", () => {
       matches.map((m) => [m.category, m.birthYear, m.kind, m.band]),
     ).toEqual([
       [9, 2018, "age", "Onderbouw"],
-      [10, 2017, "age", getYouthDivision("U10")],
+      [10, 2017, "age", "Middenbouw"],
     ]);
     // Late-born is a birth-year rule only.
     expect(matches.every((m) => m.lateBornAlternative === null)).toBe(true);
