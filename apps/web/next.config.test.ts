@@ -75,9 +75,6 @@ describe("next.config redirects", () => {
     const redirects = await nextConfig.redirects!();
 
     const expected = [
-      // #3014 — `/club/cashless` renders its CMS page again; the sub-path
-      // lands on it.
-      { source: "/club/cashless/voorwaarden", destination: "/club/cashless" },
       { source: "/kiosk", destination: "/kalender" },
       { source: "/kiosk/:path*", destination: "/kalender" },
     ];
@@ -97,6 +94,8 @@ describe("next.config redirects", () => {
     // hub; a redirect here sends the visitor back to the page they left.
     expect(sources).not.toContain("/club/downloads");
     expect(sources).not.toContain("/club/cashless");
+    // #3569 — the terms are their own CMS page now, no longer a 308 to the hub.
+    expect(sources).not.toContain("/club/cashless/voorwaarden");
   });
 
   it("sends the printed /ongeval QR code to the accident path with 307 (#3014)", async () => {

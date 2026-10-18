@@ -328,13 +328,9 @@ const nextConfig: NextConfig = {
         permanent: false,
       },
       // #2227 (SEO-9) — retired Gatsby routes with no direct equivalent →
-      // nearest live page (owner decision on the issue). `/club/cashless` and
-      // `/club/downloads` are NOT retired: both render their CMS page (#3014).
-      {
-        source: "/club/cashless/voorwaarden",
-        destination: "/club/cashless",
-        permanent: true,
-      },
+      // nearest live page (owner decision on the issue). `/club/cashless`,
+      // `/club/cashless/voorwaarden` (#3569) and `/club/downloads` are NOT
+      // retired: each renders its CMS page (#3014).
       // Internal kiosk displays (a, b, previous, upcoming, ranking/*) → calendar.
       {
         source: "/kiosk",
