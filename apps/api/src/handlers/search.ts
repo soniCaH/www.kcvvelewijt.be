@@ -39,10 +39,14 @@ export const searchCacheKey = (request: typeof SearchRequest.Type) =>
   );
 
 /** Cache key of one team guess (#3559): the team list is part of the digest,
- * so a new season's teams never get last season's pick. */
+ * so a new season's teams never get last season's pick. Sorted and deduped
+ * here, so the key never depends on how the client ordered them. */
 export const teamGuessCacheKey = (request: typeof TeamGuessRequest.Type) =>
   Effect.map(
-    queryDigest(request.query, `${request.ages.join(",")}|`),
+    queryDigest(
+      request.query,
+      `${[...new Set(request.ages)].sort().join(",")}|`,
+    ),
     (hex) => `teamguess:v1:${hex}`,
   );
 

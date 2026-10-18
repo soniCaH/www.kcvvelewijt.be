@@ -272,12 +272,20 @@ describe("the AI fallback's inputs (#3559)", () => {
     expect(hasYouthHint(query)).toBe(true);
   });
 
-  it.each(["kantine", "wie is de voorzitter", "lidgeld betalen"])(
-    "hears no youth hint in %j",
-    (query) => {
-      expect(hasYouthHint(query)).toBe(false);
-    },
-  );
+  it.each([
+    "kantine",
+    "wie is de voorzitter",
+    "lidgeld betalen",
+    // Senior teams — `ploeg` alone would let these through (#3420 mock: "A-ploeg → no card").
+    "A-ploeg",
+    "B-ploeg",
+    "a ploeg",
+    "eerste ploeg",
+    "reserven",
+    "mijn zoon speelt bij de reserven",
+  ])("hears no youth hint in %j", (query) => {
+    expect(hasYouthHint(query)).toBe(false);
+  });
 
   it('builds the card for a confirmed pick, found by "ai"', () => {
     const result = aiTeamResult("U9", TEAMS, seasonStartYear(NOW));

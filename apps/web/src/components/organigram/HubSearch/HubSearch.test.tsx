@@ -56,7 +56,8 @@ const mockSemantic: {
   search: vi.fn(),
   clear: vi.fn(),
 };
-vi.mock("@/hooks/useSemanticSearch", () => ({
+vi.mock("@/hooks/useSemanticSearch", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/hooks/useSemanticSearch")>()),
   useSemanticSearch: () => mockSemantic,
 }));
 
@@ -941,14 +942,6 @@ describe("HubSearch — the youth team card (#3558)", () => {
       error: false,
       executedQuery: "",
     });
-    // "A-ploeg" holds a youth hint word, so the AI fallback (#3559) asks.
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => Response.json({ age: null })),
-    );
-  });
-  afterEach(() => {
-    vi.unstubAllGlobals();
   });
 
   function renderWithTeams(nodes = TEAM_CARD_NODES) {
@@ -956,8 +949,10 @@ describe("HubSearch — the youth team card (#3558)", () => {
       <HubSearch
         members={[...HUB_SEARCH_MEMBERS, ...nodes]}
         responsibilityPaths={HUB_SEARCH_PATHS}
-        youthTeams={TEAM_CARD_TEAMS}
-        seasonYear={TEAM_CARD_SEASON_YEAR}
+        youthTeamCard={{
+          teams: TEAM_CARD_TEAMS,
+          seasonYear: TEAM_CARD_SEASON_YEAR,
+        }}
       />,
     );
   }
@@ -991,7 +986,25 @@ describe("HubSearch — the youth team card (#3558)", () => {
     expect(card).toHaveTextContent("Tom Verhaegen");
   });
 
-  it('shows no card for "A-ploeg"', async () => {
+  it.each(["A-ploeg", "B-ploeg", "eerste ploeg", "reserven"])(
+    "shows no card for %j, and never asks the AI",
+    async (query) => {
+      vi.stubGlobal("fetch", vi.fn());
+      onTestFinished(() => {
+        vi.unstubAllGlobals();
+      });
+      renderWithTeams();
+      typeQuery(query);
+
+      // Past the 200ms people debounce and the 300ms team-guess one.
+      await act(() => new Promise((r) => setTimeout(r, 600)));
+      expect(screen.getByTestId("hub-search-popup")).toBeInTheDocument();
+      expect(screen.queryByRole("link", { name: /^Staf van/ })).toBeNull();
+      expect(fetch).not.toHaveBeenCalled();
+    },
+  );
+
+  it('reports no "not found" for "A-ploeg"', async () => {
     renderWithTeams();
     typeQuery("A-ploeg");
 
@@ -1067,13 +1080,16 @@ describe('HubSearch — the AI "Bedoel je …?" fallback (#3559)', () => {
       <HubSearch
         members={[...HUB_SEARCH_MEMBERS, ...TEAM_CARD_NODES]}
         responsibilityPaths={HUB_SEARCH_PATHS}
-        youthTeams={TEAM_CARD_TEAMS}
-        seasonYear={TEAM_CARD_SEASON_YEAR}
+        youthTeamCard={{
+          teams: TEAM_CARD_TEAMS,
+          seasonYear: TEAM_CARD_SEASON_YEAR,
+        }}
       />,
     );
   }
 
-  const settle = () => act(() => new Promise((r) => setTimeout(r, 250)));
+  // Past the 200ms people debounce plus the 300ms team-guess one.
+  const settle = () => act(() => new Promise((r) => setTimeout(r, 550)));
 
   it("makes no BFF call when the rules already found the team", async () => {
     renderWithTeams();
@@ -1110,6 +1126,32 @@ describe('HubSearch — the AI "Bedoel je …?" fallback (#3559)', () => {
       "organigram_team_card_shown",
       expect.anything(),
     );
+  });
+
+  it("waits the semantic-search debounce before asking", async () => {
+    renderWithTeams();
+    typeQuery("mijn zoon speelt bij de pupillen");
+
+    // The people debounce (200ms) has passed; the 300ms guess one has not.
+    await act(() => new Promise((r) => setTimeout(r, 300)));
+    expect(guessCalls()).toHaveLength(0);
+    await waitFor(() => expect(guessCalls()).toHaveLength(1));
+  });
+
+  it("fires organigram_team_guess_answered once on a double tap", async () => {
+    renderWithTeams();
+    typeQuery("mijn zoon speelt bij de pupillen");
+
+    const yes = await screen.findByRole("button", { name: "Ja, toon contact" });
+    act(() => {
+      yes.click();
+      yes.click();
+    });
+
+    const answered = vi
+      .mocked(trackEvent)
+      .mock.calls.filter(([name]) => name === "organigram_team_guess_answered");
+    expect(answered).toHaveLength(1);
   });
 
   it('"Ja" opens the normal team card, found by "ai"', async () => {

@@ -1,5 +1,9 @@
 import { createClient } from "@sanity/client";
 import { Context, Effect, Layer } from "effect";
+import {
+  TVJO_ROLE_CODE,
+  YOUTH_COORDINATOR_ROLE_CODES,
+} from "@kcvv/api-contract";
 import { WorkerEnvTag } from "../env";
 import type { PlayerImageState, StaffImageState } from "./types";
 import { sanityClientConfig } from "./config";
@@ -50,7 +54,10 @@ export interface StaffGaps {
 }
 
 /** Organigram role codes the weekly nudge expects to be filled (#3420 Q9). */
-export const COORDINATOR_ROLE_CODES = ["TVJO", "JC-OB", "JC-MB", "JC-BB"];
+export const COORDINATOR_ROLE_CODES = [
+  TVJO_ROLE_CODE,
+  ...Object.values(YOUTH_COORDINATOR_ROLE_CODES),
+];
 
 const ACTIVE_PSD_TEAM = `_type == "team" && archived != true && defined(psdId) && psdId != ""`;
 

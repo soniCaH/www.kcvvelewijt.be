@@ -129,14 +129,15 @@ export function matchYouthTeams<T extends YouthTeamSource>(
     .filter((t) => t.archived !== true)
     .map(parseTeam)
     .filter((p): p is ParsedTeam<T> => p != null);
-  const at = (category: number) =>
+  const teamsIn = (category: number) =>
     parsed.filter((p) => p.category === category);
 
   type Draft = Omit<YouthTeamMatch<T>, "band" | "teams"> & {
     teams: ParsedTeam<T>[];
   };
 
-  const draft = (
+  /** The match for an asked category — or the next one up the club fields; `null` when none. */
+  const matchCategory = (
     kind: YouthTeamMatchKind,
     category: number,
     birthYear: number | null,
@@ -144,16 +145,16 @@ export function matchYouthTeams<T extends YouthTeamSource>(
   ): Draft | null => {
     if (category < MIN_CATEGORY || category > MAX_CATEGORY) return null;
     let found = category;
-    while (found <= MAX_CATEGORY && at(found).length === 0) found++;
+    while (found <= MAX_CATEGORY && teamsIn(found).length === 0) found++;
     if (found > MAX_CATEGORY) return null;
     const lower =
       kind === "birth-year" && category <= LATE_BORN_MAX_CATEGORY
-        ? at(category - 1).filter((p) => p.regional)
+        ? teamsIn(category - 1).filter((p) => p.regional)
         : [];
     return {
       kind,
       category: found,
-      teams: at(found),
+      teams: teamsIn(found),
       birthYear,
       nextTeamUp: found !== category,
       requestedCategory: category,
@@ -167,7 +168,7 @@ export function matchYouthTeams<T extends YouthTeamSource>(
 
   const byUCode = (): Draft[] =>
     [...query.matchAll(/\bu\s?(\d{1,2})([a-z]*)\b/gi)].flatMap((m) => {
-      const d = draft("u-code", Number(m[1]), null);
+      const d = matchCategory("u-code", Number(m[1]), null);
       if (!d || d.nextTeamUp) return d ? [d] : [];
       // Narrow to `U10P` / `U8 wit` only when such a team exists; else keep the whole category.
       const suffix = m[2].toLowerCase();
@@ -187,16 +188,17 @@ export function matchYouthTeams<T extends YouthTeamSource>(
       const oldName = query.match(re)?.[0].toLowerCase();
       if (!oldName) return [];
       return Array.from({ length: to - from + 1 }, (_, i) => from + i)
-        .filter((c) => at(c).length > 0)
+        .filter((c) => teamsIn(c).length > 0)
         .flatMap(
-          (c) => draft("old-name", c, null, { age: null, oldName }) ?? [],
+          (c) =>
+            matchCategory("old-name", c, null, { age: null, oldName }) ?? [],
         );
     });
 
   const byBirthYear = (): Draft[] =>
     [...query.matchAll(/\b((?:19|20)\d{2})\b/g)].flatMap((m) => {
       const born = Number(m[1]);
-      return draft("birth-year", seasonYear - born + 1, born) ?? [];
+      return matchCategory("birth-year", seasonYear - born + 1, born) ?? [];
     });
 
   // An age fits two birth years: 8 in 2026–27 is born 2018 (U9) or 2017 (U10).
@@ -209,8 +211,10 @@ export function matchYouthTeams<T extends YouthTeamSource>(
       const age = Number(m[1] ?? m[2]);
       return [seasonYear - age, seasonYear - age - 1].flatMap(
         (born) =>
-          draft("age", seasonYear - born + 1, born, { age, oldName: null }) ??
-          [],
+          matchCategory("age", seasonYear - born + 1, born, {
+            age,
+            oldName: null,
+          }) ?? [],
       );
     });
 
@@ -252,13 +256,20 @@ export function youthTeamAges(teams: readonly YouthTeamSource[]): string[] {
   return [...categories].sort((a, b) => a - b).map((c) => `U${c}`);
 }
 
+/** Senior teams: `A-ploeg`, `B ploeg`, `eerste ploeg`, `reserven` — never a youth card (#3420 mock). */
+const SENIOR_TEAM = /\b(?:[ab]\s*-?\s*ploeg|eerste\s+ploeg|reserve)/i;
+
 /**
  * Whether a query the rules missed is worth one AI try (#3559): it speaks of a
- * child or a youth team. Prefixes, so `dochtertje` and `ploegen` count too.
+ * child or a youth team, and names no senior team. Prefixes, so `dochtertje`
+ * and `ploegen` count too.
  */
 export function hasYouthHint(query: string): boolean {
-  return /\b(?:zoon|dochter|kind|ploeg|jeugd|pupil|kadet|nieuweling|belofte|debutant)/i.test(
-    query,
+  return (
+    !SENIOR_TEAM.test(query) &&
+    /\b(?:zoon|dochter|kind|ploeg|jeugd|pupil|kadet|nieuweling|belofte|debutant)/i.test(
+      query,
+    )
   );
 }
 

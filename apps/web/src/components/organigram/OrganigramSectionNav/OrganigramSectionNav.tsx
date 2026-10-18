@@ -39,16 +39,14 @@ export interface OrganigramSectionNavProps {
   members: OrgChartNode[];
   responsibilityPaths: ResponsibilityPath[];
   /** Forwarded to `<HubSearch>` for the youth team card (#3558). */
-  youthTeams?: HubSearchProps["youthTeams"];
-  seasonYear?: HubSearchProps["seasonYear"];
+  youthTeamCard?: HubSearchProps["youthTeamCard"];
   className?: string;
 }
 
 export function OrganigramSectionNav({
   members,
   responsibilityPaths,
-  youthTeams,
-  seasonYear,
+  youthTeamCard,
   className,
 }: OrganigramSectionNavProps) {
   const { navRef, activeId, topInset } = useSectionNav(SECTION_IDS);
@@ -114,8 +112,7 @@ export function OrganigramSectionNav({
           <HubSearch
             members={members}
             responsibilityPaths={responsibilityPaths}
-            youthTeams={youthTeams}
-            seasonYear={seasonYear}
+            youthTeamCard={youthTeamCard}
             variant="nav"
             placeholder="Zoek…"
             className="ml-auto w-full max-w-[240px] min-w-0"

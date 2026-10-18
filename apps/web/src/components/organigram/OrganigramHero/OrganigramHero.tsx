@@ -9,8 +9,7 @@ export interface OrganigramHeroProps {
   responsibilityPaths: ResponsibilityPath[];
   structureIndex: StructureIndex;
   /** Forwarded to `<HubSearch>` for the youth team card (#3558). */
-  youthTeams?: HubSearchProps["youthTeams"];
-  seasonYear?: HubSearchProps["seasonYear"];
+  youthTeamCard?: HubSearchProps["youthTeamCard"];
   /** Warm mono kicker (cross-/club cohesion). */
   kicker?: string;
   /** Display heading; a trailing warm period is added automatically. */
@@ -33,8 +32,7 @@ export function OrganigramHero({
   members,
   responsibilityPaths,
   structureIndex,
-  youthTeams,
-  seasonYear,
+  youthTeamCard,
   kicker,
   heading = "Waarmee kunnen we je helpen?",
   lead = "Typ je vraag of een naam — wij wijzen je naar het antwoord én de juiste persoon.",
@@ -89,8 +87,7 @@ export function OrganigramHero({
             <HubSearch
               members={members}
               responsibilityPaths={responsibilityPaths}
-              youthTeams={youthTeams}
-              seasonYear={seasonYear}
+              youthTeamCard={youthTeamCard}
               variant="hero"
               placeholder={'bv. "mijn kind is geblesseerd" of een naam…'}
               className="max-w-[480px]"

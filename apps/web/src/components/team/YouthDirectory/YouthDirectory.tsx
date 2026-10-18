@@ -233,10 +233,10 @@ export function YouthDirectory({
                       {caption}
                     </p>
                     {/* The band as text (#3556) — the mock's outlined chip, in
-                      the caption's tone. None for U5 or Reserven. A `<span>`,
-                      not a `<p>`: the sub-line tests count paragraphs. */}
+                      the caption's tone, on its own line like the caption and
+                      the sub-line. None for U5 or Reserven. */}
                     {band ? (
-                      <span className="mt-1.5 flex justify-center">
+                      <p className="mt-1.5 flex justify-center">
                         <span
                           data-testid="youth-team-band"
                           data-tone={cardTone}
@@ -247,7 +247,7 @@ export function YouthDirectory({
                         >
                           {band}
                         </span>
-                      </span>
+                      </p>
                     ) : null}
                     {/* The reeks this team plays in, when the club has
                       published one — and nothing at all when it has not

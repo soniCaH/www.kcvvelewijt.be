@@ -308,6 +308,12 @@ describe("teamGuessWithCeilings (#3559)", () => {
     expect(guessTeam).toHaveBeenCalledTimes(2);
   });
 
+  it("keys on the team list as a set: order and duplicates do not matter", async () => {
+    const key = (ages: string[]) =>
+      Effect.runPromise(teamGuessCacheKey({ query: "pupillen", ages }));
+    expect(await key(["U10", "U9", "U9"])).toBe(await key(["U9", "U10"]));
+  });
+
   it("keys on teamguess:v1: plus a SHA-256 hex digest", async () => {
     expect(
       await Effect.runPromise(

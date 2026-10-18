@@ -100,12 +100,17 @@ export interface HubSearchProps {
   /** Extra classes on the root (e.g. `max-w-[480px]`). */
   className?: string;
   /**
-   * Youth teams for the team card (#3558): a query that names one shows
-   * `<TeamCard>` above the results. Omitted → no card.
+   * The youth team card's data (#3558): a query that names one of `teams`
+   * shows `<TeamCard>` above the results. Omitted → no card.
    */
-  youthTeams?: YouthTeamSource[];
-  /** Start year of the current season (`seasonStartYear`), from the server. */
-  seasonYear?: number;
+  youthTeamCard?: YouthTeamCardData;
+}
+
+/** What the youth team card needs from the server, always together. */
+export interface YouthTeamCardData {
+  teams: YouthTeamSource[];
+  /** Start year of the current season (`seasonStartYear`). */
+  seasonYear: number;
 }
 
 /** A light contact label for the answer-forward card (no resolveContact dep). */
@@ -257,8 +262,7 @@ export function HubSearch({
   placeholder = "Zoek een naam, functie of vraag…",
   maxResults = 5,
   className = "",
-  youthTeams,
-  seasonYear,
+  youthTeamCard,
 }: HubSearchProps) {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [debouncedValue, setDebouncedValue] = useState("");
@@ -401,20 +405,25 @@ export function HubSearch({
   const debouncedTrimmed = debouncedValue.trim();
   const rulesMatch = useMemo(
     () =>
-      youthTeams && seasonYear && debouncedTrimmed
-        ? matchYouthTeams(debouncedTrimmed, youthTeams, seasonYear)
+      youthTeamCard && debouncedTrimmed
+        ? matchYouthTeams(
+            debouncedTrimmed,
+            youthTeamCard.teams,
+            youthTeamCard.seasonYear,
+          )
         : null,
-    [debouncedTrimmed, youthTeams, seasonYear],
+    [debouncedTrimmed, youthTeamCard],
   );
   // The AI gets one try when the rules found nothing and the query speaks of
-  // a child or a youth team (#3559) — on the debounced query, so never per
-  // keystroke, and only from the on-screen instance.
-  const teamAges = useMemo(() => youthTeamAges(youthTeams ?? []), [youthTeams]);
+  // a child or a youth team (#3559) — `useTeamGuess` waits the semantic
+  // search's debounce, so never per keystroke, and only from the on-screen
+  // instance.
+  const teamAges = useMemo(
+    () => youthTeamAges(youthTeamCard?.teams ?? []),
+    [youthTeamCard],
+  );
   const guessQuery =
-    visible &&
-    seasonYear &&
-    rulesMatch?.bands.length === 0 &&
-    hasYouthHint(debouncedTrimmed)
+    visible && rulesMatch?.bands.length === 0 && hasYouthHint(debouncedTrimmed)
       ? debouncedTrimmed
       : null;
   const guess = useTeamGuess(guessQuery, teamAges);
@@ -426,17 +435,25 @@ export function HubSearch({
     guess && guessQuery && guess.query === guessQuery ? guess : null;
   const guessResult = useMemo(
     () =>
-      liveGuess && youthTeams && seasonYear
-        ? aiTeamResult(liveGuess.age, youthTeams, seasonYear)
+      liveGuess && youthTeamCard
+        ? aiTeamResult(
+            liveGuess.age,
+            youthTeamCard.teams,
+            youthTeamCard.seasonYear,
+          )
         : null,
-    [liveGuess, youthTeams, seasonYear],
+    [liveGuess, youthTeamCard],
   );
   const answered =
     guessAnswer && liveGuess && guessAnswer.query === liveGuess.query
       ? guessAnswer.answer
       : null;
+  // Dedup guard: a double tap lands both clicks before the re-render that
+  // removes the buttons, so state alone cannot tell the second one apart.
+  const answeredQueryRef = useRef<string | null>(null);
   const answerGuess = (answer: "yes" | "no") => {
-    if (!liveGuess) return;
+    if (!liveGuess || answeredQueryRef.current === liveGuess.query) return;
+    answeredQueryRef.current = liveGuess.query;
     setGuessAnswer({ query: liveGuess.query, answer });
     trackEvent("organigram_team_guess_answered", {
       answer,
@@ -447,8 +464,10 @@ export function HubSearch({
   };
   const teamMatch = answered === "yes" ? guessResult : rulesMatch;
   const askGuess = answered === null ? guessResult : null;
-  const teamCardMatches =
-    teamMatch?.bands.flatMap((band) => band.matches) ?? [];
+  const teamCardMatches = useMemo(
+    () => teamMatch?.bands.flatMap((band) => band.matches) ?? [],
+    [teamMatch],
+  );
 
   const rows: HubSearchResult[] = interleaveResults(
     memberResults,
@@ -607,20 +626,19 @@ export function HubSearch({
   // `organigram_` events (#3558) — kind and U-codes only, never the query or a
   // birth year. Keyed on what is shown, so each distinct card fires once; the
   // hidden instance's `showResults` is false, so the two mounts never both fire.
-  const teamCardKey =
-    showResults && teamCardMatches.length > 0
-      ? `${teamCardMatches[0].kind}|${teamCardMatches
-          .map((m) => `U${m.category}`)
-          .join(",")}`
-      : null;
+  const shownCardKind =
+    showResults && teamCardMatches.length > 0 ? teamCardMatches[0].kind : null;
+  const shownCardAges = useMemo(
+    () => teamCardMatches.map((m) => `U${m.category}`).join(","),
+    [teamCardMatches],
+  );
   useEffect(() => {
-    if (!teamCardKey) return;
-    const [matchKind, teamAges] = teamCardKey.split("|");
+    if (!shownCardKind) return;
     trackEvent("organigram_team_card_shown", {
-      match_kind: matchKind,
-      team_ages: teamAges,
+      match_kind: shownCardKind,
+      team_ages: shownCardAges,
     });
-  }, [teamCardKey]);
+  }, [shownCardKind, shownCardAges]);
   const teamNotFound = showResults && teamMatch?.unmatchedNumber === true;
   useEffect(() => {
     if (teamNotFound)

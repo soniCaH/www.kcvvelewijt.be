@@ -12,27 +12,22 @@
  * confirm.
  */
 
-import { useId } from "react";
+import { useId, type ReactNode } from "react";
 import Link from "next/link";
+import {
+  TVJO_ROLE_CODE,
+  YOUTH_COORDINATOR_ROLE_CODES,
+} from "@kcvv/api-contract";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { ArrowRight } from "@/lib/icons.redesign";
 import { ContactCard } from "@/components/hulp/HulpFinder/ContactCard";
 import { teamDisplayName } from "@/lib/utils/team-display-name";
-import type { YouthDivisionName } from "@/lib/utils/group-teams";
 import type {
   YouthTeamMatch,
   YouthTeamMatchResult,
   YouthTeamSource,
 } from "@/lib/utils/match-youth-team";
 import type { OrgChartNode } from "@/types/organigram";
-
-/** The organigram box that coordinates each band (`organigramNode.roleCode`). */
-const COORDINATOR_ROLE_CODE: Record<YouthDivisionName, string> = {
-  Onderbouw: "JC-OB",
-  Middenbouw: "JC-MB",
-  Bovenbouw: "JC-BB",
-};
-const TVJO_ROLE_CODE = "TVJO";
 
 export interface TeamCardProps {
   /** A non-empty `matchYouthTeams()` result. */
@@ -41,11 +36,11 @@ export interface TeamCardProps {
   nodes: OrgChartNode[];
 }
 
-const LINK =
+const STAFF_LINK_CLASS =
   "text-jersey-deep border-jersey-deep hover:bg-jersey-deep hover:text-cream inline-flex items-center gap-1.5 border-[1.5px] px-2.5 py-2 font-mono text-label-sm font-semibold uppercase transition-colors";
-const SUB =
+const SECTION_HEADING_CLASS =
   "font-display text-ink mt-3.5 mb-2 border-t-[1.5px] pt-3 text-base font-semibold";
-const YEAR =
+const BIRTH_YEAR_CLASS =
   "text-ink-muted mb-1 block font-mono text-label-sm font-semibold uppercase";
 
 const code = (category: number) => `U${category}`;
@@ -96,7 +91,7 @@ function StaffLinks({ teams }: { teams: YouthTeamSource[] }) {
         <Link
           key={team._id}
           href={`/ploegen/${team.slug}#staf`}
-          className={LINK}
+          className={STAFF_LINK_CLASS}
         >
           Staf van {teamDisplayName(team)}
           <ArrowRight size={12} aria-hidden />
@@ -133,6 +128,36 @@ function LateBornNote({ match }: { match: YouthTeamMatch }) {
   );
 }
 
+/** The card's paper frame: kicker, `<h2>` title, then the body. */
+function CardFrame({
+  kicker,
+  title,
+  children,
+}: {
+  kicker: ReactNode;
+  title: ReactNode;
+  children: ReactNode;
+}) {
+  const headingId = useId();
+  return (
+    <section
+      aria-labelledby={headingId}
+      className="border-ink bg-cream border-2 p-3.5 shadow-[var(--shadow-paper-sm)]"
+    >
+      <p className="text-jersey-deep text-label-sm mb-1.5 font-mono font-semibold uppercase">
+        {kicker}
+      </p>
+      <h2
+        id={headingId}
+        className="font-display text-ink text-display-sm mb-3 font-semibold"
+      >
+        {title}
+      </h2>
+      {children}
+    </section>
+  );
+}
+
 function kickerFor(matches: YouthTeamMatch[], sectioned: boolean): string {
   const first = matches[0];
   if (first.kind === "age" && first.age != null)
@@ -151,7 +176,6 @@ function kickerFor(matches: YouthTeamMatch[], sectioned: boolean): string {
 }
 
 export function TeamCard({ result, nodes }: TeamCardProps) {
-  const headingId = useId();
   const matches = result.bands.flatMap((b) => b.matches);
   const first = matches[0];
   const last = matches.at(-1);
@@ -163,18 +187,10 @@ export function TeamCard({ result, nodes }: TeamCardProps) {
     matches.length > 1 && (first.kind === "age" || result.bands.length > 1);
 
   return (
-    <section
-      aria-labelledby={headingId}
-      className="border-ink bg-cream border-2 p-3.5 shadow-[var(--shadow-paper-sm)]"
-    >
-      <p className="text-jersey-deep text-label-sm mb-1.5 font-mono font-semibold uppercase">
-        {kickerFor(matches, sectioned)}
-      </p>
-      <h2
-        id={headingId}
-        className="font-display text-ink text-display-sm mb-3 font-semibold"
-      >
-        {sectioned ? (
+    <CardFrame
+      kicker={kickerFor(matches, sectioned)}
+      title={
+        sectioned ? (
           matches
             .map((m) => code(m.category))
             .join(first.kind === "age" ? " of " : " en ")
@@ -187,32 +203,44 @@ export function TeamCard({ result, nodes }: TeamCardProps) {
                 : code(first.category)
             }
           />
-        )}
-      </h2>
-
+        )
+      }
+    >
       {sectioned ? (
         <>
           {matches.map((m) => (
             <div key={m.category}>
-              <h3 className={`${SUB} border-ink-muted border-dashed`}>
+              <h3
+                className={`${SECTION_HEADING_CLASS} border-ink-muted border-dashed`}
+              >
                 {m.birthYear != null && (
-                  <span className={YEAR}>Geboren in {m.birthYear}</span>
+                  <span className={BIRTH_YEAR_CLASS}>
+                    Geboren in {m.birthYear}
+                  </span>
                 )}
                 <BandTitle match={m} label={code(m.category)} />
               </h3>
               <NextTeamUpHint match={m} />
-              <People nodes={nodes} roleCode={COORDINATOR_ROLE_CODE[m.band]} />
+              <People
+                nodes={nodes}
+                roleCode={YOUTH_COORDINATOR_ROLE_CODES[m.band]}
+              />
               <StaffLinks teams={m.teams} />
               <LateBornNote match={m} />
             </div>
           ))}
-          <h3 className={`${SUB} border-ink-muted`}>Voor alle jeugd</h3>
+          <h3 className={`${SECTION_HEADING_CLASS} border-ink-muted`}>
+            Voor alle jeugd
+          </h3>
           <People nodes={nodes} roleCode={TVJO_ROLE_CODE} />
         </>
       ) : (
         <>
           <NextTeamUpHint match={first} />
-          <People nodes={nodes} roleCode={COORDINATOR_ROLE_CODE[first.band]} />
+          <People
+            nodes={nodes}
+            roleCode={YOUTH_COORDINATOR_ROLE_CODES[first.band]}
+          />
           <People nodes={nodes} roleCode={TVJO_ROLE_CODE} />
           <StaffLinks teams={matches.flatMap((m) => m.teams)} />
           {matches.map((m) => (
@@ -220,7 +248,7 @@ export function TeamCard({ result, nodes }: TeamCardProps) {
           ))}
         </>
       )}
-    </section>
+    </CardFrame>
   );
 }
 
@@ -230,7 +258,7 @@ export interface TeamGuessCardProps {
   onAnswer: (answer: "yes" | "no") => void;
 }
 
-const ASK =
+const ANSWER_BUTTON_CLASS =
   "border-ink border-2 px-3.5 py-2 font-mono text-label-sm font-semibold uppercase transition-colors";
 
 /**
@@ -238,35 +266,25 @@ const ASK =
  * band title. "Ja" opens `<TeamCard>` for it; "Nee" removes it.
  */
 export function TeamGuessCard({ result, onAnswer }: TeamGuessCardProps) {
-  const headingId = useId();
   const first = result.bands[0]?.matches[0];
   if (!first) return null;
   return (
-    <section
-      aria-labelledby={headingId}
-      className="border-ink bg-cream border-2 p-3.5 shadow-[var(--shadow-paper-sm)]"
+    <CardFrame
+      kicker="Bedoel je deze ploeg?"
+      title={<BandTitle match={first} label={code(first.category)} />}
     >
-      <p className="text-jersey-deep text-label-sm mb-1.5 font-mono font-semibold uppercase">
-        Bedoel je deze ploeg?
-      </p>
-      <h2
-        id={headingId}
-        className="font-display text-ink text-display-sm mb-3 font-semibold"
-      >
-        <BandTitle match={first} label={code(first.category)} />
-      </h2>
       <div className="mt-1 flex flex-wrap gap-2">
         <button
           type="button"
           onClick={() => onAnswer("yes")}
-          className={`${ASK} bg-ink text-cream hover:bg-jersey-deep`}
+          className={`${ANSWER_BUTTON_CLASS} bg-ink text-cream hover:bg-jersey-deep`}
         >
           Ja, toon contact
         </button>
         <button
           type="button"
           onClick={() => onAnswer("no")}
-          className={`${ASK} text-ink hover:bg-ink hover:text-cream bg-transparent`}
+          className={`${ANSWER_BUTTON_CLASS} text-ink hover:bg-ink hover:text-cream bg-transparent`}
         >
           Nee
         </button>
@@ -274,6 +292,6 @@ export function TeamGuessCard({ result, onAnswer }: TeamGuessCardProps) {
       <p className="text-ink-muted mt-2 text-sm">
         Niet zeker? Zoek op leeftijd, bv. “U9” of “geboren in 2018”.
       </p>
-    </section>
+    </CardFrame>
   );
 }

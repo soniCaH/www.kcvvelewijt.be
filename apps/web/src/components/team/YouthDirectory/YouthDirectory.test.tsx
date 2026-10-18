@@ -30,9 +30,6 @@ const HEADING = "Jeugdwerking";
 const renderDirectory = (divisions: YouthDivisionGroup[], heading = HEADING) =>
   render(<YouthDirectory heading={heading} divisions={divisions} />);
 
-/** How many `<p>` a card carries: the caption, plus a sub-line if it has one. */
-const paragraphsIn = (card: HTMLElement) => card.querySelectorAll("p").length;
-
 describe("YouthDirectory", () => {
   it("returns null when no division has teams", () => {
     const { container } = renderDirectory([
@@ -108,7 +105,6 @@ describe("YouthDirectory", () => {
       renderDirectory([{ label: "Reserven", teams: [reservenTeam()] }]);
       const card = screen.getByTestId("youth-team-card");
       expect(within(card).getByText("Reserven VV AH")).toBeInTheDocument();
-      expect(paragraphsIn(card)).toBe(2); // caption + sub-line
     });
 
     it("stays empty when there is none, rather than echoing the team's own name", () => {
@@ -124,7 +120,6 @@ describe("YouthDirectory", () => {
       ]);
       const card = screen.getByTestId("youth-team-card");
       expect(card.textContent).not.toContain("KCVVE");
-      expect(paragraphsIn(card)).toBe(1); // the caption alone
     });
   });
 

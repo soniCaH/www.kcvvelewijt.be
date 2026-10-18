@@ -105,20 +105,22 @@ export default async function HulpHubPage() {
       "[HulpHubPage] failed to load youth teams — no team card",
     ),
   );
-  const youthTeams = teams.flatMap((t) =>
-    t.age && isAgeCode(t.age)
-      ? [
-          {
-            _id: t.id,
-            slug: t.slug,
-            name: t.name,
-            displayName: t.displayName,
-            age: t.age,
-          },
-        ]
-      : [],
-  );
-  const seasonYear = seasonStartYear(new Date());
+  const youthTeamCard = {
+    teams: teams.flatMap((t) =>
+      t.age && isAgeCode(t.age)
+        ? [
+            {
+              _id: t.id,
+              slug: t.slug,
+              name: t.name,
+              displayName: t.displayName,
+              age: t.age,
+            },
+          ]
+        : [],
+    ),
+    seasonYear: seasonStartYear(new Date()),
+  };
 
   const structureIndex = deriveStructureIndex(members);
   const faqEntries = responsibilityPathsToFaqEntries(responsibilityPaths);
@@ -150,8 +152,7 @@ export default async function HulpHubPage() {
       <OrganigramSectionNav
         members={members}
         responsibilityPaths={responsibilityPaths}
-        youthTeams={youthTeams}
-        seasonYear={seasonYear}
+        youthTeamCard={youthTeamCard}
       />
       {/* Top under the sticky nav + hero keeps the plain step (an opening,
             #3306); the bottom sits above the `<CtaBand>` seam, so it gives one
@@ -161,8 +162,7 @@ export default async function HulpHubPage() {
           members={members}
           responsibilityPaths={responsibilityPaths}
           structureIndex={structureIndex}
-          youthTeams={youthTeams}
-          seasonYear={seasonYear}
+          youthTeamCard={youthTeamCard}
         />
 
         {/* ① Hulp-first — the responsibility finder (#2056). */}
