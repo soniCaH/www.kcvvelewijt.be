@@ -6,7 +6,8 @@ import type { OrgChartNode } from "@/types/organigram";
  * The explorer navigates the REAL `parentNode` reporting tree (decision 7o3 +
  * the live data audit: there are no afdeling container nodes — `department` is an
  * orthogonal tag). This module turns the flat `OrgChartNode[]` the page already
- * fetches (`StaffRepository.findAll()`, including the synthetic "club" root) into
+ * fetches (`StaffRepository.findAll()`, plus the synthetic "club" root that
+ * `withClubRoot` adds) into
  * a navigable tree and, for a given focused node, the spotlight "neighbourhood"
  * the UI renders: breadcrumb trail · parent · siblings (with the focus index) ·
  * children. Only the neighbourhood is ever mounted — never the whole tree
@@ -17,6 +18,32 @@ import type { OrgChartNode } from "@/types/organigram";
  */
 
 export const CLUB_ROOT_ID = "club";
+
+/**
+ * The organisation itself, the root the reporting tree hangs from. Not a box:
+ * the repository never returns it, and the one consumer that needs a root —
+ * this tree — adds it (`withClubRoot`).
+ */
+export const CLUB_ROOT_NODE: OrgChartNode = {
+  id: CLUB_ROOT_ID,
+  title: "KCVV Elewijt",
+  members: [
+    {
+      id: CLUB_ROOT_ID,
+      name: "KCVV Elewijt",
+      imageUrl: "/images/logo-flat.png",
+    },
+  ],
+  department: "algemeen",
+  parentId: null,
+};
+
+/** The boxes with the club root in front, unless the list already has one. */
+export function withClubRoot(nodes: OrgChartNode[]): OrgChartNode[] {
+  return nodes.some((node) => node.id === CLUB_ROOT_ID)
+    ? nodes
+    : [CLUB_ROOT_NODE, ...nodes];
+}
 
 export interface SpotlightTree {
   rootId: string;

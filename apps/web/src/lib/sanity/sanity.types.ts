@@ -804,6 +804,13 @@ export type OrganigramNode = {
   title?: string;
   description?: string;
   roleCode?: string;
+  pillar?:
+    | "bestuur"
+    | "sportief"
+    | "jeugd-organisatie"
+    | "jeugd-opleiding"
+    | "club"
+    | "integriteit";
   department?: "hoofdbestuur" | "jeugdbestuur" | "algemeen";
   parentNode?: OrganigramNodeReference;
   members?: Array<
@@ -2548,12 +2555,20 @@ export type SPONSORS_QUERY_RESULT = Array<{
 
 // Source: ../web/src/lib/repositories/staff.repository.ts
 // Variable: ORGANIGRAM_NODES_QUERY
-// Query: *[_type == "organigramNode" && active == true] | order(coalesce(sortOrder, 9999) asc, title asc) {  _id,  title,  description,  roleCode,  department,  "parentId": select(defined(parentNode) && parentNode->active == true => parentNode->_id, null),  "members": members[@->archived != true]->{    "id": _id,    "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),    "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",    "psdImageUrl": psdImage.asset->url + "?w=200&q=80&fm=webp&fit=max",    email,    phone,    "psdId": psdId  }}
+// Query: *[_type == "organigramNode" && active == true] | order(coalesce(sortOrder, 9999) asc, title asc) {  _id,  title,  description,  roleCode,  pillar,  department,  "parentId": select(defined(parentNode) && parentNode->active == true => parentNode->_id, null),  "members": members[@->archived != true]->{    "id": _id,    "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),    "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",    "psdImageUrl": psdImage.asset->url + "?w=200&q=80&fm=webp&fit=max",    email,    phone,    "psdId": psdId  }}
 export type ORGANIGRAM_NODES_QUERY_RESULT = Array<{
   _id: string;
   title: string | null;
   description: string | null;
   roleCode: string | null;
+  pillar:
+    | "bestuur"
+    | "club"
+    | "integriteit"
+    | "jeugd-opleiding"
+    | "jeugd-organisatie"
+    | "sportief"
+    | null;
   department: "algemeen" | "hoofdbestuur" | "jeugdbestuur" | null;
   parentId: string | null;
   members: Array<{
@@ -2794,7 +2809,7 @@ declare global {
     '*[_type == "player" && keeper == true && archived != true].psdId': KEEPER_PSD_IDS_QUERY_RESULT;
     '*[_type == "responsibility" && active == true] | order(title asc) {\n  "id": slug.current,\n  title,\n  "role": audience,\n  question,\n  keywords,\n  summary,\n  category,\n  icon,\n  "primaryContact": primaryContact {\n    contactType,\n    teamRole,\n    "position": organigramNode->title,\n    "roleCode": organigramNode->roleCode,\n    "members": organigramNode->members[@->archived != true]->{\n      "id": _id,\n      "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n      "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",\n      "psdImageUrl": psdImage.asset->url + "?w=200&q=80&fm=webp&fit=max",\n      email, phone\n    },\n    "nodeId": organigramNode->_id,\n    "role": role,\n    "email": email,\n    "phone": phone,\n    "department": department\n  },\n  "steps": steps[] {\n    description,\n    link,\n    "contact": select(defined(contact) => contact {\n      contactType,\n      teamRole,\n      "position": organigramNode->title,\n      "roleCode": organigramNode->roleCode,\n      "members": organigramNode->members[@->archived != true]->{\n        "id": _id,\n        "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n        email, phone\n      },\n      "nodeId": organigramNode->_id,\n      "role": role,\n      "email": email,\n      "phone": phone,\n      "department": department\n    }, null)\n  },\n  "relatedPaths": coalesce(relatedPaths[]->slug.current, [])\n}': RESPONSIBILITY_PATHS_QUERY_RESULT;
     '*[_type == "sponsor" && active == true] | order(name asc) {\n  "id": _id, "name": coalesce(name, ""), url, type, tier, "featured": coalesce(featured, false), description,\n  "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n}': SPONSORS_QUERY_RESULT;
-    '*[_type == "organigramNode" && active == true] | order(coalesce(sortOrder, 9999) asc, title asc) {\n  _id,\n  title,\n  description,\n  roleCode,\n  department,\n  "parentId": select(defined(parentNode) && parentNode->active == true => parentNode->_id, null),\n  "members": members[@->archived != true]->{\n    "id": _id,\n    "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n    "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",\n    "psdImageUrl": psdImage.asset->url + "?w=200&q=80&fm=webp&fit=max",\n    email,\n    phone,\n    "psdId": psdId\n  }\n}': ORGANIGRAM_NODES_QUERY_RESULT;
+    '*[_type == "organigramNode" && active == true] | order(coalesce(sortOrder, 9999) asc, title asc) {\n  _id,\n  title,\n  description,\n  roleCode,\n  pillar,\n  department,\n  "parentId": select(defined(parentNode) && parentNode->active == true => parentNode->_id, null),\n  "members": members[@->archived != true]->{\n    "id": _id,\n    "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n    "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",\n    "psdImageUrl": psdImage.asset->url + "?w=200&q=80&fm=webp&fit=max",\n    email,\n    phone,\n    "psdId": psdId\n  }\n}': ORGANIGRAM_NODES_QUERY_RESULT;
     '*[_type == "organigramNode" && active == true && roleCode in $roleCodes]{\n  title,\n  roleCode,\n  "members": members[@->archived != true && defined(@->email)]->{\n    "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n    email\n  }\n}[count(members) > 0] | order(title asc)': KEY_CONTACTS_QUERY_RESULT;
     '*[_type == "staffMember" && psdId == $psdId && archived != true][0] {\n  _id, psdId, firstName, lastName, email, phone, bio,\n  "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "organigramPositions": *[_type == "organigramNode" && ^._id in members[]._ref && active == true] | order(title asc, _id asc) { _id, title, roleCode, department },\n  // Reverse lookup: find responsibilities where this staff member is referenced through organigramNode members.\n  // primaryContact branch: ^.^ = staffMember (parent of responsibility filter, parent of organigramNode filter).\n  // steps branch: ^.^.^ = staffMember (extra caret level because steps[] adds a scope).\n  "responsibilityPaths": *[_type == "responsibility" && active == true && defined(slug.current) && slug.current != "" && (primaryContact.organigramNode._ref in *[_type == "organigramNode" && ^.^._id in members[]._ref]._id || count(steps[defined(contact.organigramNode._ref) && contact.organigramNode._ref in *[_type == "organigramNode" && ^.^.^._id in members[]._ref]._id]) > 0)] | order(title asc, _id asc) { title, "slug": slug.current, category, icon }\n}': STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT;
     '*[_type == "team" && archived != true && showInNavigation != false] | order(name asc) {\n  _id, psdId, name, displayName, "slug": slug.current, age, division, divisionFull,\n  "teamImageUrl": teamImage.asset->url + "?w=1200&h=800&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(teamImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(teamImage.hotspot.y, 0.5))\n}': TEAMS_QUERY_RESULT;

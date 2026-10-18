@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { deriveStructureIndex } from "./structure-index";
 import type { OrgChartNode } from "@/types/organigram";
+import { explorerFixture } from "../OrganigramExplorer/organigram-explorer.fixture";
 
 const nodes: OrgChartNode[] = [
   {
@@ -45,6 +46,17 @@ describe("deriveStructureIndex", () => {
 
   it("counts distinct populated departments", () => {
     expect(deriveStructureIndex(nodes).afdelingen).toBe(2);
+  });
+
+  it("counts the real boxes and distinct people of the explorer fixture", () => {
+    const people = new Set(
+      explorerFixture.flatMap((node) => node.members.map((m) => m.id)),
+    );
+
+    const index = deriveStructureIndex(explorerFixture);
+
+    expect(index.posities).toBe(explorerFixture.length);
+    expect(index.mensen).toBe(people.size);
   });
 
   it("returns zeroes for an empty organigram", () => {

@@ -916,10 +916,9 @@
 
      Both forms of each selector are needed: the descendant form (a space
      before `::selection`) covers text inside a child element, but a band's
-     OWN text node — e.g. `<OrgPersonCard>`'s `bg-jersey-deep` role pill,
-     `<CalendarSubscribePanel>`'s `bg-jersey-deep` copy button, both of which
-     render their label as a direct child of the coloured element itself —
-     needs the bare `.bg-X::selection` form too, or it falls through to the
+     OWN text node — e.g. `<CalendarSubscribePanel>`'s `bg-jersey-deep` copy
+     button, which renders its label as a direct child of the coloured
+     element itself — needs the bare `.bg-X::selection` form too, or it falls through to the
      un-inverted default and goes invisible on its own background (#2610
      review, round 1). */
   ::selection {
@@ -1779,9 +1778,8 @@ html {
    Volledig organigram — pure-CSS box tree (Phase 7 · #2054)
    Connector elbows drawn with ::before/::after on the <li>s (the canonical
    CSS-only tree). Node boxes are styled with Tailwind in the component; this
-   block owns only the structural connectors. The A4 print stylesheet is
-   injected dynamically by the "Download als PDF" handler (so it can never
-   hijack an unrelated page's print).
+   block owns only the structural connectors. The tree is not printed: the
+   PDF is the clubboek's list (`ClubBook/print-style.ts`).
    ────────────────────────────────────────────────────────────────────────── */
 .vo-tree,
 .vo-tree ul {

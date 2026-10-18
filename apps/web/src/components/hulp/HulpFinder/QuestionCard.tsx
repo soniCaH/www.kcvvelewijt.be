@@ -240,7 +240,13 @@ export function QuestionCard({
           <ContactCard
             contact={contact}
             onContactClick={onContactClick}
-            onShowInStructure={onShowInStructure}
+            onShowInStructure={(event, nodeId) => {
+              // Leaving for the structuur is a scroll of the visitor's own:
+              // the grow's scroll-back guard must not pull them back to this
+              // card's header when the answer finishes opening beneath them.
+              disarmGuard();
+              onShowInStructure?.(event, nodeId);
+            }}
           />
         </div>
       </HeightGrow>

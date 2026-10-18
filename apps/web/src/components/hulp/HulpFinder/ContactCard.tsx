@@ -2,13 +2,12 @@
 
 /**
  * ContactCard — the finder's single contact, in the locked **person vocabulary**
- * (7o6c · 4 / reuses `<OrgPersonCard>`'s round avatar — the shared
- * `<RoundAvatar>` photo or monogram · name first-semibold + last-italic · mono function label ·
+ * (7o6c · 4 / the shared `<RoundAvatar>` photo or monogram · name first-semibold + last-italic · mono function label ·
  * tappable ✉/☎ (only when present), NOT `<TeamStaff>`'s post-#2575 3:4
  * card, which is a directory of people rather than a chart of positions).
  * A `position` contact also gets a **"Toon in structuur →"** cross-link
- * that opens the `<MemberDetailPanel>` (handled by the finder via
- * `useHubMemberPanel()`); `team-role` gets a plain "Vind je ploeg →" link.
+ * that opens the person's row in the `/hulp` clubboek (handled by the finder
+ * via `openStructureRow()`); `team-role` gets a plain "Vind je ploeg →" link.
  *
  * The avatar shows the member's photo when one exists (the same image source
  * the organigram card beside it uses — #3333), a monogram otherwise.
@@ -23,7 +22,7 @@ import {
   Phone,
   TreeStructure,
 } from "@/lib/icons.redesign";
-import { splitDisplayName } from "@/components/organigram/OrgPersonCard";
+import { splitDisplayName } from "./split-display-name";
 import { RoundAvatar } from "@/components/design-system/RoundAvatar";
 import type { ResolvedContact } from "./resolveContact";
 

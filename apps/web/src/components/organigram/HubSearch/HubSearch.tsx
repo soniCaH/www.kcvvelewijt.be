@@ -46,7 +46,7 @@ import { getCategoryInfo } from "@/lib/responsibility-utils";
 import { cn } from "@/lib/utils/cn";
 import { revealHash } from "@/lib/utils/same-page-anchor";
 import { useSemanticSearch } from "@/hooks/useSemanticSearch";
-import { useHubMemberPanel } from "@/components/organigram/HubMemberPanel";
+import { openStructureRow } from "@/components/organigram/ClubBook";
 import { RoundAvatar } from "@/components/design-system/RoundAvatar";
 import { CHIP_LINK_CLASSES } from "@/components/design-system/press-down";
 import { CLUB_ROOT_ID } from "@/components/organigram/OrganigramExplorer/spotlight-tree";
@@ -298,10 +298,6 @@ export function HubSearch({
     observer.observe(el);
     return () => observer.disconnect();
   }, [isHero, topInset]);
-  // Null outside a `<HubMemberPanel>` (e.g. Storybook) → person-select falls back
-  // to a plain scroll to the directory.
-  const panel = useHubMemberPanel();
-
   // Debounce the people (keyword) lane (200ms — matches the legacy feel).
   useEffect(() => {
     const id = setTimeout(() => setDebouncedValue(value), 200);
@@ -490,14 +486,11 @@ export function HubSearch({
 
     if (typeof window !== "undefined") {
       if (result.type === "member") {
-        // Open the person's panel directly (7o9 / F5) — the same destination as
-        // a directory card or the finder cross-link — and scroll to the
-        // directory behind it. Falls back to a plain scroll without a provider.
-        window.location.hash = "structuur";
-        panel?.openMember(result.member, {
-          view: "cards",
-          trigger: inputRef.current,
-        });
+        // Open the person's row in the clubboek (7o9 / F5) — the same
+        // destination as the finder cross-link. Without a row (Storybook) fall
+        // back to a plain jump to the structuur section.
+        if (!openStructureRow(result.member.id))
+          window.location.hash = "structuur";
       } else {
         // An answer deep-links the finder accordion by its slug (#2056).
         revealHash(result.path.id);

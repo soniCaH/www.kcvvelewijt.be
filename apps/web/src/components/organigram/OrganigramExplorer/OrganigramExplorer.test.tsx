@@ -11,8 +11,13 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { renderToString } from "react-dom/server";
 import { OrganigramExplorer, announceFocus } from "./OrganigramExplorer";
-import { buildSpotlightTree, getSpotlightView } from "./spotlight-tree";
+import {
+  buildSpotlightTree,
+  getSpotlightView,
+  withClubRoot,
+} from "./spotlight-tree";
 import { explorerFixture } from "./organigram-explorer.fixture";
 import { mockLayoutProps } from "@/../tests/helpers/scroll-hint.helpers";
 
@@ -351,7 +356,7 @@ describe("OrganigramExplorer — Esc", () => {
 });
 
 describe("announceFocus", () => {
-  const tree = buildSpotlightTree(explorerFixture);
+  const tree = buildSpotlightTree(withClubRoot(explorerFixture));
 
   it("names the node, level, parent, holders and child count in Dutch", () => {
     const msg = announceFocus(getSpotlightView(tree, "sportief"));
@@ -409,5 +414,56 @@ describe("OrganigramExplorer — parent cycles (#3478)", () => {
     expect([...visited].join(" ")).toContain("Cyclus A");
     expect([...visited].join(" ")).toContain("Cyclus B");
     expect([...visited].join(" ")).toContain("Onder de cyclus");
+  });
+});
+
+describe("OrganigramExplorer — the contact trigger and hydration", () => {
+  const html = (props: Partial<Parameters<typeof OrganigramExplorer>[0]>) =>
+    renderToString(
+      <OrganigramExplorer
+        nodes={explorerFixture}
+        open
+        onClose={vi.fn()}
+        onOpenMember={vi.fn()}
+        {...props}
+      />,
+    );
+
+  it("renders no 'Contactgegevens' on the server when the page decides per box, so hydration cannot mismatch", () => {
+    expect(html({ canOpenMember: () => true })).not.toContain(
+      "Contactgegevens",
+    );
+  });
+
+  it("renders it on the server when every box qualifies", () => {
+    expect(html({})).toContain("Contactgegevens");
+  });
+
+  it("hides it on the client for a box the page has no row for, and shows it for one it has", () => {
+    const { rerender } = render(
+      <OrganigramExplorer
+        nodes={explorerFixture}
+        open
+        onClose={vi.fn()}
+        onOpenMember={vi.fn()}
+        canOpenMember={() => false}
+      />,
+    );
+    expect(
+      screen.queryByRole("button", { name: "Contactgegevens" }),
+    ).toBeNull();
+
+    rerender(
+      <OrganigramExplorer
+        nodes={explorerFixture}
+        open
+        onClose={vi.fn()}
+        onOpenMember={vi.fn()}
+        canOpenMember={() => true}
+      />,
+    );
+    expect(
+      screen.getByRole("button", { name: "Contactgegevens" }),
+    ).toBeInTheDocument();
   });
 });
