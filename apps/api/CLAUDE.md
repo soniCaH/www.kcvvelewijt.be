@@ -41,7 +41,8 @@ src/
 │   └── search.ts             ← SearchApi HttpApiGroup + searchWithCeilings (rate limits, response cache, #3468)
 └── sync/
     ├── psd-team-client.ts    ← PsdTeamClient (teams/members/staff fetch for sync)
-    └── psd-sanity-sync.ts    ← PSD → Sanity player/team/staff sync
+    ├── psd-sanity-sync.ts    ← PSD → Sanity player/team/staff sync
+    └── staff-gaps-check.ts   ← weekly Slack nudge for staff/coordinator gaps (#3561)
 ```
 
 ## Local development
@@ -158,6 +159,16 @@ wrangler kv key put "sync:orphan-cap-override" "all" --binding=PSD_CACHE --env s
 
 Only set this after confirming the refusal is a false positive (a genuine mass roster change, not a truncated/regressed PSD fetch) — see the WARN log `reconciliation: SKIPPED — …` for the counts that tripped it, and `reconciliation: orphan-cap override consumed — …` for confirmation of what the key actually bypassed.
 
+## Weekly staff-gaps nudge (#3561)
+
+Cron `0 6 * * MON` (Monday 06:00 UTC — named, because Cloudflare numbers weekdays `1` = Sunday; the string is `STAFF_GAPS_CRON`, and `index.scheduled.test.ts` asserts `wrangler.toml` carries it; production only — staging keeps `crons = []`) runs `runStaffGapsCheck` (`sync/staff-gaps-check.ts`) from its own `scheduled()` branch, never inside the `0 2 * * *` sync and its 15-minute ceiling. One GROQ read, `SanityProjection.getStaffGaps()`, returns three groups, and `buildStaffGapsMessage` (`psd/slack-alert.ts`) turns them into one Slack message with a count per group and a Studio link per item:
+
+- **Staff without a role** — a `team.staff[]` entry with an **empty** role on a non-archived team with a `psdId`. `andere` is a real answer and is never reported; empty means "not done yet" (#3560).
+- **Staff without a photo** — a `staffMember` on those teams with neither `photo` nor `psdImage`.
+- **Coordinator positions not filled** — an `organigramNode` with roleCode `TVJO`, `JC-OB`, `JC-MB` or `JC-BB` that is not `active == true` or has no **live** member (an archived or dangling member reference does not count — the web's TeamCard hides that box too), and any of those role codes that no organigram node carries at all.
+
+Nothing to report → no message. `SLACK_ALERT_WEBHOOK_URL` unset → the job returns before the read. A failed read, or a Slack POST that is not confirmed, fails the run, which reports through `reportScheduledJobOutcome` under the job name **`staff-gaps-check`** — never through `gate.reportOutcome`. Its job-alert state TTL is the shared 3 days, shorter than the weekly interval, so a failure alerts every week it recurs instead of once per streak — and it **never sends a "recovered" ping**: by the next run the failure state has expired, so a success finds nothing to recover from. A missing Monday message after a failure alert therefore means either "fixed" or "nothing to report"; check the run log.
+
 ## Only the website may call the worker (#3485)
 
 The worker is public on `workers.dev` with no zone or WAF in front of it, and
@@ -231,6 +242,19 @@ Either limit hit → `429` (`HttpTooManyRequests`), body error
 that throws fails **open** (logged): search stays up and the AI cap is the
 backstop. A search failure is `503` with the fixed text
 `Search service unavailable`; the real message goes to `Effect.logError` only.
+
+### `/search/team-guess` (`teamGuessWithCeilings`, `AiAnswerService.guessTeam`)
+
+The `/hulp` team card's AI fallback (#3559): `{ query, ages }` →
+`{ age: one of ages | null }`. Same order and the same four ceilings as
+`/search` — the two limiters (one shared budget per visitor), the cache under
+its own prefix `teamguess:v1:{sha256(ages joined "," + "|" + q)}` for
+`TTL.SEARCH`, and the same `ai:answers:{day}` counter against
+`AI_ANSWER_DAILY_CAP` (`max_tokens: 8`). The model's reply counts only as a
+bare code on the list (`allowedAge`); anything else is `null`. The cap or an
+AI failure is `age: null` too — never a 5xx — and is not cached; a pick and
+a "none" are. The web calls it only when the rules matched no team and the
+query holds a youth hint word.
 
 **Namespace ids are account-wide** and both workers share one account:
 production uses `1001`/`1002`, staging `2001`/`2002`. Named envs do not

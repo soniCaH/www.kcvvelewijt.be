@@ -9,7 +9,11 @@ import { KvCacheLive } from "../cache/kv-cache";
 import { utcDay } from "../cache/daily-ceiling";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
 
-function setup(cap: string | undefined, answersToday?: number) {
+function setup(
+  cap: string | undefined,
+  answersToday?: number,
+  reply = "Een antwoord.",
+) {
   const store = new Map<string, string>();
   if (answersToday !== undefined)
     store.set(`ai:answers:${utcDay()}`, String(answersToday));
@@ -22,7 +26,7 @@ function setup(cap: string | undefined, answersToday?: number) {
       store.delete(key);
     },
   } as unknown as KVNamespace;
-  const run = vi.fn(async () => ({ response: "Een antwoord." }));
+  const run = vi.fn(async () => ({ response: reply }));
   const errors: string[] = [];
   const layer = AiAnswerServiceLive.pipe(
     Layer.provideMerge(KvCacheLive),
@@ -46,7 +50,13 @@ function setup(cap: string | undefined, answersToday?: number) {
         ai.generateAnswer("waar is de kantine?", "1. Kantine: uitleg"),
       ).pipe(Effect.provide(layer), Effect.provide(logger)),
     );
-  return { answer, run, store, errors };
+  const guess = (ages = ["U8", "U9", "U10"]) =>
+    Effect.runPromise(
+      Effect.flatMap(AiAnswerService, (ai) =>
+        ai.guessTeam("mijn zoon speelt bij de pupillen", ages),
+      ).pipe(Effect.provide(layer), Effect.provide(logger)),
+    );
+  return { answer, guess, run, store, errors };
 }
 
 describe("AiAnswerServiceLive (#3468)", () => {
@@ -76,5 +86,59 @@ describe("AiAnswerServiceLive (#3468)", () => {
     await answer();
     await answer();
     expect(errors.filter((e) => e.includes("daily cap"))).toHaveLength(1);
+  });
+});
+
+describe("AiAnswerServiceLive.guessTeam (#3559)", () => {
+  it("returns the age the model picked from the list", async () => {
+    const { guess } = setup("2000", 0, "U9");
+    expect(await guess()).toBe("U9");
+  });
+
+  it("tolerates case, quotes and a trailing full stop", async () => {
+    const { guess } = setup("2000", 0, ' "u9." ');
+    expect(await guess()).toBe("U9");
+  });
+
+  it.each(["U12", "none", "Ik denk U9", "U9 of U10"])(
+    "turns %j (not one allowed age) into null",
+    async (reply) => {
+      const { guess } = setup("2000", 0, reply);
+      expect(await guess()).toBeNull();
+    },
+  );
+
+  it("sends only the allowed ages and a tiny token ceiling", async () => {
+    const { guess, run } = setup("2000", 0, "U9");
+    await guess(["U8", "U9"]);
+    expect(run).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        max_tokens: 8,
+        messages: expect.arrayContaining([
+          expect.objectContaining({
+            content: expect.stringContaining("U8, U9"),
+          }),
+        ]),
+      }),
+    );
+  });
+
+  it("counts against the shared daily answer counter", async () => {
+    const { guess, store } = setup("2000", 4, "none");
+    await guess();
+    expect(store.get(`ai:answers:${utcDay()}`)).toBe("5");
+  });
+
+  it("at the cap, returns undefined (not asked) and makes no AI call", async () => {
+    const { guess, run } = setup("2000", 2000, "U9");
+    expect(await guess()).toBeUndefined();
+    expect(run).not.toHaveBeenCalled();
+  });
+
+  it("on an AI error, returns undefined (not asked)", async () => {
+    const { guess, run } = setup("2000", 0);
+    run.mockRejectedValueOnce(new Error("workers ai down"));
+    expect(await guess()).toBeUndefined();
   });
 });

@@ -8,6 +8,7 @@
  * read path.
  */
 import type { IncidentAlert } from "./incident";
+import type { StaffGaps } from "../sanity/projection";
 
 /** Human duration, coarse: "3d 4h", "5h 12m", "45m", "30s". */
 export function formatDuration(ms: number): string {
@@ -110,6 +111,70 @@ export function buildJobAlertMessage(
   }
   const detail = ctx.error ? `: ${ctx.error}` : "";
   return `:red_circle: *Scheduled job failing* — \`${ctx.job}\` has now failed ${ctx.consecutiveFailures} consecutive ${runs}${detail}.`;
+}
+
+const STUDIO_EDIT_URL = "https://kcvvelewijt.sanity.studio/intent/edit";
+
+/** Slack mrkdwn treats `&`, `<`, `>` as control characters. */
+const escapeSlack = (text: string): string =>
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+const studioLink = (id: string, type: string): string =>
+  `<${STUDIO_EDIT_URL}/id=${id};type=${type}|open in Studio>`;
+
+/**
+ * Weekly staff-gaps nudge (#3561): one section per non-empty group, each
+ * with its count and a Studio link per item. `null` when there is nothing
+ * to report — the caller then posts nothing.
+ */
+export function buildStaffGapsMessage(gaps: StaffGaps): string | null {
+  const name = (value: string | null, fallback: string) =>
+    escapeSlack(value ?? fallback);
+  const sections: Array<[string, string[]]> = [
+    [
+      "Staff without a role",
+      gaps.emptyRoles.map(
+        (r) =>
+          `• ${name(r.teamName, "(no team name)")} — ${name(r.memberName, "(no name)")} ${studioLink(r.teamId, "team")}`,
+      ),
+    ],
+    [
+      "Staff without a photo",
+      gaps.noPhoto.map(
+        (s) =>
+          `• ${name(s.name, "(no name)")} ${studioLink(s.id, "staffMember")}`,
+      ),
+    ],
+    [
+      "Coordinator positions not filled",
+      gaps.coordinators
+        .map((c) => {
+          const why = [
+            c.active ? null : "inactive",
+            c.memberCount === 0 ? "no member" : null,
+          ]
+            .filter(Boolean)
+            .join(", ");
+          return `• ${escapeSlack(c.roleCode)} — ${name(c.title, "(no title)")} (${why}) ${studioLink(c.id, "organigramNode")}`;
+        })
+        .concat(
+          gaps.missingRoleCodes.map(
+            (code) =>
+              `• ${escapeSlack(code)} — no organigram node with this role code`,
+          ),
+        ),
+    ],
+  ];
+  const filled = sections.filter(([, lines]) => lines.length > 0);
+  if (filled.length === 0) return null;
+  const total = filled.reduce((n, [, lines]) => n + lines.length, 0);
+  const gapWord = total === 1 ? "gap" : "gaps";
+  return [
+    `:clipboard: *Weekly staff check* — ${total} ${gapWord} to fill in Studio.`,
+    ...filled.map(
+      ([title, lines]) => `\n*${title}* (${lines.length})\n${lines.join("\n")}`,
+    ),
+  ].join("\n");
 }
 
 /** Slack must answer within this or the ping is dropped (resolves `false`). */

@@ -7,8 +7,7 @@ import { teamHref } from "@/lib/utils/team-href";
 import { NextRequest, NextResponse } from "next/server";
 import { Effect } from "effect";
 import { unstable_cache } from "next/cache";
-import { CLIENT_IP_HEADER } from "@kcvv/api-contract";
-import { bffKeyHeader } from "@/lib/server/bff-key";
+import { proxyPostToBff } from "@/lib/server/bff-proxy";
 import { runPromise } from "@/lib/effect/runtime";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
 import { PlayerRepository } from "@/lib/repositories/player.repository";
@@ -243,50 +242,7 @@ const searchTeams = (query: string) =>
  * URL out of the client bundle.
  */
 export async function POST(request: NextRequest) {
-  const bffUrl = process.env.KCVV_API_URL;
-  const bffKey = bffKeyHeader();
-  if (!bffUrl || !bffKey) {
-    return NextResponse.json(
-      { error: "Search service not configured" },
-      { status: 503 },
-    );
-  }
-
-  try {
-    const body = (await request.json()) as unknown;
-    // The worker rate-limits per visitor (#3468) but only sees Vercel's IP.
-    // Vercel overwrites x-vercel-forwarded-for, so a client cannot spoof it.
-    const clientIp =
-      request.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim() ||
-      request.headers.get("x-real-ip") ||
-      undefined;
-    const res = await fetch(`${bffUrl}/search`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...bffKey,
-        ...(clientIp ? { [CLIENT_IP_HEADER]: clientIp } : {}),
-      },
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(15_000),
-    });
-    // Read the body once: `res.json()` consumes it, so a `res.text()` fallback
-    // after a failed parse would throw "Body is unusable".
-    const text = await res.text();
-    let data: unknown;
-    try {
-      data = JSON.parse(text) as unknown;
-    } catch {
-      data = { error: text || "Unknown error from search service" };
-    }
-    return NextResponse.json(data, { status: res.status });
-  } catch (error) {
-    console.error("[Search API] Semantic search proxy error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
-  }
+  return proxyPostToBff(request, "/search");
 }
 
 export async function GET(request: NextRequest) {

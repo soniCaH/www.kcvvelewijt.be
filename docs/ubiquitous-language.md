@@ -238,11 +238,15 @@ Multiple teams can share the same age group (e.g. three U9 teams distinguished b
 
 The three-tier grouping of youth teams used by the club internally and by parents. Derived client-side from the age group — not stored in any data source.
 
-| Code / Label   | Dutch      | Age range | Teams                    |
-| -------------- | ---------- | --------- | ------------------------ |
-| `"Onderbouw"`  | Onderbouw  | U6–U11    | U6, U7, U8, U9, U10, U11 |
-| `"Middenbouw"` | Middenbouw | U12–U16   | U12, U13, U14, U15, U16  |
-| `"Bovenbouw"`  | Bovenbouw  | U17–U21   | U17, U19, U21            |
+The bands follow the federation's match formats, per Voetbal Vlaanderen's [jeugdreglementering poster 2024](https://belgianfootball.s3.eu-central-1.amazonaws.com/s3fs-public/voetbalvlaanderen/Club/Jeugdvoetbal/010824_Poster+jeugdreglementering+2024.pdf) (#3555; a Sanity field was rejected on #3420):
+
+| Code / Label   | Dutch      | Age range | Match format | Teams                        |
+| -------------- | ---------- | --------- | ------------ | ---------------------------- |
+| `"Onderbouw"`  | Onderbouw  | U6–U9     | 2v2 → 5v5    | U6, U7, U8, U9               |
+| `"Middenbouw"` | Middenbouw | U10–U13   | 8v8          | U10, U11, U12, U13           |
+| `"Bovenbouw"`  | Bovenbouw  | U14–U21   | 11v11        | U14, U15, U16, U17, U19, U21 |
+
+`KCVVE U16` arrives from PSD with `age: "U17"` — Bovenbouw either way.
 
 **Implementation:** `getYouthDivision()` in `apps/web/src/lib/utils/group-teams.ts`. Used for section headers on `/ploegen` and `/jeugd`, and as a badge on individual team detail pages. Both pages list the divisions and their teams small → large (#3427).
 

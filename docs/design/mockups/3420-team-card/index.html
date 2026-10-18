@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>#3420 — ploegkaart in /hulp</title>
+<link rel="stylesheet" href="https://use.typekit.net/cvo5raz.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+:root{--cream:#f5f1e6;--cream-soft:#ede8da;--cream-deep:#e1d7bf;--ink:#0a0a0a;--ink-muted:#6b6b6b;--jersey:#4acf52;--jersey-deep:#007c46;--warm:#f0c264;--warning-soft:#ecddb8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font:16px/1.5 "freight-sans-pro",system-ui,sans-serif;padding:24px 16px 64px}
+.mono{font-family:"IBM Plex Mono",monospace}
+.disp{font-family:"freight-display-pro",georgia,serif}
+h1{font:600 30px/1.1 "freight-display-pro",georgia,serif;margin:0 0 6px}
+.intro{max-width:70ch;margin:0 0 28px;color:var(--ink-muted)}
+h2{font:600 13px/1.3 "IBM Plex Mono",monospace;text-transform:uppercase;letter-spacing:.08em;margin:40px 0 14px;color:var(--jersey-deep)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:28px;align-items:start}
+.state{max-width:420px}
+.query{display:flex;align-items:center;gap:8px;border:2px solid var(--ink);background:#fff;padding:10px 12px;font-size:16px;margin-bottom:10px}
+.query::before{content:"⌕";font-size:18px;color:var(--ink-muted)}
+.label{font:600 11px/1.3 "IBM Plex Mono",monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-muted);margin:0 0 6px}
+.card{border:2px solid var(--ink);background:var(--cream-soft);box-shadow:4px 4px 0 var(--ink);padding:14px}
+.kicker{font:600 10px/1 "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--jersey-deep);margin-bottom:6px}
+.title{font:600 24px/1.1 "freight-display-pro",georgia,serif;margin:0 0 12px}
+.title em{font-weight:400}
+.sub{font:600 16px/1.2 "freight-display-pro",georgia,serif;margin:14px 0 8px;padding-top:12px;border-top:1.5px dashed var(--ink-muted)}
+.sub .yr{font:600 10px/1 "IBM Plex Mono",monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-muted);display:block;margin-bottom:4px}
+.person{display:flex;align-items:center;gap:10px;border:2px solid var(--ink);background:var(--cream);padding:8px 10px;margin-bottom:8px;box-shadow:2px 2px 0 var(--ink)}
+.av{width:36px;height:36px;border-radius:50%;background:var(--jersey-deep);color:var(--cream);display:flex;align-items:center;justify-content:center;font:600 13px "IBM Plex Mono",monospace;flex:none}
+.pn{font:15px/1.15 "freight-display-pro",georgia,serif}.pn b{font-weight:600}.pn em{font-weight:400}
+.pr{font:9px/1.2 "IBM Plex Mono",monospace;letter-spacing:.05em;text-transform:uppercase;color:var(--jersey-deep);margin-top:2px}
+.act{margin-left:auto;display:flex;gap:6px}.act span{width:34px;height:34px;border:1.5px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:14px}
+.links{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.link{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--jersey-deep);color:var(--jersey-deep);padding:7px 10px;font:600 10px/1 "IBM Plex Mono",monospace;letter-spacing:.05em;text-transform:uppercase;text-decoration:none}
+.note{margin-top:12px;background:var(--warning-soft);border-left:4px solid var(--warm);padding:10px 12px;font-size:15px;line-height:1.35}
+.note .link{margin-top:8px}
+.ask{display:flex;gap:8px;margin-top:4px}
+.btn{border:2px solid var(--ink);background:var(--ink);color:var(--cream);padding:8px 14px;font:600 11px/1 "IBM Plex Mono",monospace;letter-spacing:.05em;text-transform:uppercase}
+.btn.ghost{background:transparent;color:var(--ink)}
+.hint{font-size:14px;color:var(--ink-muted);margin:8px 0 0}
+.answers{margin-top:14px;border-top:2px solid var(--ink);padding-top:8px;font-size:14px;color:var(--ink-muted)}
+.answers div{padding:6px 0;border-bottom:1px solid var(--cream-deep)}
+.why{font-size:13px;color:var(--ink-muted);margin:8px 0 0;max-width:420px}
+/* entry points */
+.tcard{position:relative;width:220px;border:2px solid var(--ink);background:var(--cream);padding:18px 14px 14px;box-shadow:4px 4px 0 var(--ink)}
+.tcard::before{content:"";position:absolute;top:-9px;left:50%;width:70px;height:18px;transform:translateX(-50%) rotate(-3deg);background:rgb(232 224 200/.85)}
+.tcard .n{font:600 26px/1 "freight-display-pro",georgia,serif}
+.band{display:inline-block;margin-top:8px;font:600 10px/1 "IBM Plex Mono",monospace;letter-spacing:.06em;text-transform:uppercase;padding:5px 7px;border:1.5px solid currentColor}
+.ob{color:#b0761d}.mb{color:var(--jersey-deep)}.bb{color:#1f1f1f}
+.tcard .lg{font-size:13px;color:var(--ink-muted);margin-top:6px}
+.hero{background:var(--jersey-deep);color:var(--cream);padding:28px 22px;max-width:640px}
+.hero .k{font:600 11px/1 "IBM Plex Mono",monospace;letter-spacing:.08em;text-transform:uppercase;opacity:.85}
+.hero .n{font:600 46px/1 "freight-display-pro",georgia,serif;margin:10px 0 14px}
+.pill{display:inline-block;border:1.5px solid var(--cream);padding:6px 9px;font:600 11px/1 "IBM Plex Mono",monospace;letter-spacing:.06em;text-transform:uppercase}
+.row{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
+.tag{display:inline-block;font:600 10px/1 "IBM Plex Mono",monospace;background:var(--ink);color:var(--cream);padding:3px 6px;letter-spacing:.05em;margin-left:6px;vertical-align:middle}
+</style></head><body>
+<h1>Ploegkaart in /hulp — #3420</h1>
+<p class="intro">Prototype. Every state the card can be in, from the decisions on #3420. The names are placeholders. The card sits above the normal search answers (greyed out below each card). Real fonts and colours; layout is a sketch, not the final component.</p>
+
+<div id="states"></div>
+
+<h2>Other entry points — band as text</h2>
+<div class="row">
+  <div><p class="label">Team card · /jeugd + /ploegen</p>
+    <div class="row">
+      <div class="tcard"><div class="n">U9</div><span class="band ob">Onderbouw</span><div class="lg">U9 - Wit</div></div>
+      <div class="tcard"><div class="n">U12</div><span class="band mb">Middenbouw</span><div class="lg">U12 - Groen</div></div>
+      <div class="tcard"><div class="n">U16</div><span class="band bb">Bovenbouw</span><div class="lg">U17 Gewestelijk</div></div>
+    </div>
+    <p class="why">Today the band only colours the card. New: the band name as text on every card. U16 moves from Middenbouw to Bovenbouw.</p>
+  </div>
+  <div><p class="label">Team page header</p>
+    <div class="hero"><div class="k">Jeugd · seizoen 2026–27</div><div class="n">U12</div><span class="pill">U12 · Middenbouw</span></div>
+    <p class="why">The hero pill already shows the band. New: the age in front, so it reads the same as the /hulp card.</p>
+  </div>
+</div>
+
+<script>
+const P=(i,n,r)=>`<div class="person"><div class="av">${i}</div><div><div class="pn"><b>${n.split(" ")[0]}</b> <em>${n.split(" ").slice(1).join(" ")}</em></div><div class="pr">${r}</div></div><div class="act"><span>✉</span><span>☎</span></div></div>`;
+const COORD={OB:P("CO","Coördinator Onderbouw","Jeugdcoördinator Onderbouw"),MB:P("CM","Coördinator Middenbouw","Jeugdcoördinator Middenbouw"),BB:P("CB","Coördinator Bovenbouw","Jeugdcoördinator Bovenbouw")};
+const TVJO=P("TV","Naam TVJO","TVJO · alle jeugd");
+const L=t=>`<a class="link" href="#">${t} →</a>`;
+const ANS=`<div class="answers"><div>Normale antwoorden…</div><div>…blijven hieronder staan</div></div>`;
+const S=[
+ {h:"Rules hits",items:[
+  {q:"U12",l:"U-code",c:`<div class="kicker">Jouw ploeg</div><div class="title">U12 · <em>Middenbouw</em></div>${COORD.MB}${TVJO}<div class="links">${L("Staf van U12")}</div>`},
+  {q:"vraag over de U8",l:"Two teams at one age → one card",c:`<div class="kicker">Jouw ploeg</div><div class="title">U8 · <em>Onderbouw</em></div>${COORD.OB}${TVJO}<div class="links">${L("Staf van U8 Wit")}${L("Staf van U8 Groen")}</div>`},
+  {q:"miniemen",l:"Old name (sure list) → U12 + U13",c:`<div class="kicker">Miniemen = U12 en U13</div><div class="title">U12–U13 · <em>Middenbouw</em></div>${COORD.MB}${TVJO}<div class="links">${L("Staf van U12")}${L("Staf van U13")}</div>`},
+ ]},
+ {h:"Age and birth year",items:[
+  {q:"mijn zoon is 8 jaar, wie moet ik contacteren?",l:"Plain age → both teams",c:`<div class="kicker">8 jaar — hangt af van het geboortejaar</div><div class="title">U9 of U10</div><div class="sub"><span class="yr">Geboren in 2018</span>U9 · <em>Onderbouw</em></div>${COORD.OB}<div class="links">${L("Staf van U9")}</div><div class="sub"><span class="yr">Geboren in 2017</span>U10 · <em>Middenbouw</em></div>${COORD.MB}<div class="links">${L("Staf van U10")}${L("Staf van U10P")}</div><div class="sub" style="border-top-style:solid">Voor alle jeugd</div>${TVJO}`,w:"Two bands, so two coordinators. The TVJO shows once, at the bottom."},
+  {q:"mijn dochter is geboren in 2018, welke ploeg is dat?",l:"Birth year + late-born note",c:`<div class="kicker">Geboren in 2018</div><div class="title">U9 · <em>Onderbouw</em></div>${COORD.OB}${TVJO}<div class="links">${L("Staf van U9")}</div><div class="note">Geboren tussen juli en december? Dan mag je kind ook in de <b>U8</b> spelen — de coördinator beslist.<br>${L("Staf van U8 Wit")} ${L("Staf van U8 Groen")}</div>`,w:"Federation rule since 1 July 2025: born July–December may play one category lower (regional, up to U17)."},
+  {q:"geboren in 2009",l:"No team at that age → next team up",c:`<div class="kicker">Geboren in 2009 = U18</div><div class="title">U19 · <em>Bovenbouw</em></div><p class="hint" style="margin:0 0 10px">We hebben geen U18. Spelers van die leeftijd spelen bij de U19.</p>${COORD.BB}${TVJO}<div class="links">${L("Staf van U19")}</div>`},
+ ]},
+ {h:"AI fallback — asks first",items:[
+  {q:"mijn zoon speelt bij de pupillen",l:"AI pick, before the tap",c:`<div class="kicker">Bedoel je deze ploeg?</div><div class="title">U9 · <em>Onderbouw</em></div><div class="ask"><span class="btn">Ja, toon contact</span><span class="btn ghost">Nee</span></div><p class="hint">Niet zeker? Zoek op leeftijd, bv. “U9” of “geboren in 2018”.</p>`,w:"The AI may only pick from the real team list. After “Ja” the normal card opens. Both answers go to GA4."},
+ ]},
+ {h:"Edge states",items:[
+  {q:"U14",l:"Coordinator missing → row hidden",c:`<div class="kicker">Jouw ploeg</div><div class="title">U14 · <em>Bovenbouw</em></div>${TVJO}<div class="links">${L("Staf van U14")}</div>`,w:"The weekly email names the empty coordinator position."},
+  {q:"U5",l:"U5 → Onderbouw coordinator",c:`<div class="kicker">Jouw ploeg</div><div class="title">U5</div>${COORD.OB}${TVJO}<div class="links">${L("Staf van U5")}</div>`,w:"No band in the title — U5 has none. The Onderbouw coordinator looks after it."},
+  {q:"A-ploeg",l:"Senior team → no card",c:null,w:"Only the normal answers."},
+ ]},
+];
+document.getElementById("states").innerHTML=S.map(g=>`<h2>${g.h}</h2><div class="grid">${g.items.map(s=>`<div class="state"><p class="label">${s.l}</p><div class="query">${s.q}</div>${s.c?`<div class="card">${s.c}</div>`:""}${ANS}${s.w?`<p class="why">${s.w}</p>`:""}</div>`).join("")}</div>`).join("");
+</script>
+</body></html>

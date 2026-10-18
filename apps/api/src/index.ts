@@ -40,6 +40,11 @@ import { pruneJobOutcome, type JobOutcome } from "./search/prune-outcome";
 import { SanityMutationLive } from "./sanity/mutation";
 import { SanityProjectionLive } from "./sanity/projection";
 import { runSync } from "./sync/psd-sanity-sync";
+import {
+  runStaffGapsCheck,
+  STAFF_GAPS_CRON,
+  STAFF_GAPS_JOB,
+} from "./sync/staff-gaps-check";
 import { handleIndexWebhook } from "./webhooks/index-handler";
 import { reportScheduledJobOutcome } from "./psd/job-alert";
 import { refuseUnlessBffKey } from "./auth/bff-key";
@@ -285,6 +290,18 @@ export default {
       // "wall-clock" number #2900 measures against the 15-minute Cron
       // Trigger ceiling (#2870 review).
       await reportJobOutcome("psd-sanity-sync", outcome);
+      if (!outcome.ok) throw outcome.error;
+    } else if (event.cron === STAFF_GAPS_CRON) {
+      // Weekly staff-gaps nudge (#3561) — one Sanity read and at most one
+      // Slack POST, so it runs on its own cron instead of eating into the
+      // nightly sync's 15-minute ceiling. Own job name in the job-alert state.
+      const layer = Layer.mergeAll(SanityProjectionLive, envLayer).pipe(
+        Layer.provide(envLayer),
+      );
+      const outcome = await settleJob(STAFF_GAPS_JOB, () =>
+        Effect.runPromise(Effect.provide(runStaffGapsCheck, layer)),
+      );
+      await reportJobOutcome(STAFF_GAPS_JOB, outcome);
       if (!outcome.ok) throw outcome.error;
     } else {
       await Effect.runPromise(

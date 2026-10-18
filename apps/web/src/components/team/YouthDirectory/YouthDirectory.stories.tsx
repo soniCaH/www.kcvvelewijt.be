@@ -21,24 +21,23 @@ const divisions: YouthDivisionGroup[] = [
   reserven,
   {
     label: "Onderbouw",
-    range: "U6–U11",
-    teams: [
-      team("U6", PHOTO),
-      team("U7"),
-      team("U8"),
-      team("U9"),
-      team("U11", PHOTO),
-    ],
+    range: "U6–U9",
+    teams: [team("U6", PHOTO), team("U7"), team("U8"), team("U9")],
   },
   {
     label: "Middenbouw",
-    range: "U12–U16",
-    teams: [team("U13", PHOTO), team("U15", PHOTO)],
+    range: "U10–U13",
+    teams: [team("U11", PHOTO), team("U13", PHOTO)],
   },
   {
     label: "Bovenbouw",
-    range: "U17–U21",
-    teams: [team("U17", PHOTO), team("U19"), team("U21", PHOTO)],
+    range: "U14–U21",
+    teams: [
+      team("U15", PHOTO),
+      team("U17", PHOTO),
+      team("U19"),
+      team("U21", PHOTO),
+    ],
   },
 ];
 
@@ -74,9 +73,9 @@ export const SparseDirectory: Story = {
     heading: "Andere",
     divisions: [
       { label: "Reserven", teams: [] },
-      { label: "Onderbouw", range: "U6–U11", teams: [] },
-      { label: "Middenbouw", range: "U12–U16", teams: [team("U13")] },
-      { label: "Bovenbouw", range: "U17–U21", teams: [] },
+      { label: "Onderbouw", range: "U6–U9", teams: [] },
+      { label: "Middenbouw", range: "U10–U13", teams: [team("U13")] },
+      { label: "Bovenbouw", range: "U14–U21", teams: [] },
     ],
   },
 };
@@ -96,9 +95,27 @@ export const BovenbouwFocus: Story = {
     heading: "Andere",
     divisions: [
       { label: "Reserven", teams: [] },
-      { label: "Onderbouw", range: "U6–U11", teams: [] },
-      { label: "Middenbouw", range: "U12–U16", teams: [] },
-      { label: "Bovenbouw", range: "U17–U21", teams: [team("U19")] },
+      { label: "Onderbouw", range: "U6–U9", teams: [] },
+      { label: "Middenbouw", range: "U10–U13", teams: [] },
+      { label: "Bovenbouw", range: "U14–U21", teams: [team("U19")] },
+    ],
+  },
+};
+
+/**
+ * One team per band, plus U5 — the band label as text (#3556). U5 is an age
+ * code with no band, so its card prints none. Production never groups U5 here
+ * (`groupTeamsForLanding` places only banded ages); the card is placed by hand
+ * to pin the no-band case. Phone-first, so every card is in frame on mobile.
+ */
+export const EveryBand: Story = {
+  args: {
+    heading: "Andere",
+    divisions: [
+      { label: "Reserven", teams: [] },
+      { label: "Onderbouw", range: "U6–U9", teams: [team("U5"), team("U9")] },
+      { label: "Middenbouw", range: "U10–U13", teams: [team("U12")] },
+      { label: "Bovenbouw", range: "U14–U21", teams: [team("U16")] },
     ],
   },
 };

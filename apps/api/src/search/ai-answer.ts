@@ -23,6 +23,17 @@ export interface AiAnswerServiceInterface {
     query: string,
     context: string,
   ) => Effect.Effect<string | undefined, AiAnswerError>;
+  /**
+   * The `/hulp` team card's AI fallback (#3559): one of `ages` for a query the
+   * rules found no team for, or `null` when the model named none of them.
+   * `undefined` when the model was not asked (daily cap) or failed — a
+   * caller may cache a `null`, never an `undefined`. Same model and daily cap
+   * as answers.
+   */
+  readonly guessTeam: (
+    query: string,
+    ages: readonly string[],
+  ) => Effect.Effect<string | null | undefined>;
 }
 
 export class AiAnswerService extends Context.Tag("AiAnswerService")<
@@ -37,6 +48,29 @@ const SYSTEM_PROMPT =
   "Beantwoord de vraag beknopt en duidelijk in het Nederlands op basis van de gegeven context. " +
   "Geef geen antwoord als de context geen relevant antwoord bevat. " +
   "Antwoord in maximaal 3 zinnen.";
+
+const TEAM_GUESS_PROMPT = (ages: readonly string[]) =>
+  "Je helpt ouders bij voetbalclub KCVV Elewijt de jeugdploeg van hun kind te vinden. " +
+  "Een ploeg heet naar de leeftijdscategorie: U9 is voor kinderen onder 9 jaar. " +
+  `De club heeft enkel deze ploegen: ${ages.join(", ")}. ` +
+  "Antwoord met precies één code uit die lijst, of met none als je het niet zeker weet. " +
+  "Schrijf niets anders.";
+
+/**
+ * The model's reply as one of `ages`, or `null`. Only a bare code counts —
+ * `"Ik denk U9"` or `"U9 of U10"` is not a pick, and neither is a code that
+ * is not on the list.
+ */
+export const allowedAge = (
+  reply: string,
+  ages: readonly string[],
+): string | null => {
+  const code = reply
+    .trim()
+    .replace(/^["'`]+|["'`.!]+$/g, "")
+    .toUpperCase();
+  return ages.includes(code) ? code : null;
+};
 
 /** KV day counter of AI answers; kept 2 days so yesterday stays readable. */
 const answersKey = (day: string) => `ai:answers:${day}`;
@@ -61,24 +95,24 @@ export const AiAnswerServiceLive = Layer.effect(
         ),
       );
 
-    const run = (query: string, context: string) =>
+    const run = (
+      system: string,
+      user: string,
+      // Bounds the bill if the model does not listen to the prompt (#3468).
+      maxTokens: number,
+    ) =>
       Effect.tryPromise({
         try: async () => {
           const messages = [
-            { role: "system" as const, content: SYSTEM_PROMPT },
-            {
-              role: "user" as const,
-              content: `Context:\n${context}\n\nVraag: ${query}\n\nAntwoord:`,
-            },
+            { role: "system" as const, content: system },
+            { role: "user" as const, content: user },
           ];
           const ai = env.AI as unknown as {
             run: (model: string, input: unknown) => Promise<unknown>;
           };
-          // The prompt asks for 3 sentences; this bounds the bill if it
-          // does not listen (#3468).
           const result = (await ai.run(MODEL, {
             messages,
-            max_tokens: 256,
+            max_tokens: maxTokens,
           })) as {
             response?: string;
           };
@@ -95,20 +129,38 @@ export const AiAnswerServiceLive = Layer.effect(
         ),
       );
 
+    /** One model call under the daily cap; counted only when it replied. */
+    const metered = (call: Effect.Effect<string | undefined>) =>
+      Effect.gen(function* () {
+        const day = utcDay();
+        const count = parseCount(yield* cache.get(answersKey(day)));
+        if (cap !== undefined && count >= cap) {
+          yield* logCappedOncePerDay(day, count, cap);
+          return undefined;
+        }
+        const reply = yield* call;
+        if (reply !== undefined)
+          yield* cache.set(answersKey(day), String(count + 1), COUNTER_TTL);
+        return reply;
+      });
+
     return {
       generateAnswer: (query: string, context: string) =>
-        Effect.gen(function* () {
-          const day = utcDay();
-          const count = parseCount(yield* cache.get(answersKey(day)));
-          if (cap !== undefined && count >= cap) {
-            yield* logCappedOncePerDay(day, count, cap);
-            return undefined;
-          }
-          const answer = yield* run(query, context);
-          if (answer !== undefined)
-            yield* cache.set(answersKey(day), String(count + 1), COUNTER_TTL);
-          return answer;
-        }),
+        // The prompt asks for 3 sentences.
+        metered(
+          run(
+            SYSTEM_PROMPT,
+            `Context:\n${context}\n\nVraag: ${query}\n\nAntwoord:`,
+            256,
+          ),
+        ),
+      guessTeam: (query: string, ages: readonly string[]) =>
+        // One code or "none" is a few tokens.
+        metered(run(TEAM_GUESS_PROMPT(ages), query, 8)).pipe(
+          Effect.map((reply) =>
+            reply === undefined ? undefined : allowedAge(reply, ages),
+          ),
+        ),
     };
   }),
 );

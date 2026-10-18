@@ -16,7 +16,7 @@ export type TeamLandingItem = {
 export type YouthDivisionGroup = {
   label: YouthDivisionName | typeof RESERVEN_LABEL;
   /**
-   * The group's age band, e.g. "U12–U16". Absent on groups that are not an
+   * The group's age band, e.g. "U10–U13". Absent on groups that are not an
    * age band at all (Reserven), which the directory heading renders bare.
    */
   range?: string;
@@ -58,16 +58,21 @@ export function isAgeCode(ageGroup: string | undefined): boolean {
   return ageGroup != null && parseAge(ageGroup) != null;
 }
 
-/** Derive the youth division name from an age group string (e.g. "U15" → "Middenbouw"). */
+/**
+ * Derive the youth division name from an age group string (e.g. "U15" →
+ * "Bovenbouw"). The bands follow Voetbal Vlaanderen's match formats (#3555):
+ * Onderbouw U6–U9 (2v2 → 5v5), Middenbouw U10–U13 (8v8), Bovenbouw U14–U21
+ * (11v11).
+ */
 export function getYouthDivision(
   ageGroup: string | undefined,
 ): YouthDivisionName | null {
   if (!ageGroup) return null;
   const age = parseAge(ageGroup);
   if (age == null) return null;
-  if (age >= 17 && age <= 21) return "Bovenbouw";
-  if (age >= 12 && age <= 16) return "Middenbouw";
-  if (age >= 6 && age <= 11) return "Onderbouw";
+  if (age >= 14 && age <= 21) return "Bovenbouw";
+  if (age >= 10 && age <= 13) return "Middenbouw";
+  if (age >= 6 && age <= 9) return "Onderbouw";
   return null;
 }
 
@@ -138,21 +143,21 @@ export function groupTeamsForLanding(teams: TeamLandingItem[]): GroupedTeams {
       },
       {
         label: "Onderbouw",
-        range: "U6–U11",
+        range: "U6–U9",
         teams: teams
           .filter((t) => getYouthDivision(t.age) === "Onderbouw")
           .sort(byAgeAsc),
       },
       {
         label: "Middenbouw",
-        range: "U12–U16",
+        range: "U10–U13",
         teams: teams
           .filter((t) => getYouthDivision(t.age) === "Middenbouw")
           .sort(byAgeAsc),
       },
       {
         label: "Bovenbouw",
-        range: "U17–U21",
+        range: "U14–U21",
         teams: teams
           .filter((t) => getYouthDivision(t.age) === "Bovenbouw")
           .sort(byAgeAsc),

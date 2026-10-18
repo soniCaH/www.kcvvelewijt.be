@@ -38,6 +38,7 @@ function makeVectorizeMock(
 function makeAiAnswerMock(answer?: string): AiAnswerServiceInterface {
   return {
     generateAnswer: () => Effect.succeed(answer),
+    guessTeam: () => Effect.succeed(null),
   };
 }
 
@@ -299,7 +300,7 @@ describe("handleSearch — LLM answer", () => {
             makeHit("kantine", LLM_SCORE_THRESHOLD),
             makeHit("bar", MIN_SCORE + 0.05),
           ],
-          aiService: { generateAnswer },
+          aiService: { ...makeAiAnswerMock(), generateAnswer },
         },
       ),
     );
@@ -322,7 +323,7 @@ describe("handleSearch — LLM answer", () => {
     const result = await Effect.runPromise(
       provideAllServices(handleSearch({ query: "vague question", limit: 5 }), {
         matches: [makeHit("low", LLM_SCORE_THRESHOLD - 1e-6)],
-        aiService: { generateAnswer },
+        aiService: { ...makeAiAnswerMock(), generateAnswer },
       }),
     );
 
@@ -338,7 +339,7 @@ describe("handleSearch — LLM answer", () => {
     const result = await Effect.runPromise(
       provideAllServices(handleSearch({ query: "kantine", limit: 5 }), {
         matches: [makeHit("kantine", LLM_SCORE_THRESHOLD)],
-        aiService: { generateAnswer },
+        aiService: { ...makeAiAnswerMock(), generateAnswer },
       }),
     );
 

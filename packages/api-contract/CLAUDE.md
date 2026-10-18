@@ -14,7 +14,7 @@ src/
 │   ├── ranking.ts      ← RankingEntry, RankingArray, RankingTable, RankingTableArray
 │   ├── related.ts      ← RelatedItem
 │   ├── player-stats.ts ← PlayerSeasonStats, PlayerTeamStats
-│   ├── search.ts       ← SearchRequest, SearchResponse
+│   ├── search.ts       ← SearchRequest, SearchResponse, TeamGuessRequest, TeamGuessResponse (#3559)
 │   ├── forms.ts        ← MembershipRequest, MembershipResponse
 │   └── index.ts        ← barrel
 ├── api/
@@ -22,9 +22,10 @@ src/
 │   ├── ranking.ts      ← RankingApi HttpApiGroup
 │   ├── opponent.ts     ← OpponentApi HttpApiGroup
 │   ├── related.ts      ← RelatedApi HttpApiGroup
-│   ├── search.ts       ← SearchApi HttpApiGroup
+│   ├── search.ts       ← SearchApi HttpApiGroup (`/search`, `/search/team-guess`)
 │   ├── forms.ts        ← FormsApi HttpApiGroup
 │   └── index.ts        ← PsdApi root export + BFF_KEY_HEADER (`x-kcvv-bff-key`, #3485) + CLIENT_IP_HEADER (`x-kcvv-client-ip`, #3468)
+├── organigram.ts       ← YOUTH_COORDINATOR_ROLE_CODES, TVJO_ROLE_CODE (#3420) — plain constants, not schemas
 ├── wire.test.ts        ← the BFF seam: every schema round-trips encode → JSON → decode
 └── index.ts            ← re-exports everything
 ```

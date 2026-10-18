@@ -55,6 +55,15 @@ import {
   SECTION_NAV_CHIP_SHADOW_CLASS,
   SECTION_NAV_TRAILING_SLOT_CLASSES,
 } from "@/components/design-system/section-nav";
+import { TeamCard, TeamGuessCard } from "@/components/hulp/TeamCard";
+import { useTeamGuess } from "@/hooks/useTeamGuess";
+import {
+  aiTeamResult,
+  hasYouthHint,
+  matchYouthTeams,
+  youthTeamAges,
+  type YouthTeamSource,
+} from "@/lib/utils/match-youth-team";
 import type { OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
 import {
@@ -90,6 +99,20 @@ export interface HubSearchProps {
   maxResults?: number;
   /** Extra classes on the root (e.g. `max-w-[480px]`). */
   className?: string;
+  /**
+   * The youth team card's data (#3558): a query that names one of `teams`
+   * shows `<TeamCard>` above the results. Omitted → no card.
+   */
+  youthTeamCard?: YouthTeamCardData;
+}
+
+/** What the youth team card needs from the server, always together. */
+export interface YouthTeamCardData {
+  teams: YouthTeamSource[];
+  /** Start year of the current season (`seasonStartYear`). */
+  seasonYear: number;
+  /** The calendar year now — ages read birth years from it, not from the season. */
+  calendarYear: number;
 }
 
 /** A light contact label for the answer-forward card (no resolveContact dep). */
@@ -241,6 +264,7 @@ export function HubSearch({
   placeholder = "Zoek een naam, functie of vraag…",
   maxResults = 5,
   className = "",
+  youthTeamCard,
 }: HubSearchProps) {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [debouncedValue, setDebouncedValue] = useState("");
@@ -377,6 +401,75 @@ export function HubSearch({
       maxResults,
     ],
   );
+
+  // Youth team card (#3558) — rules first, on the debounced query like the
+  // people lane. Members carry the coordinator and TVJO boxes already.
+  const debouncedTrimmed = debouncedValue.trim();
+  const rulesMatch = useMemo(
+    () =>
+      youthTeamCard && debouncedTrimmed
+        ? matchYouthTeams(
+            debouncedTrimmed,
+            youthTeamCard.teams,
+            youthTeamCard.seasonYear,
+            youthTeamCard.calendarYear,
+          )
+        : null,
+    [debouncedTrimmed, youthTeamCard],
+  );
+  // The AI gets one try when the rules found nothing and the query speaks of
+  // a child or a youth team (#3559) — `useTeamGuess` waits the semantic
+  // search's debounce, so never per keystroke, and only from the on-screen
+  // instance.
+  const teamAges = useMemo(
+    () => youthTeamAges(youthTeamCard?.teams ?? []),
+    [youthTeamCard],
+  );
+  const guessQuery =
+    visible && rulesMatch?.bands.length === 0 && hasYouthHint(debouncedTrimmed)
+      ? debouncedTrimmed
+      : null;
+  const guess = useTeamGuess(guessQuery, teamAges);
+  const [guessAnswer, setGuessAnswer] = useState<{
+    query: string;
+    answer: "yes" | "no";
+  } | null>(null);
+  const liveGuess =
+    guess && guessQuery && guess.query === guessQuery ? guess : null;
+  const guessResult = useMemo(
+    () =>
+      liveGuess && youthTeamCard
+        ? aiTeamResult(
+            liveGuess.age,
+            youthTeamCard.teams,
+            youthTeamCard.seasonYear,
+            youthTeamCard.calendarYear,
+          )
+        : null,
+    [liveGuess, youthTeamCard],
+  );
+  const answered =
+    guessAnswer && liveGuess && guessAnswer.query === liveGuess.query
+      ? guessAnswer.answer
+      : null;
+  // Dedup guard: a double tap lands both clicks before the re-render that
+  // removes the buttons, so state alone cannot tell the second one apart.
+  const answeredQueryRef = useRef<string | null>(null);
+  const answerGuess = (answer: "yes" | "no") => {
+    if (!liveGuess || answeredQueryRef.current === liveGuess.query) return;
+    answeredQueryRef.current = liveGuess.query;
+    setGuessAnswer({ query: liveGuess.query, answer });
+    trackEvent("organigram_team_guess_answered", {
+      answer,
+      team_age: liveGuess.age,
+    });
+    // The button just pressed unmounts; keep the caret in the search.
+    inputRef.current?.focus();
+  };
+  const teamMatch = answered === "yes" ? guessResult : rulesMatch;
+  const askGuess = answered === null ? guessResult : null;
+  const teamCardMatches =
+    teamMatch?.bands.flatMap((band) => band.matches) ?? [];
 
   const rows: HubSearchResult[] = interleaveResults(
     memberResults,
@@ -532,6 +625,35 @@ export function HubSearch({
     }
   };
 
+  // `organigram_` events (#3558) — kind and U-codes only, never the query or a
+  // birth year. Keyed on the query and the card, so each distinct card fires
+  // once — closing and reopening the popup on it does not fire again; the
+  // hidden instance's `showResults` is false, so the two mounts never both fire.
+  const shownCardKind =
+    showResults && teamCardMatches.length > 0 ? teamCardMatches[0].kind : null;
+  const shownCardAges = teamCardMatches.map((m) => `U${m.category}`).join(",");
+  const shownCardKey = shownCardKind
+    ? `${debouncedTrimmed}|${shownCardKind}|${shownCardAges}`
+    : null;
+  const firedCardKeyRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!shownCardKind || firedCardKeyRef.current === shownCardKey) return;
+    firedCardKeyRef.current = shownCardKey;
+    trackEvent("organigram_team_card_shown", {
+      match_kind: shownCardKind,
+      team_ages: shownCardAges,
+    });
+  }, [shownCardKey, shownCardKind, shownCardAges]);
+  const teamNotFound = showResults && teamMatch?.unmatchedNumber === true;
+  // Keyed on the trimmed query like the card event: a reopen or a trailing
+  // space on the same query does not fire again.
+  const firedNotFoundRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!teamNotFound || firedNotFoundRef.current === debouncedTrimmed) return;
+    firedNotFoundRef.current = debouncedTrimmed;
+    trackEvent("organigram_team_not_found", { query_kind: "number" });
+  }, [teamNotFound, debouncedTrimmed]);
+
   // Announce result state to screen readers when the listbox is open (S1).
   const statusMessage = !showResults
     ? ""
@@ -541,7 +663,11 @@ export function HubSearch({
         "Bezig met zoeken…"
       : items.length > 0
         ? `${items.length} ${items.length === 1 ? "resultaat" : "resultaten"}`
-        : "Geen resultaten";
+        : teamCardMatches.length > 0
+          ? `Ploeg gevonden: ${shownCardAges.replaceAll(",", ", ")}`
+          : askGuess
+            ? "Bedoel je deze ploeg?"
+            : "Geen resultaten";
 
   // #2478 rule 5 addendum: the `nav` instance sits in a section nav's chip
   // row (<OrganigramSectionNav>) and takes the light chip's exact paper
@@ -723,6 +849,18 @@ export function HubSearch({
           // the section bar's own `z-30` stacking context either way.
           className={`border-ink bg-cream absolute z-40 mt-2 max-h-96 ${dropdownWidth} overflow-y-auto border-2 shadow-[var(--shadow-paper-sm)]`}
         >
+          {/* Above the results and outside the listbox: the card holds links,
+              not options, so arrow-key navigation of the rows is unchanged. */}
+          {teamMatch && teamCardMatches.length > 0 && (
+            <div className="border-ink border-b-2 p-3">
+              <TeamCard result={teamMatch} nodes={members} />
+            </div>
+          )}
+          {askGuess && (
+            <div className="border-ink border-b-2 p-3">
+              <TeamGuessCard result={askGuess} onAnswer={answerGuess} />
+            </div>
+          )}
           {/* `role="listbox"`'s owned children must all be `option`/`group`
               (#3188 — axe `aria-required-children`); the smart-hint banner
               and the "geen resultaten" message are real (non-`aria-hidden`)
@@ -834,7 +972,8 @@ export function HubSearch({
                 )}
               </div>
             </>
-          ) : (
+          ) : teamCardMatches.length > 0 || askGuess ? null : (
+            // The card (or its question) above is the answer — no dead end under it.
             <>
               <div className="px-4 py-6 text-center">
                 <p className="text-ink text-sm">

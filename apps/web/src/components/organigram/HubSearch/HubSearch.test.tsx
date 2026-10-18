@@ -28,6 +28,13 @@ import {
   HUB_SEARCH_PATHS_FORWARD_PHOTO,
 } from "./hub-search.fixture";
 import type { SemanticSearchResult } from "@/hooks/useSemanticSearch";
+import {
+  TEAM_CARD_NODES,
+  TEAM_CARD_CALENDAR_YEAR,
+  TEAM_CARD_SEASON_YEAR,
+  TEAM_CARD_TEAMS,
+  withoutHolder,
+} from "@/components/hulp/TeamCard/team-card.fixture";
 
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 import { trackEvent } from "@/lib/analytics/track-event";
@@ -50,7 +57,8 @@ const mockSemantic: {
   search: vi.fn(),
   clear: vi.fn(),
 };
-vi.mock("@/hooks/useSemanticSearch", () => ({
+vi.mock("@/hooks/useSemanticSearch", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/hooks/useSemanticSearch")>()),
   useSemanticSearch: () => mockSemantic,
 }));
 
@@ -923,5 +931,328 @@ describe("HubSearch — the hub handoff (#3043)", () => {
     const popup = heroRoot.querySelector('[data-testid="hub-search-popup"]');
     expect(popup).toHaveClass("z-40");
     expect(popup).not.toHaveClass("z-50");
+  });
+});
+
+describe("HubSearch — the youth team card (#3558)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    setSemantic({
+      results: [],
+      loading: false,
+      error: false,
+      executedQuery: "",
+    });
+  });
+
+  function renderWithTeams(nodes = TEAM_CARD_NODES) {
+    return render(
+      <HubSearch
+        members={[...HUB_SEARCH_MEMBERS, ...nodes]}
+        responsibilityPaths={HUB_SEARCH_PATHS}
+        youthTeamCard={{
+          teams: TEAM_CARD_TEAMS,
+          seasonYear: TEAM_CARD_SEASON_YEAR,
+          calendarYear: TEAM_CARD_CALENDAR_YEAR,
+        }}
+      />,
+    );
+  }
+
+  it('shows the U12 card with the Middenbouw coordinator and the TVJO for "U12"', async () => {
+    renderWithTeams();
+    typeQuery("U12");
+
+    const card = (
+      await screen.findByRole("heading", { name: "U12 · Middenbouw" })
+    ).closest("section") as HTMLElement;
+    expect(card).toHaveTextContent("Pieter Van den Broeck");
+    expect(card).toHaveTextContent("Tom Verhaegen");
+    expect(screen.getByRole("link", { name: "Staf van U12" })).toHaveAttribute(
+      "href",
+      "/ploegen/kcvve-u12#staf",
+    );
+    // The card is not a listbox option.
+    expect(card.closest('[role="listbox"]')).toBeNull();
+  });
+
+  it("hides the coordinator row when the coordinator box has no active member", async () => {
+    renderWithTeams(withoutHolder("JC-MB"));
+    typeQuery("U12");
+
+    const card = (
+      await screen.findByRole("heading", { name: "U12 · Middenbouw" })
+    ).closest("section") as HTMLElement;
+    expect(card).not.toHaveTextContent("Pieter Van den Broeck");
+    expect(card).not.toHaveTextContent("Jeugdcoördinator Middenbouw");
+    expect(card).toHaveTextContent("Tom Verhaegen");
+  });
+
+  it.each(["A-ploeg", "B-ploeg", "eerste ploeg", "reserven"])(
+    "shows no card for %j, and never asks the AI",
+    async (query) => {
+      vi.stubGlobal("fetch", vi.fn());
+      onTestFinished(() => {
+        vi.unstubAllGlobals();
+      });
+      renderWithTeams();
+      typeQuery(query);
+
+      // Past the 200ms debounce the card and the team guess run on.
+      await act(() => new Promise((r) => setTimeout(r, 250)));
+      expect(screen.getByTestId("hub-search-popup")).toBeInTheDocument();
+      expect(screen.queryByRole("link", { name: /^Staf van/ })).toBeNull();
+      expect(fetch).not.toHaveBeenCalled();
+    },
+  );
+
+  it('reports no "not found" for "A-ploeg"', async () => {
+    renderWithTeams();
+    typeQuery("A-ploeg");
+
+    // Past the 200ms debounce the card's matcher runs on.
+    await act(() => new Promise((r) => setTimeout(r, 250)));
+    expect(screen.getByTestId("hub-search-popup")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /^Staf van/ })).toBeNull();
+    expect(trackEvent).not.toHaveBeenCalledWith(
+      "organigram_team_not_found",
+      expect.anything(),
+    );
+  });
+
+  it("fires organigram_team_card_shown once per distinct card, with kind and ages only", async () => {
+    renderWithTeams();
+    typeQuery("miniemen");
+    await screen.findByRole("heading", { name: "U12–U13 · Middenbouw" });
+    typeQuery("miniemen ");
+    await act(() => new Promise((r) => setTimeout(r, 250)));
+
+    const shown = vi
+      .mocked(trackEvent)
+      .mock.calls.filter(([name]) => name === "organigram_team_card_shown");
+    expect(shown).toEqual([
+      [
+        "organigram_team_card_shown",
+        { match_kind: "old-name", team_ages: "U12,U13" },
+      ],
+    ]);
+  });
+
+  it('shows no "Geen resultaten" under a card when no row matches, and the status names the card', async () => {
+    // The semantic lane has settled on this query, with no rows.
+    setSemantic({ results: [], executedQuery: "U12" });
+    renderWithTeams();
+    typeQuery("U12");
+
+    await screen.findByRole("heading", { name: "U12 · Middenbouw" });
+    expect(screen.queryByRole("option")).toBeNull();
+    expect(screen.queryByText(/Geen resultaten/)).toBeNull();
+    expect(screen.getByRole("status")).toHaveTextContent("Ploeg gevonden: U12");
+  });
+
+  it("fires organigram_team_card_shown once when the popup closes and reopens on the same card", async () => {
+    renderWithTeams();
+    const input = typeQuery("U12");
+    await screen.findByRole("heading", { name: "U12 · Middenbouw" });
+
+    fireEvent.keyDown(input, { key: "Escape" });
+    expect(screen.queryByTestId("hub-search-popup")).toBeNull();
+    fireEvent.focus(input);
+    await screen.findByRole("heading", { name: "U12 · Middenbouw" });
+
+    const shown = vi
+      .mocked(trackEvent)
+      .mock.calls.filter(([name]) => name === "organigram_team_card_shown");
+    expect(shown).toHaveLength(1);
+  });
+
+  it("fires organigram_team_not_found when the query held a number but matched nothing", async () => {
+    renderWithTeams();
+    typeQuery("geboren in 1980");
+
+    await waitFor(() =>
+      expect(trackEvent).toHaveBeenCalledWith("organigram_team_not_found", {
+        query_kind: "number",
+      }),
+    );
+    expect(trackEvent).not.toHaveBeenCalledWith(
+      "organigram_team_card_shown",
+      expect.anything(),
+    );
+  });
+
+  it("fires organigram_team_not_found once per query, across a reopen and a trailing space", async () => {
+    renderWithTeams();
+    const input = typeQuery("geboren in 1980");
+    const notFound = () =>
+      vi
+        .mocked(trackEvent)
+        .mock.calls.filter(([name]) => name === "organigram_team_not_found");
+    await waitFor(() => expect(notFound()).toHaveLength(1));
+
+    fireEvent.keyDown(input, { key: "Escape" });
+    fireEvent.focus(input);
+    typeQuery("geboren in 1980 ");
+    await act(() => new Promise((r) => setTimeout(r, 250)));
+
+    expect(notFound()).toHaveLength(1);
+  });
+});
+
+describe('HubSearch — the AI "Bedoel je …?" fallback (#3559)', () => {
+  const guessCalls = () =>
+    vi
+      .mocked(fetch)
+      .mock.calls.filter(([url]) => url === "/api/search/team-guess");
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    setSemantic({
+      results: [],
+      loading: false,
+      error: false,
+      executedQuery: "",
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Response.json({ age: "U9" })),
+    );
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  function renderWithTeams() {
+    return render(
+      <HubSearch
+        members={[...HUB_SEARCH_MEMBERS, ...TEAM_CARD_NODES]}
+        responsibilityPaths={HUB_SEARCH_PATHS}
+        youthTeamCard={{
+          teams: TEAM_CARD_TEAMS,
+          seasonYear: TEAM_CARD_SEASON_YEAR,
+          calendarYear: TEAM_CARD_CALENDAR_YEAR,
+        }}
+      />,
+    );
+  }
+
+  const settle = () => act(() => new Promise((r) => setTimeout(r, 250)));
+
+  it("makes no BFF call when the rules already found the team", async () => {
+    renderWithTeams();
+    typeQuery("mijn zoon speelt in de U9");
+    await screen.findByRole("heading", { name: "U9 · Onderbouw" });
+    await settle();
+    expect(guessCalls()).toHaveLength(0);
+  });
+
+  it("makes no BFF call without a youth hint word", async () => {
+    renderWithTeams();
+    typeQuery("waar is de kantine");
+    await settle();
+    expect(guessCalls()).toHaveLength(0);
+  });
+
+  it("asks once, on the debounced query, with the club's U-codes", async () => {
+    renderWithTeams();
+    typeQuery("mijn zoon");
+    typeQuery("mijn zoon speelt bij de pupillen");
+
+    await screen.findByText("Bedoel je deze ploeg?");
+    expect(guessCalls()).toHaveLength(1);
+    const body = JSON.parse(String(guessCalls()[0][1]?.body)) as {
+      query: string;
+      ages: string[];
+    };
+    expect(body.query).toBe("mijn zoon speelt bij de pupillen");
+    expect(body.ages).toContain("U9");
+    expect(body.ages).not.toContain("A");
+    // Asking first: no team card, no card event yet.
+    expect(screen.queryByRole("link", { name: /^Staf van/ })).toBeNull();
+    expect(trackEvent).not.toHaveBeenCalledWith(
+      "organigram_team_card_shown",
+      expect.anything(),
+    );
+  });
+
+  it('shows no "Geen resultaten" under the question, and the status asks it', async () => {
+    setSemantic({ executedQuery: "mijn zoon speelt bij de pupillen" });
+    renderWithTeams();
+    typeQuery("mijn zoon speelt bij de pupillen");
+
+    await screen.findByRole("button", { name: "Nee" });
+    expect(screen.queryByText(/Geen resultaten/)).toBeNull();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Bedoel je deze ploeg?",
+    );
+  });
+
+  it("fires organigram_team_guess_answered once on a double tap", async () => {
+    renderWithTeams();
+    typeQuery("mijn zoon speelt bij de pupillen");
+
+    const yes = await screen.findByRole("button", { name: "Ja, toon contact" });
+    act(() => {
+      yes.click();
+      yes.click();
+    });
+
+    const answered = vi
+      .mocked(trackEvent)
+      .mock.calls.filter(([name]) => name === "organigram_team_guess_answered");
+    expect(answered).toHaveLength(1);
+  });
+
+  it('"Ja" opens the normal team card, found by "ai"', async () => {
+    const user = userEvent.setup();
+    renderWithTeams();
+    typeQuery("mijn zoon speelt bij de pupillen");
+
+    await user.click(
+      await screen.findByRole("button", { name: "Ja, toon contact" }),
+    );
+
+    expect(
+      await screen.findByRole("link", { name: "Staf van U9" }),
+    ).toHaveAttribute("href", "/ploegen/kcvve-u9#staf");
+    expect(screen.queryByText("Bedoel je deze ploeg?")).toBeNull();
+    expect(trackEvent).toHaveBeenCalledWith("organigram_team_guess_answered", {
+      answer: "yes",
+      team_age: "U9",
+    });
+    expect(trackEvent).toHaveBeenCalledWith("organigram_team_card_shown", {
+      match_kind: "ai",
+      team_ages: "U9",
+    });
+  });
+
+  it('"Nee" hides the question and fires the event, no card', async () => {
+    const user = userEvent.setup();
+    renderWithTeams();
+    typeQuery("mijn zoon speelt bij de pupillen");
+
+    await user.click(await screen.findByRole("button", { name: "Nee" }));
+
+    expect(screen.queryByText("Bedoel je deze ploeg?")).toBeNull();
+    expect(screen.queryByRole("link", { name: /^Staf van/ })).toBeNull();
+    expect(trackEvent).toHaveBeenCalledWith("organigram_team_guess_answered", {
+      answer: "no",
+      team_age: "U9",
+    });
+    expect(trackEvent).not.toHaveBeenCalledWith(
+      "organigram_team_card_shown",
+      expect.anything(),
+    );
+  });
+
+  it("shows nothing when the AI found none", async () => {
+    vi.mocked(fetch).mockImplementation(async () =>
+      Response.json({ age: null }),
+    );
+    renderWithTeams();
+    typeQuery("mijn zoon speelt bij de pupillen");
+    await waitFor(() => expect(guessCalls()).toHaveLength(1));
+    await settle();
+    expect(screen.queryByText("Bedoel je deze ploeg?")).toBeNull();
   });
 });

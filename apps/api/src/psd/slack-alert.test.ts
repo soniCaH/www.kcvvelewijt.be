@@ -3,6 +3,7 @@ import {
   buildIncidentMessage,
   buildDriftMessage,
   buildJobAlertMessage,
+  buildStaffGapsMessage,
   formatDuration,
   postSlack,
 } from "./slack-alert";
@@ -167,5 +168,112 @@ describe("postSlack", () => {
     );
     expect(errorSpy).toHaveBeenCalled();
     errorSpy.mockRestore();
+  });
+});
+
+describe("buildStaffGapsMessage", () => {
+  const none = {
+    emptyRoles: [],
+    noPhoto: [],
+    coordinators: [],
+    missingRoleCodes: [],
+  };
+  const studio = "https://kcvvelewijt.sanity.studio/intent/edit";
+
+  it("returns null when there is nothing to report", () => {
+    expect(buildStaffGapsMessage(none)).toBeNull();
+  });
+
+  it("lists staff with an empty role, linking the team document", () => {
+    const msg = buildStaffGapsMessage({
+      ...none,
+      emptyRoles: [
+        { teamId: "team-a", teamName: "U13 A", memberName: "Jan Peeters" },
+        { teamId: "team-b", teamName: "U9 B", memberName: null },
+      ],
+    });
+    expect(msg).toContain("*Staff without a role* (2)");
+    expect(msg).toContain(
+      `• U13 A — Jan Peeters <${studio}/id=team-a;type=team|open in Studio>`,
+    );
+    expect(msg).toContain("• U9 B — (no name)");
+    expect(msg).not.toContain("without a photo");
+    expect(msg).not.toContain("Coordinator");
+  });
+
+  it("lists staff members without a photo, linking the staffMember document", () => {
+    const msg = buildStaffGapsMessage({
+      ...none,
+      noPhoto: [{ id: "staff-1", name: "An <Smet> & co" }],
+    });
+    expect(msg).toContain("*Staff without a photo* (1)");
+    expect(msg).toContain(
+      `• An &lt;Smet&gt; &amp; co <${studio}/id=staff-1;type=staffMember|open in Studio>`,
+    );
+  });
+
+  it("lists coordinator nodes that are inactive or have no member", () => {
+    const msg = buildStaffGapsMessage({
+      ...none,
+      coordinators: [
+        {
+          id: "n1",
+          roleCode: "TVJO",
+          title: "TVJO",
+          active: false,
+          memberCount: 1,
+        },
+        {
+          id: "n2",
+          roleCode: "JC-OB",
+          title: "Coördinator onderbouw",
+          active: true,
+          memberCount: 0,
+        },
+        {
+          id: "n3",
+          roleCode: "JC-BB",
+          title: null,
+          active: false,
+          memberCount: 0,
+        },
+      ],
+    });
+    expect(msg).toContain("*Coordinator positions not filled* (3)");
+    expect(msg).toContain(
+      `• TVJO — TVJO (inactive) <${studio}/id=n1;type=organigramNode|open in Studio>`,
+    );
+    expect(msg).toContain("• JC-OB — Coördinator onderbouw (no member)");
+    expect(msg).toContain("• JC-BB — (no title) (inactive, no member)");
+  });
+
+  it("lists a coordinator role code with no organigram node at all", () => {
+    const msg = buildStaffGapsMessage({
+      ...none,
+      coordinators: [
+        {
+          id: "n2",
+          roleCode: "JC-OB",
+          title: "Coördinator onderbouw",
+          active: true,
+          memberCount: 0,
+        },
+      ],
+      missingRoleCodes: ["JC-BB"],
+    });
+    expect(msg).toContain("*Coordinator positions not filled* (2)");
+    expect(msg).toContain("• JC-BB — no organigram node with this role code");
+  });
+
+  it("opens with the total count across groups", () => {
+    const msg = buildStaffGapsMessage({
+      emptyRoles: [{ teamId: "t", teamName: "U7", memberName: "X" }],
+      noPhoto: [{ id: "s", name: "Y" }],
+      coordinators: [],
+      missingRoleCodes: [],
+    });
+    expect(msg?.split("\n")[0]).toBe(
+      ":clipboard: *Weekly staff check* — 2 gaps to fill in Studio.",
+    );
   });
 });

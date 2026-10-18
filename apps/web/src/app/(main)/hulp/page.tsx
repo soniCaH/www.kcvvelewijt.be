@@ -21,6 +21,10 @@ import { SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
 import { runPromise } from "@/lib/effect/runtime";
 import { StaffRepository } from "@/lib/repositories/staff.repository";
 import { ResponsibilityRepository } from "@/lib/repositories/responsibility.repository";
+import { TeamRepository } from "@/lib/repositories/team.repository";
+import { degradeSection } from "@/lib/effect/degrade";
+import { isAgeCode } from "@/lib/utils/group-teams";
+import { seasonStartYear } from "@/lib/utils/season";
 import { JsonLd } from "@/components/seo/JsonLd";
 import {
   buildBreadcrumbJsonLd,
@@ -88,6 +92,41 @@ export default async function HulpHubPage() {
     }).pipe(Effect.orDie),
   );
 
+  // Context read: the youth team card (#3558) is an extra above the search
+  // results, so a failed read only drops the card. The coordinator and TVJO
+  // boxes it shows are already in `members` (by `roleCode`). The landing read
+  // carries each team's staff, so a "Staf van …" link only aims at `#staf`
+  // where the team page renders that section.
+  const teams = await runPromise(
+    degradeSection(
+      Effect.gen(function* () {
+        const teamRepo = yield* TeamRepository;
+        return yield* teamRepo.findAllForLanding();
+      }),
+      [],
+      "[HulpHubPage] failed to load youth teams — no team card",
+    ),
+  );
+  const now = new Date();
+  const youthTeamCard = {
+    teams: teams.flatMap((t) =>
+      t.age && isAgeCode(t.age)
+        ? [
+            {
+              _id: t._id,
+              slug: t.slug,
+              name: t.name,
+              displayName: t.displayName,
+              age: t.age,
+              hasStaff: (t.staff?.length ?? 0) > 0,
+            },
+          ]
+        : [],
+    ),
+    seasonYear: seasonStartYear(now),
+    calendarYear: now.getFullYear(),
+  };
+
   const structureIndex = deriveStructureIndex(members);
   const faqEntries = responsibilityPathsToFaqEntries(responsibilityPaths);
 
@@ -118,6 +157,7 @@ export default async function HulpHubPage() {
       <OrganigramSectionNav
         members={members}
         responsibilityPaths={responsibilityPaths}
+        youthTeamCard={youthTeamCard}
       />
       {/* Top under the sticky nav + hero keeps the plain step (an opening,
             #3306); the bottom sits above the `<CtaBand>` seam, so it gives one
@@ -127,6 +167,7 @@ export default async function HulpHubPage() {
           members={members}
           responsibilityPaths={responsibilityPaths}
           structureIndex={structureIndex}
+          youthTeamCard={youthTeamCard}
         />
 
         {/* ① Hulp-first — the responsibility finder (#2056). */}
