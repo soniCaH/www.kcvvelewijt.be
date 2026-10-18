@@ -10,6 +10,7 @@
     "board-2627": "tsx src/board-2627/apply-board-2627.ts",
     "board:audit": "tsx src/board-cleanup/audit-board-docs.ts",
     "psd-privacy:cleanup": "tsx src/psd-privacy-cleanup/apply-psd-privacy-cleanup.ts",
+    "staff-role:fill": "tsx src/staff-role-fill/fill-staff-roles.ts",
     "team-image:backfill": "tsx src/team-image-backfill/backfill-team-images.ts"
   },
   "dependencies": {

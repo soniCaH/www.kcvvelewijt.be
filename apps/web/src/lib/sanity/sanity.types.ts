@@ -885,7 +885,7 @@ export type Team = {
   };
   staff?: Array<{
     member?: StaffMemberReference;
-    role?: "trainer" | "afgevaardigde";
+    role?: "trainer" | "afgevaardigde" | "andere";
     boardTitle?: string;
     _key: string;
   }>;
@@ -2719,7 +2719,7 @@ export type TEAM_BY_SLUG_QUERY_RESULT = {
     transparentImageUrl: string | null;
   }> | null;
   staff: Array<{
-    role: "afgevaardigde" | "trainer" | null;
+    role: "afgevaardigde" | "andere" | "trainer" | null;
     boardTitle: string | null;
     member: {
       _id: string;
@@ -2762,7 +2762,7 @@ export type TEAMS_LANDING_QUERY_RESULT = Array<{
   tagline: string | null;
   teamImageUrl: string | null;
   staff: Array<{
-    role: "afgevaardigde" | "trainer" | null;
+    role: "afgevaardigde" | "andere" | "trainer" | null;
     member: {
       firstName: string | null;
       lastName: string | null;

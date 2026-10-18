@@ -8,7 +8,7 @@ export interface TeamStaffMemberData {
   lastName: string;
   /** PSD functionTitle, shown verbatim (e.g. "T1 - A-team", "TVJO", "Keeperstrainer"). */
   functionTitle?: string | null;
-  /** Editorial role bucket fallback ("trainer" / "afgevaardigde"). */
+  /** Editorial role bucket fallback ("trainer" / "afgevaardigde"; "andere" shows nothing). */
   role?: string | null;
   /**
    * Photo URL (newsprint-treated). Missing → the coat-garment
@@ -54,9 +54,12 @@ export interface TeamStaffProps {
 }
 
 // Editorial role bucket → capitalised label (fallback when functionTitle null).
-const ROLE_BUCKET_LABELS: Record<string, string> = {
+// `andere` maps to null: it only says "not a trainer or delegate" (#3560), so
+// it earns no label of its own and the card behaves as if the role were empty.
+const ROLE_BUCKET_LABELS: Record<string, string | null> = {
   trainer: "Trainer",
   afgevaardigde: "Afgevaardigde",
+  andere: null,
 };
 
 /**
@@ -64,7 +67,8 @@ const ROLE_BUCKET_LABELS: Record<string, string> = {
  *   1. functionTitle present → pass through verbatim. PSD is the writer and
  *      its codes (`T1`, `TVJO`, …) are the club's official titles, so the
  *      site does not translate them (#2495).
- *   2. functionTitle null, role is a known bucket → bucket label (Trainer / …)
+ *   2. functionTitle null, role is a known bucket → bucket label (Trainer / …),
+ *      or null for `andere`
  *   3. functionTitle null, role is free text → pass the role through verbatim
  *      (a board's `staff[].boardTitle` — "Voorzitter" / "Secretaris" / … —
  *      arrives here as `role` with `functionTitle` cleared by the repository)
@@ -81,7 +85,10 @@ export function resolveFunctionLabel(
   if (ft) return ft;
   const roleText = role?.trim();
   if (roleText) {
-    return ROLE_BUCKET_LABELS[roleText.toLowerCase()] ?? roleText;
+    const bucket = roleText.toLowerCase();
+    return Object.hasOwn(ROLE_BUCKET_LABELS, bucket)
+      ? ROLE_BUCKET_LABELS[bucket]
+      : roleText;
   }
   return null;
 }

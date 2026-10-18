@@ -161,7 +161,7 @@ export const team = defineType({
       title: 'Staff',
       type: 'array',
       group: 'staf',
-      description: 'De staf van de ploeg. Koppel een staflid en kies zijn rol (trainer of afgevaardigde) voor déze ploeg.',
+      description: 'De staf van de ploeg. Koppel een staflid en kies zijn rol (trainer, afgevaardigde of andere) voor déze ploeg.',
       of: [
         {
           type: 'object',
@@ -177,13 +177,24 @@ export const team = defineType({
               name: 'role',
               title: 'Role',
               type: 'string',
-              description: 'De rol van dit staflid binnen deze ploeg.',
+              description:
+                'De rol van dit staflid binnen deze ploeg. Kies "Andere" voor een functie die geen trainer of afgevaardigde is (coördinator, TVJO, verzorger, …). Leeg betekent: nog niet ingevuld.',
               options: {
                 list: [
                   {title: 'Trainer', value: 'trainer'},
                   {title: 'Afgevaardigde', value: 'afgevaardigde'},
+                  {title: 'Andere', value: 'andere'},
                 ],
               },
+              // Board pseudo-teams (no psdId) carry no roles, so only PSD teams warn.
+              validation: (r) =>
+                r
+                  .custom((value, context) =>
+                    !value && context.document?.psdId
+                      ? 'Nog niet ingevuld: kies Trainer, Afgevaardigde of Andere.'
+                      : true,
+                  )
+                  .warning(),
             }),
             defineField({
               name: 'boardTitle',
