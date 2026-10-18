@@ -41,7 +41,9 @@ export class AiAnswerService extends Context.Tag("AiAnswerService")<
   AiAnswerServiceInterface
 >() {}
 
-const MODEL = "@cf/meta/llama-3.1-8b-instruct";
+// The plain `llama-3.1-8b-instruct` left the Workers AI catalog; every call
+// threw `AiError` and was swallowed as "degraded" (#3582).
+const MODEL = "@cf/meta/llama-3.1-8b-instruct-fp8";
 
 const SYSTEM_PROMPT =
   "Je bent een assistent voor voetbalclub KCVV Elewijt. " +
@@ -123,8 +125,10 @@ export const AiAnswerServiceLive = Layer.effect(
       }).pipe(
         Effect.timeout("8 seconds"),
         Effect.catchAll((cause) =>
+          // `message` too: a serialised Error keeps only its name (#3582).
           Effect.logWarning("[Workers AI] degraded — answer skipped", {
             cause,
+            message: cause instanceof Error ? cause.message : String(cause),
           }).pipe(Effect.map(() => undefined)),
         ),
       );
