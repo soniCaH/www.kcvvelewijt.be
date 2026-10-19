@@ -10,21 +10,21 @@ const STATUSES = [
 const NEWEST_FIRST = [{field: 'submittedAt', direction: 'desc'}] as const
 
 /**
- * Inschrijvingen desk structure: all applications plus one filter view per
+ * Interesse desk structure: all applications plus one filter view per
  * status. Mirrors the feedback section's filter-chip pattern. Labels in Dutch.
  */
 export function membershipApplicationStructure(S: StructureBuilder) {
   return S.listItem()
-    .title('📨 Inschrijvingen')
+    .title('📨 Interesse')
     .child(
       S.list()
-        .title('Inschrijvingen')
+        .title('Interesse')
         .items([
           S.listItem()
-            .title('Alle inschrijvingen')
+            .title('Alle interesseaanvragen')
             .child(
               S.documentList()
-                .title('Alle inschrijvingen')
+                .title('Alle interesseaanvragen')
                 .filter('_type == "membershipApplication"')
                 .defaultOrdering([...NEWEST_FIRST]),
             ),

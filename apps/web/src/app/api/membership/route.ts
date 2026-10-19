@@ -6,7 +6,7 @@ export async function POST(request: Request) {
   const bffKey = bffKeyHeader();
   if (!bffUrl || !bffKey) {
     return NextResponse.json(
-      { ok: false, error: "Inschrijvingen zijn momenteel niet beschikbaar." },
+      { ok: false, error: "Het formulier is momenteel niet beschikbaar." },
       { status: 503 },
     );
   }
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("[Membership API] Proxy error:", error);
     return NextResponse.json(
-      { ok: false, error: "Inschrijving kon niet worden verzonden." },
+      { ok: false, error: "Je bericht kon niet worden verzonden." },
       { status: 500 },
     );
   }

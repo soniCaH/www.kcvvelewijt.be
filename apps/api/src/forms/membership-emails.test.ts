@@ -47,3 +47,71 @@ describe("buildMembershipEmails — remark", () => {
     expect(applicant).not.toContain("Opmerking");
   });
 });
+
+describe("buildMembershipEmails — interesse copy", () => {
+  const minor = {
+    ...payload,
+    parentEmail: "ouder@example.com",
+    parentalConsent: true,
+  } as MembershipRequest;
+
+  it("uses the interesse subjects for an adult (applicant + admin)", () => {
+    const [applicant, admin, ...rest] = buildMembershipEmails({
+      payload,
+      isMinor: false,
+      adminRecipient: "bestuur@example.com",
+    });
+    expect(rest).toHaveLength(0);
+    expect(applicant!.subject).toBe(
+      "Bedankt voor je interesse in KCVV Elewijt",
+    );
+    expect(admin!.subject).toBe("Nieuwe interesse: Jan Peeters (Vrijwilliger)");
+  });
+
+  it("uses the interesse subjects for a minor (applicant + parent + admin)", () => {
+    const [applicant, parent, admin] = buildMembershipEmails({
+      payload: minor,
+      isMinor: true,
+      adminRecipient: "bestuur@example.com",
+    });
+    expect(applicant!.subject).toBe(
+      "Bedankt voor je interesse in KCVV Elewijt",
+    );
+    expect(parent!.subject).toBe("Interesse van Jan Peeters in KCVV Elewijt");
+    expect(admin!.subject).toBe("Nieuwe interesse: Jan Peeters (Vrijwilliger)");
+  });
+
+  it("never says inschrijving in any subject, html or text", () => {
+    for (const m of buildMembershipEmails({
+      payload: minor,
+      isMinor: true,
+      adminRecipient: "bestuur@example.com",
+    })) {
+      expect(`${m.subject} ${m.html} ${m.text}`).not.toMatch(/inschrijv/i);
+    }
+  });
+
+  it("sends an explicit plain-text part with one Label: value per line", () => {
+    const [, admin] = buildMembershipEmails({
+      payload: { ...payload, remark: "regel 1\nregel 2" } as MembershipRequest,
+      isMinor: false,
+      adminRecipient: "bestuur@example.com",
+    });
+    const lines = admin!.text.split("\n");
+    expect(lines).toContain("Rol: Vrijwilliger");
+    expect(lines).toContain("Naam: Jan Peeters");
+    expect(lines).toContain("E-mail: jan@example.com");
+    expect(lines).toContain("Opmerking: regel 1 regel 2");
+  });
+
+  it("gives the applicant and parent a plain-text part naming the role", () => {
+    const [applicant, parent] = buildMembershipEmails({
+      payload: minor,
+      isMinor: true,
+      adminRecipient: "bestuur@example.com",
+    });
+    expect(applicant!.text).toContain("interesse als Vrijwilliger");
+    expect(parent!.text).toContain("Jan Peeters");
+    expect(parent!.text).not.toContain("<");
+  });
+});

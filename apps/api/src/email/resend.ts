@@ -5,7 +5,7 @@ import { WorkerEnvTag } from "../env";
  * Form-agnostic transactional-email transport over Resend.
  *
  * Deliberately knows nothing about membership (or any specific form): it sends
- * one `{ to, subject, html }` message. Future intake forms (VIP-restaurant,
+ * one `{ to, subject, html, text }` message. Future intake forms (VIP-restaurant,
  * stage, sponsorship …) reuse this transport and supply their own template
  * builders — the membership-specific templates live in `forms/membership-emails.ts`.
  */
@@ -28,6 +28,8 @@ export interface EmailMessage {
   readonly to: string | string[];
   readonly subject: string;
   readonly html: string;
+  /** Explicit plain-text part — Resend's HTML-derived text glues table cells together. */
+  readonly text: string;
   /** Defaults to {@link DEFAULT_FROM}. */
   readonly from?: string;
   readonly replyTo?: string;
@@ -83,6 +85,7 @@ export const EmailTransportLive = Layer.effect(
                   to: Array.isArray(msg.to) ? msg.to : [msg.to],
                   subject: msg.subject,
                   html: msg.html,
+                  text: msg.text,
                   ...(msg.replyTo ? { reply_to: msg.replyTo } : {}),
                 }),
               }),

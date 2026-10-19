@@ -16,13 +16,13 @@ const STATUS_OPTIONS = [
 ]
 
 /**
- * Membership-intake submission, created by the public `/club/word-lid` form via
+ * Membership-interest submission, created by the public `/club/word-lid` form via
  * the BFF (never by an editor). Submitted fields are read-only; editors manage
  * the `status` workflow and add internal `notes`.
  */
 export const membershipApplication = defineType({
   name: 'membershipApplication',
-  title: 'Inschrijving',
+  title: 'Interesse',
   type: 'document',
   groups: [
     {name: 'aanvraag', title: 'Aanvraag', default: true},
@@ -37,7 +37,7 @@ export const membershipApplication = defineType({
       group: 'aanvraag',
       readOnly: true,
       description:
-        'De rol waarvoor deze persoon zich inschreef. Bepaalt naar welk e-mailadres de melding ging (zie Form routing config).',
+        'De rol waarvoor deze persoon interesse toonde. Bepaalt naar welk e-mailadres de melding ging (zie Form routing config).',
       options: {list: ROLE_OPTIONS},
       validation: (Rule) =>
         Rule.required().error('Verplicht — wordt automatisch ingevuld door het formulier.'),
@@ -75,7 +75,7 @@ export const membershipApplication = defineType({
       group: 'aanvraag',
       readOnly: true,
       description:
-        'Automatisch berekend uit de geboortedatum op het moment van inschrijven. Bij minderjarigen is een ouder/voogd-e-mail + toestemming vereist.',
+        'Automatisch berekend uit de geboortedatum op het moment van indienen. Bij minderjarigen is een ouder/voogd-e-mail + toestemming vereist.',
     }),
     defineField({
       name: 'gender',
@@ -139,7 +139,7 @@ export const membershipApplication = defineType({
       type: 'boolean',
       group: 'toestemming',
       readOnly: true,
-      description: 'De ouder/voogd bevestigde toestemming te geven voor deze inschrijving (minderjarigen).',
+      description: 'De ouder/voogd bevestigde toestemming te geven om dit formulier te versturen (minderjarigen).',
     }),
     defineField({
       name: 'medicalCertAcknowledged',
@@ -156,7 +156,7 @@ export const membershipApplication = defineType({
       type: 'boolean',
       group: 'toestemming',
       readOnly: true,
-      description: 'De aanvrager aanvaardde de privacyverklaring bij het inschrijven.',
+      description: 'De aanvrager aanvaardde de privacyverklaring bij het invullen van het formulier.',
     }),
     defineField({
       name: 'submittedAt',
@@ -174,8 +174,8 @@ export const membershipApplication = defineType({
       initialValue: 'new',
       options: {list: STATUS_OPTIONS, layout: 'radio'},
       description:
-        'Beheer de opvolging: Nieuw → Gecontacteerd → Goedgekeurd/Afgewezen. Bepaalt onder welke filter deze inschrijving in de lijst verschijnt.',
-      validation: (Rule) => Rule.required().error('Verplicht — kies een status zodat de inschrijving correct gefilterd wordt.'),
+        'Beheer de opvolging: Nieuw → Gecontacteerd → Goedgekeurd/Afgewezen. Bepaalt onder welke filter deze interesse in de lijst verschijnt.',
+      validation: (Rule) => Rule.required().error('Verplicht — kies een status zodat de interesse correct gefilterd wordt.'),
     }),
     defineField({
       name: 'notes',

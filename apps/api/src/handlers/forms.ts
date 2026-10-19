@@ -121,7 +121,7 @@ export const handleMembership = (payload: MembershipRequest) =>
           () =>
             new HttpServiceUnavailable({
               error:
-                "Inschrijving kon niet worden opgeslagen. Probeer later opnieuw.",
+                "Je bericht kon niet worden opgeslagen. Probeer later opnieuw.",
             }),
         ),
       );
