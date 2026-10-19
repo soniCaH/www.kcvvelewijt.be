@@ -58,21 +58,35 @@ function parentText(payload: MembershipRequest): string {
   ].join("\n");
 }
 
+const REMARK_LABEL = "Opmerking";
+
+/** Raw (unescaped) label/value rows shared by the admin html and text parts. */
+function adminRows(
+  payload: MembershipRequest,
+  isMinor: boolean,
+): ReadonlyArray<readonly [label: string, value: string]> {
+  return [
+    ["Rol", ROLE_LABELS[payload.role]],
+    ["Naam", `${payload.firstName} ${payload.lastName}`],
+    ["Geboortedatum", `${payload.birthDate}${isMinor ? " (minderjarig)" : ""}`],
+    ["Geslacht", GENDER_LABELS[payload.gender] ?? payload.gender],
+    ["Gemeente", payload.municipality],
+    ["E-mail", payload.email],
+    ...(payload.priorClub ? [["Vorige club", payload.priorClub] as const] : []),
+    ...(isMinor && payload.parentEmail
+      ? [["Ouder/voogd e-mail", payload.parentEmail] as const]
+      : []),
+    ...(payload.remark ? [[REMARK_LABEL, payload.remark] as const] : []),
+  ];
+}
+
 function adminText(payload: MembershipRequest, isMinor: boolean): string {
   return [
     "Nieuwe interesse via de website",
     "",
-    `Rol: ${ROLE_LABELS[payload.role]}`,
-    `Naam: ${payload.firstName} ${payload.lastName}`,
-    `Geboortedatum: ${payload.birthDate}${isMinor ? " (minderjarig)" : ""}`,
-    `Geslacht: ${GENDER_LABELS[payload.gender] ?? payload.gender}`,
-    `Gemeente: ${payload.municipality}`,
-    `E-mail: ${payload.email}`,
-    ...(payload.priorClub ? [`Vorige club: ${payload.priorClub}`] : []),
-    ...(isMinor && payload.parentEmail
-      ? [`Ouder/voogd e-mail: ${payload.parentEmail}`]
-      : []),
-    ...(payload.remark ? [`Opmerking: ${payload.remark}`] : []),
+    ...adminRows(payload, isMinor).map(
+      ([label, value]) => `${label}: ${value}`,
+    ),
     "",
     "Beheer dit in Sanity Studio (Interesse).",
     "",
@@ -101,20 +115,14 @@ function parentHtml(payload: MembershipRequest): string {
 }
 
 function adminHtml(payload: MembershipRequest, isMinor: boolean): string {
-  const row = (label: string, value: string, bold = true) =>
-    `<tr><td style="padding:4px 12px 4px 0;color:#666;vertical-align:top">${label}</td><td style="padding:4px 0;word-break:break-word">${bold ? `<strong>${value}</strong>` : value}</td></tr>`;
+  const row = ([label, value]: readonly [string, string]) =>
+    label === REMARK_LABEL
+      ? `<tr><td style="padding:4px 12px 4px 0;color:#666;vertical-align:top">${label}</td><td style="padding:4px 0;word-break:break-word">${esc(value).replace(/\n/g, "<br>")}</td></tr>`
+      : `<tr><td style="padding:4px 12px 4px 0;color:#666;vertical-align:top">${label}</td><td style="padding:4px 0;word-break:break-word"><strong>${esc(value)}</strong></td></tr>`;
   return shell(
     "Nieuwe interesse via de website",
     `<table style="border-collapse:collapse;font-size:14px">
-       ${row("Rol", ROLE_LABELS[payload.role])}
-       ${row("Naam", `${esc(payload.firstName)} ${esc(payload.lastName)}`)}
-       ${row("Geboortedatum", `${esc(payload.birthDate)}${isMinor ? " (minderjarig)" : ""}`)}
-       ${row("Geslacht", GENDER_LABELS[payload.gender] ?? esc(payload.gender))}
-       ${row("Gemeente", esc(payload.municipality))}
-       ${row("E-mail", esc(payload.email))}
-       ${payload.priorClub ? row("Vorige club", esc(payload.priorClub)) : ""}
-       ${isMinor && payload.parentEmail ? row("Ouder/voogd e-mail", esc(payload.parentEmail)) : ""}
-       ${payload.remark ? row("Opmerking", esc(payload.remark).replace(/\n/g, "<br>"), false) : ""}
+       ${adminRows(payload, isMinor).map(row).join("\n       ")}
      </table>
      <p style="font-size:13px;color:#888">Beheer dit in Sanity Studio (Interesse).</p>`,
   );
