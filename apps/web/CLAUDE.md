@@ -145,9 +145,11 @@ Save, then **Publish**. Check it by requesting the **same** real match page 31 t
 
 **Why these two paths.** `/tegenstander/[clubId]` and `/wedstrijd/[matchId]` are the only pages whose `generateStaticParams` is `[]` over a PSD id: every new valid id renders on demand and costs PSD calls (`/tegenstander` about 4 × (1 + seasons) per club). `parsePsdId` stops junk ids, but a bot walking real-looking integers still mints a fresh render each time — that drains the shared PSD quota and, on Hobby's hard usage limits, can get the whole site paused. Traffic the rule blocks is not billed. Search is not on this rule: the worker limits it (#3468).
 
-## Vercel builds with `turbo --force`
+## Vercel builds: `turbo --force`, and skip what does not touch the web app
 
 `apps/web/vercel.json`'s `buildCommand` passes `--force`. **Keep it.** Turbo's cache key has no clock in it, so a deploy that changes nothing under `apps/web` (an `apps/api`-only merge) got the last web build's `.next` back from the remote cache — prerendered pages included. On 2026-10-19 that put a homepage built before Sunday's kickoff back live ("Vandaag 15:00" for a match lost 0–5 the day before) until its 15-minute ISR window ran out. A fresh build costs minutes per deploy; the stale homepage cost the first visitors after every API deploy.
+
+`vercel.json`'s `ignoreCommand` (`apps/web/scripts/vercel-ignore-build.sh`) skips a deployment when nothing the web app builds from changed since the branch's previous deployment (`VERCEL_GIT_PREVIOUS_SHA`), and always skips the VR bot's `vr-diffs/*` branches. Every deployment keeps its own copy of the functions against Hobby's 10 GB **Functions Storage**, and api-only, research and VR-diff pushes each built one: the project hit 10.14 GB on 2026-10-19. A branch's first deployment, or a previous SHA missing from the clone, always builds. Add a new top-level input of the web build to the script's path list.
 
 ## Analytics Checklist for New Features
 
