@@ -101,7 +101,7 @@ describe("buildMembershipEmails — interesse copy", () => {
     expect(lines).toContain("Rol: Vrijwilliger");
     expect(lines).toContain("Naam: Jan Peeters");
     expect(lines).toContain("E-mail: jan@example.com");
-    expect(admin!.text).toContain("Opmerking: regel 1\nregel 2");
+    expect(lines).toContain("Opmerking: regel 1 regel 2");
   });
 
   it("gives the applicant and parent a plain-text part naming the role", () => {

@@ -84,8 +84,9 @@ function adminText(payload: MembershipRequest, isMinor: boolean): string {
   return [
     "Nieuwe interesse via de website",
     "",
+    // One field per line: a line break inside a value would read as a new row.
     ...adminRows(payload, isMinor).map(
-      ([label, value]) => `${label}: ${value}`,
+      ([label, value]) => `${label}: ${value.replace(/\s*\r?\n\s*/g, " ")}`,
     ),
     "",
     "Beheer dit in Sanity Studio (Interesse).",
