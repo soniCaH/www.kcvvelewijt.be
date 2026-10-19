@@ -1,4 +1,12 @@
-import { Context, Effect, Either, Layer, Option, Schema as S } from "effect";
+import {
+  Context,
+  Effect,
+  Either,
+  Layer,
+  Option,
+  Ref,
+  Schema as S,
+} from "effect";
 import { WorkerEnvTag } from "../env";
 import { PsdGateService, withFlight } from "../psd/gate";
 import { BackgroundRunnerService, type PsdRefreshEnv } from "../psd/background";
@@ -373,6 +381,13 @@ export const TypedKvCache = <A, I>(
          * {@link TTL.PARTIAL_FANOUT}, so the missing part heals in minutes
          * instead of waiting out the full soft TTL. */
         isPartial?: (value: A) => boolean;
+        /** True when a stale value is worth the visitor's wait: the refresh
+         * then runs inline (same single-flight, same bounds) and its result
+         * is served, instead of the stale value. Match detail uses it for a
+         * match past kickoff with no result yet (2026-10-19: a forfeit kept
+         * its preview for 36 h on a page that is only read once in a while,
+         * because every read served stale and refreshed behind it). */
+        refreshInline?: (value: A) => boolean;
       },
     ): Effect.Effect<
       A,
@@ -517,7 +532,11 @@ export const TypedKvCache = <A, I>(
         // Background (SWR) refresh: single-flight leader fetches and updates KV;
         // any failure (or schema-invalid data) keeps stale + marks. Never throws
         // — it runs detached via the background runner.
-        const backgroundRefresh = (fetchedAt: number, staleSince: number) =>
+        const backgroundRefresh = (
+          fetchedAt: number,
+          staleSince: number,
+          landed?: Ref.Ref<Option.Option<A>>,
+        ) =>
           Effect.gen(function* () {
             const token = yield* gate.beginFlight(key);
             if (token === null) return; // another isolate/fiber is already refreshing
@@ -559,7 +578,13 @@ export const TypedKvCache = <A, I>(
               yield* report({ ok: true, key });
               const valid = S.decodeUnknownOption(schema)(result.right);
               yield* Option.isSome(valid)
-                ? persist(result.right)
+                ? persist(result.right).pipe(
+                    Effect.zipRight(
+                      landed
+                        ? Ref.set(landed, Option.some(result.right))
+                        : Effect.void,
+                    ),
+                  )
                 : // Not a PSD outage (200 w/ bad shape), but the value still
                   // drifts toward the cliff — nudge if it's aged past threshold.
                   keepStale("background refresh returned schema-invalid data", {
@@ -695,6 +720,13 @@ export const TypedKvCache = <A, I>(
             // what the runner's layer provides. No runner (tests only) → the
             // same single-flight, bounded refresh runs inline. Either way there
             // is no unguarded foreground fan-out (#3467).
+            if (options?.refreshInline?.(value)) {
+              // Any failure, timeout or a refresh already in flight leaves
+              // `landed` empty: the stale value is served as before.
+              const landed = yield* Ref.make(Option.none<A>());
+              yield* backgroundRefresh(fetchedAt, staleSince, landed);
+              return Option.getOrElse(yield* Ref.get(landed), () => value);
+            }
             const refresh = backgroundRefresh(fetchedAt, staleSince);
             yield* Option.isSome(runnerOpt)
               ? runnerOpt.value.fork(`refresh:${key}`, refresh)

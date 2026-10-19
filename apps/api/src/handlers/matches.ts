@@ -256,7 +256,14 @@ export const getMatchDetailHandler = (
         hasReport: detail.hasReport,
       }),
     undefined,
-    { shouldServeStale },
+    {
+      shouldServeStale,
+      // Past kickoff, no result yet: a stale preview is the wrong answer,
+      // not just an old one — fetch it now (one `/info` call).
+      refreshInline: (detail) =>
+        kickoffMs(detail.date) < Date.now() &&
+        !isSettledMatchStatus(detail.status),
+    },
   );
 };
 

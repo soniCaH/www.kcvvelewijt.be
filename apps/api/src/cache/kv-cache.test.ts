@@ -638,6 +638,64 @@ describe("TypedKvCache — stale-while-revalidate + storm gate (#2328)", () => {
     expect(stored.value).toEqual({ name: "fresh", value: 42 });
   });
 
+  it("refreshInline: a stale value it flags is refreshed in the foreground and the fresh one served", async () => {
+    const mockKv = makeMockKv();
+    mockKv.store.set("test-key", staleWrapper({ name: "old", value: 1 }));
+    const gate = PsdGateTest;
+    const { runnerLayer, settle } = withRunner(mockKv, gate);
+    const run = (fetchEffect: Effect.Effect<{ name: string; value: number }>) =>
+      Effect.runPromise(
+        TypedKvCache(TestSchema)
+          .getOrFetch("test-key", fetchEffect, 60, undefined, {
+            refreshInline: (v) => v.name === "old",
+          })
+          .pipe(
+            Effect.provide(runnerLayer),
+            Effect.provide(KvCacheLive),
+            Effect.provide(gate),
+            Effect.provide(makeEnvLayer(mockKv)),
+          ),
+      );
+
+    expect(await run(Effect.succeed({ name: "fresh", value: 42 }))).toEqual({
+      name: "fresh",
+      value: 42,
+    });
+    await settle();
+    expect(JSON.parse(mockKv.store.get("test-key")!).value).toEqual({
+      name: "fresh",
+      value: 42,
+    });
+  });
+
+  it("refreshInline: a failed inline refresh still serves the stale value", async () => {
+    const mockKv = makeMockKv();
+    mockKv.store.set("test-key", staleWrapper({ name: "old", value: 1 }));
+    const gate = PsdGateTest;
+    const { runnerLayer, settle } = withRunner(mockKv, gate);
+
+    const result = await Effect.runPromise(
+      TypedKvCache(TestSchema)
+        .getOrFetch(
+          "test-key",
+          Effect.fail(new Error("PSD 429") as never),
+          60,
+          undefined,
+          { refreshInline: () => true },
+        )
+        .pipe(
+          Effect.provide(runnerLayer),
+          Effect.provide(KvCacheLive),
+          Effect.provide(gate),
+          Effect.provide(makeEnvLayer(mockKv)),
+        ),
+    );
+    await settle();
+
+    expect(result).toEqual({ name: "old", value: 1 });
+    expect(mockKv.store.get("neg:test-key")).toBe("1");
+  });
+
   it("negative marker present → serves stale WITHOUT fetching", async () => {
     const mockKv = makeMockKv();
     mockKv.store.set("test-key", staleWrapper({ name: "stale", value: 7 }));
