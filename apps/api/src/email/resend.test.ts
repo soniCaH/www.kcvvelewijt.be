@@ -12,6 +12,7 @@ const message: EmailMessage = {
   to: "jan@example.com",
   subject: "Welkom",
   html: "<p>Hallo</p>",
+  text: "Hallo",
   replyTo: "info@kcvvelewijt.be",
 };
 
@@ -85,6 +86,8 @@ describe("EmailTransportLive.dispatchEmail (#3464)", () => {
     expect(JSON.parse(init.body as string)).toMatchObject({
       to: ["jan@example.com"],
       subject: "Welkom",
+      html: "<p>Hallo</p>",
+      text: "Hallo",
       reply_to: "info@kcvvelewijt.be",
     });
   });
