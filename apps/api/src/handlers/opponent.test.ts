@@ -110,3 +110,54 @@ describe("opponentHistoryTtl", () => {
     ).toBe(TTL.OPPONENT_HISTORY);
   });
 });
+
+describe("getOpponentHistoryHandler — played match still scheduled", () => {
+  const H = 60 * 60 * 1000;
+  const match = (status: "scheduled" | "finished") =>
+    ({
+      ...history,
+      matches: [
+        {
+          id: 3437,
+          date: wireDate(Date.now() - 19 * H),
+          time: "15:00",
+          home_team: { id: 456, name: "Opponent FC" },
+          away_team: { id: 123, name: "KCVV Elewijt" },
+          status,
+          competition: "LEAGUE",
+        },
+      ],
+    }) as OpponentHistory;
+
+  it("a stale copy is refreshed inline, so the page never renders 'Gepland' for a played match", async () => {
+    // Erpe-Mere, 2026-10-19: ISR froze the stale copy into the page.
+    const key = `opponent:team:${CACHE_VERSION}:1:club:456`;
+    const store = new Map<string, string>([
+      [
+        key,
+        JSON.stringify({
+          value: match("scheduled"),
+          fetchedAt: Date.now() - 2 * H,
+        }),
+      ],
+    ]);
+    const cache: KvCacheInterface = {
+      get: (k) => Effect.succeed(store.get(k) ?? null),
+      set: (k, v) => Effect.sync(() => void store.set(k, v)),
+      delete: () => Effect.succeed(undefined),
+      durable: noopDurableKv,
+    };
+    const service = {
+      getOpponentHistory: () => Effect.succeed(match("finished")),
+    } as unknown as PsdServiceInterface;
+    const result = await Effect.runPromise(
+      getOpponentHistoryHandler(1, 456).pipe(
+        Effect.provide(Layer.succeed(PsdService, service)),
+        Effect.provide(Layer.succeed(KvCacheService, cache)),
+        Effect.provide(PsdGateTest),
+        Effect.provide(testEnvLayer),
+      ),
+    );
+    expect(result.matches[0]?.status).toBe("finished");
+  });
+});

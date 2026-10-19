@@ -66,7 +66,14 @@ export const getOpponentHistoryHandler = (
     fetchHistory,
     (history) => opponentHistoryTtl(history),
     TTL.OPPONENT_HISTORY * 2,
-    { shouldServeStale, isPartial: isPartialFanout },
+    {
+      shouldServeStale,
+      isPartial: isPartialFanout,
+      // A stale copy with a played match still "Gepland" is the wrong
+      // answer, and ISR would freeze it into the page for 15 min: fetch now.
+      refreshInline: (history) =>
+        opponentHistoryTtl(history) !== TTL.OPPONENT_HISTORY,
+    },
   );
 };
 
