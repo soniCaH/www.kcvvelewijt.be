@@ -21,8 +21,12 @@ esac
 # always meant to build.
 [ "$VERCEL_GIT_PREVIOUS_SHA" != "${VERCEL_GIT_COMMIT_SHA:-}" ] || exit 1
 
-# No change to the web app or anything it builds from: skip. A git error (the
-# previous SHA missing from a shallow clone) exits non-zero, so it builds.
-git diff --quiet "$VERCEL_GIT_PREVIOUS_SHA" HEAD -- \
+# No change to the web app or anything it builds from: skip. Anything else
+# builds — including a git error (the previous SHA gone after a force-push),
+# which exits 128, and Vercel fails the deploy on any code but 0 or 1 (#3604).
+if git diff --quiet "$VERCEL_GIT_PREVIOUS_SHA" HEAD -- \
   . ../../packages ../../package.json ../../pnpm-lock.yaml \
-  ../../pnpm-workspace.yaml ../../turbo.json ../../.npmrc
+  ../../pnpm-workspace.yaml ../../turbo.json ../../.npmrc; then
+  exit 0
+fi
+exit 1
