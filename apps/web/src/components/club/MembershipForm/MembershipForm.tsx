@@ -564,7 +564,8 @@ function MembershipFormFields({
               onChange={(checked) => setField("parentalConsent", checked)}
               error={fieldErrors.parentalConsent}
             >
-              Ik ben de ouder/voogd en geef toestemming voor deze inschrijving.
+              Ik ben de ouder/voogd en geef toestemming om dit formulier te
+              versturen.
             </CheckboxField>
           </div>
         ) : null}

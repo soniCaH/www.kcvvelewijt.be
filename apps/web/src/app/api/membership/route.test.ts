@@ -43,7 +43,7 @@ describe("POST /api/membership", () => {
     expect(response.status).toBe(503);
     expect(await response.json()).toEqual({
       ok: false,
-      error: "Inschrijvingen zijn momenteel niet beschikbaar.",
+      error: "Het formulier is momenteel niet beschikbaar.",
     });
     expect(fetch).not.toHaveBeenCalled();
   });
@@ -131,7 +131,7 @@ describe("POST /api/membership", () => {
     expect(response.status).toBe(500);
     expect(await response.json()).toEqual({
       ok: false,
-      error: "Inschrijving kon niet worden verzonden.",
+      error: "Je bericht kon niet worden verzonden.",
     });
     expect(console.error).toHaveBeenCalledWith(
       "[Membership API] Proxy error:",
