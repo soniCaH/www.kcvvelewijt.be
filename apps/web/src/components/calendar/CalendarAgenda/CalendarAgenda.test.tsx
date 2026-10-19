@@ -253,6 +253,34 @@ describe("CalendarAgenda", () => {
     expect(row).toHaveAttribute("href", "/wedstrijd/92");
   });
 
+  it("names a forfeit on the row, so its 5 – 0 never reads as a plain result", () => {
+    render(
+      <CalendarAgenda
+        {...baseProps}
+        matches={[
+          makeMatch({
+            id: 94,
+            status: "forfeited",
+            homeScore: 5,
+            awayScore: 0,
+          }),
+          makeMatch({ id: 95, status: "finished", homeScore: 2, awayScore: 1 }),
+        ]}
+        events={[]}
+      />,
+    );
+    const [forfeit, played] = screen.getAllByTestId("agenda-match-row");
+    // Once per layout (mobile stack, sm+ line).
+    expect(forfeit!.querySelectorAll('[data-status="forfeited"]')).toHaveLength(
+      2,
+    );
+    expect(forfeit).toHaveAttribute(
+      "aria-label",
+      expect.stringContaining("Forfait"),
+    );
+    expect(played!.querySelector("[data-status]")).toBeNull();
+  });
+
   it("never triggers the reduced row from the Dutch competition label alone (#2715)", () => {
     // The competition string "Tornooi" with a non-tournament competitionType
     // must render as an ordinary match row — the lawful detector is
