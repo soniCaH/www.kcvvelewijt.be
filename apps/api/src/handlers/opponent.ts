@@ -11,6 +11,7 @@ import { CACHE_VERSION } from "./matches";
 import { kickoffMs } from "../psd/wall-clock";
 
 const opponentHistoryCache = TypedKvCache(OpponentHistory);
+const HOUR_MS = 60 * 60 * 1000;
 
 // #2491: `transformPsdGame` gained a `venue` field — see the matching
 // `CACHE_VERSION` comment in `handlers/matches.ts`. A cached pre-#2491
@@ -25,23 +26,25 @@ const opponentHistoryCache = TypedKvCache(OpponentHistory);
  * The flat 7-day TTL pinned a pre-kickoff snapshot: Erpe-Mere's page still
  * showed the 18 Oct match as "Gepland" the morning after a 0–5 loss
  * (2026-10-19). While a match is past kickoff but still "scheduled" (PSD has
- * no score yet), refresh at matchday cadence, like `teamMatchesTtl`. The
- * window is the TTL itself, not 48h: a page nobody opened for two days must
- * still catch the result on its next read.
+ * no score yet), refresh at matchday cadence for 48 h, like
+ * `teamMatchesTtl`; then daily until the 7-day TTL. A refresh is a whole
+ * season fan-out, so a match PSD never scores must not cost one every 15 min
+ * for a week, yet a page nobody opened for two days still catches its result.
  */
 export function opponentHistoryTtl(
   history: OpponentHistory,
   now: number = Date.now(),
 ): number {
-  const resultPending = history.matches.some((m) => {
-    const kickoff = kickoffMs(m.date);
-    return (
-      m.status === "scheduled" &&
-      now > kickoff &&
-      now - kickoff < TTL.OPPONENT_HISTORY * 1000
-    );
-  });
-  return resultPending ? TTL.MATCH_DETAIL_MATCHDAY : TTL.OPPONENT_HISTORY;
+  const pendingFor = history.matches
+    .filter((m) => m.status === "scheduled" && kickoffMs(m.date) < now)
+    .map((m) => now - kickoffMs(m.date));
+  if (pendingFor.some((ms) => ms < 48 * HOUR_MS)) {
+    return TTL.MATCH_DETAIL_MATCHDAY;
+  }
+  if (pendingFor.some((ms) => ms < TTL.OPPONENT_HISTORY * 1000)) {
+    return TTL.MATCHES_TEAM;
+  }
+  return TTL.OPPONENT_HISTORY;
 }
 
 export const getOpponentHistoryHandler = (

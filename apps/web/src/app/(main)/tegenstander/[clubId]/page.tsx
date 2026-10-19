@@ -405,7 +405,7 @@ export default async function OpponentPage({ params }: OpponentPageProps) {
   const data = await fetchOpponentData(clubId);
   if (!data) notFound();
 
-  const { opponentName, opponentLogo, sections, unavailableSquads } = data;
+  const { opponentName, opponentLogo, sections, squadOrder } = data;
   const pageUrl = `${SITE_CONFIG.siteUrl}/tegenstander/${clubId}`;
 
   return (
@@ -438,25 +438,32 @@ export default async function OpponentPage({ params }: OpponentPageProps) {
           upLink={{ href: "/kalender", label: "Kalender" }}
         />
 
-        {sections.map((section, index) => (
-          <SquadHistorySection
-            key={section.teamPsdId}
-            section={section}
-            className={index === 0 ? "mt-7" : "mt-12"}
-          />
-        ))}
-        {unavailableSquads.map((squadLabel) => (
-          <section key={squadLabel} aria-label={squadLabel} className="mt-12">
-            <SectionHeader title={squadLabel} size="display-sm" />
-            <EmptyState
-              tier="slot"
-              reason="unavailable"
-              emphasis={{ text: "even niet beschikbaar" }}
+        {squadOrder.map((squadLabel, index) => {
+          const className = index === 0 ? "mt-7" : "mt-12";
+          const section = sections.find((s) => s.squadLabel === squadLabel);
+          return section ? (
+            <SquadHistorySection
+              key={squadLabel}
+              section={section}
+              className={className}
+            />
+          ) : (
+            <section
+              key={squadLabel}
+              aria-label={squadLabel}
+              className={className}
             >
-              {`De wedstrijden van de ${squadLabel} tegen ${opponentName} zijn even niet beschikbaar. Probeer het later opnieuw.`}
-            </EmptyState>
-          </section>
-        ))}
+              <SectionHeader title={squadLabel} size="display-sm" />
+              <EmptyState
+                tier="slot"
+                reason="unavailable"
+                emphasis={{ text: "even niet beschikbaar" }}
+              >
+                {`De wedstrijden van de ${squadLabel} tegen ${opponentName} zijn even niet beschikbaar. Probeer het later opnieuw.`}
+              </EmptyState>
+            </section>
+          );
+        })}
       </PageContainer>
     </div>
   );

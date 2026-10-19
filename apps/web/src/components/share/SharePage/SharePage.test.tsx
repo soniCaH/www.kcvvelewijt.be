@@ -927,6 +927,9 @@ describe("SharePage", () => {
         1200,
       );
       expect(close).toHaveBeenCalled();
+      expect(createImageBitmap).toHaveBeenCalledWith(file, {
+        imageOrientation: "from-image",
+      });
     } finally {
       getContext.mockRestore();
       toBlob.mockRestore();
@@ -1543,14 +1546,15 @@ describe("SharePage", () => {
       expect(pressed("Kaart")).toBe("true");
     });
 
-    it("a saved PNG that used a fallback moves the look to its next picture", async () => {
+    it("a saved PNG leaves the picture for the next page load to move, so it never moves twice", async () => {
       const user = userEvent.setup();
       renderTool();
       expect(previewHtml()).toContain("share-fallback/A-1.webp");
 
       await save(user);
       await user.click(screen.getByRole("button", { name: "Kaart" }));
-      expect(previewHtml()).toContain("share-fallback/A-3.webp");
+      expect(previewHtml()).toContain("share-fallback/A-1.webp");
+      expect(JSON.parse(localStorage.getItem(KEY)!).fallbackNext.kaart).toBe(0);
     });
 
     it("every page load moves each look to its next picture, wrapping on the uneven set", () => {

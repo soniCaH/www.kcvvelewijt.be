@@ -33,7 +33,7 @@ SEARCH_INDEX_PRUNE_DRY_RUN = "false"
 AI_ANSWER_DAILY_CAP = "2000"
 # PSD calls per UTC day (the PsdGate DO's daily count, #3490) after which a cold
 # cache miss fails fast. The count includes the 02:00 UTC sync (at most ~300 calls,
-# measured 2026-10-19), so 850 = sync 300 + ~560 for visitors (our ~1000 half of
+# measured 2026-10-19), so 850 = sync 300 + ~550 for visitors (our ~1000 half of
 # PSD's 2000/day, shared with the old AWS app, minus the sync, minus 20%). Never
 # above 1000. See "How the budget was chosen" in apps/api/CLAUDE.md.
 PSD_ONDEMAND_DAILY_BUDGET = "850"

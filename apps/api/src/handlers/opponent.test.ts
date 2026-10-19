@@ -90,10 +90,11 @@ describe("opponentHistoryTtl", () => {
     ).toBe(TTL.MATCH_DETAIL_MATCHDAY);
   });
 
-  it("still catches a result on a page nobody opened for days", () => {
+  it("still catches a result on a page nobody opened for days, once a day", () => {
+    // A refresh is a whole season fan-out: never every 15 min for a week.
     expect(
       opponentHistoryTtl(withMatches([-5 * 24 * H, "scheduled"]), now),
-    ).toBe(TTL.MATCH_DETAIL_MATCHDAY);
+    ).toBe(TTL.MATCHES_TEAM);
   });
 
   it("keeps the 7-day TTL once every played match is settled", () => {

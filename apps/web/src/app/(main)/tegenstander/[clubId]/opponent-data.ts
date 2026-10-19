@@ -66,6 +66,9 @@ export interface OpponentPageData {
   /** Squads whose read failed upstream (PSD budget, 5xx): named on the page
    *  as "even niet beschikbaar", never dropped as if they never played. */
   unavailableSquads: string[];
+  /** Every squad the page shows, loaded or unavailable, in `results` order —
+   *  so a failed A-ploeg still renders above a loaded B-ploeg. */
+  squadOrder: string[];
 }
 
 function sortMatchesDescending(matches: readonly Match[]): Match[] {
@@ -122,6 +125,13 @@ export function buildOpponentPageData(
     sections,
     unavailableSquads: results
       .filter((r) => r.unavailable)
+      .map((r) => r.team.squadLabel),
+    squadOrder: results
+      .filter(
+        (r) =>
+          r.unavailable ||
+          sections.some((s) => s.squadLabel === r.team.squadLabel),
+      )
       .map((r) => r.team.squadLabel),
   };
 }

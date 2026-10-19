@@ -234,6 +234,18 @@ export function matchDetailTtl(
   return reportPending ? Math.min(natural, TTL.MATCH_DETAIL_MATCHDAY) : natural;
 }
 
+/**
+ * Past kickoff and still "scheduled" (no result yet): a stale preview is the
+ * wrong answer, not just an old one, so the read fetches it now (one `/info`
+ * call). Postponed / stopped / cancelled never settle, so they never wait.
+ */
+export function needsInlineRefresh(
+  detail: Pick<MatchDetail, "date" | "status">,
+  now: number = Date.now(),
+): boolean {
+  return detail.status === "scheduled" && kickoffMs(detail.date) < now;
+}
+
 export const getMatchDetailHandler = (
   matchId: number,
 ): Effect.Effect<
@@ -258,11 +270,7 @@ export const getMatchDetailHandler = (
     undefined,
     {
       shouldServeStale,
-      // Past kickoff, no result yet: a stale preview is the wrong answer,
-      // not just an old one — fetch it now (one `/info` call).
-      refreshInline: (detail) =>
-        kickoffMs(detail.date) < Date.now() &&
-        !isSettledMatchStatus(detail.status),
+      refreshInline: (detail) => needsInlineRefresh(detail),
     },
   );
 };

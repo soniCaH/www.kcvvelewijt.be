@@ -696,6 +696,39 @@ describe("TypedKvCache — stale-while-revalidate + storm gate (#2328)", () => {
     expect(mockKv.store.get("neg:test-key")).toBe("1");
   });
 
+  it("refreshInline: a negative marker still wins, no inline fetch", async () => {
+    const mockKv = makeMockKv();
+    mockKv.store.set("test-key", staleWrapper({ name: "old", value: 1 }));
+    mockKv.store.set("neg:test-key", "1");
+    const gate = PsdGateTest;
+    const { runnerLayer, settle } = withRunner(mockKv, gate);
+    let fetchCalled = false;
+
+    const result = await Effect.runPromise(
+      TypedKvCache(TestSchema)
+        .getOrFetch(
+          "test-key",
+          Effect.sync(() => {
+            fetchCalled = true;
+            return { name: "fresh", value: 2 };
+          }),
+          60,
+          undefined,
+          { refreshInline: () => true },
+        )
+        .pipe(
+          Effect.provide(runnerLayer),
+          Effect.provide(KvCacheLive),
+          Effect.provide(gate),
+          Effect.provide(makeEnvLayer(mockKv)),
+        ),
+    );
+    await settle();
+
+    expect(result).toEqual({ name: "old", value: 1 });
+    expect(fetchCalled).toBe(false);
+  });
+
   it("negative marker present → serves stale WITHOUT fetching", async () => {
     const mockKv = makeMockKv();
     mockKv.store.set("test-key", staleWrapper({ name: "stale", value: 7 }));

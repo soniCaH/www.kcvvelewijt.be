@@ -17,8 +17,12 @@ esac
 # First deploy of a branch: no previous deploy to compare against, so build.
 [ -n "${VERCEL_GIT_PREVIOUS_SHA:-}" ] || exit 1
 
+# A redeploy of the same commit (an env-var change, a manual "Redeploy") is
+# always meant to build.
+[ "$VERCEL_GIT_PREVIOUS_SHA" != "${VERCEL_GIT_COMMIT_SHA:-}" ] || exit 1
+
 # No change to the web app or anything it builds from: skip. A git error (the
 # previous SHA missing from a shallow clone) exits non-zero, so it builds.
 git diff --quiet "$VERCEL_GIT_PREVIOUS_SHA" HEAD -- \
   . ../../packages ../../package.json ../../pnpm-lock.yaml \
-  ../../pnpm-workspace.yaml ../../turbo.json
+  ../../pnpm-workspace.yaml ../../turbo.json ../../.npmrc

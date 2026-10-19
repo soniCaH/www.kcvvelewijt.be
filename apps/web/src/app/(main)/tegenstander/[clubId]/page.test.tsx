@@ -193,6 +193,24 @@ describe("/tegenstander/[clubId] renders one section per senior squad (#2463)", 
     );
   });
 
+  it("keeps a failed A-ploeg above a loaded B-ploeg", async () => {
+    mockGetOpponentHistory.mockImplementation((teamId: number) =>
+      teamId === 2
+        ? Effect.succeed(history(3, [match(2, "2026-02-15")]))
+        : Effect.fail(new HttpServiceUnavailable({ error: "budget" })),
+    );
+
+    render(
+      await OpponentPage({
+        params: Promise.resolve({ clubId: String(CLUB_ID) }),
+      }),
+    );
+
+    expect(
+      screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent),
+    ).toEqual(["A-ploeg.", "B-ploeg."]);
+  });
+
   it("throws when every squad failed upstream, so ISR keeps its last good page", async () => {
     mockGetOpponentHistory.mockReturnValue(
       Effect.fail(new HttpServiceUnavailable({ error: "budget" })),

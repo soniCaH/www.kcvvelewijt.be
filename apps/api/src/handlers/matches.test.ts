@@ -8,6 +8,7 @@ import {
   getPlayerStatsHandler,
   matchDetailTtl,
   teamMatchesTtl,
+  needsInlineRefresh,
   nextMatchesTtl,
   CACHE_VERSION,
 } from "./matches";
@@ -738,6 +739,34 @@ describe("getPlayerStatsHandler", () => {
     expect(result._tag).toBe("Left");
     if (result._tag === "Left") {
       expect(result.left._tag).toBe("ResourceNotFound");
+    }
+  });
+});
+
+describe("needsInlineRefresh", () => {
+  const now = new Date("2026-10-19T05:42:00.000Z").getTime();
+  const past = wireDate(now - 36 * 60 * 60 * 1000);
+  const future = wireDate(now + 60 * 60 * 1000);
+
+  it("fetches in the foreground for a played match with no result yet", () => {
+    // U17 forfeit, 2026-10-19: the preview stayed 36 h on an idle page.
+    expect(needsInlineRefresh({ date: past, status: "scheduled" }, now)).toBe(
+      true,
+    );
+  });
+
+  it("never waits for a match before kickoff or one that will not settle", () => {
+    expect(needsInlineRefresh({ date: future, status: "scheduled" }, now)).toBe(
+      false,
+    );
+    for (const status of [
+      "finished",
+      "forfeited",
+      "postponed",
+      "stopped",
+      "cancelled",
+    ] as const) {
+      expect(needsInlineRefresh({ date: past, status }, now)).toBe(false);
     }
   });
 });
