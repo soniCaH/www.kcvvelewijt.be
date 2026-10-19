@@ -18,7 +18,7 @@ import { PageHero } from "@/components/layout/PageHero";
  * Last updated date for the privacy policy.
  * NOTE: Maintainers must update this constant whenever the privacy policy content changes.
  */
-const LAST_UPDATED = "juni 2026";
+const LAST_UPDATED = "oktober 2026";
 
 export const metadata = buildPageMetadata({
   title: "Privacyverklaring",
