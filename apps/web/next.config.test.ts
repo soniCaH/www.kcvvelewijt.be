@@ -184,10 +184,12 @@ describe("next.config redirects", () => {
 
     // Resolve a pathname the way Next does: walk EVERY redirect rule in order
     // with Next's own matcher (`getPathMatch`, path-to-regexp) and take the
-    // first hit. A pathname no rule matches answers 200.
+    // first hit. A pathname no rule matches answers 200. Rules with `has` are
+    // host-scoped (#3579) and skipped: this resolves for the main site's host.
     const resolve = async (pathname: string) => {
       const redirects = await nextConfig.redirects!();
       for (const r of redirects) {
+        if (r.has) continue;
         const params = getPathMatch(r.source)(pathname);
         if (params) {
           return {
@@ -337,6 +339,43 @@ describe("next.config redirects", () => {
       expect(match!.destination).toBe(destination);
       expect(match!.permanent).toBe(true);
     }
+  });
+});
+
+describe("sponsoring.kcvvelewijt.be redirect (#3579)", () => {
+  const SPONSORING_HOST = "sponsoring.kcvvelewijt.be";
+  const find = async () => {
+    const redirects = await nextConfig.redirects!();
+    return {
+      redirects,
+      rule: redirects.find((r) =>
+        r.has?.some((h) => h.type === "host" && h.value === SPONSORING_HOST),
+      ),
+    };
+  };
+
+  it("sends every path to the workers.dev host, keeping the path", async () => {
+    const { rule } = await find();
+    expect(rule).toMatchObject({
+      source: "/:path*",
+      destination:
+        "https://kcvv-sponsorship-web.kevin-van-ransbeeck.workers.dev/:path*",
+    });
+  });
+
+  it("is non-permanent, so it stays reversible", async () => {
+    expect((await find()).rule?.permanent).toBe(false);
+  });
+
+  it("is matched on the host alone, so the main site is untouched", async () => {
+    expect((await find()).rule?.has).toEqual([
+      { type: "host", value: SPONSORING_HOST },
+    ]);
+  });
+
+  it("comes first, so no host-less rule answers for this host before it", async () => {
+    const { redirects, rule } = await find();
+    expect(redirects[0]).toBe(rule);
   });
 });
 

@@ -50,6 +50,18 @@ const nextConfig: NextConfig = {
   // would 404 against the psdId-/slug-keyed targets (#2227).
   async redirects() {
     return [
+      // #3579 — sponsoring.kcvvelewijt.be used to be a Netlify alias with a
+      // forced 302; this replaces it before that site is deleted. First on
+      // purpose: the path rules below carry no `has`, so they would otherwise
+      // answer for this host too. 307, not 308: reversible, never cached.
+      {
+        source: "/:path*",
+        has: [{ type: "host" as const, value: "sponsoring.kcvvelewijt.be" }],
+        destination:
+          "https://kcvv-sponsorship-web.kevin-van-ransbeeck.workers.dev/:path*",
+        permanent: false,
+      },
+
       // ── #2960 — Gatsby's content-hashed asset URLs for two PDFs that are
       // already migrated to `public/downloads/` at identical byte sizes. Only
       // the old hashed path was unrouted.
