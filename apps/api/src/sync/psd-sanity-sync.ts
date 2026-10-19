@@ -169,6 +169,37 @@ export type ReconciliationResult =
   | { readonly action: "none" };
 
 /**
+ * One reason the cycle-end cleanup (archiving players, staff and teams that
+ * left PSD) did not fully run (#3564).
+ */
+export type CleanupSkip =
+  | { readonly kind: "cycle-incomplete"; readonly missingTeamIds: string[] }
+  | { readonly kind: "staff-fetch-failed"; readonly error: string }
+  | {
+      readonly kind: "orphan-cap";
+      readonly entity: "players" | "staff" | "teams";
+      readonly orphanCount: number;
+      readonly activeCount: number;
+      readonly ratio: number;
+    };
+
+/**
+ * The cycle-end cleanup's outcome this run, for the caller (index.ts) to turn
+ * into a `psd-sanity-sync-cleanup` job-alert report (#3564). Shaped like
+ * `PrunePhaseOutcome` in `search/sanity-index-sync.ts`.
+ *
+ * - `"not-run"` — no cycle end this run (the rotation ends a cycle every few
+ *   nights), a manual run, or no teams. Proves nothing: report nothing.
+ * - `"ok"` — a cycle ended and every cleanup leg ran.
+ * - `"skipped"` — a cycle ended but at least one leg was skipped; `skips`
+ *   names each reason with its counts.
+ */
+export type CleanupOutcome =
+  | { readonly kind: "not-run" }
+  | { readonly kind: "ok" }
+  | { readonly kind: "skipped"; readonly skips: readonly CleanupSkip[] };
+
+/**
  * Compare active Sanity IDs against accumulated PSD IDs and archive orphans,
  * unless the orphan ratio exceeds the safety threshold. A thin adapter over
  * the shared `reconcileOrphans` helper (#2854) — the four-step shape
@@ -551,7 +582,8 @@ export const runSync = Effect.gen(function* () {
 
   if (teams.length === 0) {
     yield* Effect.log("no teams found — skipping sync");
-    return;
+    const cleanup: CleanupOutcome = { kind: "not-run" };
+    return { cleanup };
   }
 
   const teamIndex = cursor % teams.length;
@@ -889,8 +921,24 @@ export const runSync = Effect.gen(function* () {
       "cycle end reached by a manual run — skipping reconciliation and leaving the accumulators alone",
     );
   }
+  let cleanup: CleanupOutcome = { kind: "not-run" };
   if (nextCursor === 0 && !manualRun) {
     yield* Effect.log("cycle complete — running reconciliation");
+    const skips: CleanupSkip[] = [];
+    const noteCapRefusal = (
+      entity: "players" | "staff" | "teams",
+      result: ReconciliationResult,
+    ) => {
+      if (result.action === "skipped") {
+        skips.push({
+          kind: "orphan-cap",
+          entity,
+          orphanCount: result.orphanCount,
+          activeCount: result.activeCount,
+          ratio: result.ratio,
+        });
+      }
+    };
 
     // Cycle-end guard (#3465): archival is only as good as the accumulators.
     // A live team that was never accumulated this cycle (skipped by a
@@ -903,6 +951,7 @@ export const runSync = Effect.gen(function* () {
     );
     const cycleComplete = missingTeamIds.length === 0;
     if (!cycleComplete) {
+      skips.push({ kind: "cycle-incomplete", missingTeamIds });
       yield* Effect.logWarning(
         `reconciliation: cycle INCOMPLETE — live team(s) ${missingTeamIds.join(", ")} never accumulated this cycle; skipping player and staff archival (accumulators are cleared, the next cycle starts fresh)`,
       );
@@ -941,12 +990,15 @@ export const runSync = Effect.gen(function* () {
 
     if (cycleComplete) {
       const activeInSanity = yield* sanityReader.getActivePlayerPsdIds();
-      yield* reconcileEntity(
+      noteCapRefusal(
         "players",
-        activeInSanity,
-        accumulatedIds,
-        (ids) => sanityWriter.archivePlayers(ids),
-        ratioThresholdFor("players"),
+        yield* reconcileEntity(
+          "players",
+          activeInSanity,
+          accumulatedIds,
+          (ids) => sanityWriter.archivePlayers(ids),
+          ratioThresholdFor("players"),
+        ),
       );
     }
 
@@ -1001,12 +1053,15 @@ export const runSync = Effect.gen(function* () {
             `reconciliation: ${protectedStaffIds.length} staff protected by organigram/responsibility refs: ${protectedStaffIds.join(", ")}`,
           );
         }
-        yield* reconcileEntity(
+        noteCapRefusal(
           "staff",
-          activeStaffInSanity,
-          accumulatedStaffIds,
-          (ids) => sanityWriter.archiveStaff(ids),
-          ratioThreshold,
+          yield* reconcileEntity(
+            "staff",
+            activeStaffInSanity,
+            accumulatedStaffIds,
+            (ids) => sanityWriter.archiveStaff(ids),
+            ratioThreshold,
+          ),
         );
       });
 
@@ -1016,6 +1071,10 @@ export const runSync = Effect.gen(function* () {
     if (clubStaffResult === null) {
       // incomplete cycle — staff archival skipped above
     } else if (Either.isLeft(clubStaffResult)) {
+      skips.push({
+        kind: "staff-fetch-failed",
+        error: String(clubStaffResult.left),
+      });
       yield* Effect.log(
         `reconciliation: SKIPPED staff archival — club-wide staff fetch failed: ${String(clubStaffResult.left)}`,
       );
@@ -1034,12 +1093,15 @@ export const runSync = Effect.gen(function* () {
     // A team still in PSD's live list is never an orphan, even when this
     // cycle did not reach it (#3465).
     const activeTeamsInSanity = yield* sanityReader.getActiveTeamPsdIds();
-    yield* reconcileEntity(
+    noteCapRefusal(
       "teams",
-      activeTeamsInSanity,
-      new Set([...accumulatedTeamIds, ...liveTeamIds]),
-      (ids) => sanityWriter.archiveTeams(ids),
-      ratioThresholdFor("teams"),
+      yield* reconcileEntity(
+        "teams",
+        activeTeamsInSanity,
+        new Set([...accumulatedTeamIds, ...liveTeamIds]),
+        (ids) => sanityWriter.archiveTeams(ids),
+        ratioThresholdFor("teams"),
+      ),
     );
 
     // Clear accumulation keys for next cycle (even when archival is skipped)
@@ -1051,6 +1113,7 @@ export const runSync = Effect.gen(function* () {
       ],
       { concurrency: "unbounded" },
     );
+    cleanup = skips.length === 0 ? { kind: "ok" } : { kind: "skipped", skips };
   }
 
   // Advance cursor only after reconciliation succeeds (if applicable).
@@ -1113,6 +1176,9 @@ export const runSync = Effect.gen(function* () {
   yield* Effect.log(
     `sync completed — cursor advanced to ${nextCursor} (next: team index ${nextCursor})`,
   );
+  // The sync itself succeeded whatever `cleanup` says; the caller (index.ts)
+  // reports a skipped cleanup under its own job name (#3564).
+  return { cleanup };
 }).pipe(
   Effect.tapError((e) =>
     Effect.log(

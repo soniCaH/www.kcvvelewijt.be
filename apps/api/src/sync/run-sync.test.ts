@@ -780,7 +780,7 @@ describe("runSync", () => {
 
     const psdMock = makePsdTeamClientMock([ONE_TEAM], psdPlayers);
 
-    await Effect.runPromise(
+    const { cleanup } = await Effect.runPromise(
       runSync.pipe(
         Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
       ),
@@ -789,6 +789,7 @@ describe("runSync", () => {
     // With 1 team, cursor wraps to 0 immediately → reconciliation runs
     expect(archivePlayers).toHaveBeenCalledOnce();
     expect(archivePlayers).toHaveBeenCalledWith(["500"]);
+    expect(cleanup).toEqual({ kind: "ok" });
   });
 
   it("does not reconcile mid-cycle (cursor not at 0)", async () => {
@@ -803,13 +804,14 @@ describe("runSync", () => {
     const psdMock = makePsdTeamClientMock(TWO_TEAMS, [ONE_PLAYER]);
 
     // Run 1: processes Team A (cursor 0 → 1), not at end of cycle
-    await Effect.runPromise(
+    const { cleanup } = await Effect.runPromise(
       runSync.pipe(
         Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
       ),
     );
 
     expect(archivePlayers).not.toHaveBeenCalled();
+    expect(cleanup).toEqual({ kind: "not-run" });
   });
 
   it("accumulates player IDs across teams and reconciles at cycle end", async () => {
@@ -1041,13 +1043,22 @@ describe("runSync", () => {
         Effect.fail(new PsdTeamClientError("club-wide fetch boom")),
     };
 
-    await Effect.runPromise(
+    const { cleanup } = await Effect.runPromise(
       runSync.pipe(
         Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
       ),
     );
 
     expect(archiveStaff).not.toHaveBeenCalled();
+    expect(cleanup).toEqual({
+      kind: "skipped",
+      skips: [
+        {
+          kind: "staff-fetch-failed",
+          error: expect.stringContaining("club-wide fetch boom"),
+        },
+      ],
+    });
   });
 
   it("archives orphan team when cycle completes (team disappears from PSD)", async () => {
@@ -1194,7 +1205,7 @@ describe("runSync", () => {
     );
 
     // With 1 team, cursor wraps to 0 immediately → reconciliation runs
-    await Effect.runPromise(
+    const { cleanup } = await Effect.runPromise(
       runSync.pipe(
         Effect.provide(buildTestLayer(kvStub, writerMock, readerMock, psdMock)),
       ),
@@ -1204,6 +1215,17 @@ describe("runSync", () => {
     expect(archivePlayers).not.toHaveBeenCalled();
     expect(archiveStaff).not.toHaveBeenCalled();
     expect(archiveTeams).not.toHaveBeenCalled();
+    // ... and each refusal reaches the caller with its counts (#3564)
+    expect(cleanup).toEqual({
+      kind: "skipped",
+      skips: ["players", "staff", "teams"].map((entity) => ({
+        kind: "orphan-cap",
+        entity,
+        orphanCount: 4,
+        activeCount: 5,
+        ratio: 0.8,
+      })),
+    });
   });
 
   it("releases a stuck orphan-cap refusal via the sync:orphan-cap-override KV key, then clears it (#2854)", async () => {
@@ -1559,7 +1581,7 @@ describe("runSync", () => {
             ),
           ),
         ),
-      ).resolves.toBeUndefined();
+      ).resolves.toEqual({ cleanup: { kind: "not-run" } });
 
       expect(upsertPlayer).toHaveBeenCalledOnce();
       expect(upsertTeam).toHaveBeenCalledOnce();
@@ -2037,6 +2059,10 @@ describe("runSync", () => {
       expect(Either.isRight(result)).toBe(true);
       expect(mocks.archivePlayers).not.toHaveBeenCalled();
       expect(mocks.archiveStaff).not.toHaveBeenCalled();
+      expect(Either.isRight(result) && result.right.cleanup).toEqual({
+        kind: "skipped",
+        skips: [{ kind: "cycle-incomplete", missingTeamIds: ["2"] }],
+      });
       expect(
         logs.some((l) => l.level === "WARN" && /incomplete/i.test(l.text)),
       ).toBe(true);
@@ -2240,6 +2266,9 @@ describe("runSync", () => {
         );
 
         expect(Either.isRight(result)).toBe(true);
+        expect(Either.isRight(result) && result.right.cleanup).toEqual({
+          kind: "not-run",
+        });
         expect(mocks.upsertTeam).toHaveBeenCalledOnce();
         expect(mocks.archivePlayers).not.toHaveBeenCalled();
         expect(mocks.archiveTeams).not.toHaveBeenCalled();
