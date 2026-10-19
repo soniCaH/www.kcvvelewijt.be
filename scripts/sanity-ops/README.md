@@ -8,6 +8,7 @@ delete and change documents, so they sit in the workspace and CI runs
 | -------------------------- | --------------------------------------------------------------------------- |
 | `src/board-2627/`          | The 2026-2027 board update of the organigram and help topics (`board-2627`) |
 | `src/board-cleanup/`       | Read-only audit of board staff documents                                    |
+| `src/cashless-terms-3569/` | The cashless terms page, from Drupal's text, linked from `cashless` (#3569) |
 | `src/psd-privacy-cleanup/` | Unset staff `birthDate`, delete unreferenced PSD portrait assets (#3469)    |
 | `src/staff-role-fill/`     | List empty staff roles, build the `andere` fill for the owner (#3560)       |
 | `src/team-image-backfill/` | Recover team photos from Drupal — see its README                            |
