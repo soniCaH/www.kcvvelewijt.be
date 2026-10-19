@@ -937,6 +937,31 @@ describe("SharePage", () => {
     }
   });
 
+  it("an own photo already within 1600 px reaches the preview as picked", async () => {
+    const close = vi.fn();
+    vi.stubGlobal(
+      "createImageBitmap",
+      vi.fn().mockResolvedValue({ width: 1200, height: 900, close }),
+    );
+    const getContext = vi.spyOn(HTMLCanvasElement.prototype, "getContext");
+    try {
+      const user = userEvent.setup();
+      render(<SharePage matches={MATCHES} players={PLAYERS} />);
+      await openTab(user, "Inhoud");
+      const file = new File(["x"], "goal.jpg", { type: "image/jpeg" });
+      await user.upload(screen.getByLabelText(/foto uploaden/i), file);
+
+      await vi.waitFor(() =>
+        expect(globalThis.URL.createObjectURL).toHaveBeenCalledWith(file),
+      );
+      expect(close).toHaveBeenCalled();
+      expect(getContext).not.toHaveBeenCalled();
+    } finally {
+      getContext.mockRestore();
+      vi.unstubAllGlobals();
+    }
+  });
+
   // ─── News and events in the four new looks (#3540) ─────────────────────
 
   describe("news and events (#3540)", () => {
