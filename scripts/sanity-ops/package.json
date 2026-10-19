@@ -12,7 +12,8 @@
     "psd-privacy:cleanup": "tsx src/psd-privacy-cleanup/apply-psd-privacy-cleanup.ts",
     "staff-role:fill": "tsx src/staff-role-fill/fill-staff-roles.ts",
     "team-image:backfill": "tsx src/team-image-backfill/backfill-team-images.ts",
-    "cashless-terms": "tsx src/cashless-terms-3569/apply-cashless-terms.ts"
+    "cashless-terms": "tsx src/cashless-terms-3569/apply-cashless-terms.ts",
+    "leerplan-link": "tsx src/leerplan-link-3568/apply-leerplan-link.ts"
   },
   "dependencies": {
     "@sanity/client": "8.6.2"
