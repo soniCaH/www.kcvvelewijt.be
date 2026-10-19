@@ -402,6 +402,14 @@ describe("getBirthdayPeople", () => {
         role: null,
       },
       {
+        // Only `age: "A"` turns the " A" suffix into "A-Ploeg" — proves age is passed
+        firstName: "Jo",
+        lastName: "Claes",
+        birthDate: "1998-10-23",
+        team: { name: "KCVVE A", age: "A" },
+        role: null,
+      },
+      {
         firstName: "Marc",
         lastName: "Peeters",
         birthDate: "1975-04-12",
@@ -430,6 +438,7 @@ describe("getBirthdayPeople", () => {
     expect(result).toEqual([
       { name: "An Smet", birthDate: "2012-10-22", label: "U11" },
       { name: "Bo Maes", birthDate: "2019-10-21", label: "U8 Groen" },
+      { name: "Jo Claes", birthDate: "1998-10-23", label: "A-Ploeg" },
       { name: "Marc Peeters", birthDate: "1975-04-12", label: "Voorzitter" },
     ]);
   });
