@@ -121,6 +121,23 @@ export default {
       }
     }
 
+    // Old `footbalisto.be/calendar` subscribers: calendar apps hold no BFF key,
+    // so this answers before the check below and never touches a service
+    // (#3578). `teams` becomes `teamIds`; `side` is kept (the old API took
+    // the same home/away/all); every other parameter is dropped.
+    const url = new URL(request.url);
+    if (
+      (request.method === "GET" || request.method === "HEAD") &&
+      url.pathname === "/calendar"
+    ) {
+      const target = new URL("https://www.kcvvelewijt.be/api/calendar.ics");
+      const teams = url.searchParams.get("teams");
+      const side = url.searchParams.get("side");
+      if (teams) target.searchParams.set("teamIds", teams);
+      if (side) target.searchParams.set("side", side);
+      return Response.redirect(target.toString(), 308);
+    }
+
     // Everything else: only the website's Next server, holding the shared
     // secret, gets past here — before any KV/DO/PSD/Sanity/AI work (#3485).
     // No CORS middleware: no browser ever calls this worker.
