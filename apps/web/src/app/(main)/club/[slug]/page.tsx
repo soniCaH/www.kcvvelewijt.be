@@ -138,7 +138,7 @@ export default async function DynamicClubPage({ params }: Props) {
           ariaLabel="Schrijf je in"
           heading="Klaar om lid te worden?"
           emphasis={{ text: "lid te worden", tone: "warm" }}
-          lead="Schrijf je online in via ons inschrijvingsformulier — we nemen daarna contact met je op."
+          lead="Laat je interesse weten via ons formulier — we nemen daarna contact met je op."
           buttonLabel={
             <>
               Schrijf je in <span aria-hidden="true">+</span>

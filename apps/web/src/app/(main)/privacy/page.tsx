@@ -119,15 +119,15 @@ export default function PrivacyPage() {
           </ul>
 
           <DottedDivider color="paper-edge" />
-          <h2>Inschrijvingsformulier (Word lid)</h2>
+          <h2>Interesseformulier (Word lid)</h2>
           <p>
-            Wanneer je je inschrijft via{" "}
+            Wanneer je je interesse doorgeeft via{" "}
             <Link href="/club/word-lid" className="prose-link">
               /club/word-lid
               <LinkPendingDots />
             </Link>
-            , verwerken we enkel de gegevens die nodig zijn om je inschrijving
-            op te volgen:
+            , verwerken we enkel de gegevens die nodig zijn om je aanvraag op te
+            volgen:
           </p>
           <ul>
             <li>Voornaam en achternaam</li>
@@ -143,10 +143,10 @@ export default function PrivacyPage() {
           </ul>
           <p>
             We vragen géén telefoonnummer, volledig adres, rijksregisternummer,
-            nationaliteit of school via dit formulier. De ingediende
-            inschrijvingen worden bewaard tot maximaal 1 jaar na de laatste
-            opvolging, tenzij ze leiden tot een effectief lidmaatschap — dan
-            geldt de bewaartermijn voor leden hieronder.
+            nationaliteit of school via dit formulier. De ingediende aanvragen
+            worden bewaard tot maximaal 1 jaar na de laatste opvolging, tenzij
+            ze leiden tot een effectief lidmaatschap — dan geldt de
+            bewaartermijn voor leden hieronder.
           </p>
 
           <DottedDivider color="paper-edge" />
