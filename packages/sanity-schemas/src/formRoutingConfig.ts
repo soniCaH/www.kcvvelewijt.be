@@ -14,7 +14,7 @@ const roleRecipient = (name: string, title: string, helper: string) =>
       Rule.required()
         .email()
         .error(
-          'Verplicht. Naar dit adres sturen we de melding van elke nieuwe inschrijving voor deze rol — een leeg of ongeldig adres betekent dat niemand de aanvraag te zien krijgt.',
+          'Verplicht. Naar dit adres sturen we de melding van elke nieuwe interesse voor deze rol — een leeg of ongeldig adres betekent dat niemand de aanvraag te zien krijgt.',
         ),
   })
 
@@ -31,11 +31,11 @@ export const formRoutingConfig = defineType({
   __experimental_actions: ['update', 'publish'],
   groups: [{name: 'ontvangers', title: 'Ontvangers', default: true}],
   fields: [
-    roleRecipient('speler', 'Speler', 'Ontvanger van inschrijvingen als senior speler.'),
-    roleRecipient('jeugdspeler', 'Jeugdspeler', 'Ontvanger van jeugd-inschrijvingen.'),
-    roleRecipient('vrijwilliger', 'Vrijwilliger', 'Ontvanger van vrijwilligers-inschrijvingen.'),
-    roleRecipient('trainer', 'Trainer', 'Ontvanger van trainer-inschrijvingen.'),
-    roleRecipient('scheidsrechter', 'Scheidsrechter', 'Ontvanger van scheidsrechter-inschrijvingen.'),
+    roleRecipient('speler', 'Speler', 'Ontvanger van interesse als senior speler.'),
+    roleRecipient('jeugdspeler', 'Jeugdspeler', 'Ontvanger van interesse van jeugdspelers.'),
+    roleRecipient('vrijwilliger', 'Vrijwilliger', 'Ontvanger van interesse van vrijwilligers.'),
+    roleRecipient('trainer', 'Trainer', 'Ontvanger van interesse van trainers.'),
+    roleRecipient('scheidsrechter', 'Scheidsrechter', 'Ontvanger van interesse van scheidsrechters.'),
   ],
   preview: {
     prepare() {
