@@ -18,11 +18,11 @@ import { MembershipForm } from "@/components/club/MembershipForm/MembershipForm"
 export const metadata = buildPageMetadata({
   title: "Word lid",
   description:
-    "Schrijf je in bij KCVV Elewijt — als speler, jeugdspeler, vrijwilliger, trainer of scheidsrechter. Vul het inschrijfformulier in en we nemen contact met je op.",
+    "Laat je interesse weten bij KCVV Elewijt — als speler, jeugdspeler, vrijwilliger, trainer of scheidsrechter. Vul het formulier in en we nemen contact met je op.",
   path: "/club/word-lid",
   ogTitle: "Word lid van KCVV Elewijt",
   ogDescription:
-    "Schrijf je in bij KCVV Elewijt — speler, jeugd, vrijwilliger, trainer of scheidsrechter.",
+    "Laat je interesse weten bij KCVV Elewijt — speler, jeugd, vrijwilliger, trainer of scheidsrechter.",
   keywords: [
     "word lid",
     "inschrijven",
