@@ -143,11 +143,23 @@ describe("buildCashlessPatch", () => {
     expect(new Set(keys).size).toBe(keys.length);
   });
 
-  it("returns null when the paragraph already links to the terms", () => {
+  it("returns null on a re-run over the already patched paragraph", () => {
     const patched = buildCashlessPatch(cashless())!;
     const doc = cashless();
     doc.body![1] = patched.block;
     expect(buildCashlessPatch(doc)).toBeNull();
+  });
+
+  it("still patches when an unrelated block already links to the terms", () => {
+    const doc = cashless();
+    doc.body!.unshift({
+      _key: "other",
+      _type: "block",
+      style: "normal",
+      markDefs: [{ _key: "m", _type: "link", href: TERMS_HREF }],
+      children: [{ _key: "s", _type: "span", marks: ["m"], text: "Elders" }],
+    });
+    expect(buildCashlessPatch(doc)).toMatchObject({ blockKey: "k56" });
   });
 
   it("refuses a paragraph that was edited since", () => {

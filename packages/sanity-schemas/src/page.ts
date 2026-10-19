@@ -1,4 +1,6 @@
 import {defineField, defineType} from 'sanity'
+import {LinkIcon} from '@sanity/icons/Link'
+import {validateLink} from './validation/link'
 
 export const page = defineType({
   name: 'page',
@@ -63,6 +65,31 @@ export const page = defineType({
             {title: 'Kop 6', value: 'h6'},
             {title: 'Citaat', value: 'blockquote'},
           ],
+          // Same `link` annotation as article.body: Sanity's default one rejects
+          // relative hrefs, so an internal link (/club/cashless/voorwaarden, #3569)
+          // would block publishing. No `internalLink` here — pages don't carry it.
+          marks: {
+            annotations: [
+              {
+                name: 'link',
+                title: 'Link',
+                type: 'object',
+                icon: LinkIcon,
+                fields: [
+                  {
+                    name: 'href',
+                    title: 'URL',
+                    type: 'url',
+                    validation: (r) =>
+                      r
+                        .required()
+                        .uri({allowRelative: true, scheme: ['http', 'https', 'mailto', 'tel']})
+                        .custom(validateLink),
+                  },
+                ],
+              },
+            ],
+          },
         },
         {type: 'articleImage'},
         {type: 'fileAttachment'},

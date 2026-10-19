@@ -149,13 +149,21 @@ export interface CashlessPatch {
  * Points the "Algemene voorwaarden" paragraph at the new page: the words
  * "algemene voorwaarden" become the link and the "at the bar / on request"
  * clause becomes a paper-copy clause. The mail link and the rest stay.
- * Returns `null` when the paragraph already links there (a re-run).
+ * Returns `null` when that paragraph already carries the link (a re-run).
  */
 export function buildCashlessPatch(doc: CashlessDoc): CashlessPatch | null {
   const blocks = (doc.body ?? []).filter(
     (b): b is Block => b._type === "block",
   );
-  if (blocks.some((b) => b.markDefs?.some((d) => d.href === TERMS_HREF))) {
+  // A re-run: the target paragraph already carries the new lead and the link.
+  const done = NEW_LEAD.join("");
+  if (
+    blocks.some(
+      (b) =>
+        textOf(b).startsWith(done) &&
+        b.markDefs?.some((d) => d.href === TERMS_HREF),
+    )
+  ) {
     return null;
   }
   const block = blocks.find((b) => textOf(b).startsWith(OLD_LEAD));
