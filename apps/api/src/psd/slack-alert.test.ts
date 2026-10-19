@@ -52,9 +52,13 @@ describe("buildDriftMessage", () => {
     const msg = buildDriftMessage({
       key: "matches:team:42",
       staleAgeMs: 2 * day, // 2 days stale
+      failingForMs: day + 2 * 3600_000,
+      psdBacked: true,
       hardTtlMs: 7 * day, // 7-day cliff
       status: 429,
     });
+    expect(msg).toContain("PSD data drifting stale");
+    expect(msg).toContain("not refreshed for 1d 2h of reads");
     expect(msg).toContain("matches:team:42");
     expect(msg).toContain("2d 0h"); // stale age
     expect(msg).toContain("5d 0h"); // time to cliff (7 - 2)
@@ -66,9 +70,23 @@ describe("buildDriftMessage", () => {
     const msg = buildDriftMessage({
       key: "k",
       staleAgeMs: 8 * day,
+      failingForMs: day,
+      psdBacked: true,
       hardTtlMs: 7 * day,
     });
     expect(msg).toContain("0s until");
+  });
+
+  it("says 'Cached data' for a cache that is not PSD-backed", () => {
+    const msg = buildDriftMessage({
+      key: "related:article:x",
+      staleAgeMs: 86400_000,
+      failingForMs: 86400_000,
+      psdBacked: false,
+      hardTtlMs: 7 * 86400_000,
+    });
+    expect(msg).toContain("Cached data drifting stale");
+    expect(msg).not.toContain("PSD");
   });
 });
 
