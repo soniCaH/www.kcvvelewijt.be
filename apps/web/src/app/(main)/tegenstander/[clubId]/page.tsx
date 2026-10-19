@@ -27,6 +27,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import {
   Crest,
+  EmptyState,
   PageContainer,
   SectionHeader,
   StripedSeam,
@@ -42,6 +43,7 @@ import {
   buildOpponentPageData,
   matchCountLabel,
   type OpponentPageData,
+  type SquadHistoryResult,
   type SquadOpponentSection,
 } from "./opponent-data";
 
@@ -258,7 +260,7 @@ export const fetchOpponentData = cache(async function fetchOpponentData(
       // same throw sends the visitor straight to the error boundary instead.
       // Staying narrow is the better of two imperfect outcomes, not a
       // guarantee that throwing is free.
-      const results = yield* Effect.all(
+      const results: SquadHistoryResult[] = yield* Effect.all(
         seniorTeams.map((team) => {
           // selectSeniorTeams only admits teams carrying a psdId.
           // team.displayName is already the canonical display name
@@ -271,10 +273,38 @@ export const fetchOpponentData = cache(async function fetchOpponentData(
             Effect.catchTag("HttpNotFound", () =>
               Effect.succeed({ team: squadTeam, history: null }),
             ),
+            // A transient upstream failure (PSD's daily budget spent, a 5xx)
+            // costs this squad's section only: one refused B-ploeg read
+            // 500'd the whole page while the A-ploeg history was cached.
+            Effect.catchTags({
+              HttpServiceUnavailable: () =>
+                Effect.succeed({
+                  team: squadTeam,
+                  history: null,
+                  unavailable: true,
+                }),
+              HttpBadGateway: () =>
+                Effect.succeed({
+                  team: squadTeam,
+                  history: null,
+                  unavailable: true,
+                }),
+            }),
           );
         }),
         { concurrency: 3 },
       );
+
+      // Nothing loaded and something failed: not a 404 (the club may well
+      // exist). Throw, so ISR keeps serving the last good render.
+      if (
+        results.some((r) => r.unavailable) &&
+        !results.some((r) => (r.history?.matches.length ?? 0) > 0)
+      ) {
+        return yield* Effect.die(
+          new Error(`[Opponent] every squad's history failed for ${clubId}`),
+        );
+      }
 
       return buildOpponentPageData(clubId, results);
       // Subject read: the senior-team list and each squad's opponent history
@@ -375,7 +405,7 @@ export default async function OpponentPage({ params }: OpponentPageProps) {
   const data = await fetchOpponentData(clubId);
   if (!data) notFound();
 
-  const { opponentName, opponentLogo, sections } = data;
+  const { opponentName, opponentLogo, sections, unavailableSquads } = data;
   const pageUrl = `${SITE_CONFIG.siteUrl}/tegenstander/${clubId}`;
 
   return (
@@ -414,6 +444,18 @@ export default async function OpponentPage({ params }: OpponentPageProps) {
             section={section}
             className={index === 0 ? "mt-7" : "mt-12"}
           />
+        ))}
+        {unavailableSquads.map((squadLabel) => (
+          <section key={squadLabel} aria-label={squadLabel} className="mt-12">
+            <SectionHeader title={squadLabel} size="display-sm" />
+            <EmptyState
+              tier="slot"
+              reason="unavailable"
+              emphasis={{ text: "even niet beschikbaar" }}
+            >
+              {`De wedstrijden van de ${squadLabel} tegen ${opponentName} zijn even niet beschikbaar. Probeer het later opnieuw.`}
+            </EmptyState>
+          </section>
         ))}
       </PageContainer>
     </div>

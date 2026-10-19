@@ -33,10 +33,12 @@ export interface OpponentSquadTeam {
 }
 
 /** One squad's raw BFF read. `history` is `null` on a 404 — this squad has
- *  never met the opponent, which is not the same as an empty section. */
+ *  never met the opponent, which is not the same as an empty section — and
+ *  on a transient upstream failure, which sets `unavailable`. */
 export interface SquadHistoryResult {
   team: OpponentSquadTeam;
   history: OpponentHistory | null;
+  unavailable?: boolean;
 }
 
 /**
@@ -61,6 +63,9 @@ export interface OpponentPageData {
   /** A-ploeg first, then B-ploeg — the order `selectSeniorTeams` already
    *  guarantees by sorting its input on slug before this module ever sees it. */
   sections: SquadOpponentSection[];
+  /** Squads whose read failed upstream (PSD budget, 5xx): named on the page
+   *  as "even niet beschikbaar", never dropped as if they never played. */
+  unavailableSquads: string[];
 }
 
 function sortMatchesDescending(matches: readonly Match[]): Match[] {
@@ -115,6 +120,9 @@ export function buildOpponentPageData(
     opponentName: opponentTeam.name,
     opponentLogo: opponentTeam.logo,
     sections,
+    unavailableSquads: results
+      .filter((r) => r.unavailable)
+      .map((r) => r.team.squadLabel),
   };
 }
 

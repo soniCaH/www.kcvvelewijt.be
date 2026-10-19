@@ -14,7 +14,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { Effect, Layer } from "effect";
-import { HttpNotFound } from "@kcvv/api-contract";
+import { HttpNotFound, HttpServiceUnavailable } from "@kcvv/api-contract";
 import type { Match } from "@kcvv/api-contract";
 import type { TeamNavVM } from "@/lib/repositories/team.repository";
 import { RESERVEN_PSD_ID } from "@/lib/utils/group-teams";
@@ -169,6 +169,37 @@ describe("/tegenstander/[clubId] renders one section per senior squad (#2463)", 
       CLUB_ID,
     );
     expect(screen.queryByText(/Reserven/)).not.toBeInTheDocument();
+  });
+
+  it("names a squad whose read failed upstream instead of 500ing the page", async () => {
+    // Production 2026-10-19: PSD's daily budget refused the B-ploeg read
+    // (503) while the A-ploeg history was cached; the whole page 500'd.
+    mockGetOpponentHistory.mockImplementation((teamId: number) =>
+      teamId === 1
+        ? Effect.succeed(history(4, [match(1, "2026-02-14")]))
+        : Effect.fail(new HttpServiceUnavailable({ error: "budget" })),
+    );
+
+    const element = await OpponentPage({
+      params: Promise.resolve({ clubId: String(CLUB_ID) }),
+    });
+    render(element);
+
+    expect(
+      screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent),
+    ).toEqual(["A-ploeg.", "B-ploeg."]);
+    expect(screen.getByRole("region", { name: "B-ploeg" })).toHaveTextContent(
+      "even niet beschikbaar",
+    );
+  });
+
+  it("throws when every squad failed upstream, so ISR keeps its last good page", async () => {
+    mockGetOpponentHistory.mockReturnValue(
+      Effect.fail(new HttpServiceUnavailable({ error: "budget" })),
+    );
+    await expect(
+      OpponentPage({ params: Promise.resolve({ clubId: String(CLUB_ID) }) }),
+    ).rejects.toThrow();
   });
 
   it("prints the season band as Seizoen + the bare helper label", async () => {
