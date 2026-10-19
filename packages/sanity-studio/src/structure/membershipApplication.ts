@@ -21,10 +21,10 @@ export function membershipApplicationStructure(S: StructureBuilder) {
         .title('Interesse')
         .items([
           S.listItem()
-            .title('Alle interesse')
+            .title('Alle interesseaanvragen')
             .child(
               S.documentList()
-                .title('Alle interesse')
+                .title('Alle interesseaanvragen')
                 .filter('_type == "membershipApplication"')
                 .defaultOrdering([...NEWEST_FIRST]),
             ),
