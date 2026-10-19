@@ -5,6 +5,7 @@ import {
   YOUTH_COORDINATOR_ROLE_CODES,
 } from "@kcvv/api-contract";
 import { WorkerEnvTag } from "../env";
+import { derivePsdTeamLabel } from "../psd/transforms";
 import type { PlayerImageState, StaffImageState } from "./types";
 import { sanityClientConfig } from "./config";
 
@@ -105,7 +106,7 @@ const BIRTHDAY_QUERY = `*[_type in ["player", "staffMember"] && archived != true
   || (_type == "staffMember" && _id in *[_type == "organigramNode" && active == true].members[]._ref)
 )] {
   firstName, lastName, birthDate,
-  "team": ${CURRENT_TEAMS_OF_MEMBER} | order(name asc)[0].name,
+  "team": ${CURRENT_TEAMS_OF_MEMBER} | order(name asc)[0]{ name, age },
   "role": functionTitle
 }`;
 
@@ -367,7 +368,7 @@ export const SanityProjectionLive = Layer.effect(
                 firstName: string | null;
                 lastName: string | null;
                 birthDate: string;
-                team: string | null;
+                team: { name: string | null; age: string | null } | null;
                 role: string | null;
               }>
             >(BIRTHDAY_QUERY);
@@ -379,7 +380,10 @@ export const SanityProjectionLive = Layer.effect(
                     {
                       name,
                       birthDate: r.birthDate,
-                      label: r.team ?? r.role,
+                      // The raw PSD name reads "KCVVE  U11 " — label it like every other surface (#3598)
+                      label: r.team?.name
+                        ? derivePsdTeamLabel(r.team.name, r.team.age ?? "")
+                        : r.role,
                     },
                   ];
             });

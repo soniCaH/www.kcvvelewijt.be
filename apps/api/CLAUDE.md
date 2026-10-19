@@ -42,7 +42,8 @@ src/
 └── sync/
     ├── psd-team-client.ts    ← PsdTeamClient (teams/members/staff fetch for sync)
     ├── psd-sanity-sync.ts    ← PSD → Sanity player/team/staff sync
-    └── staff-gaps-check.ts   ← weekly Slack nudge for staff/coordinator gaps (#3561)
+    ├── staff-gaps-check.ts   ← weekly Slack nudge for staff/coordinator gaps (#3561)
+    └── birthday-post.ts      ← daily #general birthday post, plus the week's list on Mondays (#3570)
 ```
 
 ## Local development
@@ -143,7 +144,7 @@ The sync owns `psdImage` + `psdImageUrl` on `player` and `staffMember` documents
 - **No portrait in PSD → none on the site.** `syncMemberImage` calls `SanityMutation.unsetPlayerImage` / `unsetStaffImage` when PSD has no `profilePictureURL` **and** the stored `psdImageUrl` is set; otherwise it is a no-op, so documents that never had a portrait are not patched nightly. The PSD placeholder (`PSD_PLACEHOLDER_IMAGE_SHA1`, #1895) counts as "no portrait": `uploadMemberImage` calls the same unset when the downloaded bytes match it. A failed unset returns `false` from `syncMemberImage`, so the member is not checkpointed and retries.
 - **Superseded assets are deleted.** After an unset, or after a re-upload that landed a different asset, the previous asset is deleted only when `count(*[references($assetId)]) == 0` (`deleteAssetIfUnreferenced`). The just-uploaded asset is never a candidate (Sanity dedups identical bytes to one id). A failed delete is logged (`logWarning`) and never fails the member's sync; `scripts/sanity-ops` `psd-privacy:cleanup` sweeps what is left.
 - **Portrait downloads take a gate token.** `uploadMemberImage` runs `gate.acquireToken` before the PSD `fetch`, like both PSD clients. `SanityMutationLive` therefore requires `PsdGateService`: every layer that builds it must provide `PsdGateLive` (in `buildAppLayer` it sits below `SanityMutationLive` for that reason). Type-check fails if one does not.
-- **Staff birth dates are not stored.** `transformStaff` emits no `birthDate` and `staffMember` has no such field. Player `birthDate` is unchanged: `PlayerHero` needs the full date for an exact age (owner decision, 2026-10-15). The `production` dataset has been private since 2026-10-14.
+- **Staff birth dates are stored again (#3570).** #3469 dropped them; the birthday post (below) is now their reader. `transformStaff` writes `birthDate` with the time part stripped, like `transformMember`, and `staffMember.birthDate` is a read-only `date` that the site never shows. Player `birthDate` is unchanged: `PlayerHero` needs the full date for an exact age (owner decision, 2026-10-15). The `production` dataset has been private since 2026-10-14.
 
 ### Releasing a stuck PSD sync orphan-cap refusal
 
@@ -172,6 +173,14 @@ Cron `0 6 * * MON` (Monday 06:00 UTC — named, because Cloudflare numbers weekd
 - **Coordinator positions not filled** — an `organigramNode` with roleCode `TVJO`, `JC-OB`, `JC-MB` or `JC-BB` that is not `active == true` or has no **live** member (an archived or dangling member reference does not count — the web's TeamCard hides that box too), and any of those role codes that no organigram node carries at all.
 
 Nothing to report → no message. `SLACK_ALERT_WEBHOOK_URL` unset → the job returns before the read. A failed read, or a Slack POST that is not confirmed, fails the run, which reports through `reportScheduledJobOutcome` under the job name **`staff-gaps-check`** — never through `gate.reportOutcome`. Its job-alert state TTL is the shared 3 days, shorter than the weekly interval, so a failure alerts every week it recurs instead of once per streak — and it **never sends a "recovered" ping**: by the next run the failure state has expired, so a success finds nothing to recover from. A missing Monday message after a failure alert therefore means either "fixed" or "nothing to report"; check the run log.
+
+## Daily birthday post (#3570)
+
+Cron `0 7 * * *` (07:00 UTC, 08:00/09:00 in Brussels; the string is `BIRTHDAY_CRON`, and `index.scheduled.test.ts` asserts `wrangler.toml` carries it; production only — staging keeps `crons = []`) runs `runBirthdayPost` (`sync/birthday-post.ts`) from its own `scheduled()` branch. It replaces Drupal's `kcvv_birthdays_*` jobs.
+
+- **One read, zero PSD calls.** `SanityProjection.getBirthdayPeople()` returns every non-archived `player` and `staffMember` with a `birthDate` who is on a non-archived, nav-visible team or, for staff, a member of an active organigram node. The label is the team's `derivePsdTeamLabel(name, age)` (`U11`, `A-Ploeg`, #3598), else the staff function.
+- **Dates are Belgian wall-clock** (Europe/Brussels). Each day posts "Vandaag jarig"; a Monday also posts "Verjaardagen deze week" (Monday to Sunday). Born 29 February → 28 February in a non-leap year. An empty day posts nothing.
+- **`SLACK_BIRTHDAY_WEBHOOK_URL`** (wrangler secret, `#general`) unset → the job returns before the read. A Slack POST that is not confirmed fails the run, which reports under the job name **`birthday-post`** through `reportScheduledJobOutcome`.
 
 ## Only the website may call the worker (#3485)
 

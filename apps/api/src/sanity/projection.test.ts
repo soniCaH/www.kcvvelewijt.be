@@ -390,8 +390,24 @@ describe("getBirthdayPeople", () => {
         firstName: "An",
         lastName: "Smet",
         birthDate: "2012-10-22",
-        team: "U15",
+        // Raw PSD name as stored, read in the #3598 test run
+        team: { name: "KCVVE  U11 ", age: "U11" },
         role: "T1",
+      },
+      {
+        firstName: "Bo",
+        lastName: "Maes",
+        birthDate: "2019-10-21",
+        team: { name: "KCVVE U8 Groen", age: "U8" },
+        role: null,
+      },
+      {
+        // Only `age: "A"` turns the " A" suffix into "A-Ploeg" — proves age is passed
+        firstName: "Jo",
+        lastName: "Claes",
+        birthDate: "1998-10-23",
+        team: { name: "KCVVE A", age: "A" },
+        role: null,
       },
       {
         firstName: "Marc",
@@ -420,7 +436,9 @@ describe("getBirthdayPeople", () => {
     expect(query).toContain("archived != true");
     expect(query).toContain("showInNavigation != false");
     expect(result).toEqual([
-      { name: "An Smet", birthDate: "2012-10-22", label: "U15" },
+      { name: "An Smet", birthDate: "2012-10-22", label: "U11" },
+      { name: "Bo Maes", birthDate: "2019-10-21", label: "U8 Groen" },
+      { name: "Jo Claes", birthDate: "1998-10-23", label: "A-Ploeg" },
       { name: "Marc Peeters", birthDate: "1975-04-12", label: "Voorzitter" },
     ]);
   });
