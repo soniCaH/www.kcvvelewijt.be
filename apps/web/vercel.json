@@ -1,6 +1,7 @@
 {
-  "buildCommand": "cd ../.. && pnpm turbo build --filter=@kcvv/web",
+  "buildCommand": "cd ../.. && pnpm turbo build --filter=@kcvv/web --force",
   "outputDirectory": ".next",
+  "ignoreCommand": "bash scripts/vercel-ignore-build.sh",
   "installCommand": "cd ../.. && pnpm install",
   "regions": ["cdg1"]
 }

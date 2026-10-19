@@ -32,10 +32,11 @@ SEARCH_INDEX_PRUNE_DRY_RUN = "false"
 # (about $1.60/day at 2026-10 prices).
 AI_ANSWER_DAILY_CAP = "2000"
 # PSD calls per UTC day (the PsdGate DO's daily count, #3490) after which a cold
-# cache miss fails fast. 600 is the ticket's no-history default: the DO keeps
-# today only, so no 14-day history exists to measure. Never above 1000 (half of PSD's
-# 2000/day, shared with the old AWS app).
-PSD_ONDEMAND_DAILY_BUDGET = "600"
+# cache miss fails fast. The count includes the 02:00 UTC sync (at most ~300 calls,
+# measured 2026-10-19), so 850 = sync 300 + ~550 for visitors (our ~1000 half of
+# PSD's 2000/day, shared with the old AWS app, minus the sync, minus 20%). Never
+# above 1000. See "How the budget was chosen" in apps/api/CLAUDE.md.
+PSD_ONDEMAND_DAILY_BUDGET = "850"
 # SANITY_API_TOKEN is a secret — set via: wrangler secret put SANITY_API_TOKEN
 # SANITY_WEBHOOK_SECRET is a secret — set via: wrangler secret put SANITY_WEBHOOK_SECRET
 # RESEND_API_KEY is a secret — set via: wrangler secret put RESEND_API_KEY (see docs/prd/email-delivery.md)
@@ -112,7 +113,7 @@ SEARCH_INDEX_NAME = "kcvv-search-staging"
 SEARCH_INDEX_PRUNE_DRY_RUN = "false"
 # Mirrors the top-level ceilings (#3468).
 AI_ANSWER_DAILY_CAP = "2000"
-PSD_ONDEMAND_DAILY_BUDGET = "600"
+PSD_ONDEMAND_DAILY_BUDGET = "850"
 # SANITY_API_TOKEN is a secret — set via: wrangler secret put SANITY_API_TOKEN --env staging
 # SANITY_WEBHOOK_SECRET is a secret — set via: wrangler secret put SANITY_WEBHOOK_SECRET --env staging
 # RESEND_API_KEY is a secret — set via: wrangler secret put RESEND_API_KEY --env staging (see docs/prd/email-delivery.md)

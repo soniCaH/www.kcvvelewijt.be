@@ -43,7 +43,6 @@ import { trackShareImageSaved } from "../share-analytics";
 import { clubToday } from "@/lib/utils/dates";
 import {
   fallbackCount,
-  usesAiFallback,
   usesFallback,
   ShareThumbContext,
   type CoverMode,
@@ -530,13 +529,65 @@ export function SharePage(props: SharePageProps) {
   );
 }
 
+/** The longest side an own photo keeps: the photo slot is at most 1080 wide. */
+const OWN_PHOTO_MAX = 1600;
+
+/**
+ * An own photo, shrunk to `OWN_PHOTO_MAX`. A full-size phone photo (12 MP,
+ * ~4 MB) leaves the Ticket look's photo slot blank in the PNG on iOS Safari,
+ * which drops the oversized image while it rasterizes the capture. Where the
+ * browser cannot decode or redraw the file, the original is kept.
+ */
+async function shrinkPhoto(file: File): Promise<Blob> {
+  try {
+    // Explicit: Safari's default for EXIF orientation has varied by version.
+    const bitmap = await createImageBitmap(file, {
+      imageOrientation: "from-image",
+    });
+    const scale = Math.min(
+      1,
+      OWN_PHOTO_MAX / Math.max(bitmap.width, bitmap.height),
+    );
+    if (scale === 1) {
+      bitmap.close();
+      return file;
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    const ctx = canvas.getContext("2d");
+    ctx?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+    if (!ctx) return file;
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", 0.9),
+    );
+    return blob ?? file;
+  } catch {
+    return file;
+  }
+}
+
 /**
  * The stored session for this render: a deep link to another item than the
  * stored one starts a new story (the per-phone look and fallback indexes
- * stay).
+ * stay). Every load also moves each look on to its next fallback picture:
+ * iOS reloads the tab after a share to Instagram, often before the share
+ * has finished, so a style kept its photo forever. This is the only
+ * place the picture moves: a reload of a story in progress (an iOS tab
+ * eviction, the new-day remount) shows the next picture too.
  */
 function bootSession(initial: SharePageProps["initial"]): StorySession {
-  const session = readSession();
+  const stored = readSession();
+  const session: StorySession = {
+    ...stored,
+    fallbackNext: Object.fromEntries(
+      LOOKS.map(({ id }) => {
+        const last = stored.fallbackNext[id];
+        return [id, last === undefined ? 0 : (last + 1) % fallbackCount(id)];
+      }),
+    ),
+  };
   const story = session.story;
   if (
     initial &&
@@ -563,6 +614,7 @@ function ShareTool({
   const templateRef = useRef<HTMLDivElement>(null);
   const previewUrlRef = useRef<string | null>(null);
   const uploadUrlRef = useRef<string | null>(null);
+  const uploadPickRef = useRef(0);
   const isGeneratingRef = useRef(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [exportFailure, setExportFailure] = useState<ExportFailure | null>(
@@ -628,7 +680,7 @@ function ShareTool({
     mode !== "match" && !item ? "Inhoud" : null,
   );
   const [look, setLook] = useState<AnyLook>(boot.look);
-  const [fallbackNext, setFallbackNext] = useState(boot.fallbackNext);
+  const [fallbackNext] = useState(boot.fallbackNext);
   const [theme, setTheme] = useState<ShareTheme>(saved?.theme ?? "licht");
   const [wash, setWash] = useState<WashStep>(saved?.wash ?? "normaal");
   const [coverMode, setCoverMode] = useState<CoverMode>(
@@ -677,6 +729,8 @@ function ShareTool({
   }, []);
 
   const clearUpload = useCallback(() => {
+    // A pick still shrinking must not bring the photo back.
+    uploadPickRef.current++;
     if (uploadUrlRef.current) {
       URL.revokeObjectURL(uploadUrlRef.current);
       uploadUrlRef.current = null;
@@ -797,20 +851,26 @@ function ShareTool({
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    // Reset the input so re-picking the same file still fires onChange.
+    e.target.value = "";
     if (!file) return;
+    const pick = ++uploadPickRef.current;
+    const photo = await shrinkPhoto(file);
+    // A newer pick landed while this one was shrinking: it wins.
+    if (pick !== uploadPickRef.current) return;
     if (uploadUrlRef.current) URL.revokeObjectURL(uploadUrlRef.current);
-    const url = URL.createObjectURL(file);
+    const url = URL.createObjectURL(photo);
     uploadUrlRef.current = url;
     setUploadedImageUrl(url);
     clearPreview();
-    // Reset the input so re-picking the same file still fires onChange.
-    e.target.value = "";
   };
 
   useEffect(() => {
     return () => {
+      // A pick still shrinking must not create a URL nobody revokes.
+      uploadPickRef.current++;
       if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
       if (uploadUrlRef.current) URL.revokeObjectURL(uploadUrlRef.current);
     };
@@ -946,8 +1006,10 @@ function ShareTool({
 
   /**
    * A PNG left the tool (shared, or its download clicked): the next story
-   * starts on the next fitting look, the next fallback picture of this look,
-   * and the default Omslag. The match details stay. It is also the one
+   * starts on the next fitting look and the default Omslag. The fallback
+   * picture moves on at the next page load (`bootSession`), not here: iOS
+   * often reloads before this runs, and moving it in both places skipped
+   * every other picture. The match details stay. It is also the one
    * place `share_image_saved` fires (#3539).
    */
   const handleSaved = () => {
@@ -963,12 +1025,6 @@ function ShareTool({
       blocks: blocks[aspect],
       fallbackUsed: !!content && !isW && usesFallback(content, coverMode),
     });
-    if (content && !isW && usesAiFallback(content, coverMode)) {
-      setFallbackNext((prev) => ({
-        ...prev,
-        [activeLook]: ((prev[activeLook] ?? 0) + 1) % fallbackCount(activeLook),
-      }));
-    }
     const at = fittingLooks.findIndex((l) => l.id === activeLook);
     setLook(fittingLooks[(at + 1) % fittingLooks.length]!.id);
     setCoverMode(defaultCover(mode));

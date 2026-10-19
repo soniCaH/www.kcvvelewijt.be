@@ -136,6 +136,33 @@ export const DrawResult: Story = {
   },
 };
 
+/**
+ * A forfeit and a stopped match: the row names the status with a
+ * `<MatchStatusBadge>`, so a forfeit's 5 – 0 never reads as a plain result.
+ */
+export const ExceptionalStatuses: Story = {
+  args: {
+    ...baseProps,
+    matches: [
+      match(4, "2026-09-05T18:00:00", "U17", "Daring Wezembeek-Oppem", {
+        status: "forfeited",
+        homeScore: 5,
+        awayScore: 0,
+        scoreDisplay: { type: "score", home: 5, away: 0 },
+        isHome: false,
+      }),
+      match(5, "2026-09-06T15:00:00", "B-ploeg", "SK Nossegem", {
+        status: "stopped",
+        homeScore: 1,
+        awayScore: 0,
+        scoreDisplay: { type: "score", home: 1, away: 0 },
+      }),
+      ...sparseMatches,
+    ],
+    events: sparseEvents,
+  },
+};
+
 export const DenseSaturday: Story = {
   args: { ...baseProps, matches: denseMatches, events: denseEvents },
 };

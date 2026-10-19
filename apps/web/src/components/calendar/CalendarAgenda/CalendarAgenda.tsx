@@ -3,6 +3,10 @@
 import { useMemo, type CSSProperties } from "react";
 import Link from "next/link";
 import { MatchTravelLink } from "@/components/match/MatchTravelLink";
+import {
+  MatchStatusBadge,
+  matchStatusWording,
+} from "@/components/match/MatchStatusBadge";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import {
   EditorialHeading,
@@ -13,6 +17,7 @@ import {
 import { cn } from "@/lib/utils/cn";
 import {
   getResultColor,
+  isExceptionalMatchStatus,
   isPlayedMatch,
   isSettledMatch,
   OUTCOME_TINT,
@@ -195,7 +200,13 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
     isPlayed && hasScore
       ? `${match.homeTeam.name} ${match.homeScore} – ${match.awayTeam.name} ${match.awayScore}`
       : `${match.homeTeam.name} – ${match.awayTeam.name}`;
-  const rowLabel = [when, match.team, scoreboardLabel]
+  // A forfeit's 5 – 0 or a stopped match's partial score is not a plain
+  // result: name the status, the way `<CalendarWeek>`'s cards do.
+  const exceptional = isExceptionalMatchStatus(match.status);
+  const statusLabel = exceptional
+    ? matchStatusWording(match.status)?.longForm
+    : undefined;
+  const rowLabel = [when, match.team, scoreboardLabel, statusLabel]
     .filter(Boolean)
     .join(", ");
 
@@ -234,6 +245,9 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
             <span className="text-ink-muted font-mono text-[10px] leading-none font-semibold tracking-wide">
               {match.team}
             </span>
+          )}
+          {exceptional && (
+            <MatchStatusBadge status={match.status} className="self-start" />
           )}
         </div>
         <div className="flex min-w-0 flex-col gap-1">
@@ -333,6 +347,9 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
             >
               {match.homeScore} – {match.awayScore}
             </span>
+          )}
+          {exceptional && (
+            <MatchStatusBadge status={match.status} className="shrink-0" />
           )}
           {match.competition && (
             <span className="text-ink-muted hidden shrink-0 font-mono text-[10px] tracking-wide uppercase sm:inline">
