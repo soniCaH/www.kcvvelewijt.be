@@ -6,6 +6,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { makeTestEnv } from "./test-helpers/env-layer";
+import { BIRTHDAY_CRON } from "./sync/birthday-post";
 import { STAFF_GAPS_CRON } from "./sync/staff-gaps-check";
 
 // gate-do.ts imports `cloudflare:workers`, which only workerd can load.
@@ -105,5 +106,42 @@ describe("scheduled() — weekly staff-gaps check", () => {
 
     expect(kvKeys).toEqual(["job-alert:staff-gaps-check"]);
     expect(JSON.stringify(slack.mock.calls[0])).toContain("staff-gaps-check");
+  });
+});
+
+describe("scheduled() — daily birthday post (#3570)", () => {
+  const daily = {
+    cron: BIRTHDAY_CRON,
+    scheduledTime: Date.parse("2026-10-22T07:00:00Z"),
+  } as ScheduledEvent;
+
+  it("wrangler.toml schedules the exact cron string the handler matches", () => {
+    const toml = readFileSync(join(__dirname, "../wrangler.toml"), "utf8");
+    expect(toml).toContain(`"${BIRTHDAY_CRON}"`);
+  });
+
+  it("posts today's birthdays under its own job name", async () => {
+    sanityFetch.mockResolvedValueOnce([
+      {
+        firstName: "An",
+        lastName: "Smet",
+        birthDate: "2012-10-22",
+        team: "U15",
+        role: null,
+      },
+    ]);
+    const slack = vi.fn(async () => new Response("ok", { status: 200 }));
+    vi.stubGlobal("fetch", slack);
+
+    await worker.scheduled(
+      daily,
+      makeTestEnv({ PSD_CACHE: kv, SLACK_BIRTHDAY_WEBHOOK_URL: WEBHOOK }),
+      ctx,
+    );
+
+    expect(sanityFetch).toHaveBeenCalledTimes(1);
+    expect(slack).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(slack.mock.calls[0])).toContain("An Smet");
+    expect(kvKeys).toContain("job-alert:birthday-post");
   });
 });

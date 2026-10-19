@@ -40,6 +40,7 @@ PSD_ONDEMAND_DAILY_BUDGET = "600"
 # SANITY_WEBHOOK_SECRET is a secret — set via: wrangler secret put SANITY_WEBHOOK_SECRET
 # RESEND_API_KEY is a secret — set via: wrangler secret put RESEND_API_KEY (see docs/prd/email-delivery.md)
 # TURNSTILE_SECRET is a secret — set via: wrangler secret put TURNSTILE_SECRET (membership form spam check)
+# SLACK_BIRTHDAY_WEBHOOK_URL is a secret — set via: wrangler secret put SLACK_BIRTHDAY_WEBHOOK_URL (#general birthday posts, #3570; production only)
 
 [observability.logs]
 enabled = true
@@ -50,6 +51,7 @@ crons = [
   "0 2 * * *",  # 02:00 UTC — psd-sanity-sync (players, teams, matches)
   "30 2 * * *", # 02:30 UTC — sanity-index-sync (semantic search embeddings)
   "0 6 * * MON", # Monday 06:00 UTC — staff-gaps-check (weekly Slack nudge, #3561). Cloudflare: 1 = Sunday, so the day is named.
+  "0 7 * * *",  # 07:00 UTC (08:00/09:00 Brussels) — birthday-post (#general, #3570). Production only: staging has crons = [].
 ]
 
 [[kv_namespaces]]
