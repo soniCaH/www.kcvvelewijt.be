@@ -347,7 +347,6 @@ const nextConfig: NextConfig = {
 
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "api.kcvvelewijt.be", pathname: "/**" },
       {
         protocol: "https",
         hostname: "dfaozfi7c7f3s.cloudfront.net",

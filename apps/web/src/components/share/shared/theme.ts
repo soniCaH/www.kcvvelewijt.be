@@ -6,7 +6,6 @@ import { KCVV_LOGO, TOKENS } from "../constants";
  */
 const OPTIMIZER_HOSTS = new Set([
   "cdn.sanity.io",
-  "api.kcvvelewijt.be",
   "dfaozfi7c7f3s.cloudfront.net",
 ]);
 
