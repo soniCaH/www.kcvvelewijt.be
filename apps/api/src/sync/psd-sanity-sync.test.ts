@@ -174,9 +174,14 @@ describe("transformStaff", () => {
     expect(result.functionTitle).toBe("T1");
   });
 
-  it("emits no birthDate (staff birth dates are not stored, #3469)", () => {
+  it("strips the time component from birthDate (#3570)", () => {
     const result = transformStaff(baseStaff, BASE_URL);
-    expect(result).not.toHaveProperty("birthDate");
+    expect(result.birthDate).toBe("1975-04-12");
+  });
+
+  it("maps a missing birthDate to null (#3570)", () => {
+    const result = transformStaff({ ...baseStaff, birthDate: null }, BASE_URL);
+    expect(result.birthDate).toBeNull();
   });
 
   it("handles null functionTitle", () => {

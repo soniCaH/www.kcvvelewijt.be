@@ -90,6 +90,29 @@ beforeEach(() => {
   mockClientDelete.mockResolvedValue(undefined);
 });
 
+// ─── upsertStaff ────────────────────────────────────────────────────────────
+
+describe("upsertStaff", () => {
+  it("carries birthDate into the patch (#3570)", async () => {
+    await run(
+      Effect.gen(function* () {
+        const mutation = yield* SanityMutation;
+        yield* mutation.upsertStaff({
+          psdId: "9",
+          firstName: "Marc",
+          lastName: "Peeters",
+          birthDate: "1975-04-12",
+          functionTitle: "T1",
+        });
+      }),
+    );
+
+    expect(mockSet).toHaveBeenCalledWith(
+      expect.objectContaining({ psdId: "9", birthDate: "1975-04-12" }),
+    );
+  });
+});
+
 // ─── upsertPlayer ───────────────────────────────────────────────────────────
 
 describe("upsertPlayer", () => {

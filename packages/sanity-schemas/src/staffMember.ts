@@ -83,6 +83,15 @@ export const staffMember = defineType({
       description: `Korte voorstelling van het staflid in vrije tekst. Getoond op het detailprofiel op de site. ${PULLQUOTE_BIO_HELP}`,
     }),
     defineField({
+      name: 'birthDate',
+      title: 'Birth date',
+      type: 'date',
+      group: 'meta',
+      description:
+        'Geboortedatum, gesynchroniseerd vanuit PSD. Alleen-lezen — enkel gebruikt voor de verjaardagspost in Slack, nooit getoond op de site.',
+      readOnly: true,
+    }),
+    defineField({
       name: 'functionTitle',
       title: 'Function title',
       type: 'string',
