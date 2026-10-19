@@ -123,7 +123,7 @@ export function buildJobAlertMessage(
 const STUDIO_EDIT_URL = "https://kcvvelewijt.sanity.studio/intent/edit";
 
 /** Slack mrkdwn treats `&`, `<`, `>` as control characters. */
-const escapeSlack = (text: string): string =>
+export const escapeSlack = (text: string): string =>
   text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 const studioLink = (id: string, type: string): string =>

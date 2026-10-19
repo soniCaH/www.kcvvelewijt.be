@@ -96,11 +96,14 @@ export function transformTeam(
  * for exactly that reason: passed a club-wide member, `_psdImageUrl` /
  * `_psdImageFetchUrl` come back `null` and the caller skips the upload.
  *
- * @param psd - PSD member object (uses fields: id, firstName, lastName, functionTitle, profilePictureURL — staff birth dates are not stored, #3469)
+ * @param psd - PSD member object (uses fields: id, firstName, lastName, birthDate, functionTitle, profilePictureURL — staff birth dates are stored again for the birthday post, #3570)
  * @param baseUrl - Base URL to prepend to `profilePictureURL` to form an absolute `_psdImageUrl`
  */
 export function transformStaff(
-  psd: Pick<PsdMember, "id" | "firstName" | "lastName" | "functionTitle"> & {
+  psd: Pick<
+    PsdMember,
+    "id" | "firstName" | "lastName" | "birthDate" | "functionTitle"
+  > & {
     profilePictureURL?: string | null;
   },
   baseUrl: string,
@@ -113,6 +116,7 @@ export function transformStaff(
     psdId: String(psd.id),
     firstName: psd.firstName,
     lastName: psd.lastName,
+    birthDate: psd.birthDate ? psd.birthDate.split(" ")[0]! : null, // strip time "HH:MM"
     functionTitle: psd.functionTitle,
     _psdImageUrl: extractStableImageUrl(profilePictureURL, baseUrl),
     // Full URL including ?profileAccessKey — required to actually fetch the image.

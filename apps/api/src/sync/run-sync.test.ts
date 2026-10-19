@@ -114,6 +114,7 @@ function makeSanityMocks() {
     getProtectedStaffPsdIds,
     getFormRoutingConfig,
     getStaffGaps: makeSanityProjectionStub().getStaffGaps,
+    getBirthdayPeople: makeSanityProjectionStub().getBirthdayPeople,
   };
 
   return {
@@ -531,6 +532,7 @@ describe("runSync", () => {
       getProtectedStaffPsdIds: vi.fn(() => Effect.succeed([] as string[])),
       getFormRoutingConfig: vi.fn(() => Effect.succeed(null)),
       getStaffGaps: makeSanityProjectionStub().getStaffGaps,
+      getBirthdayPeople: makeSanityProjectionStub().getBirthdayPeople,
     };
     const psdMock = makePsdTeamClientMock(
       [ONE_TEAM],

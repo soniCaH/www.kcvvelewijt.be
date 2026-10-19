@@ -380,3 +380,48 @@ describe("getStaffGaps", () => {
     expect(result._tag).toBe("Left");
   });
 });
+
+// ─── getBirthdayPeople ───────────────────────────────────────────────────────
+
+describe("getBirthdayPeople", () => {
+  it("reads once, labels by team then role, and drops nameless rows (#3570)", async () => {
+    mockFetch.mockResolvedValueOnce([
+      {
+        firstName: "An",
+        lastName: "Smet",
+        birthDate: "2012-10-22",
+        team: "U15",
+        role: "T1",
+      },
+      {
+        firstName: "Marc",
+        lastName: "Peeters",
+        birthDate: "1975-04-12",
+        team: null,
+        role: "Voorzitter",
+      },
+      {
+        firstName: null,
+        lastName: null,
+        birthDate: "1980-01-01",
+        team: null,
+        role: null,
+      },
+    ]);
+
+    const result = await run(
+      Effect.gen(function* () {
+        return yield* (yield* SanityProjection).getBirthdayPeople();
+      }),
+    );
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    const query = mockFetch.mock.calls[0]![0] as string;
+    expect(query).toContain("archived != true");
+    expect(query).toContain("showInNavigation != false");
+    expect(result).toEqual([
+      { name: "An Smet", birthDate: "2012-10-22", label: "U15" },
+      { name: "Marc Peeters", birthDate: "1975-04-12", label: "Voorzitter" },
+    ]);
+  });
+});

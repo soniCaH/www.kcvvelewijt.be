@@ -56,6 +56,15 @@ export interface StaffGaps {
   readonly missingRoleCodes: ReadonlyArray<string>;
 }
 
+/** A current player or staff member with a stored birth date — the birthday post's read (#3570). */
+export interface BirthdayPerson {
+  readonly name: string;
+  /** "YYYY-MM-DD" as stored on the Sanity document. */
+  readonly birthDate: string;
+  /** Team name, or the staff function when the person is on no team. */
+  readonly label: string | null;
+}
+
 /** Organigram role codes the weekly nudge expects to be filled (#3420 Q9). */
 export const COORDINATOR_ROLE_CODES = [
   TVJO_ROLE_CODE,
@@ -82,6 +91,22 @@ const STAFF_GAPS_QUERY = `{
     "id": _id, roleCode, title, "active": active == true, "memberCount": count(${LIVE_MEMBERS})
   },
   "missingRoleCodes": $coordinatorCodes[!(@ in *[_type == "organigramNode"].roleCode)]
+}`;
+
+/**
+ * "Current" mirrors the web: not archived, and either on a non-archived,
+ * nav-visible team (`references()` matches `players[]` and `staff[].member`)
+ * or, for staff, a member of an active organigram node.
+ */
+const CURRENT_TEAMS_OF_MEMBER = `*[_type == "team" && archived != true && showInNavigation != false && references(^._id)]`;
+
+const BIRTHDAY_QUERY = `*[_type in ["player", "staffMember"] && archived != true && defined(birthDate) && (
+  count(${CURRENT_TEAMS_OF_MEMBER}) > 0
+  || (_type == "staffMember" && _id in *[_type == "organigramNode" && active == true].members[]._ref)
+)] {
+  firstName, lastName, birthDate,
+  "team": ${CURRENT_TEAMS_OF_MEMBER} | order(name asc)[0].name,
+  "role": functionTitle
 }`;
 
 const fullName = (p: {
@@ -131,6 +156,11 @@ export interface SanityProjectionInterface {
   >;
   /** One read of every staff/coordinator gap the weekly Slack nudge reports (#3561). */
   readonly getStaffGaps: () => Effect.Effect<StaffGaps, SanityQueryError>;
+  /** One read of every current player and staff member with a birth date (#3570). */
+  readonly getBirthdayPeople: () => Effect.Effect<
+    BirthdayPerson[],
+    SanityQueryError
+  >;
   /** Fetch the formRoutingConfig singleton (null per-role field → no override). */
   readonly getFormRoutingConfig: () => Effect.Effect<
     FormRoutingConfig | null,
@@ -327,6 +357,35 @@ export const SanityProjectionLive = Layer.effect(
           },
           catch: (cause) =>
             new SanityQueryError("Failed to fetch staff gaps", cause),
+        }),
+
+      getBirthdayPeople: () =>
+        Effect.tryPromise({
+          try: async () => {
+            const rows = await client.fetch<
+              Array<{
+                firstName: string | null;
+                lastName: string | null;
+                birthDate: string;
+                team: string | null;
+                role: string | null;
+              }>
+            >(BIRTHDAY_QUERY);
+            return rows.flatMap((r) => {
+              const name = fullName(r);
+              return name === null
+                ? []
+                : [
+                    {
+                      name,
+                      birthDate: r.birthDate,
+                      label: r.team ?? r.role,
+                    },
+                  ];
+            });
+          },
+          catch: (cause) =>
+            new SanityQueryError("Failed to fetch birthday people", cause),
         }),
 
       getFormRoutingConfig: () =>

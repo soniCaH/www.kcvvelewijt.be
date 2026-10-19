@@ -83,6 +83,7 @@ export interface SanityStaffDoc {
   psdId: string;
   firstName: string | null;
   lastName: string | null;
+  birthDate: string | null; // "YYYY-MM-DD" (time component stripped from PSD) — read by the birthday post (#3570)
   functionTitle: string | null; // from PSD functionTitle; null clears the stored value
 }
 
@@ -662,6 +663,7 @@ export const SanityMutationLive = Layer.effect(
           psdId: doc.psdId,
           firstName: doc.firstName,
           lastName: doc.lastName,
+          birthDate: doc.birthDate,
           functionTitle: doc.functionTitle,
           archived: false,
         }),

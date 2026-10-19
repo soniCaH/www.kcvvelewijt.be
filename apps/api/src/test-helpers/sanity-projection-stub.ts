@@ -25,5 +25,6 @@ export const makeSanityProjectionStub = (
       coordinators: [],
       missingRoleCodes: [],
     }),
+  getBirthdayPeople: () => Effect.succeed([]),
   ...overrides,
 });

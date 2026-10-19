@@ -942,6 +942,7 @@ export type StaffMember = {
     _type: "block";
     _key: string;
   }>;
+  birthDate?: string;
   functionTitle?: string;
   psdId?: string;
   psdImageUrl?: string;

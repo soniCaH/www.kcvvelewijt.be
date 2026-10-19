@@ -39,6 +39,11 @@ import {
 import { pruneJobOutcome, type JobOutcome } from "./search/prune-outcome";
 import { SanityMutationLive } from "./sanity/mutation";
 import { SanityProjectionLive } from "./sanity/projection";
+import {
+  BIRTHDAY_CRON,
+  BIRTHDAY_JOB,
+  runBirthdayPost,
+} from "./sync/birthday-post";
 import { cleanupJobOutcome } from "./sync/cleanup-outcome";
 import { runSync } from "./sync/psd-sanity-sync";
 import {
@@ -329,6 +334,18 @@ export default {
         Effect.runPromise(Effect.provide(runStaffGapsCheck, layer)),
       );
       await reportJobOutcome(STAFF_GAPS_JOB, outcome);
+      if (!outcome.ok) throw outcome.error;
+    } else if (event.cron === BIRTHDAY_CRON) {
+      // Daily birthday post (#3570) — one Sanity read, at most two Slack POSTs.
+      const layer = Layer.mergeAll(SanityProjectionLive, envLayer).pipe(
+        Layer.provide(envLayer),
+      );
+      const outcome = await settleJob(BIRTHDAY_JOB, () =>
+        Effect.runPromise(
+          Effect.provide(runBirthdayPost(new Date(event.scheduledTime)), layer),
+        ),
+      );
+      await reportJobOutcome(BIRTHDAY_JOB, outcome);
       if (!outcome.ok) throw outcome.error;
     } else {
       await Effect.runPromise(
