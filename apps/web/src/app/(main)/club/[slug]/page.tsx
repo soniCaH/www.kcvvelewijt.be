@@ -135,13 +135,13 @@ export default async function DynamicClubPage({ params }: Props) {
 
       {slug === MEMBERSHIP_INFO_SLUG ? (
         <CtaBand
-          ariaLabel="Schrijf je in"
+          ariaLabel="Interesse doorgeven"
           heading="Klaar om lid te worden?"
           emphasis={{ text: "lid te worden", tone: "warm" }}
           lead="Laat je interesse weten via ons formulier — we nemen daarna contact met je op."
           buttonLabel={
             <>
-              Schrijf je in <span aria-hidden="true">+</span>
+              Naar het formulier <span aria-hidden="true">+</span>
             </>
           }
           href="/club/word-lid"

@@ -180,7 +180,7 @@ describe("/club/[slug] page", () => {
     ).toBeInTheDocument();
   });
 
-  it("adds a 'Schrijf je in' CTA to /club/word-lid on the praktische-informatie page", async () => {
+  it("adds a 'Naar het formulier' CTA to /club/word-lid on the praktische-informatie page", async () => {
     mockFindBySlug.mockReturnValue(
       Effect.succeed(
         makePage({
@@ -196,7 +196,7 @@ describe("/club/[slug] page", () => {
     render(page);
 
     expect(
-      screen.getByRole("link", { name: /schrijf je in/i }),
+      screen.getByRole("link", { name: /naar het formulier/i }),
     ).toHaveAttribute("href", "/club/word-lid");
   });
 
@@ -211,7 +211,7 @@ describe("/club/[slug] page", () => {
     render(page);
 
     expect(
-      screen.queryByRole("link", { name: /schrijf je in/i }),
+      screen.queryByRole("link", { name: /naar het formulier/i }),
     ).not.toBeInTheDocument();
   });
 
