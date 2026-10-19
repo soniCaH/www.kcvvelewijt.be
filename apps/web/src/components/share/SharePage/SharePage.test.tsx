@@ -884,11 +884,54 @@ describe("SharePage", () => {
     const file = new File(["x"], "goal.png", { type: "image/png" });
     await user.upload(screen.getByLabelText(/foto uploaden/i), file);
 
-    expect(globalThis.URL.createObjectURL).toHaveBeenCalledWith(file);
+    // No `createImageBitmap` in happy-dom: the original file is kept.
+    await vi.waitFor(() =>
+      expect(globalThis.URL.createObjectURL).toHaveBeenCalledWith(file),
+    );
     expect(preview().innerHTML).toContain("blob:");
     await user.click(screen.getByRole("button", { name: "Foto weghalen" }));
     expect(preview().innerHTML).not.toContain("blob:");
     expect(screen.queryByRole("button", { name: "Foto weghalen" })).toBeNull();
+  });
+
+  it("an own photo is shrunk to 1600 px on its longest side before it reaches the preview", async () => {
+    // iOS Safari drops a full-size phone photo from the Ticket PNG.
+    const close = vi.fn();
+    vi.stubGlobal(
+      "createImageBitmap",
+      vi.fn().mockResolvedValue({ width: 4032, height: 3024, close }),
+    );
+    const drawImage = vi.fn();
+    const small = new Blob(["small"], { type: "image/jpeg" });
+    const getContext = vi
+      .spyOn(HTMLCanvasElement.prototype, "getContext")
+      .mockReturnValue({ drawImage } as unknown as CanvasRenderingContext2D);
+    const toBlob = vi
+      .spyOn(HTMLCanvasElement.prototype, "toBlob")
+      .mockImplementation((cb) => cb(small));
+    try {
+      const user = userEvent.setup();
+      render(<SharePage matches={MATCHES} players={PLAYERS} />);
+      await openTab(user, "Inhoud");
+      const file = new File(["x"], "goal.jpg", { type: "image/jpeg" });
+      await user.upload(screen.getByLabelText(/foto uploaden/i), file);
+
+      await vi.waitFor(() =>
+        expect(globalThis.URL.createObjectURL).toHaveBeenCalledWith(small),
+      );
+      expect(drawImage).toHaveBeenCalledWith(
+        expect.anything(),
+        0,
+        0,
+        1600,
+        1200,
+      );
+      expect(close).toHaveBeenCalled();
+    } finally {
+      getContext.mockRestore();
+      toBlob.mockRestore();
+      vi.unstubAllGlobals();
+    }
   });
 
   // ─── News and events in the four new looks (#3540) ─────────────────────
@@ -1500,22 +1543,36 @@ describe("SharePage", () => {
       expect(pressed("Kaart")).toBe("true");
     });
 
-    it("a saved PNG that used a fallback moves the look to its next picture, wrapping on the uneven set", async () => {
+    it("a saved PNG that used a fallback moves the look to its next picture", async () => {
+      const user = userEvent.setup();
+      renderTool();
+      expect(previewHtml()).toContain("share-fallback/A-1.webp");
+
+      await save(user);
+      await user.click(screen.getByRole("button", { name: "Kaart" }));
+      expect(previewHtml()).toContain("share-fallback/A-3.webp");
+    });
+
+    it("every page load moves each look to its next picture, wrapping on the uneven set", () => {
+      // iOS reloads the tab after a share to Instagram, before the share's
+      // own rotation can run: the load itself has to move the picture on.
       localStorage.setItem(
         KEY,
         JSON.stringify({
           look: "kaart",
-          fallbackNext: { kaart: 4 },
+          fallbackNext: { kaart: 4, ticket: 1 },
           story: null,
         }),
       );
-      const user = userEvent.setup();
       renderTool();
-      expect(previewHtml()).toContain("share-fallback/A-8.webp");
-
-      await save(user);
-      await user.click(screen.getByRole("button", { name: "Kaart" }));
+      // Kaart's set has 5 pictures: 4 + 1 wraps to 0 → A-1.
       expect(previewHtml()).toContain("share-fallback/A-1.webp");
+      expect(JSON.parse(localStorage.getItem(KEY)!).fallbackNext).toEqual({
+        kaart: 0,
+        plakboek: 0,
+        affiche: 0,
+        ticket: 2,
+      });
     });
 
     it("a coverless event shows the event fallback, so its save leaves the AI rotation alone", async () => {
@@ -1534,7 +1591,12 @@ describe("SharePage", () => {
       await user.click(screen.getByRole("button", { name: "Evenement" }));
       await user.click(screen.getByRole("button", { name: "Quiz" }));
       await save(user);
-      expect(JSON.parse(localStorage.getItem(KEY)!).fallbackNext).toEqual({});
+      expect(JSON.parse(localStorage.getItem(KEY)!).fallbackNext).toEqual({
+        kaart: 0,
+        plakboek: 0,
+        affiche: 0,
+        ticket: 0,
+      });
     });
 
     it("a stored fallback index past its set wraps on read; unknown looks are dropped", () => {
@@ -1547,11 +1609,11 @@ describe("SharePage", () => {
         }),
       );
       renderTool();
-      // Kaart's set has 5 pictures: 9 % 5 = 4 → A-8.
-      expect(previewHtml()).toContain("share-fallback/A-8.webp");
-      expect(JSON.parse(localStorage.getItem(KEY)!).fallbackNext).toEqual({
-        kaart: 4,
-      });
+      // Kaart's set has 5 pictures: 9 % 5 = 4, and the load moves it on → A-1.
+      expect(previewHtml()).toContain("share-fallback/A-1.webp");
+      expect(
+        JSON.parse(localStorage.getItem(KEY)!).fallbackNext,
+      ).not.toHaveProperty("bogus");
     });
 
     it("a saved PNG resets Omslag for the next story", async () => {

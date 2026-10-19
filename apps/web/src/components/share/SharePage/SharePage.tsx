@@ -530,13 +530,60 @@ export function SharePage(props: SharePageProps) {
   );
 }
 
+/** The longest side an own photo keeps: the photo slot is at most 1080 wide. */
+const OWN_PHOTO_MAX = 1600;
+
+/**
+ * An own photo, shrunk to `OWN_PHOTO_MAX`. A full-size phone photo (12 MP,
+ * ~4 MB) leaves the Ticket look's photo slot blank in the PNG on iOS Safari,
+ * which drops the oversized image while it rasterizes the capture. Where the
+ * browser cannot decode or redraw the file, the original is kept.
+ */
+async function shrinkPhoto(file: File): Promise<Blob> {
+  try {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(
+      1,
+      OWN_PHOTO_MAX / Math.max(bitmap.width, bitmap.height),
+    );
+    if (scale === 1) {
+      bitmap.close();
+      return file;
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    const ctx = canvas.getContext("2d");
+    ctx?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+    if (!ctx) return file;
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", 0.9),
+    );
+    return blob ?? file;
+  } catch {
+    return file;
+  }
+}
+
 /**
  * The stored session for this render: a deep link to another item than the
  * stored one starts a new story (the per-phone look and fallback indexes
- * stay).
+ * stay). Every load also moves each look on to its next fallback picture:
+ * iOS reloads the tab after a share to Instagram, often before the share's
+ * own rotation in `handleSaved` has run, so a style kept its photo forever.
  */
 function bootSession(initial: SharePageProps["initial"]): StorySession {
-  const session = readSession();
+  const stored = readSession();
+  const session: StorySession = {
+    ...stored,
+    fallbackNext: Object.fromEntries(
+      LOOKS.map(({ id }) => {
+        const last = stored.fallbackNext[id];
+        return [id, last === undefined ? 0 : (last + 1) % fallbackCount(id)];
+      }),
+    ),
+  };
   const story = session.story;
   if (
     initial &&
@@ -563,6 +610,7 @@ function ShareTool({
   const templateRef = useRef<HTMLDivElement>(null);
   const previewUrlRef = useRef<string | null>(null);
   const uploadUrlRef = useRef<string | null>(null);
+  const uploadPickRef = useRef(0);
   const isGeneratingRef = useRef(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [exportFailure, setExportFailure] = useState<ExportFailure | null>(
@@ -677,6 +725,8 @@ function ShareTool({
   }, []);
 
   const clearUpload = useCallback(() => {
+    // A pick still shrinking must not bring the photo back.
+    uploadPickRef.current++;
     if (uploadUrlRef.current) {
       URL.revokeObjectURL(uploadUrlRef.current);
       uploadUrlRef.current = null;
@@ -797,16 +847,20 @@ function ShareTool({
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    // Reset the input so re-picking the same file still fires onChange.
+    e.target.value = "";
     if (!file) return;
+    const pick = ++uploadPickRef.current;
+    const photo = await shrinkPhoto(file);
+    // A newer pick landed while this one was shrinking: it wins.
+    if (pick !== uploadPickRef.current) return;
     if (uploadUrlRef.current) URL.revokeObjectURL(uploadUrlRef.current);
-    const url = URL.createObjectURL(file);
+    const url = URL.createObjectURL(photo);
     uploadUrlRef.current = url;
     setUploadedImageUrl(url);
     clearPreview();
-    // Reset the input so re-picking the same file still fires onChange.
-    e.target.value = "";
   };
 
   useEffect(() => {
