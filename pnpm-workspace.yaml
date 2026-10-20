@@ -10,3 +10,6 @@ minimumReleaseAge: 4320
 overrides:
   # Remove once lockfile maintenance resolves joi >= 17.13.8 on its own, or @storybook/test-runner drops wait-on@7 (#3475).
   "joi@<17.13.8": "17.13.8"
+minimumReleaseAgeExclude:
+  # Renovate security update: @sanity/ui@4.4.9
+  - "@sanity/ui@4.4.9"
