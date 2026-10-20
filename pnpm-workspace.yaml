@@ -13,3 +13,5 @@ overrides:
 minimumReleaseAgeExclude:
   # Renovate security update: @sanity/ui@4.4.9
   - "@sanity/ui@4.4.9"
+  # Renovate security update: pnpm@10.34.7
+  - pnpm@10.34.7
