@@ -42,7 +42,7 @@ Amateur clubs at this level either run a template site or live entirely on Faceb
 
 ## Operating Context
 
-- **Language:** Dutch throughout the UI (labels, slugs, display values); English in code. The canonical glossary is `docs/ubiquitous-language.md`.
+- **Language:** Dutch throughout the UI (labels, slugs, display values); English in code. The canonical glossary is `GLOSSARY.md`.
 - **Matchday rhythm.** Traffic and relevance peak around fixtures: before (lineup, opponent, kickoff, location) and immediately after (score, goalscorers, standings movement, report).
 - **Season rhythm.** Squads, teams and standings turn over per season; youth teams are organised as Bovenbouw / Middenbouw / Onderbouw.
 - **Home ground:** Driesstraat 32, 1982 Elewijt, Belgium.

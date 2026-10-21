@@ -78,7 +78,7 @@ describe("MatchStrip (server component)", () => {
       expect(await matchDayProp()).toBe(false);
     });
 
-    // A pitch-reservation placeholder is not a Match (docs/ubiquitous-language.md)
+    // A pitch-reservation placeholder is not a Match (GLOSSARY.md)
     // — it carries no opponent, kickoff certainty, or confirmed venue, so it
     // never earns the "Vandaag" relabel or the dark ground even when dated today.
     it("is false when the next fixture is a pitch-reservation placeholder dated today", async () => {
