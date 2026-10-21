@@ -51,15 +51,29 @@ export async function validateShortLinkName(
  * own-site path starting with a single `/`. Stricter than `validateLink`: no
  * `http://`, `mailto:`, `tel:` or `#anchor`, because a short link is an HTTP
  * redirect. Rejects `//host` and `/\host` (protocol-relative, an open redirect)
- * and any whitespace or control character. Empty passes (`.required()` is the
- * field's own call).
+ * and any whitespace or control character.
+ *
+ * An own-site target must be a real page: its first path segment (before any
+ * `/`, `?` or `#`) is empty (`/`) or a reserved top-level name. A target that
+ * is itself a short link (`stage` → `/stage`, or `a` → `/b` and `b` → `/a`)
+ * would redirect forever. Real pages never redirect back into the catch-all,
+ * so no chain can loop.
+ *
+ * Empty passes (`.required()` is the field's own call).
  */
 const TARGET_PATTERN = /^(https:\/\/[^/\s]|\/(?![/\\]))/
 
 export function validateShortLinkTarget(value: unknown): true | string {
   if (typeof value !== 'string' || value.length === 0) return true
   const unsafe = /\s/.test(value) || [...value].some((ch) => ch.charCodeAt(0) < 32 || ch.charCodeAt(0) === 127)
-  return TARGET_PATTERN.test(value) && !unsafe
-    ? true
-    : 'Dit is geen geldige bestemming. Gebruik een volledige link die met "https://" begint (bijv. https://www.tournify.nl/live/kcvvelewijt2025) of een pad op deze site dat met "/" begint (bijv. /nieuws/herfststage-2026), zonder spaties.'
+  if (!TARGET_PATTERN.test(value) || unsafe) {
+    return 'Dit is geen geldige bestemming. Gebruik een volledige link die met "https://" begint (bijv. https://www.tournify.nl/live/kcvvelewijt2025) of een pad op deze site dat met "/" begint (bijv. /nieuws/herfststage-2026), zonder spaties.'
+  }
+  if (value.startsWith('/')) {
+    const first = value.slice(1).split(/[/?#]/)[0].toLowerCase()
+    if (first !== '' && !RESERVED_SHORT_LINK_NAMES.includes(first)) {
+      return 'Een korte link moet naar een echte pagina van de site wijzen, niet naar een andere korte link. Kies een pad dat met een bestaande pagina begint (bijv. /nieuws/herfststage-2026), of een volledige https://-link.'
+    }
+  }
+  return true
 }

@@ -70,6 +70,9 @@ describe('validateShortLinkTarget', () => {
     '/nieuws/herfststage-2026',
     '/',
     '/hulp#sportongeval',
+    '/NIEUWS/herfststage-2026',
+    '/?x=1',
+    '/nieuws?x=1',
   ])('accepts %s', (value) => {
     expect(validateShortLinkTarget(value)).toBe(true)
   })
@@ -90,8 +93,17 @@ describe('validateShortLinkTarget', () => {
     'tel:+3212345678',
     '#top',
     'nieuws/herfststage',
+    '/stage',
+    '/stage/extra',
+    '/onbekend?x=1',
+    '/onbekend#top',
+    '/Stage',
   ])('rejects %j', (value) => {
     expect(typeof validateShortLinkTarget(value)).toBe('string')
+  })
+
+  it('names the loop in the message for an own-site target that is another short link', () => {
+    expect(validateShortLinkTarget('/stage')).toMatch(/niet naar een andere korte link/)
   })
 
   it('lets an empty value through', () => {
