@@ -199,6 +199,16 @@ describe("POST /api/revalidate", () => {
     expect(revalidateTag).toHaveBeenCalledWith("staff", "max");
   });
 
+  it("busts the short-link tag on a shortLink change, and no path (#3573)", async () => {
+    // The catch-all reads one cached list tagged `shortLinks`; no page embeds a
+    // short link, so there is no path to bust.
+    const res = await post({ _type: "shortLink" });
+    expect(res.status).toBe(200);
+    expect(revalidateTag).toHaveBeenCalledTimes(1);
+    expect(revalidateTag).toHaveBeenCalledWith("shortLinks", "max");
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
   it("acks unknown types with 200 and revalidates nothing", async () => {
     const res = await post({ _type: "mysteryType" });
     expect(res.status).toBe(200);

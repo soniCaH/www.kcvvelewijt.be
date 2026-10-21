@@ -130,12 +130,24 @@ test.describe("dynamic routes", () => {
 });
 
 test("404 — unknown route", async ({ page }) => {
-  // Use a path that doesn't match any SSG route pattern. Unknown slugs under
+  // A one-segment path no real route owns lands in the short-link catch-all
+  // (`app/[shortLink]`, #3573), which looks the name up and calls
+  // `notFound()`. The status is the point: a `loading.tsx` or `Suspense`
+  // boundary above that segment would stream the not-found page as a 200 (a
+  // soft 404), and the page text alone would not show it. Unknown slugs under
   // SSG routes (e.g. /nieuws/[slug]) are served by Next as 200 with cached
-  // not-found content per `x-nextjs-prerender: 1`. Routing to a path with no
-  // matching segment exercises the global `not-found.tsx` and returns 404.
+  // not-found content per `x-nextjs-prerender: 1`, so they cannot stand in.
   await smokeTest(page, {
     path: "/totally-unknown-path-no-matching-route",
+    expectedStatus: 404,
+  });
+});
+
+test("404 — unknown two-segment route is not a short link", async ({
+  page,
+}) => {
+  await smokeTest(page, {
+    path: "/totally-unknown/path-no-matching-route",
     expectedStatus: 404,
   });
 });

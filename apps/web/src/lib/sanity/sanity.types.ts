@@ -21,6 +21,16 @@ type ArrayOf<T> = Array<
 >;
 
 // Source: schema.json
+export type ShortLink = {
+  _id: string;
+  _type: "shortLink";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  name?: string;
+  target?: string;
+};
+
 export type FormRoutingConfig = {
   _id: string;
   _type: "formRoutingConfig";
@@ -1104,6 +1114,7 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
+  | ShortLink
   | FormRoutingConfig
   | MembershipApplication
   | SanityImageAssetReference
@@ -2531,6 +2542,14 @@ export type RESPONSIBILITY_PATHS_QUERY_RESULT = Array<{
   relatedPaths: Array<never> | Array<string | null>;
 }>;
 
+// Source: ../web/src/lib/repositories/short-link.repository.ts
+// Variable: SHORT_LINKS_QUERY
+// Query: *[_type == "shortLink" && defined(name) && defined(target)] | order(name asc) {  "name": coalesce(name, ""), "target": coalesce(target, "")}
+export type SHORT_LINKS_QUERY_RESULT = Array<{
+  name: string;
+  target: string;
+}>;
+
 // Source: ../web/src/lib/repositories/sponsor.repository.ts
 // Variable: SPONSORS_QUERY
 // Query: *[_type == "sponsor" && active == true] | order(name asc) {  "id": _id, "name": coalesce(name, ""), url, type, tier, "featured": coalesce(featured, false), description,  "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"}
@@ -2800,6 +2819,7 @@ declare global {
     '*[_type == "player" && psdId == $psdId][0] {\n  _id, psdId, firstName, lastName, jerseyNumber, keeper, positionPsd, position,\n  birthDate,\n  "psdImageUrl": psdImage.asset->url + "?w=400&q=80&fm=webp&fit=max",\n  "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  "celebrationImageUrl": celebrationImage.asset->url + "?w=600&q=80&fm=webp&fit=max",\n  bio,\n  "currentTeam": *[_type == "team" && archived != true && showInNavigation != false && references(^._id)] | order(name asc)[0] {\n    _id, name, displayName, "slug": slug.current,\n    "teamImageUrl": teamImage.asset->url + "?w=1200&h=800&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(teamImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(teamImage.hotspot.y, 0.5))\n  }\n}': PLAYER_BY_PSD_ID_QUERY_RESULT;
     '*[_type == "player" && keeper == true && archived != true].psdId': KEEPER_PSD_IDS_QUERY_RESULT;
     '*[_type == "responsibility" && active == true] | order(title asc) {\n  "id": slug.current,\n  title,\n  "role": audience,\n  question,\n  keywords,\n  summary,\n  category,\n  icon,\n  "primaryContact": primaryContact {\n    contactType,\n    teamRole,\n    "position": organigramNode->title,\n    "roleCode": organigramNode->roleCode,\n    "members": organigramNode->members[@->archived != true]->{\n      "id": _id,\n      "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n      "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",\n      "psdImageUrl": psdImage.asset->url + "?w=200&q=80&fm=webp&fit=max",\n      email, phone\n    },\n    "nodeId": organigramNode->_id,\n    "role": role,\n    "email": email,\n    "phone": phone,\n    "department": department\n  },\n  "steps": steps[] {\n    description,\n    link,\n    "contact": select(defined(contact) => contact {\n      contactType,\n      teamRole,\n      "position": organigramNode->title,\n      "roleCode": organigramNode->roleCode,\n      "members": organigramNode->members[@->archived != true]->{\n        "id": _id,\n        "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n        email, phone\n      },\n      "nodeId": organigramNode->_id,\n      "role": role,\n      "email": email,\n      "phone": phone,\n      "department": department\n    }, null)\n  },\n  "relatedPaths": coalesce(relatedPaths[]->slug.current, [])\n}': RESPONSIBILITY_PATHS_QUERY_RESULT;
+    '*[_type == "shortLink" && defined(name) && defined(target)] | order(name asc) {\n  "name": coalesce(name, ""), "target": coalesce(target, "")\n}': SHORT_LINKS_QUERY_RESULT;
     '*[_type == "sponsor" && active == true] | order(name asc) {\n  "id": _id, "name": coalesce(name, ""), url, type, tier, "featured": coalesce(featured, false), description,\n  "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"\n}': SPONSORS_QUERY_RESULT;
     '*[_type == "organigramNode" && active == true] | order(coalesce(sortOrder, 9999) asc, title asc) {\n  _id,\n  title,\n  description,\n  roleCode,\n  pillar,\n  department,\n  "parentId": select(defined(parentNode) && parentNode->active == true => parentNode->_id, null),\n  "members": members[@->archived != true]->{\n    "id": _id,\n    "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n    "photoUrl": photo.asset->url + "?w=200&q=80&fm=webp&fit=max",\n    "psdImageUrl": psdImage.asset->url + "?w=200&q=80&fm=webp&fit=max",\n    email,\n    phone,\n    "psdId": psdId\n  }\n}': ORGANIGRAM_NODES_QUERY_RESULT;
     '*[_type == "organigramNode" && active == true && roleCode in $roleCodes]{\n  title,\n  roleCode,\n  "members": members[@->archived != true && defined(@->email)]->{\n    "name": coalesce(firstName, "") + " " + coalesce(lastName, ""),\n    email\n  }\n}[count(members) > 0] | order(title asc)': KEY_CONTACTS_QUERY_RESULT;

@@ -45,6 +45,10 @@ import {
   PhotoGalleryRepository,
   PhotoGalleryRepositoryLive,
 } from "../repositories/photoGallery.repository";
+import {
+  ShortLinkRepository,
+  ShortLinkRepositoryLive,
+} from "../repositories/short-link.repository";
 
 const AppLayer = Layer.mergeAll(
   BffServiceLive,
@@ -58,6 +62,7 @@ const AppLayer = Layer.mergeAll(
   ResponsibilityRepositoryLive,
   PageRepositoryLive,
   PhotoGalleryRepositoryLive,
+  ShortLinkRepositoryLive,
 );
 const runtime = ManagedRuntime.make(AppLayer);
 
@@ -150,6 +155,7 @@ export const runPromise = <A>(
     | ResponsibilityRepository
     | PageRepository
     | PhotoGalleryRepository
+    | ShortLinkRepository
   >,
 ) =>
   runtime.runPromise(effect).catch(async (error: unknown) => {
@@ -180,4 +186,5 @@ export {
   ResponsibilityRepository,
   PageRepository,
   PhotoGalleryRepository,
+  ShortLinkRepository,
 };
