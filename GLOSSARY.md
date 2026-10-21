@@ -2,7 +2,7 @@
 
 The football club KCVV Elewijt: its teams, players, staff, matches and the content it publishes. English terms are used in code; the Dutch word in _italics_ is what a visitor reads.
 
-Code names, value lists, rules and history for each term live in [`docs/domain-reference.md`](docs/domain-reference.md).
+Value lists, code names, rules and history for each term live in [`docs/domain-reference.md`](docs/domain-reference.md).
 
 ## Language
 
@@ -13,7 +13,7 @@ A single football game between two sides. _Wedstrijd_.
 _Avoid_: game, fixture
 
 **Match Status**:
-Where a match is in its life: scheduled (_Gepland_), finished (_Afgelopen_), forfeited (_Forfait_), postponed (_Uitgesteld_) or stopped (_Gestaakt_).
+The lifecycle state a match is in. A postponed match may still be rescheduled; a cancelled match will not be played. [Values](docs/domain-reference.md#match-status).
 
 **Match Side**:
 One of the two participants in a match, home or away; either a KCVV team or an opponent. An opponent exists only inside a match, never as an entity of its own.
@@ -23,32 +23,32 @@ A match where both sides are the same club: the association's way to say a team 
 _Avoid_: self-match, "KCVV vs KCVV", placeholder (on its own; see **Off-Season Notice**)
 
 **Reduced Row**:
-The way a match row or page reads when there is no confirmed two-sided match to show: one crest, a subject line, the real time, no score, no link. A Pitch-Reservation Placeholder and a not-yet-played tournament fixture both read this way, until a score appears.
+The way a match row or page reads when there is no confirmed two-sided match to show: one crest, a subject line, the real time, no score, no link.
 
 **Lineup**:
-The players picked for one match, each with a lineup status. _Opstelling_.
+The players picked for one match. _Opstelling_.
 _Avoid_: squad (that is the season roster)
 
 **Lineup Status**:
-A player's part in one match: starter (_Basisspeler_), substitute (_Wisselspeler_), substituted (_Gewisseld_) or subbed in (_Ingevallen_).
+A player's part in one match lineup. [Values](docs/domain-reference.md#lineup-status).
 
 **Card**:
-A disciplinary card shown in a match: yellow (_Geel_), red (_Rood_) or second yellow (_Tweede geel_).
+A disciplinary card shown to a player in a match. [Values](docs/domain-reference.md#card-type).
 
 **Competition**:
-The kind of tournament a match belongs to: league (_Competitie_), cup (_Beker_), friendly (_Vriendschappelijk_) or tournament (_Tornooi_).
+The kind of tournament a match belongs to. [Values](docs/domain-reference.md#competition).
 _Avoid_: reeks (that is the division a team plays in)
 
 **Reeks**:
-The specific division a team is placed in for a competition, e.g. `3e Nationale VV A`. The federation and the club each have a name for it; the club's name wins wherever a person reads it.
+The specific division a team is placed in for a competition, e.g. `3e Nationale VV A`.
 _Avoid_: competition (that is the kind of tournament)
 
 **Competition Phase**:
-One half of a youth season, split by the winter break: _Najaar_ or _Voorjaar_. The second half is often a different reeks with different opponents.
+One half of a youth season, split by the winter break. [Names](docs/domain-reference.md#competition-phase).
 _Avoid_: return round
 
 **Season**:
-The football year, running July to June, written `’25/’26`. _Seizoen_. Always worked out from a date; never something a document stores.
+The football year a match or team belongs to, written `’25/’26`. _Seizoen_.
 
 ### Teams
 
@@ -56,7 +56,7 @@ The football year, running July to June, written `’25/’26`. _Seizoen_. Alway
 A KCVV team registered with the club and usually with the football federation. _Ploeg_.
 
 **Team Display Name**:
-What a team is called wherever a person reads it: page heading, browser tab, share card, listing row. Distinct from the team's registered name in PSD.
+What a team is called wherever a person reads it. Distinct from the team's registered name in PSD.
 _Avoid_: age group (as a name)
 
 **Squad**:
@@ -64,22 +64,22 @@ The players registered to a team for the current season. _Selectie_ / _Kern_.
 _Avoid_: lineup (that is one match)
 
 **Squad Label**:
-The short label that says which KCVV team a match belongs to, e.g. "A-Ploeg" or "U15 A", shown when matches of several teams are listed together.
+The short label that says which KCVV team a match belongs to, e.g. "A-Ploeg" or "U15 A".
 
 **Age Group**:
-The competition band a team plays in: `A` for seniors (_eerste elftal_), `U{N}` for youth (_jeugd_). It says which competition a team plays in, never which team it is.
+The competition band a team plays in, e.g. `A` for seniors or `U17` for youth. It says which competition a team plays in, never which team it is.
 
 **Youth Division**:
-The three age bands the club groups its youth teams in: _Onderbouw_ (U6–U9), _Middenbouw_ (U10–U13) and _Bovenbouw_ (U14–U21). _Afdeling_.
+One of the three age bands the club groups its youth teams in. _Afdeling_. [Bands](docs/domain-reference.md#youth-division-afdeling).
 _Avoid_: scholieren, duiveltjes
 
 ### People
 
 **Player**:
-An athlete registered with the club. _Speler_. A player is on a squad or not; there is no injured, suspended or transferred status.
+An athlete registered with the club. _Speler_.
 
 **Position**:
-Where a player plays: _Keeper_, _Verdediger_, _Middenvelder_, _Aanvaller_, or _Speler_ when no finer position exists yet (U6–U9). A player with no known position has none; it is never filled with a default.
+Where a player plays on the field. [Values](docs/domain-reference.md#position).
 _Avoid_: role (that is staff), forward (use attacker)
 
 **Staff Member**:
@@ -90,23 +90,23 @@ What a staff member does, e.g. _hoofdtrainer_ or _voorzitter_.
 _Avoid_: position (that is players only)
 
 **Department**:
-The board a staff member belongs to: _Hoofdbestuur_, _Jeugdbestuur_ or _Algemeen_ when neither fits.
+The board a staff member belongs to. [Values](docs/domain-reference.md#department).
 
 **Organigram**:
-Who does the work day to day: the club's boxes and who holds them. The boards on `/club/bestuur` and `/club/jeugdbestuur` are the board on paper, a separate truth; the two never sync.
+Who does the work day to day: the club's boxes and who holds them. The boards on `/club/bestuur` and `/club/jeugdbestuur` are the board on paper, a separate truth.
 
 **Box**:
 One position in the organigram, such as _Secretaris_ or _Kantinedienst_, held by zero, one or several staff members.
 
 **Pillar**:
-What a box is for, which decides where it is listed in the clubboek: _bestuur_, _sportief_, _jeugd-organisatie_, _jeugd-opleiding_, _club_ or _integriteit_. _Pijler_.
+What a box is for, which decides where it is listed in the clubboek. _Pijler_. [Values](docs/domain-reference.md#pillar).
 
 **Chapter**:
-A section of the clubboek that shows one or more pillars: _Sportief_, _Jeugd_, _Club & werking_ or _Integriteit_.
+A section of the clubboek that shows one or more pillars. [Values](docs/domain-reference.md#pillar).
 _Avoid_: pillar (that is the stored value)
 
 **Key Figure**:
-One of the eight boxes shown as a card at the top of the clubboek, such as _Voorzitter_ or _TVJO_.
+One of the boxes shown as a card at the top of the clubboek, such as _Voorzitter_ or _TVJO_.
 
 **Monogram**:
 The initials a round avatar shows when a person has no photo.
@@ -120,13 +120,13 @@ A news article on the website. _Artikel_ / _Nieuwsbericht_.
 The optional closing band an editor adds to an article: a question, a short lead and one button. _Oproep onderaan_.
 
 **Event**:
-A club event or announcement, shown until it has passed. _Evenement_.
+A club event or announcement. _Evenement_.
 
 **Sponsor**:
-A partner of the club, shown while it is active.
+A partner of the club.
 
 **Sponsor Package**:
-What a sponsor bought: _Crossing_, _Training_, _Wit_, _Groen_, _Paneel_ or _Andere_. A name, not a rank.
+What a sponsor bought; a name, not a rank. [Values](docs/domain-reference.md#sponsor).
 
 **Page**:
 A plain content page written in the Studio, shown under `/club/`. _Pagina_.
@@ -135,60 +135,60 @@ A plain content page written in the Studio, shown under `/club/`. _Pagina_.
 A promotional image in one of the homepage's fixed slots.
 
 **Off-Season Notice**:
-What an editor writes to fill the homepage first-team band when there are no matches: a countdown to the new season, a short message and an image. _Tussenseizoen-bericht_.
+What an editor writes to fill the homepage first-team band when there are no matches. _Tussenseizoen-bericht_.
 _Avoid_: placeholder (that is a Pitch-Reservation Placeholder)
 
 **Held-Open Frame**:
-The empty frame that keeps a slot's shape when data from the provider or system is missing, so the gap reads as known and not as broken. An empty slot an editor did not fill hides instead.
+The empty frame that keeps a slot's shape when data from the provider or system is missing, so the gap reads as known and not as broken.
 
 **Draft**:
-The half-filled membership form a visitor leaves on `/club/word-lid`, kept for that browser tab only.
+The half-filled membership form a visitor leaves on `/club/word-lid`.
 
 **Responsibility**:
 A help topic on `/hulp` that sends a visitor to the right contact person. _Verantwoordelijkheid_.
 
 **Audience**:
-Who a responsibility is for: _Speler_, _Ouder_, _Trainer_, _Supporter_, _Niet-lid_ or _Andere_.
+Who a responsibility is for. [Values](docs/domain-reference.md#audience).
 
 **Category**:
-The topic of a responsibility: _Medisch_, _Sportief_, _Administratief_, _Gedrag_, _Algemeen_ or _Commercieel_.
+The topic of a responsibility. [Values](docs/domain-reference.md#category).
 
 ### Share Tool
 
 **Share Tool**:
-The unlisted page at `/share` where the club makes Instagram stories and squares of a match moment, an article or an event. It saves a picture; it publishes nothing.
+The unlisted page at `/share` where the club makes Instagram stories and squares of a match moment, an article or an event.
 
 **Share Look**:
-One of the five styles a story is drawn in: _Kaart_, _Plakboek_, _Affiche_, _Ticket_ or _Wedstrijd_ (matches only).
+One of the visual styles a story is drawn in. [Values](docs/domain-reference.md#share-look).
 
 **Share Moment**:
-The moment of a match a story tells, such as kickoff, half-time, full-time, a goal or a card.
+The moment of a match a story tells, such as kickoff, a goal or a card.
 
 **Movable Block**:
-A part of a look the editor can drag on the preview. It counts as moved once it is off its spot or sent behind.
+A part of a look the editor can drag on the preview.
 
 **Omslag**:
-How an article or event cover fills a look's photo slot: _Foto_, _Affiche wazig_ or _Reservefoto_.
+How an article or event cover fills a look's photo slot. [Values](docs/domain-reference.md#omslag).
 
 **Story Session**:
-The story in progress, kept in the browser so it survives a trip to Instagram and back, until the next day.
+The story in progress, which survives a trip to Instagram and back.
 
 ### Statistics & Ranking
 
 **Player Stats**:
-A player's season numbers for one team: matches, goals, assists, cards, minutes.
+A player's season numbers for one team. [Fields](docs/domain-reference.md#player-stats).
 
 **Team Stats**:
-A team's season numbers: results, goals for and against, clean sheets, top scorers.
+A team's season numbers. [Fields](docs/domain-reference.md#team-stats).
 
 **Ranking**:
 The league standings table of one reeks. _Klassement_.
 
 **Ranking Entry**:
-One team's row in a ranking: position, matches, results, goals and points.
+One team's row in a ranking. [Fields](docs/domain-reference.md#ranking-entry).
 
 **Competitive Block**:
-The ranking and match list on a team page, shown or hidden together as one unit. What it shows depends on the data, never on the age group or on last season.
+The ranking and match list on a team page, shown or hidden together as one unit.
 
 ### Systems
 
@@ -204,13 +204,13 @@ _Avoid_: Footbalisto
 The content system that owns editorial content and the editorial details of players, teams and staff.
 
 **PSD↔Sanity Sync**:
-The nightly job that copies PSD-owned player, team and staff data into Sanity. It never writes an editorial field.
+The nightly job that copies PSD-owned player, team and staff data into Sanity.
 
 **Permanent Read Failure**:
-A failed read that will fail the same way on every retry, so the page shows what it can.
+A failed read that will fail the same way on every retry.
 
 **Transient Read Failure**:
-A failed read that the next try will probably fix, so the last good page stays up.
+A failed read that the next try will probably fix.
 
 ### Navigation
 

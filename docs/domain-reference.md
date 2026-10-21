@@ -25,15 +25,16 @@ A single football game between two sides. The canonical term throughout the code
 
 The lifecycle state of a match.
 
-| Code        | Dutch      | Meaning                                          |
-| ----------- | ---------- | ------------------------------------------------ |
-| `scheduled` | Gepland    | Not yet played, no score                         |
-| `finished`  | Afgelopen  | Played, final score available                    |
-| `forfeited` | Forfait    | Awarded by forfeit (FF)                          |
-| `postponed` | Uitgesteld | Cancelled/rescheduled (AFG or `cancelled: true`) |
-| `stopped`   | Gestaakt   | Ended prematurely (STOP), may be replayed        |
+| Code        | Dutch       | Meaning                                                      |
+| ----------- | ----------- | ------------------------------------------------------------ |
+| `scheduled` | Gepland     | Not yet played, no score                                     |
+| `finished`  | Afgelopen   | Played, final score available                                |
+| `forfeited` | Forfait     | Awarded by forfeit (FF)                                      |
+| `postponed` | Uitgesteld  | Afgelast (AFG), may be rescheduled                           |
+| `cancelled` | Geannuleerd | Will not be played (`cancelled: true`, overrides every code) |
+| `stopped`   | Gestaakt    | Ended prematurely (STOP), may be replayed                    |
 
-**Status derivation:** PSD numeric code + `cancelled` boolean + presence of goals → `MatchStatus`. See `mapGameStatus()` in `apps/api/src/psd/transforms.ts`.
+**Status derivation:** PSD numeric code + `cancelled` boolean (takes full precedence) + presence of goals → `MatchStatus`. See `mapGameStatus()` in `apps/api/src/psd/transforms.ts`.
 
 ### Match Side
 

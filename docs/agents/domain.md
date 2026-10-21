@@ -28,7 +28,7 @@ If any of these files don't exist, **proceed silently**. Don't flag their absenc
 
 When your output names a domain concept (an issue title, a refactor proposal, a hypothesis, a test name), use the term as defined in `GLOSSARY.md`. Don't drift to synonyms the glossary explicitly avoids.
 
-**Adding a term:** the definition goes in `GLOSSARY.md`, in its `**Term**:` + `_Avoid_:` format and with no implementation detail. Code names, value lists, rules and history go in a matching `###` section of `docs/domain-reference.md`.
+**Adding a term:** the definition goes in `GLOSSARY.md`, in its `**Term**:` + `_Avoid_:` format and with no implementation detail. Code names, value lists, rules and history go in a matching `###` section of `docs/domain-reference.md`. A term that only refines a broader one (e.g. **Box** and **Chapter** under Organigram and Pillar, **Ranking** under Ranking Entry) may keep its detail in that parent section instead; the glossary entry then links there.
 
 If the concept you need isn't in the glossary yet, that's a signal — either you're inventing language the project doesn't use (reconsider) or there's a real gap (note it for `/domain-modeling`).
 
