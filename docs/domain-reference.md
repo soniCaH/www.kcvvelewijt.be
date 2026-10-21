@@ -422,6 +422,18 @@ A generic static content page.
 
 **Page or hand-written route:** a `/club/*` page is a Sanity `page` by default. It stays a hand-written route only when it **needs code** (live data, a form, an interactive tool) **or opens with its own top banner**. A body piece the `page` schema has no block for is not a reason to stay hand-written; add the block instead (#3309).
 
+### Short link
+
+A one-word path on the club site (`/stage`) that sends visitors to a target the board sets. A real page always wins over it.
+
+| Code                          | Dutch      | Notes                                                                                     |
+| ----------------------------- | ---------- | ----------------------------------------------------------------------------------------- |
+| `shortLink` (Sanity document) | Korte link | `name` (one lowercase word, unique) + `target` (an `https://` URL or an own-site `/path`) |
+
+**Route:** `app/[shortLink]`, the only top-level dynamic segment. A known name answers `307` to its `target`; an unknown one is the normal 404. A name the site already serves at its first path segment (`nieuws`, `club`, `ongeval`, a `public/` folder, …) is refused in the Studio via `RESERVED_SHORT_LINK_NAMES`; a web test keeps that list complete.
+
+**Counted, not tracked:** each known hit sends one `short_link_click` event to GA4 from the server, with the link's name and no visitor data. Browser GTM never sees a redirect.
+
 ### Banner
 
 A promotional image shown on the homepage in designated slots (A, B, C).
