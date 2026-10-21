@@ -3,6 +3,8 @@
 > Canonical glossary for every concept in the KCVV monorepo.
 > **Rule:** English in code, Dutch in UI (labels, slugs, display values).
 > Each concept lists the **code term** and the **Dutch UI term** where applicable.
+> **Format:** this file deliberately keeps its own shape (`### Term`, prose, Code ↔ Dutch table) instead of the
+> `/domain-modeling` skill's `**Term**:` + `_Avoid_:` format. Add new terms in this file's shape, so it stays one style.
 
 ---
 
