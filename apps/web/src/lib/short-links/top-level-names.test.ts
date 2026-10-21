@@ -119,6 +119,20 @@ describe("collectTopLevelNames", () => {
     expect(names(found)).toEqual(["ongeval", "proxy", "team"]);
   });
 
+  it("reads all three phases when rewrites() returns the object form", () => {
+    const dirs = fixture({ app: [], public: [] });
+    const found = collectTopLevelNames({
+      ...dirs,
+      redirects: [],
+      rewrites: {
+        beforeFiles: [{ source: "/voor", destination: "/a" }],
+        afterFiles: [{ source: "/na", destination: "/b" }],
+        fallback: [{ source: "/terugval/:path*", destination: "/c" }],
+      },
+    });
+    expect(names(found)).toEqual(["na", "terugval", "voor"]);
+  });
+
   it("takes public/ directories and extension-less files, not dotted files (a name cannot hold a dot)", () => {
     const dirs = fixture({
       app: [],
