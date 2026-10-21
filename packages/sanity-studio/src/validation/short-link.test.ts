@@ -73,6 +73,9 @@ describe('validateShortLinkTarget', () => {
     '/NIEUWS/herfststage-2026',
     '/?x=1',
     '/nieuws?x=1',
+    'https://www.kcvvelewijt.be/nieuws/herfststage-2026',
+    'https://kcvvelewijt.be/',
+    'https://kcvvelewijt.be.example.com/stage',
   ])('accepts %s', (value) => {
     expect(validateShortLinkTarget(value)).toBe(true)
   })
@@ -98,6 +101,9 @@ describe('validateShortLinkTarget', () => {
     '/onbekend?x=1',
     '/onbekend#top',
     '/Stage',
+    'https://www.kcvvelewijt.be/stage',
+    'https://kcvvelewijt.be/Stage?x=1',
+    'https://WWW.KCVVELEWIJT.BE:443/stage',
   ])('rejects %j', (value) => {
     expect(typeof validateShortLinkTarget(value)).toBe('string')
   })

@@ -69,11 +69,21 @@ export function validateShortLinkTarget(value: unknown): true | string {
   if (!TARGET_PATTERN.test(value) || unsafe) {
     return 'Dit is geen geldige bestemming. Gebruik een volledige link die met "https://" begint (bijv. https://www.tournify.nl/live/kcvvelewijt2025) of een pad op deze site dat met "/" begint (bijv. /nieuws/herfststage-2026), zonder spaties.'
   }
-  if (value.startsWith('/')) {
-    const first = value.slice(1).split(/[/?#]/)[0].toLowerCase()
+  const ownPath = value.startsWith('/') ? value : ownSitePath(value)
+  if (ownPath !== null) {
+    const first = ownPath.slice(1).split(/[/?#]/)[0].toLowerCase()
     if (first !== '' && !RESERVED_SHORT_LINK_NAMES.includes(first)) {
       return 'Een korte link moet naar een echte pagina van de site wijzen, niet naar een andere korte link. Kies een pad dat met een bestaande pagina begint (bijv. /nieuws/herfststage-2026), of een volledige https://-link.'
     }
   }
   return true
+}
+
+/** The club's own host, any case, optional port; the lookahead stops `kcvvelewijt.be.evil.com` and `kcvvelewijt.be@evil.com`. */
+const OWN_SITE_URL = /^https:\/\/(?:www\.)?kcvvelewijt\.be\.?(?::\d*)?(?=[/?#]|$)([^?#]*)/i
+
+/** The path of an `https://` URL on the club's own host, else `null`: `https://www.kcvvelewijt.be/stage` loops like `/stage`. */
+function ownSitePath(value: string): string | null {
+  const match = OWN_SITE_URL.exec(value)
+  return match ? match[1] || '/' : null
 }

@@ -36,5 +36,22 @@ export const getShortLinks = unstable_cache(
  */
 export async function findShortLink(segment: string) {
   const name = segment.toLowerCase();
-  return (await getShortLinks()).find((link) => link.name === name) ?? null;
+  const link = (await getShortLinks()).find((link) => link.name === name);
+  return link && isSafeRedirectTarget(link.target) ? link : null;
+}
+
+/**
+ * The Studio validates `target`, but a write through the API skips it, and
+ * `redirect("//evil.com")` would be an open redirect. Only an `https://` URL or
+ * a single-slash own-site path, with no whitespace or control character, is
+ * ever redirected to; anything else is a 404.
+ */
+export function isSafeRedirectTarget(target: string): boolean {
+  return (
+    /^(https:\/\/[^/]|\/(?![/\\]))/.test(target) &&
+    ![...target].some((ch) => {
+      const code = ch.charCodeAt(0);
+      return code <= 32 || code === 127 || /\s/.test(ch);
+    })
+  );
 }

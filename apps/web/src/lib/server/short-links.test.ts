@@ -35,7 +35,11 @@ vi.mock("@/lib/effect/runtime", async () => {
   };
 });
 
-import { findShortLink, getShortLinks } from "./short-links";
+import {
+  findShortLink,
+  getShortLinks,
+  isSafeRedirectTarget,
+} from "./short-links";
 
 const LINKS = [
   { name: "stage", target: "/nieuws/herfststage-2026" },
@@ -85,5 +89,28 @@ describe("findShortLink", () => {
 
   it("returns null for an unknown name", async () => {
     expect(await findShortLink("onbekend")).toBeNull();
+  });
+});
+
+describe("isSafeRedirectTarget", () => {
+  it.each([
+    "/nieuws/herfststage-2026",
+    "/",
+    "https://www.tournify.nl/live/kcvvelewijt2025",
+  ])("allows %s", (target) => {
+    expect(isSafeRedirectTarget(target)).toBe(true);
+  });
+
+  it.each([
+    "//evil.com",
+    "/\\evil.com",
+    "http://example.be",
+    "javascript:alert(1)",
+    "https://",
+    "/ spatie",
+    "/a\nb",
+    "",
+  ])("refuses %j", (target) => {
+    expect(isSafeRedirectTarget(target)).toBe(false);
   });
 });

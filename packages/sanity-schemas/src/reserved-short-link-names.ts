@@ -4,7 +4,7 @@
  * serves at its first path segment.
  *
  * Hard-coded on purpose, because the schema package cannot read the web app.
- * `apps/web/src/lib/short-links/reserved-names.test.ts` derives the real list
+ * `apps/web/src/lib/short-links/top-level-names.test.ts` derives the real list
  * from the app router folders, the `source`s in `next.config.ts`
  * `redirects()` / `rewrites()` and the entries in `public/`, and fails (naming
  * the missing ones) when this constant does not cover them. Add a top-level
