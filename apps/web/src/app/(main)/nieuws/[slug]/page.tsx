@@ -492,6 +492,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
             status: matchDetail.status,
             url: `${SITE_CONFIG.siteUrl}/wedstrijd/${article.linkedMatch}`,
             venue: matchDetail.venue,
+            homeTeamLogo: matchDetail.home_team.logo,
+            awayTeamLogo: matchDetail.away_team.logo,
+            competition: matchDetail.competition,
           },
         }
       : undefined;

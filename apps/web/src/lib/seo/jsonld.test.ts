@@ -532,9 +532,138 @@ describe("buildSportsEventJsonLd", () => {
     expect(result.location.name).toBe("Driesstraat 39, Elewijt");
   });
 
-  it("omits location when venue is not provided", () => {
+  describe("location", () => {
+    it("home (venue present): Place named after the venue, with the club PostalAddress", () => {
+      const result = buildSportsEventJsonLd({
+        ...matchInput,
+        venue: "Sportpark Elewijt, Driesstraat 32, 1982 Elewijt",
+      }) as AnyJsonLd;
+
+      expect(result.location).toEqual({
+        "@type": "Place",
+        name: "Sportpark Elewijt, Driesstraat 32, 1982 Elewijt",
+        address: buildSportsClubJsonLd().address,
+      });
+      expect(result.location.address).toEqual({
+        "@type": "PostalAddress",
+        streetAddress: "Driesstraat 32",
+        addressLocality: "Elewijt",
+        postalCode: "1982",
+        addressCountry: "BE",
+      });
+    });
+
+    it("away (no venue): Place named after the home team, no address", () => {
+      const result = buildSportsEventJsonLd({
+        ...matchInput,
+        homeTeamName: "FC Opponent",
+        awayTeamName: "KCVV Elewijt",
+      }) as AnyJsonLd;
+
+      expect(result.location).toEqual({
+        "@type": "Place",
+        name: "FC Opponent",
+      });
+      expect(result.location.address).toBeUndefined();
+    });
+  });
+
+  describe("organizer", () => {
+    it("home: the home club, with the site url", () => {
+      const result = buildSportsEventJsonLd({
+        ...matchInput,
+        venue: "Sportpark Elewijt",
+      }) as AnyJsonLd;
+
+      expect(result.organizer).toEqual({
+        "@type": "SportsOrganization",
+        name: "KCVV Elewijt",
+        url: "https://www.kcvvelewijt.be",
+      });
+    });
+
+    it("away: the home club by name only, no url", () => {
+      const result = buildSportsEventJsonLd({
+        ...matchInput,
+        homeTeamName: "FC Opponent",
+        awayTeamName: "KCVV Elewijt",
+      }) as AnyJsonLd;
+
+      expect(result.organizer).toEqual({
+        "@type": "SportsOrganization",
+        name: "FC Opponent",
+      });
+    });
+  });
+
+  it("performer lists both teams as the homeTeam / awayTeam objects", () => {
     const result = buildSportsEventJsonLd(matchInput) as AnyJsonLd;
-    expect(result.location).toBeUndefined();
+
+    expect(result.performer).toEqual([result.homeTeam, result.awayTeam]);
+  });
+
+  describe("image", () => {
+    it("lists the team logos the match carries", () => {
+      const result = buildSportsEventJsonLd({
+        ...matchInput,
+        homeTeamLogo: "https://cdn.example/home.png",
+        awayTeamLogo: "https://cdn.example/away.png",
+      }) as AnyJsonLd;
+
+      expect(result.image).toEqual([
+        "https://cdn.example/home.png",
+        "https://cdn.example/away.png",
+      ]);
+    });
+
+    it("omits a missing logo without leaving a hole", () => {
+      const result = buildSportsEventJsonLd({
+        ...matchInput,
+        awayTeamLogo: "https://cdn.example/away.png",
+      }) as AnyJsonLd;
+
+      expect(result.image).toEqual(["https://cdn.example/away.png"]);
+    });
+
+    it("falls back to the club logo when neither team has one", () => {
+      const result = buildSportsEventJsonLd(matchInput) as AnyJsonLd;
+
+      expect(result.image).toEqual(["https://www.kcvvelewijt.be/icon.png"]);
+    });
+  });
+
+  describe("description", () => {
+    it("is a Dutch sentence with teams, date and competition", () => {
+      const result = buildSportsEventJsonLd({
+        ...matchInput,
+        kickoff: new Date(Date.UTC(2026, 9, 25, 15, 0)),
+        competition: "3e Provinciale B",
+      }) as AnyJsonLd;
+
+      expect(result.description).toBe(
+        "KCVV Elewijt tegen FC Opponent op zondag 25 oktober 2026 (3e Provinciale B).",
+      );
+    });
+
+    it("leaves the competition part out when absent", () => {
+      const result = buildSportsEventJsonLd({
+        ...matchInput,
+        kickoff: new Date(Date.UTC(2026, 9, 25, 15, 0)),
+      }) as AnyJsonLd;
+
+      expect(result.description).toBe(
+        "KCVV Elewijt tegen FC Opponent op zondag 25 oktober 2026.",
+      );
+    });
+  });
+
+  it("never emits offers", () => {
+    const result = buildSportsEventJsonLd({
+      ...matchInput,
+      venue: "Sportpark Elewijt",
+    }) as AnyJsonLd;
+
+    expect(result).not.toHaveProperty("offers");
   });
 });
 

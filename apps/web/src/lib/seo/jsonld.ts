@@ -23,6 +23,15 @@ interface JsonLdDocument {
 
 const LOGO_URL = `${SITE_CONFIG.siteUrl}/icon.png`;
 
+/** The club's one postal address — read by the SportsClub and every home SportsEvent. */
+const CLUB_ADDRESS = {
+  "@type": "PostalAddress",
+  streetAddress: "Driesstraat 32",
+  addressLocality: "Elewijt",
+  postalCode: "1982",
+  addressCountry: "BE",
+} as const;
+
 /**
  * schema-dts models SportsClub under LocalBusiness, not SportsOrganization,
  * so `sport` is absent from SportsClubLeaf. Google Rich Results accept it
@@ -143,13 +152,7 @@ export function buildSportsClubJsonLd(): WithContext<SportsClubOrganization> {
     // never asserted" (#2435).
     sameAs: [EXTERNAL_LINKS.facebook, EXTERNAL_LINKS.instagram],
     sport: "Soccer",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "Driesstraat 32",
-      addressLocality: "Elewijt",
-      postalCode: "1982",
-      addressCountry: "BE",
-    },
+    address: CLUB_ADDRESS,
   };
 }
 
@@ -259,7 +262,11 @@ export interface SportsEventInput {
   awayTeamName: string;
   status: MatchStatus;
   url: string;
+  /** BFF `venue` — only set for home fixtures; its presence marks a KCVV home match. */
   venue?: string;
+  homeTeamLogo?: string;
+  awayTeamLogo?: string;
+  competition?: string;
 }
 
 function mapEventStatus(status: SportsEventInput["status"]): string {
@@ -365,28 +372,37 @@ export function buildEventJsonLd(
 export function buildSportsEventJsonLd(
   input: SportsEventInput,
 ): JsonLdDocument {
+  const homeTeam = { "@type": "SportsTeam" as const, name: input.homeTeamName };
+  const awayTeam = { "@type": "SportsTeam" as const, name: input.awayTeamName };
+  const logos = [input.homeTeamLogo, input.awayTeamLogo].filter(
+    (logo): logo is string => !!logo,
+  );
+  const kickoff = toMatchDisplayZone(input.kickoff);
+  const isHome = !!input.venue;
+
   return {
     "@context": "https://schema.org",
     "@type": "SportsEvent",
     name: input.name,
-    startDate: toMatchDisplayZone(input.kickoff).toISO()!,
+    startDate: kickoff.toISO()!,
     url: input.url,
     eventStatus: mapEventStatus(input.status),
-    homeTeam: {
-      "@type": "SportsTeam",
+    description: `${input.homeTeamName} tegen ${input.awayTeamName} op ${kickoff.toFormat("cccc d MMMM yyyy")}${input.competition ? ` (${input.competition})` : ""}.`,
+    image: logos.length > 0 ? logos : [LOGO_URL],
+    homeTeam,
+    awayTeam,
+    performer: [homeTeam, awayTeam],
+    // The BFF only sets `venue` for home fixtures. An away ground has no
+    // address in PSD, so it is a name-only Place — never a guessed street.
+    location: {
+      "@type": "Place" as const,
+      name: input.venue || input.homeTeamName,
+      ...(isHome ? { address: CLUB_ADDRESS } : {}),
+    },
+    organizer: {
+      "@type": "SportsOrganization" as const,
       name: input.homeTeamName,
+      ...(isHome ? { url: SITE_CONFIG.siteUrl } : {}),
     },
-    awayTeam: {
-      "@type": "SportsTeam",
-      name: input.awayTeamName,
-    },
-    ...(input.venue
-      ? {
-          location: {
-            "@type": "Place" as const,
-            name: input.venue,
-          },
-        }
-      : {}),
   };
 }
