@@ -615,6 +615,9 @@ export default async function MatchPage({ params }: MatchPageProps) {
             status: match.status,
             url: `${SITE_CONFIG.siteUrl}/wedstrijd/${matchId}`,
             venue: match.venue,
+            homeTeamLogo: match.home_team.logo,
+            awayTeamLogo: match.away_team.logo,
+            competition: match.competition,
           })}
         />
       )}
