@@ -480,7 +480,7 @@ clause, visible "last updated" stamp. Prices can be added later.
       production: **26 teams, 0 with a training schedule.** So this is not an S-sized build that PSD might
       shortcut — **it is shipped code waiting on data entry.** The highest-value item in the professional
       tier file costs zero engineering.
-- [x] **T6 — ACFF → FFA: no drift.** No `ACFF` occurrences in `docs/ubiquitous-language.md`,
+- [x] **T6 — ACFF → FFA: no drift.** No `ACFF` occurrences in `GLOSSARY.md`,
       `apps/web/public/llms.txt`, or `packages/api-contract/src`. Nothing to fix.
 
 ### What T1/T2/T5 mean together

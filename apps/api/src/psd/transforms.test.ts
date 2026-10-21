@@ -591,7 +591,7 @@ describe("derivePsdTeamLabel (#3235)", () => {
     ["Reserven", "A", "Reserven"],
     // A youth squad whose own name happens to end " A" must not be read as a
     // senior suffix — that check only applies when `age` is itself "A"
-    // (docs/ubiquitous-language.md's own example).
+    // (docs/domain-reference.md's own example).
     ["KCVVE U15 A", "U15", "U15 A"],
     // PSD names carry stray spaces around the club prefix.
     ["KCVVE  U11 ", "U11", "U11"],

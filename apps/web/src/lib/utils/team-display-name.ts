@@ -5,7 +5,7 @@
  * clicked: `/ploegen/reserven` read `A-ploeg.`, `kcvve-u16` read `U17.`,
  * `kcvve-u10p` read `U10.` All three were the same bug. `age` is a *competition
  * band*, and bands are legitimately shared — four teams carry `A`, two carry
- * `U17`, two carry `U10` (`docs/ubiquitous-language.md` has said so since it was
+ * `U17`, two carry `U10` (`docs/domain-reference.md` has said so since it was
  * written) — but `<TeamHero>` used it as the page's identity anyway. The data
  * was never wrong; the rendering was.
  *

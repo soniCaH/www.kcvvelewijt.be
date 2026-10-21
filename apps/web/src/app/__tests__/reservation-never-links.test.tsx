@@ -2,7 +2,7 @@
  * A pitch-reservation placeholder is never a link — on every renderer (#2801)
  *
  * A fixture where both sides are the same club (`homeClubId === awayClubId`,
- * docs/ubiquitous-language.md § "Pitch-Reservation Placeholder") resolves to
+ * docs/domain-reference.md § "Pitch-Reservation Placeholder") resolves to
  * `/wedstrijd/{id}`, a page that renders nothing worth clicking through to —
  * #2606 decision 5 dropped the `<Link>` for this reason. That rule is not
  * held by anything shared (#2688's `/simplify` round declined the extraction

@@ -1,8 +1,8 @@
-# KCVV Elewijt — Ubiquitous Language
+# KCVV Elewijt — Domain Reference
 
-> Canonical glossary for every concept in the KCVV monorepo.
+> The code names, Dutch UI labels, rules and history behind each term in [`GLOSSARY.md`](../GLOSSARY.md).
+> `GLOSSARY.md` says **what a term means**; this file says **how the code holds it** and **why**.
 > **Rule:** English in code, Dutch in UI (labels, slugs, display values).
-> Each concept lists the **code term** and the **Dutch UI term** where applicable.
 
 ---
 
@@ -25,15 +25,16 @@ A single football game between two sides. The canonical term throughout the code
 
 The lifecycle state of a match.
 
-| Code        | Dutch      | Meaning                                          |
-| ----------- | ---------- | ------------------------------------------------ |
-| `scheduled` | Gepland    | Not yet played, no score                         |
-| `finished`  | Afgelopen  | Played, final score available                    |
-| `forfeited` | Forfait    | Awarded by forfeit (FF)                          |
-| `postponed` | Uitgesteld | Cancelled/rescheduled (AFG or `cancelled: true`) |
-| `stopped`   | Gestaakt   | Ended prematurely (STOP), may be replayed        |
+| Code        | Dutch       | Meaning                                                      |
+| ----------- | ----------- | ------------------------------------------------------------ |
+| `scheduled` | Gepland     | Not yet played, no score                                     |
+| `finished`  | Afgelopen   | Played, final score available                                |
+| `forfeited` | Forfait     | Awarded by forfeit (FF)                                      |
+| `postponed` | Uitgesteld  | Afgelast (AFG), may be rescheduled                           |
+| `cancelled` | Geannuleerd | Will not be played (`cancelled: true`, overrides every code) |
+| `stopped`   | Gestaakt    | Ended prematurely (STOP), may be replayed                    |
 
-**Status derivation:** PSD numeric code + `cancelled` boolean + presence of goals → `MatchStatus`. See `mapGameStatus()` in `apps/api/src/psd/transforms.ts`.
+**Status derivation:** PSD numeric code + `cancelled` boolean (takes full precedence) + presence of goals → `MatchStatus`. See `mapGameStatus()` in `apps/api/src/psd/transforms.ts`.
 
 ### Match Side
 

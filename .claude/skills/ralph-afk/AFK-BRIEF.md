@@ -24,7 +24,7 @@ A fresh shell here defaults to Node 16, which breaks commitlint and Playwright w
 3. gh issue view <N> --comments
    Read the COMMENTS, not just the body. Parked decisions and scope changes live in comments in this repo.
 4. <the PRD the issue names, e.g. docs/prd/<name>.md — read it from the MAIN checkout path>
-5. docs/ubiquitous-language.md  (glossary — use these exact terms, do not drift to synonyms)
+5. GLOSSARY.md  (glossary — use these exact terms, do not drift to synonyms)
 6. /Users/kevinvanransbeeck/Sites/KCVV/www.kcvvelewijt.be/.claude/commands/tdd.md
    The KCVV TDD loop. Read it as a file — the `/tdd` shortcut may not resolve here.
    Then follow the `mattpocock-skills:tdd` skill it sends you to; invoke that one

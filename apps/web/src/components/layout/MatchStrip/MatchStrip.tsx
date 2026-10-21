@@ -36,7 +36,7 @@ import { stripDates } from "./strip-dates";
  * Gated on a real `ScheduleMatch` (`kind: "match"`), never a
  * pitch-reservation placeholder or a reduced tournament fixture with no
  * result yet (#2606/#2802): "Match" is a defined term
- * (`docs/ubiquitous-language.md`) with a confirmed opponent and kickoff,
+ * (`GLOSSARY.md`) with a confirmed opponent and kickoff,
  * which is exactly what neither reduced state has yet. Reading either match
  * day and relabelling it "Vandaag" would assert a certainty PSD hasn't given
  * the club yet — excluding only the reservation case would still pass a

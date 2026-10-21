@@ -82,7 +82,7 @@ Declaring a Sanity field `readOnly: true` with a description like "gesynchronise
 - **A sync-owned field needs a named write site** in `apps/api/src/sync/psd-sanity-sync.ts` (or the equivalent sync module) — grep for the field name before adding it to a schema's read-only group, and confirm the upstream source (e.g. `PsdTeam`, `PsdMember`) actually carries the value.
 - **No write site exists → delete the field, don't declare it "for later."** `team.season` was invented this way during the redesign: `readOnly: true`, "gesynchroniseerd vanuit PSD", and nothing ever wrote it — it went dark on every document and survived a full redesign unnoticed (#2535/#2567).
 
-This is the **declaration-time** half of the Writer Rule. The **render-time** half (never fill a slot from a neighbour or a generic literal) lives in `apps/web/CLAUDE.md`; the concrete before/after lives in `docs/ubiquitous-language.md`.
+This is the **declaration-time** half of the Writer Rule. The **render-time** half (never fill a slot from a neighbour or a generic literal) lives in `apps/web/CLAUDE.md`; the concrete before/after lives in `docs/domain-reference.md`.
 
 ### CLAUDE.md Is a Required Deliverable
 
@@ -127,4 +127,4 @@ Five triage roles → repo labels: `ready-for-agent` → existing `ready`, `wont
 
 ### Domain docs
 
-Single-context layout — glossary at `docs/ubiquitous-language.md` + `docs/adr/`. See `docs/agents/domain.md`.
+Single-context layout — glossary at `GLOSSARY.md` (code names, rules and history per term in `docs/domain-reference.md`) + `docs/adr/`. See `docs/agents/domain.md`.

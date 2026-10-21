@@ -818,7 +818,7 @@ Decisions made in the 2026-04-27 brainstorm, with rationale.
 - Visual source: `docs/design/mockups/retro-terrace-fanzine/` — 7 owner-curated screenshots from a Claude Design exploration (homepage 3-variant, duo interview desktop+mobile, player profile desktop+mobile) plus a `README.md` describing each.
 - Visual Regression contract: `docs/prd/visual-regression-testing.md`.
 - Multi-subject interview precedent: `docs/design/interview-multi-subject-review.md`.
-- Ubiquitous language (domain glossary): `docs/ubiquitous-language.md`.
+- Ubiquitous language (domain glossary): `GLOSSARY.md`.
 - Owner saved preferences (memory): see `feedback_visual_preferences.md`, `feedback_no_negative_margin_seam_fix.md`, `feedback_subject_photo_fallback.md`, `reference_sponsor_tiers.md`, `reference_design_inspiration_sites.md`.
 - Existing per-feature redesign PRDs (to be superseded as phases land): `docs/prd/news-redesign.md`, `docs/prd/sponsors-redesign.md`, `docs/prd/jeugd-landing-page.md`, `docs/prd/teams-landing-page.md`, `docs/prd/club-landing-page.md`. (Phase 5 article-detail PRD was deleted on completion — see `docs/prd/redesign-phase-5-article-detail.md`.)
 
