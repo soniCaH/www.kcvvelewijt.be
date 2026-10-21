@@ -56,6 +56,9 @@ export const structure: StructureResolver = (S) =>
       S.listItem()
         .title('Pages')
         .child(S.documentTypeList('page').title('Pages')),
+      S.listItem()
+        .title('Korte links')
+        .child(S.documentTypeList('shortLink').title('Korte links')),
       S.divider(),
       S.listItem()
         .title('Banners')

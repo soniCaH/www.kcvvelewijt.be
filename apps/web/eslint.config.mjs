@@ -468,6 +468,16 @@ const eslintConfig = [
     rules: { "@next/next/no-img-element": "off" },
   },
   {
+    // `app/[shortLink]` (#3573) is a one-segment dynamic page, so the rule
+    // below sees EVERY one-segment href (`/hulp`, `/privacy`, `/test-route`) as
+    // a page and asks for `<Link>`. Production code is unaffected (it already
+    // links with `<Link>`); tests and stories render raw anchors on purpose, to
+    // drive click delegation and analytics with a plain element, and never
+    // navigate.
+    files: ["**/*.test.{ts,tsx}", "**/*.stories.tsx"],
+    rules: { "@next/next/no-html-link-for-pages": "off" },
+  },
+  {
     // Test-file rules: img rules off (we mock Next.js Image), plus the
     // module-scope import guard, the window-size ban and the fixed-port ban above.
     files: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],

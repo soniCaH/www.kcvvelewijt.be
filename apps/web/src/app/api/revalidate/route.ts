@@ -130,6 +130,11 @@ function targets(
     // alone also refreshes `/club/contact`: no path bust needed for it.
     case "organigramNode":
       return { paths: [HULP], tags: [SANITY_TAGS.staff] };
+    // Short links (#3573): the top-level catch-all reads one tagged list and
+    // no page embeds a link, so the tag alone is enough. The Sanity webhook's
+    // type filter must include `shortLink` (ops step, #3608).
+    case "shortLink":
+      return { paths: [], tags: [SANITY_TAGS.shortLinks] };
     default:
       return null;
   }

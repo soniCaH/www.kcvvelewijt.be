@@ -12,6 +12,7 @@ export const SANITY_TAGS = {
   articles: "articles",
   banners: "banners",
   galleries: "galleries",
+  shortLinks: "shortLinks",
 } as const;
 
 /**

@@ -77,6 +77,14 @@ export {jeugdLandingPage} from './jeugdLandingPage'
 export {matchesSliderPlaceholder} from './matchesSliderPlaceholder'
 export {membershipApplication} from './membershipApplication'
 export {formRoutingConfig} from './formRoutingConfig'
+export {shortLink} from './shortLink'
+export {RESERVED_SHORT_LINK_NAMES} from './reserved-short-link-names'
+export {
+  SHORT_LINK_NAME_PATTERN,
+  validateShortLinkName,
+  validateShortLinkTarget,
+} from './validation/short-link'
+export type {ShortLinkNameContext} from './validation/short-link'
 
 import {player} from './player'
 import {team} from './team'
@@ -104,6 +112,7 @@ import {jeugdLandingPage} from './jeugdLandingPage'
 import {matchesSliderPlaceholder} from './matchesSliderPlaceholder'
 import {membershipApplication} from './membershipApplication'
 import {formRoutingConfig} from './formRoutingConfig'
+import {shortLink} from './shortLink'
 
 export const schemaTypes = [
   player,
@@ -134,4 +143,5 @@ export const schemaTypes = [
   matchesSliderPlaceholder,
   membershipApplication,
   formRoutingConfig,
+  shortLink,
 ]

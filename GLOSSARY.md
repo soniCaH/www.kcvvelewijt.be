@@ -131,6 +131,9 @@ What a sponsor bought; a name, not a rank. [Values](docs/domain-reference.md#spo
 **Page**:
 A plain content page written in the Studio, shown under `/club/`. _Pagina_.
 
+**Short Link**:
+A one-word path on the club site (`/stage`) that sends visitors to a target the board sets; a real page always wins over it. _Korte link_. [Details](docs/domain-reference.md#short-link).
+
 **Banner**:
 A promotional image in one of the homepage's fixed slots.
 

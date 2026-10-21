@@ -1357,7 +1357,7 @@ describe("a repository method with no caller renders nothing, silently (#2505)",
  */
 describe("rule 10 catches what it claims to (#2505)", () => {
   it("covers every repository under lib/repositories/", () => {
-    expect(repositoryFiles).toHaveLength(11);
+    expect(repositoryFiles).toHaveLength(12);
     expect(repositoryFiles).toContain(
       "lib/repositories/homepage.repository.ts",
     );

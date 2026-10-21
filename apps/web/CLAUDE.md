@@ -6,6 +6,8 @@ This is the KCVV Elewijt club website. See root `.claude/CLAUDE.md` for monorepo
 
 `/`, `/nieuws`, `/nieuws/[slug]`, `/spelers/[slug]`, `/ploegen`, `/ploegen/[slug]`, `/jeugd`, `/kalender`, `/wedstrijd/[matchId]`, `/events`, `/events/[slug]`, `/sponsors`, `/club/geschiedenis`, `/hulp`, `/zoeken`, `/privacy`
 
+**Short links (#3573).** `app/[shortLink]` is the one top-level dynamic segment: a one-word path no real route owns (`/stage`) is looked up in a single cached list of Studio `shortLink` documents and answers `307`, or the normal 404. **A new top-level route, a top-level `redirects()`/`rewrites()` source or a new `public/` entry needs its name added to `RESERVED_SHORT_LINK_NAMES`** (`packages/sanity-schemas/src/reserved-short-link-names.ts`), or `src/lib/short-links/top-level-names.test.ts` fails naming it. Never put a `loading.tsx` or `Suspense` boundary in or above that segment: `notFound()` would stream a `200` (a soft 404) and `redirect()` a meta-refresh. `GA4_MEASUREMENT_ID` + `GA4_API_SECRET` (server-only) enable the `short_link_click` count; either missing skips the count, never the redirect.
+
 `/nieuws/[slug]` shipped its Phase 5 redesign (Phase 5: article detail) — see `docs/prd/redesign-phase-5-article-detail.md`.
 
 ### Feature → route map
