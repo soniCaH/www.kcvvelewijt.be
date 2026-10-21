@@ -17,9 +17,7 @@ If any of these files don't exist, **proceed silently**. Don't flag their absenc
 /
 ├── GLOSSARY.md                  ← canonical glossary
 ├── docs/
-│   └── adr/
-│       ├── 0001-....md
-│       └── 0002-....md
+│   └── adr/                     ← none yet; created with the first ADR
 ├── apps/       (web · studio · api)
 └── packages/   (api-contract · sanity-schemas · sanity-studio)
 ```
