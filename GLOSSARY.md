@@ -1,709 +1,221 @@
-# KCVV Elewijt — Ubiquitous Language
+# KCVV Elewijt
 
-> Canonical glossary for every concept in the KCVV monorepo.
-> **Rule:** English in code, Dutch in UI (labels, slugs, display values).
-> Each concept lists the **code term** and the **Dutch UI term** where applicable.
-> **Format:** this file deliberately keeps its own shape (`### Term`, prose, Code ↔ Dutch table) instead of the
-> `/domain-modeling` skill's `**Term**:` + `_Avoid_:` format. Add new terms in this file's shape, so it stays one style.
+The football club KCVV Elewijt: its teams, players, staff, matches and the content it publishes. English terms are used in code; the Dutch word in _italics_ is what a visitor reads.
 
----
+Code names, value lists, rules and history for each term live in [`docs/domain-reference.md`](docs/domain-reference.md).
 
-## Core Domain
+## Language
 
-### Match
+### Matches
 
-A single football game between two sides. The canonical term throughout the codebase — never "game" or "fixture."
+**Match**:
+A single football game between two sides. _Wedstrijd_.
+_Avoid_: game, fixture
 
-| Code          | Dutch           | Notes                                         |
-| ------------- | --------------- | --------------------------------------------- |
-| `Match`       | Wedstrijd       | Basic match data (date, teams, score, status) |
-| `MatchDetail` | Wedstrijddetail | Extended with lineup, events, report flag     |
+**Match Status**:
+Where a match is in its life: scheduled (_Gepland_), finished (_Afgelopen_), forfeited (_Forfait_), postponed (_Uitgesteld_) or stopped (_Gestaakt_).
 
-**Route:** `/wedstrijd/[matchId]` (see [#819])
+**Match Side**:
+One of the two participants in a match, home or away; either a KCVV team or an opponent. An opponent exists only inside a match, never as an entity of its own.
 
-**Source:** PSD API (`PsdGame` is a raw implementation detail in the BFF, never exposed).
+**Pitch-Reservation Placeholder**:
+A match where both sides are the same club: the association's way to say a team has something on the calendar that day, with the details not settled yet.
+_Avoid_: self-match, "KCVV vs KCVV", placeholder (on its own; see **Off-Season Notice**)
 
-### Match Status
+**Reduced Row**:
+The way a match row or page reads when there is no confirmed two-sided match to show: one crest, a subject line, the real time, no score, no link. A Pitch-Reservation Placeholder and a not-yet-played tournament fixture both read this way, until a score appears.
 
-The lifecycle state of a match.
+**Lineup**:
+The players picked for one match, each with a lineup status. _Opstelling_.
+_Avoid_: squad (that is the season roster)
 
-| Code        | Dutch      | Meaning                                          |
-| ----------- | ---------- | ------------------------------------------------ |
-| `scheduled` | Gepland    | Not yet played, no score                         |
-| `finished`  | Afgelopen  | Played, final score available                    |
-| `forfeited` | Forfait    | Awarded by forfeit (FF)                          |
-| `postponed` | Uitgesteld | Cancelled/rescheduled (AFG or `cancelled: true`) |
-| `stopped`   | Gestaakt   | Ended prematurely (STOP), may be replayed        |
+**Lineup Status**:
+A player's part in one match: starter (_Basisspeler_), substitute (_Wisselspeler_), substituted (_Gewisseld_) or subbed in (_Ingevallen_).
 
-**Status derivation:** PSD numeric code + `cancelled` boolean + presence of goals → `MatchStatus`. See `mapGameStatus()` in `apps/api/src/psd/transforms.ts`.
+**Card**:
+A disciplinary card shown in a match: yellow (_Geel_), red (_Rood_) or second yellow (_Tweede geel_).
 
-### Match Side
+**Competition**:
+The kind of tournament a match belongs to: league (_Competitie_), cup (_Beker_), friendly (_Vriendschappelijk_) or tournament (_Tornooi_).
+_Avoid_: reeks (that is the division a team plays in)
 
-A participant in a match — either the home or away side. Could be a KCVV team or an opponent.
+**Reeks**:
+The specific division a team is placed in for a competition, e.g. `3e Nationale VV A`. The federation and the club each have a name for it; the club's name wins wherever a person reads it.
+_Avoid_: competition (that is the kind of tournament)
 
-| Code                      | Notes                                     |
-| ------------------------- | ----------------------------------------- |
-| `MatchTeam`               | Value object: `{ id, name, logo, score }` |
-| `home_team` / `away_team` | Fields on `Match`                         |
+**Competition Phase**:
+One half of a youth season, split by the winter break: _Najaar_ or _Voorjaar_. The second half is often a different reeks with different opponents.
+_Avoid_: return round
 
-**Not a standalone entity.** Opponents only exist within match context. The `id` comes from PSD's club registry and can be used to link matches against the same opponent (future feature).
+**Season**:
+The football year, running July to June, written `’25/’26`. _Seizoen_. Always worked out from a date; never something a document stores.
 
-### Pitch-Reservation Placeholder
+### Teams
 
-A fixture where both sides are the same club (`home_team.id === away_team.id`). The association's device for "this team has something on the calendar that day, the details aren't settled yet" — used for the club's own youth tournaments and for external tournaments/friendlies alike (#2606). Not a bug in the feed; not derivable from `competition`/`competitionType` (a genuine tournament fixture with a real opponent carries the same values).
+**Team**:
+A KCVV team registered with the club and usually with the football federation. _Ploeg_.
 
-| Code                    | Notes                                                                                                                                                    |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Match.is_placeholder`  | Contract field (optional boolean), computed by the BFF from club-id equality                                                                             |
-| `ScheduleReservation`   | Web view-model — the `kind: "reservation"` member of `ScheduleRow`, carrying one `team` (never `homeTeam`/`awayTeam`) and no score (#2688)               |
-| `UpcomingReservation`   | Web view-model — the `UpcomingRow` reservation member, used by the homepage's match agenda (#2688)                                                       |
-| `CalendarReservation`   | Web view-model — the `CalendarMatch` reservation member on `/kalender`, carrying one `club` (#2802). Replaced the flat `isPlaceholder: boolean` route VM |
-| `reservationView()`     | `apps/web/src/lib/utils/match-display.ts` — the shared subject/status derivation every renderer of a reservation uses                                    |
-| `reservationRowLabel()` | `apps/web/src/lib/utils/match-display.ts` — the shared accessible-name sentence every reservation row's `aria-label` builds from (#2688)                 |
+**Team Display Name**:
+What a team is called wherever a person reads it: page heading, browser tab, share card, listing row. Distinct from the team's registered name in PSD.
+_Avoid_: age group (as a name)
 
-**Render rule:** never a second crest, a score slot, a home/away side, a reason line for the missing opponent, or a click-through link — the row/page states only what it has (date, subject, real time). `<TeamAgendaRow>` (#2606) is the prior art every other surface (`<MatchStripView>`, `<UpcomingMatchesClient>`, `/kalender`'s three view modes, `/wedstrijd/[matchId]`) matches rather than re-deriving (#2688).
+**Squad**:
+The players registered to a team for the current season. _Selectie_ / _Kern_.
+_Avoid_: lineup (that is one match)
 
-**Enforcement (as of [#2802]):** all four row families — `ScheduleRow`, `UpcomingRow`, `/kalender`'s `CalendarMatch`, and `MatchHeroRow` — are three-member discriminated unions over a literal `kind` (`"match"` / `"reservation"` / `"reduced"`), built once by the four adapters (`components/match/transform.ts`, `app/(main)/kalender/utils.ts`, `lib/mappers/match.mapper.ts`, `app/(main)/wedstrijd/[matchId]/utils.ts`'s `matchDetailToHeroRow`). The reservation and reduced members do not carry `homeTeam`/`awayTeam`/scores at all, so a renderer reaching for the scoreboard without narrowing `kind` fails to compile rather than printing "KCVV Elewijt — KCVV Elewijt". The wire contract itself (`packages/api-contract`, `apps/api/src/psd/transforms.ts`) stays untouched by this — `transforms.ts` documents the byte-size half of why (`|| undefined` sparing every KV-cached payload), but the sharper reason this union is strictly a web-side boundary is deploy safety: a `Match`/`MatchDetail` shape change decoded against payloads a still-warm KV cache wrote under the old shape risks a wave of decode failures landing at once, each one re-fetching PSD and stampeding it with 429s.
+**Squad Label**:
+The short label that says which KCVV team a match belongs to, e.g. "A-Ploeg" or "U15 A", shown when matches of several teams are listed together.
 
-`kind` is the sole discriminant across all four families (#2825) — no member carries a separate `isPlaceholder` boolean any more. The reservation member is always `kind: "reservation"`; the reduced member (a tournament fixture with no result yet) is `kind: "reduced"`, distinct from the ordinary `kind: "match"` — `isPlaceholder` used to answer only the self-match question and could not tell those last two apart on its own, which is why it was removed rather than kept alongside `kind`.
+**Age Group**:
+The competition band a team plays in: `A` for seniors (_eerste elftal_), `U{N}` for youth (_jeugd_). It says which competition a team plays in, never which team it is.
 
-Two surfaces stay deliberately outside the union, both `noindex` and unlinked, both reading the raw contract `Match`: `/share`'s `MatchOption` and `/scheurkalender`'s `ScheurkalenderMatch` ([#2699] decision 2 — a KCVV-vs-KCVV row there is ugly, not wrong). Both of `/nieuws/[slug]`'s public `MatchDetail` surfaces are covered the same way: `toHeroMatchData` (`nieuws/[slug]/utils.ts`) returns `null` for either reduced state, and the article `SportsEvent` JSON-LD (`nieuws/[slug]/page.tsx`) is gated on the same `matchRowKind` check `/wedstrijd/[matchId]` applies to its own `SportsEvent`. "Never a click-through" is locked by the table-driven test in `app/__tests__/reservation-never-links.test.tsx` ([#2801]).
+**Youth Division**:
+The three age bands the club groups its youth teams in: _Onderbouw_ (U6–U9), _Middenbouw_ (U10–U13) and _Bovenbouw_ (U14–U21). _Afdeling_.
+_Avoid_: scholieren, duiveltjes
 
-### Reduced Row
+### People
 
-The **register** a row/page renders in when it has no confirmed two-sided fixture to show: one crest, a mono subject line, the real time, no score slot, no home/away side, no link. Distinct from the two **states** that render in it — a [Pitch-Reservation Placeholder](#pitch-reservation-placeholder) (no opponent exists) and a not-yet-played tournament fixture (an opponent exists but PSD does not say whether the named club hosts the tournament or merely shares its bracket, #2696).
+**Player**:
+An athlete registered with the club. _Speler_. A player is on a squad or not; there is no injured, suspended or transferred status.
 
-| Code                   | Notes                                                                                                                                                                                   |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `matchRowKind()`       | `apps/web/src/lib/utils/match-display.ts` — the one function deciding `kind`, including the register. The reduced half is gated on a scoreline existing, not on `isPlayedMatch` (#2696) |
-| `ScheduleReducedMatch` | The `kind: "reduced"` member of `ScheduleRow` — one `team` (the other club, by club id), no `homeTeam`/`awayTeam`/scores (#2802)                                                        |
-| `UpcomingReducedMatch` | The same member on the homepage match agenda ([#2802])                                                                                                                                  |
-| `CalendarReducedMatch` | The same member on `/kalender`, carrying one `club` ([#2802])                                                                                                                           |
+**Position**:
+Where a player plays: _Keeper_, _Verdediger_, _Middenvelder_, _Aanvaller_, or _Speler_ when no finer position exists yet (U6–U9). A player with no known position has none; it is never filled with a default.
+_Avoid_: role (that is staff), forward (use attacker)
 
-**A reduced row is not a permanent classification.** The four adapters re-ask `matchRowKind()` on every call, so the moment PSD publishes a scoreline the same fixture id transforms into the `"match"` member and the row reverts to the full scoreboard — the club really was the opponent after all. That transition is asserted in all four adapters' tests ([#2802]).
+**Staff Member**:
+A non-playing member of the club: coach, board member, admin. _Staflid_.
 
-### Lineup
+**Role**:
+What a staff member does, e.g. _hoofdtrainer_ or _voorzitter_.
+_Avoid_: position (that is players only)
 
-The players selected for a specific match, with their match-level roles.
+**Department**:
+The board a staff member belongs to: _Hoofdbestuur_, _Jeugdbestuur_ or _Algemeen_ when neither fits.
 
-| Code                | Dutch      | Notes                                                      |
-| ------------------- | ---------- | ---------------------------------------------------------- |
-| `MatchLineup`       | Opstelling | `{ home: MatchLineupPlayer[], away: MatchLineupPlayer[] }` |
-| `MatchLineupPlayer` | —          | Individual player in a lineup                              |
+**Organigram**:
+Who does the work day to day: the club's boxes and who holds them. The boards on `/club/bestuur` and `/club/jeugdbestuur` are the board on paper, a separate truth; the two never sync.
 
-### Lineup Status
+**Box**:
+One position in the organigram, such as _Secretaris_ or _Kantinedienst_, held by zero, one or several staff members.
 
-A player's role within a single match lineup.
+**Pillar**:
+What a box is for, which decides where it is listed in the clubboek: _bestuur_, _sportief_, _jeugd-organisatie_, _jeugd-opleiding_, _club_ or _integriteit_. _Pijler_.
 
-| Code          | Dutch        | Meaning                    |
-| ------------- | ------------ | -------------------------- |
-| `starter`     | Basisspeler  | In the starting eleven     |
-| `substitute`  | Wisselspeler | On the bench, did not play |
-| `substituted` | Gewisseld    | Started, was taken off     |
-| `subbed_in`   | Ingevallen   | Came on as a replacement   |
-| `unknown`     | Onbekend     | Status not determinable    |
+**Chapter**:
+A section of the clubboek that shows one or more pillars: _Sportief_, _Jeugd_, _Club & werking_ or _Integriteit_.
+_Avoid_: pillar (that is the stored value)
 
-### Card Type
+**Key Figure**:
+One of the eight boxes shown as a card at the top of the clubboek, such as _Voorzitter_ or _TVJO_.
 
-A disciplinary card shown during a match.
+**Monogram**:
+The initials a round avatar shows when a person has no photo.
 
-| Code            | Dutch       |
-| --------------- | ----------- |
-| `yellow`        | Geel        |
-| `red`           | Rood        |
-| `double_yellow` | Tweede geel |
+### Content
 
-### Competition
+**Article**:
+A news article on the website. _Artikel_ / _Nieuwsbericht_.
 
-The type of tournament a match belongs to. Stored on `Match.competition`.
+**Call-to-Action**:
+The optional closing band an editor adds to an article: a question, a short lead and one button. _Oproep onderaan_.
 
-| Code (PSD `type`) | Dutch label       | Notes                                                          |
-| ----------------- | ----------------- | -------------------------------------------------------------- |
-| `LEAGUE`          | Competitie        | Regular league play                                            |
-| `CUP`             | Beker             | Cup tournament (specific name from PSD `competitionType.name`) |
-| `FRIENDLY`        | Vriendschappelijk | Friendly match                                                 |
-| `TOURNAMENT`      | Tornooi           | Tournament fixture                                             |
+**Event**:
+A club event or announcement, shown until it has passed. _Evenement_.
 
-**Open:** PSD also returns `competitionType.name` (e.g. "Beker van Brabant"). This should be mapped to a Dutch display label. See PRD.
+**Sponsor**:
+A partner of the club, shown while it is active.
 
-### Reeks
+**Sponsor Package**:
+What a sponsor bought: _Crossing_, _Training_, _Wit_, _Groen_, _Paneel_ or _Andere_. A name, not a rank.
 
-The specific division a team is placed in for a competition — `3de Afdeling Voetb Vl A`, `Gewestelijke U13`. Distinct from [Competition](#competition), which is the _kind_ of tournament.
+**Page**:
+A plain content page written in the Studio, shown under `/club/`. _Pagina_.
 
-A reeks is named in **two vocabularies** and both are correct: the federation's (PSD `competition.name`, prefixed `Voetbal : <bond> -` plus a trailing space) and the club's (Sanity `divisionFull`). `3de Afdeling Voetb Vl A` and `3e Nationale VV A` are the same reeks. The club's name wins on anything a human reads; PSD's fills the gap where no editorial value is set (#2589).
+**Banner**:
+A promotional image in one of the homepage's fixed slots.
 
-**Only PSD carries a reeks per competition.** A match carries none — the fixture feed knows only `OFFICIAL`/`CUP`/`FRIENDLY`/`TOURNAMENT`. Sanity carries one per _team_, which cannot name two phases.
+**Off-Season Notice**:
+What an editor writes to fill the homepage first-team band when there are no matches: a countdown to the new season, a short message and an image. _Tussenseizoen-bericht_.
+_Avoid_: placeholder (that is a Pitch-Reservation Placeholder)
 
-### Competition Phase
+**Held-Open Frame**:
+The empty frame that keeps a slot's shape when data from the provider or system is missing, so the gap reads as known and not as broken. An empty slot an editor did not fill hides instead.
 
-A youth season is split in two by the winter break, and **the second half is frequently a different reeks with different opponents** — not a return round. Measured over 2025-2026: U13 shared **0 of 7** opponents between its phases, U17 shared 4 of 7, and U7 had no autumn competition at all. Senior teams do not have this: the A-team plays one continuous home-and-away league (14 of 15 opponents shared).
+**Draft**:
+The half-filled membership form a visitor leaves on `/club/word-lid`, kept for that browser tab only.
 
-**Consequences:** a team can hold more than one ranking table in a single season, so a table is identified by PSD `competition_id`, never by its name or its position in the array. Phases are named `Najaar` and `Voorjaar`, and only when the fixtures prove the ordering — see #2589. PSD exposes no phase field; the association's own convention encodes it in the reeks _code_ (`G15BS` → a `2` appears in the second phase), which is not a contract and is not parsed.
+**Responsibility**:
+A help topic on `/hulp` that sends a visitor to the right contact person. _Verantwoordelijkheid_.
 
-### Season
+**Audience**:
+Who a responsibility is for: _Speler_, _Ouder_, _Trainer_, _Supporter_, _Niet-lid_ or _Andere_.
 
-Which football year it currently is (e.g. `’25/’26`). **Not a datum any document stores.** Every season label the site renders is derived client-side from a date the surface already holds, never read from a stored "current season" field.
+**Category**:
+The topic of a responsibility: _Medisch_, _Sportief_, _Administratief_, _Gedrag_, _Algemeen_ or _Commercieel_.
 
-**One derivation owns it: `deriveSeason(date)` in `lib/utils/season.ts`** (#2546). It returns `{ key, label }` — `key` (`"2025-2026"`) for grouping and sorting, `label` (`’25/’26`) for display — and the boundary is `month >= 7`, because Belgian amateur cup fixtures start in July, so an August Beker match belongs to the _upcoming_ season.
+### Share Tool
 
-| surface                                      | derives from         | supplies the word "Seizoen"? |
-| -------------------------------------------- | -------------------- | ---------------------------- |
-| `<MatchHero>`'s meta line                    | the match's own date | no — bare label              |
-| `groupBySeason()` → `/tegenstander/[clubId]` | each match's date    | yes — the band prepends it   |
-| `/scheurkalender` masthead                   | the first fixture    | no — bare label              |
+**Share Tool**:
+The unlisted page at `/share` where the club makes Instagram stories and squares of a match moment, an article or an event. It saves a picture; it publishes nothing.
 
-The word is the **surface's** to add, never the helper's: only the opponent-history band has room for it. Until #2546 this was three separate derivations of the same boundary in three shapes (`Seizoen '25–'26`, `25/26`, `’25/’26`); `<MatchHero>`'s spelling won as the incumbent on the only public in-scope route.
+**Share Look**:
+One of the five styles a story is drawn in: _Kaart_, _Plakboek_, _Affiche_, _Ticket_ or _Wedstrijd_ (matches only).
 
-**Removed:** `team` used to carry a `season` field (`readOnly`, "gesynchroniseerd vanuit PSD"). It never had a writer — absent from `PsdTeam`, never written by `psd-sanity-sync.ts` — so it went dark on all 26 production documents and stayed that way through an entire redesign. Deleted in #2567 along with every reader of it: a `TeamHero` meta pill, `TeamHero`'s decorative artefact-column stub, both `TeamFlagship` cards on `/ploegen`, `PlayerHero`'s ticket-stub on `/spelers/[slug]` (fed by `team.season` through the player query's `currentTeam` projection, not a player-owned field), and that GROQ projection itself. None of the five moved a pixel when the field went. If a future feature needs "what season is it right now" as a genuine input (not derived from a date already in hand), it needs a real writer — PSD's own `/seasons` endpoint is an internal id-resolver, not a display source — before the field comes back. See **The Writer Rule** in `apps/web/CLAUDE.md` for the general principle this follows.
+**Share Moment**:
+The moment of a match a story tells, such as kickoff, half-time, full-time, a goal or a card.
 
----
+**Movable Block**:
+A part of a look the editor can drag on the preview. It counts as moved once it is off its spot or sent behind.
 
-## Team & Squad
+**Omslag**:
+How an article or event cover fills a look's photo slot: _Foto_, _Affiche wazig_ or _Reservefoto_.
 
-### Team
+**Story Session**:
+The story in progress, kept in the browser so it survives a trip to Instagram and back, until the next day.
 
-A KCVV team registered with the club and (usually) with the football federation.
+### Statistics & Ranking
 
-| Code                     | Dutch | Notes                                        |
-| ------------------------ | ----- | -------------------------------------------- |
-| `team` (Sanity document) | Ploeg | Full entity: roster, training, staff, league |
-| `PsdTeam`                | —     | Raw PSD shape (BFF implementation detail)    |
+**Player Stats**:
+A player's season numbers for one team: matches, goals, assists, cards, minutes.
 
-**Properties:**
+**Team Stats**:
+A team's season numbers: results, goals for and against, clean sheets, top scorers.
 
-- `psdId` — PSD identifier
-- `name` — Official name (from PSD)
-- `displayName` — Editorial override for the [Team Display Name](#team-display-name). Optional; empty on all 18 teams, so every heading currently comes from the slug-derived fallback
-- `age` — Age group: `"A"` (seniors) or `"U{N}"` (youth, e.g. `"U17"`)
-- `gender` — `"mannen"` or `"mixed"`
-- `footbelId` — Federation registration (null for unregistered youth teams)
-- `division` / `divisionFull` — The club's own name for the team's [Reeks](#reeks): short code and long form (`3 VV A` / `3e Nationale VV A`). Measured in production 2026-08-13: set on **exactly the 3 senior docs**, null on all 16 youth. Not a team-variant label — a "U9 - Wit" style distinction lives in the team's own name.
-- `showInNavigation` — Single visibility flag: controls nav, team listings, **and** match widget inclusion
+**Ranking**:
+The league standings table of one reeks. _Klassement_.
 
-**Removed fields:** `league`, `leagueId` — dead fields, never synced, never rendered. `season` — never had a writer; see [Season](#season) (#2567).
+**Ranking Entry**:
+One team's row in a ranking: position, matches, results, goals and points.
 
-### Team Display Name
+**Competitive Block**:
+The ranking and match list on a team page, shown or hidden together as one unit. What it shows depends on the data, never on the age group or on last season.
 
-What a team is **called** on any surface a human reads — the page heading, the browser tab, the share card, a listing row. Distinct from `name`, which is the team's registered identity as PSD holds it.
+### Systems
 
-| Code                | Dutch        | Notes                                             |
-| ------------------- | ------------ | ------------------------------------------------- |
-| `displayName`       | Weergavenaam | Editorial override on the Team document; optional |
-| `teamDisplayName()` | —            | The single helper every human-facing surface uses |
+**BFF**:
+The club's own API between the website and its data sources (Backend For Frontend).
+_Avoid_: Footbalisto, Drupal API
 
-**Resolution order:** `displayName` → a label derived from the team's slug → `name`.
+**PSD**:
+ProSoccerData, the outside provider that owns matches, rankings, statistics, players, teams and staff membership.
+_Avoid_: Footbalisto
 
-**Why an editorial field and not `name`:** `name` is PSD-owned. It is `readOnly` in the Studio and re-patched on every sync, so an edit there does not survive. Renaming in PSD works but the **slug is derived from the name**, so a reword moves the team's URL.
+**Sanity**:
+The content system that owns editorial content and the editorial details of players, teams and staff.
 
-**Not used for:** JSON-LD. `SportsTeam.name` is a machine-readable claim about a federation-registered entity and stays on `name`.
+**PSD↔Sanity Sync**:
+The nightly job that copies PSD-owned player, team and staff data into Sanity. It never writes an editorial field.
 
-**Vocabulary rule:** an Age Group is never a display name — see below.
+**Permanent Read Failure**:
+A failed read that will fail the same way on every retry, so the page shows what it can.
 
-### Squad
+**Transient Read Failure**:
+A failed read that the next try will probably fix, so the last good page stays up.
 
-The group of players registered to a team for the current season. Represented as `team.players[]` in Sanity.
+### Navigation
 
-| Code  | Dutch           | Notes                     |
-| ----- | --------------- | ------------------------- |
-| Squad | Selectie / Kern | Season-level player group |
+**Club**:
+A group of pages about the club's organisation under `/club`; a navigation grouping, not a domain entity.
 
-**Not a standalone entity** — it's the `players[]` reference array on a Team document. Changes when players are added/removed between seasons or transfer windows.
-
-**Distinct from Lineup:** Squad = season scope, Lineup = match scope.
-
-### Squad Label
-
-A display label identifying which KCVV team a match belongs to. Shown in match widgets when displaying matches across multiple teams.
-
-| Code                                                 | Dutch         | Notes                                                                                                                                                                                                                                                                                            |
-| ---------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `kcvv_team_label` (contract) / `kcvvTeamLabel` (web) | Ploeg (label) | Written by the BFF's `derivePsdTeamLabel` (`apps/api/src/psd/transforms.ts`) from the team's own PSD name — age decides whether the two senior sides get the "A-Ploeg"/"B-Ploeg" suffix, and is the label only when the name is blank or just "KCVVE" (#3235). E.g. "A-Ploeg", "U8 Wit", "U15 A" |
-
-**Not `Match.squadLabel`:** that contract field was the renamed `round` field, and nothing ever wrote it. It was deleted in #2710. The `/tegenstander` page keeps its own local `squadLabel`, which it fills from the team's display name.
-
-**Should resolve via [Team Display Name](#team-display-name)** — it is the same question ("what is this team called?") asked in a match context, and answering it twice is how the naming rules drifted apart in the first place (#2539).
-
-### Age Group
-
-The age category of a team, from PSD.
-
-| Value                           | Meaning                 |
-| ------------------------------- | ----------------------- |
-| `"A"`                           | Seniors (eerste elftal) |
-| `"U21"`, `"U17"`, `"U15"`, etc. | Youth (jeugd)           |
-
-Multiple teams can share the same age group (e.g. three U9 teams distinguished by `division`). Measured in production 2026-08-13: `A` is shared by four teams, `U17` by two, `U10` by two.
-
-**An age group is a competition band, not an identity.** It answers "which competition does this team play in?", never "which team is this?". Using it as a display name is what published three team pages under another team's heading (#2539) — the data was correct throughout. Anything a human reads resolves through [Team Display Name](#team-display-name).
-
-### Youth Division (Afdeling)
-
-The three-tier grouping of youth teams used by the club internally and by parents. Derived client-side from the age group — not stored in any data source.
-
-The bands follow the federation's match formats, per Voetbal Vlaanderen's [jeugdreglementering poster 2024](https://belgianfootball.s3.eu-central-1.amazonaws.com/s3fs-public/voetbalvlaanderen/Club/Jeugdvoetbal/010824_Poster+jeugdreglementering+2024.pdf) (#3555; a Sanity field was rejected on #3420):
-
-| Code / Label   | Dutch      | Age range | Match format | Teams                        |
-| -------------- | ---------- | --------- | ------------ | ---------------------------- |
-| `"Onderbouw"`  | Onderbouw  | U6–U9     | 2v2 → 5v5    | U6, U7, U8, U9               |
-| `"Middenbouw"` | Middenbouw | U10–U13   | 8v8          | U10, U11, U12, U13           |
-| `"Bovenbouw"`  | Bovenbouw  | U14–U21   | 11v11        | U14, U15, U16, U17, U19, U21 |
-
-`KCVVE U16` arrives from PSD with `age: "U17"` — Bovenbouw either way.
-
-**Implementation:** `getYouthDivision()` in `apps/web/src/lib/utils/group-teams.ts`. Used for section headers on `/ploegen` and `/jeugd`, and as a badge on individual team detail pages. Both pages list the divisions and their teams small → large (#3427).
-
-**Vocabulary rule:** Always use Bovenbouw/Middenbouw/Onderbouw — never the older terms "scholieren" or "duiveltjes."
-
----
-
-## Player
-
-### Player
-
-An athlete registered with the club. Synced from PSD, editorially enriched in Sanity.
-
-| Code                             | Dutch  | Notes                         |
-| -------------------------------- | ------ | ----------------------------- |
-| `player` (Sanity document)       | Speler | PSD-synced + editorial fields |
-| `PsdMember` (status: `"speler"`) | —      | Raw PSD shape                 |
-
-**PSD-synced fields (read-only):** `psdId`, `firstName`, `lastName`, `birthDate`, `nationality`, `keeper`, `positionPsd`, `psdImage` (removed again when PSD no longer has a portrait, #3469)
-
-**Editorial fields:** `jerseyNumber`, `height`, `weight`, `position`, `transparentImage`, `celebrationImage`, `bio`
-
-**No player status concept.** Players are either on a squad (referenced from team) or not. No injured/suspended/transferred tracking.
-
-### Position
-
-A player's playing position. Determined by fallback hierarchy:
-
-1. `keeper === true` → **Keeper**
-2. `position` (editorial, manual) → one of the enum values, **including `Speler`**
-3. `positionPsd` (from PSD `bestPosition`) → looked up in `POSITION_LABELS`
-   (`player.repository.ts`), case-insensitively, against PSD's four
-   lowercase values — a miss (a future PSD value the map doesn't carry,
-   e.g. `wing-back`) is **not** passed through as raw English; it falls to
-   step 4 (#2638)
-4. Neither set, or step 3 misses → **absent**, not defaulted
-
-Code no longer fills an unset position with a generic literal — see **The Writer Rule** in `apps/web/CLAUDE.md`. `PlayerHero`'s meta row and `PlayerCard`'s label both render an unset position as absent, distinguishable from an authored one (#2567). `SquadGrid`'s trailing group is different: its `"Spelers"` heading is a **UI label for "unmapped or unauthored"**, not a rendering of the datum itself, so a player who was deliberately authored `Speler` and a player with no position at all land under the identical heading — measured 2026-09-09, that catch-all holds 228 of 277 active players (82%). The rule's "distinguishable from an authored one" guarantee holds at the field and at the two labelled surfaces above; it does not extend to this grouping heading. On youth team pages (#3431) the same catch-all is headed `"Veldspelers"` instead, beside `"Doelmannen"` as the only other group — the owner's call, so a youth player with no known position is listed as a field player. `SquadGrid` itself gains a companion gate the same day (#2638): when the position partition yields a single group, the grid renders that group without a heading — a heading that separates nobody is the same lie as a label that classifies nobody.
-
-`Speler` itself is **not removed from the dropdown** — it stays a deliberate, authored choice (`packages/sanity-schemas/src/player.ts`'s `position` enum), distinct from an unset field. It is the honest answer for U6–U9, where no finer position exists yet (#2535): an editor picking `Speler` for a young player and an editor never opening the field are now distinguishable, which is the whole point of removing the code-level default.
-
-| Code                             | Dutch        |
-| -------------------------------- | ------------ |
-| `goalkeeper`                     | Keeper       |
-| `defender`                       | Verdediger   |
-| `midfielder`                     | Middenvelder |
-| `attacker`                       | Aanvaller    |
-| `player` (editorial, e.g. U6–U9) | Speler       |
-
-The `positionPsd` row is PSD's own `bestPosition` value, measured live against production Sanity on 2026-09-09 (`array::unique(*[_type=="player"].positionPsd)`) — `attacker`, not `forward`; corrected here from an earlier, unverified version of this table.
-
----
-
-## Staff & Organisation
-
-### Staff Member
-
-A non-playing member of the club (coaches, board, admin). Synced from PSD, editorially enriched in Sanity.
-
-| Code                            | Dutch   | Notes                         |
-| ------------------------------- | ------- | ----------------------------- |
-| `staffMember` (Sanity document) | Staflid | PSD-synced + editorial fields |
-| `PsdMember` (status: `"staff"`) | —       | Raw PSD shape                 |
-
-### Role
-
-What a staff member does. The canonical term for staff function — **"position" is reserved for players only.**
-
-| Field                                   | Purpose                                                         |
-| --------------------------------------- | --------------------------------------------------------------- |
-| `role`                                  | Controlled enum (canonical): `hoofdtrainer`, `voorzitter`, etc. |
-| `roleLabel` (currently `positionTitle`) | Free-text display override for organigram                       |
-| `roleCode` (currently `positionShort`)  | Short badge code, editorial (e.g. "T1", "VP")                   |
-
-**PSD provides:** `functionTitle` (free text) — stored but not displayed.
-
-### Department
-
-Organisational grouping for staff members.
-
-| Code           | Dutch        | Meaning                                         |
-| -------------- | ------------ | ----------------------------------------------- |
-| `hoofdbestuur` | Hoofdbestuur | Main board                                      |
-| `jeugdbestuur` | Jeugdbestuur | Youth board                                     |
-| `algemeen`     | Algemeen     | Catch-all for staff not clearly in either board |
-
-### Organigram
-
-Who does the work day to day: the club's **boxes** (`organigramNode` documents — a position such as Secretaris or Kantinedienst, held by zero, one or several staff members) and who holds them. A box has a `parentNode` (the reporting line, drawn as the full chart and the spotlight explorer) and a **Pillar** (where it sits in the clubboek list). It lives on `/hulp#structuur`; the old `/club/organigram` route is gone.
-
-The board team documents on `/club/bestuur` and `/club/jeugdbestuur` are a different truth on purpose: the board as it stands on paper (the vzw and the youth board). The organigram never syncs to them, and they never sync to it.
-
-### Pillar
-
-The group a box sits under in the `/hulp` clubboek: `bestuur`, `sportief`, `jeugd-organisatie`, `jeugd-opleiding`, `club` or `integriteit` (Studio field `organigramNode.pillar`, label "Pijler"). Written by editors, never by a sync. The page shows one **chapter** per group of pillars: Sportief, Jeugd, Club & werking and Integriteit. `jeugd-organisatie` and `jeugd-opleiding` are two pillars that render as the sub-heads Organisatie and Opleiding of the one Jeugd chapter, so "pillar" means the stored value and "chapter" the rendered section (`Chapter` in `ClubBook/club-book.ts`). `bestuur` boxes show in the key-figure cards and the Raad van bestuur line instead of a ledger. A box with no pillar shows under "Overige functies" and gets a Studio warning, so nothing disappears. Unlike `department` (hoofdbestuur, jeugdbestuur, algemeen), which stays for hulp manual contacts and the explorer, a pillar says what the box is for.
-
-### Key figure
-
-One of the eight boxes shown as a card at the top of the clubboek: Voorzitter, Secretaris and Penningmeester under "Dagelijks bestuur"; Sportief Verantwoordelijke, Jeugdvoorzitter, TVJO, Gerechtigd Correspondent and API under "Aanspreekpunten" (the boxes' titles in Studio). Which boxes form the top row is a design decision and lives in code (`ClubBook/club-book.ts`). The one-line "why" on a card is the box's `description`, written by an editor; a key box with an empty `description` shows no why-line and never borrows another field's text (the Writer Rule). The row of a clubboek ledger is not a key figure: it is `box title ······ name(s)`, and one person holding several boxes in the same list shares one row.
-
-### Monogram
-
-What a round avatar shows when a person has no photo: their initials, set in a jersey-deep glyph on a cream-soft disc (#3331, decided in #3304). Never the drawn figure — at 24-64px a `<JerseyIllustration>` reads as a blob, initials stay legible. Cards and heroes draw the figure; round avatars set a monogram. That split is the round family's rule, not an exception to a hero's.
-
-| Code                                                      | Notes                                                                                                                                                                                                                                                         |
-| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `<RoundAvatar>` (`components/design-system/RoundAvatar/`) | The round avatar family: sizes 24 / 40 / 64, ring 1px ink at 24 and 2px ink at 40/64. `SubjectAvatar` and `SubjectAvatarCluster` (the article's people) render through it (#3332), and `cross-page-consistency.test.ts` keeps every round person avatar on it |
-| `initials()` (`apps/web/src/lib/utils/initials.ts`)       | First + last token for a full name, one letter when only a first name is known                                                                                                                                                                                |
-
-A "+N" count circle or a "+" vacancy circle that sits among avatars is not a person but takes the ring, fill and size of its neighbour (`glyph` on `<RoundAvatar>`).
-
----
-
-## Content
-
-### Article
-
-A news article published on the website.
-
-| Code                        | Dutch                   | Notes |
-| --------------------------- | ----------------------- | ----- |
-| `article` (Sanity document) | Artikel / Nieuwsbericht | —     |
-
-**Visibility:** Time-bound. Visible when `publishedAt ≤ now ≤ unpublishAt`.
-
-**Route:** `/nieuws/[slug]` (see [#819])
-
-**Call-to-action:** `article.callToAction` ("Oproep onderaan") is an optional, editor-filled object — question, optional accent word, one-line lead, button label, and one link (an internal reference or an `href`). Empty is the default; once any field is set, all become required. Renders as a full-bleed `<CtaBand>` after `<ArticleCredits>` and before `<RelatedRow>` (#2525). Not a per-type closer — most articles leave it empty.
-
-### Event
-
-A club event or announcement.
-
-| Code                      | Dutch     | Notes |
-| ------------------------- | --------- | ----- |
-| `event` (Sanity document) | Evenement | —     |
-
-**Visibility:** Date-driven. Shown until `dateEnd` has passed (or `dateStart` if no end date).
-
-### Sponsor
-
-A partner or sponsor of the club.
-
-| Code                        | Dutch   | Notes |
-| --------------------------- | ------- | ----- |
-| `sponsor` (Sanity document) | Sponsor | —     |
-
-**Visibility:** Manually toggled via `active` boolean.
-
-**Sponsor packages** (current, subject to change):
-
-| Code       | Dutch    |
-| ---------- | -------- |
-| `crossing` | Crossing |
-| `training` | Training |
-| `white`    | Wit      |
-| `green`    | Groen    |
-| `panel`    | Paneel   |
-| `other`    | Andere   |
-
-These are **package names, not a ranked hierarchy.** The ordering and naming may change when sponsor packages are redesigned.
-
-### Page
-
-A generic static content page.
-
-| Code                     | Dutch  | Notes                             |
-| ------------------------ | ------ | --------------------------------- |
-| `page` (Sanity document) | Pagina | Title + slug + portable text body |
-
-**Route:** `/club/[slug]`, under the standard `<PageHero>`.
-
-**Page or hand-written route:** a `/club/*` page is a Sanity `page` by default. It stays a hand-written route only when it **needs code** (live data, a form, an interactive tool) **or opens with its own top banner**. A body piece the `page` schema has no block for is not a reason to stay hand-written; add the block instead (#3309).
-
-### Banner
-
-A promotional image shown on the homepage in designated slots (A, B, C).
-
-### Off-Season Notice
-
-The Studio-authored content that lets an editor fill the homepage "Eerste ploegen" band during the off-season, when the match feed genuinely holds nothing: a countdown to the next season's kickoff, a short mededeling (with an optional link), and a highlight image (#2505).
-
-| Code                         | Notes                                                                                                                                                      |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `matchesSliderPlaceholder`   | Sanity object field on `homePage` (`packages/sanity-schemas/src/matchesSliderPlaceholder.ts`). Studio title: "Tussenseizoen-bericht (blok Eerste ploegen)" |
-| `MatchesSliderPlaceholderVM` | Web view-model (`apps/web/src/lib/repositories/homepage.repository.ts`)                                                                                    |
-| `resolvePlaceholderState()`  | `apps/web/src/components/home/FirstTeamsBlock/placeholder-rule.ts` — the countdown/today/mededeling/empty decision rule                                    |
-
-**Name collision, deliberate (#2505/#2844):** `matchesSliderPlaceholder` has **nothing to do** with [Pitch-Reservation Placeholder](#pitch-reservation-placeholder) (`Match.is_placeholder`) above. That term names a self-match with no opponent on the competitive-data side; this one names Studio-authored off-season copy on the editorial side. Same word, unrelated meanings — the field predates this glossary entry and its `name` is kept unchanged on purpose (a rename would mean migrating the one document a club editor already authored, for zero reader benefit), so the collision is written down here rather than left for the next reader to conflate the two.
-
-**Render rule:** read only on `<FirstTeamsBlock>`'s no-rows path, and only when the match read did not fail — a failed read (`unavailable`) always wins and suppresses this notice, image included, so an outage never claims the feed is merely empty.
-
-### Held-Open Frame
-
-The held-open shape rule (#2427 tier 2) — an empty slot inside a populated page or band keeps its shape so the absence reads as a known gap, not a render failure — has two renderings: `<EmptyState tier="slot">` on ink/cream grounds, and the dashed `border-cream/40` `HELD_OPEN_FRAME` constant on the homepage's dark bands. It applies to gaps in provider or system data only; an empty editor-authored slot hides instead (#3300, `apps/web/CLAUDE.md` → The Writer Rule).
-
-| Code              | Notes                                                                                                                       |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `HELD_OPEN_FRAME` | `apps/web/src/components/home/FirstTeamsBlock/FirstTeamsBlock.tsx` — the one constant, imported verbatim, never hand-copied |
-
-**One constant, two consumers:** `FirstTeamsBlock` (`jersey-deep-dark` band) defines and uses it; `FeaturedEventBand` (`jersey-deep` band) imports that export rather than hand-rolling its own dashed frame. They don't hold it on the same cases. `FirstTeamsBlock` draws it on every no-rows cause, a genuinely empty feed included. `FeaturedEventBand` draws it only on a failed read (`unavailable`); a genuinely empty calendar still drops the band silently (`null`).
-
-**Distinct from `<EmptyState tier="slot">`**, which stays ink-only by decision — it does not grow a matching dark axis for two callers on one homepage ([#3103]). Tier `"surface"` is not affected: it already meets a dark ground through `surface="inverse"`. Reopen only if a dark consumer appears off the homepage.
-
-### Draft
-
-The half-filled membership application a visitor leaves behind on `/club/word-lid` (#3326, decided in #3299). `<MembershipForm>` keeps it in `sessionStorage`, so it is scoped to one tab and gone when that tab closes.
-
-| Code                | Dutch                                    | Notes                                                                                                  |
-| ------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `MembershipDraft`   | (concept, no UI label)                   | `apps/web/src/components/club/MembershipForm/membership-draft.ts` — type plus read/write/clear helpers |
-| restored-draft note | We hebben je ingevulde gegevens bewaard. | One line above the first field, shown only when a draft was restored                                   |
-| clear button        | Wis formulier                            | Empties every field and deletes the draft                                                              |
-
-**Holds** every field the visitor fills in, the three consent checkboxes included. **Never holds** the Turnstile token (single-use, the widget issues a fresh one on mount) or the honeypot (a restored bot hit would stick).
-
-**Lifecycle:** written on every edit, deleted on a successful submit and on _Wis formulier_, kept on a failed submit. A draft beats `defaultRole` / `defaultBirthDate` from the link. Blocked or throwing `sessionStorage` degrades to a form with no draft, never an error.
-
-### Responsibility
-
-A help/guidance topic that directs users to the right contact person. Displayed at `/hulp`.
-
-| Code                               | Dutch                | Notes                                             |
-| ---------------------------------- | -------------------- | ------------------------------------------------- |
-| `responsibility` (Sanity document) | Verantwoordelijkheid | Currently `responsibilityPath` — to be simplified |
-
-**Visibility:** Manually toggled via `active` boolean.
-
-**Indexed for semantic search** via Cloudflare Vectorize (nightly sync).
-
-### Audience
-
-Who a responsibility is relevant for. User-facing, Dutch.
-
-| Code        | Dutch     |
-| ----------- | --------- |
-| `speler`    | Speler    |
-| `ouder`     | Ouder     |
-| `trainer`   | Trainer   |
-| `supporter` | Supporter |
-| `niet-lid`  | Niet-lid  |
-| `andere`    | Andere    |
-
-### Category
-
-Topic classification for responsibilities. User-facing, Dutch.
-
-| Code             | Dutch          |
-| ---------------- | -------------- |
-| `medisch`        | Medisch        |
-| `sportief`       | Sportief       |
-| `administratief` | Administratief |
-| `gedrag`         | Gedrag         |
-| `algemeen`       | Algemeen       |
-| `commercieel`    | Commercieel    |
-
----
-
-## Share Tool (`/share`)
-
-The unlisted, `noindex` tool where the club makes Instagram stories (1080 × 1920) and squares (1080 × 1080) of a match moment, a news article or an event (spec #3535). It saves a PNG; nothing is published from it.
-
-### Share look
-
-One of the five visual styles a story is drawn in: **A Kaart**, **B Plakboek**, **C Affiche**, **E Ticket** and **W Wedstrijd**. A, B, C and E take one normalised view-model (`ShareContent`) and work for every content kind; W is the original match template set and only fits a match. News and events offer A, B, C, E; a match offers all five. After every saved PNG the tool moves on to the next fitting look (A → B → C → E → W, wrapping).
-
-| Code                     | Notes                                                                                   |
-| ------------------------ | --------------------------------------------------------------------------------------- |
-| `LookId` / `AnyLook`     | `kaart` · `plakboek` · `affiche` · `ticket` (+ `wedstrijd`) — also the analytics `look` |
-| `LOOKS`                  | `apps/web/src/components/share/looks/looks.ts`, in rotation order                       |
-| `ShareTheme`, `WashStep` | Licht / Donker per story (not for W); the wash (Zacht / Normaal / Sterk) is look C only |
-
-### Share moment
-
-The moment a match story tells: the `TemplateId` (`kickoff`, `halftime`, `full-time`, `goal-kcvv`, `goal-opponent`, the four card ids, `square-pre-game`, `square-result`). It picks the story's label, fill and detail from the `MOMENT_STYLE` table in `looks/share-content.ts`, in every look. A full-time moment also carries a mood (win / draw / loss).
-
-### Movable block
-
-A part of a look the editor can drag on the preview (Schik tab), stored as an offset in capture pixels plus a layer (`voor` = above everything, `achter` = below the pinned parts, above the photo). Each look names its own blocks (`data-block`); crest, footer and frame stay pinned. A tap only selects a block: a block counts as **moved** when its offset is non-zero or it sits `achter` — the rule behind the analytics field `blocks_moved`.
-
-| Code          | Notes                                                                            |
-| ------------- | -------------------------------------------------------------------------------- |
-| `BlockLayout` | `looks/block-layout.ts` — per block id `{ x, y, layer }`; key order = move order |
-| `moveBlock()` | The one pure offset + centre-snap function (pointer delta ÷ preview scale)       |
-
-### Omslag
-
-How a news or event cover fills a look's photo slot: **Foto** (the cover, cropped on its hotspot), **Affiche wazig** (the whole flyer, taped on, over a blurred copy of itself) or **Reservefoto** (the look's own fallback picture). News and events start on Affiche wazig; a match always uses Foto. The tool never detects a flyer — the editor picks.
-
-| Code        | Notes                                                                      |
-| ----------- | -------------------------------------------------------------------------- |
-| `CoverMode` | `foto` · `affiche_wazig` · `reservefoto` — also the analytics `cover_mode` |
-
-### Story session
-
-The one browser-storage record (`localStorage`, key `kcvv-share-session`) that lets a story survive a trip to Instagram and back: the story in progress (mode, picked item or match, moment, look, format, theme, wash, Omslag, edited text, block layout per format) plus, kept across days, the last-used look and each look's next fallback index. A saved PNG clears the layout and Omslag; another item clears everything item-specific; a new calendar day (Europe/Brussels) clears the story. A broken store means a fresh start. The uploaded own photo is never stored.
-
-| Code           | Notes                                                                                   |
-| -------------- | --------------------------------------------------------------------------------------- |
-| `StorySession` | `apps/web/src/components/share/SharePage/story-session.ts` — read validates every field |
-
-## Statistics & Ranking
-
-### Player Stats
-
-Season-level statistics for a player within a team.
-
-| Field                        | Meaning                |
-| ---------------------------- | ---------------------- |
-| `matches_played`             | Total appearances      |
-| `goals`                      | Goals scored           |
-| `assists`                    | Assists (if available) |
-| `yellow_cards` / `red_cards` | Disciplinary record    |
-| `minutes_played`             | Total minutes on pitch |
-
-### Team Stats
-
-Aggregated season statistics for a team.
-
-| Field                             | Meaning                           |
-| --------------------------------- | --------------------------------- |
-| `total_matches`                   | Matches played                    |
-| `wins` / `draws` / `losses`       | Results breakdown                 |
-| `goals_scored` / `goals_conceded` | Goal record                       |
-| `clean_sheets`                    | Matches without conceding         |
-| `top_scorers`                     | `PlayerStats[]` — leading scorers |
-
-### Ranking Entry
-
-A row in the league standings table.
-
-| Field                                             | Meaning                         |
-| ------------------------------------------------- | ------------------------------- |
-| `position`                                        | League position (1st, 2nd, ...) |
-| `team_id` / `team_name`                           | The team in this row            |
-| `played` / `won` / `drawn` / `lost`               | Match record                    |
-| `goals_for` / `goals_against` / `goal_difference` | Goal record                     |
-| `points`                                          | Total points                    |
-
-### Competitive Block
-
-The `#klassement` + `#wedstrijden` pair on a team page, gated as **one unit** rather than two independent sections. What it shows is keyed to the data — never to the age group, and never to last season.
-
-| Code                   | Dutch surface  | Meaning                                                                                                                                                                                                       |
-| ---------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `not-in-competition`   | status line    | The club has no official league fixture for this team this season. Neither section renders.                                                                                                                   |
-| `fixtures-unavailable` | status line    | The **fixtures** read failed **permanently**. Without fixtures there is no way to tell the team is in competition at all, so neither section renders — the same collapse as `not-in-competition`.             |
-| `ranking-unavailable`  | failure notice | The **ranking** read failed **permanently** while the fixtures read fulfilled ([#2795]). `#wedstrijden` renders in full; only the klassement slot is replaced, by a failure notice, not `<StandingsSection>`. |
-| `no-table`             | De reeks       | In competition; the association has published no row yet.                                                                                                                                                     |
-| `numberless`           | De reeks       | In competition; every published entry reads zero played and zero points.                                                                                                                                      |
-| `live`                 | Klassement     | At least one published table carries real numbers.                                                                                                                                                            |
-
-**The gate** is at least one fixture whose competition type is `league` in the current season — never "the ranking has rows" (the ranking arrives months after the fixtures) and never the phase's association code.
-
-**`ranking-unavailable` is not `no-table`.** `no-table` is a _value_: the ranking read fulfilled with zero rows. `ranking-unavailable` is the read never fulfilling a value at all. Conflating the two would report a broken read as "not published yet," which is false.
-
-**Rule: a failure is not a section.** The two status-line states, plus `ranking-unavailable`'s klassement-slot failure notice, carry no `<h2>`, no `id` and no sticky-nav chip for that slot. This is the one deliberate exception to the team page's rule that every nav chip leads to a section that renders — `ranking-unavailable`'s `#wedstrijden` chip is unaffected, since that section still renders in full.
-
----
-
-## Infrastructure
-
-### BFF (Backend For Frontend)
-
-The Cloudflare Worker in `apps/api/`. Transforms raw PSD data into normalised `@kcvv/api-contract` schemas. Handles caching, search, and PSD↔Sanity sync.
-
-**Term:** Always "BFF" — distinguishes from PSD API (external) and Drupal API (deprecated).
-
-### PSD API (ProSoccerData)
-
-External sports data provider. Source of truth for matches, rankings, statistics, players, teams, and staff membership.
-
-### Sanity CMS
-
-Content management system. Source of truth for editorial content (articles, events, sponsors, pages, responsibilities) and editorially-enriched player/team/staff data.
-
-### Footbalisto
-
-Legacy name for the PSD API integration layer in the BFF, now renamed to `PsdService` in `apps/api/src/psd/`. The `footbalisto.be` domain is still owned and may be used as a custom Worker domain. **Do not use "Footbalisto" for new code — use "PSD" or "BFF".**
-
-### PSD↔Sanity Sync
-
-Nightly cron job that synchronises player, team, and staff data from PSD into Sanity documents. Cursor-based: one team per invocation, full rotation over N nights. `scheduled()` awaits the sync directly rather than firing it via `ctx.waitUntil()`, so an invocation's real budget is the Workers Paid plan's Cron Trigger wall-clock limit (15 minutes), not the ~30s grace `waitUntil()` grants after an invocation ends. Within a team, a KV checkpoint tracks which members are already committed this pass, so a run that still runs out of budget (e.g. a team whose photos all changed) resumes past already-committed members on the next invocation instead of re-walking the team (#2900).
-
-**Rule:** Sync only writes PSD-owned fields. Editorial fields (position, images, bio, training schedule, etc.) are never overwritten.
-
-### Permanent vs Transient Read Failure
-
-Every BFF read failure is one of exactly two kinds, and the kind decides what the page does. This split is the reason a broken team page degrades instead of going dark forever.
-
-| Kind          | Meaning                                                                                                     | What the page does                                                         |
-| ------------- | ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| **Permanent** | A stale or mistyped PSD id, or a response this deploy can no longer decode. Every retry fails the same way. | Degrade to a value and render. There is no last-good page to fall back to. |
-| **Transient** | A timeout, a 502/503, a network blip. The next regeneration will probably succeed.                          | Let it reject, so the render throws and ISR serves the last-good page.     |
-
-**Rule:** one list owns the split (`PERMANENT_BFF_TAGS`). Nothing hand-types a second copy — a tag added to only one copy would silently disagree, with no compiler or test signal.
-
-**The declared-error-status ambiguity is closed ([#2924]):** a permanent classification is inferred from the error tag, and `ParseError` used to be ambiguous — a response whose status matched a declared BFF error (404/502/503/400) but whose body failed to decode looked identical whether PSD/the BFF changed its shape (genuinely permanent) or a stale/misconfigured Worker sent something that isn't this BFF's error at all (transient — e.g. `apps/api` deploys production on merge and staging on PRs only, so a Worker missing a newly added route is a normal state). `guard-declared-error-body.ts`'s `transformClient` hook on `BffServiceLive` (`apps/web/src/lib/effect/`) resolves this upstream of decoding, where the status and raw body are still both in hand: it decodes the body against that status's declared error schema (reflected off `PsdApi` itself, not a hand-typed list) before the response ever reaches `HttpApiClient`'s own decode. A body that decodes as the declared error still classifies permanent; one that doesn't — empty, HTML, malformed JSON, or even a `_tag`-bearing body from a mismatched contract version — fails as a transient `ResponseError` instead.
-
-**What's still open:** the same shape of ambiguity exists in principle on the **success** path — a 2xx response whose body fails to decode against the success schema is always classified permanent (#2924's own acceptance criteria require this: it must not become transient, since it's usually a genuine contract mismatch), even though in theory a Worker could crash mid-response on a 200 and produce the same decode failure a real contract drift would. Not tracked by an open issue; #2953, which raised a version of this concern, was closed as a duplicate of #2924 once triage found its described 500 case doesn't occur post-#2440 and its underlying concern was #2924's declared-error-status case, not the success path.
-
----
-
-## Navigation Concepts
-
-### Club
-
-A **navigation grouping**, not a domain entity. The `/club` route prefix collects pages about the club's organisation: board, organigram, contact, history.
-
-**Needs:** a landing page at `/club` (currently 404).
-
-### Youth (Jeugd)
-
-A **navigation section** for youth teams. Route: `/jeugd`.
-
----
-
-## Visibility Rules
-
-Each content type has its own visibility logic. There is no universal "published" concept.
-
-| Type                       | Visible when...                            |
-| -------------------------- | ------------------------------------------ |
-| Article                    | `publishedAt ≤ now ≤ unpublishAt`          |
-| Event                      | `dateEnd ≥ now` (or `dateStart` if no end) |
-| Sponsor                    | `active === true`                          |
-| Responsibility             | `active === true`                          |
-| Team (nav + match widgets) | `showInNavigation === true`                |
-
----
-
-## Naming Conventions
-
-### Casing
-
-| Context                  | Convention          | Example                         |
-| ------------------------ | ------------------- | ------------------------------- |
-| API contract fields      | `snake_case`        | `home_team`, `goals_for`        |
-| TypeScript types/classes | `PascalCase`        | `MatchDetail`, `RankingEntry`   |
-| Sanity document fields   | `camelCase`         | `firstName`, `showInNavigation` |
-| URL slugs                | `kebab-case`, Dutch | `/wedstrijd/`, `/nieuws/`       |
-| Effect Schema classes    | `PascalCase`        | `Match`, `PlayerStats`          |
-
-### Prefixes
-
-| Prefix    | Meaning                                               |
-| --------- | ----------------------------------------------------- |
-| `Psd*`    | Raw PSD API shape (BFF implementation detail)         |
-| `Match*`  | Match-scoped concept                                  |
-| `Sanity*` | Web-layer view model projected from Sanity GROQ query |
-
-[#819]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/819
-[#2699]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/2699
-[#2795]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/2795
-[#2801]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/2801
-[#2802]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/2802
-[#2924]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/2924
-[#3103]: https://github.com/soniCaH/www.kcvvelewijt.be/issues/3103
+**Youth**:
+The navigation section for youth teams, at `/jeugd`. _Jeugd_.
