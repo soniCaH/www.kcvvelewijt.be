@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { SanityImage } from "@/lib/image/sanity-image";
 import { PageViewTracker } from "@/components/analytics";
 import { PageContainer } from "@/components/design-system";
 import { StripedSeam } from "@/components/design-system/StripedSeam";
@@ -200,7 +200,7 @@ function TimelineContent() {
           </>
         }
       >
-        <Image
+        <SanityImage
           src={HISTORY_52_53}
           alt=""
           fill
@@ -226,7 +226,7 @@ function TimelineContent() {
           </>
         }
       >
-        <Image
+        <SanityImage
           src={HISTORY_58_59}
           alt=""
           fill
@@ -264,7 +264,7 @@ function TimelineContent() {
           </>
         }
       >
-        <Image
+        <SanityImage
           src={HISTORY_63_64}
           alt=""
           fill
@@ -284,7 +284,7 @@ function TimelineContent() {
           </>
         }
       >
-        <Image
+        <SanityImage
           src={HISTORY_FUSIE}
           alt=""
           fill
@@ -338,7 +338,7 @@ function TimelineContent() {
           </>
         }
       >
-        <Image
+        <SanityImage
           src={HISTORY_BVB}
           alt=""
           fill
@@ -396,7 +396,7 @@ function TimelineContent() {
           </span>
         }
       >
-        <Image
+        <SanityImage
           src={HISTORY_2018}
           alt=""
           fill
@@ -431,7 +431,7 @@ function TimelineContent() {
           </span>
         }
       >
-        <Image
+        <SanityImage
           src={HISTORY_2022}
           alt=""
           fill
@@ -497,7 +497,7 @@ function TimelineContent() {
           </>
         }
       >
-        <Image
+        <SanityImage
           src={HISTORY_24_25}
           alt=""
           fill

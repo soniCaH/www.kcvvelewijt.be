@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { SanityImage } from "@/lib/image/sanity-image";
 import { SITE_CONFIG } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
@@ -71,7 +71,7 @@ export default function UltrasPage() {
                 rotation: "c",
               }}
             >
-              <Image
+              <SanityImage
                 src={ULTRAS_KAMPIOEN}
                 alt="KCVV Ultra's op de kampioenenmatch in 3e provinciale"
                 fill
@@ -140,7 +140,7 @@ export default function UltrasPage() {
                 rotation: "c",
               }}
             >
-              <Image
+              <SanityImage
                 src={ULTRAS_SJR}
                 alt="KCVV Ultra's schijt-je-rijk affiche"
                 fill
