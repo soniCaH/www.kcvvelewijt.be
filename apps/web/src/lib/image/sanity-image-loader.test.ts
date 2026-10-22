@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sanityImageLoader } from "./sanity-image-loader";
+import { isSanityImageUrl, sanityImageLoader } from "./sanity-image-loader";
 
 const BASE =
   "https://cdn.sanity.io/images/vhb33jaz/production/abc-1600x900.jpg";
@@ -46,6 +46,19 @@ describe("sanityImageLoader", () => {
       quality: undefined,
       expected: { w: "384", fit: "max", auto: "format", q: "75" },
     },
+    {
+      name: "an explicit fit without w is kept, not replaced by max",
+      src: `${BASE}?fit=crop&crop=focalpoint`,
+      width: 640,
+      quality: undefined,
+      expected: {
+        w: "640",
+        fit: "crop",
+        crop: "focalpoint",
+        auto: "format",
+        q: "75",
+      },
+    },
   ])("$name", ({ src, width, quality, expected }) => {
     const out = sanityImageLoader({ src, width, quality });
 
@@ -54,15 +67,11 @@ describe("sanityImageLoader", () => {
   });
 
   it.each([
-    ["/images/logo.png"],
-    ["https://dfaozfi7c7f3s.cloudfront.net/photo.jpg"],
-    ["https://cdn.sanity.io/images/otherproj/production/x.jpg?w=800"],
-  ])("falls back to Next's own optimizer for %s", (src) => {
-    expect(sanityImageLoader({ src, width: 640 })).toBe(
-      `/_next/image?url=${encodeURIComponent(src)}&w=640&q=75`,
-    );
-    expect(sanityImageLoader({ src, width: 640, quality: 50 })).toBe(
-      `/_next/image?url=${encodeURIComponent(src)}&w=640&q=50`,
-    );
+    ["/images/logo.png", false],
+    ["https://dfaozfi7c7f3s.cloudfront.net/photo.jpg", false],
+    ["https://cdn.sanity.io/images/otherproj/production/x.jpg?w=800", false],
+    [BASE, true],
+  ])("isSanityImageUrl(%s) is %s", (src, expected) => {
+    expect(isSanityImageUrl(src)).toBe(expected);
   });
 });

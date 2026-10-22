@@ -123,10 +123,8 @@ describe("<TransferFactCard>", () => {
         '[data-transfer-fact-inline-logo="true"]',
       );
       expect(logo).not.toBeNull();
-      // A non-Sanity logo falls through `SanityImage`'s loader to Next's own
-      // optimizer URL (#3664).
       expect(logo?.getAttribute("src")).toBe(
-        `/_next/image?url=${encodeURIComponent("/images/logos/clubs/dummy-rouge.svg")}&w=32&q=75`,
+        "/images/logos/clubs/dummy-rouge.svg",
       );
       // Logo is decorative — must be aria-hidden + alt="".
       expect(logo?.getAttribute("aria-hidden")).toBe("true");
