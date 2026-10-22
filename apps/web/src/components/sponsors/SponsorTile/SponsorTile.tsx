@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { SanityImage } from "@/lib/image/sanity-image";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 import { formatSponsorAlt } from "../formatSponsorAlt";
@@ -50,7 +50,7 @@ export const SponsorTile = ({
   colorAtRest = false,
 }: SponsorTileProps) => {
   const inner = sponsor.logo ? (
-    <Image
+    <SanityImage
       src={sponsor.logo}
       alt={formatSponsorAlt(sponsor.name)}
       width={200}

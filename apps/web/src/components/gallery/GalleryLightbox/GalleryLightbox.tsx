@@ -1,7 +1,7 @@
 "use client";
 
 import { lazy, Suspense, useState } from "react";
-import Image from "next/image";
+import { SanityImage } from "@/lib/image/sanity-image";
 import { LightboxLoading } from "../lightbox-chrome";
 
 // The viewer (library, plugins, CSS) is its own chunk (#3480). `loadViewer` is
@@ -115,7 +115,7 @@ export const GalleryLightbox = ({
                 aria-label={`${alt} vergroten`}
                 className="group relative block aspect-square w-full overflow-hidden"
               >
-                <Image
+                <SanityImage
                   src={sized(img.url, 600)}
                   alt={alt}
                   fill

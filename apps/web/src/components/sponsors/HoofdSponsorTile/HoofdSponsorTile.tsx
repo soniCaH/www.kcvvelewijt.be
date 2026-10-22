@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { SanityImage } from "@/lib/image/sanity-image";
 import Link from "next/link";
 import { TapedCard } from "@/components/design-system/TapedCard";
 import { formatSponsorAlt } from "../formatSponsorAlt";
@@ -33,7 +33,7 @@ export function HoofdSponsorTile({ sponsor }: HoofdSponsorTileProps) {
     >
       <div className="flex min-h-[56px] items-center justify-center">
         {sponsor.logo ? (
-          <Image
+          <SanityImage
             src={sponsor.logo}
             alt={formatSponsorAlt(sponsor.name)}
             width={220}

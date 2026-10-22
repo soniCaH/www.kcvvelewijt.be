@@ -108,7 +108,9 @@ describe("RootDocument — Typekit loader", () => {
     // Never a render-blocking stylesheet in the server markup, and no
     // preconnect: the preload already warms the one host the fonts share.
     expect(doc.querySelector('link[rel="stylesheet"]')).toBeNull();
-    expect(doc.querySelector('link[rel="preconnect"]')).toBeNull();
+    expect(
+      doc.querySelector('link[rel="preconnect"][href*="typekit"]'),
+    ).toBeNull();
   });
 
   it("injects a stylesheet whose crossOrigin matches the preload", () => {
@@ -127,5 +129,16 @@ describe("RootDocument — Typekit loader", () => {
     const markup = render();
 
     expect(markup).not.toContain("typekit");
+  });
+});
+
+describe("RootDocument — Sanity CDN preconnect (#3664)", () => {
+  it("preconnects to cdn.sanity.io in no-cors mode, matching <img> fetches", () => {
+    const link = parse(render()).querySelector(
+      'link[rel="preconnect"][href="https://cdn.sanity.io"]',
+    );
+
+    expect(link).not.toBeNull();
+    expect(link!.hasAttribute("crossorigin")).toBe(false);
   });
 });

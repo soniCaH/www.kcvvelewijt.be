@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { SanityImage } from "@/lib/image/sanity-image";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
@@ -144,7 +144,7 @@ export function EditorialHubCard({
           // a news cover. Decorative either way (the card's own title names
           // the tile), never greyscale (that treatment is sponsor-logo only).
           <TravelTarget>
-            <Image
+            <SanityImage
               src={imageUrl}
               alt=""
               fill

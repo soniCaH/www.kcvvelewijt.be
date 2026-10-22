@@ -19,7 +19,7 @@
  * Spec: docs/design/mockups/phase-4-homepage/hero-flourishes-locked.md
  * (R1.5). Image constraint: landscape only (audit §I1).
  */
-import Image from "next/image";
+import { SanityImage } from "@/lib/image/sanity-image";
 import {
   TravelDestination,
   TravelLink,
@@ -245,7 +245,7 @@ function EditorialHeroCover({
   placement,
 }: EditorialHeroCoverProps) {
   const photo = (
-    <Image
+    <SanityImage
       src={coverImage.url}
       alt=""
       fill

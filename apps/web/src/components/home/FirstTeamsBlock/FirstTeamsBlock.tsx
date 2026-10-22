@@ -14,7 +14,7 @@
  * (visual record: docs/design/mockups/eerste-ploegen/04-b3-ia.html).
  */
 import { useId } from "react";
-import Image from "next/image";
+import { SanityImage } from "@/lib/image/sanity-image";
 import Link from "next/link";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { EditorialHeading, StripedSeam } from "@/components/design-system";
@@ -214,7 +214,7 @@ function PlaceholderNotice({
     <div className={`${HELD_OPEN_FRAME} px-4 py-8`}>
       {image ? (
         <div className="relative mx-auto mb-4 h-40 w-full max-w-2xl overflow-hidden">
-          <Image
+          <SanityImage
             src={image.url}
             alt={image.alt}
             fill

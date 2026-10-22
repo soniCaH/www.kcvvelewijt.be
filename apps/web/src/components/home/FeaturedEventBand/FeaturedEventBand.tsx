@@ -1,5 +1,5 @@
 // apps/web/src/components/home/FeaturedEventBand/FeaturedEventBand.tsx
-import Image from "next/image";
+import { SanityImage } from "@/lib/image/sanity-image";
 import { DateTime } from "luxon";
 import { CLUB_TIMEZONE, toDisplayZone } from "@/lib/utils/dates";
 import {
@@ -232,7 +232,7 @@ export const FeaturedEventBand = ({
           tape={{ color: "warm", seed: event.slug }}
           bg="cream"
         >
-          <Image
+          <SanityImage
             src={cover.url}
             alt={cover.alt}
             fill

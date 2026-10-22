@@ -10,7 +10,7 @@
 
 import Link from "next/link";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
-import Image from "next/image";
+import { SanityImage } from "@/lib/image/sanity-image";
 import { SearchResult as SearchResultType } from "./SearchInterface";
 import { MonoLabel, StampBadge } from "@/components/design-system";
 import { toDisplayZone } from "@/lib/utils/dates";
@@ -62,7 +62,7 @@ export const SearchResult = ({ result, onClick }: SearchResultProps) => {
           fallback). */}
       <div className="border-ink bg-cream relative flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden border-[1.5px]">
         {result.imageUrl ? (
-          <Image
+          <SanityImage
             src={result.imageUrl}
             alt=""
             fill

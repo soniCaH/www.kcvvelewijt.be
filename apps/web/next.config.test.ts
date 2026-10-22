@@ -423,6 +423,13 @@ describe("next.config security surface (#3476)", () => {
     expect(sanity[0]!.pathname).toBe("/images/vhb33jaz/**");
   });
 
+  it("spends as few optimizer transformations as it can (#3664)", () => {
+    const images = nextConfig.images!;
+
+    expect(images.formats).toEqual(["image/webp"]);
+    expect(images.minimumCacheTTL).toBe(2678400);
+  });
+
   it("keeps story-only hosts out of the optimizer allowlist", () => {
     const hosts = nextConfig.images!.remotePatterns!.map((p) =>
       "hostname" in p ? p.hostname : undefined,

@@ -3,7 +3,7 @@ import type {
   PortableTextBlock,
   PortableTextComponents,
 } from "@portabletext/react";
-import Image from "next/image";
+import { SanityImage } from "@/lib/image/sanity-image";
 import Link from "next/link";
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
 import { FacebookLogo, InstagramLogo, X } from "@/lib/icons.redesign";
@@ -619,7 +619,7 @@ function renderArticleImage(value: ArticleImageValue): ReactNode {
             : undefined
         }
       >
-        <Image
+        <SanityImage
           src={url}
           alt={alt}
           width={dimsWidth}
