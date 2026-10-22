@@ -93,6 +93,10 @@ export function RootDocument({
             </Script>
           </>
         )}
+        {/* Sanity photos load straight from its CDN (`SanityImage`, #3664).
+            No `crossorigin`: <img> fetches are no-cors, and the preconnect
+            must match that mode to be reused. */}
+        <link rel="preconnect" href="https://cdn.sanity.io" />
         {head}
       </head>
       <body

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import Image from "next/image";
+import { SanityImage } from "@/lib/image/sanity-image";
 import { cn } from "@/lib/utils/cn";
 import { TapedCard } from "@/components/design-system/TapedCard";
 import { TapedFigure } from "@/components/design-system/TapedFigure";
@@ -403,7 +403,7 @@ function DarkBand({
               }}
               className="w-full md:w-[24rem]"
             >
-              <Image
+              <SanityImage
                 src={image}
                 alt=""
                 fill
@@ -561,7 +561,7 @@ export function PageHero(props: PageHeroProps) {
                 seed: `${headline} · foto`,
               }}
             >
-              <Image
+              <SanityImage
                 src={image!}
                 alt=""
                 fill

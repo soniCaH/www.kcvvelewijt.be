@@ -22,7 +22,7 @@
  * Source-of-record: docs/design/mockups/phase-4-homepage/hero-flourishes-locked.md (R1.5),
  * docs/design/mockups/phase-5-article-detail/match-locked.md (match, 5.d-mat).
  */
-import Image from "next/image";
+import { SanityImage } from "@/lib/image/sanity-image";
 import type { MatchStatus } from "@kcvv/api-contract";
 import { cn } from "@/lib/utils/cn";
 import { Crest } from "@/components/design-system";
@@ -199,7 +199,7 @@ function ClubBadge({
         )}
       >
         {logoUrl ? (
-          <Image
+          <SanityImage
             src={logoUrl}
             alt=""
             fill

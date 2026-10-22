@@ -13,7 +13,7 @@
 
 import { cache } from "react";
 import type { Metadata } from "next";
-import Image from "next/image";
+import { SanityImage } from "@/lib/image/sanity-image";
 import { notFound } from "next/navigation";
 import { Effect } from "effect";
 
@@ -210,7 +210,7 @@ export default async function EventDetailPage({ params }: EventPageProps) {
           location={event.location}
           cover={
             event.coverImageUrl ? (
-              <Image
+              <SanityImage
                 src={event.coverImageUrl}
                 alt=""
                 fill

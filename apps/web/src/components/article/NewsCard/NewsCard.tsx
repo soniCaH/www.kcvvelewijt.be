@@ -1,6 +1,6 @@
 // apps/web/src/components/article/NewsCard/NewsCard.tsx
 import { LinkPendingDots } from "@/components/design-system/LinkPendingDots";
-import Image from "next/image";
+import { SanityImage } from "@/lib/image/sanity-image";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 import { TravelLink, TravelScope, TravelTarget } from "@/components/travel";
@@ -277,7 +277,7 @@ export const NewsCard = ({
           // The photo is what grows into the article's cover (#3405) — only
           // when `href` is an article, and never the region around it.
           <TravelTarget>
-            <Image
+            <SanityImage
               src={imageUrl}
               alt=""
               fill

@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { SanityImage } from "@/lib/image/sanity-image";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 import { formatSponsorAlt } from "../formatSponsorAlt";
@@ -36,7 +36,7 @@ export function FeaturedSponsorCard({ sponsor }: FeaturedSponsorCardProps) {
       <div className="px-[22px] pt-[18px] pb-[22px]">
         <div className="bg-cream border-ink mt-1 mb-3 flex min-h-[56px] items-center justify-center border-2 p-[18px]">
           {sponsor.logo ? (
-            <Image
+            <SanityImage
               src={sponsor.logo}
               alt={formatSponsorAlt(sponsor.name)}
               width={240}

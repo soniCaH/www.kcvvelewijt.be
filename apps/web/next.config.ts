@@ -358,14 +358,15 @@ const nextConfig: NextConfig = {
         pathname: "/images/vhb33jaz/**",
       },
     ],
-    // PERF-2 (#2235): serve optimizer-transformed heroes as AVIF (best
-    // compression) with WebP fallback, and cache optimized variants for a
-    // day so repeat views skip re-optimization. Most photos already arrive
-    // as pre-transformed Sanity CDN URLs; this only governs the optimizer-
-    // served path. Story-only hosts (picsum.photos, placehold.co) are not
-    // listed: Storybook renders every <Image /> unoptimized.
-    formats: ["image/avif", "image/webp"],
-    minimumCacheTTL: 86400,
+    // Vercel Hobby meters every transformation, and a STALE re-transform is
+    // billed again (#3664). Sanity photos skip this optimizer (`SanityImage`'s
+    // loader, `src/lib/image/`); what still reaches it are local and static
+    // images, which never change in place. So: one format (AVIF would double
+    // every variant) and a 31-day cache. Story-only hosts (picsum.photos,
+    // placehold.co) are not listed: Storybook renders every <Image />
+    // unoptimized.
+    formats: ["image/webp"],
+    minimumCacheTTL: 2678400,
     // SVG is allowed (local controlled files such as footer-top.svg), so the
     // optimizer response gets a locked-down CSP and is served as an attachment
     // (below) — defence in depth against SVG XSS. Sanity serves raster images.

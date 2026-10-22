@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import Image from "next/image";
+import { SanityImage } from "@/lib/image/sanity-image";
 import { TOP_HEADING_LEVEL } from "@/components/article/ArticleBody";
 import {
   TapedCard,
@@ -72,7 +72,7 @@ function renderRouteLine(
   }
 
   const inlineLogo = logoUrl ? (
-    <Image
+    <SanityImage
       src={logoUrl}
       alt=""
       aria-hidden="true"
