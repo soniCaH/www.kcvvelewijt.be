@@ -23,15 +23,15 @@
     "effect": "3.22.2"
   },
   "devDependencies": {
-    "@cloudflare/vitest-plugin": "1.4.0",
-    "@cloudflare/workers-types": "5.20261009.1",
+    "@cloudflare/vitest-plugin": "1.4.6",
+    "@cloudflare/workers-types": "5.20261021.1",
     "@typescript/native-preview": "7.0.0-dev.20260707.2",
-    "@vitest/coverage-istanbul": "4.1.11",
+    "@vitest/coverage-istanbul": "4.1.12",
     "eslint": "10.12.0",
     "groq-js": "2.0.0",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.2",
-    "vitest": "4.1.11",
-    "wrangler": "4.149.0"
+    "vitest": "4.1.12",
+    "wrangler": "4.151.3"
   }
 }

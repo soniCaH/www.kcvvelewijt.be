@@ -15,3 +15,31 @@ minimumReleaseAgeExclude:
   - "@sanity/ui@4.4.9"
   # Renovate security update: pnpm@10.34.7
   - pnpm@10.34.7
+  # Renovate security update: @cloudflare/vitest-plugin@1.4.6
+  - "@cloudflare/vitest-plugin@1.4.6"
+  # Renovate security update: @vitest/coverage-istanbul@4.1.12
+  - "@vitest/coverage-istanbul@4.1.12"
+  # Renovate security update: vitest@4.1.12
+  - vitest@4.1.12
+  # Renovate security update: prettier@3.9.10
+  - prettier@3.9.10
+  # Renovate security update: @testing-library/user-event@14.6.8
+  - "@testing-library/user-event@14.6.8"
+  # Renovate security update: @vitest/browser@4.1.12
+  - "@vitest/browser@4.1.12"
+  # Renovate security update: @vitest/browser-playwright@4.1.12
+  - "@vitest/browser-playwright@4.1.12"
+  # Renovate security update: @vitest/coverage-v8@4.1.12
+  - "@vitest/coverage-v8@4.1.12"
+  # Renovate security update: @vitest/ui@4.1.12
+  - "@vitest/ui@4.1.12"
+  # Renovate security update: postcss@8.5.31
+  - postcss@8.5.31
+  # Renovate security update: vite@8.3.5
+  - vite@8.3.5
+  # Renovate security update: @commitlint/cli@21.2.4
+  - "@commitlint/cli@21.2.4"
+  # Renovate security update: @commitlint/config-conventional@21.2.4
+  - "@commitlint/config-conventional@21.2.4"
+  # Renovate security update: turbo@2.11.10
+  - turbo@2.11.10
