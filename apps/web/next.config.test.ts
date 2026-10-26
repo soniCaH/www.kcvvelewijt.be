@@ -98,6 +98,20 @@ describe("next.config redirects", () => {
     expect(sources).not.toContain("/club/cashless/voorwaarden");
   });
 
+  it("sends the Gatsby /downloads page to /club/downloads with 308, never the PDFs under it (#3670)", async () => {
+    const redirects = await nextConfig.redirects!();
+
+    const match = redirects.find((r) => r.source === "/downloads");
+    expect(match?.destination).toBe("/club/downloads");
+    expect(match?.permanent).toBe(true);
+    // `public/downloads/*.pdf` is served under the same prefix. Host-scoped
+    // rules (`has`, #3579) never answer for the main site, so they are skipped.
+    const pdf = "/downloads/reglement_inwendige_orde_2022.pdf";
+    expect(
+      redirects.filter((r) => !r.has && getPathMatch(r.source)(pdf)),
+    ).toEqual([]);
+  });
+
   it("sends the printed /ongeval QR code to the accident path with 307 (#3014)", async () => {
     const redirects = await nextConfig.redirects!();
 
