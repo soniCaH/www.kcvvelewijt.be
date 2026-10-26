@@ -133,3 +133,19 @@ A later, separate measurement, dated and frozen like the rest: [`test-layer-cove
 **One of these is alive; nine are frozen.** `test-suite-flake-ledger.md` is the **register of the unit
 of work** — a flake class is the unit, never an occurrence — and it is edited as classes open and
 close. The other nine are dated evidence: cite them, do not revise them.
+
+## Old-stack corpus — 2026-10
+
+Produced for [Retire the old site's stack](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3547),
+a `/wayfinder` map, now closed. **The runbook
+[#3580](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3580) is the front door**: it holds the live
+state of every delete. These five documents are dated evidence from 2026-10-18 — cite them, do not
+revise them. The AWS and Drupal documents are cut down; the full versions are kept off this public repo.
+
+| Document                                                               | What it establishes                                                     |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| [`aws-account-inventory.md`](./old-stack/aws-account-inventory.md)     | What the old API ran in AWS, and what it cost (USD 24–25/month)         |
+| [`old-api-callers.md`](./old-stack/old-api-callers.md)                 | Who still called `footbalisto.be`; only calendar subscribers get hurt   |
+| [`calendar-feed-redirects.md`](./old-stack/calendar-feed-redirects.md) | Calendar apps follow a redirect but never rewrite the stored URL        |
+| [`drupal-kcvv-data-api.md`](./old-stack/drupal-kcvv-data-api.md)       | What Drupal ran, who depended on it, and the data that lived only there |
+| [`netlify-old-site.md`](./old-stack/netlify-old-site.md)               | What the old Netlify project ran besides `www`, and what had to move    |
