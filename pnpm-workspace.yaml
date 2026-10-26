@@ -19,3 +19,5 @@ minimumReleaseAgeExclude:
   - sanitize-html@2.18.0
   # Renovate security update: happy-dom@21.0.4
   - happy-dom@21.0.4
+  # Renovate security update: next@16.4.1
+  - next@16.4.1
