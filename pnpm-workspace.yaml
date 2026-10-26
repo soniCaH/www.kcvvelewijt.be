@@ -15,3 +15,5 @@ minimumReleaseAgeExclude:
   - "@sanity/ui@4.4.9"
   # Renovate security update: pnpm@10.34.7
   - pnpm@10.34.7
+  # Renovate security update: sanitize-html@2.18.0
+  - sanitize-html@2.18.0
