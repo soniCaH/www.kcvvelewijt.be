@@ -44,7 +44,7 @@ import { fixtureImage, fixtureImageSize } from "@test-fixtures/images";
 const meta = {
   title: "Pages/Home",
   // Page-level composition: visual coverage lives in the Playwright `/` e2e
-  // spec, not Storybook VR (docs/prd/page-level-testing-rework.md). The
+  // spec, not Storybook VR (docs/prd/archive/2026/page-level-testing-rework.md). The
   // assembled sections carry their own VR via their component stories.
   tags: ["autodocs"],
   parameters: {

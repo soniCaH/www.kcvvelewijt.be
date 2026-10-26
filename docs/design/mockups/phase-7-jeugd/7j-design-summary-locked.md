@@ -3,7 +3,7 @@
 **Date:** 2026-06-07
 **Owner:** @climacon
 **Tracker:** #1529 (Phase 7 master)
-**Supersedes (on landing):** `docs/prd/jeugd-landing-page.md`
+**Supersedes (on landing):** `docs/prd/archive/2026/jeugd-landing-page.md`
 **Drill record:** `7j0`–`7j3` lock docs + `7j0b` verification + `*-compare.html` + `7j-final-page.html`.
 
 The `/jeugd` redesign in the retro-terrace-fanzine system. Audience: **parents**. Register:

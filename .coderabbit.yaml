@@ -3,7 +3,7 @@
 # This file exists to keep VR baseline pushes from consuming review quota.
 # The mechanism is `path_filters` — when the bot pushes a PNG-only commit,
 # CodeRabbit's incremental review sees zero in-scope files and consumes no
-# quota. See `docs/prd/visual-regression-testing.md` §9 for rationale.
+# quota. See `docs/prd/archive/2026/visual-regression-testing.md` §9 for rationale.
 #
 # We deliberately do NOT use `auto_review.ignore_usernames` for the bot:
 # `ignore_usernames` filters PR *authors*, not commit authors on existing PRs.

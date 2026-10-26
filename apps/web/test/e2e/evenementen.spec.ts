@@ -8,7 +8,7 @@
  *  - the detail page exposes the always-present "Zet in agenda" CTA
  *
  * Runs against the real Next.js app (the page-level coverage layer per the
- * Phase 0.5 testing rework — `docs/prd/page-level-testing-rework.md`). Each
+ * Phase 0.5 testing rework — `docs/prd/archive/2026/page-level-testing-rework.md`). Each
  * test asserts on the pinned fixture event, never on whichever event sorts
  * first (#3149).
  */

@@ -15,7 +15,7 @@ import {
 
 /**
  * The canonical GTM Custom-Event trigger RegEx. Must stay byte-identical to
- * the live trigger and to `docs/prd/analytics.md` §3. If you change
+ * the live trigger and to `docs/prd/archive/2026/analytics.md` §3. If you change
  * `prefixes`, update this string in the same commit (that is the point of
  * this assertion).
  */

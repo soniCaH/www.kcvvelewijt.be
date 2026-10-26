@@ -13,7 +13,7 @@ Baselines for `apps/web` Storybook stories are committed under
 Captured by `@storybook/test-runner` via the post-visit hook in
 `.storybook/test-runner.ts`. See `apps/web/CLAUDE.md` → _Visual Regression
 Testing_ for the local workflow and the canonical Claude decision loop.
-Background and rationale: `docs/prd/visual-regression-testing.md`.
+Background and rationale: `docs/prd/archive/2026/visual-regression-testing.md`.
 
 ## Anti-pattern
 

@@ -9,7 +9,7 @@ import PrivacyPage from "./page";
  *
  * `Pages/*` stories are design references only and are intentionally **not**
  * VR-tagged — page-composition correctness is the e2e suite's job
- * (`docs/prd/page-level-testing-rework.md`). The privacy page is a pure,
+ * (`docs/prd/archive/2026/page-level-testing-rework.md`). The privacy page is a pure,
  * synchronous server component with no data dependencies, so it renders
  * directly here.
  */

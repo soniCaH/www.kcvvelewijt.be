@@ -3,7 +3,7 @@
 > **Status:** ✅ **LOCKED — Two-form Alert API: `<AlertBadge>` (E) primary + `<Alert>` (B) long-form.**
 > **Date locked:** 2026-04-30.
 > **Worktree:** `feat/issue-1572` (`docs/design/mockups/phase-2-a-5-alert/`).
-> **PRD:** `docs/prd/redesign-phase-2.md` §6.4 — rewritten as part of this checkpoint.
+> **PRD:** `docs/prd/archive/2026/redesign-phase-2.md` §6.4 — rewritten as part of this checkpoint.
 > **Tracking issue:** [#1572](https://github.com/soniCaH/www.kcvvelewijt.be/issues/1572).
 
 ## Locked decisions

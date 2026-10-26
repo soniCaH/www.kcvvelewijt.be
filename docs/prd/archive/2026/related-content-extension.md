@@ -1,9 +1,3 @@
----
-status: completed
-completed_at: 2026-04-23
-completed_in: "#1314, #1316, #1317, #1318, #1319"
----
-
 # PRD: Related Content Extension
 
 **Status:** Draft
@@ -81,18 +75,18 @@ Phase 3 is blocked-by Phase 2 (needs the extended `relatedContent` field landed)
 - [x] GROQ projection in `apps/web/src/lib/repositories/article.repository.ts` reads `relatedContent[]->` with `_type`-conditional field selection.
 - [x] `mergeRelatedItems()` dedupes by `_id` between curated `relatedContent` and auto-derived `mentionedPlayers` (unit test).
 - [x] Test article on staging renders Related section with the curated player card. _(Seeded as `article-phase-1316-related-content-tracer` — visit `/nieuws/phase-1316-tracer-curated-related-content` on staging.)_
-- [x] `pnpm --filter @kcvv/web check-all` passes.
+- [x] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### Phase 2 — Full explicit curation
 
 - [ ] `relatedContent` accepts references to `article`, `player`, `team`, `staffMember`.
 - [ ] Self-reference filter on `article` type (`_id != ^._id`) so an article can't relate to itself.
 - [ ] Validation: `max(8)` on `relatedContent` array (soft cap to discourage grab-bag use).
-- [ ] Migration script copies existing `relatedArticles` values into `relatedContent` preserving order; run on staging then production per `feedback_sanity_migrations.md`.
-- [ ] `relatedArticles` field removed from schema after migration verified.
+- [x] Migration script copies existing `relatedArticles` values into `relatedContent` preserving order; run on staging then production per `feedback_sanity_migrations.md`. (Ran on both datasets 2026-10-17, see #1457.)
+- [x] `relatedArticles` field removed from schema after migration verified. (#1457)
 - [ ] Dedupe tested for all three auto-derived sources (players, teams, staff) against curated entries.
 - [ ] Storybook story updated: `Features/Related/` shows curated + auto mix (no new variant yet).
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### Phase 3 — Event detail pages
 
@@ -102,7 +96,7 @@ Phase 3 is blocked-by Phase 2 (needs the extended `relatedContent` field landed)
 - [ ] `generateMetadata` exports title/description/OG fields per `apps/web/CLAUDE.md` SEO checklist.
 - [ ] JSON-LD `Event` block rendered via new builder in `src/lib/seo/jsonld.ts`, validated with Google Rich Results Test.
 - [ ] Canonical URL set; route appears in `sitemap.ts`.
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ### Phase 4 — Event in related content
 
@@ -113,7 +107,7 @@ Phase 3 is blocked-by Phase 2 (needs the extended `relatedContent` field landed)
 - [ ] GTM DLV + GA4 custom-dimension mapping updated; manual verification in GTM Preview + GA4 DebugView.
 - [ ] Storybook variant `Features/Related/RelatedContentCard` — new event story.
 - [ ] Vitest coverage for event branch of `mergeRelatedItems()` and `RelatedContentCard`.
-- [ ] `pnpm --filter @kcvv/web check-all` passes.
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes.
 
 ## 6. Effect Schema / api-contract Changes
 

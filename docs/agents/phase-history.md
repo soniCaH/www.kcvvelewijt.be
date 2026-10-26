@@ -15,16 +15,16 @@ review comment references a phase number or a retired component.
 
 ### Redesign primitives (Phase 0+)
 
-Phase 0 of the editorial-redesign series ("retro-terrace fanzine") added the following design-system primitives. They live alongside legacy components per the dual-coexistence policy. See `docs/plans/2026-04-27-redesign-master-design.md` for the design language audit and `docs/prd/redesign-phase-0.md` for token + primitive specs.
+Phase 0 of the editorial-redesign series ("retro-terrace fanzine") added the following design-system primitives. They live alongside legacy components per the dual-coexistence policy. See `docs/plans/2026-04-27-redesign-master-design.md` for the design language audit and `docs/prd/archive/2026/redesign-phase-0.md` for token + primitive specs.
 
 - `<TapeStrip>` — diagonal washi-tape graphic for card corners.
 - `<StripedSeam>` — SVG-backed diagonal barber-pole horizontal section divider.
 - `<DottedDivider>`, `<DashedDivider>` — thin row dividers (interview Q&A, table rows).
 - `<QuoteMark>` — two stacked italic open-quote glyphs.
-- `<HighlighterStroke>` — hand-drawn marker underline beneath italic emphasis. Phase 1 added a `color: 'jersey' | 'jersey-deep' | 'ink' | 'cream'` prop (default `jersey`); previously fixed jersey green. Single-line CSS-bg SVG; multi-line wrapping is the deferred follow-up tracked in `docs/prd/redesign-phase-1.md` §11.1.
+- `<HighlighterStroke>` — hand-drawn marker underline beneath italic emphasis. Phase 1 added a `color: 'jersey' | 'jersey-deep' | 'ink' | 'cream'` prop (default `jersey`); previously fixed jersey green. Single-line CSS-bg SVG; multi-line wrapping is the deferred follow-up tracked in `docs/prd/archive/2026/redesign-phase-1.md` §11.1.
 - `<MonoLabel>` — tracked uppercase pill or plain label. Pill variants gained vertical padding in Phase 1 to read as proper badges.
 
-A new `Foundation/Patterns` MDX story documents `--pattern-jersey-stripes`, `--pattern-jersey-stripes-tight`, and `--pattern-seam`. The cream/ink/jersey colour, fluid display/body/mono typography, layout container, rotation pool, paper-shadow, and motion tokens added in Phase 0 are visible in `Foundation/Colors`, `Foundation/Typography`, and `Foundation/Spacing & Icons` MDX. The `--rotate-tape-*` pool was retuned in Phase 1 from the original master-design values to a sub-degree range (`-0.5°` / `-0.25°` / `0.25°` / `0.5°`) after `<TapedCardGrid>` rendered "seasick" on real card grids — see `docs/prd/redesign-phase-1.md` §11.5.
+A new `Foundation/Patterns` MDX story documents `--pattern-jersey-stripes`, `--pattern-jersey-stripes-tight`, and `--pattern-seam`. The cream/ink/jersey colour, fluid display/body/mono typography, layout container, rotation pool, paper-shadow, and motion tokens added in Phase 0 are visible in `Foundation/Colors`, `Foundation/Typography`, and `Foundation/Spacing & Icons` MDX. The `--rotate-tape-*` pool was retuned in Phase 1 from the original master-design values to a sub-degree range (`-0.5°` / `-0.25°` / `0.25°` / `0.5°`) after `<TapedCardGrid>` rendered "seasick" on real card grids — see `docs/prd/archive/2026/redesign-phase-1.md` §11.5.
 
 **Phase 1 additions (Tier B composition primitives):**
 

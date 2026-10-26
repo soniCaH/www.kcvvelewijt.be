@@ -10,7 +10,7 @@ failing VR job. The conceptual four-layer model — including the Storybook
 ## Page-Level E2E Testing (Playwright)
 
 Functional smoke checks against `next start` (or a Vercel preview URL), one
-test per route. PRD: `docs/prd/page-level-testing-rework.md`.
+test per route. PRD: `docs/prd/archive/2026/page-level-testing-rework.md`.
 
 ### Local workflow
 
@@ -208,7 +208,7 @@ If the new route doesn't have a visible `<h1>` (page-shell pattern), add a
 
 Self-hosted Playwright + `@storybook/test-runner`. Baselines live under
 `apps/web/test/vr/__snapshots__/` as `<story-id>--<viewport>.png` and are
-committed to the repo. Background and rationale: `docs/prd/visual-regression-testing.md`.
+committed to the repo. Background and rationale: `docs/prd/archive/2026/visual-regression-testing.md`.
 
 ### Local workflow (Docker required)
 
@@ -605,7 +605,7 @@ const meta = {
 ```
 
 Phase 2 covers every `UI/*`, `Foundation/*`, and `Layout/*` story file.
-Phase 3 (`docs/prd/visual-regression-testing.md` §12 Phase 3 appendix)
+Phase 3 (`docs/prd/archive/2026/visual-regression-testing.md` §12 Phase 3 appendix)
 defines a 36-file Include list of `Features/*` components that **must**
 adopt the `vr` tag — but adoption is staged with the upcoming full
 component redesign rather than landed in one big capture. See the next
@@ -624,13 +624,13 @@ without paying the throwaway-baseline cost up front.
 **Definition of Ready** — before opening the redesign PR:
 
 - Confirm the component's story file is in the Phase 3 Include list (see
-  `docs/prd/visual-regression-testing.md` §12 Phase 3 appendix). If it is
+  `docs/prd/archive/2026/visual-regression-testing.md` §12 Phase 3 appendix). If it is
   in the Defer list, no VR adoption is required by this redesign.
 - If the redesign splits or renames an Included story file (e.g.
   `MatchDetailView.stories.tsx` becomes `MatchDetailHero.stories.tsx` +
   `MatchDetailBody.stories.tsx`), every resulting story file inherits the
   `vr` obligation, and the Phase 3 Include list in
-  `docs/prd/visual-regression-testing.md` is updated in the same PR to
+  `docs/prd/archive/2026/visual-regression-testing.md` is updated in the same PR to
   reflect the new file names.
 - Confirm Docker Desktop is running locally (required for `pnpm vr:update:story`).
 

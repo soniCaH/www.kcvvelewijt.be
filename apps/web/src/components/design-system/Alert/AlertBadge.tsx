@@ -6,7 +6,7 @@
  * Direction E ("Angled badge + italic Freight Display message") locked at
  * the Phase 2.A.5 design checkpoint (2026-04-30). Source-of-record:
  * `docs/design/mockups/phase-2-a-5-alert/option-e-angled-badge.html` and
- * `docs/prd/redesign-phase-2.md` §6.4.A.
+ * `docs/prd/archive/2026/redesign-phase-2.md` §6.4.A.
  *
  * Two-form Alert API: this is the inline form. Use `<AlertBadge>` for
  * form-field validation, short single-headline confirmations, and form

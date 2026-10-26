@@ -3,7 +3,7 @@
 **Date:** 2026-06-07
 **Owner:** @climacon
 **Tracker:** #1529 (Phase 7 master)
-**Supersedes (on landing):** `docs/prd/sponsors-redesign.md`
+**Supersedes (on landing):** `docs/prd/archive/2026/sponsors-redesign.md`
 **Drill record:** `7d0`…`7d5` lock docs + `*-compare.html` in this folder (authoritative for design).
 
 The `/sponsors` redesign in the retro-terrace-fanzine system. Register: **grateful, warm,

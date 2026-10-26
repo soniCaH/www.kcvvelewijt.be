@@ -54,4 +54,4 @@ is locked.
 ## Drill complete
 
 Rounds `7o0`–`7o7` (+ `7o2c` re-scope) are locked. Next: the PRD
-(`docs/prd/redesign-phase-7-hulp-hub.md`) → `/prd-to-issues`.
+(`docs/prd/archive/2026/redesign-phase-7-hulp-hub.md`) → `/prd-to-issues`.

@@ -114,7 +114,7 @@ asymmetric sidebar variant.
 
 ## PRD + brief impact
 
-- `docs/prd/redesign-phase-5-article-detail.md` — §1 shared body shell
+- `docs/prd/archive/2026/redesign-phase-5-article-detail.md` — §1 shared body shell
   loses `<EditieLabel />`; §1 closing note loses "Editie line is
   UI-only"; §3 phasing loses 5.A.3 Editie mention; §6 new-components
   table loses EditieLabel row; §9 row 5.d4 updated to lock; §8 issue

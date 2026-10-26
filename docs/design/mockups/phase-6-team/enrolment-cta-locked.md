@@ -39,9 +39,9 @@ height="md">` precedes it, exactly like every other section. Reuses the page
 
 The section now mounts **after `#info`**, before `<VerderLezenRow>` — the last
 content moment on the page. Round 1 chose B to put the CTA at the end of the
-content; in June that *was* "between squad and staff", because `#info` rendered
+content; in June that _was_ "between squad and staff", because `#info` rendered
 on **0 of 16** team pages. [#2540](https://github.com/soniCaH/www.kcvvelewijt.be/issues/2540)
-makes `#info` (*Trainingen & contact*) render on 18 of 18, which left the locked
+makes `#info` (_Trainingen & contact_) render on 18 of 18, which left the locked
 slot in the middle of the page and made the CTA the **first `<h2>`** a youth
 page emits — ahead of the coach and the training times. Moving it follows round
 1's reasoning rather than overturning it; A and C stay rejected.
@@ -148,7 +148,7 @@ in the PR body.
 
 - Drill artefact: `6cd7-enrolment-cta/visual-compare.html` + `compare.md`.
 - Sits outside `detail-ia-locked.md` (locked IA) and
-  `docs/prd/redesign-phase-6c-team.md` (6.C PRD) — a discovered-unknown
+  `docs/prd/archive/2026/redesign-phase-6c-team.md` (6.C PRD) — a discovered-unknown
   follow-up mounted on top of the shipped Phase 6.C page.
 - Primitives: `<TapedCard>`, `<JerseyShirt>`, `<MonoLabel>`,
   `<EditorialHeading>`, `<LinkButton>`, `<StripedSeam>`.

@@ -106,7 +106,7 @@ const meta = {
   // but empirical evidence on this codebase contradicts that), so
   // `--excludeTags vr-skip` is the filter that actually keeps the test file
   // from being generated. Page-level visual coverage moves to Playwright e2e
-  // per docs/prd/page-level-testing-rework.md.
+  // per docs/prd/archive/2026/page-level-testing-rework.md.
   // This file used to fail to import under the Storybook Vitest addon's
   // browser project (#3146) — it imports `@/app/(landing)/nieuws/loading`,
   // which imported data constants straight from its sibling `page.tsx`,

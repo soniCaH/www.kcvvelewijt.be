@@ -6,16 +6,16 @@
 
 ## What this locks
 
-| Decision | Locked value |
-| --- | --- |
-| Overall shape | Single row card — `border-2 ink + shadow-paper-sm + bg-cream`. Three zones: left stub (~64px) → body (teams + score) → result pill at the right edge |
-| Stub | `bg-cream-soft`, centred. Display-big date number (18px, weight 900) over italic display month label ("jun", lowercase Dutch). 2px dashed ink right border. No time in the stub. |
-| Body | Mono kicker dropped (date stamp is the marker; rows live under date-grouped section headers when needed). 3-col grid: home (`1fr`) / score (`auto`) / away (`1fr`). Italic display team names; KCVV gets `font-weight: 600`. Score `display-big` weight 900, 16px |
-| Result pill | At the row end, separated by a 1px dashed ink-muted vertical divider. 22×22 square pill. Three variants: W (jersey green bg, ink text) / G (cream-soft bg, ink border, ink text) / L (warm bg, cream text — per round 2 deferral) |
-| Theme | Light only (dark dropped — single consumer `<TeamSchedule>` is light) |
-| Hover | Canonical press-down per `[[feedback_canonical_press_down_hover]]` |
-| Link wrap | Whole row is a `<Link>` to `/wedstrijd/[matchId]` (matches today's behaviour) |
-| New primitives | **None** — pure composition of d6 vocabulary at row scale |
+| Decision       | Locked value                                                                                                                                                                                                                                                      |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Overall shape  | Single row card — `border-2 ink + shadow-paper-sm + bg-cream`. Three zones: left stub (~64px) → body (teams + score) → result pill at the right edge                                                                                                              |
+| Stub           | `bg-cream-soft`, centred. Display-big date number (18px, weight 900) over italic display month label ("jun", lowercase Dutch). 2px dashed ink right border. No time in the stub.                                                                                  |
+| Body           | Mono kicker dropped (date stamp is the marker; rows live under date-grouped section headers when needed). 3-col grid: home (`1fr`) / score (`auto`) / away (`1fr`). Italic display team names; KCVV gets `font-weight: 600`. Score `display-big` weight 900, 16px |
+| Result pill    | At the row end, separated by a 1px dashed ink-muted vertical divider. 22×22 square pill. Three variants: W (jersey green bg, ink text) / G (cream-soft bg, ink border, ink text) / L (warm bg, cream text — per round 2 deferral)                                 |
+| Theme          | Light only (dark dropped — single consumer `<TeamSchedule>` is light)                                                                                                                                                                                             |
+| Hover          | Canonical press-down per `[[feedback_canonical_press_down_hover]]`                                                                                                                                                                                                |
+| Link wrap      | Whole row is a `<Link>` to `/wedstrijd/[matchId]` (matches today's behaviour)                                                                                                                                                                                     |
+| New primitives | **None** — pure composition of d6 vocabulary at row scale                                                                                                                                                                                                         |
 
 ## Composition
 
@@ -31,11 +31,11 @@
 
 ## Result pill colours
 
-| Result | Pill | Notes |
-| --- | --- | --- |
-| **W** (winst) | `bg-jersey text-ink` (effectively `pill-jersey`) | Existing MonoLabel pill variant |
-| **G** (gelijkspel / draw) | `bg-cream-soft text-ink border border-ink` | Neutral; matches MatchStatusBadge T3's cream-deep no-game tier in spirit |
-| **L** (verlies) | `bg-warm text-cream` | Round 2 sub-decision; warm reads as "abnormal but match concluded". Owner can downgrade to a bordered-cream pill if warm feels too loud across many losses in a season |
+| Result                    | Pill                                             | Notes                                                                                                                                                                  |
+| ------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **W** (winst)             | `bg-jersey text-ink` (effectively `pill-jersey`) | Existing MonoLabel pill variant                                                                                                                                        |
+| **G** (gelijkspel / draw) | `bg-cream-soft text-ink border border-ink`       | Neutral; matches MatchStatusBadge T3's cream-deep no-game tier in spirit                                                                                               |
+| **L** (verlies)           | `bg-warm text-cream`                             | Round 2 sub-decision; warm reads as "abnormal but match concluded". Owner can downgrade to a bordered-cream pill if warm feels too loud across many losses in a season |
 
 ## Rejected alternatives
 
@@ -64,18 +64,18 @@
 
 ## Drill state after this lock — ALL DRILLS COMPLETE
 
-| Drill | Subject | Status |
-| --- | --- | --- |
-| 6.B.d0 | Data reality | ✅ LOCKED |
-| 6.B.d1 | Page composition | ✅ LOCKED |
-| 6.B.d2 | `<MatchHero>` shape | ✅ LOCKED |
-| 6.B.d3 | `<MatchLineupSection>` + `<MatchEventsSection>` | ✅ LOCKED |
-| 6.B.d4 | `<MatchArticleLinkCard>` | ✅ LOCKED (build deferred to post-#1470) |
-| 6.B.d5 | `<MatchStatusBadge>` Direction-D + tint | ✅ LOCKED |
-| 6.B.d6 | `<MatchTeaser>` | ✅ LOCKED (default only; compact + MatchesSlider retired) |
-| 6.B.d7 | `<MatchResultRow>` | ✅ **LOCKED (this doc — Variant A mini-teaser row)** |
-| 6.B.d8 | `<MatchStrip>` audit | ✅ LOCKED (no-op — Phase 3.C lock authoritative) |
-| 6.B.d2 round 4 | MatchHero mobile collapse | deferred to implementation kickoff |
-| 6.B.d3 round 2 | Per-row visual refinements | deferred unless flagged |
+| Drill          | Subject                                         | Status                                                    |
+| -------------- | ----------------------------------------------- | --------------------------------------------------------- |
+| 6.B.d0         | Data reality                                    | ✅ LOCKED                                                 |
+| 6.B.d1         | Page composition                                | ✅ LOCKED                                                 |
+| 6.B.d2         | `<MatchHero>` shape                             | ✅ LOCKED                                                 |
+| 6.B.d3         | `<MatchLineupSection>` + `<MatchEventsSection>` | ✅ LOCKED                                                 |
+| 6.B.d4         | `<MatchArticleLinkCard>`                        | ✅ LOCKED (build deferred to post-#1470)                  |
+| 6.B.d5         | `<MatchStatusBadge>` Direction-D + tint         | ✅ LOCKED                                                 |
+| 6.B.d6         | `<MatchTeaser>`                                 | ✅ LOCKED (default only; compact + MatchesSlider retired) |
+| 6.B.d7         | `<MatchResultRow>`                              | ✅ **LOCKED (this doc — Variant A mini-teaser row)**      |
+| 6.B.d8         | `<MatchStrip>` audit                            | ✅ LOCKED (no-op — Phase 3.C lock authoritative)          |
+| 6.B.d2 round 4 | MatchHero mobile collapse                       | deferred to implementation kickoff                        |
+| 6.B.d3 round 2 | Per-row visual refinements                      | deferred unless flagged                                   |
 
-**Next step: `/write-a-prd`** consolidating all 8 drill decisions + the BFF schema delta + the cleanup deliverables into `docs/prd/redesign-phase-6b-match-detail.md`. Then `/prd-to-issues` to spawn the implementation tickets.
+**Next step: `/write-a-prd`** consolidating all 8 drill decisions + the BFF schema delta + the cleanup deliverables into `docs/prd/archive/2026/redesign-phase-6b-match-detail.md`. Then `/prd-to-issues` to spawn the implementation tickets.

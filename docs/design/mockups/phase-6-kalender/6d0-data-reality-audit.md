@@ -1,6 +1,6 @@
 # 6.D Kalender — `6d0` Data-Reality Audit
 
-**Issue:** #1993 (Phase 6.D design gate) · **PRD:** `docs/prd/redesign-phase-6d-kalender.md`
+**Issue:** #1993 (Phase 6.D design gate) · **PRD:** `docs/prd/archive/2026/redesign-phase-6d-kalender.md`
 **Purpose:** Establish what the calendar actually renders — per-source row data + real
 volume/density — so the `6d1` reskin-vs-agenda A/B is decided against reality, not the
 master-plan §6.6 sketch (which was drafted picturing a sparse events agenda).
@@ -15,11 +15,11 @@ Audit only — no design decisions here. Decisions land in `6d1`+ and the lock d
 `buildCalendarFeed`) — a discriminated union over `source`, each row carrying a single
 `kalenderType` facet (`"Wedstrijden" | EventType`) and an ISO `dateStart`:
 
-| `source`  | Origin                         | Detail link            | `kalenderType`            |
-| --------- | ------------------------------ | ---------------------- | ------------------------- |
-| `match`   | PSD via BFF (`getMatches`)     | `/wedstrijd/[matchId]` | `"Wedstrijden"`           |
-| `event`   | Sanity `event` doc             | `/evenementen/[slug]`  | `eventType` (→ `Andere`)  |
-| `article` | Sanity `articleType:event`     | `/nieuws/[slug]`       | `eventType` (→ `Andere`)  |
+| `source`  | Origin                     | Detail link            | `kalenderType`           |
+| --------- | -------------------------- | ---------------------- | ------------------------ |
+| `match`   | PSD via BFF (`getMatches`) | `/wedstrijd/[matchId]` | `"Wedstrijden"`          |
+| `event`   | Sanity `event` doc         | `/evenementen/[slug]`  | `eventType` (→ `Andere`) |
+| `article` | Sanity `articleType:event` | `/nieuws/[slug]`       | `eventType` (→ `Andere`) |
 
 ## 2. What each source provides for a calendar row
 
@@ -31,7 +31,7 @@ Audit only — no design decisions here. Decisions land in `6d1`+ and the lock d
 (`kcvv_team_label` — "A-ploeg", "U15 A") · `isHome`.
 
 - A match row wants **two crests + a score/VS + a time + the KCVV team label + home/away**.
-  This is a *two-sided scoreboard*, not a one-line title. The 6.B/6.C work already locked
+  This is a _two-sided scoreboard_, not a one-line title. The 6.B/6.C work already locked
   this vocabulary (`<MatchHero>`, `<TeamAgendaRow>`: symmetric desktop / KCVV-centric mobile;
   outcome colour win=jersey-deep / draw=none / loss=brick).
 - `status` distinguishes upcoming (VS + time) from played (score). A calendar spanning the
@@ -59,7 +59,7 @@ two weekend days**:
   still. Across a whole month, events + articles together are typically **single digits**.
 
 > **Implication for `6d1`:** the master-plan §6.6 "tabular month agenda" was sketched for the
-> sparse *events* surface. Applied to the real feed, a flat chronological agenda renders a
+> sparse _events_ surface. Applied to the real feed, a flat chronological agenda renders a
 > **wall of ~10–15 near-identical match rows on every Saturday**, with the occasional event
 > lost among them. The existing month **grid** absorbs density natively (a day-cell shows N
 > dots / a count, detail-on-select). So the A/B is not merely cosmetic — it is **"can the

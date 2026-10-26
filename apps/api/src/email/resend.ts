@@ -10,7 +10,7 @@ import { WorkerEnvTag } from "../env";
  * builders — the membership-specific templates live in `forms/membership-emails.ts`.
  */
 
-/** Verified sender — apex `kcvvelewijt.be` (see docs/prd/email-delivery.md). */
+/** Verified sender — apex `kcvvelewijt.be` (see docs/prd/archive/2026/email-delivery.md). */
 const DEFAULT_FROM = "KCVV Elewijt <noreply@kcvvelewijt.be>";
 
 export class EmailDeliveryError extends Error {

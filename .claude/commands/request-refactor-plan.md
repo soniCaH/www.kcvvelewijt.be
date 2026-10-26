@@ -11,7 +11,7 @@ Analyze the current codebase and produce a prioritized refactor plan. Run this a
 5. **Sanity query sprawl** — duplicate or near-duplicate GROQ queries that could be consolidated
 6. **Dead code** — imports, exports, or utility functions no longer used
 7. **Tailwind consistency** — one-off values that should be tokens; repeated class combos that should be components
-8. **Discovered unknowns backlog** — scan all `docs/prd/*.md` files for unresolved items in the "Discovered unknowns" section that never got a GitHub issue
+8. **Discovered unknowns backlog** — scan all `docs/prd/*.md` and `docs/prd/archive/2026/*.md` files for unresolved items in the "Discovered unknowns" section that never got a GitHub issue
 
 ## Output format
 

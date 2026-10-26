@@ -21,7 +21,7 @@ SANITY_API_TOKEN=
 SANITY_WEBHOOK_SECRET=
 
 # Resend — transactional email for member-facing forms.
-# See docs/prd/email-delivery.md for the email-delivery decisions.
+# See docs/prd/archive/2026/email-delivery.md for the email-delivery decisions.
 RESEND_API_KEY=
 
 # Cloudflare Turnstile — membership-form spam check (server-side siteverify secret).
