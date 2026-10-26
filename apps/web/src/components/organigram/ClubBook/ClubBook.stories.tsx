@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { expect, userEvent, within } from "storybook/test";
+import { expect, fireEvent, userEvent, within } from "storybook/test";
 import { ClubBook } from "./ClubBook";
 import { clubBookNodes, clubBookPaths } from "./club-book.fixture";
 import { CLUB_BOOK_PRINT_CSS } from "./print-style";
@@ -30,6 +30,14 @@ const ledgersOnly = clubBookNodes.map((node) => {
 const onlyPillar = (pillar: string) =>
   ledgersOnly.filter((node) => node.pillar === pillar);
 
+/**
+ * Opens a row the way a mouse does on screen: no focus ring, no scroll. `userEvent.click`
+ * focuses the `<summary>` since Storybook 10.6, which draws `:focus-visible` and scrolls
+ * the clipped print sheet to the row.
+ */
+const openRow = (canvasElement: HTMLElement, text: string) =>
+  fireEvent.click(within(canvasElement).getByText(text));
+
 /** Key-figure cards and the Raad line on top, then the four pillars. */
 export const Default: Story = {};
 
@@ -42,10 +50,7 @@ export const PillarsClosed: Story = {
 export const RowOpenSingleHolder: Story = {
   args: { nodes: onlyPillar("jeugd-opleiding") },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await userEvent.click(
-      canvas.getByText("TVJO · Jeugdcoördinator Onderbouw"),
-    );
+    openRow(canvasElement, "TVJO · Jeugdcoördinator Onderbouw");
   },
 };
 
@@ -53,8 +58,7 @@ export const RowOpenSingleHolder: Story = {
 export const RowOpenSharedBox: Story = {
   args: { nodes: onlyPillar("club") },
   play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-    await userEvent.click(canvas.getByText("Kledij"));
+    openRow(canvasElement, "Kledij");
   },
 };
 
@@ -127,7 +131,7 @@ export const PrintSheet: Story = {
     ),
   ],
   play: async ({ canvasElement }) => {
-    await userEvent.click(within(canvasElement).getByText("Kledij"));
+    openRow(canvasElement, "Kledij");
   },
 };
 
