@@ -156,6 +156,25 @@ describe("sitemap.ts", () => {
     expect(articleEntries[0].priority).toBe(0.7);
   });
 
+  // Next writes `<loc>` and `<image:loc>` unescaped, so a bare `&` from an
+  // image query string made the whole file invalid XML (#3672).
+  it("emits no bare & or < in any url or image", async () => {
+    const image =
+      "https://cdn.sanity.io/images/p/production/x.jpg?w=1200&h=630&fit=crop";
+    mockFetch.mockResolvedValue([
+      { slug: "a&b<c", updatedAt: "2026-03-15T10:00:00Z", image },
+    ]);
+
+    const result = await sitemap();
+
+    const values = result.flatMap((e) => [e.url, ...(e.images ?? [])]);
+    expect(values).toContain(
+      "https://cdn.sanity.io/images/p/production/x.jpg?w=1200&amp;h=630&amp;fit=crop",
+    );
+    expect(values).toContain("https://www.kcvvelewijt.be/nieuws/a&amp;b&lt;c");
+    expect(values.filter((v) => /&(?!amp;|lt;)|</.test(v))).toEqual([]);
+  });
+
   describe("CMS pages at /club/<slug> (#3483)", () => {
     const clubUrl = (slug: string) => `https://www.kcvvelewijt.be/club/${slug}`;
 
