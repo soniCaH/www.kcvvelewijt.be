@@ -509,11 +509,11 @@ jobs:
       fail-fast: false
       matrix:
         shard: [1, 2, 3]
-    # Pinned to match @playwright/test in apps/web/package.json (1.60.0) and the
+    # Pinned to match @playwright/test in apps/web/package.json (1.64.1) and the
     # local Docker image in apps/web/Dockerfile.vr. Bump all three together —
     # drift produces silent font-rendering diffs.
     container:
-      image: mcr.microsoft.com/playwright:v1.60.0-noble
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
       options: --user 0:0
     # Installs dependencies and drives a browser over the built Storybook; it
     # only ever reads the repo.
