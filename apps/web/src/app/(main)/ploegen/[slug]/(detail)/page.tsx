@@ -87,6 +87,7 @@ import {
   competitiveBlockHeadingLabel,
   isCompetitiveBlockOpen,
 } from "@/lib/utils/competitive-block-state";
+import { parsePsdId } from "@/lib/utils/psd-id";
 import { TeamSectionNav, type TeamSectionNavItem } from "./TeamSectionNav";
 import { fetchTeamOrNull } from "../team-data";
 
@@ -328,7 +329,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
   if (!team) notFound();
 
   const displayName = team.displayName;
-  const psdTeamId = team.psdId ? parseInt(team.psdId, 10) : NaN;
+  const psdTeamId = team.psdId ? parsePsdId(team.psdId) : null;
 
   // Both depend only on `team`, never on each other, so they share one wave
   // rather than serializing Sanity behind the BFF pair (#2441).
@@ -355,9 +356,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
         "[ploegen/[slug]] related-articles lookup failed; rendering without the RelatedRow.",
       ),
     ),
-    Number.isFinite(psdTeamId) && psdTeamId > 0
-      ? fetchBffData(psdTeamId)
-      : null,
+    psdTeamId !== null ? fetchBffData(psdTeamId) : null,
   ]);
 
   // `bffData` collapses `null` (no usable psdId) and `"unavailable"`

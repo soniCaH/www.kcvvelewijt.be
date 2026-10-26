@@ -525,3 +525,29 @@ describe("/ploegen/[slug] enrolment CTA band — moved position + in-view event 
     );
   });
 });
+
+describe("/ploegen/[slug] parses the team's PSD id strictly (#3642)", () => {
+  beforeEach(() => {
+    mockFindBySlug.mockReset();
+    mockGetMatches.mockReset();
+    mockGetRanking.mockReset();
+    mockGetMatches.mockReturnValue(Effect.succeed([]));
+    mockGetRanking.mockReturnValue(Effect.succeed([]));
+  });
+
+  // `parseInt` read "01" as 1 and "12abc" as 12 — a different team's data.
+  it.each(["01", "12abc"])(
+    "treats psdId %j as no PSD id: no match or ranking read",
+    async (psdId) => {
+      mockFindBySlug.mockReturnValue(Effect.succeed(teamFixture(psdId)));
+
+      const element = await TeamPage({
+        params: Promise.resolve({ slug: "kcvv-elewijt-u13" }),
+      });
+      render(element);
+
+      expect(mockGetMatches).not.toHaveBeenCalled();
+      expect(mockGetRanking).not.toHaveBeenCalled();
+    },
+  );
+});

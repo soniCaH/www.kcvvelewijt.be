@@ -190,3 +190,25 @@ describe("/ploegen/[slug]/wedstrijden — a failed matches read never 404s a res
     });
   });
 });
+
+describe("/ploegen/[slug]/wedstrijden parses the team's PSD id strictly (#3642)", () => {
+  beforeEach(() => {
+    mockFindBySlug.mockReset();
+    mockGetMatches.mockReset();
+    mockGetMatches.mockReturnValue(Effect.succeed([]));
+  });
+
+  // `parseInt` read "01" as 1 and "12abc" as 12 — a different team's matches.
+  it.each(["01", "12abc"])(
+    "treats psdId %j as no PSD id: no matches read",
+    async (psdId) => {
+      mockFindBySlug.mockReturnValue(Effect.succeed(teamFixture(psdId)));
+
+      await WedstrijdenPage({
+        params: Promise.resolve({ slug: "kcvv-elewijt-u13" }),
+      });
+
+      expect(mockGetMatches).not.toHaveBeenCalled();
+    },
+  );
+});

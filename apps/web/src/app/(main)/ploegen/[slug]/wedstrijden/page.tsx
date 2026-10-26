@@ -16,6 +16,7 @@ import { buildBreadcrumbJsonLd, buildSportsTeamJsonLd } from "@/lib/seo/jsonld";
 import { transformMatchToSchedule } from "@/components/match";
 import type { ScheduleRow } from "@/components/match/types";
 import { findNextMatch } from "@/components/team/TeamMatchesSection/match-visibility";
+import { parsePsdId } from "@/lib/utils/psd-id";
 import { AgendaScrollToNext } from "./AgendaScrollToNext";
 import { fetchTeamOrNull } from "../team-data";
 
@@ -112,11 +113,11 @@ export default async function WedstrijdenPage({
   if (!team) notFound();
 
   const displayName = team.displayName;
-  const psdTeamId = team.psdId ? parseInt(team.psdId, 10) : NaN;
+  const psdTeamId = team.psdId ? parsePsdId(team.psdId) : null;
   const pageUrl = `${SITE_CONFIG.siteUrl}/ploegen/${slug}/wedstrijden`;
 
   let rawMatches: readonly Match[] = [];
-  if (Number.isFinite(psdTeamId) && psdTeamId > 0) {
+  if (psdTeamId !== null) {
     rawMatches = await runPromise(
       Effect.gen(function* () {
         const bff = yield* BffService;
@@ -229,7 +230,7 @@ export default async function WedstrijdenPage({
                     >
                       <TeamAgendaRow
                         match={m}
-                        kcvvTeamId={psdTeamId}
+                        kcvvTeamId={psdTeamId ?? undefined}
                         featured={nextMatch?.id === m.id}
                         // One green row inside a month list headed only by
                         // "September '26" — unlike `<TeamMatchesSection>`, this
