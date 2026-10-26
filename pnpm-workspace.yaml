@@ -17,3 +17,5 @@ minimumReleaseAgeExclude:
   - pnpm@10.34.7
   # Renovate security update: sanitize-html@2.18.0
   - sanitize-html@2.18.0
+  # Renovate security update: happy-dom@21.0.4
+  - happy-dom@21.0.4
