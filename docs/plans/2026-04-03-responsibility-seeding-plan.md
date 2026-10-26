@@ -9,7 +9,7 @@
 **Tech Stack:** Sanity schemas (defineField/defineType), GROQ projections, TypeScript strict, Vitest, Sanity client mutations
 
 **Design doc:** `docs/plans/2026-04-03-responsibility-seeding-design.md`
-**PRD:** `docs/prd/staff-migration-organigram-seeding.md`
+**PRD:** `docs/prd/archive/2026/staff-migration-organigram-seeding.md`
 
 ---
 

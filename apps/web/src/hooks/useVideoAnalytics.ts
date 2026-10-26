@@ -25,7 +25,7 @@ interface VideoEventInput {
  * `article_video_complete` is emitted on the upload `ended` event only.
  * Provider iframes (YouTube/Vimeo) do not expose an end-of-playback signal
  * without postMessage wiring (`YT.Player`, Vimeo Player SDK), which is
- * explicitly out of scope per `docs/prd/article-video-support.md` §4.
+ * explicitly out of scope per `docs/prd/archive/2026/article-video-support.md` §4.
  */
 export function useVideoAnalytics() {
   const playFiredRef = useRef(false);

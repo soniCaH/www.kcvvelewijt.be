@@ -3,7 +3,7 @@
 **Date:** 2026-06-07
 **Owner:** @climacon
 **Tracker:** #1529 (Phase 7 master)
-**Supersedes (on landing):** `docs/prd/jeugd-landing-page.md`
+**Supersedes (on landing):** `docs/prd/archive/2026/jeugd-landing-page.md`
 
 Locks what data the /jeugd redesign may render, before voice/IA/detail drilling.
 

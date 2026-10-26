@@ -3,7 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 import { derivePort } from "../../scripts/e2e-dev-port.mjs";
 
 // Phase 0.5 — Page-level Playwright e2e suite.
-// PRD: docs/prd/page-level-testing-rework.md
+// PRD: docs/prd/archive/2026/page-level-testing-rework.md
 // This config is dedicated to the e2e suite and is NOT shared with the
 // Storybook test-runner (which has its own internal config) or the legacy
 // VR config at apps/web/playwright.config.ts.

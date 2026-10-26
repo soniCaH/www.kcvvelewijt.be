@@ -41,7 +41,7 @@ const DEFAULT_IGNORE_CONSOLE_ERRORS: Array<string | RegExp> = [
  * site is expected to satisfy — does not assert content. Intended as a
  * cross-route reusable check, not a per-route deep assertion.
  *
- * Contract enforced (per PRD `docs/prd/page-level-testing-rework.md` §Decisions item 4):
+ * Contract enforced (per PRD `docs/prd/archive/2026/page-level-testing-rework.md` §Decisions item 4):
  *   - HTTP status matches `expectedStatus` (default 200)
  *   - `<h1>` rendered and visible
  *   - primary `<nav>` visible

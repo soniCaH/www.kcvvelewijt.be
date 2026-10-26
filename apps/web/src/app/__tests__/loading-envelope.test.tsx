@@ -25,7 +25,7 @@
  * route group, and the placement guard below now asserts the rule itself
  * rather than a growing list of per-route content checks.
  *
- * @see docs/prd/loading-skeleton-consistency.md — original Phase 4 guard
+ * @see docs/prd/archive/2026/loading-skeleton-consistency.md — original Phase 4 guard
  * @see https://github.com/kcvvelewijt/www.kcvvelewijt.be/issues/2573
  */
 

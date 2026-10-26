@@ -1,9 +1,3 @@
----
-status: completed
-completed_at: 2026-03-18
-completed_in: "#1038, #1039, #1040, #1041"
----
-
 # PRD: /jeugd Landing Page Redesign
 
 **Issues:** #1038, #1039, #1040, #1041
@@ -31,7 +25,7 @@ The `/jeugd` page currently shows a plain listing of youth teams with a basic he
 - New component: `JeugdEditorialGrid` — 9-item asymmetric grid (3 dynamic articles + 6 hardcoded nav cards)
 - New component: `JeugdQuote` (youth mission banner, same pattern as `MissionBanner`)
 - Refactor `TeamOverview`'s `getAgeCategory()` — replace 7-category grouping (Kleuters/Duiveltjes/Preminiemen/Miniemen/Kadetten/Scholieren/Beloften) with 3-tier grouping (Bovenbouw/Middenbouw/Onderbouw)
-- Reuse `EditorialCard` from `/club` (#1031) — already has `backgroundImage`, `featured`, and `variant?: 'default' | 'nav'` props; the `nav` variant applies the blue-ish gradient tint (reused as-is, no extension needed)
+- Reuse `EditorialCard` from `/club` (#1031) — already has `backgroundImage` and `featured` props; extend with `variant` prop for nav card blue-ish tint
 - Reuse `MissionBanner` from `/club` (#1031) — `JeugdQuote` can be a direct reuse with different props, or a thin wrapper
 - Reuse `ClubEditorialGrid` grid layout pattern from `/club` (#1031) — adapt from 6 to 9 cards
 - Use design tokens from #1031: `tracking-label`, `tracking-caps`, `rounded-card`, `shadow-card-hover`, `text-stat`
@@ -60,7 +54,7 @@ Proves: hero bleed-through works (same pattern as `/club`), `TeamOverview` 3-tie
 
 ## 4. Phases
 
-```text
+```
 Phase 1: Tracer bullet — hero + single card + refactored team listing (#1038)
 Phase 2: Full editorial grid with dynamic articles + nav cards (#1039)
 Phase 3: Youth quote section + final polish (#1040)
@@ -77,7 +71,7 @@ Phase 4: Storybook stories for all new components (#1041)
 - [ ] `TeamOverview` groups youth teams into 3 tiers: Bovenbouw (U14–U21), Middenbouw (U10–U13), Onderbouw (U6–U9)
 - [ ] Old 7-category grouping (Kleuters, Duiveltjes, etc.) is fully removed from `getAgeCategory()`
 - [ ] `TeamOverview` tests updated for new grouping
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 2 — Full editorial grid
 
@@ -88,7 +82,7 @@ Phase 4: Storybook stories for all new components (#1041)
 - [ ] Grid collapses responsively: 2-col at `≤960px` (featured full-width), 1-col at `≤640px`
 - [ ] Graceful fallback when fewer than 3 jeugd articles exist (show only available articles, fill remaining slots with nav cards or hide empty slots)
 - [ ] All nav card links point to correct routes
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 3 — Quote section + polish
 
@@ -97,7 +91,7 @@ Phase 4: Storybook stories for all new components (#1041)
 - [ ] Diagonal directions alternate correctly: right → left → right → left
 - [ ] Page metadata updated (title, description, OpenGraph)
 - [ ] ISR revalidation maintained (1 hour for article freshness)
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ### Phase 4 — Storybook
 
@@ -105,7 +99,7 @@ Phase 4: Storybook stories for all new components (#1041)
 - [ ] `JeugdEditorialGrid` story under `Features/Jeugd/JeugdEditorialGrid`
 - [ ] `JeugdQuote` story under `Features/Jeugd/JeugdQuote`
 - [ ] All stories use `StoryObj<typeof meta>` pattern
-- [ ] `pnpm --filter @kcvv/web check-all` passes
+- [ ] `pnpm turbo run lint type-check test build --filter=@kcvv/web` passes
 
 ## 6. Effect Schema / api-contract Changes
 
@@ -206,24 +200,18 @@ The `EditorialCard` component (`components/club/EditorialCard/`) from the /club 
 - Uses design tokens: `rounded-card`, `shadow-card-hover`, `tracking-label`, `tracking-caps`
 - Animated top border bar with `clip-path` hover effect
 
-**Reused for /jeugd (no extension needed):**
+**Needed extension for /jeugd:**
 
-The `EditorialCard` component already supports `variant?: 'default' | 'nav'`
-(see `apps/web/src/components/club/EditorialCard/EditorialCard.tsx`). The `nav`
-variant applies the blue-ish gradient tint via the `editorial-card-overlay--nav`
-class. No new prop was added — the existing implementation was reused as-is.
-
-The gradient tint applied by the `nav` variant:
-
-```css
-linear-gradient(to top, rgba(30,32,36,0.95) 0%, rgba(30,40,54,0.6) 40%, rgba(30,40,54,0.2) 100%)
-```
+1. **`variant` prop** — `"default" | "nav"` — nav variant applies a blue-ish gradient tint to differentiate navigation cards from article cards:
+   ```css
+   linear-gradient(to top, rgba(30,32,36,0.95) 0%, rgba(30,40,54,0.6) 40%, rgba(30,40,54,0.2) 100%)
+   ```
 
 Since `EditorialCard` is now used by both `/club` and `/jeugd`, keep in `components/club/` for now (it's a shared editorial pattern). Reconsider location if a third page uses it.
 
 #### Responsive grid behavior
 
-```text
+```
 ≤960px: grid-cols-2, all cards col-auto row-auto min-h-[260px], featured col-span-full min-h-[320px]
 ≤640px: grid-cols-1, featured min-h-[280px]
 ```
@@ -296,7 +284,7 @@ The `MissionBanner` component from `/club` (#1031) renders a quote section with 
 
 ## 8. Component File Structure
 
-```text
+```
 apps/web/src/
 ├── app/(main)/jeugd/
 │   └── page.tsx                          # Rewritten: SectionStack, data fetching

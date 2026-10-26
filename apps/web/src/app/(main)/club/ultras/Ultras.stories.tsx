@@ -8,7 +8,7 @@ import { PullQuote } from "@/components/design-system/PullQuote";
  * Storybook doc story for the reskinned `/club/ultras` page (Phase 7, design
  * contract 7u1). The opening is `<UltrasHero>`. Page-level
  * visual coverage moves to the Playwright e2e suite
- * (docs/prd/page-level-testing-rework.md).
+ * (docs/prd/archive/2026/page-level-testing-rework.md).
  */
 const meta = {
   title: "Pages/Ultras",

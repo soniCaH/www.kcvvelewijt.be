@@ -429,7 +429,7 @@ Closes #1269 (partial)"
 
 **Files:**
 
-- Modify: `docs/prd/first-team-match-strip.md` (discovered unknowns)
+- Modify: `docs/prd/archive/2026/first-team-match-strip.md` (discovered unknowns)
 
 The shared utility `getFirstTeamNextMatch()` is used only by the `(main)` layout. The homepage retains its existing `BffService.getNextMatches()` + `mapMatchesToUpcomingMatches()` pipeline because `MatchesSliderSection` needs the full matches array, not just the first match. No homepage code change is needed — document this decision in the PRD discovered unknowns.
 
@@ -440,13 +440,13 @@ The homepage already has its own fetch + map pipeline that returns the full arra
 ### Step 2: Add discovered unknown to PRD
 
 ```bash
-echo "- [2026-04-12] Discovered: homepage needs full matches array for MatchesSliderSection, not just first match — shared utility used by (main) layout only; homepage retains its own BFF call → resolved inline" >> docs/prd/first-team-match-strip.md
+echo "- [2026-04-12] Discovered: homepage needs full matches array for MatchesSliderSection, not just first match — shared utility used by (main) layout only; homepage retains its own BFF call → resolved inline" >> docs/prd/archive/2026/first-team-match-strip.md
 ```
 
 ### Step 3: Commit
 
 ```bash
-git add docs/prd/first-team-match-strip.md
+git add docs/prd/archive/2026/first-team-match-strip.md
 git commit -m "docs(ui): document homepage match fetch decision in PRD
 
 Homepage retains its own BFF call because it needs the full matches array
@@ -504,12 +504,12 @@ Closes #1269"
 
 ## Files created/modified summary
 
-| Action | Path                                                            |
-| ------ | --------------------------------------------------------------- |
-| Create | `apps/web/src/lib/server/match-data.ts`                         |
-| Create | `apps/web/src/lib/server/match-data.test.ts`                    |
-| Create | `apps/web/src/components/layout/MatchStrip/MatchStrip.tsx`      |
-| Create | `apps/web/src/components/layout/MatchStrip/MatchStrip.test.tsx` |
-| Create | `apps/web/src/components/layout/MatchStrip/index.ts`            |
-| Create | `apps/web/src/app/(main)/layout.tsx`                            |
-| Modify | `docs/prd/first-team-match-strip.md` (discovered unknowns)      |
+| Action | Path                                                                    |
+| ------ | ----------------------------------------------------------------------- |
+| Create | `apps/web/src/lib/server/match-data.ts`                                 |
+| Create | `apps/web/src/lib/server/match-data.test.ts`                            |
+| Create | `apps/web/src/components/layout/MatchStrip/MatchStrip.tsx`              |
+| Create | `apps/web/src/components/layout/MatchStrip/MatchStrip.test.tsx`         |
+| Create | `apps/web/src/components/layout/MatchStrip/index.ts`                    |
+| Create | `apps/web/src/app/(main)/layout.tsx`                                    |
+| Modify | `docs/prd/archive/2026/first-team-match-strip.md` (discovered unknowns) |

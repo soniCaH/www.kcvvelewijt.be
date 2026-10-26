@@ -1,6 +1,6 @@
 # Phase 6.D — `/kalender` design lock
 
-**Issue:** #1993 (design gate) · **PRD:** `docs/prd/redesign-phase-6d-kalender.md`
+**Issue:** #1993 (design gate) · **PRD:** `docs/prd/archive/2026/redesign-phase-6d-kalender.md`
 **Status:** LOCKED 2026-06-05 (drilled with owner, rounds 6d1–6d4). Supersedes the parked
 A/B in master-plan §6.6. Build phases (#1994/#1995) take their final ACs from here.
 

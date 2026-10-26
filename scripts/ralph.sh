@@ -227,8 +227,8 @@ The main repo is available read-only at ${REPO_ROOT} for reading CLAUDE.md, docs
 ## Step 1 — Read your brief
   gh issue view ${issue}
 
-Find the PRD path in the issue body (format: "docs/prd/[name].md") and read it:
-  cat ${REPO_ROOT}/docs/prd/[name].md
+If the issue body cites a PRD path, read it (shipped PRDs live under docs/prd/archive/2026/):
+  cat ${REPO_ROOT}/<path-from-issue>
 
 Read the root CLAUDE.md for project-wide rules:
   cat ${REPO_ROOT}/CLAUDE.md

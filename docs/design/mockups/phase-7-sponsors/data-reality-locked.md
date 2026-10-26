@@ -3,7 +3,7 @@
 **Date:** 2026-06-06
 **Owner:** @climacon
 **Tracker:** #1529 (Phase 7 master)
-**Supersedes (on landing):** `docs/prd/sponsors-redesign.md`
+**Supersedes (on landing):** `docs/prd/archive/2026/sponsors-redesign.md`
 
 The first checkpoint locks **what data the design is allowed to render**, before any
 voice/IA/detail drilling. Mockups may only show fields the `sponsor` schema actually

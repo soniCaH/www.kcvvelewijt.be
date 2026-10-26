@@ -4,7 +4,7 @@
 > **Date:** 2026-04-30.
 > **Worktree:** `design/phase-2-track-b`.
 > **Master design:** [`docs/plans/2026-04-27-redesign-master-design.md`](../../../plans/2026-04-27-redesign-master-design.md) §6.5.
-> **PRD:** [`docs/prd/redesign-phase-2.md`](../../../prd/redesign-phase-2.md) §6.5.
+> **PRD:** [`docs/prd/archive/2026/redesign-phase-2.md`](../../../prd/archive/2026/redesign-phase-2.md) §6.5.
 > **Tracking issues:** [#1524](https://github.com/soniCaH/www.kcvvelewijt.be/issues/1524) (umbrella), [#1575](https://github.com/soniCaH/www.kcvvelewijt.be/issues/1575) (Spinner), [#1576](https://github.com/soniCaH/www.kcvvelewijt.be/issues/1576) (BrandedTabs), [#1577](https://github.com/soniCaH/www.kcvvelewijt.be/issues/1577) (FilterTabs), [#1578](https://github.com/soniCaH/www.kcvvelewijt.be/issues/1578) (HorizontalSlider + ScrollHint arrows).
 
 ---
@@ -16,7 +16,7 @@
 Direction D is a synthesis derived from owner feedback on the three exploratory directions. Its threads:
 
 - **Paper-card foundation everywhere on chrome:** `border-2 ink` + `shadow-paper-sm` + cream bg.
-- **Ink-invert active states**, never jersey-fill. Jersey reserved for *content* (live match strip, KCVV name, scoring) — not chrome.
+- **Ink-invert active states**, never jersey-fill. Jersey reserved for _content_ (live match strip, KCVV name, scoring) — not chrome.
 - **No tape on chrome.** Tape stays for editorial primitives (TapedCard hero artefacts).
 - **Sharp corners** everywhere — no `border-radius`.
 - **No leading glyphs** on filter tabs.
@@ -109,12 +109,12 @@ Used wherever `--shadow-paper-sm` (ink) would vanish: ink-bg active states (Bran
 
 The three original directional explorations led to the synthesis. Each is preserved for context:
 
-| File | Direction | Status |
-| --- | --- | --- |
-| [`option-a-paper-and-tape.html`](option-a-paper-and-tape.html) | Paper &amp; Tape — paper feel everywhere on chrome | Historical — not chosen |
-| [`option-b-mono-and-ink.html`](option-b-mono-and-ink.html) | Mono &amp; Ink — flat chrome, restrained | Historical — not chosen |
-| [`option-c-matchday-programme.html`](option-c-matchday-programme.html) | Matchday Programme — programme vocabulary, sub-variants | Historical — not chosen |
-| [`option-d-paper-chrome-ink-emphasis.html`](option-d-paper-chrome-ink-emphasis.html) | **Paper chrome, ink emphasis** | ✅ **Chosen** |
+| File                                                                                 | Direction                                               | Status                  |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------- | ----------------------- |
+| [`option-a-paper-and-tape.html`](option-a-paper-and-tape.html)                       | Paper &amp; Tape — paper feel everywhere on chrome      | Historical — not chosen |
+| [`option-b-mono-and-ink.html`](option-b-mono-and-ink.html)                           | Mono &amp; Ink — flat chrome, restrained                | Historical — not chosen |
+| [`option-c-matchday-programme.html`](option-c-matchday-programme.html)               | Matchday Programme — programme vocabulary, sub-variants | Historical — not chosen |
+| [`option-d-paper-chrome-ink-emphasis.html`](option-d-paper-chrome-ink-emphasis.html) | **Paper chrome, ink emphasis**                          | ✅ **Chosen**           |
 
 Owner feedback that drove the synthesis:
 

@@ -1,7 +1,7 @@
 # Responsibility Finder Seeding — Design
 
 **Issue:** #1207
-**PRD:** `docs/prd/staff-migration-organigram-seeding.md` (phases 1-5 complete)
+**PRD:** `docs/prd/archive/2026/staff-migration-organigram-seeding.md` (phases 1-5 complete)
 **Date:** 2026-04-03
 **Depends on:** #1213 (organigram seeding, CLOSED), #1212 (staff migration, CLOSED)
 **Prepares for:** #1220 (dynamic team-level routing)
@@ -20,23 +20,23 @@ The responsibility finder (`/hulp`) has zero `responsibility` documents in Sanit
 
 The `contactFields` shared object in the `responsibility` schema gets a `contactType` field that conditionally shows/hides fields:
 
-| `contactType` | Visible fields | Use case |
-|---|---|---|
-| `"position"` | `organigramNode` ref picker | Any organigram position (TVJO, Secretaris, API, Kledij) |
-| `"team-role"` | `teamRole` dropdown | Dynamic: "your team's trainer/afgevaardigde" (seeded in #1220) |
-| `"manual"` | `role`, `email`, `phone`, `department` | Fallback for contacts not in the organigram |
+| `contactType` | Visible fields                         | Use case                                                       |
+| ------------- | -------------------------------------- | -------------------------------------------------------------- |
+| `"position"`  | `organigramNode` ref picker            | Any organigram position (TVJO, Secretaris, API, Kledij)        |
+| `"team-role"` | `teamRole` dropdown                    | Dynamic: "your team's trainer/afgevaardigde" (seeded in #1220) |
+| `"manual"`    | `role`, `email`, `phone`, `department` | Fallback for contacts not in the organigram                    |
 
 Sanity `hidden` callbacks ensure editors see only the relevant fields per type. Validation enforces: pick a type, fill in its required field.
 
 ### 3. Scope split with #1220
 
-| This issue (#1207) | Deferred to #1220 |
-|---|---|
-| Schema extension (contactType, organigramNode ref, teamRole field) | Team selection UI ("Selecteer je ploeg") |
-| Seed ~20 static questions (niet-sportieve + admin/medical) | Seed ~8 dynamic sportieve vragen |
-| GROQ query update for organigramNode dereferencing | Frontend runtime resolution of team-role contacts |
-| Frontend Contact component update for multi-member nodes | Age-group → JC resolution logic |
-| Update `api-contract` Contact type if needed | New API endpoint for team → staff resolution |
+| This issue (#1207)                                                 | Deferred to #1220                                 |
+| ------------------------------------------------------------------ | ------------------------------------------------- |
+| Schema extension (contactType, organigramNode ref, teamRole field) | Team selection UI ("Selecteer je ploeg")          |
+| Seed ~20 static questions (niet-sportieve + admin/medical)         | Seed ~8 dynamic sportieve vragen                  |
+| GROQ query update for organigramNode dereferencing                 | Frontend runtime resolution of team-role contacts |
+| Frontend Contact component update for multi-member nodes           | Age-group → JC resolution logic                   |
+| Update `api-contract` Contact type if needed                       | New API endpoint for team → staff resolution      |
 
 ### 4. Search & indexing: no changes needed
 
@@ -51,74 +51,75 @@ Replace the current `contactFields` with:
 ```typescript
 const contactFields = [
   defineField({
-    name: 'contactType',
-    title: 'Type contact',
-    type: 'string',
+    name: "contactType",
+    title: "Type contact",
+    type: "string",
     options: {
       list: [
-        { title: 'Organigram positie', value: 'position' },
-        { title: 'Teamrol (dynamisch)', value: 'team-role' },
-        { title: 'Handmatig', value: 'manual' },
+        { title: "Organigram positie", value: "position" },
+        { title: "Teamrol (dynamisch)", value: "team-role" },
+        { title: "Handmatig", value: "manual" },
       ],
-      layout: 'radio',
+      layout: "radio",
     },
-    initialValue: 'position',
+    initialValue: "position",
     validation: (Rule) => Rule.required(),
   }),
   defineField({
-    name: 'organigramNode',
-    title: 'Positie',
-    type: 'reference',
-    to: [{ type: 'organigramNode' }],
-    description: 'Kies de organigram-positie (bijv. Secretaris, TVJO, API)',
-    hidden: ({ parent }) => parent?.contactType !== 'position',
+    name: "organigramNode",
+    title: "Positie",
+    type: "reference",
+    to: [{ type: "organigramNode" }],
+    description: "Kies de organigram-positie (bijv. Secretaris, TVJO, API)",
+    hidden: ({ parent }) => parent?.contactType !== "position",
   }),
   defineField({
-    name: 'teamRole',
-    title: 'Teamrol',
-    type: 'string',
+    name: "teamRole",
+    title: "Teamrol",
+    type: "string",
     options: {
       list: [
-        { title: 'Trainer', value: 'trainer' },
-        { title: 'Afgevaardigde', value: 'afgevaardigde' },
+        { title: "Trainer", value: "trainer" },
+        { title: "Afgevaardigde", value: "afgevaardigde" },
       ],
     },
-    description: 'Wordt dynamisch ingevuld op basis van de ploeg die de gebruiker kiest',
-    hidden: ({ parent }) => parent?.contactType !== 'team-role',
+    description:
+      "Wordt dynamisch ingevuld op basis van de ploeg die de gebruiker kiest",
+    hidden: ({ parent }) => parent?.contactType !== "team-role",
   }),
   defineField({
-    name: 'role',
-    title: 'Rol',
-    type: 'string',
+    name: "role",
+    title: "Rol",
+    type: "string",
     description: 'Weergavenaam (bijv. "Kantine")',
-    hidden: ({ parent }) => parent?.contactType !== 'manual',
+    hidden: ({ parent }) => parent?.contactType !== "manual",
   }),
   defineField({
-    name: 'email',
-    title: 'Email',
-    type: 'string',
-    hidden: ({ parent }) => parent?.contactType !== 'manual',
+    name: "email",
+    title: "Email",
+    type: "string",
+    hidden: ({ parent }) => parent?.contactType !== "manual",
   }),
   defineField({
-    name: 'phone',
-    title: 'Telefoon',
-    type: 'string',
-    hidden: ({ parent }) => parent?.contactType !== 'manual',
+    name: "phone",
+    title: "Telefoon",
+    type: "string",
+    hidden: ({ parent }) => parent?.contactType !== "manual",
   }),
   defineField({
-    name: 'department',
-    title: 'Afdeling',
-    type: 'string',
+    name: "department",
+    title: "Afdeling",
+    type: "string",
     options: {
       list: [
-        { title: 'Hoofdbestuur', value: 'hoofdbestuur' },
-        { title: 'Jeugdbestuur', value: 'jeugdbestuur' },
-        { title: 'Algemeen', value: 'algemeen' },
+        { title: "Hoofdbestuur", value: "hoofdbestuur" },
+        { title: "Jeugdbestuur", value: "jeugdbestuur" },
+        { title: "Algemeen", value: "algemeen" },
       ],
     },
-    hidden: ({ parent }) => parent?.contactType !== 'manual',
+    hidden: ({ parent }) => parent?.contactType !== "manual",
   }),
-]
+];
 ```
 
 ### Validation
@@ -126,21 +127,22 @@ const contactFields = [
 The existing `primaryContact` custom validation changes from "staffMember OR inline fields" to:
 
 ```typescript
-validation: (Rule) => Rule.required().custom((contact) => {
-  if (!contact?.contactType) return 'Kies een type contact'
-  switch (contact.contactType) {
-    case 'position':
-      return contact.organigramNode ? true : 'Kies een organigram-positie'
-    case 'team-role':
-      return contact.teamRole ? true : 'Kies een teamrol'
-    case 'manual':
-      return (contact.email || contact.phone || contact.role)
-        ? true
-        : 'Vul minstens één van: rol, email, telefoon in'
-    default:
-      return 'Ongeldig type contact'
-  }
-})
+validation: (Rule) =>
+  Rule.required().custom((contact) => {
+    if (!contact?.contactType) return "Kies een type contact";
+    switch (contact.contactType) {
+      case "position":
+        return contact.organigramNode ? true : "Kies een organigram-positie";
+      case "team-role":
+        return contact.teamRole ? true : "Kies een teamrol";
+      case "manual":
+        return contact.email || contact.phone || contact.role
+          ? true
+          : "Vul minstens één van: rol, email, telefoon in";
+      default:
+        return "Ongeldig type contact";
+    }
+  });
 ```
 
 ## GROQ query changes
@@ -174,19 +176,19 @@ The frontend `Contact` type expands to accommodate both:
 
 ```typescript
 interface Contact {
-  contactType: 'position' | 'team-role' | 'manual'
+  contactType: "position" | "team-role" | "manual";
   // position
-  position?: string       // organigramNode title
-  roleCode?: string       // organigramNode roleCode
-  members?: Array<{ id: string; name: string; email?: string; phone?: string }>
-  nodeId?: string         // for "Bekijk in organigram" link
+  position?: string; // organigramNode title
+  roleCode?: string; // organigramNode roleCode
+  members?: Array<{ id: string; name: string; email?: string; phone?: string }>;
+  nodeId?: string; // for "Bekijk in organigram" link
   // team-role
-  teamRole?: 'trainer' | 'afgevaardigde'
+  teamRole?: "trainer" | "afgevaardigde";
   // manual
-  role?: string
-  email?: string
-  phone?: string
-  department?: 'hoofdbestuur' | 'jeugdbestuur' | 'algemeen'
+  role?: string;
+  email?: string;
+  phone?: string;
+  department?: "hoofdbestuur" | "jeugdbestuur" | "algemeen";
 }
 ```
 
@@ -224,29 +226,29 @@ organigramNode-gerechtelijk-correspondent
 
 Authoritative source: "Contactpersonen Jeugdwerking" flow chart + brainstorm plan. organigramNode IDs from `scripts/staff-cleanup/src/phase4-organigram-seeding.ts`.
 
-| Contact role | organigramNode ID | contactType |
-|---|---|---|
-| Secretaris | `organigramNode-secretaris` | position |
-| TVJO | `organigramNode-tvjo` | position |
-| Jeugdsecretaris | `organigramNode-jeugdsecretaris` | position |
-| Jeugdvoorzitter | `organigramNode-jeugdvoorzitter` | position |
-| Sportief Verantw. | `organigramNode-sportief-verantwoordelijke` | position |
-| Gerechtelijk Correspondent | `organigramNode-gerechtelijk-correspondent` | position |
-| API (integriteit) | `organigramNode-api` | position |
-| Sponsoring | `organigramNode-sponsoring` | position |
-| Kledij | `organigramNode-kledij` | position |
-| Kantine & Evenementen | `organigramNode-kantine-evenementen` | position |
-| Materiaal & Kantinedienst Wedstrijden | `organigramNode-materiaal-kantinedienst-wedstrijden` | position |
-| Kantinedienst Trainingen | `organigramNode-kantinedienst-trainingen` | position |
-| ProSoccerData | `organigramNode-prosoccerdata` | position |
-| Website / Communicatie | `organigramNode-website-communicatie` | position |
-| Voorzitter | `organigramNode-voorzitter` | position |
-| JC Onderbouw | `organigramNode-jc-onderbouw` | position |
-| JC Middenbouw | `organigramNode-jc-middenbouw` | position |
-| JC Bovenbouw | `organigramNode-jc-bovenbouw` | position |
-| Verzekering | _(no node)_ | manual (`verzekering@kcvvelewijt.be`) |
-| Trainer | _(deferred to #1220)_ | team-role |
-| Afgevaardigde | _(deferred to #1220)_ | team-role |
+| Contact role                          | organigramNode ID                                    | contactType                           |
+| ------------------------------------- | ---------------------------------------------------- | ------------------------------------- |
+| Secretaris                            | `organigramNode-secretaris`                          | position                              |
+| TVJO                                  | `organigramNode-tvjo`                                | position                              |
+| Jeugdsecretaris                       | `organigramNode-jeugdsecretaris`                     | position                              |
+| Jeugdvoorzitter                       | `organigramNode-jeugdvoorzitter`                     | position                              |
+| Sportief Verantw.                     | `organigramNode-sportief-verantwoordelijke`          | position                              |
+| Gerechtelijk Correspondent            | `organigramNode-gerechtelijk-correspondent`          | position                              |
+| API (integriteit)                     | `organigramNode-api`                                 | position                              |
+| Sponsoring                            | `organigramNode-sponsoring`                          | position                              |
+| Kledij                                | `organigramNode-kledij`                              | position                              |
+| Kantine & Evenementen                 | `organigramNode-kantine-evenementen`                 | position                              |
+| Materiaal & Kantinedienst Wedstrijden | `organigramNode-materiaal-kantinedienst-wedstrijden` | position                              |
+| Kantinedienst Trainingen              | `organigramNode-kantinedienst-trainingen`            | position                              |
+| ProSoccerData                         | `organigramNode-prosoccerdata`                       | position                              |
+| Website / Communicatie                | `organigramNode-website-communicatie`                | position                              |
+| Voorzitter                            | `organigramNode-voorzitter`                          | position                              |
+| JC Onderbouw                          | `organigramNode-jc-onderbouw`                        | position                              |
+| JC Middenbouw                         | `organigramNode-jc-middenbouw`                       | position                              |
+| JC Bovenbouw                          | `organigramNode-jc-bovenbouw`                        | position                              |
+| Verzekering                           | _(no node)_                                          | manual (`verzekering@kcvvelewijt.be`) |
+| Trainer                               | _(deferred to #1220)_                                | team-role                             |
+| Afgevaardigde                         | _(deferred to #1220)_                                | team-role                             |
 
 ### Complete question list — from flow chart + brainstorm plan
 
@@ -256,77 +258,77 @@ Source key: **FC** = flow chart (authoritative), **BP** = brainstorm plan (suppl
 
 These have Trainer/Afgevaardigde as first contact, requiring team selection:
 
-| ID | Question | Source | Steps (escalation chain) | Why #1220 |
-|---|---|---|---|---|
-| FC-S1 | "Gaat het over je eigen kind of zijn/haar ploeg?" | FC | Trainer → JCs (per leeftijd) → TVJO + Sportief Verantw. | team-role first step |
-| FC-S2 | "Gaat het over het sportieve beleid?" | FC | Trainer → JCs (per leeftijd) → TVJO + Sportief Verantw. | team-role first step |
-| FC-S3 | "Heeft je kind een sportongeval?" (jeugd) | FC | Trainer → Jeugdsecretaris → Gerechtelijk Correspondent → JCs | team-role first step |
-| FC-G1 | "Ongewenst gedrag / pesten / discriminatie" | FC + BP G1/G2 | Trainer → API | team-role first step |
+| ID    | Question                                          | Source        | Steps (escalation chain)                                     | Why #1220            |
+| ----- | ------------------------------------------------- | ------------- | ------------------------------------------------------------ | -------------------- |
+| FC-S1 | "Gaat het over je eigen kind of zijn/haar ploeg?" | FC            | Trainer → JCs (per leeftijd) → TVJO + Sportief Verantw.      | team-role first step |
+| FC-S2 | "Gaat het over het sportieve beleid?"             | FC            | Trainer → JCs (per leeftijd) → TVJO + Sportief Verantw.      | team-role first step |
+| FC-S3 | "Heeft je kind een sportongeval?" (jeugd)         | FC            | Trainer → Jeugdsecretaris → Gerechtelijk Correspondent → JCs | team-role first step |
+| FC-G1 | "Ongewenst gedrag / pesten / discriminatie"       | FC + BP G1/G2 | Trainer → API                                                | team-role first step |
 
 #### Sportieve vragen — static (seed now)
 
-| ID | Question | Source | Primary contact | Steps |
-|---|---|---|---|---|
-| FC-S4 | "Vragen als afgevaardigde?" | FC | Jeugdsecretaris (`organigramNode-jeugdsecretaris`) | 1. Neem contact op met de Jeugdsecretaris & Afgevaardigden |
-| BP-S1 | "wil een proeftraining aanvragen" | BP | TVJO (`organigramNode-tvjo`) | 1. Neem contact op met de TVJO |
-| BP-S4 | "wil van ploeg veranderen" | BP | TVJO (`organigramNode-tvjo`) | 1. Bespreek met de TVJO |
-| BP-S6 | "wil scheidsrechter worden" | BP | Secretaris (`organigramNode-secretaris`) | 1. Neem contact op met de Secretaris |
-| FC-S5 | "Heeft je kind een sportongeval?" (senioren) | FC | Gerechtelijk Correspondent (`organigramNode-gerechtelijk-correspondent`) | 1. Neem direct contact op met de GC |
+| ID    | Question                                     | Source | Primary contact                                                          | Steps                                                      |
+| ----- | -------------------------------------------- | ------ | ------------------------------------------------------------------------ | ---------------------------------------------------------- |
+| FC-S4 | "Vragen als afgevaardigde?"                  | FC     | Jeugdsecretaris (`organigramNode-jeugdsecretaris`)                       | 1. Neem contact op met de Jeugdsecretaris & Afgevaardigden |
+| BP-S1 | "wil een proeftraining aanvragen"            | BP     | TVJO (`organigramNode-tvjo`)                                             | 1. Neem contact op met de TVJO                             |
+| BP-S4 | "wil van ploeg veranderen"                   | BP     | TVJO (`organigramNode-tvjo`)                                             | 1. Bespreek met de TVJO                                    |
+| BP-S6 | "wil scheidsrechter worden"                  | BP     | Secretaris (`organigramNode-secretaris`)                                 | 1. Neem contact op met de Secretaris                       |
+| FC-S5 | "Heeft je kind een sportongeval?" (senioren) | FC     | Gerechtelijk Correspondent (`organigramNode-gerechtelijk-correspondent`) | 1. Neem direct contact op met de GC                        |
 
 #### Niet-sportieve vragen — static (seed now)
 
-| ID | Question | Source | Primary contact | Steps |
-|---|---|---|---|---|
-| FC-N1 | "Opmerking over trainer of afgevaardigde" | FC | JC Onderbouw + JC Middenbouw + JC Bovenbouw (multi-node step) | 1. JC voor de juiste leeftijdsgroep → 2. Jeugdvoorzitter / TVJO |
-| FC-N2 | "Wil je je engageren als vrijwilliger?" | FC + BP AL1 | Jeugdvoorzitter (`organigramNode-jeugdvoorzitter`) | 1. Neem contact op met het Jeugdbestuur |
-| FC-N3 | "Wil je je engageren als afgevaardigde of trainer?" | FC | TVJO (`organigramNode-tvjo`) | 1. Neem contact op met de TVJO |
-| FC-N4a | "Wil je sponsor worden?" | FC + BP C1 | Sponsoring (`organigramNode-sponsoring`) | 1. Neem contact op met de Commerciële Cel |
-| FC-N4b | "Wil je helpen sponsors te werven?" | FC | Sponsoring (`organigramNode-sponsoring`) | 1. Neem contact op met de Commerciële Cel |
-| FC-N5 | "Vraag over kantinedienst op wedstrijddagen?" | FC | Mat. & Kantinedienst Wedstrijden (`organigramNode-materiaal-kantinedienst-wedstrijden`) | 1. Neem contact op |
-| FC-N6 | "Vraag over kantinedienst op trainingen?" | FC | Kantinedienst Trainingen (`organigramNode-kantinedienst-trainingen`) | 1. Neem contact op |
-| FC-N7 | "Vraag over lidgeld of inschrijving?" | FC + BP A1 | Jeugdsecretaris (`organigramNode-jeugdsecretaris`) | 1. Neem contact op met de Jeugdsecretaris |
-| FC-N8 | "Vraag over kledij of uitrusting?" | FC + BP A5 | Kledij (`organigramNode-kledij`) | 1. Neem contact op met de verantwoordelijke Kledij |
-| FC-N9 | "Allerlei vragen over jeugd of ouders" | FC | Jeugdvoorzitter (`organigramNode-jeugdvoorzitter`) | 1. Neem contact op met de Jeugdvoorzitter |
+| ID     | Question                                            | Source      | Primary contact                                                                         | Steps                                                           |
+| ------ | --------------------------------------------------- | ----------- | --------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| FC-N1  | "Opmerking over trainer of afgevaardigde"           | FC          | JC Onderbouw + JC Middenbouw + JC Bovenbouw (multi-node step)                           | 1. JC voor de juiste leeftijdsgroep → 2. Jeugdvoorzitter / TVJO |
+| FC-N2  | "Wil je je engageren als vrijwilliger?"             | FC + BP AL1 | Jeugdvoorzitter (`organigramNode-jeugdvoorzitter`)                                      | 1. Neem contact op met het Jeugdbestuur                         |
+| FC-N3  | "Wil je je engageren als afgevaardigde of trainer?" | FC          | TVJO (`organigramNode-tvjo`)                                                            | 1. Neem contact op met de TVJO                                  |
+| FC-N4a | "Wil je sponsor worden?"                            | FC + BP C1  | Sponsoring (`organigramNode-sponsoring`)                                                | 1. Neem contact op met de Commerciële Cel                       |
+| FC-N4b | "Wil je helpen sponsors te werven?"                 | FC          | Sponsoring (`organigramNode-sponsoring`)                                                | 1. Neem contact op met de Commerciële Cel                       |
+| FC-N5  | "Vraag over kantinedienst op wedstrijddagen?"       | FC          | Mat. & Kantinedienst Wedstrijden (`organigramNode-materiaal-kantinedienst-wedstrijden`) | 1. Neem contact op                                              |
+| FC-N6  | "Vraag over kantinedienst op trainingen?"           | FC          | Kantinedienst Trainingen (`organigramNode-kantinedienst-trainingen`)                    | 1. Neem contact op                                              |
+| FC-N7  | "Vraag over lidgeld of inschrijving?"               | FC + BP A1  | Jeugdsecretaris (`organigramNode-jeugdsecretaris`)                                      | 1. Neem contact op met de Jeugdsecretaris                       |
+| FC-N8  | "Vraag over kledij of uitrusting?"                  | FC + BP A5  | Kledij (`organigramNode-kledij`)                                                        | 1. Neem contact op met de verantwoordelijke Kledij              |
+| FC-N9  | "Allerlei vragen over jeugd of ouders"              | FC          | Jeugdvoorzitter (`organigramNode-jeugdvoorzitter`)                                      | 1. Neem contact op met de Jeugdvoorzitter                       |
 
 #### Administratief — from brainstorm plan (seed now)
 
-| ID | Question | Primary contact | Steps |
-|---|---|---|---|
-| BP-A2 | "wil de club verlaten / uitschrijven" | Secretaris | 1. Neem contact op met de Secretaris |
-| BP-A3 | "kom van een andere club en wil overstappen (transfer)" | Secretaris | 1. Neem contact op met de Secretaris |
-| BP-A4 | "wil mijn contactgegevens wijzigen" | ProSoccerData | 1. Log in op ProSoccerData of neem contact op |
-| BP-A6 | "heb een probleem met mijn aansluiting bij Voetbal Vlaanderen" | Secretaris | 1. Neem contact op met de Secretaris |
-| BP-A7 | "wil weten wanneer het nieuwe seizoen begint" | TVJO | 1. Neem contact op met de TVJO |
+| ID    | Question                                                       | Primary contact | Steps                                         |
+| ----- | -------------------------------------------------------------- | --------------- | --------------------------------------------- |
+| BP-A2 | "wil de club verlaten / uitschrijven"                          | Secretaris      | 1. Neem contact op met de Secretaris          |
+| BP-A3 | "kom van een andere club en wil overstappen (transfer)"        | Secretaris      | 1. Neem contact op met de Secretaris          |
+| BP-A4 | "wil mijn contactgegevens wijzigen"                            | ProSoccerData   | 1. Log in op ProSoccerData of neem contact op |
+| BP-A6 | "heb een probleem met mijn aansluiting bij Voetbal Vlaanderen" | Secretaris      | 1. Neem contact op met de Secretaris          |
+| BP-A7 | "wil weten wanneer het nieuwe seizoen begint"                  | TVJO            | 1. Neem contact op met de TVJO                |
 
 #### Medisch — from brainstorm plan (seed now)
 
-| ID | Question | Primary contact | Steps |
-|---|---|---|---|
-| BP-M1 | "heb een medisch attest nodig voor sport" | Verzekering (manual: `verzekering@kcvvelewijt.be`) | 1. Neem contact op met de verzekering |
-| BP-M3 | "wil allergieën of medicatie van mijn kind melden" | TVJO | 1. Meld het aan de TVJO en de trainer van je ploeg |
-| BP-M4 | "zoek de AED of heb EHBO nodig op het terrein" | Kantine & Evenementen | 1. Ga naar de kantine, de AED hangt aan de ingang |
+| ID    | Question                                           | Primary contact                                    | Steps                                              |
+| ----- | -------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------- |
+| BP-M1 | "heb een medisch attest nodig voor sport"          | Verzekering (manual: `verzekering@kcvvelewijt.be`) | 1. Neem contact op met de verzekering              |
+| BP-M3 | "wil allergieën of medicatie van mijn kind melden" | TVJO                                               | 1. Meld het aan de TVJO en de trainer van je ploeg |
+| BP-M4 | "zoek de AED of heb EHBO nodig op het terrein"     | Kantine & Evenementen                              | 1. Ga naar de kantine, de AED hangt aan de ingang  |
 
 #### Gedrag — from brainstorm plan (seed now, static subset)
 
-| ID | Question | Primary contact | Steps |
-|---|---|---|---|
-| BP-G3 | "heb een conflict met een andere ouder of speler" | API (`organigramNode-api`) | 1. Neem contact op met het API |
-| BP-G4 | "wil het fair play charter raadplegen" | API (`organigramNode-api`) | 1. Raadpleeg het charter op de website |
+| ID    | Question                                          | Primary contact            | Steps                                  |
+| ----- | ------------------------------------------------- | -------------------------- | -------------------------------------- |
+| BP-G3 | "heb een conflict met een andere ouder of speler" | API (`organigramNode-api`) | 1. Neem contact op met het API         |
+| BP-G4 | "wil het fair play charter raadplegen"            | API (`organigramNode-api`) | 1. Raadpleeg het charter op de website |
 
 #### Algemeen — from brainstorm plan (seed now)
 
-| ID | Question | Primary contact | Steps |
-|---|---|---|---|
-| BP-AL2 | "wil het terrein of de kantine huren" | Kantine & Evenementen | 1. Neem contact op |
-| BP-AL3 | "heb iets verloren op het terrein (gevonden voorwerpen)" | Kantine & Evenementen | 1. Vraag aan de kantine |
-| BP-AL5 | "wil een klacht indienen" | Secretaris | 1. Stuur een mail naar de Secretaris → 2. API indien gedragsgerelateerd |
-| BP-AL6 | "wil contact met het bestuur" | Voorzitter | 1. Neem contact op met de Voorzitter |
-| BP-AL7 | "ontvang geen mails meer van de club" | ProSoccerData | 1. Controleer je gegevens in ProSoccerData |
+| ID     | Question                                                 | Primary contact       | Steps                                                                   |
+| ------ | -------------------------------------------------------- | --------------------- | ----------------------------------------------------------------------- |
+| BP-AL2 | "wil het terrein of de kantine huren"                    | Kantine & Evenementen | 1. Neem contact op                                                      |
+| BP-AL3 | "heb iets verloren op het terrein (gevonden voorwerpen)" | Kantine & Evenementen | 1. Vraag aan de kantine                                                 |
+| BP-AL5 | "wil een klacht indienen"                                | Secretaris            | 1. Stuur een mail naar de Secretaris → 2. API indien gedragsgerelateerd |
+| BP-AL6 | "wil contact met het bestuur"                            | Voorzitter            | 1. Neem contact op met de Voorzitter                                    |
+| BP-AL7 | "ontvang geen mails meer van de club"                    | ProSoccerData         | 1. Controleer je gegevens in ProSoccerData                              |
 
 #### Commercieel — from brainstorm plan (seed now)
 
-| ID | Question | Primary contact | Steps |
-|---|---|---|---|
+| ID    | Question                                       | Primary contact       | Steps              |
+| ----- | ---------------------------------------------- | --------------------- | ------------------ |
 | BP-C2 | "wil een evenement organiseren op het terrein" | Kantine & Evenementen | 1. Neem contact op |
 
 ### Deduplication notes

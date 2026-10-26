@@ -13,9 +13,9 @@ No HTML mockup file — three sub-decisions surface from the audit; each can be 
 type BadgeStatus = Extract<MatchStatus, "postponed" | "stopped" | "forfeited">;
 
 const statusLabels: Record<BadgeStatus, string> = {
-  postponed: "Uitgesteld",   // long-form Dutch
+  postponed: "Uitgesteld", // long-form Dutch
   stopped: "Gestopt",
-  forfeited: "FF",            // abbreviation (the one exception)
+  forfeited: "FF", // abbreviation (the one exception)
 };
 
 // Visual: thin wrapper around <MonoLabel variant="pill-…">
@@ -67,12 +67,12 @@ PSD's `cancelled: boolean` is a separate field that signals "definitively dead �
 
 **BFF schema delta required** — Phase 6.B owns it (per owner direction):
 
-| Touch point | Change |
-| --- | --- |
-| `packages/api-contract/src/schemas/match.ts` | Add `"cancelled"` to `MatchStatus` literal |
-| `apps/api/src/psd/transforms.ts` | Return `"cancelled"` (not `"postponed"`) when `cancelled === true`; preserve PSD code 2 → `"postponed"` |
-| `apps/api/src/psd/service.test.ts` + `apps/api/src/handlers/matches.test.ts` | Cover the new branch |
-| All consumers branching on `status === "postponed"` | Decide per-consumer whether `cancelled` shares the branch or splits |
+| Touch point                                                                  | Change                                                                                                  |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `packages/api-contract/src/schemas/match.ts`                                 | Add `"cancelled"` to `MatchStatus` literal                                                              |
+| `apps/api/src/psd/transforms.ts`                                             | Return `"cancelled"` (not `"postponed"`) when `cancelled === true`; preserve PSD code 2 → `"postponed"` |
+| `apps/api/src/psd/service.test.ts` + `apps/api/src/handlers/matches.test.ts` | Cover the new branch                                                                                    |
+| All consumers branching on `status === "postponed"`                          | Decide per-consumer whether `cancelled` shares the branch or splits                                     |
 
 Resulting full set: **6 normalised statuses** (`scheduled`, `finished`, `forfeited`, `postponed`, `cancelled`, `stopped`); **5 render badges** (FT, FF, PP, CANC, STOP); `scheduled` doesn't render (kickoff time IS the status).
 
@@ -84,11 +84,11 @@ Resulting full set: **6 normalised statuses** (`scheduled`, `finished`, `forfeit
 
 Current MonoLabel pill chrome:
 
-| State | Current visual | Direction D equivalent |
-| --- | --- | --- |
-| `postponed`, `stopped` | `pill-jersey` — bright jersey-green bg, no border, no shadow | `border-2 ink + shadow-paper-sm + bg-cream + mono caps` |
-| `forfeited` (today via `pill-jersey` too) | Same as above | Same as above |
-| `finished` (per d2 — net-new) | n/a today | `border-2 ink + shadow-paper-sm + bg-cream` (or jersey-deep for "FT" emphasis) |
+| State                                     | Current visual                                               | Direction D equivalent                                                         |
+| ----------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| `postponed`, `stopped`                    | `pill-jersey` — bright jersey-green bg, no border, no shadow | `border-2 ink + shadow-paper-sm + bg-cream + mono caps`                        |
+| `forfeited` (today via `pill-jersey` too) | Same as above                                                | Same as above                                                                  |
+| `finished` (per d2 — net-new)             | n/a today                                                    | `border-2 ink + shadow-paper-sm + bg-cream` (or jersey-deep for "FT" emphasis) |
 
 The bright-jersey pill diverges from Direction D. It's also a colour choice the redesign has otherwise dialled down (per `[[feedback_no_bright_jersey]]` — `--color-jersey` retired in favour of `--color-jersey-deep`).
 
@@ -111,13 +111,13 @@ Reasoning: abbreviations read like printed-matchday-programme codes — fit the 
 - **Copy**: abbreviations. FT / FF / PP / CANC / STOP. `title=` tooltip carries the long-form Dutch for accessibility.
 - **Visual treatment**: Direction D paper-chrome base (`border-2 ink + shadow-paper-sm + bg-cream + mono caps`) with **per-status tint** signalling severity. Four tints across five statuses:
 
-| Status | Tint token | Severity tier | Why |
-| --- | --- | --- | --- |
-| FT | `cream` | Normal | Game played to full time |
-| PP | `cream-deep` | No game today (held) | May reschedule |
-| FF | `cream-deep` | No game today (dead) | Won't be played; result imposed. Owner-grouped with PP — both read as "no game today" |
-| STOP | `warm` | Notice (abnormal) | Game started + ended weird — incomplete result |
-| CANC | `card-red` (new token) | Alert (dead) | Definitively dead, won't play, may have no result |
+| Status | Tint token             | Severity tier        | Why                                                                                   |
+| ------ | ---------------------- | -------------------- | ------------------------------------------------------------------------------------- |
+| FT     | `cream`                | Normal               | Game played to full time                                                              |
+| PP     | `cream-deep`           | No game today (held) | May reschedule                                                                        |
+| FF     | `cream-deep`           | No game today (dead) | Won't be played; result imposed. Owner-grouped with PP — both read as "no game today" |
+| STOP   | `warm`                 | Notice (abnormal)    | Game started + ended weird — incomplete result                                        |
+| CANC   | `card-red` (new token) | Alert (dead)         | Definitively dead, won't play, may have no result                                     |
 
 A small HTML mockup confirming the visual treatment lives at `round-1-statusbadge-comparisons.html` — all 5 statuses rendered in 3 treatments (current `pill-jersey`, uniform Direction D, Direction D + status tint).
 
@@ -129,6 +129,6 @@ A small HTML mockup confirming the visual treatment lives at `round-1-statusbadg
 
 - Existing component: `apps/web/src/components/match/MatchStatusBadge/MatchStatusBadge.tsx`
 - d2 lock (where "FT" corner stamp originates): `docs/design/mockups/phase-6-match-detail/matchhero-locked.md`
-- Direction D source-of-record: `docs/prd/redesign-phase-2.md` §6.5 + `docs/design/mockups/phase-2-track-b/option-d-paper-chrome-ink-emphasis.html`
+- Direction D source-of-record: `docs/prd/archive/2026/redesign-phase-2.md` §6.5 + `docs/design/mockups/phase-2-track-b/option-d-paper-chrome-ink-emphasis.html`
 - MonoLabel pill specs: `apps/web/src/components/design-system/MonoLabel/MonoLabel.tsx`
 - Memory: `[[feedback_no_bright_jersey]]` (bright `--color-jersey` retired)

@@ -452,7 +452,7 @@ Two further facts worth recording:
   says "Check that you actually need sponsorship — the Hobby plan is often sufficient for smaller projects"
   ([open-source](https://argos-ci.com/docs/learn/billing-and-subscription/open-source.md)).
 
-**And the one hosted claim in this repo's PRD needs retiring.** `docs/prd/visual-regression-testing.md:36`:
+**And the one hosted claim in this repo's PRD needs retiring.** `docs/prd/archive/2026/visual-regression-testing.md:36`:
 
 > "Chosen over Chromatic/Percy because Claude can read diff PNGs directly via the vision-enabled `Read` tool and run
 > the `pnpm vr:update` command in-session. This file-based property is the critical enabler for Claude integration —
@@ -701,14 +701,14 @@ Small deliverable findings, each a `file:line`.
    chain as "paused during the redesign". `gh api repos/soniCaH/www.kcvvelewijt.be/actions/variables` returns
    `RUN_VISUAL_REGRESSION=true`, and 61 of the 100 most recent `ci.yml` runs executed the VR job. **VR is running.**
    Three comments to correct or delete.
-2. **`docs/prd/visual-regression-testing.md:100` is falsified by #2370.** It says "Docker running Playwright's
+2. **`docs/prd/archive/2026/visual-regression-testing.md:100` is falsified by #2370.** It says "Docker running Playwright's
    official multi-arch image (**Apple Silicon native**) eliminates this category of flakiness". The measured
    opposite is true — arm64 drifted 52/57 baselines, and `docker-compose.vr.yml:22` now pins `linux/amd64`
    precisely to stop being Apple-Silicon-native.
-3. **`docs/prd/visual-regression-testing.md:113` ("Gates merge to `main` the same way the other quality-checks jobs
+3. **`docs/prd/archive/2026/visual-regression-testing.md:113` ("Gates merge to `main` the same way the other quality-checks jobs
    do") is false.** #3086 measured `deploy` waiting on `quality-checks` only (`ci.yml:441`) and no branch protection
    on `main`. VR gates nothing.
-4. **`docs/prd/visual-regression-testing.md:36`'s tooling rationale is half-obsolete** — see §2.5. The "SaaS tools
+4. **`docs/prd/archive/2026/visual-regression-testing.md:36`'s tooling rationale is half-obsolete** — see §2.5. The "SaaS tools
    hide diffs behind web UIs" half was answered in-house by `vr-diff-comment`.
 5. **`@storybook/addon-a11y` is registered (`.storybook/main.ts:17`) and never runs in CI** _(measured — no a11y
    step in any workflow)_. Polaris and Carbon both run a11y as a separate non-pixel gate. Cheap coverage, sitting
@@ -794,7 +794,7 @@ Still fog:
 **This repo** — `apps/web/.storybook/test-runner.ts`, `apps/web/.storybook/main.ts`, `apps/web/vitest.config.ts`,
 `apps/web/package.json`, `apps/web/Dockerfile.vr`, `apps/web/docker-compose.vr.yml`,
 `apps/web/test/vr/structural-assertions.ts`, `.github/workflows/ci.yml`, `.github/workflows/vr-baseline-update.yml`,
-`docs/agents/testing-ops.md`, `docs/prd/visual-regression-testing.md`, `apps/web/CLAUDE.md` ·
+`docs/agents/testing-ops.md`, `docs/prd/archive/2026/visual-regression-testing.md`, `apps/web/CLAUDE.md` ·
 [#3086 layer contract](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3086),
 [#3085 layer balance](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3085),
 [flake ledger](https://github.com/soniCaH/www.kcvvelewijt.be/blob/research/flake-ledger/docs/research/test-suite-flake-ledger.md),

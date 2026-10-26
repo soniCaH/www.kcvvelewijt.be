@@ -1,6 +1,6 @@
 name: E2E
 
-# Page-level Playwright smoke suite. PRD: docs/prd/page-level-testing-rework.md
+# Page-level Playwright smoke suite. PRD: docs/prd/archive/2026/page-level-testing-rework.md
 #
 # Path filtering uses the same broad globs as ci.yml's `web` filter (#3285):
 # apps/web/** and packages/sanity-schemas/**, plus packages/api-contract/**,

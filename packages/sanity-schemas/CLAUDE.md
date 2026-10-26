@@ -69,7 +69,7 @@ New schemas must adopt the closest semantic match from this list. Never invent a
 
 ## Editor-UX Convention (Editor-UX Rework)
 
-The editor-UX rework (`docs/prd/sanity-studio-editor-ux-rework.md`) gives every reworked document type three schema-side ingredients. The pattern shipped on `responsibility` (#1499/#1500) and `article` (#1501); copy from `responsibility.ts` when reworking a new type. There are **no** `withPlaceholder` / `sectionIntro` / `*-guidance.ts` abstractions — guidance lives entirely in inline `description` + `.error(...)` copy. (The always-visible guide panel is a separate, layered feature — see `packages/sanity-studio` `GuideFormInput` / `guideContent` (#2180, #2196) — not a schema concern.)
+The editor-UX rework (`docs/prd/archive/2026/sanity-studio-editor-ux-rework.md`) gives every reworked document type three schema-side ingredients. The pattern shipped on `responsibility` (#1499/#1500) and `article` (#1501); copy from `responsibility.ts` when reworking a new type. There are **no** `withPlaceholder` / `sectionIntro` / `*-guidance.ts` abstractions — guidance lives entirely in inline `description` + `.error(...)` copy. (The always-visible guide panel is a separate, layered feature — see `packages/sanity-studio` `GuideFormInput` / `guideContent` (#2180, #2196) — not a schema concern.)
 
 ### 1. Field groups — one `default: true`
 

@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { ARTICLE_TYPES, discoverMatchId, FIXTURES } from "./helpers/fixtures";
 import { smokeTest } from "./helpers/smoke";
 
-// Page-level smoke contract per PRD `docs/prd/page-level-testing-rework.md`
+// Page-level smoke contract per PRD `docs/prd/archive/2026/page-level-testing-rework.md`
 // §Decisions item 3 (route list) and item 4 (per-route assertions).
 //
 // Dynamic routes test the pinned `staging` subjects in `helpers/fixtures.ts`

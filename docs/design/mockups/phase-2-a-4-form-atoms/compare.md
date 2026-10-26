@@ -3,7 +3,7 @@
 > **Status:** ✅ **LOCKED — Direction C chosen, with revisions.**
 > **Date:** 2026-04-30.
 > **Scope:** Issue [#1571](https://github.com/soniCaH/www.kcvvelewijt.be/issues/1571) — Input / Select / Textarea / Label reskin.
-> **PRD:** [`docs/prd/redesign-phase-2.md`](../../../prd/redesign-phase-2.md) §6.3.
+> **PRD:** [`docs/prd/archive/2026/redesign-phase-2.md`](../../../prd/archive/2026/redesign-phase-2.md) §6.3.
 > **Master design:** [`docs/plans/2026-04-27-redesign-master-design.md`](../../../plans/2026-04-27-redesign-master-design.md) §6.3.
 > **Track B precedent:** [`docs/design/mockups/phase-2-track-b/compare.md`](../phase-2-track-b/compare.md) — paper chrome / ink emphasis / `--shadow-paper-sm-soft`.
 > **Canonical visual reference:** [`option-c-locked.html`](option-c-locked.html).

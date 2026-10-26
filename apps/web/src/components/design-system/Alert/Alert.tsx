@@ -6,7 +6,7 @@
  * Direction B ("Ticket Stub — torn from a programme") locked at the
  * Phase 2.A.5 design checkpoint (2026-04-30). Source-of-record:
  * `docs/design/mockups/phase-2-a-5-alert/option-b-ticket-stub.html` and
- * `docs/prd/redesign-phase-2.md` §6.4.B.
+ * `docs/prd/archive/2026/redesign-phase-2.md` §6.4.B.
  *
  * Two-form Alert API: this is the long-form companion. Use `<Alert>` for
  * page-level / dashboard-level alerts that need a title, multi-paragraph

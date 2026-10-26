@@ -20,7 +20,7 @@ export interface SectionConfig {
    * AND into the adjacent striped-seam transition strips. Rendered absolutely
    * positioned at z-0; section content sits at z-10. The backdrop's top/bottom
    * overflow into a neighbour seam by that seam's bleed height (see
-   * `docs/prd/section-backdrop-pattern.md` §5).
+   * `docs/prd/archive/2026/section-backdrop-pattern.md` §5).
    */
   backdrop?: React.ReactNode;
   paddingTop?: string;

@@ -39,7 +39,7 @@ AI_ANSWER_DAILY_CAP = "2000"
 PSD_ONDEMAND_DAILY_BUDGET = "850"
 # SANITY_API_TOKEN is a secret — set via: wrangler secret put SANITY_API_TOKEN
 # SANITY_WEBHOOK_SECRET is a secret — set via: wrangler secret put SANITY_WEBHOOK_SECRET
-# RESEND_API_KEY is a secret — set via: wrangler secret put RESEND_API_KEY (see docs/prd/email-delivery.md)
+# RESEND_API_KEY is a secret — set via: wrangler secret put RESEND_API_KEY (see docs/prd/archive/2026/email-delivery.md)
 # TURNSTILE_SECRET is a secret — set via: wrangler secret put TURNSTILE_SECRET (membership form spam check)
 # SLACK_BIRTHDAY_WEBHOOK_URL is a secret — set via: wrangler secret put SLACK_BIRTHDAY_WEBHOOK_URL (#general birthday posts, #3570; production only)
 
@@ -116,7 +116,7 @@ AI_ANSWER_DAILY_CAP = "2000"
 PSD_ONDEMAND_DAILY_BUDGET = "850"
 # SANITY_API_TOKEN is a secret — set via: wrangler secret put SANITY_API_TOKEN --env staging
 # SANITY_WEBHOOK_SECRET is a secret — set via: wrangler secret put SANITY_WEBHOOK_SECRET --env staging
-# RESEND_API_KEY is a secret — set via: wrangler secret put RESEND_API_KEY --env staging (see docs/prd/email-delivery.md)
+# RESEND_API_KEY is a secret — set via: wrangler secret put RESEND_API_KEY --env staging (see docs/prd/archive/2026/email-delivery.md)
 # TURNSTILE_SECRET is a secret — set via: wrangler secret put TURNSTILE_SECRET --env staging (membership form spam check)
 
 [[env.staging.kv_namespaces]]

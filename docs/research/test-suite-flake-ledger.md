@@ -441,7 +441,7 @@ should be checked against it before it is called done.
    that scopes its viewport must declare it in `vr.viewports`) and #2865 (the repository-orphan guard
    extended to projected VM fields). None of them ended with a raised timeout.
 5. **2026-09-26 — [#3150](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3150) re-measured the
-   E2E rate after #3146 deleted rows 1 and 4's carrier files, per [§0.9's tripwire](../prd/test-suite.md#section-0--cross-layer-rules),
+   E2E rate after #3146 deleted rows 1 and 4's carrier files, per [§0.9's tripwire](../prd/archive/2026/test-suite.md#section-0--cross-layer-rules),
    and found it is not near zero.** Cutoff: #3146 merged 2026-09-25T20:03:31Z. Only **6** `E2E`
    runs actually executed after that (draft-gated `skipped` runs excluded) — a small sample, flagged
    as such rather than padded with earlier runs. **1 of those 6 (16.7 %) was flaky**
