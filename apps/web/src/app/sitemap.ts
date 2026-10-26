@@ -304,7 +304,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // (`word-lid`, the board pages): the first entry wins, so the static route's
   // priority is kept and no `<loc>` appears twice.
   const seen = new Set<string>();
-  return [
+  const entries: MetadataRoute.Sitemap = [
     ...staticEntries,
     ...articleEntries,
     ...eventEntries,
@@ -314,5 +314,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staffEntries,
     ...teamEntries,
     ...matchEntries,
-  ].filter((entry) => !seen.has(entry.url) && seen.add(entry.url));
+  ];
+  return (
+    entries
+      .filter((entry) => !seen.has(entry.url) && seen.add(entry.url))
+      // Next writes `<loc>` and `<image:loc>` unescaped: a bare `&` (the image
+      // query strings) makes the whole file invalid XML (#3672).
+      .map((entry) => ({
+        ...entry,
+        url: xmlEscape(entry.url),
+        ...(entry.images ? { images: entry.images.map(xmlEscape) } : {}),
+      }))
+  );
 }
+
+const xmlEscape = (text: string) =>
+  text.replaceAll("&", "&amp;").replaceAll("<", "&lt;");
