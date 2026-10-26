@@ -15,8 +15,8 @@ minimumReleaseAgeExclude:
   - "@sanity/ui@4.4.9 || 4.4.10"
   # Renovate security update: pnpm@10.34.7
   - pnpm@10.34.7
-  # Renovate security update: sanitize-html@2.18.0
-  - sanitize-html@2.18.0
+  # Renovate security update: sanitize-html@2.18.0 || 2.18.1
+  - sanitize-html@2.18.0 || 2.18.1
   # Renovate security update: happy-dom@21.0.4
   - happy-dom@21.0.4
   # Renovate security update: @cloudflare/vitest-plugin@1.4.7
