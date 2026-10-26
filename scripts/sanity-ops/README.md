@@ -13,7 +13,6 @@ delete and change documents, so they sit in the workspace and CI runs
 | `src/psd-privacy-cleanup/` | Unset staff `birthDate`, delete unreferenced PSD portrait assets (#3469)    |
 | `src/short-links-3573/`    | Seed the `/tornooi` and `/stage` short links, dry run by default (#3573)    |
 | `src/staff-role-fill/`     | List empty staff roles, build the `andere` fill for the owner (#3560)       |
-| `src/team-image-backfill/` | Recover team photos from Drupal — see its README                            |
 | `src/shared/`              | The one Sanity client and the ref helpers                                   |
 
 Run a script with its package.json name, or directly with tsx:
