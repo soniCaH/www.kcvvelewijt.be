@@ -340,6 +340,13 @@ const nextConfig: NextConfig = {
         destination: "/kalender",
         permanent: true,
       },
+      // #3670 — the Gatsby downloads page, still in Google's index. No
+      // `:path*`, so the `public/downloads/*.pdf` files under it never match.
+      {
+        source: "/downloads",
+        destination: "/club/downloads",
+        permanent: true,
+      },
     ];
   },
 
