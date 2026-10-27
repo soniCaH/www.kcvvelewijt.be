@@ -129,7 +129,6 @@ export function TeamFlagship({
       href={href}
       data-testid="team-flagship"
       data-variant={variant}
-      aria-label={`${category} — bekijk ploeg`}
       className={cn("group relative block", className)}
     >
       <TapedCard

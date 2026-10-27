@@ -636,7 +636,6 @@ export function EditorialHero(props: EditorialHeroProps) {
           // rather than guessing DOM position or link count.
           data-testid="homepage-hero-link"
           className={cn("group relative block", PRESS_DOWN_CLASSES)}
-          aria-label={serializeTitle(title)}
         >
           {body}
           {/* The shell renders an `mx-auto max-w-[var(--container-wide)]` <section> with

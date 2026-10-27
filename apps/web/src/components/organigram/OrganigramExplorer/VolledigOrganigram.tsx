@@ -62,7 +62,7 @@ function OrgBranch({
     <>
       <span className="font-display text-ink text-[9px] leading-[1.1] font-semibold">
         {node.title}
-      </span>
+      </span>{" "}
       <span className="text-ink-muted font-mono text-[7px] tracking-[0.04em] uppercase">
         {isRoot ? "de club" : holderLabel(node)}
       </span>
@@ -76,10 +76,13 @@ function OrgBranch({
           type="button"
           data-state={state}
           onClick={(e) => onNodeClick(node.id, e.currentTarget)}
-          aria-label={`Open ${node.title} in de verkenner`}
           className={boxClass}
         >
+          {/* Named by its visible content, not an `aria-label`, so the name
+              holds every visible word (#3690). */}
+          <span className="sr-only">Open </span>
           {content}
+          <span className="sr-only"> in de verkenner</span>
         </button>
       ) : (
         <div data-state={state} className={boxClass}>

@@ -262,7 +262,6 @@ export function CalendarMonth({
               key={day}
               type="button"
               onClick={() => onSelectDate(day)}
-              aria-label={dt.toFormat("d MMMM")}
               aria-pressed={isSelected}
               className={cn(
                 "border-paper-edge flex min-h-[108px] flex-col items-stretch border-r border-b border-dashed p-1.5 text-left transition-colors last:border-r-0",
@@ -288,6 +287,11 @@ export function CalendarMonth({
                 )}
               >
                 {dt.day}
+                {/* The month completes the visible day number in the
+                    button's name ("20 maart") without a replacing
+                    `aria-label`, which would have to repeat the cell's
+                    visible content (axe `label-content-name-mismatch`). */}
+                <span className="sr-only"> {dt.toFormat("MMMM")}</span>
               </span>
               <DayCellBody
                 day={day}

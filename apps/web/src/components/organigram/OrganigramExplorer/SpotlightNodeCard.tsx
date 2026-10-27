@@ -68,7 +68,7 @@ export function SpotlightNodeCard({
     >
       <span className="font-display text-ink line-clamp-2 text-xs leading-[1.15] font-semibold">
         {node.title}
-      </span>
+      </span>{" "}
       {/* Wraps, and the card grows with it. A fixed-height box used to push the
           clamped title out when a long holder name ("Kevin Van Ransbeeck")
           wrapped, clipping its second line ("Website & Communicatie" read

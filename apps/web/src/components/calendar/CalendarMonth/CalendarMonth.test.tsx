@@ -329,7 +329,7 @@ describe("CalendarMonth", () => {
         events={[]}
       />,
     );
-    await user.click(screen.getByRole("button", { name: "20 maart" }));
+    await user.click(screen.getByRole("button", { name: /^20 maart/ }));
     expect(onSelectDate).toHaveBeenCalledWith("2026-03-20");
   });
 

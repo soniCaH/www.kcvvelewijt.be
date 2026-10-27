@@ -243,18 +243,22 @@ describe("PlayerCard", () => {
       expect(card.tagName).toBe("DIV");
     });
 
-    it("drops the position suffix from aria-label when position is absent", () => {
+    // #3690 — no replacing `aria-label`: the name must hold the visible
+    // text (axe `label-content-name-mismatch`); the shirt number stays out.
+    it("is named by its visible name and position", () => {
       render(
         <PlayerCard
           id="player-test"
           firstName="Maxim"
           lastName="Breugelmans"
+          position="Aanvaller"
+          jerseyNumber={9}
           href="/x"
         />,
       );
-      expect(screen.getByTestId("player-card").getAttribute("aria-label")).toBe(
-        "Maxim Breugelmans",
-      );
+      const card = screen.getByTestId("player-card");
+      expect(card).not.toHaveAttribute("aria-label");
+      expect(card).toHaveAccessibleName(/^Maxim Breugelmans\s*Aanvaller$/);
     });
   });
 

@@ -184,15 +184,7 @@ export function PlayerCard({
     // no player profile: the scope stays inert and it keeps the cut.
     return (
       <TravelScope kind="player" href={href}>
-        <TravelLink
-          data-testid="player-card"
-          aria-label={
-            hasPosition
-              ? `${firstName} ${lastName} — ${position}`
-              : `${firstName} ${lastName}`
-          }
-          className="relative block h-full"
-        >
+        <TravelLink data-testid="player-card" className="relative block h-full">
           {card}
           <LinkPendingDots placement="corner" />
         </TravelLink>

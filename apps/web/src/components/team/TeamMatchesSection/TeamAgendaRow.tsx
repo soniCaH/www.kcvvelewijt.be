@@ -636,9 +636,9 @@ export function TeamAgendaRow({
         aria-label={placeholderLabel}
         className={cardBase}
       >
-        {/* `aria-hidden`: unlike the normal row's `<Link aria-label>`, which
-            replaces the accessible-name computation for an atomic
-            interactive element, an `<article>` does not suppress its own
+        {/* `aria-hidden`: unlike the normal row's `<Link>`, whose name is
+            computed from its `sr-only` label alone (its visual article is
+            hidden too), an `<article>` does not suppress its own
             text content — its children stay separately walkable to a screen
             reader in linear/browse mode. Hiding them keeps the article's
             `aria-label` above as the row's sole spoken content, rather than
@@ -672,15 +672,18 @@ export function TeamAgendaRow({
     );
   }
 
-  // The `aria-label` replaces the row's contents as its accessible name, so
-  // anything not spelled out here is unreachable by a screen reader tabbing the
-  // links — and until #2404 that included the scoreline itself. Stated
+  // This label is the row's whole accessible name, so anything not spelled
+  // out here is unreachable by a screen reader tabbing the links — and until #2404 that included the scoreline itself. Stated
   // side-by-side with each name, the way `<MatchStripView>`'s ledger rows do it,
   // since "3 – 1" alone does not say whose goals are whose.
   const scoreboardLabel = hasScoreline
     ? `${match.homeTeam.name} ${match.homeScore} – ${match.awayTeam.name} ${match.awayScore}`
     : `${match.homeTeam.name} – ${match.awayTeam.name}`;
   const matchLabel = buildRowLabel(scoreboardLabel);
+  // Spoken as `sr-only` text over an `aria-hidden` article, never as an
+  // `aria-label`: a label must contain the visible text in its visible order
+  // (WCAG 2.5.3, axe `label-content-name-mismatch`, #3690), and the paired
+  // reading deliberately re-orders the scoreboard.
 
   const desktopCaption = buildCaption(desktopKindWord);
   const mobileCaption = buildCaption(mobileKindWord);
@@ -688,13 +691,14 @@ export function TeamAgendaRow({
   return (
     <MatchTravelLink
       matchId={match.id}
-      aria-label={matchLabel}
       onClick={onNavigate}
       className="relative block no-underline"
     >
+      <span className="sr-only">{matchLabel}</span>
       <article
         data-testid="team-agenda-row"
         data-featured={featured}
+        aria-hidden="true"
         className={cardBase}
       >
         {/* Date stub */}

@@ -44,7 +44,7 @@ describe("HoofdSponsorTile", () => {
   it("wraps the tile in a secure external link when a url is present", () => {
     render(<HoofdSponsorTile sponsor={base} />);
     const link = screen.getByRole("link", {
-      name: "Bezoek de website van Garage Peeters",
+      name: /Garage Peeters/,
     });
     expect(link).toHaveAttribute("href", base.url);
     expect(link).toHaveAttribute("target", "_blank");

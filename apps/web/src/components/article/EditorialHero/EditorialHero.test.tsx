@@ -104,8 +104,9 @@ describe("EditorialHero — shell + placement", () => {
     );
     const link = container.querySelector("a");
     expect(link?.getAttribute("href")).toBe("/nieuws/zomer-2026");
-    expect(link?.getAttribute("aria-label")).toBe(
-      "De zomer van 2026 begint nu.",
+    // Named by its content, not a title-only `aria-label` (#3690).
+    expect(link).toHaveAccessibleName(
+      expect.stringContaining("De zomer van 2026 begint nu."),
     );
   });
 

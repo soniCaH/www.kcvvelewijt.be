@@ -56,7 +56,7 @@ describe("FeaturedSponsorCard", () => {
   it('renders a "Bezoek website" affordance linking out when a url is present', () => {
     render(<FeaturedSponsorCard sponsor={base} />);
     const link = screen.getByRole("link", {
-      name: "Bezoek de website van Garage Peeters",
+      name: /Garage Peeters.*Bezoek website$/,
     });
     expect(link).toHaveAttribute("href", base.url);
     expect(link).toHaveAttribute("target", "_blank");

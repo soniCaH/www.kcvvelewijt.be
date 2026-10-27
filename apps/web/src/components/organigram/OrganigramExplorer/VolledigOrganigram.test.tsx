@@ -24,7 +24,9 @@ describe("VolledigOrganigram", () => {
       <VolledigOrganigram nodes={explorerFixture} onNodeClick={onNodeClick} />,
     );
     await userEvent.click(
-      screen.getByRole("button", { name: "Open Voorzitter in de verkenner" }),
+      screen.getByRole("button", {
+        name: /^Open Voorzitter .* in de verkenner$/,
+      }),
     );
     expect(onNodeClick).toHaveBeenCalledWith("voorzitter", expect.anything());
   });
