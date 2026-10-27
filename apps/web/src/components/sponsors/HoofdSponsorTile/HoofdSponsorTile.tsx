@@ -35,14 +35,20 @@ export function HoofdSponsorTile({ sponsor }: HoofdSponsorTileProps) {
         {sponsor.logo ? (
           <SanityImage
             src={sponsor.logo}
-            alt={formatSponsorAlt(sponsor.name)}
+            // Inside the link the caption below already names it; an alt
+            // would say the name twice in the link's name (#3690).
+            alt={sponsor.url ? "" : formatSponsorAlt(sponsor.name)}
             width={220}
             height={88}
             className="h-auto max-h-[56px] w-auto max-w-full object-contain"
             sizes="(max-width: 640px) 80vw, (max-width: 1024px) 45vw, 30vw"
           />
         ) : (
-          <span className="font-display text-ink line-clamp-3 text-lg italic">
+          // Wordmark only: the caption below says the name once (#3690).
+          <span
+            aria-hidden="true"
+            className="font-display text-ink line-clamp-3 text-lg italic"
+          >
             {sponsor.name}
           </span>
         )}

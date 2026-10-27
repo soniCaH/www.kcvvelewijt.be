@@ -33,18 +33,20 @@ const base: Sponsor = {
 };
 
 describe("HoofdSponsorTile", () => {
-  it("renders the logo with sponsor alt text and the italic name caption", () => {
+  it("renders the logo as decoration inside the link and the italic name caption", () => {
     render(<HoofdSponsorTile sponsor={base} />);
-    expect(
-      screen.getByAltText("Garage Peeters — sponsor KCVV Elewijt"),
-    ).toHaveAttribute("src", base.logo);
+    // Inside the link the visible name already says it: the logo is
+    // decorative, so the link's name holds the name once (#3690).
+    const logo = document.querySelector("img");
+    expect(logo).toHaveAttribute("src", base.logo);
+    expect(logo).toHaveAttribute("alt", "");
     expect(screen.getByText("Garage Peeters")).toBeInTheDocument();
   });
 
   it("wraps the tile in a secure external link when a url is present", () => {
     render(<HoofdSponsorTile sponsor={base} />);
     const link = screen.getByRole("link", {
-      name: /Garage Peeters/,
+      name: "Garage Peeters",
     });
     expect(link).toHaveAttribute("href", base.url);
     expect(link).toHaveAttribute("target", "_blank");
@@ -68,6 +70,6 @@ describe("HoofdSponsorTile", () => {
 
   it("renders the logo in colour at rest — /sponsors is the exception to the wall's greyscale rule", () => {
     render(<HoofdSponsorTile sponsor={base} />);
-    expect(screen.getByRole("img")).not.toHaveClass("grayscale");
+    expect(document.querySelector("img")).not.toHaveClass("grayscale");
   });
 });

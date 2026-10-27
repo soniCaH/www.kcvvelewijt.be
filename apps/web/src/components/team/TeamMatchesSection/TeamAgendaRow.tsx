@@ -444,7 +444,7 @@ export function TeamAgendaRow({
   const desktopKindWord = kind ? (outcomeWord ?? slotWord) : null;
   const mobileKindWord = outcomeWord ?? slotWord;
   // The accessible-name twin of `mobileKindWord` above — same resolution
-  // order, but reads `outcomeWordA11y` so a drawn row's aria-label says
+  // order, but reads `outcomeWordA11y` so a drawn row's spoken label says
   // "Gelijkspel", never the caption's width-driven "Gelijk" (#2656 review).
   const mobileKindWordA11y = outcomeWordA11y ?? slotWord;
 
@@ -673,9 +673,10 @@ export function TeamAgendaRow({
   }
 
   // This label is the row's whole accessible name, so anything not spelled
-  // out here is unreachable by a screen reader tabbing the links — and until #2404 that included the scoreline itself. Stated
-  // side-by-side with each name, the way `<MatchStripView>`'s ledger rows do it,
-  // since "3 – 1" alone does not say whose goals are whose.
+  // out here is unreachable by a screen reader tabbing the links — and until
+  // #2404 that included the scoreline itself. Stated side-by-side with each
+  // name, the way `<MatchStripView>`'s ledger rows do it, since "3 – 1" alone
+  // does not say whose goals are whose.
   const scoreboardLabel = hasScoreline
     ? `${match.homeTeam.name} ${match.homeScore} – ${match.awayTeam.name} ${match.awayScore}`
     : `${match.homeTeam.name} – ${match.awayTeam.name}`;

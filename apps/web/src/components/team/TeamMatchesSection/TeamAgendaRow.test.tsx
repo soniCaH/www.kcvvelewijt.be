@@ -762,7 +762,7 @@ describe("TeamAgendaRow", () => {
       // only to fit `<MatchStripView>`'s `w-14` mobile-ledger stub — this
       // row's own caption is not column-constrained the way that stub is
       // (#2512 accepted "Gelijk" here anyway, for consistency), but its
-      // `aria-label` has no column at all, so the full word belongs there.
+      // `sr-only` label has no column at all, so the full word belongs there.
       it("keeps 'Gelijkspel' — not the caption's shortened 'Gelijk' — in a drawn row's accessible name", () => {
         render(<TeamAgendaRow match={FINISHED_DRAW} />);
         const label = linkName();
