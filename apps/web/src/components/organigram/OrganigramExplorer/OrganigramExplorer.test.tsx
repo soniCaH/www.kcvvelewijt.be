@@ -129,10 +129,10 @@ describe("OrganigramExplorer — focus + navigation", () => {
       "KCVV Elewijt",
     );
     expect(
-      screen.getByRole("button", { name: "Naar Voorzitter" }),
+      screen.getByRole("button", { name: /^Naar Voorzitter / }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Naar Gedelegeerd Commissaris" }),
+      screen.getByRole("button", { name: /^Naar Gedelegeerd Commissaris / }),
     ).toBeInTheDocument();
   });
 
@@ -152,7 +152,7 @@ describe("OrganigramExplorer — focus + navigation", () => {
   it("descends when a child is clicked (re-centres)", async () => {
     open({ initialFocusId: "club" });
     await userEvent.click(
-      screen.getByRole("button", { name: "Naar Voorzitter" }),
+      screen.getByRole("button", { name: /^Naar Voorzitter / }),
     );
     expect(screen.getByRole("button", { current: true })).toHaveTextContent(
       "Voorzitter",
@@ -256,7 +256,7 @@ describe("OrganigramExplorer — FLIP settle re-measures the stage (#3340)", () 
       document.querySelector('[data-scroll-fade="bottom"]'),
     ).toBeInTheDocument();
     await userEvent.click(
-      screen.getByRole("button", { name: "Naar Voorzitter" }),
+      screen.getByRole("button", { name: /^Naar Voorzitter / }),
     );
     expect(animate).toHaveBeenCalledTimes(1);
 
@@ -298,15 +298,15 @@ describe("OrganigramExplorer — count-then-expand fan", () => {
       screen.getByRole("button", { name: /\+5 meer/ }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Naar ProSoccerData" }),
+      screen.getByRole("button", { name: /^Naar ProSoccerData / }),
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Naar Spelersraad" }),
+      screen.queryByRole("button", { name: /^Naar Spelersraad / }),
     ).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: /\+5 meer/ }));
     expect(
-      screen.getByRole("button", { name: "Naar Spelersraad" }),
+      screen.getByRole("button", { name: /^Naar Spelersraad / }),
     ).toBeInTheDocument();
   });
 });
@@ -368,13 +368,13 @@ describe("announceFocus", () => {
 
   it("flags a vacant node", () => {
     expect(announceFocus(getSpotlightView(tree, "ouderraad"))).toContain(
-      "deze plek is vrij",
+      "Ouderraad vacature.",
     );
   });
 
   it("flags a shared node with its count", () => {
     expect(announceFocus(getSpotlightView(tree, "kledij"))).toContain(
-      "gedeeld, 3 personen",
+      "Kledij 3 personen.",
     );
   });
 });

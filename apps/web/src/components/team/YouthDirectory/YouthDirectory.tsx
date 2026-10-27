@@ -173,7 +173,6 @@ export function YouthDirectory({
                   key={team._id}
                   href={`/ploegen/${team.slug}`}
                   data-testid="youth-team-card"
-                  aria-label={`${caption} — bekijk ploeg`}
                   className="relative block"
                 >
                   <TapedCard

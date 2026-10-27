@@ -17,8 +17,8 @@ export interface FeaturedSponsorCardProps {
  *   `border-b-2 border-ink`. Text only — no dingbat.
  * - **Body:** logo inset (cream box, `border-2 border-ink`) → italic-display
  *   name → optional `description` blurb (~3-line clamp, omitted when absent) →
- *   mono "Bezoek website" when `url` is present. No external mark: the card's
- *   own `aria-label` already names the destination (#2547 rule 1).
+ *   mono "Bezoek website" when `url` is present. No external mark: that visible
+ *   "Bezoek website" already names the destination (#2547 rule 1).
  * - **Logo absent:** the italic-display name fills the inset.
  * - **Link:** when `url` is present the whole card is the link and presses down
  *   on hover (canonical paper-stamp); without a `url` it renders as a static
@@ -38,14 +38,20 @@ export function FeaturedSponsorCard({ sponsor }: FeaturedSponsorCardProps) {
           {sponsor.logo ? (
             <SanityImage
               src={sponsor.logo}
-              alt={formatSponsorAlt(sponsor.name)}
+              // Inside the link the name below already says it; an alt would
+              // repeat it in the link's name (#3690).
+              alt={sponsor.url ? "" : formatSponsorAlt(sponsor.name)}
               width={240}
               height={96}
               className="h-auto max-h-[72px] w-auto max-w-full object-contain"
               sizes="(max-width: 1024px) 80vw, 320px"
             />
           ) : (
-            <span className="font-display text-ink line-clamp-3 text-center text-xl italic">
+            // Wordmark only: the name below says it once (#3690).
+            <span
+              aria-hidden="true"
+              className="font-display text-ink line-clamp-3 text-center text-xl italic"
+            >
               {sponsor.name}
             </span>
           )}
@@ -81,7 +87,6 @@ export function FeaturedSponsorCard({ sponsor }: FeaturedSponsorCardProps) {
         href={sponsor.url}
         target="_blank"
         rel="noopener noreferrer"
-        aria-label={`Bezoek de website van ${sponsor.name}`}
         data-sponsor-id={sponsor.id}
         data-sponsor-tier={sponsor.tier}
         data-sponsor-featured="true"

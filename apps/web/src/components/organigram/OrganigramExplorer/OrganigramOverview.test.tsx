@@ -24,7 +24,7 @@ describe("OrganigramOverview", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 
     await userEvent.click(
-      screen.getByRole("button", { name: "Open TVJO in de verkenner" }),
+      screen.getByRole("button", { name: /^Open TVJO .* in de verkenner$/ }),
     );
     const dialog = await screen.findByRole("dialog");
     expect(

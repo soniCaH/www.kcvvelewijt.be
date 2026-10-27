@@ -30,7 +30,7 @@ import { PRESS_DOWN_CLASSES } from "@/components/design-system/press-down";
 import { EditorialLink } from "@/components/design-system/EditorialLink";
 import { ScrollRail } from "@/components/design-system/ScrollHint/ScrollRail";
 import { ScrollOverlay } from "@/components/design-system/ScrollHint/ScrollOverlay";
-import { SpotlightNodeCard } from "./SpotlightNodeCard";
+import { SpotlightNodeCard, holderLabel } from "./SpotlightNodeCard";
 import {
   buildSpotlightTree,
   withClubRoot,
@@ -114,18 +114,15 @@ const NAV_KEYS = new Set<string>([
 
 const SCALE_STEPS = [1, 1.15, 1.3] as const;
 
-/** Dutch screen-reader sentence for the newly centred node (7o3b a11y model). */
+/**
+ * Dutch screen-reader sentence for the newly centred node (7o3b a11y model).
+ * Opens with the card's own visible words — title, then sub-label — so the
+ * name contains the label a voice-control user reads off the card (WCAG 2.5.3,
+ * axe `label-content-name-mismatch`, #3690).
+ */
 export function announceFocus(view: SpotlightView): string {
   const { focus, parent, children, depth, siblings, focusIndex } = view;
-  const state = deriveCardState(focus.members.length);
-  const holders =
-    focus.id === CLUB_ROOT_ID
-      ? "de club"
-      : state === "vacant"
-        ? "deze plek is vrij"
-        : state === "shared"
-          ? `gedeeld, ${focus.members.length} personen`
-          : focus.members[0]?.name?.trim() || "—";
+  const holders = focus.id === CLUB_ROOT_ID ? "de club" : holderLabel(focus);
   const under = parent ? `, onder ${parent.title}` : "";
   const pos =
     siblings.length > 1
@@ -135,7 +132,7 @@ export function announceFocus(view: SpotlightView): string {
     children.length === 0
       ? "geen onderliggende functies"
       : `${children.length} ${children.length === 1 ? "onderliggende functie" : "onderliggende functies"}`;
-  return `${focus.title}. Niveau ${depth}${under}. ${holders}. ${kids}${pos}.`;
+  return `${focus.title} ${holders}. Niveau ${depth}${under}. ${kids}${pos}.`;
 }
 
 const subscribeNever = () => () => {};
@@ -357,7 +354,7 @@ export function OrganigramExplorer({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Verkenner sluiten"
+          aria-label="Esc — verkenner sluiten"
           className="border-cream/40 hover:border-cream text-cream flex items-center gap-1 border px-2 py-1 font-mono text-[11px] uppercase"
         >
           <X size={12} aria-hidden /> Esc
@@ -584,9 +581,11 @@ export function OrganigramExplorer({
                       type="button"
                       data-node-id={child.id}
                       onClick={() => navigate(child.id)}
-                      aria-label={`Naar ${child.title}`}
                       className={PRESS_DOWN_CLASSES}
                     >
+                      {/* Named by the card it shows, not an `aria-label`, so
+                          the name holds every visible word (#3690). */}
+                      <span className="sr-only">Naar </span>
                       <SpotlightNodeCard node={child} variant="node" />
                     </button>
                   ))}

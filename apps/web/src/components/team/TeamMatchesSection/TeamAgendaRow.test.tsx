@@ -87,6 +87,18 @@ const LONG_AWAY: ScheduleMatch = {
   },
 };
 
+/**
+ * The row link's accessible name: its `sr-only` label, over an `aria-hidden`
+ * visual article (#3690). Asserted against the real computed name, so a
+ * visible text leaking back into the name fails here.
+ */
+const linkName = () => {
+  const link = screen.getByRole("link");
+  const name = link.querySelector(".sr-only")?.textContent ?? "";
+  expect(link).toHaveAccessibleName(name);
+  return name;
+};
+
 // Both layouts are in the DOM under jsdom (no CSS breakpoints), so a
 // normal row's combined `textContent` cannot tell them apart. Shared by
 // "Kind word" below — the normal row's two `data-layout` trees genuinely
@@ -521,7 +533,7 @@ describe("TeamAgendaRow", () => {
 
     it("uses the full home–away label as the link's accessible name", () => {
       render(<TeamAgendaRow match={BASE} />);
-      const label = screen.getByRole("link").getAttribute("aria-label") ?? "";
+      const label = linkName();
       // Lock the full accessible-name contract — both teams in home→away order,
       // a space-padded dash separator, plus the date suffix (see `matchLabel`
       // in TeamAgendaRow). The `[–—-]` class tolerates en-/em-dash or hyphen
@@ -531,13 +543,13 @@ describe("TeamAgendaRow", () => {
       );
     });
 
-    // #2404 — the label REPLACES the row's contents as its accessible name, so
+    // #2404 — the label is the row's whole accessible name, so
     // a score missing from it is a score no screen-reader user ever hears. The
     // outcome leads it on any settled match, slot or no slot: the tint that
     // would otherwise carry it reaches no screen reader at all.
     it("spells the scoreline out beside each name, led by the outcome", () => {
       render(<TeamAgendaRow match={FINISHED_WIN} />);
-      const label = screen.getByRole("link").getAttribute("aria-label") ?? "";
+      const label = linkName();
       expect(label).toMatch(
         /^Winst: KCVV Elewijt 3 [–—-] FC Opponent 1, 15 aug$/,
       );
@@ -545,18 +557,18 @@ describe("TeamAgendaRow", () => {
 
     it("omits the kickoff from the name when the row shows an upcoming label", () => {
       render(<TeamAgendaRow match={BASE} upcomingLabel="Gepland" />);
-      const label = screen.getByRole("link").getAttribute("aria-label") ?? "";
+      const label = linkName();
       expect(label).not.toContain("om 15:00");
     });
 
     it("prefixes the kind word when a slot is given", () => {
       render(<TeamAgendaRow match={FINISHED_WIN} kind="result" />);
-      const label = screen.getByRole("link").getAttribute("aria-label") ?? "";
+      const label = linkName();
       expect(label).toMatch(/^Winst: KCVV Elewijt 3 /);
     });
 
     /**
-     * The label REPLACES the row's contents, so the status marker rendered in
+     * The label is the row's whole name, so the status marker rendered in
      * the visible caption never reaches a screen reader on its own. Announcing
      * a kickoff for a match that is off is the #2423 failure in audio.
      */
@@ -567,7 +579,7 @@ describe("TeamAgendaRow", () => {
       "names a %s match and asserts no kickoff",
       (status, longForm) => {
         render(<TeamAgendaRow match={{ ...BASE, status }} />);
-        const label = screen.getByRole("link").getAttribute("aria-label") ?? "";
+        const label = linkName();
         expect(label).toContain(longForm);
         expect(label).not.toContain("om 15:00");
       },
@@ -580,7 +592,7 @@ describe("TeamAgendaRow", () => {
           kind="result"
         />,
       );
-      const label = screen.getByRole("link").getAttribute("aria-label") ?? "";
+      const label = linkName();
       expect(label).toContain("Forfait");
     });
   });
@@ -628,7 +640,7 @@ describe("TeamAgendaRow", () => {
 
     it("carries the waiting state, not a kickoff, in the accessible name", () => {
       render(<TeamAgendaRow match={BASE} kind="result" />);
-      const label = screen.getByRole("link").getAttribute("aria-label") ?? "";
+      const label = linkName();
       expect(label).toMatch(/^Uitslag volgt: KCVV Elewijt [–—-] FC Opponent/);
       expect(label).not.toContain("om 15:00");
     });
@@ -642,9 +654,7 @@ describe("TeamAgendaRow", () => {
       );
       expect(desktopText()).toContain("PP");
       expect(desktopText()).not.toContain("Uitslag volgt");
-      expect(
-        screen.getByRole("link").getAttribute("aria-label") ?? "",
-      ).not.toContain("Uitslag volgt");
+      expect(linkName()).not.toContain("Uitslag volgt");
     });
 
     it("leaves a fixture-slot or unslotted row on its kickoff", () => {
@@ -752,10 +762,10 @@ describe("TeamAgendaRow", () => {
       // only to fit `<MatchStripView>`'s `w-14` mobile-ledger stub — this
       // row's own caption is not column-constrained the way that stub is
       // (#2512 accepted "Gelijk" here anyway, for consistency), but its
-      // `aria-label` has no column at all, so the full word belongs there.
+      // `sr-only` label has no column at all, so the full word belongs there.
       it("keeps 'Gelijkspel' — not the caption's shortened 'Gelijk' — in a drawn row's accessible name", () => {
         render(<TeamAgendaRow match={FINISHED_DRAW} />);
-        const label = screen.getByRole("link").getAttribute("aria-label") ?? "";
+        const label = linkName();
         expect(label).toMatch(/\bGelijkspel\b/);
         expect(label).not.toMatch(/\bGelijk\b/);
       });
@@ -901,8 +911,8 @@ describe("TeamAgendaRow", () => {
     });
 
     it("hides its visible content from assistive tech so aria-label is the row's sole spoken content, not a duplicate", () => {
-      // Unlike the normal row's <Link aria-label>, which replaces the
-      // accessible name for an atomic interactive element, an <article>
+      // Unlike the normal row's <Link>, named by its sr-only label alone
+      // over an aria-hidden article (#3690), an <article>
       // does not suppress its own children — they stay separately walkable
       // in linear/browse mode. Content is hidden explicitly instead.
       render(<TeamAgendaRow match={PLACEHOLDER} />);

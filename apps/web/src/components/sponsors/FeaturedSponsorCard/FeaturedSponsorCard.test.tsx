@@ -40,11 +40,13 @@ describe("FeaturedSponsorCard", () => {
     expect(screen.getByText("In de kijker")).toBeInTheDocument();
   });
 
-  it("renders the logo with sponsor alt text and the italic name", () => {
+  it("renders the logo as decoration inside the link and the italic name", () => {
     render(<FeaturedSponsorCard sponsor={base} />);
-    expect(
-      screen.getByAltText("Garage Peeters — sponsor KCVV Elewijt"),
-    ).toHaveAttribute("src", base.logo);
+    // Inside the link the visible name already says it: the logo is
+    // decorative, so the link's name holds the name once (#3690).
+    const logo = document.querySelector("img");
+    expect(logo).toHaveAttribute("src", base.logo);
+    expect(logo).toHaveAttribute("alt", "");
     expect(screen.getByText("Garage Peeters")).toBeInTheDocument();
   });
 
@@ -56,13 +58,13 @@ describe("FeaturedSponsorCard", () => {
   it('renders a "Bezoek website" affordance linking out when a url is present', () => {
     render(<FeaturedSponsorCard sponsor={base} />);
     const link = screen.getByRole("link", {
-      name: "Bezoek de website van Garage Peeters",
+      name: /Garage Peeters.*Bezoek website$/,
     });
     expect(link).toHaveAttribute("href", base.url);
     expect(link).toHaveAttribute("target", "_blank");
     expect(link).toHaveAttribute("rel", "noopener noreferrer");
-    // #2547 rule 1 — the whole card is the link and its aria-label already
-    // names the destination, so the affordance text earns no external mark;
+    // #2547 rule 1 — the whole card is the link and its visible "Bezoek
+    // website" already names the destination, so the affordance text earns no external mark;
     // the old literal ↗ dies.
     expect(screen.getByText("Bezoek website")).toBeInTheDocument();
     expect(screen.queryByText(/Bezoek website ↗/)).not.toBeInTheDocument();
@@ -96,6 +98,6 @@ describe("FeaturedSponsorCard", () => {
 
   it("renders the logo in colour at rest — /sponsors is the exception to the wall's greyscale rule", () => {
     render(<FeaturedSponsorCard sponsor={base} />);
-    expect(screen.getByRole("img")).not.toHaveClass("grayscale");
+    expect(document.querySelector("img")).not.toHaveClass("grayscale");
   });
 });

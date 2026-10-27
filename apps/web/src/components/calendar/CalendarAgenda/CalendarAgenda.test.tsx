@@ -274,10 +274,7 @@ describe("CalendarAgenda", () => {
     expect(forfeit!.querySelectorAll('[data-status="forfeited"]')).toHaveLength(
       2,
     );
-    expect(forfeit).toHaveAttribute(
-      "aria-label",
-      expect.stringContaining("Forfait"),
-    );
+    expect(forfeit).toHaveAccessibleName(expect.stringContaining("Forfait"));
     expect(played!.querySelector("[data-status]")).toBeNull();
   });
 

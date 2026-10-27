@@ -50,7 +50,7 @@ describe("SponsorHero", () => {
     expect(screen.getByText("In de kijker")).toBeInTheDocument();
     expect(
       screen.getByRole("link", {
-        name: "Bezoek de website van Garage Peeters",
+        name: /Garage Peeters.*Bezoek website$/,
       }),
     ).toBeInTheDocument();
   });

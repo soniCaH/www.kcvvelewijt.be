@@ -187,9 +187,9 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
       ? OUTCOME_TINT.light[outcome]
       : undefined;
 
-  // The `aria-label` replaces the row's contents as its accessible name
-  // (#2599 review) — below `sm` the visible content is two unpaired lists
-  // (home/away names, then their scores each on their own line), so without
+  // The built label is the row's whole accessible name (#2599 review) —
+  // below `sm` the visible content is two unpaired lists (home/away names,
+  // then their scores each on their own line), so without
   // a built label a screen reader hears "09:15 U10 FC Zemst Sportief KCVV
   // Elewijt 5 3" rather than a paired result. Mirrors `<TeamAgendaRow>`'s
   // `scoreboardLabel` / `<MatchStripView>`'s own built label: state the
@@ -209,11 +209,14 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
   const rowLabel = [when, match.team, scoreboardLabel, statusLabel]
     .filter(Boolean)
     .join(", ");
+  // Spoken as `sr-only` text with both layouts `aria-hidden`, never as an
+  // `aria-label`: a label must contain the visible text in its visible order
+  // (WCAG 2.5.3, axe `label-content-name-mismatch`, #3690), and the paired
+  // reading above deliberately re-orders it. `<TeamAgendaRow>` does the same.
 
   return (
     <MatchTravelLink
       matchId={match.id}
-      aria-label={rowLabel}
       data-testid="agenda-match-row"
       onClick={() => trackKalenderItemClick("match")}
       className={cn(
@@ -233,8 +236,10 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
         already says home/away, the same rule `<TeamAgendaRow>`'s desktop
         scoreboard follows (detail-ia-locked.md §3, "no venue indicator").
       */}
+      <span className="sr-only">{rowLabel}</span>
       <div
         data-layout="mobile"
+        aria-hidden="true"
         className="grid grid-cols-[56px_1fr_auto] items-center gap-3 px-2 py-2 sm:hidden"
       >
         <div className="flex flex-col gap-0.5">
@@ -312,6 +317,7 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
       {/* sm+ (#2599): today's one-line row, unchanged. */}
       <div
         data-layout="desktop"
+        aria-hidden="true"
         className="hidden grid-cols-[52px_1fr_auto] items-center gap-3 px-2 py-2 sm:grid"
       >
         <span className="text-ink-muted font-mono text-[11px]">{when}</span>

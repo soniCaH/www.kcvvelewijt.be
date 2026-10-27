@@ -318,7 +318,6 @@ function UploadFigureContent({
         <button
           type="button"
           onClick={onPlayClick}
-          aria-label="Speel video af"
           data-testid="video-block-play-pill"
           // Canonical paper-stamped pill: jersey-deep + ink border +
           // offset shadow + canonical press-down hover per
