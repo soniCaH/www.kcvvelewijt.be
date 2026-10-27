@@ -105,12 +105,12 @@ jobs:
       github.event.pull_request.draft == false &&
       (needs.changes.result != 'success' || needs.changes.outputs.web == 'true')
     environment: Preview
-    # Pinned to match @playwright/test in apps/web/package.json (1.60.0) and the
+    # Pinned to match @playwright/test in apps/web/package.json (1.64.1) and the
     # local Docker image used by the visual-regression suite. Bump all of these
     # together — drift between the version that runs the suite and the
     # @playwright/test API can produce silent skips or false-positive failures.
     container:
-      image: mcr.microsoft.com/playwright:v1.60.0-noble
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
       options: --user 0:0
     env:
       # The container ships browsers under /ms-playwright. Suppress
