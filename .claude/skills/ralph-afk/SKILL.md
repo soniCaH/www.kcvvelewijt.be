@@ -186,6 +186,8 @@ If an agent finished **without** opening a PR, roll its label back so the queue 
 gh issue edit <N> --remove-label "in-progress" --add-label "ready"
 ```
 
+If an agent stopped with a PID and a log path instead of a PR, it handed you a long run (AFK-BRIEF § Verify). Watch it with `Monitor` on an until-loop over `kill -0 <PID>`. When the PID is gone, read the log's `exit=` line and its last lines, and send both to that agent with `SendMessage`. No `exit=` line means the job died: say so in the message.
+
 When the wave is done, present a table: issue · PR URL · status (draft / blocked / failed) · what it skipped.
 
 ### 5. Review each branch — this part is yours

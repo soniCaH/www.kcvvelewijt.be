@@ -86,7 +86,7 @@ Before writing any new file that lands in a folder with two or more existing pee
 
 Both must pass before you go further. Changed another workspace? Filter on it instead; the command is valid in every workspace. The `lint:fix` line is web only. A shared package gets a leading `...` so its dependents are checked too: `--filter=...@kcvv/api-contract`, and `--filter=...@kcvv/sanity-schemas` for either Sanity package (that one also reaches studio typegen and the web build). Turbo builds the upstream packages itself — no manual build first. If type-check ever shows TS6305 ("has not been built from source"), re-run once with `--force`.
 
-**Never end your turn waiting on a background job — nothing wakes you.** Run anything under 10 minutes in the foreground. For anything longer (a full VR capture, a slow gate run), launch ONE background run that writes to a log file in your own scratchpad, reply with only its PID, and stop. The orchestrator holds the watch and messages you the result. Never chain background runs, and never pipe a run into `tail`, which hides its exit status. Before you call a job dead, confirm with `ps`.
+**Never end your turn waiting on a background job — nothing wakes you.** Run anything under 10 minutes in the foreground. For anything longer (a full VR capture, a slow gate run), launch ONE background run that writes its exit status into its own log — `( <command>; echo "exit=$?" ) > <scratchpad>/<name>.log 2>&1 &` — reply with only its PID and the log path, and stop. The orchestrator holds the watch and messages you the result (SKILL.md step 4). Never chain background runs, and never pipe a run into `tail`, which hides its exit status. Before you call a job dead, confirm with `ps`.
 
 ## Review comes to you — do not run it yourself
 
