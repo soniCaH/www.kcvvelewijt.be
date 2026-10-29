@@ -174,7 +174,11 @@ gh issue edit <N> --remove-label "ready" --add-label "in-progress"
 
 ### 4. Report back as agents finish
 
-You are notified as each background agent completes. For each:
+You are notified as each background agent completes.
+
+**First, check for a handed-off long run.** If an agent stopped with a PID and a log path instead of a PR, it handed you a long run (AFK-BRIEF § Verify). It is not done: leave its board task `in_progress` and its issue on `in-progress`, and skip the steps below. Watch it with `Monitor` on an until-loop over `kill -0 <PID>`. When the PID is gone, read the log's `exit=` line and its last lines, and send both to that agent with `SendMessage`. No `exit=` line means the job died: say so in the message. The agent's next stop is handled here again.
+
+For every other agent:
 
 - Capture the PR URL.
 - Note blockers it hit (the brief tells agents to comment-and-stop, never to work around a blocker).
@@ -185,8 +189,6 @@ If an agent finished **without** opening a PR, roll its label back so the queue 
 ```bash
 gh issue edit <N> --remove-label "in-progress" --add-label "ready"
 ```
-
-If an agent stopped with a PID and a log path instead of a PR, it handed you a long run (AFK-BRIEF § Verify). Watch it with `Monitor` on an until-loop over `kill -0 <PID>`. When the PID is gone, read the log's `exit=` line and its last lines, and send both to that agent with `SendMessage`. No `exit=` line means the job died: say so in the message.
 
 When the wave is done, present a table: issue · PR URL · status (draft / blocked / failed) · what it skipped.
 
