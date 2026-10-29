@@ -127,7 +127,7 @@ Separate worktrees mean agents never fight at run time, but they still collide a
 | Collision class                                                          | Why it collides                                                                                                                                                                                                                                                                                                                                                                  |
 | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pnpm-lock.yaml` (adds/removes a dep)                                    | The lockfile is prettier-formatted; every agent hand-edits the same 3 blocks. Two = guaranteed conflict.                                                                                                                                                                                                                                                                         |
-| Visual-regression baselines                                              | A scoped `-u` run rewrites baseline PNGs. Two agents capturing baselines overwrite each other.                                                                                                                                                                                                                                                                                   |
+| Visual-regression baselines                                              | A scoped `-u` run rewrites baseline PNGs. Two agents capturing baselines overwrite each other. Judge it by what the work does — "will this change rendered markup?" — not by whether the issue body says "VR": #2562 never mentioned it and captured 48 baselines.                                                                                                              |
 | `packages/api-contract/src/`                                             | Every downstream app type-checks against it; two concurrent contract changes break each other's build.                                                                                                                                                                                                                                                                           |
 | `packages/sanity-schemas/src/`                                           | Shared by both studios; concurrent schema edits conflict.                                                                                                                                                                                                                                                                                                                        |
 | Design tokens / `DESIGN.md` / global CSS                                 | Site-wide; two edits to the same token file conflict and both invalidate the whole VR suite.                                                                                                                                                                                                                                                                                     |
@@ -174,7 +174,11 @@ gh issue edit <N> --remove-label "ready" --add-label "in-progress"
 
 ### 4. Report back as agents finish
 
-You are notified as each background agent completes. For each:
+You are notified as each background agent completes.
+
+**First, check for a handed-off long run.** If an agent stopped with a PID and a log path instead of a PR, it handed you a long run (AFK-BRIEF § Verify). It is not done: leave its board task `in_progress` and its issue on `in-progress`, and skip the steps below. Watch it with `Monitor` on an until-loop over `kill -0 <PID>`. When the PID is gone, read the log's `exit=` line and its last lines, and send both to that agent with `SendMessage`. No `exit=` line means the job died: say so in the message. The agent's next stop is handled here again.
+
+For every other agent:
 
 - Capture the PR URL.
 - Note blockers it hit (the brief tells agents to comment-and-stop, never to work around a blocker).
@@ -198,6 +202,12 @@ Per branch, against `../kcvv-issue-<N>`:
 2. `/simplify ../kcvv-issue-<N>`
 
 Send the confirmed findings back to that issue's agent with `SendMessage` — it still holds the full context of its own change and applies fixes far more cheaply than you can re-derive them. Refute false positives with a one-line reason instead of forwarding them. Apply the fixes in the worktree yourself only when the agent is no longer reachable.
+
+Before you release a branch that moved VR baselines, **look at the images**. An agent's "read all three viewports back" is a claim; the PNG is the proof.
+
+1. `git -C ../kcvv-issue-<N> diff --name-status origin/main...HEAD -- '*__snapshots__*'` — run it against the worktree, not your own checkout, whose `HEAD` is `main`. A story that should have changed and shows no `M` or `A` (a new story adds its baseline) is a miss; one that changed and should not have is a leak.
+2. Check every changed story has a capture for each viewport it declares: the set in `parameters.vr.viewports` when the story sets one, otherwise desktop, tablet and mobile.
+3. Open the one or two images where the change is most visible, plus the worst case (usually mobile), with the Read tool.
 
 When the fixes land and the gate passes again, release the PR:
 
