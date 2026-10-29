@@ -205,8 +205,8 @@ Send the confirmed findings back to that issue's agent with `SendMessage` — it
 
 Before you release a branch that moved VR baselines, **look at the images**. An agent's "read all three viewports back" is a claim; the PNG is the proof.
 
-1. `git diff --name-status origin/main...HEAD -- '*__snapshots__*'` — a story that should have changed and shows no `M` is a miss; one that changed and should not have is a leak.
-2. Check every changed story has desktop, tablet and mobile.
+1. `git -C ../kcvv-issue-<N> diff --name-status origin/main...HEAD -- '*__snapshots__*'` — run it against the worktree, not your own checkout, whose `HEAD` is `main`. A story that should have changed and shows no `M` or `A` (a new story adds its baseline) is a miss; one that changed and should not have is a leak.
+2. Check every changed story has a capture for each viewport it declares: the set in `parameters.vr.viewports` when the story sets one, otherwise desktop, tablet and mobile.
 3. Open the one or two images where the change is most visible, plus the worst case (usually mobile), with the Read tool.
 
 When the fixes land and the gate passes again, release the PR:
