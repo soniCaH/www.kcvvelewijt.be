@@ -84,10 +84,10 @@ export const UITGELICHT_CARD_CLASS =
 
 export interface FeaturedUitgelichtRowProps {
   /**
-   * 0..3 featured articles. The row drops itself entirely when
-   * `articles.length === 0` (returns `null`); shorter arrays render
-   * fewer cards per the R1.6.A "render fewer cards rather than pad
-   * from non-featured pool" rule.
+   * 0..3 articles. The homepage fills empty places with regular articles
+   * when fewer are featured (#3696), so a shorter array means the site has
+   * too few articles. The row drops itself entirely when
+   * `articles.length === 0` (returns `null`).
    */
   articles: readonly UitgelichtArticle[];
   className?: string;
@@ -101,9 +101,7 @@ export const FeaturedUitgelichtRow = ({
     return null;
   }
 
-  // Cap at 3 even if a caller passes more — the row is the editorial
-  // "featured" surface, not a recent-articles fallback. Excess
-  // articles flow into <NewsGrid> downstream of the homepage spine.
+  // Cap at 3 even if a caller passes more.
   const cards = articles.slice(0, 3);
 
   return (

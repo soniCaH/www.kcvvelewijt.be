@@ -39,6 +39,14 @@ vi.mock("@/components/home/SponsorsSection/SponsorsSection", () => ({
   SponsorsSection: () => null,
 }));
 
+const { mockArticlesFindAll } = vi.hoisted(() => ({
+  mockArticlesFindAll: vi.fn(),
+}));
+
+beforeEach(() => {
+  mockArticlesFindAll.mockReturnValue(Effect.succeed([minimalArticle]));
+});
+
 vi.mock("@/lib/repositories/article.repository", async (importOriginal) => {
   const mod =
     await importOriginal<
@@ -52,7 +60,7 @@ vi.mock("@/lib/repositories/article.repository", async (importOriginal) => {
       // (`articles.length === 0 && matches.length === 0`) doesn't fire —
       // these tests are about the FirstTeamsBlock/agenda sections, not that
       // fallback screen.
-      findAll: () => Effect.succeed([minimalArticle]),
+      findAll: () => mockArticlesFindAll(),
       findBySlug: () => Effect.die("not used by this suite"),
       findPaginated: () => Effect.die("not used by this suite"),
       findTags: () => Effect.die("not used by this suite"),
@@ -383,6 +391,64 @@ describe("/ — the agenda lists every team, A and B included (#3429)", () => {
     ]) {
       expect(within(agenda).getByText(opponent)).toBeInTheDocument();
     }
+  });
+});
+
+describe("/ — Laatste nieuws is sorted by date, regardless of featured (#3696)", () => {
+  beforeEach(() => {
+    mockGetHomepage.mockReturnValue(
+      Effect.succeed({
+        banners: { bannerSlotA: null, bannerSlotB: null, bannerSlotC: null },
+        placeholder: null,
+      }),
+    );
+    mockTeamsFindAll.mockReturnValue(Effect.succeed([]));
+    mockGetMatches.mockReturnValue(Effect.succeed([]));
+    mockGetNextMatches.mockReturnValue(Effect.succeed([]));
+    mockFindNextFeatured.mockReturnValue(Effect.succeed(null));
+  });
+
+  it("renders a fifth featured article below newer regular articles", async () => {
+    const article = (
+      slug: string,
+      publishedAt: string,
+      featured: boolean,
+    ): ArticleVM => ({
+      ...minimalArticle,
+      id: slug,
+      slug,
+      title: slug,
+      publishedAt,
+      featured,
+    });
+    mockArticlesFindAll.mockReturnValue(
+      Effect.succeed([
+        article("hero", "2026-10-18T10:00:00Z", true),
+        article("row-1", "2026-10-01T10:00:00Z", true),
+        article("row-2", "2026-07-08T10:00:00Z", true),
+        article("row-3", "2026-04-27T10:00:00Z", true),
+        article("old-featured", "2026-04-17T10:00:00Z", true),
+        article("new-regular", "2026-10-30T10:00:00Z", false),
+        article("old-regular", "2026-04-25T10:00:00Z", false),
+      ]),
+    );
+
+    const element = await HomePage();
+    render(element);
+
+    const articleHrefs = screen
+      .getAllByRole("link")
+      .map((link) => link.getAttribute("href") ?? "")
+      .filter((href) => href.startsWith("/nieuws/"));
+    expect([...new Set(articleHrefs)]).toEqual([
+      "/nieuws/hero",
+      "/nieuws/row-1",
+      "/nieuws/row-2",
+      "/nieuws/row-3",
+      "/nieuws/new-regular",
+      "/nieuws/old-regular",
+      "/nieuws/old-featured",
+    ]);
   });
 });
 

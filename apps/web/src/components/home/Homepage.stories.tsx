@@ -347,12 +347,12 @@ export const Default: Story = {
 };
 
 export const NoUitgelicht: Story = {
-  render: () => <Homepage uitgelichtArticles={[]} />,
+  render: () => <Homepage uitgelichtArticles={[]} newsArticles={[]} />,
   parameters: {
     docs: {
       description: {
         story:
-          "Featured-pool size 1 — `<FeaturedUitgelichtRow>` drops entirely; the hero sits directly above the featured-event band.",
+          "Only 1 article on the site — `<FeaturedUitgelichtRow>` drops entirely; the hero sits directly above the featured-event band.",
       },
     },
   },
@@ -360,13 +360,16 @@ export const NoUitgelicht: Story = {
 
 export const SparseUitgelicht: Story = {
   render: () => (
-    <Homepage uitgelichtArticles={mockUitgelichtArticles.slice(0, 2)} />
+    <Homepage
+      uitgelichtArticles={mockUitgelichtArticles.slice(0, 2)}
+      newsArticles={[]}
+    />
   ),
   parameters: {
     docs: {
       description: {
         story:
-          "Featured-pool size 3 — Uitgelicht renders 2 cards (positions 2..3); the row keeps its section header without padding from the non-featured pool.",
+          "Only 3 articles on the site — Uitgelicht renders 2 cards (positions 2..3); the row keeps its section header.",
       },
     },
   },

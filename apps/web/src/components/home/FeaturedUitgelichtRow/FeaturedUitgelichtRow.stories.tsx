@@ -26,9 +26,9 @@ const meta = {
     docs: {
       description: {
         component:
-          "Equal 3-up featured-article row that sits between the hero and the news grid. " +
-          "Drops itself (returns null) when no featured articles are present; renders fewer " +
-          "cards rather than padding from the recent-articles pool. See " +
+          "Equal 3-up article row that sits between the hero and the news grid. " +
+          "Featured articles come first; regular articles fill empty places (#3696). " +
+          "Drops itself (returns null) when it gets no articles. See " +
           "`docs/design/mockups/phase-4-homepage/uitgelicht-locked.md` (R1.6.A).",
       },
     },
@@ -83,8 +83,7 @@ export const ThreeArticles: Story = {
   args: { articles: threeArticles },
 };
 
-// N=2 — two featured articles, third card slot stays empty (no padding
-// from non-featured pool).
+// N=2 — two articles, third card slot stays empty.
 export const TwoArticles: Story = {
   args: { articles: threeArticles.slice(0, 2) },
 };

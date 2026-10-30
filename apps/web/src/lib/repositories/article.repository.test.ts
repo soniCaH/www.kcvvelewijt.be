@@ -16,6 +16,7 @@ import { sanityClient } from "../sanity/client";
 import {
   ArticleRepository,
   ArticleRepositoryLive,
+  pickHomepageArticles,
   type ArticleRepositoryInterface,
 } from "./article.repository";
 
@@ -321,6 +322,84 @@ describe("ArticleRepository", () => {
         "recent-b",
         "recent-c",
       ]);
+    });
+  });
+
+  describe("pickHomepageArticles (#3696)", () => {
+    const featuredRow = (id: string, publishedAt: string) =>
+      makeArticleListRow({ id, publishedAt, featured: true });
+    const regularRow = (id: string, publishedAt: string) =>
+      makeArticleListRow({ id, publishedAt, featured: false });
+    const pickedIds = async (rows: ARTICLES_QUERY_RESULT) => {
+      mockFetch.mockResolvedValueOnce(rows);
+      const all = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findAll();
+        }),
+      );
+      return pickHomepageArticles(all).map((a) => a.id);
+    };
+
+    it("sorts a fifth featured article into the grid by date, not above newer regular articles", async () => {
+      const ids = await pickedIds([
+        featuredRow("hero", "2026-10-18T10:00:00Z"),
+        featuredRow("row-1", "2026-10-01T10:00:00Z"),
+        featuredRow("row-2", "2026-07-08T10:00:00Z"),
+        featuredRow("row-3", "2026-04-27T10:00:00Z"),
+        featuredRow("old-featured", "2026-04-17T10:00:00Z"),
+        regularRow("new-regular", "2026-10-30T10:00:00Z"),
+        regularRow("old-regular", "2026-04-25T10:00:00Z"),
+      ]);
+
+      expect(ids).toEqual([
+        "hero",
+        "row-1",
+        "row-2",
+        "row-3",
+        "new-regular",
+        "old-regular",
+        "old-featured",
+      ]);
+    });
+
+    it("keeps a new regular article on the homepage when 10 or more articles are featured", async () => {
+      const featured = Array.from({ length: 11 }, (_, i) =>
+        featuredRow(`featured-${i}`, `2026-01-${String(20 - i)}T10:00:00Z`),
+      );
+
+      const ids = await pickedIds([
+        ...featured,
+        regularRow("new-regular", "2026-10-30T10:00:00Z"),
+      ]);
+
+      expect(ids).toHaveLength(10);
+      expect(ids[4]).toBe("new-regular");
+    });
+
+    it("fills the hero and row with regular articles when fewer than 4 are featured", async () => {
+      const ids = await pickedIds([
+        featuredRow("hero", "2026-01-01T10:00:00Z"),
+        featuredRow("row-1", "2026-01-02T10:00:00Z"),
+        regularRow("row-2", "2026-03-01T10:00:00Z"),
+        regularRow("row-3", "2026-02-01T10:00:00Z"),
+        regularRow("grid-1", "2026-01-15T10:00:00Z"),
+      ]);
+
+      expect(ids).toEqual(["hero", "row-1", "row-2", "row-3", "grid-1"]);
+    });
+
+    it("compares grid dates as instants, across time-zone offsets", async () => {
+      const ids = await pickedIds([
+        featuredRow("hero", "2026-10-18T10:00:00Z"),
+        featuredRow("row-1", "2026-10-17T10:00:00Z"),
+        featuredRow("row-2", "2026-10-16T10:00:00Z"),
+        featuredRow("row-3", "2026-10-15T10:00:00Z"),
+        regularRow("earlier-instant", "2026-04-27T21:00:00+02:00"),
+        regularRow("later-instant", "2026-04-27T20:00:00.000Z"),
+      ]);
+
+      expect(ids.slice(4)).toEqual(["later-instant", "earlier-instant"]);
     });
   });
 
