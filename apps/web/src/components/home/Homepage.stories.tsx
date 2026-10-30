@@ -347,7 +347,7 @@ export const Default: Story = {
 };
 
 export const NoUitgelicht: Story = {
-  render: () => <Homepage uitgelichtArticles={[]} />,
+  render: () => <Homepage uitgelichtArticles={[]} newsArticles={[]} />,
   parameters: {
     docs: {
       description: {
@@ -360,7 +360,10 @@ export const NoUitgelicht: Story = {
 
 export const SparseUitgelicht: Story = {
   render: () => (
-    <Homepage uitgelichtArticles={mockUitgelichtArticles.slice(0, 2)} />
+    <Homepage
+      uitgelichtArticles={mockUitgelichtArticles.slice(0, 2)}
+      newsArticles={[]}
+    />
   ),
   parameters: {
     docs: {
