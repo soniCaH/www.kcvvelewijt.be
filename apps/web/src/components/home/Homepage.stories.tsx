@@ -366,7 +366,7 @@ export const SparseUitgelicht: Story = {
     docs: {
       description: {
         story:
-          "Featured-pool size 3 — Uitgelicht renders 2 cards (positions 2..3); the row keeps its section header without padding from the non-featured pool.",
+          "Only 3 articles on the site — Uitgelicht renders 2 cards (positions 2..3); the row keeps its section header.",
       },
     },
   },

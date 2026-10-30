@@ -33,6 +33,7 @@ import {
 import {
   ArticleRepository,
   type ArticleVM,
+  pickHomepageArticles,
   toHomepageArticles,
 } from "@/lib/repositories/article.repository";
 import { formatArticleDate } from "@/lib/utils/dates";
@@ -161,12 +162,7 @@ export default async function HomePage() {
       degradeSection(
         Effect.gen(function* () {
           const repo = yield* ArticleRepository;
-          const all = yield* repo.findAll();
-          // Slice [0..10] per the R1.B + R2.B + R1.6 spine:
-          //   • position 1 (index 0) feeds the static <EditorialHero>.
-          //   • positions 2..4 (index 1..3) fill <FeaturedUitgelichtRow>.
-          //   • positions 5..10 (index 4..9) fill the 3×2 <NewsGrid>.
-          return all.slice(0, 10);
+          return pickHomepageArticles(yield* repo.findAll());
         }),
         [] as ArticleVM[],
         "[HomePage] articles read failed; falling back to an empty list.",

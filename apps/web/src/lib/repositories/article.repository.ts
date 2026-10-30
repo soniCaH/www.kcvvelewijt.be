@@ -29,10 +29,9 @@ import { formatArticleDate } from "../utils/dates";
 // speaker there is pure unread payload on every homepage/listing fetch.
 const PULL_QUOTE_SPEAKER_PROJECTION = `"speaker": select(_type == "pullQuote" => speaker->{ _type, firstName, lastName, position, "transparentImageUrl": transparentImage.asset->url + "?w=600&q=80&fm=webp&fit=max", "psdImageUrl": psdImage.asset->url + "?w=600&q=80&fm=webp&fit=max", "photoUrl": photo.asset->url + "?w=600&q=80&fm=webp&fit=max", functionTitle }, null)`;
 
-// Phase 4.C.2 — Round 2 S.2 lock: featured articles surface first in the
-// homepage carousel (slots 0..2); ties and overflow fall back to recency.
-// `featured: false` articles still appear after all featured ones, so the
-// NewsGrid slice [3..8] inherits the same ordering automatically.
+// Featured articles come first, then recency, so the homepage hero and
+// Uitgelicht row fill from the featured pool and regular articles fill what is
+// left. The NewsGrid does not inherit this order: `pickHomepageArticles`.
 export const ARTICLES_QUERY =
   defineQuery(`*[_type == "article" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(featured desc, publishedAt desc) {
   "id": _id, "title": coalesce(pt::text(title), title, ""), "lead": coalesce(lead, ""), "slug": coalesce(slug.current, ""), publishedAt, "featured": coalesce(featured, false), "tags": coalesce(tags, []),
@@ -475,6 +474,25 @@ export function toHomepageArticles(
 ): HomepageArticle[] {
   return articles.map((a) => toHomepageArticle(a));
 }
+
+/**
+ * The homepage's 10 articles, from the featured-first `findAll()` list.
+ * Index 0 feeds the hero, 1..3 the Uitgelicht row, and 4..9 the NewsGrid: the
+ * newest of all other articles, `featured` or not (#3696).
+ */
+export const pickHomepageArticles = (
+  all: readonly ArticleVM[],
+): ArticleVM[] => [
+  ...all.slice(0, 4),
+  ...all
+    .slice(4)
+    .sort(
+      (a, b) =>
+        new Date(b.publishedAt ?? 0).getTime() -
+        new Date(a.publishedAt ?? 0).getTime(),
+    )
+    .slice(0, 6),
+];
 
 /** A tag and how many published articles carry it. */
 export interface TagCount {
