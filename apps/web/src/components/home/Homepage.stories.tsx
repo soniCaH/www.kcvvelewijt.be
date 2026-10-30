@@ -352,7 +352,7 @@ export const NoUitgelicht: Story = {
     docs: {
       description: {
         story:
-          "Featured-pool size 1 — `<FeaturedUitgelichtRow>` drops entirely; the hero sits directly above the featured-event band.",
+          "Only 1 article on the site — `<FeaturedUitgelichtRow>` drops entirely; the hero sits directly above the featured-event band.",
       },
     },
   },
