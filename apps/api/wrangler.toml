@@ -2,6 +2,7 @@ name = "kcvv-api"
 main = "src/index.ts"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
+routes = [{ pattern = "footbalisto.be", custom_domain = true }] # the BFF's own domain since the old AWS API left it (#3580)
 
 [vars]
 PSD_API_BASE_URL = "https://clubapi.prosoccerdata.com"
@@ -94,6 +95,7 @@ simple = { limit = 120, period = 60 }
 
 [env.staging]
 name = "kcvv-api-staging"
+routes = [] # routes are inherited — without this a staging deploy takes footbalisto.be from production
 
 [env.staging.triggers]
 crons = [] # no scheduled sync on staging — shares PSD API quota with production
