@@ -55,3 +55,17 @@ minimumReleaseAgeExclude:
   - next@16.4.3
   # Renovate security update: joi@17.13.9
   - joi@17.13.9
+  # Renovate security update: @storybook/addon-a11y@10.6.5
+  - "@storybook/addon-a11y@10.6.5"
+  # Renovate security update: @storybook/addon-docs@10.6.5
+  - "@storybook/addon-docs@10.6.5"
+  # Renovate security update: @storybook/addon-onboarding@10.6.5
+  - "@storybook/addon-onboarding@10.6.5"
+  # Renovate security update: @storybook/addon-vitest@10.6.5
+  - "@storybook/addon-vitest@10.6.5"
+  # Renovate security update: @storybook/nextjs-vite@10.6.5
+  - "@storybook/nextjs-vite@10.6.5"
+  # Renovate security update: eslint-plugin-storybook@10.6.5
+  - eslint-plugin-storybook@10.6.5
+  # Renovate security update: storybook@10.6.5
+  - storybook@10.6.5
