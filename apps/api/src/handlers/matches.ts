@@ -38,9 +38,13 @@ const playerStatsCache = TypedKvCache(PlayerSeasonStats);
 // unknown. A v3 detail written during an index failure could carry a youth
 // score (staging only; production never saw v3).
 //
+// v5 (#3705): `matches:team` and `match:detail` gained `kcvv_team_label`. A v4
+// entry has none, so the calendar feed and the match page would keep showing
+// no team for up to 7 days after deploy.
+//
 // One constant for every match-shaped cache key, `opponent.ts` included, so a
 // shape change can never bump one and forget the other.
-export const CACHE_VERSION = "v4";
+export const CACHE_VERSION = "v5";
 
 export const getMatchesByTeamHandler = (
   teamId: number,
@@ -270,6 +274,8 @@ export const getMatchDetailHandler = (
     undefined,
     {
       shouldServeStale,
+      // Only a detail built while `/teams` failed (#3705).
+      isPartial: isPartialFanout,
       refreshInline: (detail) => needsInlineRefresh(detail),
     },
   );

@@ -95,6 +95,23 @@ describe("generateIcal", () => {
     expect(output).toContain("SUMMARY:KCVV Elewijt 3-1 KFC Turnhout");
   });
 
+  it("prefixes the SUMMARY with the KCVV team that plays (#3705)", () => {
+    const scheduled = makeMatch({ kcvv_team_label: "U8" });
+    const finished = makeMatch({
+      id: 2,
+      kcvv_team_label: "U21",
+      status: "finished",
+      home_team: { id: 2, name: "KFC Turnhout", score: 0 },
+      away_team: { id: 1, name: "KCVV Elewijt", score: 2 },
+    } as Partial<Match>);
+    const reservation = makePlaceholderMatch({ kcvv_team_label: "U10" });
+    const output = renderIcal([scheduled, finished, reservation]);
+
+    expect(output).toContain("SUMMARY:[U8] KCVV Elewijt - KFC Turnhout");
+    expect(output).toContain("SUMMARY:[U21] KFC Turnhout 0-2 KCVV Elewijt");
+    expect(output).toContain("SUMMARY:[U10] Jeugdtornooi — KCVV Elewijt");
+  });
+
   it("uses the BFF-supplied venue as LOCATION when provided", () => {
     const match = makeMatch({ venue: "Stadion De Kuip" });
     const output = renderIcal([match]);

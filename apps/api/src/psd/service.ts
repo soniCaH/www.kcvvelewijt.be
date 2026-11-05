@@ -136,6 +136,9 @@ interface EmptyBodyNotFoundOptions {
 // it a hung socket holds its caller until the runtime gives up.
 const PSD_FETCH_TIMEOUT_MS = 8_000;
 
+// The match-detail team label is optional: past this, the detail ships without it.
+const TEAMS_LABEL_TIMEOUT_MS = 3_000;
+
 function fetchJson<A, I>(
   url: string,
   schema: S.Schema<A, I>,
@@ -383,6 +386,8 @@ export const PsdServiceLive = Layer.effect(
     const TEAMS_BY_ID_TTL = 60 * 60 * 24; // 1 day
 
     type TeamsById = Record<string, { name: string; age: string }>;
+    const teamLabelOf = (team: TeamsById[string] | undefined) =>
+      team ? derivePsdTeamLabel(team.name, team.age) : undefined;
 
     const getTeamsById = (): Effect.Effect<TeamsById, BffError> =>
       Effect.gen(function* () {
@@ -709,13 +714,16 @@ export const PsdServiceLive = Layer.effect(
             [getCompetitionLabels(), getTeamsById()],
             { concurrency: "unbounded" },
           );
-          const hideScores = hidesScores(teams[String(teamId)]?.age);
-          return games.map((game) =>
-            transformPsdGame(
+          const team = teams[String(teamId)];
+          const hideScores = hidesScores(team?.age);
+          const kcvvTeamLabel = teamLabelOf(team);
+          return games.map((game) => ({
+            ...transformPsdGame(
               { ...game, teamId: game.teamId ?? teamId },
               { ownClubId, competitionLabels, hideScores },
             ),
-          );
+            kcvv_team_label: kcvvTeamLabel,
+          }));
         }),
 
       getNextMatches: () =>
@@ -970,7 +978,21 @@ export const PsdServiceLive = Layer.effect(
                       }),
                     ),
               ),
-              Effect.map((index) => {
+              Effect.zip(
+                // Best-effort: a failed or slow `/teams` read drops only the
+                // label (#3705). The cap keeps it from eating the detail's
+                // miss budget (`MISS_FETCH_TIMEOUT_MS`).
+                getTeamsById().pipe(
+                  Effect.timeout(TEAMS_LABEL_TIMEOUT_MS),
+                  Effect.option,
+                ),
+                { concurrent: true },
+              ),
+              Effect.map(([index, teamsRead]) => {
+                const teams = Option.getOrElse(
+                  teamsRead,
+                  (): TeamsById => ({}),
+                );
                 const entry = index[String(matchId)];
                 // No index entry → no team → no band: the score shows. The
                 // index holds this season only, so a U6–U13 match from an
@@ -1007,9 +1029,11 @@ export const PsdServiceLive = Layer.effect(
                     detail.status === "scheduled" &&
                     kickoffMs(detail.date) < Date.now());
 
+                const team = teams[String(entry.teamId)];
                 const enriched = {
                   ...detail,
                   kcvv_team_id: entry.teamId,
+                  kcvv_team_label: teamLabelOf(team),
                   competitionType: entry.competitionType,
                   ...(backfill
                     ? {
@@ -1045,10 +1069,12 @@ export const PsdServiceLive = Layer.effect(
                   }),
                 };
                 // Last, after the backfill and the venue have read the real
-                // score (#3428).
-                return entry.hideScores
-                  ? withoutDetailScores(withVenue)
-                  : withVenue;
+                // score (#3428). A failed `/teams` read is partial, so the
+                // missing label heals in minutes, not at the full TTL.
+                return markPartial(
+                  entry.hideScores ? withoutDetailScores(withVenue) : withVenue,
+                  Option.isNone(teamsRead),
+                );
               }),
             ),
           ),
@@ -1222,9 +1248,7 @@ export const PsdServiceLive = Layer.effect(
             );
           }
 
-          const kcvvTeamLabel = team
-            ? derivePsdTeamLabel(team.name, team.age)
-            : undefined;
+          const kcvvTeamLabel = teamLabelOf(team);
 
           // Enrich matches: kcvv_team_label from team metadata (mirrors
           // getNextMatches). `is_home`'s clubId-based safety net now runs

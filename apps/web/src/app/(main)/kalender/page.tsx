@@ -124,14 +124,14 @@ async function fetchCalendarData(): Promise<CalendarData> {
       );
 
       // Flatten, enrich with team label, and deduplicate by match ID.
-      // The BFF getTeamMatches endpoint doesn't set kcvv_team_label,
-      // so we enrich from the Sanity team name here.
+      // The Sanity team name, not the BFF's `kcvv_team_label`: the filter
+      // chips below use `displayName`, so a row must spell its team the same way.
       const deduplicatedMatches = matchArrays
         .flatMap((matches, i) => {
           const teamLabel = teamsWithPsd[i]!.displayName;
           return matches.map((m) => ({
             ...transformMatchToCalendar(m),
-            team: m.kcvv_team_label ?? teamLabel,
+            team: teamLabel,
           }));
         })
         .reduce((map, cal) => {

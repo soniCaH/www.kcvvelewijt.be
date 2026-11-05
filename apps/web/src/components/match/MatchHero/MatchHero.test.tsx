@@ -352,7 +352,7 @@ describe("MatchHero", () => {
   });
 
   describe("competition meta line", () => {
-    it("composes competition · kcvvTeamLabel · season", () => {
+    it("composes competition · season — the team label is a chip, not a meta part (#3705)", () => {
       render(
         <MatchHero
           match={{
@@ -365,9 +365,70 @@ describe("MatchHero", () => {
         />,
       );
       expect(screen.getByText("3e provinciale A")).toBeInTheDocument();
-      expect(screen.getByText("KCVV-A")).toBeInTheDocument();
       // 2025-09 → ’25/’26
       expect(screen.getByText("’25/’26")).toBeInTheDocument();
+      // Exactly once: in the chip, not also in the meta line.
+      expect(screen.getAllByText("KCVV-A")).toHaveLength(1);
+    });
+  });
+
+  describe("KCVV team chip (#3705)", () => {
+    it.each([
+      ["home", homeTeam, awayTeam],
+      ["away", awayTeam, homeTeam],
+    ])(
+      "sits in the KCVV slot on a %s match, read after the club name",
+      (_, home, away) => {
+        const { container } = render(
+          <MatchHero
+            match={{
+              ...baseMatch,
+              date: scheduledMatchDate,
+              status: "scheduled",
+              homeTeam: home,
+              awayTeam: away,
+              kcvvTeamLabel: "U8 Wit",
+            }}
+          />,
+        );
+        const chip = container.querySelector("[data-team-part=label]");
+        expect(chip).toHaveTextContent("U8 Wit");
+        const slot = chip!.parentElement!;
+        expect(slot.querySelector("[data-team-part=name]")).toHaveTextContent(
+          "KCVV Elewijt",
+        );
+        expect(screen.getByRole("heading", { level: 1 })).toHaveAccessibleName(
+          expect.stringContaining("KCVV Elewijt U8 Wit"),
+        );
+      },
+    );
+
+    it("renders no chip when both sides are KCVV — the label names one team", () => {
+      const { container } = render(
+        <MatchHero
+          match={{
+            ...baseMatch,
+            date: scheduledMatchDate,
+            status: "scheduled",
+            awayTeam: homeTeam,
+            kcvvTeamLabel: "U13",
+          }}
+        />,
+      );
+      expect(container.querySelector("[data-team-part=label]")).toBeNull();
+    });
+
+    it("renders no chip without a label", () => {
+      const { container } = render(
+        <MatchHero
+          match={{
+            ...baseMatch,
+            date: scheduledMatchDate,
+            status: "scheduled",
+          }}
+        />,
+      );
+      expect(container.querySelector("[data-team-part=label]")).toBeNull();
     });
 
     it("drops missing parts gracefully", () => {

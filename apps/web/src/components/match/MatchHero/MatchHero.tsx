@@ -4,6 +4,7 @@ import { toMatchDisplayZone } from "@/lib/utils/dates";
 import { deriveSeason } from "@/lib/utils/season";
 import { TapedCard } from "@/components/design-system/TapedCard";
 import { cn } from "@/lib/utils/cn";
+import { KCVV_CLUB_ID } from "@/lib/constants";
 import { reservationView } from "@/lib/utils/match-display";
 import { assertNever } from "@/lib/utils/assert-never";
 import type { MatchStatus } from "../types";
@@ -112,14 +113,13 @@ function formatStubDate(date: Date): StubDateParts {
   };
 }
 
+// The KCVV team is a chip in its own slot (#3705), not a meta part.
 function buildCompetitionMeta(
   competition: string | undefined,
-  kcvvTeamLabel: string | undefined,
   date: Date,
 ): string[] {
   const parts: string[] = [];
   if (competition) parts.push(competition);
-  if (kcvvTeamLabel) parts.push(kcvvTeamLabel);
   parts.push(deriveSeason(date).label);
   return parts;
 }
@@ -226,15 +226,22 @@ function TeamShieldFallback({ name }: { name: string }) {
  * crest above name — and the name wraps (3 lines max) instead of truncating.
  * From `md` up nothing changes (every mobile rule is `max-md:`). The
  * reservation hero keeps the single-row layout.
+ *
+ * `label` (#3705): the KCVV team ("U13", "A-Ploeg") as a chip between crest
+ * and name — beside the crest on desktop, its own line on a phone. It follows
+ * the name in the DOM so the `<h1>` reads "KCVV Elewijt U13"; `order` moves
+ * it visually.
  */
 function TeamSlot({
   team,
   align,
   stacked = false,
+  label,
 }: {
   team: MatchHeroTeam;
   align: "start" | "end";
   stacked?: boolean;
+  label?: string;
 }) {
   const isEnd = align === "end";
   return (
@@ -262,7 +269,7 @@ function TeamSlot({
         data-team-part="name"
         title={team.name.trim() || undefined}
         className={cn(
-          "font-display text-ink min-w-0 flex-1 truncate text-[18px] leading-tight italic md:text-[22px]",
+          "font-display text-ink order-2 min-w-0 flex-1 truncate text-[18px] leading-tight italic md:text-[22px]",
           // `self-stretch` gives the name the slot's width to wrap in. A club
           // name is unbounded free text, so it takes the Hyphenation Rule's
           // `hyphens-auto` + `wrap-break-word` pair (DESIGN.md), capped at
@@ -273,6 +280,15 @@ function TeamSlot({
       >
         {team.name}
       </span>
+      {label && (
+        <span
+          data-team-part="label"
+          className="bg-jersey-deep text-cream text-label order-1 shrink-0 px-[7px] py-[3px] font-mono whitespace-nowrap uppercase"
+        >
+          {/* A space so the heading's accessible name reads "KCVV Elewijt U13". */}{" "}
+          {label}
+        </span>
+      )}
     </div>
   );
 }
@@ -284,7 +300,7 @@ function TeamSlot({
  * headline on the right) so it reads as the same page, but the headline
  * names one club — never "vs" a second one — and the meta line carries the
  * competition (`reservationView()`, the same helper `<TeamAgendaRow>`/
- * `<MatchStripView>` use) instead of a competition + squad + season list. No
+ * `<MatchStripView>` use) instead of a competition + season list. No
  * score region, no result vocabulary: neither state has one yet.
  *
  * `reservationView()` is deliberately called with **no** `otherClub` here,
@@ -413,9 +429,16 @@ function FullHeroCard({
     competition,
     kcvvTeamLabel,
   } = match;
+  // The label names one KCVV team, so a KCVV-vs-KCVV match gets no chip.
+  const kcvvSide =
+    (homeTeam.id === KCVV_CLUB_ID) === (awayTeam.id === KCVV_CLUB_ID)
+      ? undefined
+      : homeTeam.id === KCVV_CLUB_ID
+        ? "home"
+        : "away";
   const stubDate = formatStubDate(date);
   const kicker = getKicker(status);
-  const metaParts = buildCompetitionMeta(competition, kcvvTeamLabel, date);
+  const metaParts = buildCompetitionMeta(competition, date);
 
   return (
     <TapedCard
@@ -468,7 +491,12 @@ function FullHeroCard({
               score cell is as tall as a crest (`h-10`) so it centres on the
               crest row whatever the names do. */}
           <h1 className="grid grid-cols-[1fr_auto_1fr] items-start gap-3 font-normal md:items-center md:gap-6">
-            <TeamSlot team={homeTeam} align="start" stacked />
+            <TeamSlot
+              team={homeTeam}
+              align="start"
+              stacked
+              label={kcvvSide === "home" ? kcvvTeamLabel : undefined}
+            />
             <div className="flex items-center justify-center max-md:h-10">
               <ScoreRegion
                 status={status}
@@ -476,7 +504,12 @@ function FullHeroCard({
                 awayScore={awayTeam.score}
               />
             </div>
-            <TeamSlot team={awayTeam} align="end" stacked />
+            <TeamSlot
+              team={awayTeam}
+              align="end"
+              stacked
+              label={kcvvSide === "away" ? kcvvTeamLabel : undefined}
+            />
           </h1>
 
           <MetaLine parts={metaParts} />
