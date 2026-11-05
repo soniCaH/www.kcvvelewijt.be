@@ -52,7 +52,7 @@ const baseMatch = {
   time: "14:30",
   venue: "Sportpark Elewijt",
   competition: "3e provinciale A",
-  kcvvTeamLabel: "KCVV-A",
+  kcvvTeamLabel: "A-Ploeg",
 } as const;
 
 export const Upcoming: Story = {
@@ -68,6 +68,22 @@ export const Upcoming: Story = {
  */
 export const TravelTarget: Story = {
   args: { match: { ...baseMatch, id: 3740, status: "scheduled" } },
+};
+
+/**
+ * KCVV away, with a two-word youth label (#3705): the chip follows the KCVV
+ * side to the right slot and never breaks across lines.
+ */
+export const AwayTeamChip: Story = {
+  args: {
+    match: {
+      ...baseMatch,
+      homeTeam: defaultAwayTeam,
+      awayTeam: defaultHomeTeam,
+      kcvvTeamLabel: "U8 Wit",
+      status: "scheduled",
+    },
+  },
 };
 
 export const Finished: Story = {
@@ -268,6 +284,7 @@ export const MobileCollapse: Story = {
 interface HeroGeometry {
   crests: HTMLElement[];
   names: HTMLElement[];
+  labels: HTMLElement[];
   score: HTMLElement;
 }
 
@@ -279,13 +296,14 @@ async function heroGeometry(canvasElement: HTMLElement): Promise<HeroGeometry> {
   return {
     crests: all("crest"),
     names: all("name"),
+    labels: all("label"),
     score: h1.querySelector<HTMLElement>("[data-score-state]") as HTMLElement,
   };
 }
 
 const mid = (r: DOMRect) => r.top + r.height / 2;
 
-function assertStackedHero({ crests, names, score }: HeroGeometry) {
+function assertStackedHero({ crests, names, labels, score }: HeroGeometry) {
   expect(crests).toHaveLength(2);
   expect(names).toHaveLength(2);
   for (const name of names) {
@@ -294,10 +312,28 @@ function assertStackedHero({ crests, names, score }: HeroGeometry) {
   const [c0, c1] = crests.map((el) => el.getBoundingClientRect());
   expect(Math.abs(c0.top - c1.top)).toBeLessThanOrEqual(1);
   const [n0, n1] = names.map((el) => el.getBoundingClientRect());
-  expect(Math.abs(n0.top - n1.top)).toBeLessThanOrEqual(1);
   // Crest ABOVE name, not beside it — on both sides.
   expect(n0.top).toBeGreaterThanOrEqual(c0.bottom);
   expect(n1.top).toBeGreaterThanOrEqual(c1.bottom);
+  // The KCVV chip (#3705) takes its own line between crest and name, so the
+  // first line under each crest — chip or name — starts level, not the names.
+  for (const label of labels) {
+    const r = label.getBoundingClientRect();
+    const name = label.parentElement!.querySelector<HTMLElement>(
+      '[data-team-part="name"]',
+    )!;
+    expect(r.top).toBeGreaterThanOrEqual(c0.bottom);
+    expect(name.getBoundingClientRect().top).toBeGreaterThanOrEqual(r.bottom);
+  }
+  const firstUnderCrest = names.map((name) => {
+    const label = name.parentElement!.querySelector<HTMLElement>(
+      '[data-team-part="label"]',
+    );
+    return (label ?? name).getBoundingClientRect().top;
+  });
+  expect(
+    Math.abs(firstUnderCrest[0]! - firstUnderCrest[1]!),
+  ).toBeLessThanOrEqual(1);
   expect(
     Math.abs(mid(score.getBoundingClientRect()) - mid(c0)),
   ).toBeLessThanOrEqual(2);
