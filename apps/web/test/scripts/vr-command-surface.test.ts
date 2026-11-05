@@ -12,7 +12,9 @@
  *
  * Agent-facing docs handed out two of them anyway — the AFK brief and
  * `apps/web/CLAUDE.md` both taught a bare `-u <prefix>` — which is what this
- * test exists to stop.
+ * test exists to stop. It scans this repo only: the shared ralph core
+ * (`~/personal-skills/ralph-afk/`, #3715) lives outside it and carries its own
+ * tests.
  *
  * The patterns match command shapes, not mentions: prose may still explain that
  * a pattern has to follow `-u`, or that CI calls `vr:ci:update`, because neither

@@ -356,7 +356,7 @@ describe("isVrContainerRunning", () => {
 });
 
 describe("buildDockerArgs", () => {
-  it("never carries --build (#3141) — the image is built once, in step 0", () => {
+  it("never carries --build (#3141) — the image is built once, in pre-flight", () => {
     expect(buildDockerArgs(["-u", "ui-button"])).not.toContain("--build");
   });
 

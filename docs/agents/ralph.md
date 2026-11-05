@@ -10,7 +10,7 @@ RULE_SURFACE='(^|/)(eslint\.config\.|commitlint\.config\.)|(^|/)__tests__/[^/]*c
 CODE_SURFACE='^(apps|packages)/[^/]+/src/'
 MIGRATION_SURFACE=''
 LOCKFILE_SURFACE='^pnpm-lock\.yaml$'
-CHECK_CMD='pnpm --filter @kcvv/web lint:fix && pnpm turbo run lint type-check test build --filter=@kcvv/web'
+CHECK_CMD='corepack pnpm turbo run lint type-check test build --filter=...<every workspace the rule covers or the branch touches>'
 SCHEMA_REDO=''
 ADR_DIR='docs/adr'
 EXCLUDE_TITLE_PREFIX=''
@@ -46,7 +46,7 @@ git status --short pnpm-lock.yaml                              # lockfile guard:
 
 ## Checks
 
-Run `CHECK_CMD` (§ Config). The gate is exactly four Turbo task names: lint, type-check, test, build (`.claude/CLAUDE.md` → Git Workflow 3). It has no clock budget; 130–340 s is normal.
+Run `corepack pnpm --filter @kcvv/web lint:fix`, then `corepack pnpm turbo run lint type-check test build --filter=@kcvv/web`. `CHECK_CMD` (§ Config) is the same gate in its workspace-generic form, which `wave-check.sh` quotes as the re-check for a rule-vs-code pair: a rule can cover `apps/api` or a package, where the web gate proves nothing. The gate is exactly four Turbo task names: lint, type-check, test, build (`.claude/CLAUDE.md` → Git Workflow 3). It has no clock budget; 130–340 s is normal.
 
 - Changed another workspace: filter on it instead. A shared package gets a leading `...` so its dependents run too: `--filter=...@kcvv/api-contract`, and `--filter=...@kcvv/sanity-schemas` for either Sanity package (that one also reaches studio typegen and the web build). `lint:fix` exists in `apps/web` only.
 - Touched a `*.sh` or a `.husky/` hook: `pnpm lint:sh`.
@@ -69,8 +69,8 @@ Run `CHECK_CMD` (§ Config). The gate is exactly four Turbo task names: lint, ty
 In the main checkout, before a wave or a once-run:
 
 ```bash
-git -C "$MAIN" pull --rebase --autostash origin main
-pnpm --filter @kcvv/web run vr:build-image    # once per wave, never inside a lane
+git -C "$MAIN" fetch --prune origin             # fetch only: other sessions share the main checkout; worktrees start from origin/main
+corepack pnpm --filter @kcvv/web run vr:build-image    # once per wave, never inside a lane
 ```
 
 `vr:build-image` may be skipped only when no issue in the wave touches a VR-tagged story or calls `vr:*`. A missing or stale image makes the first such call fail fast, naming this command.

@@ -548,7 +548,7 @@ container from ${VR_IMAGE_TAG} — clear it by hand:
   rm -rf ${lockDir}
 `;
 
-/** Removed `--build` (#3141) — the image is built once, in step 0, never here. */
+/** Removed `--build` (#3141) — the image is built once, in ralph's pre-flight, never here. */
 export function buildDockerArgs(dockerArgs) {
   return [
     "compose",

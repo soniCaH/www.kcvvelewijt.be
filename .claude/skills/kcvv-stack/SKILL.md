@@ -77,7 +77,7 @@ const standings = await runPromise(
 
 ## BFF / Wrangler
 
-Use Node 24 — the repo's own floor (`.nvmrc`, `package.json` → `engines.node`). Wrangler's own `engines.node` is `>=22.0.0` (`apps/api/node_modules/wrangler/package.json`), but 24 is the one number to act on here. Always run wrangler through `corepack pnpm` (workspace-pinned version, per AFK-BRIEF's homebrew-pnpm warning), never `npx` (resolves whatever's cached or latest).
+Use Node 24 — the repo's own floor (`.nvmrc`, `package.json` → `engines.node`). Wrangler's own `engines.node` is `>=22.0.0` (`apps/api/node_modules/wrangler/package.json`), but 24 is the one number to act on here. Always run wrangler through `corepack pnpm` (workspace-pinned version; Homebrew's pnpm 8 rewrites the lockfile — `docs/agents/ralph.md` § Bootstrap), never `npx` (resolves whatever's cached or latest).
 
 **Production deploys from CI on merge to `main`** (`ci.yml`'s `deploy` job) — a hand deploy from a worktree is the exception, not the normal path. When you do need one, both CI deploy jobs build `api-contract` first; skip that step and a manual deploy can bundle a missing or stale contract.
 
