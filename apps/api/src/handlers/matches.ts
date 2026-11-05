@@ -274,6 +274,8 @@ export const getMatchDetailHandler = (
     undefined,
     {
       shouldServeStale,
+      // Only a detail built while `/teams` failed (#3705).
+      isPartial: isPartialFanout,
       refreshInline: (detail) => needsInlineRefresh(detail),
     },
   );

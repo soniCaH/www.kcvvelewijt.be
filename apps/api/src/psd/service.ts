@@ -136,6 +136,9 @@ interface EmptyBodyNotFoundOptions {
 // it a hung socket holds its caller until the runtime gives up.
 const PSD_FETCH_TIMEOUT_MS = 8_000;
 
+// The match-detail team label is optional: past this, the detail ships without it.
+const TEAMS_LABEL_TIMEOUT_MS = 3_000;
+
 function fetchJson<A, I>(
   url: string,
   schema: S.Schema<A, I>,
@@ -976,13 +979,20 @@ export const PsdServiceLive = Layer.effect(
                     ),
               ),
               Effect.zip(
-                // Best-effort: a failed `/teams` read drops only the label (#3705).
+                // Best-effort: a failed or slow `/teams` read drops only the
+                // label (#3705). The cap keeps it from eating the detail's
+                // miss budget (`MISS_FETCH_TIMEOUT_MS`).
                 getTeamsById().pipe(
-                  Effect.orElseSucceed((): TeamsById => ({})),
+                  Effect.timeout(TEAMS_LABEL_TIMEOUT_MS),
+                  Effect.option,
                 ),
                 { concurrent: true },
               ),
-              Effect.map(([index, teams]) => {
+              Effect.map(([index, teamsRead]) => {
+                const teams = Option.getOrElse(
+                  teamsRead,
+                  (): TeamsById => ({}),
+                );
                 const entry = index[String(matchId)];
                 // No index entry → no team → no band: the score shows. The
                 // index holds this season only, so a U6–U13 match from an
@@ -1059,10 +1069,12 @@ export const PsdServiceLive = Layer.effect(
                   }),
                 };
                 // Last, after the backfill and the venue have read the real
-                // score (#3428).
-                return entry.hideScores
-                  ? withoutDetailScores(withVenue)
-                  : withVenue;
+                // score (#3428). A failed `/teams` read is partial, so the
+                // missing label heals in minutes, not at the full TTL.
+                return markPartial(
+                  entry.hideScores ? withoutDetailScores(withVenue) : withVenue,
+                  Option.isNone(teamsRead),
+                );
               }),
             ),
           ),

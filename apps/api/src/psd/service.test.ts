@@ -2334,6 +2334,44 @@ describe("PsdService.getMatchDetail - competition/team enrichment", () => {
       expect(result.right.competitionType).toBe("league");
       // The match page names the KCVV team that plays (#3705).
       expect(result.right.kcvv_team_label).toBe("A-Ploeg");
+      expect(isPartialFanout(result.right)).toBe(false);
+    }
+  });
+
+  it("tags the detail partial when /teams fails, so the label heals soon (#3705)", async () => {
+    const kvMock: KvCacheInterface = {
+      get: (key: string) =>
+        Effect.succeed(
+          key === "psd:match-team-index:v5"
+            ? JSON.stringify({
+                "123": { teamId: 1, competitionType: "league" },
+              })
+            : null, // psd:teams-by-id → miss → /teams fetch
+        ),
+      set: () => Effect.succeed(undefined),
+      delete: () => Effect.succeed(undefined),
+      durable: noopDurableKv,
+    };
+    (global.fetch as ReturnType<typeof vi.fn>).mockImplementation(
+      async (url: string) =>
+        url.endsWith("/teams")
+          ? { ok: false, status: 503, statusText: "Unavailable" }
+          : {
+              ok: true,
+              json: async () => rawDetailWithGoal,
+              text: async () => JSON.stringify(rawDetailWithGoal),
+            },
+    );
+
+    const result = await runService((svc) => svc.getMatchDetail(123), {
+      kvMock,
+    });
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.kcvv_team_id).toBe(1);
+      expect(result.right.kcvv_team_label).toBeUndefined();
+      expect(isPartialFanout(result.right)).toBe(true);
     }
   });
 
