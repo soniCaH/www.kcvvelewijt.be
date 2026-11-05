@@ -60,13 +60,13 @@ afterAll(() => {
 });
 
 /** True when the hook printed a deny decision for this file. */
-const denies = (relativePath: string) => {
+const denies = (relativePath: string, key = "file_path") => {
   const result = spawnSync("bash", [HOOK], {
     cwd: fixture.project,
     encoding: "utf8",
     env: { ...gitEnv, CLAUDE_PROJECT_DIR: fixture.project },
     input: JSON.stringify({
-      tool_input: { file_path: join(fixture.project, relativePath) },
+      tool_input: { [key]: join(fixture.project, relativePath) },
     }),
   });
   expect(result.status).toBe(0);
@@ -76,6 +76,10 @@ const denies = (relativePath: string) => {
 describe("block-main-edits.sh", () => {
   it("denies a source edit in the checkout that is on main", () => {
     expect(denies("apps/web/src/a.tsx")).toBe(true);
+  });
+
+  it("denies a NotebookEdit on main", () => {
+    expect(denies("apps/web/a.ipynb", "notebook_path")).toBe(true);
   });
 
   it("allows docs/ on main", () => {

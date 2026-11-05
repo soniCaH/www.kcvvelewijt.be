@@ -113,12 +113,13 @@
       // same. Without it a .husky edit serves a cached green (#3096).
       //
       // The same holds for the other repo-root files those tests spawn or
-      // import (#3284): .claude/hooks/** (check-branch.test.ts spawns
-      // check-branch.sh), the top-level scripts/* (trigger-psd-sync.sh,
+      // import (#3284): .claude/** (check-branch.test.ts spawns
+      // check-branch.sh; vr-command-surface.test.ts scans its agent docs), the top-level scripts/* (trigger-psd-sync.sh,
       // backfill-staging-search.sh spawned; analytics-taxonomy.mjs
       // imported by the taxonomy and UpcomingMatches analytics tests) and
       // apps/api/wrangler.toml (backfill-staging-search.test.ts reads it),
-      // docs/agents/ralph.md (ralph-config.test.ts reads its config block), and
+      // docs/agents/** (ralph-config.test.ts reads ralph.md's config block;
+      // vr-command-surface.test.ts scans every file), and
       // the root package.json (pre-commit.test.ts reads its lint-staged entry).
       // The glob is scripts/*, not scripts/**: scripts/sanity-ops/ is its own
       // workspace and must not bust these tests' cache.
@@ -126,10 +127,10 @@
         "$TURBO_DEFAULT$",
         "!test/vr/__snapshots__/**",
         "$TURBO_ROOT$/.husky/**",
-        "$TURBO_ROOT$/.claude/hooks/**",
+        "$TURBO_ROOT$/.claude/**",
         "$TURBO_ROOT$/scripts/*",
         "$TURBO_ROOT$/apps/api/wrangler.toml",
-        "$TURBO_ROOT$/docs/agents/ralph.md",
+        "$TURBO_ROOT$/docs/agents/**",
         "$TURBO_ROOT$/package.json"
       ]
     },

@@ -5,17 +5,14 @@ set -euo pipefail
 
 is_main() { [ "$1" = "main" ] || [ "$1" = "master" ]; }
 
-# Fast path: a session whose checkout is off main only reaches files on its own
-# branch or in other worktrees, so it never needs the payload parsed.
-is_main "$(git branch --show-current 2>/dev/null || echo unknown)" || exit 0
-
 # Read the file path being written from the hook input
 INPUT=$(cat)
 FILE_PATH=$(echo "$INPUT" | python3 -c "
 import sys, json
 try:
     data = json.load(sys.stdin)
-    print(data.get('tool_input', {}).get('path', '') or data.get('tool_input', {}).get('file_path', ''))
+    ti = data.get('tool_input', {})
+    print(ti.get('path', '') or ti.get('file_path', '') or ti.get('notebook_path', ''))
 except:
     print('')
 " 2>/dev/null || echo "")
@@ -32,7 +29,7 @@ DIR=$(dirname "$FILE_PATH")
 while [ ! -d "$DIR" ]; do DIR=$(dirname "$DIR"); done
 is_main "$(git -C "$DIR" branch --show-current 2>/dev/null || echo unknown)" || exit 0
 
-# Allow writes to docs/, .claude/, scripts/, and root CLAUDE.md on main
+# Allow writes to docs/, .claude/, scripts/, and any CLAUDE.md on main
 RELATIVE_PATH=${FILE_PATH#"$CLAUDE_PROJECT_DIR"/}
 if [[ "$RELATIVE_PATH" =~ ^(docs/|\.claude/|scripts/)|(^|/)CLAUDE\.md$ ]]; then
   exit 0

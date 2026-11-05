@@ -70,7 +70,7 @@ In the main checkout, before a wave or a once-run:
 
 ```bash
 git -C "$MAIN" fetch --prune origin             # fetch only: other sessions share the main checkout; worktrees start from origin/main
-corepack pnpm --filter @kcvv/web run vr:build-image    # once per wave, never inside a lane
+source ~/.nvm/nvm.sh && nvm use --silent && corepack pnpm --filter @kcvv/web run vr:build-image    # once per wave, never inside a lane
 ```
 
 `vr:build-image` may be skipped only when no issue in the wave touches a VR-tagged story or calls `vr:*`. A missing or stale image makes the first such call fail fast, naming this command.

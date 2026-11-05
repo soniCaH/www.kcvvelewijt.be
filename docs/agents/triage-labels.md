@@ -14,4 +14,4 @@ When a skill mentions a role (e.g. "apply the AFK-ready triage label"), use the 
 
 A spec or PRD issue never gets `ready-for-agent`: it is the only AFK gate, so a labelled spec becomes an agent brief for its whole decision set. Only its sliced tickets get it.
 
-Two more labels take an issue out of every queue, whatever else it carries: `blocked` (waits on someone outside) and `postponed` (parked by our choice). The pickers in `~/personal-skills/ralph-afk/scripts/` skip both.
+Two more labels keep an issue out of the pickers' queues, whatever else it carries: `blocked` (waits on someone outside) and `postponed` (parked by our choice). The pickers in `~/personal-skills/ralph-afk/scripts/` skip both. `/spec` does not skip `blocked`: a blocked issue can still be specced.
