@@ -123,7 +123,7 @@ Issues and PRDs live in GitHub Issues (via the `gh` CLI); external PRs are **not
 
 ### Triage labels
 
-Five triage roles, each label named as its role (`ready-for-agent`, `ready-for-human`, `needs-triage`, `needs-info`, `wontfix`); `blocked` and `postponed` keep an issue out of every queue. See `docs/agents/triage-labels.md`.
+Labels and what each means: `docs/agents/triage-labels.md`.
 
 ### Domain docs
 

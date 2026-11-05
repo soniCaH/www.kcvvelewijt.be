@@ -16,7 +16,7 @@ ADR_DIR='docs/adr'
 EXCLUDE_TITLE_PREFIX=''
 ```
 
-`MIGRATION_SURFACE` is empty on purpose: this repo has no database migrations (§ Migrations). A spec issue never carries `ready-for-agent` (only its sliced tickets do), so no title prefix needs excluding.
+`MIGRATION_SURFACE` is empty on purpose: this repo has no database migrations (§ Migrations). `EXCLUDE_TITLE_PREFIX` is empty because a spec issue never carries `ready-for-agent` (`docs/agents/triage-labels.md`).
 
 ## Read first
 
@@ -26,6 +26,7 @@ EXCLUDE_TITLE_PREFIX=''
 4. `.claude/commands/tdd.md` — the KCVV TDD loop. Then follow the `mattpocock-skills:tdd` skill it sends you to.
 5. Any ADR (`docs/adr/`) or design doc the issue names.
 6. Reads Sanity, calls the BFF, runs an Effect in a page, or changes `packages/api-contract` or `apps/api`: `.claude/skills/kcvv-stack/SKILL.md` (`fetchGroq`, `runPromise`, `degradeSection`, the wrangler commands).
+7. Designs an interface or chases a bug: `docs/agents/code-patterns.md`.
 
 Before code, re-validate each acceptance criterion against the repo today. A criterion already met, or contradicted by the code, goes in the PR body, never silently reinterpreted.
 
@@ -46,9 +47,8 @@ git status --short pnpm-lock.yaml                              # lockfile guard:
 
 ## Checks
 
-Run `corepack pnpm --filter @kcvv/web lint:fix`, then `corepack pnpm turbo run lint type-check test build --filter=@kcvv/web`. `CHECK_CMD` (§ Config) is the same gate in its workspace-generic form, which `wave-check.sh` quotes as the re-check for a rule-vs-code pair: a rule can cover `apps/api` or a package, where the web gate proves nothing. The gate is exactly four Turbo task names: lint, type-check, test, build (`.claude/CLAUDE.md` → Git Workflow 3). It has no clock budget; 130–340 s is normal.
+The gate is `.claude/CLAUDE.md` → Git Workflow 3. `CHECK_CMD` (§ Config) is its workspace-generic form, which `wave-check.sh` quotes as the re-check for a rule-vs-code pair. On top of the gate:
 
-- Changed another workspace: filter on it instead. A shared package gets a leading `...` so its dependents run too: `--filter=...@kcvv/api-contract`, and `--filter=...@kcvv/sanity-schemas` for either Sanity package (that one also reaches studio typegen and the web build). `lint:fix` exists in `apps/web` only.
 - Touched a `*.sh` or a `.husky/` hook: `pnpm lint:sh`.
 - Touched `.husky/` or `.claude/hooks/`: `pnpm --filter @kcvv/web test` — `apps/web/test/hooks/` is those scripts' only test home.
 - Touched `commitlint.config.js`: no automated test covers it. Make a deliberately malformed commit in a scratch worktree and confirm it is refused.
@@ -107,11 +107,8 @@ Separate worktrees isolate the filesystem and nothing else. A wave stays at **4*
 
 - **VR baselines:** a visual change to a VR-tagged story captures its baselines in the same PR, one prefix per run, through `pnpm --filter @kcvv/web run vr:update:story -- <story-id-prefix>` only (it runs in the pinned amd64 container). Before claiming no baseline moved, grep `*.stories.tsx` for imports of every `page.tsx` and `loading.tsx` you changed.
 - **Analytics:** a feature that adds interactive UI needs its events, GTM and GA4 entries (`apps/web/CLAUDE.md` → Analytics Checklist for New Features).
-- **Schema:** edit `packages/sanity-schemas/src/<file>.ts` only; both studios consume it.
 - **Dependency:** never let pnpm rewrite the lockfile. Resolve the version once, `git checkout origin/main -- pnpm-lock.yaml`, hand-insert the three blocks (importers, packages, snapshots) in prettier style, and confirm `corepack pnpm install --frozen-lockfile` changes nothing.
-- **`llms.txt`:** a renamed or removed route, or a changed club fact, re-checks `apps/web/public/llms.txt`.
-- **CLAUDE.md:** a change to the architecture a `CLAUDE.md` describes updates it in the same PR.
-- **Peers:** a new file in a folder with two or more peers (a JSON-LD builder, a `use*Analytics` hook, a repository, a story) mirrors their return type, import order and optional-field style.
+- **The rest** (schemas, `llms.txt`, CLAUDE.md updates, scaffolding from peers): `.claude/CLAUDE.md` → Development Guidelines.
 
 ## Implementer agent
 
@@ -123,9 +120,8 @@ Title: `<type>(<scope>): <description> (#<N>)`, a conventional commit with a sco
 
 ## Hard rules
 
-- Never set `ALLOW_MAIN_COMMIT=1`; it is a human escape hatch. A branch guard that blocks you means: use the worktree.
-- Never write to a Sanity dataset from an agent. Content writes run through Kevin.
-- No `eslint-disable` comments; fix the site.
+- No `eslint-disable` comments; fix the site. (#3717 moves checkable rules into lint.)
+- The rest: `.claude/CLAUDE.md` → Git Workflow 6 (`ALLOW_MAIN_COMMIT`) and § Migrations above (Sanity writes).
 
 ## Loop
 

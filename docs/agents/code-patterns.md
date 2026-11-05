@@ -6,7 +6,6 @@ KCVV-only notes kept from the retired `design-an-interface` and `triage-issue` c
 
 - **Effect services.** A service is a `Context.Tag` class with its interface beside it, for example `KvCacheService` (`apps/api/src/cache/kv-cache.ts`) and `EmailTransport` (`apps/api/src/email/resend.ts`). Errors are tagged and typed in the Effect's error channel: no `Promise` in the interface, no `throw`. Mirror a peer before writing a new one.
 - **HttpApi groups.** Endpoints live in `packages/api-contract/src/`, grouped by domain. Add only what `apps/api` actually serves; never an endpoint "for later". Conventions: `packages/api-contract/CLAUDE.md`.
-- **Sanity reads.** GROQ lives in `apps/web/src/lib/repositories/`, one `<domain>.repository.ts` per domain, each with its test. Results are typed by the generated Sanity types; the read and run patterns are in `.claude/skills/kcvv-stack/SKILL.md`.
 
 ## Debugging gotchas
 

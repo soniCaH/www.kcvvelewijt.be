@@ -16,14 +16,30 @@ const repoRoot = spawnSync("git", ["rev-parse", "--show-toplevel"], {
 }).stdout.trim();
 const CONFIG = join(repoRoot, "docs", "agents", "ralph.md");
 
-/** Same extraction as `~/personal-skills/ralph-afk/scripts/config.sh`. */
+/**
+ * A deliberate copy of the extraction in `~/personal-skills/ralph-afk/scripts/config.sh`
+ * (CI cannot reach that file). Change both together.
+ */
 const READ_BLOCK = `eval "$(awk '/^\`\`\`sh ralph-config[[:space:]]*$/ { f = 1; next } f && /^\`\`\`[[:space:]]*$/ { exit } f' "$CONFIG")"`;
 
-const configValue = (name: string) =>
-  spawnSync("bash", ["-c", `${READ_BLOCK}; printf '%s' "\${${name}}"`], {
-    encoding: "utf8",
-    env: { ...process.env, CONFIG },
-  }).stdout;
+const NAMES = ["SHORT", "RULE_SURFACE", "CODE_SURFACE", "LOCKFILE_SURFACE"];
+
+/** Every value, read once: one per line, in NAMES order. */
+const config: Record<string, string> = Object.fromEntries(
+  spawnSync(
+    "bash",
+    [
+      "-c",
+      `${READ_BLOCK}; printf '%s\\n' ${NAMES.map((n) => `"\${${n}}"`).join(" ")}`,
+    ],
+    { encoding: "utf8", env: { ...process.env, CONFIG } },
+  )
+    .stdout.split("\n")
+    .slice(0, NAMES.length)
+    .map((value, i) => [NAMES[i], value]),
+);
+
+const configValue = (name: string) => config[name] ?? "";
 
 const matches = (surface: string, path: string) =>
   spawnSync("grep", ["-qE", configValue(surface)], { input: `${path}\n` })
