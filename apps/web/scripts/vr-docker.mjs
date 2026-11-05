@@ -22,9 +22,9 @@
 // front of the `&&` chain would never see the scoping pattern.
 //
 // Three more things live here (#3141 — a wave guards named shared resources,
-// never CPU; see .claude/skills/ralph-afk/SKILL.md for the full register):
+// never CPU; see docs/agents/ralph.md § Shared resources for the full register):
 //
-//   - The image is never built here. `/ralph-afk` step 0 builds
+//   - The image is never built here. Ralph's pre-flight (docs/agents/ralph.md) builds
 //     `kcvv-vr-runner:latest` once, before any lane starts (`vr:build-image`,
 //     which takes the SAME lock below around its own `docker build` — a
 //     retag mid-run is exactly what the lock exists to rule out). This
@@ -155,7 +155,7 @@ export function decide({ mode, args, fullRun = false }) {
 /** Must match `docker-compose.vr.yml`'s `image:` field. */
 export const VR_IMAGE_TAG = "kcvv-vr-runner:latest";
 
-/** The command `/ralph-afk` step 0 runs once, before any lane starts. */
+/** The command ralph's pre-flight runs once, before any lane starts. */
 export const VR_IMAGE_BUILD_COMMAND =
   "pnpm --filter @kcvv/web run vr:build-image";
 
@@ -257,8 +257,8 @@ export const imageAbsentMessage = (imageTag) => `
 Refusing to start the visual-regression container — image "${imageTag}" was
 not found.
 
-A wave's step 0 builds this image once, before any lane starts (see the
-shared-resource register in .claude/skills/ralph-afk/SKILL.md, #3141) — this
+A wave's pre-flight builds this image once, before any lane starts (see
+§ Shared resources in docs/agents/ralph.md, #3141) — this
 script no longer builds it itself, so a rebuild here can never race another
 lane's. Build it now, then re-run this command:
 
@@ -353,7 +353,8 @@ function lockAgeMs(lockDir, now) {
   }
 }
 
-const uniqueSuffix = () => `${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+const uniqueSuffix = () =>
+  `${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
 /**
  * Atomically claims `lockDir`: the pid file is written into a temp directory

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Warn when editing files on main — but allow docs/ and .claude/ writes.
+# Block source edits on main — but allow docs/, .claude/ and scripts/ writes.
 # Planning artifacts (PRDs, skills, commands) legitimately live on main.
 set -euo pipefail
 
@@ -25,11 +25,6 @@ if [[ "$FILE_PATH" != "$CLAUDE_PROJECT_DIR/"* ]]; then
   exit 0
 fi
 
-# If file is inside a .worktrees/ subdirectory, it's on a feature branch — allow it
-if [[ "$FILE_PATH" == "$CLAUDE_PROJECT_DIR/.worktrees/"* ]]; then
-  exit 0
-fi
-
 # Allow writes to docs/, .claude/, scripts/, and root CLAUDE.md on main
 RELATIVE_PATH=${FILE_PATH#"$CLAUDE_PROJECT_DIR"/}
 if echo "$RELATIVE_PATH" | grep -qE "^(docs/|\.claude/|scripts/)|(^|/)CLAUDE\.md$"; then
@@ -38,6 +33,6 @@ fi
 
 # Block everything else on main
 cat <<EOF
-{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"BLOCKED: Editing source files on main. Use ./scripts/ralph.sh to create a worktree. (docs/, .claude/, scripts/ are allowed on main)"}}
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"BLOCKED: Editing source files on main. Use /ralph-once to create a worktree. (docs/, .claude/, scripts/ are allowed on main)"}}
 EOF
 exit 0

@@ -134,8 +134,8 @@ describe("the visual-regression command surface", () => {
     expect(SURFACE).toEqual(
       expect.arrayContaining([
         ".claude/agents/kcvv-implementer.md",
-        ".claude/commands/ralph.md",
-        ".claude/skills/ralph-afk/AFK-BRIEF.md",
+        ".claude/commands/tdd.md",
+        ".claude/skills/kcvv-stack/SKILL.md",
         "docs/agents/testing-ops.md",
       ]),
     );

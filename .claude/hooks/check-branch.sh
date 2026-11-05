@@ -141,7 +141,7 @@ except Exception:
     branch = ""
 
 if branch in ("main", "master"):
-    emit_deny("BLOCKED: that commit would land on %s in %s. Use /ralph to "
+    emit_deny("BLOCKED: that commit would land on %s in %s. Use /ralph-once to "
               "create a worktree for an issue first." % (branch, target))
 
 allow()   # feature branch, detached HEAD, or not a repo — git will sort it out

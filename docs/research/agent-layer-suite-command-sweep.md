@@ -1,5 +1,7 @@
 # Agent-layer suite-command sweep (pass 1)
 
+> **History.** A snapshot of 2026-09-23. #3715 deleted several files this sweep names (the old ralph files, `triage-issue`, `write-a-prd`, `prd-to-issues`, and the `doctor-plus`, `review-retro` and `effect-service-design` skills). Read it as a record, not as the current tree.
+
 Resolves [#3113](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3113) — _Task: sweep the agent skills and hooks for suite commands that contradict the contract_ — a child of the [test-suite walk map (#3078)](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3078).
 
 Measured **2026-09-23** against `origin/main` @ `4aedfc48`. Line numbers below are `origin/main` line numbers unless a row says otherwise.

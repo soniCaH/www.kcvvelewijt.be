@@ -295,7 +295,7 @@ describe("imageAbsentMessage", () => {
 
     expect(message).toContain(VR_IMAGE_BUILD_COMMAND);
     expect(message).toContain("kcvv-vr-runner:latest");
-    expect(message).toContain(".claude/skills/ralph-afk/SKILL.md");
+    expect(message).toContain("docs/agents/ralph.md");
   });
 });
 

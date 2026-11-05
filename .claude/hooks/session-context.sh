@@ -20,7 +20,7 @@ if [ -n "$GIT_DIR" ] && [ "$GIT_DIR" != "$GIT_COMMON_DIR" ]; then
 fi
 
 if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
-  OUTPUT="$OUTPUT | WARNING: on main — use /ralph to pick an issue and create a worktree"
+  OUTPUT="$OUTPUT | WARNING: on main — use /ralph-once to pick an issue and create a worktree"
 fi
 
 echo "$OUTPUT"

@@ -76,7 +76,7 @@ Do NOT expand this worktree's scope. Instead:
 # Create a new issue for the discovered work
 gh issue create \
   --title "[type](scope): [discovered work]" \
-  --label "ready" \
+  --label "ready-for-agent" \
   --body "Discovered during implementation of #[current-issue].\n\n[description]"
 
 # Comment on current issue
