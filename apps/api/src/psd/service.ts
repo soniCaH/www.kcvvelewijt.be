@@ -383,6 +383,8 @@ export const PsdServiceLive = Layer.effect(
     const TEAMS_BY_ID_TTL = 60 * 60 * 24; // 1 day
 
     type TeamsById = Record<string, { name: string; age: string }>;
+    const teamLabelOf = (team: TeamsById[string] | undefined) =>
+      team ? derivePsdTeamLabel(team.name, team.age) : undefined;
 
     const getTeamsById = (): Effect.Effect<TeamsById, BffError> =>
       Effect.gen(function* () {
@@ -711,9 +713,7 @@ export const PsdServiceLive = Layer.effect(
           );
           const team = teams[String(teamId)];
           const hideScores = hidesScores(team?.age);
-          const kcvvTeamLabel = team
-            ? derivePsdTeamLabel(team.name, team.age)
-            : undefined;
+          const kcvvTeamLabel = teamLabelOf(team);
           return games.map((game) => ({
             ...transformPsdGame(
               { ...game, teamId: game.teamId ?? teamId },
@@ -1023,9 +1023,7 @@ export const PsdServiceLive = Layer.effect(
                 const enriched = {
                   ...detail,
                   kcvv_team_id: entry.teamId,
-                  kcvv_team_label: team
-                    ? derivePsdTeamLabel(team.name, team.age)
-                    : undefined,
+                  kcvv_team_label: teamLabelOf(team),
                   competitionType: entry.competitionType,
                   ...(backfill
                     ? {
@@ -1238,9 +1236,7 @@ export const PsdServiceLive = Layer.effect(
             );
           }
 
-          const kcvvTeamLabel = team
-            ? derivePsdTeamLabel(team.name, team.age)
-            : undefined;
+          const kcvvTeamLabel = teamLabelOf(team);
 
           // Enrich matches: kcvv_team_label from team metadata (mirrors
           // getNextMatches). `is_home`'s clubId-based safety net now runs

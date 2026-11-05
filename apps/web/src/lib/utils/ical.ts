@@ -235,14 +235,15 @@ export function normalizeCacheKey(
 function matchToEntry(match: Match): TimedIcalEntry | undefined {
   const start = buildStartDateTime(match);
   if (!start.isValid) return undefined;
+  // "[U8] KCVV Elewijt - X": names which KCVV team plays (#3705).
+  const teamPrefix = match.kcvv_team_label ? `[${match.kcvv_team_label}] ` : "";
 
   return {
     // `kcvv-match-` is the other half of the namespace disjointness
     // `buildEventUid` (`event-uid.ts`) documents for `kcvv-event-` — kept
     // as a local literal since matches have no shared-surface UID to unify.
     id: `kcvv-match-${match.id}@kcvvelewijt.be`,
-    // "[U8] KCVV Elewijt - X": names which KCVV team plays (#3705).
-    summary: `${match.kcvv_team_label ? `[${match.kcvv_team_label}] ` : ""}${buildSummary(match)}`,
+    summary: `${teamPrefix}${buildSummary(match)}`,
     start,
     end: start.plus({ hours: 2 }),
     // Competition only — never the team names, so a placeholder cannot
