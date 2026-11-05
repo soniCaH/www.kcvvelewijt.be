@@ -57,6 +57,41 @@ function mergePreservingOrder(
   return [...kept, ...psdIds.filter((id) => !keptSet.has(id))];
 }
 
+/**
+ * Deep equality as Sanity stores data: a field written as `null` comes back
+ * with no key at all, so `null` and `undefined` are the same value. Arrays
+ * compare in order; object keys in any order.
+ */
+const sameValue = (a: unknown, b: unknown): boolean => {
+  if ((a ?? null) === (b ?? null)) return true;
+  if (Array.isArray(a) || Array.isArray(b)) {
+    return (
+      Array.isArray(a) &&
+      Array.isArray(b) &&
+      a.length === b.length &&
+      a.every((item, i) => sameValue(item, b[i]))
+    );
+  }
+  if (typeof a !== "object" || typeof b !== "object" || !a || !b) return false;
+  const ra = a as Record<string, unknown>;
+  const rb = b as Record<string, unknown>;
+  return [...new Set([...Object.keys(ra), ...Object.keys(rb)])].every((k) =>
+    sameValue(ra[k], rb[k]),
+  );
+};
+
+/**
+ * True when the stored document already holds every field the sync would
+ * `set`. Such a patch changes nothing (Sanity keeps `_updatedAt`), but it still
+ * fires the revalidate webhook, which busts a whole cache tag (#3709).
+ */
+const alreadyStored = (
+  stored: Record<string, unknown> | null | undefined,
+  fields: Record<string, unknown>,
+): boolean =>
+  stored != null &&
+  Object.entries(fields).every(([k, v]) => sameValue(stored[k], v));
+
 // ─── Document shapes written to Sanity ───────────────────────────────────────
 
 export interface SanityPlayerDoc {
@@ -230,15 +265,19 @@ export const SanityMutationLive = Layer.effect(
       psdFields: T,
     ) =>
       Effect.tryPromise({
-        try: () =>
-          client
+        try: async () => {
+          const id = docId(type, psdId);
+          const stored = await client.getDocument(id);
+          if (alreadyStored(stored, psdFields)) return;
+          await client
             .transaction()
-            .createIfNotExists({ _id: docId(type, psdId), _type: type, psdId })
-            .patch(docId(type, psdId), (p) => p.set(psdFields))
-            .commit(),
+            .createIfNotExists({ _id: id, _type: type, psdId })
+            .patch(id, (p) => p.set(psdFields))
+            .commit();
+        },
         catch: (cause) =>
           new SanityMutationError(`Failed to upsert ${type} ${psdId}`, cause),
-      }).pipe(Effect.asVoid);
+      });
 
     /** Stored portrait of a member doc: the dedup url and the asset it points at. */
     const readStoredImage = (entityType: string, psdId: string) =>
@@ -636,6 +675,8 @@ export const SanityMutationLive = Layer.effect(
             staff: staffArray,
             archived: false,
           };
+
+          if (alreadyStored(existing, psdFields)) return;
 
           // Use ifRevisionId when document exists to detect concurrent edits
           yield* Effect.tryPromise({

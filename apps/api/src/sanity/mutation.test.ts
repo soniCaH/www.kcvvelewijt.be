@@ -24,8 +24,14 @@ function makeTxObject(): Record<string, unknown> {
   const tx: Record<string, unknown> = {};
   tx.createIfNotExists = mockCreateIfNotExists.mockImplementation(() => tx);
   tx.patch = vi.fn(
-    (_id: string, fn: (p: { set: typeof mockSet }) => unknown) => {
-      fn({ set: mockSet });
+    (
+      _id: string,
+      fn: (p: {
+        set: typeof mockSet;
+        ifRevisionId: () => { set: typeof mockSet };
+      }) => unknown,
+    ) => {
+      fn({ set: mockSet, ifRevisionId: () => ({ set: mockSet }) });
       return tx;
     },
   );
@@ -482,6 +488,158 @@ describe("upsertTeam", () => {
     expect(mockSet).toHaveBeenCalledWith(
       expect.not.objectContaining({ footbelId: expect.anything() }),
     );
+  });
+});
+
+// ─── no-op upserts (#3709) ──────────────────────────────────────────────────
+//
+// A patch that changes nothing still fires the Sanity revalidate webhook, which
+// busts a whole cache tag. So an upsert whose PSD fields already hold the
+// stored values must send no mutation at all.
+
+describe("upserts skip a write that changes nothing (#3709)", () => {
+  const player = {
+    psdId: "123",
+    firstName: "Jan",
+    lastName: "Janssens",
+    birthDate: "1995-03-15",
+    keeper: false,
+    positionPsd: null,
+  };
+  // As Sanity returns it: system fields, editorial fields, and no key at all
+  // for a field written as null.
+  const storedPlayer = {
+    _id: "player-psd-123",
+    _type: "player",
+    _rev: "r1",
+    _updatedAt: "2026-09-23T02:00:57Z",
+    psdId: "123",
+    firstName: "Jan",
+    lastName: "Janssens",
+    birthDate: "1995-03-15",
+    keeper: false,
+    archived: false,
+    bio: "editorial",
+  };
+
+  const upsertPlayer = (doc: typeof player) =>
+    run(
+      Effect.gen(function* () {
+        yield* (yield* SanityMutation).upsertPlayer(doc);
+      }),
+    );
+
+  it("sends no mutation when every player field already holds its value", async () => {
+    mockGetDocument.mockResolvedValueOnce(storedPlayer);
+    await upsertPlayer(player);
+    expect(mockTransaction).not.toHaveBeenCalled();
+  });
+
+  it("writes when one player field changed", async () => {
+    mockGetDocument.mockResolvedValueOnce(storedPlayer);
+    await upsertPlayer({ ...player, lastName: "Peeters" });
+    expect(mockTransaction).toHaveBeenCalledOnce();
+    expect(mockSet).toHaveBeenCalledWith(
+      expect.objectContaining({ lastName: "Peeters" }),
+    );
+  });
+
+  it("writes when the stored player is archived", async () => {
+    mockGetDocument.mockResolvedValueOnce({ ...storedPlayer, archived: true });
+    await upsertPlayer(player);
+    expect(mockSet).toHaveBeenCalledWith(
+      expect.objectContaining({ archived: false }),
+    );
+  });
+
+  it("writes when a stored value must become null", async () => {
+    mockGetDocument.mockResolvedValueOnce({
+      ...storedPlayer,
+      positionPsd: "MV",
+    });
+    await upsertPlayer(player);
+    expect(mockTransaction).toHaveBeenCalledOnce();
+  });
+
+  it("sends no mutation for an unchanged staff member", async () => {
+    mockGetDocument.mockResolvedValueOnce({
+      _id: "staffMember-psd-9",
+      _rev: "r1",
+      psdId: "9",
+      firstName: "Marc",
+      lastName: "Peeters",
+      birthDate: "1975-04-12",
+      archived: false,
+    });
+    await run(
+      Effect.gen(function* () {
+        yield* (yield* SanityMutation).upsertStaff({
+          psdId: "9",
+          firstName: "Marc",
+          lastName: "Peeters",
+          birthDate: "1975-04-12",
+          functionTitle: null,
+        });
+      }),
+    );
+    expect(mockTransaction).not.toHaveBeenCalled();
+  });
+
+  const team = {
+    psdId: "42",
+    name: "Eerste Elftal A",
+    slug: "eerste-elftal-a",
+    age: "A",
+    gender: "mannen",
+    footbelId: null,
+    playerPsdIds: ["100", "200"],
+    staffPsdIds: ["300"],
+  };
+  // Same content as the sync writes, keys in Sanity's own order.
+  const storedTeam = {
+    _id: "team-psd-42",
+    _type: "team",
+    _rev: "r7",
+    archived: false,
+    age: "A",
+    gender: "mannen",
+    name: "Eerste Elftal A",
+    psdId: "42",
+    slug: { current: "eerste-elftal-a", _type: "slug" },
+    players: [
+      { _key: "100", _ref: "player-psd-100", _type: "reference" },
+      { _key: "200", _ref: "player-psd-200", _type: "reference" },
+    ],
+    staff: [
+      {
+        _key: "300",
+        _type: "object",
+        member: { _ref: "staffMember-psd-300", _type: "reference" },
+        role: "T1",
+      },
+    ],
+  };
+
+  const upsertTeam = () =>
+    run(
+      Effect.gen(function* () {
+        yield* (yield* SanityMutation).upsertTeam(team);
+      }),
+    );
+
+  it("sends no mutation for an unchanged team", async () => {
+    mockGetDocument.mockResolvedValueOnce(storedTeam);
+    await upsertTeam();
+    expect(mockTransaction).not.toHaveBeenCalled();
+  });
+
+  it("writes a team whose membership changed", async () => {
+    mockGetDocument.mockResolvedValueOnce({
+      ...storedTeam,
+      players: storedTeam.players.slice(0, 1),
+    });
+    await upsertTeam();
+    expect(mockTransaction).toHaveBeenCalledOnce();
   });
 });
 
