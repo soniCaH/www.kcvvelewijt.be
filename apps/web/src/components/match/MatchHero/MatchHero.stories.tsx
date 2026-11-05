@@ -319,10 +319,10 @@ function assertStackedHero({ crests, names, labels, score }: HeroGeometry) {
   // first line under each crest — chip or name — starts level, not the names.
   for (const label of labels) {
     const r = label.getBoundingClientRect();
-    const name = label.parentElement!.querySelector<HTMLElement>(
-      '[data-team-part="name"]',
-    )!;
-    expect(r.top).toBeGreaterThanOrEqual(c0.bottom);
+    const slot = label.parentElement!;
+    const name = slot.querySelector<HTMLElement>('[data-team-part="name"]')!;
+    const crest = slot.querySelector<HTMLElement>('[data-team-part="crest"]')!;
+    expect(r.top).toBeGreaterThanOrEqual(crest.getBoundingClientRect().bottom);
     expect(name.getBoundingClientRect().top).toBeGreaterThanOrEqual(r.bottom);
   }
   const firstUnderCrest = names.map((name) => {

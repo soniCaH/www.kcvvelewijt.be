@@ -429,6 +429,13 @@ function FullHeroCard({
     competition,
     kcvvTeamLabel,
   } = match;
+  // The label names one KCVV team, so a KCVV-vs-KCVV match gets no chip.
+  const kcvvSide =
+    (homeTeam.id === KCVV_CLUB_ID) === (awayTeam.id === KCVV_CLUB_ID)
+      ? undefined
+      : homeTeam.id === KCVV_CLUB_ID
+        ? "home"
+        : "away";
   const stubDate = formatStubDate(date);
   const kicker = getKicker(status);
   const metaParts = buildCompetitionMeta(competition, date);
@@ -488,7 +495,7 @@ function FullHeroCard({
               team={homeTeam}
               align="start"
               stacked
-              label={homeTeam.id === KCVV_CLUB_ID ? kcvvTeamLabel : undefined}
+              label={kcvvSide === "home" ? kcvvTeamLabel : undefined}
             />
             <div className="flex items-center justify-center max-md:h-10">
               <ScoreRegion
@@ -501,7 +508,7 @@ function FullHeroCard({
               team={awayTeam}
               align="end"
               stacked
-              label={awayTeam.id === KCVV_CLUB_ID ? kcvvTeamLabel : undefined}
+              label={kcvvSide === "away" ? kcvvTeamLabel : undefined}
             />
           </h1>
 

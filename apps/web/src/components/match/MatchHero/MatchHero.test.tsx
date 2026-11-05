@@ -403,6 +403,21 @@ describe("MatchHero", () => {
       },
     );
 
+    it("renders no chip when both sides are KCVV — the label names one team", () => {
+      const { container } = render(
+        <MatchHero
+          match={{
+            ...baseMatch,
+            date: scheduledMatchDate,
+            status: "scheduled",
+            awayTeam: homeTeam,
+            kcvvTeamLabel: "U13",
+          }}
+        />,
+      );
+      expect(container.querySelector("[data-team-part=label]")).toBeNull();
+    });
+
     it("renders no chip without a label", () => {
       const { container } = render(
         <MatchHero
