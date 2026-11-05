@@ -85,7 +85,7 @@ const sameValue = (a: unknown, b: unknown): boolean => {
  * `set`. Such a patch changes nothing (Sanity keeps `_updatedAt`), but it still
  * fires the revalidate webhook, which busts a whole cache tag (#3709).
  */
-const holdsAll = (
+const alreadyStored = (
   stored: Record<string, unknown> | null | undefined,
   fields: Record<string, unknown>,
 ): boolean =>
@@ -266,12 +266,13 @@ export const SanityMutationLive = Layer.effect(
     ) =>
       Effect.tryPromise({
         try: async () => {
-          const stored = await client.getDocument(docId(type, psdId));
-          if (holdsAll(stored, psdFields)) return;
+          const id = docId(type, psdId);
+          const stored = await client.getDocument(id);
+          if (alreadyStored(stored, psdFields)) return;
           await client
             .transaction()
-            .createIfNotExists({ _id: docId(type, psdId), _type: type, psdId })
-            .patch(docId(type, psdId), (p) => p.set(psdFields))
+            .createIfNotExists({ _id: id, _type: type, psdId })
+            .patch(id, (p) => p.set(psdFields))
             .commit();
         },
         catch: (cause) =>
@@ -675,7 +676,7 @@ export const SanityMutationLive = Layer.effect(
             archived: false,
           };
 
-          if (holdsAll(existing, psdFields)) return;
+          if (alreadyStored(existing, psdFields)) return;
 
           // Use ifRevisionId when document exists to detect concurrent edits
           yield* Effect.tryPromise({
