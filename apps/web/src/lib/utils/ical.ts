@@ -241,7 +241,8 @@ function matchToEntry(match: Match): TimedIcalEntry | undefined {
     // `buildEventUid` (`event-uid.ts`) documents for `kcvv-event-` — kept
     // as a local literal since matches have no shared-surface UID to unify.
     id: `kcvv-match-${match.id}@kcvvelewijt.be`,
-    summary: buildSummary(match),
+    // "[U8] KCVV Elewijt - X": names which KCVV team plays (#3705).
+    summary: `${match.kcvv_team_label ? `[${match.kcvv_team_label}] ` : ""}${buildSummary(match)}`,
     start,
     end: start.plus({ hours: 2 }),
     // Competition only — never the team names, so a placeholder cannot

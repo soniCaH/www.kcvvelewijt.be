@@ -709,13 +709,18 @@ export const PsdServiceLive = Layer.effect(
             [getCompetitionLabels(), getTeamsById()],
             { concurrency: "unbounded" },
           );
-          const hideScores = hidesScores(teams[String(teamId)]?.age);
-          return games.map((game) =>
-            transformPsdGame(
+          const team = teams[String(teamId)];
+          const hideScores = hidesScores(team?.age);
+          const kcvvTeamLabel = team
+            ? derivePsdTeamLabel(team.name, team.age)
+            : undefined;
+          return games.map((game) => ({
+            ...transformPsdGame(
               { ...game, teamId: game.teamId ?? teamId },
               { ownClubId, competitionLabels, hideScores },
             ),
-          );
+            kcvv_team_label: kcvvTeamLabel,
+          }));
         }),
 
       getNextMatches: () =>
@@ -970,7 +975,14 @@ export const PsdServiceLive = Layer.effect(
                       }),
                     ),
               ),
-              Effect.map((index) => {
+              Effect.zip(
+                // Best-effort: a failed `/teams` read drops only the label (#3705).
+                getTeamsById().pipe(
+                  Effect.orElseSucceed((): TeamsById => ({})),
+                ),
+                { concurrent: true },
+              ),
+              Effect.map(([index, teams]) => {
                 const entry = index[String(matchId)];
                 // No index entry → no team → no band: the score shows. The
                 // index holds this season only, so a U6–U13 match from an
@@ -1007,9 +1019,13 @@ export const PsdServiceLive = Layer.effect(
                     detail.status === "scheduled" &&
                     kickoffMs(detail.date) < Date.now());
 
+                const team = teams[String(entry.teamId)];
                 const enriched = {
                   ...detail,
                   kcvv_team_id: entry.teamId,
+                  kcvv_team_label: team
+                    ? derivePsdTeamLabel(team.name, team.age)
+                    : undefined,
                   competitionType: entry.competitionType,
                   ...(backfill
                     ? {
