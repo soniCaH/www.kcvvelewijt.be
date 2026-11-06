@@ -561,6 +561,14 @@ unrelated drift alongside the actual change.
 which is what everyone already assumes it means. It satisfies #3086's clause 2 — the class closes with a rule, not
 a raised timeout — and it is the cheapest finding in this document.
 
+> **2026-11-06 (#3707): the baseline bot is the exception.** `.storybook/test-runner.ts` now reads
+> `updatePassedSnapshot: process.env.VR_UPDATE_PASSED !== "0"`. A local `vr:update:story` keeps the default (on, as
+> above); the three `vr:ci:update` steps in `vr-baseline-update.yml` set `VR_UPDATE_PASSED: "0"`. Over every story the
+> flag made one bot run commit the whole suite's run-to-run noise (624 files on #3706 for a 34-file change), so the bot
+> now rewrites only baselines that fail the 0.05 % gate, plus new ones. The cost is the one this section describes:
+> sub-threshold drift in untouched stories is not written by the bot and lands in whichever later local capture
+> touches that prefix.
+
 Worth noting against §2.3: **Vitest's `--update` cannot express this distinction at all.** Its `'all'` mode updates
 changed snapshots _and deletes obsolete ones_ in the same pass, with no confirm-per-image and no threshold
 awareness. Migrating to Vitest would make this defect harder to reason about, not easier.

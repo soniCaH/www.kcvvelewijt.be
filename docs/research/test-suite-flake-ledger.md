@@ -293,7 +293,7 @@ outside the workspace, and a test that cannot fail.
 Four agents, one Docker daemon, one emulated `linux/amd64` image, and screenshot capture that is
 sensitive to CPU. Nothing sequences them.
 
-- Members: rows 18, 20. Both **live and unfiled** — row 20 only for its parallel-capture-noise half; its stale-baseline half is fixed by #3136.
+- Members: rows 18, 20. Both **live and unfiled** — row 20 only for its parallel-capture-noise half; its stale-baseline half is fixed by #3136. The baseline bot no longer commits that noise (`VR_UPDATE_PASSED=0`, #3707); a local `-u` still does.
 - Member: a test that binds a fixed TCP port — `trigger-psd-sync.test.ts`'s `8890 + n`, which two lanes computed alike
   ([#3127](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3127)). **Fixed** and **closed by a rule** in #3109:
   `FIXED_PORT_LISTEN` in `apps/web/eslint.config.mjs`. [#3142](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3142) proves it fires.

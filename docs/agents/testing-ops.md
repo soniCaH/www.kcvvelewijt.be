@@ -288,7 +288,9 @@ through `apps/web/scripts/vr-docker.mjs`, which refuses an unscoped local run
   local `vr:check` is the full ~2.5 h suite. To check one component, run a
   scoped **update** and read `git status test/vr/__snapshots__/`: modified =
   drift, untracked = new. Since #3136 (`updatePassedSnapshot: true`), modified
-  means **any** pixel change, including drift under the 0.05 % gate. Discard **by prefix**, never the whole directory —
+  means **any** pixel change, including drift under the 0.05 % gate. The baseline bot is the exception (#3707): it sets
+  `VR_UPDATE_PASSED=0`, so it rewrites only baselines that fail the gate, plus new ones. Locally,
+  `VR_UPDATE_PASSED=0 pnpm --filter @kcvv/web run vr:update:story -- <prefix>` does the same. Discard **by prefix**, never the whole directory —
   a blanket `git checkout -- test/vr/__snapshots__/` also throws away baselines
   you legitimately updated earlier on the branch:
 
