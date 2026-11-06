@@ -1,4 +1,4 @@
-import ical from "ical-generator";
+import ical, { ICalEventStatus } from "ical-generator";
 import { getVtimezoneComponent } from "@touch4it/ical-timezones";
 import { DateTime } from "luxon";
 import type { Match } from "@kcvv/api-contract";
@@ -10,9 +10,10 @@ import { CLUB_TIMEZONE as TIMEZONE, toMatchDisplayZone } from "./dates";
 import { resolveEventDateRange } from "./event-datetime";
 import { buildEventUid } from "./event-uid";
 import {
+  feedStatusPrefix,
+  isPlayedMatch,
   matchRowKind,
   reservationTitle,
-  reservationView,
 } from "./match-display";
 
 export type MatchSide = "home" | "away" | "all";
@@ -29,6 +30,10 @@ export interface TimedIcalEntry extends IcalEntryBase {
   start: DateTime;
   end?: DateTime;
   description?: string;
+  /** A call-off (`cancelled` only, #3645): emitted as `STATUS:CANCELLED`, the VEVENT stays. */
+  cancelled?: boolean;
+  /** 1 for an exceptional Match so a subscribed calendar re-renders it; otherwise 0. */
+  sequence?: 0 | 1;
 }
 
 export interface AllDayIcalEntry extends IcalEntryBase {
@@ -119,43 +124,37 @@ function isHomeSide(match: Match): boolean {
 }
 
 /**
- * A pitch-reservation placeholder (#2606) gets its own summary rather than
- * "KCVV Elewijt - KCVV Elewijt" — via the shared `reservationTitle()`
+ * The VEVENT title. A pitch-reservation placeholder (#2606) or a hidden-result
+ * tournament fixture gets its own subject via the shared `reservationTitle()`
  * (`lib/utils/match-display.ts`), the same helper `formatMatchTitle()`
  * (`/wedstrijd/[matchId]/utils.ts`, the match detail page's SEO title) calls,
- * so the wording can't drift between the two surfaces (#2698).
+ * so the wording can't drift between the two surfaces (#2698) — never
+ * "KCVV Elewijt - KCVV Elewijt".
  *
- * Also folds in `statusWording` (e.g. "Afgelast"), the way every other
- * reservation renderer does (`<TeamAgendaRow>`, `<MatchStripView>`,
- * `<MatchHero>`, `<CalendarWeek>`, `<UpcomingMatchesClient>`) — a cancelled
- * reservation carries no opponent or score to otherwise hint that anything
- * changed, and a subscriber's calendar app has no other way to show it.
- * Scoped to the reduced branch only: an ordinary match has the same gap
- * today, but that is a separate, pre-existing concern (out of scope here).
- *
- * One branch, not two (#2802 review) — a tournament fixture with no result
- * yet (#2696) gets the exact same treatment as a reservation, since
- * `reservationTitle()` already resolves both members of `matchRowKind()`
- * (subject-only for a reservation, "subject · other club" for a reduced
- * fixture) and `statusWording` reads only `match.status`, which neither
- * branch needed the other's `otherClub` lookup for in the first place.
+ * Every exceptional status, ordinary league Matches included, then gets the
+ * shared `feedStatusPrefix()` ("AFGELAST: ", "FORFAIT: ", "GESTOPT: ", #3645):
+ * a calendar app has no badge, so the title is the only place a subscriber
+ * can see that a fixture changed. A forfeited or stopped Match keeps its score
+ * after the prefix. The old "— Uitgesteld" suffix on reduced rows is gone —
+ * one form for both.
  */
 function buildSummary(match: Match): string {
-  if (matchRowKind(match) !== "match") {
-    const { statusWording } = reservationView(match);
-    return `${reservationTitle(match)}${
-      statusWording ? ` — ${statusWording.longForm}` : ""
-    }`;
-  }
+  const prefix = feedStatusPrefix(match.status);
+  const title = buildTitle(match);
+  return prefix ? `${prefix}: ${title}` : title;
+}
+
+const buildTitle = (match: Match): string => {
+  if (matchRowKind(match) !== "match") return reservationTitle(match);
   if (
-    match.status === "finished" &&
+    isPlayedMatch(match.status) &&
     match.home_team.score != null &&
     match.away_team.score != null
   ) {
     return `${match.home_team.name} ${match.home_team.score}-${match.away_team.score} ${match.away_team.name}`;
   }
   return `${match.home_team.name} - ${match.away_team.name}`;
-}
+};
 
 /**
  * `match.venue` is the single source now (#2491): the BFF stamps it for a
@@ -252,6 +251,8 @@ function matchToEntry(match: Match): TimedIcalEntry | undefined {
     description: match.competition,
     url: `${SITE_CONFIG.siteUrl}/wedstrijd/${match.id}`,
     location: buildLocation(match),
+    sequence: feedStatusPrefix(match.status) ? 1 : 0,
+    cancelled: match.status === "cancelled",
   };
 }
 
@@ -373,6 +374,8 @@ function emitEntry(cal: ReturnType<typeof ical>, entry: IcalEntry): void {
     start: entry.start,
     timezone: TIMEZONE,
     url: entry.url,
+    ...(entry.sequence !== undefined ? { sequence: entry.sequence } : {}),
+    ...(entry.cancelled ? { status: ICalEventStatus.CANCELLED } : {}),
     ...(entry.end ? { end: entry.end } : {}),
     ...(entry.description !== undefined
       ? { description: entry.description }

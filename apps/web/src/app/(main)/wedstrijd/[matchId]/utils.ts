@@ -162,9 +162,10 @@ export { extractMatchTime } from "@/lib/utils/match-time";
  *
  * A pitch-reservation placeholder (#2606) gets its own title rather than
  * "KCVV Elewijt vs KCVV Elewijt" — via the shared `reservationTitle()`
- * (`lib/utils/match-display.ts`), the same helper `buildSummary()`
+ * (`lib/utils/match-display.ts`), the same helper `buildTitle()`
  * (`lib/utils/ical.ts`, the ICS feed) calls, so the wording can't drift
- * between the two surfaces (#2688/#2698).
+ * between the two surfaces (#2688/#2698). The feed's `buildSummary()` adds a
+ * status prefix on top (#3645) that this SEO title does not carry.
  *
  * Widened to a tournament fixture with no result yet (#2696/#2802 review):
  * it is no more a confirmed "X vs Y" than a reservation is, so it gets the

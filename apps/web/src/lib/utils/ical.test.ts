@@ -335,11 +335,26 @@ describe("a pitch-reservation placeholder", () => {
     expect(renderIcal([match], { side: "away" })).not.toContain("BEGIN:VEVENT");
   });
 
-  it("folds a cancelled status into the SUMMARY, the way every other reservation renderer does", () => {
+  it("moves a postponed status to the AFGELAST prefix, the way an ordinary Match carries it", () => {
     const output = renderIcal([makePlaceholderMatch({ status: "postponed" })]);
 
+    expect(output).toContain("SUMMARY:AFGELAST: Jeugdtornooi — KCVV Elewijt");
+    expect(output).not.toContain("Uitgesteld");
+    expect(output).toMatch(/^SEQUENCE:1$/m);
+  });
+
+  it("prefixes a hidden-result tournament fixture the same way", () => {
+    const output = renderIcal([
+      makeMatch({
+        competitionType: "tournament",
+        competition: "Jeugdtornooi",
+        status: "postponed",
+        home_team: { id: 1235, name: "KCVV Elewijt", score: undefined },
+      }),
+    ]);
+
     expect(output).toContain(
-      "SUMMARY:Jeugdtornooi — KCVV Elewijt — Uitgesteld",
+      "SUMMARY:AFGELAST: Jeugdtornooi · KFC Turnhout — KCVV Elewijt",
     );
   });
 
@@ -740,5 +755,101 @@ describe("generateIcal and buildEventIcs agree on the event UID scheme", () => {
     const expectedUid = buildEventUid("abc123");
     expect(feedOutput).toContain(`UID:${expectedUid}`);
     expect(downloadOutput).toContain(`UID:${expectedUid}`);
+  });
+});
+
+describe("an exceptional Match (#3645)", () => {
+  const sequenceOf = (output: string) => output.match(/^SEQUENCE:(\d+)$/m)?.[1];
+
+  it("keeps SEQUENCE:0 and the plain title for scheduled and finished Matches", () => {
+    const scheduled = renderIcal([makeMatch()]);
+    const finished = renderIcal([
+      makeMatch({
+        status: "finished",
+        home_team: { id: 1, name: "KCVV Elewijt", score: 3 },
+        away_team: { id: 2, name: "KFC Turnhout", score: 1 },
+      } as Partial<Match>),
+    ]);
+
+    expect(sequenceOf(scheduled)).toBe("0");
+    expect(sequenceOf(finished)).toBe("0");
+    expect(scheduled).toContain("SUMMARY:KCVV Elewijt - KFC Turnhout");
+    expect(finished).toContain("SUMMARY:KCVV Elewijt 3-1 KFC Turnhout");
+    expect(scheduled).not.toMatch(/^STATUS:/m);
+  });
+
+  it.each(["postponed", "cancelled"] as const)(
+    "prefixes a %s Match with AFGELAST and bumps SEQUENCE",
+    (status) => {
+      const output = renderIcal([makeMatch({ status })]);
+
+      expect(output).toContain("SUMMARY:AFGELAST: KCVV Elewijt - KFC Turnhout");
+      expect(sequenceOf(output)).toBe("1");
+      expect(output).toContain("BEGIN:VEVENT");
+    },
+  );
+
+  it("emits STATUS:CANCELLED for cancelled only", () => {
+    expect(renderIcal([makeMatch({ status: "cancelled" })])).toMatch(
+      /^STATUS:CANCELLED$/m,
+    );
+    for (const status of ["postponed", "forfeited", "stopped"] as const) {
+      expect(renderIcal([makeMatch({ status })])).not.toMatch(/^STATUS:/m);
+    }
+  });
+
+  it("keeps the score after the FORFAIT and GESTOPT prefixes", () => {
+    const scored = (status: Match["status"]) =>
+      renderIcal([
+        makeMatch({
+          status,
+          home_team: { id: 1, name: "KCVV Elewijt", score: 5 },
+          away_team: { id: 2, name: "KFC Turnhout", score: 0 },
+        } as Partial<Match>),
+      ]);
+
+    expect(scored("forfeited")).toContain(
+      "SUMMARY:FORFAIT: KCVV Elewijt 5-0 KFC Turnhout",
+    );
+    expect(scored("stopped")).toContain(
+      "SUMMARY:GESTOPT: KCVV Elewijt 5-0 KFC Turnhout",
+    );
+    expect(sequenceOf(scored("forfeited"))).toBe("1");
+    expect(sequenceOf(scored("stopped"))).toBe("1");
+  });
+
+  it("puts the KCVV team label before the status prefix", () => {
+    const output = renderIcal([
+      makeMatch({ status: "postponed", kcvv_team_label: "U8" }),
+    ]);
+
+    expect(output).toContain(
+      "SUMMARY:[U8] AFGELAST: KCVV Elewijt - KFC Turnhout",
+    );
+  });
+
+  it("marks a cancelled Pitch-Reservation Placeholder with the prefix, STATUS and SEQUENCE", () => {
+    const output = renderIcal([makePlaceholderMatch({ status: "cancelled" })]);
+
+    expect(output).toContain("SUMMARY:AFGELAST: Jeugdtornooi — KCVV Elewijt");
+    expect(output).toMatch(/^STATUS:CANCELLED$/m);
+    expect(sequenceOf(output)).toBe("1");
+  });
+
+  it("prefixes a stopped tournament row that has no scoreline yet", () => {
+    const output = renderIcal([
+      makeMatch({
+        competitionType: "tournament",
+        competition: "Jeugdtornooi",
+        status: "stopped",
+        home_team: { id: 1235, name: "KCVV Elewijt", score: undefined },
+      }),
+    ]);
+
+    expect(output).toContain(
+      "SUMMARY:GESTOPT: Jeugdtornooi · KFC Turnhout — KCVV Elewijt",
+    );
+    expect(sequenceOf(output)).toBe("1");
+    expect(output).not.toMatch(/^STATUS:/m);
   });
 });
