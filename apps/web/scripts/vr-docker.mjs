@@ -30,7 +30,8 @@
 //     retag mid-run is exactly what the lock exists to rule out). This
 //     script fails fast, naming that command, when the image is absent OR
 //     stale (its content-hash label no longer matches pnpm-lock.yaml /
-//     Dockerfile.vr — worktrees on different lockfiles share this one tag).
+//     Dockerfile.vr / the pnpm version in package.json's `packageManager` —
+//     worktrees on different lockfiles share this one tag).
 //   - The container run is guarded by an exclusive lock, taken FIRST — before
 //     even the image check, so a busy lock is reported immediately and the
 //     image can't be retagged out from under this run between the check and
@@ -181,6 +182,7 @@ const WEB_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
 const REPO_ROOT = join(WEB_DIR, "..", "..");
 const LOCKFILE_PATH = join(REPO_ROOT, "pnpm-lock.yaml");
 const DOCKERFILE_PATH = join(WEB_DIR, "Dockerfile.vr");
+const readUtf8 = (path) => readFileSync(path, "utf8");
 const ROOT_PACKAGE_JSON_PATH = join(REPO_ROOT, "package.json");
 
 /**
@@ -206,9 +208,7 @@ export function parsePnpmVersion(packageManager) {
  *
  * @param {{ readFile?: (path: string) => string }} [deps]
  */
-export function readPnpmVersion({
-  readFile = (path) => readFileSync(path, "utf8"),
-} = {}) {
+export function readPnpmVersion({ readFile = readUtf8 } = {}) {
   return parsePnpmVersion(
     JSON.parse(readFile(ROOT_PACKAGE_JSON_PATH)).packageManager,
   );
@@ -243,9 +243,7 @@ export function hashImageInputs(
 /**
  * @param {{ readFile?: (path: string) => string }} [deps]
  */
-export function computeExpectedImageHash({
-  readFile = (path) => readFileSync(path, "utf8"),
-} = {}) {
+export function computeExpectedImageHash({ readFile = readUtf8 } = {}) {
   return hashImageInputs(
     readFile(LOCKFILE_PATH),
     readFile(DOCKERFILE_PATH),
