@@ -827,4 +827,29 @@ describe("an exceptional Match (#3645)", () => {
       "SUMMARY:[U8] AFGELAST: KCVV Elewijt - KFC Turnhout",
     );
   });
+
+  it("marks a cancelled Pitch-Reservation Placeholder with the prefix, STATUS and SEQUENCE", () => {
+    const output = renderIcal([makePlaceholderMatch({ status: "cancelled" })]);
+
+    expect(output).toContain("SUMMARY:AFGELAST: Jeugdtornooi — KCVV Elewijt");
+    expect(output).toMatch(/^STATUS:CANCELLED$/m);
+    expect(sequenceOf(output)).toBe("1");
+  });
+
+  it("prefixes a stopped tournament row that has no scoreline yet", () => {
+    const output = renderIcal([
+      makeMatch({
+        competitionType: "tournament",
+        competition: "Jeugdtornooi",
+        status: "stopped",
+        home_team: { id: 1235, name: "KCVV Elewijt", score: undefined },
+      }),
+    ]);
+
+    expect(output).toContain(
+      "SUMMARY:GESTOPT: Jeugdtornooi · KFC Turnhout — KCVV Elewijt",
+    );
+    expect(sequenceOf(output)).toBe("1");
+    expect(output).not.toMatch(/^STATUS:/m);
+  });
 });

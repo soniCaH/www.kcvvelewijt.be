@@ -11,7 +11,6 @@ import { resolveEventDateRange } from "./event-datetime";
 import { buildEventUid } from "./event-uid";
 import {
   feedStatusPrefix,
-  isExceptionalMatchStatus,
   isPlayedMatch,
   matchRowKind,
   reservationTitle,
@@ -145,7 +144,7 @@ function buildSummary(match: Match): string {
   return prefix ? `${prefix}: ${title}` : title;
 }
 
-function buildTitle(match: Match): string {
+const buildTitle = (match: Match): string => {
   if (matchRowKind(match) !== "match") return reservationTitle(match);
   if (
     isPlayedMatch(match.status) &&
@@ -155,7 +154,7 @@ function buildTitle(match: Match): string {
     return `${match.home_team.name} ${match.home_team.score}-${match.away_team.score} ${match.away_team.name}`;
   }
   return `${match.home_team.name} - ${match.away_team.name}`;
-}
+};
 
 /**
  * `match.venue` is the single source now (#2491): the BFF stamps it for a
@@ -252,7 +251,7 @@ function matchToEntry(match: Match): TimedIcalEntry | undefined {
     description: match.competition,
     url: `${SITE_CONFIG.siteUrl}/wedstrijd/${match.id}`,
     location: buildLocation(match),
-    sequence: isExceptionalMatchStatus(match.status) ? 1 : 0,
+    sequence: feedStatusPrefix(match.status) ? 1 : 0,
     cancelled: match.status === "cancelled",
   };
 }
@@ -375,7 +374,7 @@ function emitEntry(cal: ReturnType<typeof ical>, entry: IcalEntry): void {
     start: entry.start,
     timezone: TIMEZONE,
     url: entry.url,
-    sequence: entry.sequence ?? 0,
+    ...(entry.sequence !== undefined ? { sequence: entry.sequence } : {}),
     ...(entry.cancelled ? { status: ICalEventStatus.CANCELLED } : {}),
     ...(entry.end ? { end: entry.end } : {}),
     ...(entry.description !== undefined

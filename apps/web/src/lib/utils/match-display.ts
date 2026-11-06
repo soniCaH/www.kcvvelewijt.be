@@ -115,16 +115,17 @@ export function isExceptionalMatchStatus(status: MatchStatus): boolean {
  * because a badge has room for the distinction. `null` for the unremarkable
  * `scheduled`/`finished`.
  */
-const FEED_STATUS_PREFIX: Partial<Record<MatchStatus, string>> = {
+const FEED_STATUS_PREFIX: Record<MatchStatus, string | null> = {
+  scheduled: null,
+  finished: null,
   postponed: "AFGELAST",
   cancelled: "AFGELAST",
   forfeited: "FORFAIT",
   stopped: "GESTOPT",
 };
 
-export function feedStatusPrefix(status: MatchStatus): string | null {
-  return FEED_STATUS_PREFIX[status] ?? null;
-}
+export const feedStatusPrefix = (status: MatchStatus): string | null =>
+  FEED_STATUS_PREFIX[status];
 
 /** The raw `Match`/`MatchDetail` fields `matchRowKind()` needs — both share
  *  this shape via `BaseMatchFields` (`packages/api-contract/src/schemas/match.ts`). */
@@ -539,7 +540,7 @@ export interface ReservationTitleInput extends MatchRowKindSource {
  * A pitch-reservation placeholder's or a hidden-result tournament fixture's
  * title/summary: `reservationView()`'s subject plus the KCVV side's own
  * name, the shape both `formatMatchTitle()` (`/wedstrijd/[matchId]/utils.ts`,
- * the match detail page's SEO title) and `buildSummary()` (`lib/utils/ical.ts`,
+ * the match detail page's SEO title) and `buildTitle()` (`lib/utils/ical.ts`,
  * the ICS feed) need. Shared here rather than hand-spelled twice so the
  * separator between the two halves can't diverge silently between the two
  * surfaces (#2698), and widened to the reduced branch (#2696/#2802 review)
