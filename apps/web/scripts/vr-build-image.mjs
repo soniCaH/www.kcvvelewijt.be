@@ -13,6 +13,7 @@
 // keeps executing the OLD image while the tag it was checked against no
 // longer refers to it.
 import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -26,6 +27,10 @@ import {
 
 const cwd = join(dirname(fileURLToPath(import.meta.url)), "..");
 const hash = computeExpectedImageHash();
+// Dockerfile.vr installs this pnpm; the root package.json owns the version.
+const pnpmVersion = JSON.parse(
+  readFileSync(join(cwd, "..", "..", "package.json"), "utf8"),
+).packageManager.replace(/^pnpm@/, "");
 
 const lock = acquireLock(VR_LOCK_DIR);
 if (!lock.ok) {
@@ -44,6 +49,8 @@ try {
       "build",
       "--build-arg",
       `VR_IMAGE_CONTENT_HASH=${hash}`,
+      "--build-arg",
+      `PNPM_VERSION=${pnpmVersion}`,
       "vr",
     ],
     { cwd, stdio: "inherit" },

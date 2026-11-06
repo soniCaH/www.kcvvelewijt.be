@@ -23,8 +23,11 @@ ENV CI=true \
     PNPM_HOME=/root/.local/share/pnpm \
     PATH=/root/.local/share/pnpm:$PATH
 
-RUN corepack enable \
-    && corepack prepare pnpm@10.33.2 --activate
+# `vr:build-image` sets this from the root package.json `packageManager`, so the
+# image never drifts from the repo. The base image no longer ships the shim that
+# used to install pnpm (#3707).
+ARG PNPM_VERSION
+RUN test -n "$PNPM_VERSION" && npm install --global "pnpm@$PNPM_VERSION"
 
 WORKDIR /work
 

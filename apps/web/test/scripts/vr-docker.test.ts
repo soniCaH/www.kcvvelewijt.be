@@ -642,3 +642,27 @@ describe("lockBusyMessage", () => {
     expect(message).toContain("rm -rf /tmp/kcvv-vr-docker.lock");
   });
 });
+
+// The playwright base image no longer ships corepack, and a literal pnpm
+// version drifts from package.json's `packageManager` (#3707).
+describe("Dockerfile.vr", () => {
+  const dockerfile = readFileSync(
+    join(dirname(SCRIPT), "..", "Dockerfile.vr"),
+    "utf8",
+  );
+
+  it("installs pnpm without corepack and without a literal version", () => {
+    expect(dockerfile).not.toMatch(/corepack/);
+    expect(dockerfile).not.toMatch(/pnpm@\d/);
+    expect(dockerfile).toMatch(/^ARG PNPM_VERSION$/m);
+  });
+
+  it("gets that version from package.json through vr-build-image", () => {
+    const build = readFileSync(
+      join(dirname(SCRIPT), "vr-build-image.mjs"),
+      "utf8",
+    );
+    expect(build).toContain("PNPM_VERSION=");
+    expect(build).toContain("packageManager");
+  });
+});
