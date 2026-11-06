@@ -183,7 +183,7 @@ export function toPlayerVM(
 //
 // Caching strategy:
 //   - Sanity client already runs with `useCdn: true` → first-hop cache.
-//   - Page-level ISR on /wedstrijd/[matchId] revalidates every 5 min.
+//   - Page-level ISR on /wedstrijd/[matchId] revalidates every 15 min.
 //   - On top of those, we memoise the result in module scope for 24h:
 //     keeper status changes rarely (PSD-synced) and a stale answer for a
 //     warm worker is acceptable. Cold starts re-fetch; no global state leaks

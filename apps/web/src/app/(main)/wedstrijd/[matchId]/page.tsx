@@ -179,7 +179,7 @@ export async function generateMetadata({
  * three-tag split. Widening to also catch `ParseError`/`HttpApiDecodeError`
  * would call `notFound()` for those too — telling a visitor "this match does
  * not exist" about a real match this deploy simply failed to decode. Left to
- * reject, that same failure throws instead, and at this route's 5-minute ISR
+ * reject, that same failure throws instead, and at this route's 15-minute ISR
  * window (`revalidate` below) a *cached* match keeps serving its last-good
  * render rather than a false 404 for the window. That fallback exists only
  * once the route has rendered successfully at least once, though — on a cold
@@ -231,7 +231,7 @@ export const fetchMatchOrNotFound = cache(async function fetchMatchOrNotFound(
  * `/ploegen/[slug]`'s tool) — see the `fetchStandings` docblock for why
  * `HttpNotFound` needs different treatment here than the other two.
  *
- * This route's own facts: a 5-minute ISR window (below), and no cheaper
+ * This route's own facts: a 15-minute ISR window (below), and no cheaper
  * failure domain to isolate this one read into than the whole page. This
  * site has no PPR/streaming (root `CLAUDE.md`'s "Nothing streams" rule), so
  * every read in this render's single `Promise.all` (below) fails the whole
@@ -709,12 +709,16 @@ export default async function MatchPage({ params }: MatchPageProps) {
 }
 
 /**
- * ISR at 5 minutes. Kept modest (not lengthened like the other routes) so the
- * page picks up fresh BFF match data promptly. Proximity-aware throttling of
- * the rate-limited PSD hop lives in the BFF's match-detail KV TTL
- * (`apps/api` `matchDetailTtl`): distant/finished matches are served from KV
- * for hours/days, so frequent ISR here is cheap. The page's own Sanity reads
- * (linked articles/galleries) are tag-cached (Scope B), so re-running this
- * render does not re-hit the Sanity CDN.
+ * ISR at 15 minutes: the cap for a route carrying a BFF-fed section (#2433
+ * rule 5; `REVALIDATE_CAP_SECONDS` in `cross-page-consistency.test.ts`). The
+ * window is not shorter because every regeneration is an ISR write (#3708).
+ *
+ * Freshness: a new final score shows after the BFF's own match-detail KV TTL
+ * (`apps/api` `matchDetailTtl`) plus up to 15 min of ISR on top, and the first
+ * visitor after the window still gets the old page while it regenerates. A
+ * section that degraded quietly (standings, linked articles or galleries
+ * during a short outage) stays cached for the whole window too. The page's own
+ * Sanity reads (linked articles/galleries) are tag-cached (Scope B), so
+ * re-running this render does not re-hit the Sanity CDN.
  */
-export const revalidate = 300;
+export const revalidate = 900;
