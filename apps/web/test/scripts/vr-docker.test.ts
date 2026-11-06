@@ -35,6 +35,7 @@ import {
   imageStaleMessage,
   isVrContainerRunning,
   lockBusyMessage,
+  parsePnpmVersion,
   releaseLock,
   VR_IMAGE_BUILD_COMMAND,
   VR_IMAGE_HASH_LABEL,
@@ -186,26 +187,60 @@ describe("cli", () => {
 
 describe("hashImageInputs", () => {
   it("is deterministic for the same inputs", () => {
-    expect(hashImageInputs("lockfile-a", "dockerfile-a")).toBe(
-      hashImageInputs("lockfile-a", "dockerfile-a"),
+    expect(hashImageInputs("lockfile-a", "dockerfile-a", "10.1.0")).toBe(
+      hashImageInputs("lockfile-a", "dockerfile-a", "10.1.0"),
     );
   });
 
-  it("changes when either input changes", () => {
-    const base = hashImageInputs("lockfile-a", "dockerfile-a");
+  it("changes when any input changes", () => {
+    const base = hashImageInputs("lockfile-a", "dockerfile-a", "10.1.0");
 
-    expect(hashImageInputs("lockfile-b", "dockerfile-a")).not.toBe(base);
-    expect(hashImageInputs("lockfile-a", "dockerfile-b")).not.toBe(base);
+    expect(hashImageInputs("lockfile-b", "dockerfile-a", "10.1.0")).not.toBe(
+      base,
+    );
+    expect(hashImageInputs("lockfile-a", "dockerfile-b", "10.1.0")).not.toBe(
+      base,
+    );
+    expect(hashImageInputs("lockfile-a", "dockerfile-a", "10.2.0")).not.toBe(
+      base,
+    );
+  });
+});
+
+describe("parsePnpmVersion", () => {
+  it("reads the version and drops a corepack hash suffix", () => {
+    expect(parsePnpmVersion("pnpm@10.34.9")).toBe("10.34.9");
+    expect(parsePnpmVersion("pnpm@10.34.9+sha512.abc")).toBe("10.34.9");
+  });
+
+  it("throws when packageManager is missing or not pnpm", () => {
+    expect(() => parsePnpmVersion(undefined)).toThrow(/packageManager/);
+    expect(() => parsePnpmVersion("yarn@4.1.0")).toThrow(/packageManager/);
   });
 });
 
 describe("computeExpectedImageHash", () => {
-  it("hashes the lockfile and Dockerfile it is given, in order", () => {
-    const readFile = (path: string) =>
-      path.endsWith("Dockerfile.vr") ? "dockerfile-contents" : "lock-contents";
+  const readFileWith =
+    (packageManager: string) =>
+    (path: string): string => {
+      if (path.endsWith("Dockerfile.vr")) return "dockerfile-contents";
+      if (path.endsWith("package.json"))
+        return JSON.stringify({ packageManager });
+      return "lock-contents";
+    };
 
-    expect(computeExpectedImageHash({ readFile })).toBe(
-      hashImageInputs("lock-contents", "dockerfile-contents"),
+  it("hashes the lockfile, Dockerfile and pnpm version it is given, in order", () => {
+    expect(
+      computeExpectedImageHash({ readFile: readFileWith("pnpm@10.1.0") }),
+    ).toBe(hashImageInputs("lock-contents", "dockerfile-contents", "10.1.0"));
+  });
+
+  // A Renovate pnpm bump edits package.json only; the image still has the old pnpm.
+  it("changes when only package.json's packageManager changes", () => {
+    expect(
+      computeExpectedImageHash({ readFile: readFileWith("pnpm@10.1.0") }),
+    ).not.toBe(
+      computeExpectedImageHash({ readFile: readFileWith("pnpm@10.2.0") }),
     );
   });
 });
@@ -640,5 +675,35 @@ describe("lockBusyMessage", () => {
     const message = lockBusyMessage(4242, "/tmp/kcvv-vr-docker.lock");
 
     expect(message).toContain("rm -rf /tmp/kcvv-vr-docker.lock");
+  });
+});
+
+// The playwright base image no longer ships corepack, and a literal pnpm
+// version drifts from package.json's `packageManager` (#3707).
+describe("Dockerfile.vr", () => {
+  const dockerfile = readFileSync(
+    join(dirname(SCRIPT), "..", "Dockerfile.vr"),
+    "utf8",
+  );
+
+  it("installs pnpm without corepack and without a literal version", () => {
+    expect(dockerfile).not.toMatch(/corepack/);
+    expect(dockerfile).not.toMatch(/pnpm@\d/);
+    expect(dockerfile).toMatch(/^ARG PNPM_VERSION$/m);
+  });
+
+  it("names the rebuild command when built without PNPM_VERSION", () => {
+    expect(dockerfile).toMatch(
+      /PNPM_VERSION is required: build with pnpm --filter @kcvv\/web run vr:build-image/,
+    );
+  });
+
+  it("gets that version from package.json through vr-build-image", () => {
+    const build = readFileSync(
+      join(dirname(SCRIPT), "vr-build-image.mjs"),
+      "utf8",
+    );
+    expect(build).toContain("PNPM_VERSION=");
+    expect(build).toContain("readPnpmVersion");
   });
 });

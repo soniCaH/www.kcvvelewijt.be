@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Builds the visual-regression image and stamps it with a content-hash label
 // (#3141) — `vr-docker.mjs`'s `checkImageStatus` compares this worktree's own
-// hash of pnpm-lock.yaml + Dockerfile.vr against the label on every local run,
-// so a lockfile or Dockerfile change fails fast with a rebuild command instead
+// hash of pnpm-lock.yaml + Dockerfile.vr + the pnpm version against the label on
+// every local run, so a lockfile, Dockerfile or pnpm change fails fast with a rebuild command instead
 // of silently running against a stale image (the whole point of dropping
 // `--build` from the per-run command in the first place).
 //
@@ -20,12 +20,15 @@ import {
   acquireLock,
   computeExpectedImageHash,
   lockBusyMessage,
+  readPnpmVersion,
   releaseLock,
   VR_LOCK_DIR,
 } from "./vr-docker.mjs";
 
 const cwd = join(dirname(fileURLToPath(import.meta.url)), "..");
 const hash = computeExpectedImageHash();
+// Dockerfile.vr installs this pnpm; the root package.json owns the version.
+const pnpmVersion = readPnpmVersion();
 
 const lock = acquireLock(VR_LOCK_DIR);
 if (!lock.ok) {
@@ -44,6 +47,8 @@ try {
       "build",
       "--build-arg",
       `VR_IMAGE_CONTENT_HASH=${hash}`,
+      "--build-arg",
+      `PNPM_VERSION=${pnpmVersion}`,
       "vr",
     ],
     { cwd, stdio: "inherit" },

@@ -57,6 +57,11 @@ const SURFACE = [
   ).sort(),
 ];
 
+// A workflow step that calls `vr:ci:update` in its `run:`; a commented-out
+// command is not a call.
+const runsBotUpdate = (step: string): boolean =>
+  /\n\s+run:/.test(step) && /^[^#\n]*\bvr:ci:update\b/m.test(step);
+
 const SCOPED_CAPTURE =
   "pnpm --filter @kcvv/web run vr:update:story -- <story-id-prefix>";
 
@@ -210,9 +215,7 @@ describe("vr-baseline-update.yml", () => {
   );
   // ponytail: a text split on the step marker, not a YAML parser — apps/web
   // has no YAML dependency, and every step in this file starts the same way.
-  const captures = workflow
-    .split(/\n\s+- name: /)
-    .filter((step) => step.includes("vr:ci:update"));
+  const captures = workflow.split(/\n\s+- name: /).filter(runsBotUpdate);
 
   it("runs the update in 3 shards, each with its own time limit", () => {
     expect(
@@ -269,6 +272,30 @@ describe("vr-baseline-update.yml", () => {
   });
 });
 
+describe("runsBotUpdate", () => {
+  const call = "pnpm --filter @kcvv/web run vr:ci:update";
+
+  it("ignores a commented-out command in a multiline run", () => {
+    expect(
+      runsBotUpdate(
+        `Update\n        run: |\n          # ${call}\n          echo done\n`,
+      ),
+    ).toBe(false);
+  });
+
+  it("counts an executable command in a multiline run", () => {
+    expect(
+      runsBotUpdate(
+        `Update\n        run: |\n          # note\n          ${call}\n`,
+      ),
+    ).toBe(true);
+  });
+
+  it("counts a single-line run", () => {
+    expect(runsBotUpdate(`Update\n        run: ${call}\n`)).toBe(true);
+  });
+});
+
 // Guards `runInProcess` in test-runner.ts; the reason sits next to it (#3272).
 describe("the VR image diff", () => {
   it("runs in process, never in a spawnSync child", () => {
@@ -278,5 +305,44 @@ describe("the VR image diff", () => {
     );
     const call = runner.match(/toMatchImageSnapshot\(\{[\s\S]*?\n\s*\}\);/);
     expect(call?.[0]).toMatch(/^\s*runInProcess: true,/m);
+  });
+});
+
+// The baseline bot rewrites only baselines that FAIL the threshold; a local
+// `vr:update:story` keeps rewriting sub-threshold drift too (#3136, #3707).
+describe("passed-snapshot updates", () => {
+  it("are on by default but switch off through VR_UPDATE_PASSED=0", () => {
+    const runner = readFileSync(
+      join(ROOT, "apps/web/.storybook/test-runner.ts"),
+      "utf8",
+    );
+    const call = runner.match(/toMatchImageSnapshot\(\{[\s\S]*?\n\s*\}\);/);
+    expect(call?.[0]).toMatch(
+      /^\s*updatePassedSnapshot: process\.env\.VR_UPDATE_PASSED !== "0",/m,
+    );
+  });
+
+  it("are off in every bot update step, in that step's own env", () => {
+    const workflow = readFileSync(
+      join(ROOT, ".github/workflows/vr-baseline-update.yml"),
+      "utf8",
+    );
+    // Same text split as the `vr-baseline-update.yml` block below: a step is
+    // everything up to the next `- name:`. Only a step whose `run:` calls
+    // `vr:ci:update` counts; a comment that mentions it does not.
+    const updates = workflow.split(/\n\s+- name: /).filter(runsBotUpdate);
+    expect(updates).toHaveLength(3);
+    for (const step of updates) {
+      const env = step.match(/^( +)env:\n((?:\1 +.*\n)+)/m)?.[2];
+      expect(env).toMatch(/^\s*VR_UPDATE_PASSED: "0"/m);
+    }
+  });
+
+  it("reach the local container, so the switch works there too", () => {
+    const compose = readFileSync(
+      join(ROOT, "apps/web/docker-compose.vr.yml"),
+      "utf8",
+    );
+    expect(compose).toMatch(/^\s*- VR_UPDATE_PASSED$/m);
   });
 });
