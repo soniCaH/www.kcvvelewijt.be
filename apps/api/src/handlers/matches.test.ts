@@ -605,6 +605,15 @@ describe("teamMatchesTtl", () => {
     );
   });
 
+  it("starts fast-polling the instant after kickoff, not at kickoff", () => {
+    expect(teamMatchesTtl([match(at(0), "scheduled")], now)).toBe(
+      TTL.MATCHES_TEAM,
+    );
+    expect(teamMatchesTtl([match(at(-1), "scheduled")], now)).toBe(
+      TTL.MATCH_DETAIL_MATCHDAY,
+    );
+  });
+
   it("does not fast-poll for past matches whose status already changed", () => {
     const list = [
       match(at(-16 * H), "postponed"),
