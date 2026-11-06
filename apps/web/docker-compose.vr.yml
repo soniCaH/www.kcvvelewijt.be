@@ -37,3 +37,6 @@ services:
     environment:
       - CI=true
       - NODE_OPTIONS=--max-old-space-size=4096
+      # Passed through from the host when set; `VR_UPDATE_PASSED=0` makes -u
+      # rewrite failing baselines only (#3707).
+      - VR_UPDATE_PASSED

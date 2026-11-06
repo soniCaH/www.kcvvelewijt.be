@@ -280,3 +280,35 @@ describe("the VR image diff", () => {
     expect(call?.[0]).toMatch(/^\s*runInProcess: true,/m);
   });
 });
+
+// The baseline bot rewrites only baselines that FAIL the threshold; a local
+// `vr:update:story` keeps rewriting sub-threshold drift too (#3136, #3707).
+describe("passed-snapshot updates", () => {
+  it("are on by default but switch off through VR_UPDATE_PASSED=0", () => {
+    const runner = readFileSync(
+      join(ROOT, "apps/web/.storybook/test-runner.ts"),
+      "utf8",
+    );
+    const call = runner.match(/toMatchImageSnapshot\(\{[\s\S]*?\n\s*\}\);/);
+    expect(call?.[0]).toMatch(
+      /^\s*updatePassedSnapshot: process\.env\.VR_UPDATE_PASSED !== "0",/m,
+    );
+  });
+
+  it("are off in every bot update step", () => {
+    const workflow = readFileSync(
+      join(ROOT, ".github/workflows/vr-baseline-update.yml"),
+      "utf8",
+    );
+    expect([...workflow.matchAll(/vr:ci:update/g)]).toHaveLength(3);
+    expect([...workflow.matchAll(/VR_UPDATE_PASSED: "0"/g)]).toHaveLength(3);
+  });
+
+  it("reach the local container, so the switch works there too", () => {
+    const compose = readFileSync(
+      join(ROOT, "apps/web/docker-compose.vr.yml"),
+      "utf8",
+    );
+    expect(compose).toMatch(/^\s*- VR_UPDATE_PASSED$/m);
+  });
+});

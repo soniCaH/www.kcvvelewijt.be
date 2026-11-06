@@ -1084,8 +1084,10 @@ const config: TestRunnerConfig = {
           // Without this, `-u` skips any capture that PASSES the threshold, so a
           // sub-threshold drift leaves the stale PNG on disk (flake ledger row
           // 20, #3136). Proved by
-          // `pnpm --filter @kcvv/web run vr:accept:sub-threshold`.
-          updatePassedSnapshot: true,
+          // `pnpm --filter @kcvv/web run vr:accept:sub-threshold`. The baseline
+          // bot sets VR_UPDATE_PASSED=0: over every story it would commit the
+          // whole suite's run-to-run noise, hundreds of untouched files (#3707).
+          updatePassedSnapshot: process.env.VR_UPDATE_PASSED !== "0",
           // The default diffs in a `spawnSync` child with no timeout. A stuck
           // child blocks this worker's event loop, so no timer — not even
           // `--testTimeout` — can end it: the bot hung on one story until the
