@@ -709,15 +709,16 @@ export default async function MatchPage({ params }: MatchPageProps) {
 }
 
 /**
- * ISR at 15 minutes, the rule-5 cap for a BFF-fed route (#2563,
- * `REVALIDATE_CAP_SECONDS` in `cross-page-consistency.test.ts`). This route
- * was the top ISR writer at 300 s (#3708), so it now sits at the cap like the
- * other BFF-fed detail routes: fewer regenerations, fewer ISR writes. The cost
- * is that a new final score can take up to 15 min to show (it was 5). How
- * fresh the PSD data behind the page is stays the BFF's call, via its
- * match-detail KV TTL (`apps/api` `matchDetailTtl`): distant/finished matches
- * are served from KV for hours/days. The page's own Sanity reads (linked
- * articles/galleries) are tag-cached (Scope B), so re-running this render
- * does not re-hit the Sanity CDN.
+ * ISR at 15 minutes: the cap for a route carrying a BFF-fed section (#2433
+ * rule 5; `REVALIDATE_CAP_SECONDS` in `cross-page-consistency.test.ts`). The
+ * window is not shorter because every regeneration is an ISR write (#3708).
+ *
+ * Freshness: a new final score shows after the BFF's own match-detail KV TTL
+ * (`apps/api` `matchDetailTtl`) plus up to 15 min of ISR on top, and the first
+ * visitor after the window still gets the old page while it regenerates. A
+ * section that degraded quietly (standings, linked articles or galleries
+ * during a short outage) stays cached for the whole window too. The page's own
+ * Sanity reads (linked articles/galleries) are tag-cached (Scope B), so
+ * re-running this render does not re-hit the Sanity CDN.
  */
 export const revalidate = 900;
