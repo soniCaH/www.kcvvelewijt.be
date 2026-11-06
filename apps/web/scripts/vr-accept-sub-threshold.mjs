@@ -3,7 +3,8 @@
 // drifts UNDER the VR failure threshold must still be rewritten by `-u`.
 //
 // jest-image-snapshot only rewrites a PASSING snapshot when
-// `updatePassedSnapshot: true` is set (.storybook/test-runner.ts). Without it,
+// `updatePassedSnapshot` is on (.storybook/test-runner.ts: on unless
+// VR_UPDATE_PASSED=0, which the baseline bot sets, #3707). Without it,
 // a sub-threshold drift passes, `-u` leaves the stale PNG on disk, and the
 // committed baselines drift quietly.
 //
@@ -40,6 +41,8 @@ const run = (command, args, stdio = "inherit") => {
     cwd,
     stdio,
     encoding: "utf8",
+    // An exported VR_UPDATE_PASSED=0 would fake a FAIL below.
+    env: { ...process.env, VR_UPDATE_PASSED: "1" },
   });
   if (error) throw error;
   return { status, stdout };
@@ -85,7 +88,7 @@ try {
   } else if (after.equals(stale)) {
     console.error(
       `\nFAIL: ${BASELINE} still carries the planted sub-threshold drift.\n` +
-        "`-u` left a stale baseline — is `updatePassedSnapshot: true` set in .storybook/test-runner.ts?",
+        "`-u` left a stale baseline — is `updatePassedSnapshot` still on in .storybook/test-runner.ts?",
     );
     process.exitCode = 1;
   } else {

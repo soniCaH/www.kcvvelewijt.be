@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Builds the visual-regression image and stamps it with a content-hash label
 // (#3141) — `vr-docker.mjs`'s `checkImageStatus` compares this worktree's own
-// hash of pnpm-lock.yaml + Dockerfile.vr against the label on every local run,
-// so a lockfile or Dockerfile change fails fast with a rebuild command instead
+// hash of pnpm-lock.yaml + Dockerfile.vr + the pnpm version against the label on
+// every local run, so a lockfile, Dockerfile or pnpm change fails fast with a rebuild command instead
 // of silently running against a stale image (the whole point of dropping
 // `--build` from the per-run command in the first place).
 //
@@ -13,7 +13,6 @@
 // keeps executing the OLD image while the tag it was checked against no
 // longer refers to it.
 import { spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -21,6 +20,7 @@ import {
   acquireLock,
   computeExpectedImageHash,
   lockBusyMessage,
+  readPnpmVersion,
   releaseLock,
   VR_LOCK_DIR,
 } from "./vr-docker.mjs";
@@ -28,9 +28,7 @@ import {
 const cwd = join(dirname(fileURLToPath(import.meta.url)), "..");
 const hash = computeExpectedImageHash();
 // Dockerfile.vr installs this pnpm; the root package.json owns the version.
-const pnpmVersion = JSON.parse(
-  readFileSync(join(cwd, "..", "..", "package.json"), "utf8"),
-).packageManager.replace(/^pnpm@/, "");
+const pnpmVersion = readPnpmVersion();
 
 const lock = acquireLock(VR_LOCK_DIR);
 if (!lock.ok) {

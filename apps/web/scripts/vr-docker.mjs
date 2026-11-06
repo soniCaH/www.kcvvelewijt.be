@@ -181,20 +181,61 @@ const WEB_DIR = join(dirname(fileURLToPath(import.meta.url)), "..");
 const REPO_ROOT = join(WEB_DIR, "..", "..");
 const LOCKFILE_PATH = join(REPO_ROOT, "pnpm-lock.yaml");
 const DOCKERFILE_PATH = join(WEB_DIR, "Dockerfile.vr");
+const ROOT_PACKAGE_JSON_PATH = join(REPO_ROOT, "package.json");
 
 /**
- * Pure — the content-hash that decides whether the built image is stale.
+ * Pure — the pnpm version out of a `packageManager` value, minus a corepack
+ * `+sha512…` suffix. Throws when it is missing or not pnpm.
+ *
+ * @param {unknown} packageManager
+ */
+export function parsePnpmVersion(packageManager) {
+  const match = /^pnpm@([^+]+)/.exec(
+    typeof packageManager === "string" ? packageManager : "",
+  );
+  if (!match) {
+    throw new Error(
+      `package.json "packageManager" must be "pnpm@<version>", got ${JSON.stringify(packageManager)}`,
+    );
+  }
+  return match[1];
+}
+
+/**
+ * The pnpm version the image installs (Dockerfile.vr's PNPM_VERSION build arg).
+ *
+ * @param {{ readFile?: (path: string) => string }} [deps]
+ */
+export function readPnpmVersion({
+  readFile = (path) => readFileSync(path, "utf8"),
+} = {}) {
+  return parsePnpmVersion(
+    JSON.parse(readFile(ROOT_PACKAGE_JSON_PATH)).packageManager,
+  );
+}
+
+/**
+ * Pure — the content-hash that decides whether the built image is stale. The
+ * pnpm version is an input because the image installs it from package.json
+ * (#3707), and a pnpm bump touches neither the lockfile nor the Dockerfile.
  * Truncated to 16 hex chars: this labels a local dev image, not a security
  * boundary, and a short label is easier to eyeball in `docker image inspect`.
  *
  * @param {string} lockfileContents
  * @param {string} dockerfileContents
+ * @param {string} pnpmVersion
  */
-export function hashImageInputs(lockfileContents, dockerfileContents) {
+export function hashImageInputs(
+  lockfileContents,
+  dockerfileContents,
+  pnpmVersion,
+) {
   return createHash("sha256")
     .update(lockfileContents)
     .update("\0")
     .update(dockerfileContents)
+    .update("\0")
+    .update(pnpmVersion)
     .digest("hex")
     .slice(0, 16);
 }
@@ -205,7 +246,11 @@ export function hashImageInputs(lockfileContents, dockerfileContents) {
 export function computeExpectedImageHash({
   readFile = (path) => readFileSync(path, "utf8"),
 } = {}) {
-  return hashImageInputs(readFile(LOCKFILE_PATH), readFile(DOCKERFILE_PATH));
+  return hashImageInputs(
+    readFile(LOCKFILE_PATH),
+    readFile(DOCKERFILE_PATH),
+    readPnpmVersion({ readFile }),
+  );
 }
 
 /**
@@ -215,7 +260,7 @@ export function computeExpectedImageHash({
 
 /**
  * Whether the visual-regression image is present AND still matches
- * pnpm-lock.yaml / Dockerfile.vr. Injectable so the decision can be tested
+ * pnpm-lock.yaml / Dockerfile.vr / the pnpm version. Injectable so the decision can be tested
  * without invoking real Docker.
  *
  * @param {string} imageTag
@@ -267,7 +312,8 @@ lane's. Build it now, then re-run this command:
 
 export const imageStaleMessage = (imageTag) => `
 Refusing to start the visual-regression container — image "${imageTag}" no
-longer matches pnpm-lock.yaml / Dockerfile.vr in this worktree.
+longer matches pnpm-lock.yaml / Dockerfile.vr / the pnpm version of this
+worktree.
 
 Worktrees on different lockfiles share this one tag (#3141), so a mismatch
 just means the image was last built from a different checkout. Rebuild it for

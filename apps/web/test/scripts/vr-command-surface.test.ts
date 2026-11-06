@@ -295,13 +295,22 @@ describe("passed-snapshot updates", () => {
     );
   });
 
-  it("are off in every bot update step", () => {
+  it("are off in every bot update step, in that step's own env", () => {
     const workflow = readFileSync(
       join(ROOT, ".github/workflows/vr-baseline-update.yml"),
       "utf8",
     );
-    expect([...workflow.matchAll(/vr:ci:update/g)]).toHaveLength(3);
-    expect([...workflow.matchAll(/VR_UPDATE_PASSED: "0"/g)]).toHaveLength(3);
+    // Same text split as the `vr-baseline-update.yml` block below: a step is
+    // everything up to the next `- name:`. Only a step whose `run:` calls
+    // `vr:ci:update` counts; a comment that mentions it does not.
+    const updates = workflow
+      .split(/\n\s+- name: /)
+      .filter((step) => /\n\s+run:[\s\S]*vr:ci:update/.test(step));
+    expect(updates).toHaveLength(3);
+    for (const step of updates) {
+      const env = step.match(/^( +)env:\n((?:\1 +.*\n)+)/m)?.[2];
+      expect(env).toMatch(/^\s*VR_UPDATE_PASSED: "0"/m);
+    }
   });
 
   it("reach the local container, so the switch works there too", () => {
