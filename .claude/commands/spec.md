@@ -1,13 +1,13 @@
 # Spec — Make Issues Ready for Ralph
 
-Refine underspecified issues until they're implementation-ready. Human-in-the-loop: review and approve before labeling `ready`.
+Refine underspecified issues until they're implementation-ready. Human-in-the-loop: review and approve before labeling `ready-for-agent`.
 
 ## How Spec Works
 
-1. Find open issues that are **not labeled `ready`** (regardless of blocking status)
+1. Find open issues that are **not labeled `ready-for-agent`** (regardless of blocking status)
 2. Evaluate each for specification completeness
 3. Refine underspecified ones via conversation with the user
-4. Label `ready` when the issue is 200% clear
+4. Label `ready-for-agent` when the issue is 200% clear
 
 ## Starting Spec
 
@@ -24,12 +24,12 @@ Or target a specific issue or milestone:
 
 ## Step 1 — Find Candidates
 
-Fetch open issues that are NOT labeled `ready`, `in-progress`, or `ready-for-review`:
+Fetch open issues that are NOT labeled `ready-for-agent`, `in-progress`, or `ready-for-review`:
 
 ```bash
-# Get all open issues without the ready label
-gh issue list --state open --json number,title,labels,milestone \
-  --jq '[.[] | select(.labels | map(.name) | (contains(["ready"]) or contains(["in-progress"]) or contains(["ready-for-review"])) | not)] | sort_by(.number) | .[] | "\(.number)\t\(.title)\t\(.milestone.title // "none")"'
+# Get all open issues without the ready-for-agent label
+gh issue list --state open --limit 500 --json number,title,labels,milestone \
+  --jq '[.[] | select(.labels | map(.name) | (contains(["ready-for-agent"]) or contains(["in-progress"]) or contains(["ready-for-review"])) | not)] | sort_by(.number) | .[] | "\(.number)\t\(.title)\t\(.milestone.title // "none")"'
 ```
 
 Present all unready candidates to the user. Note which ones are blocked (for context), but do NOT skip them — an issue can be spec'd while still blocked.
@@ -91,7 +91,7 @@ EOF
 Once the issue is fully specified and the user approves:
 
 ```bash
-gh issue edit $ISSUE_NUM --add-label "ready"
+gh issue edit $ISSUE_NUM --add-label "ready-for-agent"
 gh issue comment $ISSUE_NUM --body "Spec complete. Ready for implementation."
 ```
 
@@ -101,8 +101,9 @@ Propose the next unready issue. Repeat from Step 1.
 
 ## Rules
 
-- Never label `ready` without user approval
+- Never label `ready-for-agent` without user approval
 - Never modify acceptance criteria without showing the user what changed
-- `ready` means "specs are clear" — it's independent of blocking status. A blocked issue CAN be `ready`.
+- `ready-for-agent` means "specs are clear" — it's independent of blocking status. A blocked issue CAN be `ready-for-agent`.
+- A spec or PRD issue itself never gets `ready-for-agent`; only its sliced tickets do. On the spec issue it would make an agent take the whole decision set as one brief.
 - If an issue is a wishlist item with no clear scope, tell the user — don't force-spec it
 - Tracer bullet issues should be spec'd first within a milestone (they inform later phases)

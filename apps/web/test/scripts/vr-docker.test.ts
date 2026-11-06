@@ -295,7 +295,7 @@ describe("imageAbsentMessage", () => {
 
     expect(message).toContain(VR_IMAGE_BUILD_COMMAND);
     expect(message).toContain("kcvv-vr-runner:latest");
-    expect(message).toContain(".claude/skills/ralph-afk/SKILL.md");
+    expect(message).toContain("docs/agents/ralph.md");
   });
 });
 
@@ -356,7 +356,7 @@ describe("isVrContainerRunning", () => {
 });
 
 describe("buildDockerArgs", () => {
-  it("never carries --build (#3141) — the image is built once, in step 0", () => {
+  it("never carries --build (#3141) — the image is built once, in pre-flight", () => {
     expect(buildDockerArgs(["-u", "ui-button"])).not.toContain("--build");
   });
 

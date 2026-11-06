@@ -1,6 +1,11 @@
-# KCVV Stack — Reference & Learnings
+---
+name: kcvv-stack
+description: KCVV site stack reference — Sanity reads, Effect in pages, api-contract rules, the BFF on Wrangler, the PSD API. Use when working with Sanity, the BFF, Effect patterns or the api-contract.
+---
 
-Consult this when working with Sanity, the BFF, Effect patterns, or the api-contract. Append new learnings as they're discovered.
+# KCVV Stack — Reference
+
+Consult this when working with Sanity, the BFF, Effect patterns, or the api-contract.
 
 ## Stack Quick Reference
 
@@ -72,7 +77,7 @@ const standings = await runPromise(
 
 ## BFF / Wrangler
 
-Use Node 24 — the repo's own floor (`.nvmrc`, `package.json` → `engines.node`). Wrangler's own `engines.node` is `>=22.0.0` (`apps/api/node_modules/wrangler/package.json`), but 24 is the one number to act on here. Always run wrangler through `corepack pnpm` (workspace-pinned version, per AFK-BRIEF's homebrew-pnpm warning), never `npx` (resolves whatever's cached or latest).
+Use Node 24 — the repo's own floor (`.nvmrc`, `package.json` → `engines.node`). Wrangler's own `engines.node` is `>=22.0.0` (`apps/api/node_modules/wrangler/package.json`), but 24 is the one number to act on here. Always run wrangler through `corepack pnpm` (workspace-pinned version; Homebrew's pnpm 8 rewrites the lockfile — `docs/agents/ralph.md` § Bootstrap), never `npx` (resolves whatever's cached or latest).
 
 **Production deploys from CI on merge to `main`** (`ci.yml`'s `deploy` job) — a hand deploy from a worktree is the exception, not the normal path. When you do need one, both CI deploy jobs build `api-contract` first; skip that step and a manual deploy can bundle a missing or stale contract.
 
@@ -103,21 +108,3 @@ corepack pnpm --filter @kcvv/api exec wrangler kv key get --binding=PSD_CACHE --
 - Base: `https://clubapi.prosoccerdata.com`
 - Auth headers: `x-api-key`, `x-api-club`, `Authorization: Bearer ...`
 - Keys live in `.dev.vars` (local) and Wrangler secrets (production)
-
-## Worktrees
-
-```bash
-# Create for an issue
-git worktree add "../kcvv-issue-<N>" -b "feat/issue-<N>" origin/main
-
-# List active
-git worktree list
-
-# Remove after PR merge
-git worktree remove "../kcvv-issue-<N>" --force
-git branch -d "feat/issue-<N>"
-```
-
-## Learnings
-
-<!-- Format: YYYY-MM-DD — what happened / gotcha discovered -->

@@ -330,11 +330,11 @@ guard in front of the `&&` chain would never see the scoping pattern.
 ### The image build and the exclusive lock (#3141)
 
 A wave guards named shared resources, never CPU — the full register lives in
-`.claude/skills/ralph-afk/SKILL.md`. Two of its five members live in
+`docs/agents/ralph.md` § Shared resources. Two of its five members live in
 `vr-docker.mjs`:
 
 - **The image is never built inside the wrapper.** Build it once, by hand or
-  as a wave's step 0, with `pnpm --filter @kcvv/web run vr:build-image` — it
+  as ralph's pre-flight, with `pnpm --filter @kcvv/web run vr:build-image` — it
   stamps the image with a content-hash label of `pnpm-lock.yaml` +
   `Dockerfile.vr`. If `kcvv-vr-runner:latest` is missing, or that label no
   longer matches this worktree's own hash (every worktree on the machine

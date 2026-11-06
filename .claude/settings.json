@@ -28,7 +28,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/warn-main-edits.sh",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/block-main-edits.sh",
             "timeout": 5
           }
         ]
@@ -36,8 +36,6 @@
     ]
   },
   "enabledPlugins": {
-    "vercel@claude-plugins-official": false,
-    "superpowers@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": true
+    "vercel@claude-plugins-official": false
   }
 }

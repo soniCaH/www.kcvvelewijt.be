@@ -11,7 +11,7 @@
  * `/__scheduled` must be requested exactly once. A stub server records every
  * request path, so "once" is measured rather than reasoned about.
  *
- * Like `wave-check.test.ts` and `check-branch.test.ts`, this script lives
+ * Like `check-branch.test.ts`, this script lives
  * outside every workspace and nothing else in CI would exercise it. This file
  * is its only home: it rides the existing `apps/web` vitest config, so
  * `pnpm --filter @kcvv/web test` and the web gate collect it.

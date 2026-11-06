@@ -27,7 +27,7 @@ main | master)
 
 🚫 BLOCKED: that commit would land on '$BRANCH' in $TARGET.
 
-   Use /ralph to create a worktree for an issue first.
+   Use /ralph-once to create a worktree for an issue first.
    If you really meant this one commit: ALLOW_MAIN_COMMIT=1 git commit …
 
 EOF
