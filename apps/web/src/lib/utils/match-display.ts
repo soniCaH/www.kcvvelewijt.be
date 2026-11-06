@@ -106,6 +106,26 @@ export function isExceptionalMatchStatus(status: MatchStatus): boolean {
   return status !== "scheduled" && status !== "finished";
 }
 
+/**
+ * The ICS feed's title prefix per exceptional status (#3645) — upper-case with
+ * a colon, so a subscribed calendar shows "AFGELAST: …" in its own register,
+ * which has no badge to carry the status. `cancelled` and `postponed` share one
+ * word on purpose (owner, #3617): a subscriber only needs "do not turn up".
+ * The badge wording (`matchStatusWording`) differs ("Uitgesteld"/"Geannuleerd")
+ * because a badge has room for the distinction. `null` for the unremarkable
+ * `scheduled`/`finished`.
+ */
+const FEED_STATUS_PREFIX: Partial<Record<MatchStatus, string>> = {
+  postponed: "AFGELAST",
+  cancelled: "AFGELAST",
+  forfeited: "FORFAIT",
+  stopped: "GESTOPT",
+};
+
+export function feedStatusPrefix(status: MatchStatus): string | null {
+  return FEED_STATUS_PREFIX[status] ?? null;
+}
+
 /** The raw `Match`/`MatchDetail` fields `matchRowKind()` needs — both share
  *  this shape via `BaseMatchFields` (`packages/api-contract/src/schemas/match.ts`). */
 export interface MatchRowKindSource {
