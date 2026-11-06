@@ -123,6 +123,14 @@ export const getMatchesWindowHandler = (): Effect.Effect<
 
 const HOUR_MS = 60 * 60 * 1000;
 
+/** A "scheduled" match past kickoff by under 48 h: its result is still pending. */
+const isResultPending = (m: Match, now: number): boolean => {
+  const kickoff = kickoffMs(m.date);
+  return (
+    m.status === "scheduled" && now > kickoff && now - kickoff < 48 * HOUR_MS
+  );
+};
+
 /**
  * Soft cache TTL (seconds) for a team's season match list.
  *
@@ -144,12 +152,7 @@ export function teamMatchesTtl(
   matches: readonly Match[],
   now: number = Date.now(),
 ): number {
-  const resultPending = matches.some((m) => {
-    const kickoff = kickoffMs(m.date);
-    return (
-      m.status === "scheduled" && now > kickoff && now - kickoff < 48 * HOUR_MS
-    );
-  });
+  const resultPending = matches.some((m) => isResultPending(m, now));
   return resultPending ? TTL.MATCH_DETAIL_MATCHDAY : TTL.MATCHES_TEAM;
 }
 
