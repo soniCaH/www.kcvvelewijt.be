@@ -1,6 +1,6 @@
 import { Data, Effect } from "effect";
 import { sanityClient, sanityPreviewClient } from "./client";
-import { isPreviewMode } from "./preview-mode";
+import { draftMode } from "next/headers";
 
 /** Next.js Data Cache directives forwarded to `@sanity/client`'s 3rd arg. */
 export interface GroqCacheOptions {
@@ -44,7 +44,7 @@ export class SanityReadError extends Data.TaggedError("SanityReadError")<{
  */
 export const readPreviewMode: Effect.Effect<boolean, SanityReadError> =
   Effect.tryPromise({
-    try: () => isPreviewMode(),
+    try: async () => (await draftMode()).isEnabled,
     catch: (cause) => new SanityReadError({ cause }),
   });
 

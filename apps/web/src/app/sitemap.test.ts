@@ -42,9 +42,14 @@ vi.mock("@/lib/effect/services/BffService", async (importOriginal) => {
 // real SanityClient is ever constructed, so the escape is impossible however the
 // wrapper is imported.
 vi.mock("@sanity/client", () => ({
-  createClient: () => ({
-    fetch: (...args: unknown[]) => mockFetch(...args),
-  }),
+  createClient: () => {
+    const client = {
+      fetch: (...args: unknown[]) => mockFetch(...args),
+      // `client.ts` derives the preview client with `withConfig`.
+      withConfig: () => client,
+    };
+    return client;
+  },
 }));
 
 /** `sitemap()` issues exactly one Sanity query per `fetchFromSanity` call. */
