@@ -679,6 +679,11 @@ export default async function TeamPage({ params }: TeamPageProps) {
                     teamSlug={slug}
                     kcvvTeamId={bffTeamId}
                     now={now}
+                    subscribeTeam={
+                      psdTeamId !== null
+                        ? { psdId: psdTeamId, label: displayName }
+                        : undefined
+                    }
                   />
                 </PageContainer>
               </TrackInView>

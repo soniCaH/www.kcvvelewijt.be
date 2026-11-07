@@ -36,6 +36,12 @@ describe("RemovableChip", () => {
     expect(onRemove).toHaveBeenCalledTimes(1);
   });
 
+  it("renders a fixed token without a × control when onRemove is omitted", () => {
+    render(<RemovableChip label="A-ploeg" />);
+    expect(screen.getByTestId("removable-chip")).toHaveTextContent("A-ploeg");
+    expect(screen.queryByRole("button")).toBeNull();
+  });
+
   it("applies the outline tone classes", () => {
     render(<RemovableChip label="A-ploeg" onRemove={vi.fn()} tone="outline" />);
     expect(screen.getByTestId("removable-chip").className).toContain(

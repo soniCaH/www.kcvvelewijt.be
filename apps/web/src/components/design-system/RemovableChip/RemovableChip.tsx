@@ -7,8 +7,8 @@ export type RemovableChipTone = "ink" | "outline";
 export interface RemovableChipProps {
   /** Visible token label. */
   label: string;
-  /** Fired when the remove (×) control is pressed. */
-  onRemove: () => void;
+  /** Fired when the remove (×) control is pressed. Omitted = a fixed token, no × control. */
+  onRemove?: () => void;
   /**
    * Accessible verb prefixed to the label on the remove control
    * (`"{removeLabel} {label}"`). Default `"Verwijder"` — the × glyph itself is
@@ -49,14 +49,16 @@ export function RemovableChip({
       )}
     >
       {label}
-      <button
-        type="button"
-        onClick={onRemove}
-        aria-label={`${removeLabel} ${label.trim() || "selectie"}`}
-        className="flex h-4 w-4 items-center justify-center text-sm leading-none transition-opacity duration-150 hover:opacity-70"
-      >
-        <span aria-hidden="true">×</span>
-      </button>
+      {onRemove ? (
+        <button
+          type="button"
+          onClick={onRemove}
+          aria-label={`${removeLabel} ${label.trim() || "selectie"}`}
+          className="flex h-4 w-4 items-center justify-center text-sm leading-none transition-opacity duration-150 hover:opacity-70"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+      ) : null}
     </span>
   );
 }

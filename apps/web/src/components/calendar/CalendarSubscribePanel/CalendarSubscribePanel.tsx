@@ -16,6 +16,9 @@ export interface CalendarSubscribePanelProps {
   teams: CalendarTeamInfo[];
   preselectedTeamLabel?: string;
   isOpen: boolean;
+  /** Surface the subscribe events came from (`source` is a registered GA4
+   * dimension). Defaults to the `/kalender` widget. */
+  source?: "kalender" | "team";
 }
 
 type Side = "all" | "home" | "away";
@@ -51,10 +54,6 @@ function computeInitialSelection(
   return new Set(teams.map((t) => t.id));
 }
 
-/** Surface the subscribe events came from (`source` is a registered GA4
- * dimension; the Team page panel will pass "team"). */
-const SOURCE = "kalender";
-
 /** The classes the iPhone link and the copy button share, so the equal-height
  * pair cannot drift apart. */
 const ACTION_BUTTON_CLASSES =
@@ -66,6 +65,7 @@ export function CalendarSubscribePanel({
   teams,
   preselectedTeamLabel,
   isOpen,
+  source = "kalender",
 }: CalendarSubscribePanelProps) {
   const [selectedTeamIds, setSelectedTeamIds] = useState(() =>
     computeInitialSelection(teams, preselectedTeamLabel),
@@ -119,12 +119,15 @@ export function CalendarSubscribePanel({
   }
 
   const canSubscribe = selectedPsdIds.length > 0;
+  // The Team page panel is for that one team: no × (removing it would leave a
+  // QR with an empty `teamIds=`).
+  const isTeamPanel = source === "team";
   // Counts only — no team ids or names leave the page.
   const subscribeParams = () => ({
     teams_count: selectedPsdIds.length,
     side,
     events: includeEvents,
-    source: SOURCE,
+    source,
   });
 
   async function handleCopy() {
@@ -161,7 +164,11 @@ export function CalendarSubscribePanel({
     <div
       {...overlayFade(
         isOpen,
-        "border-paper-edge bg-cream-soft border-b-2 border-dashed p-4",
+        // The widget frame belongs to the `/kalender` card; on a Team page
+        // the ticket sits straight in the section.
+        isTeamPanel
+          ? undefined
+          : "border-paper-edge bg-cream-soft border-b-2 border-dashed p-4",
       )}
       data-testid="subscribe-panel"
     >
@@ -204,7 +211,7 @@ export function CalendarSubscribePanel({
                 <RemovableChip
                   key={team.id}
                   label={team.label}
-                  onRemove={() => removeTeam(team.id)}
+                  onRemove={isTeamPanel ? undefined : () => removeTeam(team.id)}
                 />
               ))}
             {unselectedTeams.length > 0 && (
