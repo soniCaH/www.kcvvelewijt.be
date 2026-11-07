@@ -3,6 +3,7 @@ import {structureTool} from 'sanity/structure'
 import {visionTool} from '@sanity/vision'
 import {
   LinkToPsdAction,
+  RemovePsdImageAction,
   withPublishedAtDefault,
   launcherTool,
   launcherTemplates,
@@ -34,6 +35,7 @@ export default defineConfig({
         schemaType === 'article' && action.action === 'publish' ? withPublishedAtDefault(action) : action,
       ),
       LinkToPsdAction,
+      RemovePsdImageAction,
     ],
     newDocumentOptions: curatedNewDocumentOptions,
   },
