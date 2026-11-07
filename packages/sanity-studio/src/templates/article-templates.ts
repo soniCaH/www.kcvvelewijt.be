@@ -4,8 +4,8 @@ import type {LauncherTemplate} from './types'
  * Phase 3 launcher manifest for `article` (#1501).
  *
  * One card per editorial `articleType` an editor hand-creates. The two
- * data-driven types (`matchPreview` / `matchRecap`) are generated from match
- * data, not launched here, so they get no card. Per design decision D6 each
+ * match types (`matchPreview` / `matchRecap`) are rarely created and need a
+ * PSD match id the editor pastes in, so they get no card. Per design decision D6 each
  * template seeds ONLY `articleType` — the field that changes the form's shape
  * (which groups/fields show) — and never any editorial-content prefill; the
  * card copy is the teaching moment.

@@ -4,7 +4,9 @@ This is the KCVV Elewijt club website. See root `.claude/CLAUDE.md` for monorepo
 
 ## Implemented Routes
 
-`/`, `/nieuws`, `/nieuws/[slug]`, `/spelers/[slug]`, `/ploegen`, `/ploegen/[slug]`, `/jeugd`, `/kalender`, `/wedstrijd/[matchId]`, `/events`, `/events/[slug]`, `/sponsors`, `/club/geschiedenis`, `/hulp`, `/zoeken`, `/privacy`
+`/`, `/nieuws`, `/nieuws/[slug]`, `/spelers/[slug]`, `/staf/[slug]`, `/ploegen`, `/ploegen/[slug]`, `/ploegen/[slug]/wedstrijden`, `/jeugd`, `/jeugd/[slug]`, `/kalender`, `/wedstrijd/[matchId]`, `/tegenstander/[clubId]`, `/evenementen`, `/evenementen/[slug]`, `/galerij`, `/galerij/[slug]`, `/sponsors`, `/club`, `/club/[slug]`, `/club/angels`, `/club/bestuur`, `/club/cashless/voorwaarden`, `/club/contact`, `/club/geschiedenis`, `/club/jeugdbestuur`, `/club/ultras`, `/club/word-lid`, `/darts`, `/hulp`, `/inhoud`, `/scheurkalender`, `/share`, `/zoeken`, `/privacy`, `/[shortLink]`
+
+Regenerated from the `page.tsx` tree under `src/app` (route groups like `(main)` and `(landing)` are not in URLs). Intentionally unlisted: `/events` and `/events/[slug]` (renamed to `/evenementen` in #1964, the old paths 308-redirect via `next.config`), the legacy redirect-only routes `/player/[slug]`, `/players/[slug]` and `/staff/[slug]` (308 to `/spelers/<psdId>` and `/staf/<psdId>`), and `src/app/api/*` (route handlers, no pages).
 
 **Short links (#3573).** `app/[shortLink]` is the one top-level dynamic segment: a one-word path no real route owns (`/stage`) is looked up in a single cached list of Studio `shortLink` documents and answers `307`, or the normal 404. **A new top-level route, a top-level `redirects()`/`rewrites()` source or a new `public/` entry needs its name added to `RESERVED_SHORT_LINK_NAMES`** (`packages/sanity-schemas/src/reserved-short-link-names.ts`), or `src/lib/short-links/top-level-names.test.ts` fails naming it. Never put a `loading.tsx` or `Suspense` boundary in or above that segment: `notFound()` would stream a `200` (a soft 404) and `redirect()` a meta-refresh. `GA4_MEASUREMENT_ID` + `GA4_API_SECRET` (server-only) enable the `short_link_click` count; either missing skips the count, never the redirect.
 
