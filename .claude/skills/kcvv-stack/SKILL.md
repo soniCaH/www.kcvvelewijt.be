@@ -21,7 +21,7 @@ Consult this when working with Sanity, the BFF, Effect patterns, or the api-cont
 
 ## Sanity Reads
 
-Never call `sanityClient.fetch` directly. Every read goes through `fetchGroq`, which fails with a typed `SanityReadError`. Query result types come from `apps/web/src/lib/sanity/sanity.types.ts` (typegen).
+Never call `sanityClient.fetch` directly. Every read goes through `fetchGroq`, which fails with a typed `SanityReadError`. Query result types come from `apps/web/src/lib/sanity/sanity.types.ts` (typegen). In preview mode (an editor's draft-mode cookie) `fetchGroq` reads unpublished changes and ignores cache options — see `apps/web/CLAUDE.md`.
 
 ```typescript
 import { defineQuery } from "groq";
