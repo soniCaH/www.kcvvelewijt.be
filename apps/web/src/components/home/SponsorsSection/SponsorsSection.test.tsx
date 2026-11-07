@@ -7,6 +7,10 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Effect, Layer } from "effect";
+import { render } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+
+vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
 const { mockFindAll } = vi.hoisted(() => ({ mockFindAll: vi.fn() }));
 
@@ -26,6 +30,8 @@ vi.mock("@/lib/repositories/sponsor.repository", async (importOriginal) => {
 // Imported at module scope — see CLAUDE.md "Import the module under test at
 // module scope".
 const { SponsorsSection } = await import("./SponsorsSection");
+const { trackEvent: mockTrackEvent } =
+  await import("@/lib/analytics/track-event");
 
 describe("SponsorsSection", () => {
   beforeEach(() => {
@@ -57,5 +63,30 @@ describe("SponsorsSection", () => {
 
     const element = await SponsorsSection({});
     expect(element).toBeTruthy();
+  });
+
+  // The team page renders <SponsorsSection> with no tracker around it, and a
+  // tile click there sends nothing today. Only the homepage call site wraps it
+  // in <SponsorWallTracker> (#3649).
+  it("sends no analytics event on a tile click without a wall tracker around it", async () => {
+    mockFindAll.mockReturnValue(
+      Effect.succeed([
+        {
+          id: "s1",
+          name: "Hoofdsponsor BV",
+          logoUrl: "https://cdn.example.com/logo.png",
+          url: "https://example.com",
+          tier: "hoofdsponsor" as const,
+          type: null,
+        },
+      ]),
+    );
+
+    const { container } = render(await SponsorsSection({}));
+    const tile = container.querySelector<HTMLElement>("[data-sponsor-id]");
+    expect(tile).not.toBeNull();
+    await userEvent.click(tile!);
+
+    expect(mockTrackEvent).not.toHaveBeenCalled();
   });
 });

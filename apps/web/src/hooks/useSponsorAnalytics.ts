@@ -10,8 +10,9 @@ interface SponsorClickInput {
   tier?: SponsorTier;
   /**
    * Which surface the tile sat on — `homepage` for `<SponsorsBlock>`, omitted
-   * on `/sponsors` (#2400). Without it the two surfaces are indistinguishable
-   * in GA4 and neither can be judged on its own.
+   * on `/sponsors` (#2400). Set by `<SponsorWallTracker>` (#3649). Without it
+   * the two surfaces are indistinguishable in GA4 and neither can be judged on
+   * its own.
    */
   source?: "homepage";
 }

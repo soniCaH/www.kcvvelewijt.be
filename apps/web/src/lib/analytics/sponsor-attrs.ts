@@ -9,9 +9,9 @@ export interface SponsorAttrs {
  * Read the inert markers `<SponsorTile>` / `<HoofdSponsorTile>` emit off a
  * delegated click target, or `null` when the element carries no sponsor id.
  *
- * Two surfaces delegate on those tiles — `<SponsorsAnalytics>` for `/sponsors`
- * and `<HomepageAnalytics>` for the homepage block (#2400) — so the attribute
- * names and the empty-string coercion live here rather than in both.
+ * `<SponsorWallTracker>` (#3649) is the one reader, for the homepage block
+ * (#2400) and `/sponsors` alike; the attribute names and the empty-string
+ * coercion live here beside the type.
  */
 export function readSponsorAttrs(el: HTMLElement): SponsorAttrs | null {
   const sponsorId = el.getAttribute("data-sponsor-id");
@@ -19,7 +19,6 @@ export function readSponsorAttrs(el: HTMLElement): SponsorAttrs | null {
   return {
     sponsorId,
     tier: (el.getAttribute("data-sponsor-tier") || undefined) as
-      | SponsorTier
-      | undefined,
+      SponsorTier | undefined,
   };
 }

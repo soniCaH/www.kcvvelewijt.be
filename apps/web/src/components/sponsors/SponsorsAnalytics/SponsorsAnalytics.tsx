@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 import { useSponsorAnalytics } from "@/hooks/useSponsorAnalytics";
-import { readSponsorAttrs } from "@/lib/analytics/sponsor-attrs";
 import { useDelegatedClick } from "@/hooks/useDelegatedClick";
 
 export interface SponsorsAnalyticsProps {
@@ -11,46 +10,27 @@ export interface SponsorsAnalyticsProps {
 
 /**
  * Client analytics shell for the `/sponsors` page. Fires `sponsor_view` once on
- * mount and delegates clicks to the data-attributed sponsor links/buttons
- * rendered by the (server) tiles below — so the presentational components stay
- * server-rendered and the homepage `<SponsorTile>` (no wrapper) is unaffected.
+ * mount and delegates the band button click to its data-attributed marker —
+ * so the presentational components stay server-rendered.
  *
- * Markers (set by the components): `data-sponsor-id` + `data-sponsor-tier` on a
- * tile link → `sponsor_click`; the same plus `data-sponsor-featured` on the
- * marquee link → `sponsor_featured_click`; `data-sponsor-cta` on the band button
- * → `sponsor_cta_click`. A native listener on the container (not a JSX `onClick`
- * on a non-interactive div) catches the bubbled click from mouse and keyboard
- * activation alike.
+ * Marker (set by the component): `data-sponsor-cta` on the band button →
+ * `sponsor_cta_click`. The tile and marquee clicks belong to
+ * `<SponsorWallTracker>` (#3649), not to this wrapper. A native listener on
+ * the container (not a JSX `onClick` on a non-interactive div) catches the
+ * bubbled click from mouse and keyboard activation alike.
  */
 export function SponsorsAnalytics({ children }: SponsorsAnalyticsProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const {
-    trackSponsorView,
-    trackSponsorClick,
-    trackSponsorFeaturedClick,
-    trackSponsorCtaClick,
-  } = useSponsorAnalytics();
+  const { trackSponsorView, trackSponsorCtaClick } = useSponsorAnalytics();
 
   useEffect(() => {
     trackSponsorView();
   }, [trackSponsorView]);
 
   useDelegatedClick(ref, {
-    selector: "[data-sponsor-id], [data-sponsor-cta]",
-    onMatch: (el) => {
-      if (el.hasAttribute("data-sponsor-cta")) {
-        trackSponsorCtaClick();
-        return;
-      }
-
-      const sponsor = readSponsorAttrs(el);
-      if (!sponsor) return;
-
-      if (el.hasAttribute("data-sponsor-featured")) {
-        trackSponsorFeaturedClick(sponsor);
-      } else {
-        trackSponsorClick(sponsor);
-      }
+    selector: "[data-sponsor-cta]",
+    onMatch: () => {
+      trackSponsorCtaClick();
     },
   });
 
