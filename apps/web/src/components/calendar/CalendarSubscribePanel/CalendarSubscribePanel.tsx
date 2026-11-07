@@ -16,6 +16,9 @@ export interface CalendarSubscribePanelProps {
   teams: CalendarTeamInfo[];
   preselectedTeamLabel?: string;
   isOpen: boolean;
+  /** Surface the subscribe events came from (`source` is a registered GA4
+   * dimension). Defaults to the `/kalender` widget. */
+  source?: "kalender" | "team";
 }
 
 type Side = "all" | "home" | "away";
@@ -51,10 +54,6 @@ function computeInitialSelection(
   return new Set(teams.map((t) => t.id));
 }
 
-/** Surface the subscribe events came from (`source` is a registered GA4
- * dimension; the Team page panel will pass "team"). */
-const SOURCE = "kalender";
-
 /** The classes the iPhone link and the copy button share, so the equal-height
  * pair cannot drift apart. */
 const ACTION_BUTTON_CLASSES =
@@ -66,6 +65,7 @@ export function CalendarSubscribePanel({
   teams,
   preselectedTeamLabel,
   isOpen,
+  source = "kalender",
 }: CalendarSubscribePanelProps) {
   const [selectedTeamIds, setSelectedTeamIds] = useState(() =>
     computeInitialSelection(teams, preselectedTeamLabel),
@@ -124,7 +124,7 @@ export function CalendarSubscribePanel({
     teams_count: selectedPsdIds.length,
     side,
     events: includeEvents,
-    source: SOURCE,
+    source,
   });
 
   async function handleCopy() {

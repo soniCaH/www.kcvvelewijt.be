@@ -412,6 +412,23 @@ describe("CalendarSubscribePanel", () => {
     });
   });
 
+  describe("source (#3644)", () => {
+    it("reports the surface it was given on copy and on the iPhone tap", async () => {
+      const user = userEvent.setup();
+      render(<CalendarSubscribePanel {...defaultProps} source="team" />);
+      await user.click(screen.getByRole("button", { name: /Kopieer link/ }));
+      expect(trackEvent).toHaveBeenLastCalledWith(
+        "kalender_subscribe_copy",
+        expect.objectContaining({ source: "team" }),
+      );
+      await user.click(screen.getByRole("link", { name: /Zet in je agenda/ }));
+      expect(trackEvent).toHaveBeenLastCalledWith(
+        "kalender_subscribe_webcal",
+        expect.objectContaining({ source: "team" }),
+      );
+    });
+  });
+
   describe("iPhone one-tap link (#3643)", () => {
     const getLink = () =>
       screen.getByRole("link", { name: /Zet in je agenda/ });

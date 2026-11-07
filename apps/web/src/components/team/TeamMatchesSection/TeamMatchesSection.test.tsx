@@ -203,4 +203,29 @@ describe("TeamMatchesSection", () => {
     );
     expect(container.firstChild).toBeNull();
   });
+
+  describe("subscribe panel (#3644)", () => {
+    const matches = [makeMatch({ id: 1, status: "scheduled" })];
+
+    it("shows the panel for the given team, preselected, with only its id in the feed", () => {
+      render(
+        <TeamMatchesSection
+          matches={matches}
+          teamSlug="kcvv-a"
+          subscribeTeam={{ psdId: 9401, label: "U13" }}
+        />,
+      );
+      expect(screen.getByTestId("subscribe-panel")).not.toHaveAttribute(
+        "hidden",
+      );
+      expect(screen.getByTestId("qr-code")).toBeInTheDocument();
+      const link = screen.getByRole("link", { name: /Zet in je agenda/ });
+      expect(link.getAttribute("href")).toMatch(/[?&]teamIds=9401&/);
+    });
+
+    it("shows no panel without a subscribe team", () => {
+      render(<TeamMatchesSection matches={matches} teamSlug="kcvv-a" />);
+      expect(screen.queryByTestId("subscribe-panel")).toBeNull();
+    });
+  });
 });

@@ -8,6 +8,7 @@
 import { cn } from "@/lib/utils/cn";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
 import { EditorialLink } from "@/components/design-system/EditorialLink";
+import { CalendarSubscribePanel } from "@/components/calendar/CalendarSubscribePanel";
 import { TeamAgendaRow } from "./TeamAgendaRow";
 import { findNextMatch, recentResults } from "./match-visibility";
 import type { ScheduleRow } from "@/components/match/types";
@@ -30,6 +31,13 @@ export interface TeamMatchesSectionProps {
    * in `match-visibility.ts` for the reachable failure this closes.
    */
   now?: Date;
+  /**
+   * The team the "Volg je ploeg" subscribe panel offers (#3644). The caller
+   * passes it only for a team with a strictly parsed PSD id (`parsePsdId`);
+   * without it no panel renders. The panel lives in this section, so it hides
+   * with it between seasons.
+   */
+  subscribeTeam?: { psdId: number; label: string };
   className?: string;
 }
 
@@ -38,6 +46,7 @@ export function TeamMatchesSection({
   teamSlug,
   kcvvTeamId,
   now = new Date(),
+  subscribeTeam,
   className,
 }: TeamMatchesSectionProps) {
   const next = findNextMatch(matches, now);
@@ -83,6 +92,21 @@ export function TeamMatchesSection({
       >
         Volledige kalender
       </EditorialLink>
+
+      {subscribeTeam ? (
+        <CalendarSubscribePanel
+          teams={[
+            {
+              id: String(subscribeTeam.psdId),
+              name: subscribeTeam.label,
+              psdId: subscribeTeam.psdId,
+              label: subscribeTeam.label,
+            },
+          ]}
+          isOpen
+          source="team"
+        />
+      ) : null}
     </section>
   );
 }

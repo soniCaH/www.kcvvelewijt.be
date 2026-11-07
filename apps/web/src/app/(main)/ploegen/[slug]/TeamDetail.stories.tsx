@@ -400,6 +400,7 @@ function TeamDetailAssembly({ competitive = "live" }: TeamDetailAssemblyProps) {
               matches={scheduleMatches}
               teamSlug={TEAM_SLUG}
               kcvvTeamId={KCVV_TEAM_ID}
+              subscribeTeam={{ psdId: KCVV_TEAM_ID, label: "A-ploeg" }}
             />
           </PageContainer>
         </>
