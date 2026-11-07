@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Effect } from "effect";
 import { unstable_cache } from "next/cache";
+import { draftMode } from "next/headers";
 import { unstable_rethrow } from "next/navigation";
 import { runPromise } from "@/lib/effect/runtime";
 import {
@@ -219,13 +220,18 @@ export async function GET(request: NextRequest) {
 
     const icalOutput = buildIcalFeed(matches, events, variant, side);
     const { filename } = getFeedVariantMeta(variant);
+    // The events read returned unpublished changes in preview mode, so the
+    // feed must never reach a shared cache then (#3619).
+    const preview = (await draftMode()).isEnabled;
 
     return new NextResponse(icalOutput, {
       status: 200,
       headers: {
         "Content-Type": "text/calendar; charset=utf-8",
         "Content-Disposition": `attachment; filename="${filename}"`,
-        "Cache-Control": `max-age=${CACHE_MAX_AGE}, s-maxage=${CACHE_MAX_AGE}`,
+        "Cache-Control": preview
+          ? "private, no-store"
+          : `max-age=${CACHE_MAX_AGE}, s-maxage=${CACHE_MAX_AGE}`,
       },
     });
   } catch (error) {

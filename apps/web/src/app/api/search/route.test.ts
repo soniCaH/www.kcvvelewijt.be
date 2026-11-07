@@ -17,14 +17,18 @@ vi.mock("next/cache", () => ({
 }));
 
 // Hoist mock so it's available inside vi.mock factory
-const { mockSanityFetch } = vi.hoisted(() => ({
+const { mockSanityFetch, draftModeMock } = vi.hoisted(() => ({
   mockSanityFetch: vi.fn().mockResolvedValue([]),
+  draftModeMock: vi.fn(),
 }));
 
 // Mock Sanity client to avoid projectId requirement in tests
 vi.mock("@/lib/sanity/client", () => ({
   sanityClient: { fetch: mockSanityFetch },
+  sanityPreviewClient: { fetch: mockSanityFetch },
 }));
+
+vi.mock("next/headers", () => ({ draftMode: () => draftModeMock() }));
 
 // Helper to create NextRequest
 function createRequest(url: string): NextRequest {
@@ -181,6 +185,7 @@ describe("POST /api/search", () => {
 describe("GET /api/search", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    draftModeMock.mockResolvedValue({ isEnabled: false });
 
     // Reset Sanity mock to return empty arrays by default
     mockSanityFetch.mockResolvedValue([]);
@@ -285,6 +290,20 @@ describe("GET /api/search", () => {
       expect(body).toHaveProperty("results");
       expect(body).toHaveProperty("count");
       expect(Array.isArray(body.results)).toBe(true);
+    });
+
+    it("is publicly cacheable outside preview mode", async () => {
+      const response = await GET(createRequest("/api/search?q=test"));
+      expect(response.headers.get("Cache-Control")).toBe(
+        "public, s-maxage=60, stale-while-revalidate=300",
+      );
+    });
+
+    it("is private and uncached in preview mode, which reads unpublished changes (#3619)", async () => {
+      draftModeMock.mockResolvedValue({ isEnabled: true });
+      const response = await GET(createRequest("/api/search?q=test"));
+      expect(response.status).toBe(200);
+      expect(response.headers.get("Cache-Control")).toBe("private, no-store");
     });
 
     it("should accept type=article and return 200", async () => {
