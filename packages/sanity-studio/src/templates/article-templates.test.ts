@@ -4,7 +4,7 @@ import {articleTemplates} from './article-templates'
 import {isLauncherTemplate} from './types'
 
 // One launcher card per editorial articleType an editor hand-creates.
-// matchPreview/matchRecap are generated from match data, not launched here.
+// matchPreview/matchRecap are rarely created and need a pasted PSD match id, so no card.
 const EXPECTED: Record<string, string> = {
   'article-interview': 'interview',
   'article-announcement': 'announcement',
