@@ -22,6 +22,7 @@ Production Sanity Studio deployed to sanity.io. See the root `.claude/CLAUDE.md`
 - Import `schemaTypes` from `./schemaTypes` (which re-exports from `@kcvv/sanity-studio`)
 - Import the `structure` resolver from `./structure`
 - Register Document Actions via `document.actions` — always spread `prev` first: `(prev) => [...prev, MyAction]`
+- "Voorbeeld" (`createPreviewAction`) is built once at module level with this Studio's web origin (`https://www.kcvvelewijt.be`, the site that reads this dataset) and registered per schema type; staging must never point at the production site.
 - Dataset is hardcoded to `'production'`. Never read it from env: an untracked `.env.local` must not be able to bind this studio to staging.
 - **`dev` edits PRODUCTION data.** Try unreleased studio code in `@kcvv/studio-staging`.
 

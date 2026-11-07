@@ -9,9 +9,13 @@ import {
   launcherTemplates,
   curatedNewDocumentOptions,
   GuideFormInput,
+  createPreviewAction,
 } from '@kcvv/sanity-studio'
 import {schemaTypes} from './schemaTypes'
 import {structure} from './structure'
+
+// "Voorbeeld" opens the production site, which reads this Studio's dataset.
+const PreviewAction = createPreviewAction({webOrigin: 'https://www.kcvvelewijt.be'})
 
 export default defineConfig({
   name: 'default',
@@ -36,6 +40,8 @@ export default defineConfig({
       ),
       LinkToPsdAction,
       RemovePsdImageAction,
+      // Article only for now (#3658); Event, Page and photo gallery follow in #3660.
+      ...(schemaType === 'article' ? [PreviewAction] : []),
     ],
     newDocumentOptions: curatedNewDocumentOptions,
   },

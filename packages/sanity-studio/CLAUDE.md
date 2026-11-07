@@ -38,6 +38,7 @@ src/
 - Extract pure logic (mutation builders, queries) into a sibling `build-<action>-mutations.ts` — keeps the React component thin and the logic unit-testable
 - Actions are registered in the studio `defineConfig` in `apps/studio/` and `apps/studio-staging/` — this package exports the component, the studio app wires it in
 - Gate visibility with early-return null checks: `if (type !== 'staffMember') return null`
+- A factory action (`createPreviewAction({webOrigin})`, "Voorbeeld", #3619) is created **once at module level** in each studio's `sanity.config.ts` (a new component per `actions` call would remount it), then registered for the types that should have it. It writes a short-lived per-user secret via `@sanity/preview-url-secret/create-secret` (an `@internal` export — the version is pinned exactly) and opens the web app's `/api/preview/enable` in a new tab; the public path comes from `buildPreviewPath` (`actions/build-preview-path.ts`), the one type-to-URL table. `apps/studio` registers it for `article` only so far; the per-studio difference is the `webOrigin` and the type condition.
 
 ## Tools (top-nav tabs)
 
