@@ -412,6 +412,48 @@ describe("CalendarSubscribePanel", () => {
     });
   });
 
+  describe("source (#3644)", () => {
+    it("on the Team page the only team has no remove control and no widget frame", () => {
+      render(
+        <CalendarSubscribePanel
+          teams={[teams[0]]}
+          preselectedTeamLabel="A-ploeg"
+          isOpen
+          source="team"
+        />,
+      );
+      expect(screen.queryByRole("button", { name: /Verwijder/ })).toBeNull();
+      expect(screen.getByTestId("subscribe-panel").className).not.toMatch(
+        /border-b-2|border-dashed|bg-cream-soft/,
+      );
+      expect(
+        screen.getByRole("link", { name: /Zet in je agenda/ }),
+      ).toHaveAttribute("href");
+    });
+
+    it("on /kalender a team can still be removed", () => {
+      render(<CalendarSubscribePanel {...defaultProps} />);
+      expect(
+        screen.getByRole("button", { name: /Verwijder A-ploeg/ }),
+      ).toBeInTheDocument();
+    });
+
+    it("reports the surface it was given on copy and on the iPhone tap", async () => {
+      const user = userEvent.setup();
+      render(<CalendarSubscribePanel {...defaultProps} source="team" />);
+      await user.click(screen.getByRole("button", { name: /Kopieer link/ }));
+      expect(trackEvent).toHaveBeenLastCalledWith(
+        "kalender_subscribe_copy",
+        expect.objectContaining({ source: "team" }),
+      );
+      await user.click(screen.getByRole("link", { name: /Zet in je agenda/ }));
+      expect(trackEvent).toHaveBeenLastCalledWith(
+        "kalender_subscribe_webcal",
+        expect.objectContaining({ source: "team" }),
+      );
+    });
+  });
+
   describe("iPhone one-tap link (#3643)", () => {
     const getLink = () =>
       screen.getByRole("link", { name: /Zet in je agenda/ });

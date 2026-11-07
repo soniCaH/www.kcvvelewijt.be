@@ -80,6 +80,14 @@ export const MidSeason: Story = {
   args: { matches: midSeason },
 };
 
+/** A team with a valid PSD id: the subscribe panel closes the section (#3644). */
+export const WithSubscribePanel: Story = {
+  args: {
+    matches: midSeason,
+    subscribeTeam: { psdId: 9401, label: "U13" },
+  },
+};
+
 /** Season-start: only the next fixture; no results. */
 export const SeasonStart: Story = {
   args: { matches: seasonStart },

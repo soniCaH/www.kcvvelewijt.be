@@ -550,4 +550,47 @@ describe("/ploegen/[slug] parses the team's PSD id strictly (#3642)", () => {
       expect(mockGetRanking).not.toHaveBeenCalled();
     },
   );
+
+  it.each(["01", "12abc"])(
+    "shows no subscribe panel for psdId %j",
+    async (psdId) => {
+      mockFindBySlug.mockReturnValue(Effect.succeed(teamFixture(psdId)));
+
+      const element = await TeamPage({
+        params: Promise.resolve({ slug: "kcvv-elewijt-u13" }),
+      });
+      render(element);
+
+      expect(screen.queryByTestId("subscribe-panel")).toBeNull();
+    },
+  );
+});
+
+describe("/ploegen/[slug] subscribe panel (#3644)", () => {
+  beforeEach(() => {
+    mockFindBySlug.mockReset();
+    mockGetMatches.mockReset();
+    mockGetRanking.mockReset();
+    mockGetMatches.mockReturnValue(Effect.succeed([leagueFixture(9401)]));
+    mockGetRanking.mockReturnValue(Effect.succeed([]));
+  });
+
+  it("shows the panel at the end of #wedstrijden with only this team's id in the href", async () => {
+    mockFindBySlug.mockReturnValue(Effect.succeed(teamFixture("9401")));
+
+    const element = await TeamPage({
+      params: Promise.resolve({ slug: "kcvv-elewijt-u13" }),
+    });
+    render(element);
+
+    const section = document.getElementById("wedstrijden");
+    const panel = screen.getByTestId("subscribe-panel");
+    expect(section).toContainElement(panel);
+    const href = screen
+      .getByRole("link", { name: /Zet in je agenda/ })
+      .getAttribute("href");
+    expect(href).toMatch(
+      /^webcal:\/\/[^/]+\/api\/calendar\.ics\?teamIds=9401&/,
+    );
+  });
 });
