@@ -180,10 +180,10 @@
   },
   "src/components/calendar/CalendarSubscribePanel/CalendarSubscribePanel.tsx": {
     "kcvv/no-off-ramp-font-size": {
-      "count": 5
+      "count": 4
     },
     "kcvv/no-off-ramp-tracking": {
-      "count": 5
+      "count": 4
     }
   },
   "src/components/calendar/CalendarWeek/CalendarWeek.tsx": {
