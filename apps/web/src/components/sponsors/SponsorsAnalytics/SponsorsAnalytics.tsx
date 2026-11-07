@@ -15,9 +15,9 @@ export interface SponsorsAnalyticsProps {
  *
  * Marker (set by the component): `data-sponsor-cta` on the band button →
  * `sponsor_cta_click`. The tile and marquee clicks belong to
- * `<SponsorWallTracker>` (#3649), not to this wrapper. A native listener on the container (not a JSX `onClick`
- * on a non-interactive div) catches the bubbled click from mouse and keyboard
- * activation alike.
+ * `<SponsorWallTracker>` (#3649), not to this wrapper. A native listener on
+ * the container (not a JSX `onClick` on a non-interactive div) catches the
+ * bubbled click from mouse and keyboard activation alike.
  */
 export function SponsorsAnalytics({ children }: SponsorsAnalyticsProps) {
   const ref = useRef<HTMLDivElement>(null);
