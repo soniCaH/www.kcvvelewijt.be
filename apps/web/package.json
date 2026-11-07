@@ -49,6 +49,7 @@
     "@phosphor-icons/react": "2.1.10",
     "@portabletext/react": "8.0.1",
     "@sanity/client": "8.11.0",
+    "@sanity/preview-url-secret": "4.1.5",
     "@sanity/webhook": "4.0.4",
     "@tailwindcss/typography": "0.5.20",
     "@touch4it/ical-timezones": "1.9.0",
