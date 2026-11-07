@@ -464,7 +464,7 @@ The cost is stated rather than hidden: multiply darkens a photo that fills its f
 ### Cards / Containers
 
 - **Corner Style:** sharp (`0`).
-- **Background:** cream, cream-soft, ink, jersey or jersey-deep — the text colour flips with the surface.
+- **Background:** cream, cream-soft, ink or jersey-deep — the text colour flips with the surface.
 - **Border:** solid `2px` ink on every variant. On an ink card the border merges into the fill and the shadow alone defines the silhouette — which is why ink cards must use the muted shadow.
 - **Shadow Strategy:** Paper Medium at rest by default; see Elevation.
 - **Internal Padding:** 0.75rem / 1.25rem / 2rem, or none for flush-edge media cards.

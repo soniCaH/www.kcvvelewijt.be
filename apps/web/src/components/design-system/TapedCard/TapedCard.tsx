@@ -6,8 +6,7 @@ export type TapedCardRotation =
   "a" | "b" | "c" | "d" | "none" | "auto" | number;
 
 export type TapedCardShadow = "sm" | "md" | "lift" | "soft";
-export type TapedCardBg =
-  "cream" | "cream-soft" | "ink" | "jersey" | "jersey-deep";
+export type TapedCardBg = "cream" | "cream-soft" | "ink" | "jersey-deep";
 export type TapedCardPadding = "sm" | "md" | "lg" | "none";
 export type TapedCardAs = "div" | "article" | "section" | "li" | "figure";
 
@@ -66,7 +65,6 @@ const BG_CLASS: Record<TapedCardBg, string> = {
   cream: "bg-cream text-ink",
   "cream-soft": "bg-cream-soft text-ink",
   ink: "bg-ink text-cream",
-  jersey: "bg-jersey text-ink",
   "jersey-deep": "bg-jersey-deep text-cream",
 };
 

@@ -81,7 +81,7 @@ export const BgVariants: Story = {
   args: { children: sample },
   render: () => (
     <div className="grid grid-cols-2 items-start gap-10">
-      {(["cream", "cream-soft", "ink", "jersey"] as const).map((b) => (
+      {(["cream", "cream-soft", "ink", "jersey-deep"] as const).map((b) => (
         <TapedCard key={b} bg={b} rotation="b" padding="md">
           <p className="font-mono text-[11px] tracking-[0.08em] uppercase">
             bg = {b}
