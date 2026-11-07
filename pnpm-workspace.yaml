@@ -9,7 +9,7 @@ minimumReleaseAge: 4320
 
 overrides:
   # Remove once lockfile maintenance resolves joi >= 17.13.8 on its own, or @storybook/test-runner drops wait-on@7 (#3475).
-  "joi@<17.13.8": "17.13.9"
+  "joi@<17.13.8": "18.3.1"
 minimumReleaseAgeExclude:
   # Renovate security update: @sanity/ui@4.4.9 || 4.4.10
   - "@sanity/ui@4.4.9 || 4.4.10"
@@ -53,8 +53,8 @@ minimumReleaseAgeExclude:
   - ical-generator@11.1.2
   # Renovate security update: next@16.4.3
   - next@16.4.3
-  # Renovate security update: joi@17.13.9
-  - joi@17.13.9
+  # Renovate security update: joi@17.13.9 || 18.3.1
+  - joi@17.13.9 || 18.3.1
   # Renovate security update: @storybook/addon-a11y@10.6.5
   - "@storybook/addon-a11y@10.6.5"
   # Renovate security update: @storybook/addon-docs@10.6.5
