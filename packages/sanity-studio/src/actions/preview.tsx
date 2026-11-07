@@ -1,5 +1,6 @@
 import {useState} from 'react'
 import {EyeOpenIcon} from '@sanity/icons/EyeOpen'
+import {useToast} from '@sanity/ui/toast'
 import {createPreviewSecret} from '@sanity/preview-url-secret/create-secret'
 import {type DocumentActionComponent, useClient, useCurrentUser} from 'sanity'
 import {buildPreviewPath, hasPreviewPath} from './build-preview-path'
@@ -26,6 +27,7 @@ export const createPreviewAction = ({webOrigin}: {webOrigin: string}): DocumentA
     const {type, draft, published} = props
     const client = useClient({apiVersion: API_VERSION})
     const user = useCurrentUser()
+    const toast = useToast()
     const [busy, setBusy] = useState(false)
 
     const slug = ((draft || published)?.slug as {current?: string} | undefined)?.current
@@ -43,6 +45,15 @@ export const createPreviewAction = ({webOrigin}: {webOrigin: string}): DocumentA
         // Open the tab inside the click: a window opened after an `await` is
         // treated as a popup and blocked.
         const tab = window.open('', '_blank')
+        if (!tab) {
+          toast.push({
+            status: 'warning',
+            title: 'Pop-up geblokkeerd',
+            description: 'Sta pop-ups toe voor deze site om het voorbeeld te openen.',
+          })
+          return
+        }
+        tab.opener = null
         setBusy(true)
         try {
           const {secret} = await createPreviewSecret(
@@ -54,15 +65,14 @@ export const createPreviewAction = ({webOrigin}: {webOrigin: string}): DocumentA
           const url = new URL('/api/preview/enable', webOrigin)
           url.searchParams.set('sanity-preview-secret', secret)
           url.searchParams.set('sanity-preview-pathname', path)
-          if (tab) {
-            tab.opener = null
-            tab.location.href = url.toString()
-          } else {
-            window.open(url, '_blank', 'noopener')
-          }
-        } catch (error) {
-          tab?.close()
-          throw error
+          tab.location.href = url.toString()
+        } catch {
+          tab.close()
+          toast.push({
+            status: 'error',
+            title: 'Voorbeeld openen mislukt',
+            description: 'Het voorbeeld kon niet worden aangemaakt. Probeer het opnieuw.',
+          })
         } finally {
           setBusy(false)
           props.onComplete()

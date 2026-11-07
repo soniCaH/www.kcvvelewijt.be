@@ -11,7 +11,8 @@ const PREVIEW_PREFIX: Record<string, string> = {
 }
 
 /** Whether documents of this schema type have a public page to preview. */
-export const hasPreviewPath = (type: string): boolean => Object.prototype.hasOwnProperty.call(PREVIEW_PREFIX, type)
+export const hasPreviewPath = (type: string): boolean =>
+  Object.prototype.hasOwnProperty.call(PREVIEW_PREFIX, type)
 
 /** `undefined` for an unsupported type or a missing slug (the action then stays disabled). */
 export const buildPreviewPath = (type: string, slug: string | undefined): string | undefined => {
