@@ -3,6 +3,7 @@ import {
   buildRemovePsdImageMutations,
   collectPsdImageAssetIds,
   hasPsdImage,
+  isRemovePsdImageVisible,
 } from './build-remove-psd-image-mutations'
 
 const unset = ['psdImage', 'psdImageUrl']
@@ -48,5 +49,27 @@ describe('hasPsdImage', () => {
     expect(hasPsdImage(null, withImage('image-a'))).toBe(true)
     expect(hasPsdImage(withImage('image-a'), null)).toBe(true)
     expect(hasPsdImage({}, {})).toBe(false)
+  })
+})
+
+describe('isRemovePsdImageVisible', () => {
+  const base = {type: 'player', dialogOpen: false, draft: null, published: withImage('image-a')}
+
+  it('is visible on player and staffMember with a psdImage', () => {
+    expect(isRemovePsdImageVisible(base)).toBe(true)
+    expect(isRemovePsdImageVisible({...base, type: 'staffMember'})).toBe(true)
+  })
+
+  it('is hidden without a psdImage or on other document types', () => {
+    expect(isRemovePsdImageVisible({...base, published: {}})).toBe(false)
+    expect(isRemovePsdImageVisible({...base, type: 'article'})).toBe(false)
+  })
+
+  it('stays visible while the dialog is open after the psdImage is gone', () => {
+    expect(isRemovePsdImageVisible({...base, published: {}, dialogOpen: true})).toBe(true)
+  })
+
+  it('stays hidden on other document types even with the dialog open', () => {
+    expect(isRemovePsdImageVisible({...base, type: 'article', dialogOpen: true})).toBe(false)
   })
 })

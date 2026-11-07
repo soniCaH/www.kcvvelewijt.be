@@ -40,3 +40,21 @@ export const buildRemovePsdImageMutations = ({
   [published ? id : null, draft ? `drafts.${id}` : null]
     .filter((docId): docId is string => docId !== null)
     .map((docId) => ({patch: {id: docId, unset: PSD_IMAGE_FIELDS}}))
+
+/**
+ * The action stays visible while its dialog is open: the commit removes the
+ * `psdImage`, and hiding the action then would unmount the dialog before the
+ * editor reads the result.
+ */
+export const isRemovePsdImageVisible = ({
+  type,
+  dialogOpen,
+  draft,
+  published,
+}: {
+  type: string
+  dialogOpen: boolean
+  draft: Doc
+  published: Doc
+}): boolean =>
+  (type === 'player' || type === 'staffMember') && (dialogOpen || hasPsdImage(draft, published))

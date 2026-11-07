@@ -3,7 +3,7 @@ import {type DocumentActionComponent, useClient} from 'sanity'
 import {
   buildRemovePsdImageMutations,
   collectPsdImageAssetIds,
-  hasPsdImage,
+  isRemovePsdImageVisible,
 } from './build-remove-psd-image-mutations'
 
 const API_VERSION = '2024-01-01'
@@ -26,8 +26,7 @@ export const RemovePsdImageAction: DocumentActionComponent = (props) => {
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState<string | null>(null)
 
-  if (type !== 'player' && type !== 'staffMember') return null
-  if (!hasPsdImage(draft, published)) return null
+  if (!isRemovePsdImageVisible({type, dialogOpen, draft, published})) return null
 
   const run = async () => {
     setStatus('executing')
