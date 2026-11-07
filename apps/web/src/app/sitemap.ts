@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import type { Match } from "@kcvv/api-contract";
 
 import { SITE_CONFIG } from "@/lib/constants";
 import { PAGES_QUERY } from "@/lib/repositories/page.repository";
@@ -121,7 +122,11 @@ async function fetchFromSanity<T>(
   }
 }
 
-async function fetchRecentMatchIds(teamPsdIds: string[]): Promise<number[]> {
+type RecentMatch = Pick<Match, "id" | "date" | "status">;
+
+async function fetchRecentMatches(
+  teamPsdIds: string[],
+): Promise<RecentMatch[]> {
   const ninetyDaysAgo = new Date();
   ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
@@ -174,19 +179,20 @@ async function fetchRecentMatchIds(teamPsdIds: string[]): Promise<number[]> {
       Effect.all(effects, { concurrency: BFF_FAN_OUT_CONCURRENCY }),
     );
 
-    const allMatchIds: number[] = [];
+    // Keyed by id: the same Match returned for two Teams is one entry.
+    const byId = new Map<number, RecentMatch>();
     const now = new Date();
     for (const matches of results) {
-      for (const match of matches) {
-        if (match.date >= ninetyDaysAgo && match.date <= now) {
-          allMatchIds.push(match.id);
+      for (const { id, date, status } of matches) {
+        if (date >= ninetyDaysAgo && date <= now && !byId.has(id)) {
+          byId.set(id, { id, date, status });
         }
       }
     }
 
-    return [...new Set(allMatchIds)];
+    return [...byId.values()];
   } catch (error) {
-    console.error("[sitemap] fetchRecentMatchIds failed:", error);
+    console.error("[sitemap] fetchRecentMatches failed:", error);
     return [];
   }
 }
@@ -292,8 +298,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const teamPsdIds = teams
     .map((t) => t.psdId)
     .filter((id): id is string => id !== null && id !== "");
-  const matchIds = await fetchRecentMatchIds(teamPsdIds);
-  const matchEntries = matchIds.map((id) => ({
+  const recentMatches = await fetchRecentMatches(teamPsdIds);
+  const matchEntries = recentMatches.map(({ id }) => ({
     url: `${SITE_CONFIG.siteUrl}/wedstrijd/${id}`,
     lastModified,
     changeFrequency: "weekly" as const,
