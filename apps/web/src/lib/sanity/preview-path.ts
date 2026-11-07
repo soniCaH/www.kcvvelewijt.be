@@ -1,18 +1,19 @@
 /**
- * A redirect target that stays on this site: a path with a leading single
- * `/`, returned as `pathname + search + hash`. `null` for anything else —
- * absolute URLs, `//evil.example`, `/\evil.example` (WHATWG treats `\` as
- * `/`), a bare `nieuws/x`. Parsing against a throwaway origin and requiring it
- * to survive is what catches every host-switching spelling at once.
+ * A redirect target that stays on this site, as a URL resolved once against the
+ * real request URL (#3619). `null` for anything else: absolute URLs,
+ * `//evil.example`, `/\evil.example` (WHATWG treats `\` as `/`), a bare
+ * `nieuws/x`. Redirect to the returned URL object itself: re-resolving its path
+ * string would let dot segments such as `/.//evil.example` collapse to
+ * `//evil.example` and switch host.
  */
-export const toSamePath = (raw: string | null): string | null => {
+export const toSameOriginUrl = (
+  raw: string | null,
+  requestUrl: URL,
+): URL | null => {
   if (!raw?.startsWith("/")) return null;
   try {
-    const base = "http://same-origin.invalid";
-    const url = new URL(raw, base);
-    return url.origin === base
-      ? `${url.pathname}${url.search}${url.hash}`
-      : null;
+    const resolved = new URL(raw, requestUrl);
+    return resolved.origin === requestUrl.origin ? resolved : null;
   } catch {
     return null;
   }

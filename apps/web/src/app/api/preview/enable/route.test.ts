@@ -74,6 +74,25 @@ describe("GET /api/preview/enable", () => {
     expect(res.headers.get("location")).toBeNull();
   });
 
+  it.each([
+    ["/.//evil.example"],
+    ["/%2e//evil.example"],
+    ["/a/..//evil.example"],
+    ["/./\\evil.example"],
+  ])(
+    "never redirects off-site for the dot-segment target %s",
+    async (target) => {
+      const res = await GET(enableUrl(target));
+      const location = res.headers.get("location");
+      if (res.status === 307) {
+        expect(new URL(location!).origin).toBe("https://www.kcvvelewijt.be");
+      } else {
+        expect(res.status).toBe(400);
+        expect(location).toBeNull();
+      }
+    },
+  );
+
   it("enables preview mode and redirects 307 to the path for a valid secret", async () => {
     const res = await GET(enableUrl("/nieuws/mijn-artikel?x=1"));
     expect(res.status).toBe(307);

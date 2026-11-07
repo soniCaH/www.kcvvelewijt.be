@@ -33,6 +33,21 @@ describe("GET /api/preview/disable", () => {
     expect(res.headers.get("location")).toBe("https://www.kcvvelewijt.be/");
   });
 
+  it.each([
+    ["/.//evil.example"],
+    ["/%2e//evil.example"],
+    ["/a/..//evil.example"],
+    ["/./\\evil.example"],
+  ])(
+    "never redirects off-site for the dot-segment target %s",
+    async (target) => {
+      const res = await GET(disableUrl(target));
+      expect(new URL(res.headers.get("location")!).origin).toBe(
+        "https://www.kcvvelewijt.be",
+      );
+    },
+  );
+
   it("falls back to the homepage without a target", async () => {
     const res = await GET(disableUrl());
     expect(res.headers.get("location")).toBe("https://www.kcvvelewijt.be/");

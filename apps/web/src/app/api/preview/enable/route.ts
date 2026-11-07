@@ -5,7 +5,7 @@ import {
   validatePreviewUrl,
 } from "@sanity/preview-url-secret";
 import { sanityClient } from "@/lib/sanity/client";
-import { toSamePath } from "@/lib/sanity/preview-path";
+import { toSameOriginUrl } from "@/lib/sanity/preview-path";
 
 /**
  * Turns on preview mode (#3619). The Studio's "Voorbeeld" action opens this
@@ -27,8 +27,11 @@ export async function GET(request: Request) {
   }
 
   const url = new URL(request.url);
-  const path = toSamePath(url.searchParams.get(urlSearchParamPreviewPathname));
-  if (!path) {
+  const target = toSameOriginUrl(
+    url.searchParams.get(urlSearchParamPreviewPathname),
+    url,
+  );
+  if (!target) {
     return NextResponse.json(
       { ok: false, error: "Invalid redirect target" },
       { status: 400 },
@@ -44,5 +47,5 @@ export async function GET(request: Request) {
   }
 
   (await draftMode()).enable();
-  return NextResponse.redirect(new URL(path, url), 307);
+  return NextResponse.redirect(target, 307);
 }
