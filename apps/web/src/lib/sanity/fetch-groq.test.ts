@@ -2,9 +2,15 @@ import { Cause, Effect, Exit } from "effect";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const fetchMock = vi.fn();
+const previewFetchMock = vi.fn();
+const draftModeMock = vi.fn();
 vi.mock("./client", () => ({
   sanityClient: { fetch: (...args: unknown[]) => fetchMock(...args) },
+  sanityPreviewClient: {
+    fetch: (...args: unknown[]) => previewFetchMock(...args),
+  },
 }));
+vi.mock("next/headers", () => ({ draftMode: () => draftModeMock() }));
 
 import { fetchGroq, SanityReadError } from "./fetch-groq";
 
@@ -12,6 +18,10 @@ describe("fetchGroq", () => {
   beforeEach(() => {
     fetchMock.mockReset();
     fetchMock.mockResolvedValue([]);
+    previewFetchMock.mockReset();
+    previewFetchMock.mockResolvedValue([]);
+    draftModeMock.mockReset();
+    draftModeMock.mockResolvedValue({ isEnabled: false });
   });
 
   it("omits the options arg when no cache options are given", async () => {
@@ -31,6 +41,47 @@ describe("fetchGroq", () => {
       {},
       { next: { revalidate: 3600, tags: ["players"] } },
     );
+  });
+
+  describe("in preview mode (#3619)", () => {
+    beforeEach(() => {
+      draftModeMock.mockResolvedValue({ isEnabled: true });
+    });
+
+    it("reads through the drafts-perspective client with no Next cache options", async () => {
+      await Effect.runPromise(
+        fetchGroq(
+          "*[_type=='x']",
+          { slug: "s" },
+          { revalidate: 900, tags: ["a"] },
+        ),
+      );
+      expect(previewFetchMock).toHaveBeenCalledWith("*[_type=='x']", {
+        slug: "s",
+      });
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it("fails with a typed SanityReadError when the preview read rejects", async () => {
+      const cause = new Error("preview unreachable");
+      previewFetchMock.mockRejectedValue(cause);
+      const error = await Effect.runPromise(
+        Effect.flip(fetchGroq("*[_type=='x']")),
+      );
+      expect(error).toBeInstanceOf(SanityReadError);
+      expect(error.cause).toBe(cause);
+    });
+  });
+
+  it("fails with a typed SanityReadError when the preview state cannot be read", async () => {
+    const cause = new Error("no request scope");
+    draftModeMock.mockRejectedValue(cause);
+    const exit = await Effect.runPromiseExit(fetchGroq("*[_type=='x']"));
+    expect(Exit.isFailure(exit)).toBe(true);
+    if (!Exit.isFailure(exit)) return;
+    expect(Cause.isFailType(exit.cause)).toBe(true);
+    expect(Cause.isDieType(exit.cause)).toBe(false);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   // #2864: this is the function the whole typed-error-channel ticket turns

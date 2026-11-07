@@ -8,6 +8,13 @@ vi.mock("next/font/google", () => ({
   IBM_Plex_Mono: () => ({ variable: "--font-ibm-plex-mono" }),
 }));
 
+// `draftMode()` throws outside a Next request scope, which is where every unit
+// test runs. Default it to "preview off" so any test that reaches `fetchGroq`
+// reads the published perspective; a test of preview mode mocks it itself.
+vi.mock("next/headers", () => ({
+  draftMode: async () => ({ isEnabled: false }),
+}));
+
 // Cleanup after each test
 afterEach(() => {
   cleanup();

@@ -1,6 +1,10 @@
 import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
-import { fetchGroq, type SanityReadError } from "../sanity/fetch-groq";
+import {
+  fetchGroq,
+  readPreviewMode,
+  type SanityReadError,
+} from "../sanity/fetch-groq";
 import {
   SANITY_PUBLISH_WINDOW_REVALIDATE,
   SANITY_TAGS,
@@ -130,7 +134,7 @@ const MATCH_ARTICLES_QUERY =
 // (cards, OG, JSON-LD, sitemap, search, RSS); `titleRich` keeps the
 // PT shape for the EditorialHero accent rendering.
 export const ARTICLE_BY_SLUG_QUERY =
-  defineQuery(`*[_type == "article" && slug.current == $slug && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {
+  defineQuery(`*[_type == "article" && slug.current == $slug && ($preview || (publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())))][0] {
   "id": _id, "updatedAt": _updatedAt,
   "title": coalesce(pt::text(title), title, ""),
   "titleRich": title,
@@ -580,15 +584,27 @@ export const ArticleRepositoryLive = Layer.succeed(ArticleRepository, {
   // 900 s here is the publish-window bound (#3472), the same figure by design.
   // Saves still bust it on demand, `/api/revalidate` already fires
   // `revalidateTag('articles')`.
+  // `$preview` drops the publication window for the one detail page an editor
+  // previews (#3619): a never-published or future-scheduled article has no
+  // passing `publishedAt` yet. Lists keep the window.
   findBySlug: (slug) =>
-    fetchGroq<ARTICLE_BY_SLUG_QUERY_RESULT>(
-      ARTICLE_BY_SLUG_QUERY,
-      { slug },
-      {
-        revalidate: SANITY_PUBLISH_WINDOW_REVALIDATE,
-        tags: [SANITY_TAGS.articles, SANITY_TAGS.players, SANITY_TAGS.staff],
-      },
-    ).pipe(Effect.map((row) => (row ? filterUnpublishedRefs(row) : null))),
+    readPreviewMode.pipe(
+      Effect.flatMap((preview) =>
+        fetchGroq<ARTICLE_BY_SLUG_QUERY_RESULT>(
+          ARTICLE_BY_SLUG_QUERY,
+          { slug, preview },
+          {
+            revalidate: SANITY_PUBLISH_WINDOW_REVALIDATE,
+            tags: [
+              SANITY_TAGS.articles,
+              SANITY_TAGS.players,
+              SANITY_TAGS.staff,
+            ],
+          },
+        ),
+      ),
+      Effect.map((row) => (row ? filterUnpublishedRefs(row) : null)),
+    ),
   findPaginated: ({ offset, limit, category }) =>
     fetchGroq<ARTICLES_PAGINATED_QUERY_RESULT>(ARTICLES_PAGINATED_QUERY, {
       offset,

@@ -1,5 +1,6 @@
 import { Data, Effect } from "effect";
-import { sanityClient } from "./client";
+import { sanityClient, sanityPreviewClient } from "./client";
+import { isPreviewMode } from "./preview-mode";
 
 /** Next.js Data Cache directives forwarded to `@sanity/client`'s 3rd arg. */
 export interface GroqCacheOptions {
@@ -37,25 +38,45 @@ export class SanityReadError extends Data.TaggedError("SanityReadError")<{
 }
 
 /**
+ * Preview mode for the current request, as a Sanity read step: a failure to
+ * read it is a typed `SanityReadError` like any other read failure, so the
+ * call sites' degrade-or-die rules still hold. Article-by-slug uses it too.
+ */
+export const readPreviewMode: Effect.Effect<boolean, SanityReadError> =
+  Effect.tryPromise({
+    try: () => isPreviewMode(),
+    catch: (cause) => new SanityReadError({ cause }),
+  });
+
+/**
  * Every Sanity read in the app goes through here. Its error channel is
  * `SanityReadError` — see that class for how a call site must resolve it.
+ *
+ * In preview mode (an editor's draft-mode cookie) it reads unpublished changes
+ * through `sanityPreviewClient`, with no API CDN and no Next data cache — the
+ * caller's cache options are ignored so a preview never poisons the cache for
+ * visitors. Preview off is exactly the call it always was.
  */
 export const fetchGroq = <T>(
   query: string,
   params?: Record<string, unknown>,
   options?: GroqCacheOptions,
 ): Effect.Effect<T, SanityReadError> =>
-  Effect.tryPromise({
-    // Pass the 3rd arg whenever the caller gives options: `revalidate` sets
-    // the fetch's own lifetime and `tags` attach it to `revalidateTag`. A
-    // tags-only call (`revalidate: undefined`, #3483) sets no lifetime of its
-    // own, so the route segment's `revalidate` still applies, exactly as for a
-    // call with no options.
-    try: () =>
-      options
-        ? sanityClient.fetch<T>(query, params ?? {}, {
-            next: { revalidate: options.revalidate, tags: options.tags },
-          })
-        : sanityClient.fetch<T>(query, params ?? {}),
-    catch: (cause) => new SanityReadError({ cause }),
-  });
+  Effect.flatMap(readPreviewMode, (preview) =>
+    Effect.tryPromise({
+      // Pass the 3rd arg whenever the caller gives options: `revalidate` sets
+      // the fetch's own lifetime and `tags` attach it to `revalidateTag`. A
+      // tags-only call (`revalidate: undefined`, #3483) sets no lifetime of its
+      // own, so the route segment's `revalidate` still applies, exactly as for a
+      // call with no options.
+      try: () =>
+        preview
+          ? sanityPreviewClient.fetch<T>(query, params ?? {})
+          : options
+            ? sanityClient.fetch<T>(query, params ?? {}, {
+                next: { revalidate: options.revalidate, tags: options.tags },
+              })
+            : sanityClient.fetch<T>(query, params ?? {}),
+      catch: (cause) => new SanityReadError({ cause }),
+    }),
+  );
