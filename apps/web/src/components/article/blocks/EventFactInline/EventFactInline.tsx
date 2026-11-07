@@ -176,7 +176,7 @@ export function EventFactInline({
             {isPast ? (
               <MonoLabel variant="pill-cream">{PAST_LABEL}</MonoLabel>
             ) : tag ? (
-              <MonoLabel variant="pill-jersey">{tag}</MonoLabel>
+              <MonoLabel variant="pill-jersey-deep">{tag}</MonoLabel>
             ) : null}
             {value.ageGroup?.trim() ? (
               <span

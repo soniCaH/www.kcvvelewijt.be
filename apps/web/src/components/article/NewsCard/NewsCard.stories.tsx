@@ -245,11 +245,6 @@ export const BgCreamSoft: Story = {
   tags: ["vr"],
 };
 
-export const BgJersey: Story = {
-  args: { ...bgSharedArgs, bg: "jersey" },
-  tags: ["vr"],
-};
-
 export const BgJerseyDeep: Story = {
   args: { ...bgSharedArgs, bg: "jersey-deep" },
   tags: ["vr"],
