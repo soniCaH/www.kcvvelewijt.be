@@ -55,6 +55,11 @@ function computeInitialSelection(
  * dimension; the Team page panel will pass "team"). */
 const SOURCE = "kalender";
 
+/** The classes the iPhone link and the copy button share, so the equal-height
+ * pair cannot drift apart. */
+const ACTION_BUTTON_CLASSES =
+  "border-ink bg-jersey-deep text-cream text-mono-sm min-h-11 border-2 px-3 py-1.5 font-mono font-semibold uppercase shadow-[2px_2px_0_0_var(--color-ink)] transition-[translate,box-shadow,opacity] duration-300";
+
 const subscribeNever = () => () => {};
 
 export function CalendarSubscribePanel({
@@ -303,7 +308,8 @@ export function CalendarSubscribePanel({
                   : undefined
               }
               className={cn(
-                "border-ink bg-jersey-deep text-cream text-mono-sm inline-flex min-h-11 items-center border-2 px-3 py-1.5 font-mono font-semibold uppercase shadow-[2px_2px_0_0_var(--color-ink)] transition-[translate,box-shadow,opacity] duration-300",
+                ACTION_BUTTON_CLASSES,
+                "inline-flex items-center",
                 canSubscribe
                   ? "hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
                   : "cursor-not-allowed opacity-50",
@@ -315,7 +321,10 @@ export function CalendarSubscribePanel({
               type="button"
               onClick={handleCopy}
               disabled={!canSubscribe}
-              className="border-ink bg-jersey-deep text-cream text-mono-sm min-h-11 border-2 px-3 py-1.5 font-mono font-semibold uppercase shadow-[2px_2px_0_0_var(--color-ink)] transition-[translate,box-shadow,opacity] duration-300 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[2px_2px_0_0_var(--color-ink)]"
+              className={cn(
+                ACTION_BUTTON_CLASSES,
+                "hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[2px_2px_0_0_var(--color-ink)]",
+              )}
             >
               {copiedUrl === webcalUrl ? "Gekopieerd" : "Kopieer link"}
             </button>
