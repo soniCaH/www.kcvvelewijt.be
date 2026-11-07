@@ -173,8 +173,7 @@ export default function PrivacyPage() {
               lidmaatschap
             </li>
             <li>
-              <strong>Toestemming:</strong> Voor foto&apos;s, video&apos;s en
-              nieuwsbrieven
+              <strong>Toestemming:</strong> Voor foto&apos;s en video&apos;s
             </li>
             <li>
               <strong>Gerechtvaardigd belang:</strong> Voor het beheer en de
