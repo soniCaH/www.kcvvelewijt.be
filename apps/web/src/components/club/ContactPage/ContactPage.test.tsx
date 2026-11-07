@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { ContactPage } from "./ContactPage";
 import type { KeyContactVM } from "@/lib/repositories/staff.repository";
@@ -188,6 +188,34 @@ describe("ContactPage — Kom naar ons section", () => {
     expect(screen.getByText(/Van Innis sportpark/i)).toBeInTheDocument();
   });
 
+  it("states the bestuur's parking facts and promises no Zemst parking plan", () => {
+    render(<ContactPage />);
+    expect(
+      screen.getByText(
+        /hondenschool, het jeugdhuis, de curling en de judozaal/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /niet op gele lijnen, op private plaatsen of in opritten/i,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/parkeerplan/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/gemeente Zemst/i)).not.toBeInTheDocument();
+  });
+
+  it("prints the payment line inside the Kantine card, without Payconiq", () => {
+    render(<ContactPage />);
+    const kantineCard =
+      screen.getByText("Kantine").parentElement!.parentElement!;
+    expect(
+      within(kantineCard).getByText(
+        "Betalen kan met kaart (geen Mastercard of kredietkaarten), met de KNIP-app of cash.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/payconiq/i)).not.toBeInTheDocument();
+  });
+
   it("shows entry prices table with all tiers", () => {
     render(<ContactPage />);
     expect(screen.getByText("Jeugd")).toBeInTheDocument();
@@ -198,13 +226,15 @@ describe("ContactPage — Kom naar ons section", () => {
     expect(screen.getByText("€10")).toBeInTheDocument();
   });
 
-  it("shows canteen training-day hours", () => {
+  it("shows the canteen hours and no invented match-day hours", () => {
     render(<ContactPage />);
-    expect(screen.getByText(/woensdag/i)).toBeInTheDocument();
-    expect(screen.getByText(/vrijdag/i)).toBeInTheDocument();
-    expect(screen.getByText(/18u00/i)).toBeInTheDocument();
-    expect(screen.getByText(/donderdag/i)).toBeInTheDocument();
-    expect(screen.getByText(/20u00/i)).toBeInTheDocument();
+    expect(
+      screen.getByText("Woensdag & vrijdag: 17u45 – 21u00"),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Donderdag: 20u00 – 22u00")).toBeInTheDocument();
+    expect(
+      screen.getByText("Op thuiswedstrijddagen open, zonder vaste uren."),
+    ).toBeInTheDocument();
   });
 
   it("shows accessibility note", () => {
