@@ -340,25 +340,25 @@ describe("sitemap.ts", () => {
       vi.restoreAllMocks();
     });
 
-    it("lists matches from the last 90 days up to now, and leaves out future and older ones", async () => {
+    it("lists matches from the last 7 days up to now, and leaves out future and older ones", async () => {
       stubTeams("1");
       mockGetMatches.mockReturnValue(
         Effect.succeed([
           makeMatch(1, daysFromNow(1)), // future
           makeMatch(2, daysFromNow(-1)), // recent
-          makeMatch(3, daysFromNow(-89)), // inside the window
-          makeMatch(4, daysFromNow(-91)), // too old
+          makeMatch(3, daysFromNow(-6)), // inside the window
+          makeMatch(4, daysFromNow(-8)), // too old
         ]),
       );
 
       expect(await matchUrls()).toEqual([matchUrl(2), matchUrl(3)]);
     });
 
-    it("includes a match exactly at the 90-day cutoff and excludes one a millisecond before it", async () => {
-      // NOW is midday, so the local-time `setDate(-90)` in sitemap.ts lands on
+    it("includes a match exactly at the 7-day cutoff and excludes one a millisecond before it", async () => {
+      // NOW is midday, so the local-time `setDate(-7)` in sitemap.ts lands on
       // the same wall-clock instant this test computes; no DST edge is crossed.
       const cutoff = new Date(NOW);
-      cutoff.setDate(cutoff.getDate() - 90);
+      cutoff.setDate(cutoff.getDate() - 7);
       stubTeams("1");
       mockGetMatches.mockReturnValue(
         Effect.succeed([
