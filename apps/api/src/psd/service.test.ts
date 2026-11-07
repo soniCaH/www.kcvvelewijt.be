@@ -161,6 +161,19 @@ function runService<A>(
   );
 }
 
+// The fan-outs read team name and age from the cached team map (#3631).
+// Their tests mock `/teams` over fetch, so they start from a cold map.
+const coldTeamMapKv: KvCacheInterface = {
+  ...cacheMock,
+  get: (key: string) =>
+    key === "psd:teams-by-id" ? Effect.succeed(null) : cacheMock.get(key),
+};
+
+const runFanout = <A>(
+  fn: Parameters<typeof runService<A>>[0],
+  options: Parameters<typeof runService<A>>[1] = {},
+) => runService(fn, { kvMock: coldTeamMapKv, ...options });
+
 describe("PsdService.getTeamMatches", () => {
   it("answers [] when PSD holds no season spanning today, instead of failing", async () => {
     // The gap between two seasons, or the next one not yet published. There
@@ -532,7 +545,7 @@ describe("PsdService.getNextMatches", () => {
     });
 
     // Default sanityMock returns ["1"] — only team 1 is visible, team 23 is excluded
-    const result = await runService((svc) => svc.getNextMatches());
+    const result = await runFanout((svc) => svc.getNextMatches());
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
@@ -579,7 +592,7 @@ describe("PsdService.getNextMatches", () => {
       return Promise.resolve({ ok: true, json: async () => rawTeams });
     });
 
-    const result = await runService((svc) => svc.getNextMatches(), {
+    const result = await runFanout((svc) => svc.getNextMatches(), {
       sanityMock: makeSanityMock(["1", "23"]),
     });
 
@@ -629,7 +642,7 @@ describe("PsdService.getNextMatches", () => {
       return Promise.resolve({ ok: true, json: async () => [rawTeams[0]] });
     });
 
-    const result = await runService((svc) => svc.getNextMatches());
+    const result = await runFanout((svc) => svc.getNextMatches());
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
@@ -656,7 +669,7 @@ describe("PsdService.getNextMatches", () => {
       return Promise.resolve({ ok: true, json: async () => [rawTeams[0]] });
     });
 
-    const result = await runService((svc) => svc.getNextMatches());
+    const result = await runFanout((svc) => svc.getNextMatches());
 
     expect(result._tag).toBe("Left");
     if (result._tag === "Left") {
@@ -693,7 +706,7 @@ describe("PsdService.getNextMatches", () => {
     const opts = { sanityMock: makeSanityMock(["1", "2"]) };
 
     mockPsd(false);
-    const partial = await runService((svc) => svc.getNextMatches(), opts);
+    const partial = await runFanout((svc) => svc.getNextMatches(), opts);
     expect(partial._tag).toBe("Right");
     if (partial._tag === "Right") {
       expect(partial.right).toHaveLength(1);
@@ -701,7 +714,7 @@ describe("PsdService.getNextMatches", () => {
     }
 
     mockPsd(true);
-    const complete = await runService((svc) => svc.getNextMatches(), opts);
+    const complete = await runFanout((svc) => svc.getNextMatches(), opts);
     expect(complete._tag).toBe("Right");
     if (complete._tag === "Right") {
       expect(isPartialFanout(complete.right)).toBe(false);
@@ -721,7 +734,7 @@ describe("PsdService.getNextMatches", () => {
       return Promise.resolve({ ok: true, json: async () => [rawTeams[0]] });
     });
 
-    const result = await runService((svc) => svc.getNextMatches());
+    const result = await runFanout((svc) => svc.getNextMatches());
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
@@ -758,7 +771,7 @@ describe("PsdService.getNextMatches", () => {
 
     // Only team 1 is visible in Sanity (team 2 and 23 excluded)
     const sanityMock = makeSanityMock(["1"]);
-    const result = await runService((svc) => svc.getNextMatches(), {
+    const result = await runFanout((svc) => svc.getNextMatches(), {
       sanityMock,
     });
 
@@ -803,7 +816,7 @@ describe("PsdService.getNextMatches", () => {
     };
 
     const sanityMock = makeSanityMock(["1"]);
-    await runService((svc) => svc.getNextMatches(), {
+    await runFanout((svc) => svc.getNextMatches(), {
       sanityMock,
       kvMock: trackingKv,
     });
@@ -849,13 +862,71 @@ describe("PsdService.getNextMatches", () => {
       },
     };
 
-    await runService((svc) => svc.getNextMatches(), {
+    await runFanout((svc) => svc.getNextMatches(), {
       sanityMock: spySanityMock,
       kvMock: hitKv,
     });
 
     // Sanity should NOT be called when KV has cached data
     expect(sanityCallCount).toBe(0);
+  });
+});
+
+describe("PsdService fan-outs with a warm team map (#3631)", () => {
+  const warmKv: KvCacheInterface = {
+    ...cacheMock,
+    get: (key: string) =>
+      key === "psd:teams-by-id"
+        ? Effect.succeed(
+            JSON.stringify({
+              "1": { name: "Eerste Elftallen A", age: "A" },
+              "23": { name: "Weitse Gans", age: "A" },
+            }),
+          )
+        : cacheMock.get(key),
+  };
+  const mockNoTeamsCall = () =>
+    (global.fetch as ReturnType<typeof vi.fn>).mockImplementation(
+      (url: string) => {
+        if (url.endsWith("/teams")) {
+          return Promise.reject(new Error("no /teams call expected"));
+        }
+        return Promise.resolve({
+          ok: true,
+          json: async () =>
+            url.includes("/games/team/") ? rawFutureMatchList : seasons,
+        });
+      },
+    );
+  const teamsCalls = () =>
+    (global.fetch as ReturnType<typeof vi.fn>).mock.calls.filter(([url]) =>
+      String(url).endsWith("/teams"),
+    );
+
+  it("getNextMatches makes no team-list call", async () => {
+    mockNoTeamsCall();
+
+    const result = await runService((svc) => svc.getNextMatches(), {
+      kvMock: warmKv,
+    });
+
+    expect(teamsCalls()).toHaveLength(0);
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      expect(result.right.map((m) => m.kcvv_team_id)).toEqual([1]);
+      expect(result.right[0]?.kcvv_team_label).toBe("A-Ploeg");
+    }
+  });
+
+  it("getMatchesWindow makes no team-list call", async () => {
+    mockNoTeamsCall();
+
+    const result = await runService((svc) => svc.getMatchesWindow(), {
+      kvMock: warmKv,
+    });
+
+    expect(teamsCalls()).toHaveLength(0);
+    expect(result._tag).toBe("Right");
   });
 });
 
@@ -948,7 +1019,7 @@ describe("PsdService.getMatchesWindow", () => {
       return Promise.resolve({ ok: true, json: async () => [rawTeams[0]] });
     });
 
-    const result = await runService((svc) => svc.getMatchesWindow());
+    const result = await runFanout((svc) => svc.getMatchesWindow());
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
@@ -979,7 +1050,7 @@ describe("PsdService.getMatchesWindow", () => {
       return Promise.resolve({ ok: true, json: async () => [rawTeams[0]] });
     });
 
-    const next = await runService((svc) => svc.getNextMatches());
+    const next = await runFanout((svc) => svc.getNextMatches());
 
     expect(next._tag).toBe("Right");
     if (next._tag === "Right") {
@@ -1009,7 +1080,7 @@ describe("PsdService.getMatchesWindow", () => {
       return Promise.resolve({ ok: true, json: async () => [rawTeams[0]] });
     });
     const ids = async (op: "getNextMatches" | "getMatchesWindow") => {
-      const r = await runService((svc) => svc[op]());
+      const r = await runFanout((svc) => svc[op]());
       return r._tag === "Right" ? r.right.map((m) => m.id) : "failed";
     };
 
@@ -1059,7 +1130,7 @@ describe("PsdService.getMatchesWindow", () => {
       });
     });
 
-    const result = await runService((svc) => svc.getMatchesWindow(), {
+    const result = await runFanout((svc) => svc.getMatchesWindow(), {
       sanityMock: makeSanityMock(["1", "2"]),
     });
 
@@ -1106,7 +1177,7 @@ describe("PsdService.getMatchesWindow", () => {
       });
     });
 
-    const result = await runService((svc) => svc.getMatchesWindow(), {
+    const result = await runFanout((svc) => svc.getMatchesWindow(), {
       sanityMock: makeSanityMock(["1", "2"]),
     });
 
@@ -1135,7 +1206,7 @@ describe("PsdService.getMatchesWindow", () => {
       return Promise.resolve({ ok: true, json: async () => [rawTeams[0]] });
     });
 
-    const result = await runService((svc) => svc.getMatchesWindow());
+    const result = await runFanout((svc) => svc.getMatchesWindow());
 
     expect(result._tag).toBe("Left");
     if (result._tag === "Left") {
@@ -1158,7 +1229,7 @@ describe("PsdService.getMatchesWindow", () => {
       return Promise.resolve({ ok: true, json: async () => [rawTeams[0]] });
     });
 
-    const result = await runService((svc) => svc.getMatchesWindow());
+    const result = await runFanout((svc) => svc.getMatchesWindow());
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {
@@ -2793,7 +2864,7 @@ describe("PsdService — youth score gate (#3428)", () => {
         }),
     );
 
-    const result = await runService((svc) => svc.getMatchesWindow());
+    const result = await runFanout((svc) => svc.getMatchesWindow());
 
     expect(result._tag).toBe("Right");
     if (result._tag === "Right") {

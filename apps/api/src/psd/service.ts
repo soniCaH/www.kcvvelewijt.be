@@ -457,11 +457,17 @@ export const PsdServiceLive = Layer.effect(
       });
 
     // The club-wide fan-outs (getNextMatches, getMatchesWindow) fetch matches
-    // per visible team: Sanity's visible ids first, then the raw PSD team list.
+    // per visible team: Sanity's visible ids first, then the cached team map
+    // (#3631) — they need only id, name and age, so a warm map costs no PSD
+    // call. A failed `/teams` on a cold map still fails the fan-out.
     const getVisibleTeams = () =>
       Effect.gen(function* () {
         const visiblePsdIds = yield* getVisibleTeamIds();
-        const teams = yield* countedFetch(`${base}/teams`, PsdTeamsSchema);
+        const teamsById = yield* getTeamsById();
+        const teams = Object.entries(teamsById).map(([id, t]) => ({
+          id: Number(id),
+          ...t,
+        }));
         return visiblePsdIds
           ? teams.filter((t) => visiblePsdIds.includes(String(t.id)))
           : teams;
