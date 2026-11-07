@@ -1,14 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import {
-  Cause,
-  Effect,
-  Exit,
-  Layer,
-  Logger,
-  Option,
-  Schema as S,
-} from "effect";
-import { MembershipRequest } from "@kcvv/api-contract";
+import { Cause, Effect, Exit, Layer, Logger, Option } from "effect";
+import type { MembershipRequest } from "@kcvv/api-contract";
 import {
   SanityMutation,
   type SanityMutationInterface,
@@ -23,24 +15,15 @@ import {
 } from "../email/resend";
 import type { WorkerEnv } from "../env";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
+import {
+  decodeMembership,
+  validMembershipRaw,
+} from "../test-helpers/membership-request";
 import { makeSanityProjectionStub } from "../test-helpers/sanity-projection-stub";
 import { handleMembership } from "./forms";
 
-// Raw wire JSON, decoded through the contract so a schema change breaks here.
-const decode = (raw: unknown): MembershipRequest =>
-  S.decodeUnknownSync(MembershipRequest)(raw);
-
-const validRaw = {
-  role: "vrijwilliger",
-  firstName: "Jan",
-  lastName: "Peeters",
-  birthDate: "1990-06-15",
-  gender: "m",
-  municipality: "Elewijt",
-  email: "jan@example.com",
-  privacyAccepted: true,
-  turnstileToken: "tok",
-};
+const validRaw = validMembershipRaw;
+const decode = decodeMembership;
 
 const validPayload = decode(validRaw);
 
