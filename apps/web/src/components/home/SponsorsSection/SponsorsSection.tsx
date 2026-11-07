@@ -3,6 +3,7 @@ import { runPromise } from "@/lib/effect/runtime";
 import { degradeSection } from "@/lib/effect/degrade";
 import { SponsorRepository } from "@/lib/repositories/sponsor.repository";
 import { SponsorsBlock } from "@/components/sponsors";
+import { SponsorWallTracker } from "@/components/sponsors/SponsorWallTracker";
 import type { Sponsor } from "@/components/sponsors";
 
 export interface SponsorsSectionProps {
@@ -41,5 +42,9 @@ export async function SponsorsSection({ className }: SponsorsSectionProps) {
     ),
   );
 
-  return <SponsorsBlock sponsors={sponsors} className={className} />;
+  return (
+    <SponsorWallTracker source="homepage">
+      <SponsorsBlock sponsors={sponsors} className={className} />
+    </SponsorWallTracker>
+  );
 }

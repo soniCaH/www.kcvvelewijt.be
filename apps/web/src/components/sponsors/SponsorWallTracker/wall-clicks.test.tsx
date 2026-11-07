@@ -17,14 +17,21 @@ import { trackEvent } from "@/lib/analytics/track-event";
 import { hashMemberId } from "@/lib/analytics/hash-member-id";
 import { HomepageAnalytics } from "@/components/home/HomepageAnalytics";
 import { SponsorsAnalytics } from "../SponsorsAnalytics";
+import { SponsorWallTracker } from "./SponsorWallTracker";
 
 const mockTrackEvent = vi.mocked(trackEvent);
 
+// The same nesting the pages render: the page wrapper outside, the wall's
+// tracker inside it.
 const homepage = (wall: ReactNode) => (
-  <HomepageAnalytics>{wall}</HomepageAnalytics>
+  <HomepageAnalytics>
+    <SponsorWallTracker source="homepage">{wall}</SponsorWallTracker>
+  </HomepageAnalytics>
 );
 const sponsorsPage = (wall: ReactNode) => (
-  <SponsorsAnalytics>{wall}</SponsorsAnalytics>
+  <SponsorsAnalytics>
+    <SponsorWallTracker>{wall}</SponsorWallTracker>
+  </SponsorsAnalytics>
 );
 
 const tile = (
@@ -48,6 +55,23 @@ const featured = (
 );
 
 describe("sponsor wall clicks", () => {
+  // Nothing outside the tracker handles a sponsor marker: if a page wrapper
+  // kept its sponsor branch it would fire here, and in every test below it
+  // would make the call count 2.
+  it.each([
+    ["homepage", HomepageAnalytics],
+    ["/sponsors", SponsorsAnalytics],
+  ])("%s wrapper alone does not handle a sponsor click", async (_, Page) => {
+    render(<Page>{tile}</Page>);
+    await userEvent.click(screen.getByRole("link", { name: "Tile" }));
+
+    expect(
+      mockTrackEvent.mock.calls.filter(([name]) =>
+        name.startsWith("sponsor_c"),
+      ),
+    ).toEqual([]);
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -62,6 +86,20 @@ describe("sponsor wall clicks", () => {
       tier: "sponsor",
       source: "homepage",
     });
+  });
+
+  it("never sends the raw sponsor id", async () => {
+    render(
+      homepage(
+        <a href="https://x.example" data-sponsor-id="raw-secret">
+          Secret
+        </a>,
+      ),
+    );
+    await userEvent.click(screen.getByRole("link", { name: "Secret" }));
+
+    const params = mockTrackEvent.mock.calls[0]?.[1] as Record<string, unknown>;
+    expect(params.sponsor_id).toBe(hashMemberId("raw-secret"));
   });
 
   it("/sponsors tile: one sponsor_click without a source", async () => {

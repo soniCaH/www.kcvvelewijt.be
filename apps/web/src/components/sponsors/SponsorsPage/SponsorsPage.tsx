@@ -18,6 +18,7 @@ import { SponsorHero } from "../SponsorHero";
 import { SponsorTiers } from "../SponsorTiers";
 import { SponsorCtaBand } from "../SponsorCtaBand";
 import { SponsorsAnalytics } from "../SponsorsAnalytics";
+import { SponsorWallTracker } from "../SponsorWallTracker";
 import { selectFeaturedSponsor } from "../selectFeaturedSponsor";
 import type { Sponsor } from "../Sponsors";
 
@@ -34,27 +35,29 @@ export function SponsorsPage({ sponsors }: SponsorsPageProps) {
     <SponsorsAnalytics>
       {/* Plain top (the hero opens the page); the bottom sits above the
           `<SponsorCtaBand>` seam, so it gives one step back (#3306). */}
-      <PageContainer width="index" className="pt-12 pb-10 sm:pt-16 sm:pb-14">
-        <SponsorHero featured={featured} />
+      <SponsorWallTracker>
+        <PageContainer width="index" className="pt-12 pb-10 sm:pt-16 sm:pb-14">
+          <SponsorHero featured={featured} />
 
-        {hasSponsors ? (
-          <>
-            <div className="mb-10 sm:mb-12">
-              <StripedSeam colorPair="ink-cream" height="md" />
-            </div>
-            {/* The Hoofdsponsors run label is an <h3>; without this h2 the
+          {hasSponsors ? (
+            <>
+              <div className="mb-10 sm:mb-12">
+                <StripedSeam colorPair="ink-cream" height="md" />
+              </div>
+              {/* The Hoofdsponsors run label is an <h3>; without this h2 the
                 outline jumps h1 → h3 (axe `heading-order`). sr-only because
                 the page opener already names the section visually (#3334). */}
-            <h2 className="sr-only">Onze sponsors</h2>
-            <SponsorTiers sponsors={sponsors} />
-          </>
-        ) : (
-          <EmptyState tier="surface" heading="Nog geen sponsors">
-            We zoeken partners die mee de plezantste compagnie willen dragen —
-            jouw zaak kan de eerste langs de lijn zijn.
-          </EmptyState>
-        )}
-      </PageContainer>
+              <h2 className="sr-only">Onze sponsors</h2>
+              <SponsorTiers sponsors={sponsors} />
+            </>
+          ) : (
+            <EmptyState tier="surface" heading="Nog geen sponsors">
+              We zoeken partners die mee de plezantste compagnie willen dragen —
+              jouw zaak kan de eerste langs de lijn zijn.
+            </EmptyState>
+          )}
+        </PageContainer>
+      </SponsorWallTracker>
 
       <SponsorCtaBand />
     </SponsorsAnalytics>
