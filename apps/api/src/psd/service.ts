@@ -456,6 +456,17 @@ export const PsdServiceLive = Layer.effect(
         return ids;
       });
 
+    // The club-wide fan-outs (getNextMatches, getMatchesWindow) fetch matches
+    // per visible team: Sanity's visible ids first, then the raw PSD team list.
+    const getVisibleTeams = () =>
+      Effect.gen(function* () {
+        const visiblePsdIds = yield* getVisibleTeamIds();
+        const teams = yield* countedFetch(`${base}/teams`, PsdTeamsSchema);
+        return visiblePsdIds
+          ? teams.filter((t) => visiblePsdIds.includes(String(t.id)))
+          : teams;
+      });
+
     const fetchRawMatchDetail = (matchId: number) =>
       countedFetch(
         `${base}/games/${matchId}/info`,
@@ -728,15 +739,10 @@ export const PsdServiceLive = Layer.effect(
 
       getNextMatches: () =>
         Effect.gen(function* () {
-          const visiblePsdIds = yield* getVisibleTeamIds();
-          const teams = yield* countedFetch(`${base}/teams`, PsdTeamsSchema);
+          const visibleTeams = yield* getVisibleTeams();
           const season = yield* getCurrentSeason();
           const competitionLabels = yield* getCompetitionLabels();
           const now = Date.now();
-
-          const visibleTeams = visiblePsdIds
-            ? teams.filter((t) => visiblePsdIds.includes(String(t.id)))
-            : teams;
 
           const teamNextMatches = yield* Effect.all(
             visibleTeams.map((team) =>
@@ -826,8 +832,7 @@ export const PsdServiceLive = Layer.effect(
 
       getMatchesWindow: () =>
         Effect.gen(function* () {
-          const visiblePsdIds = yield* getVisibleTeamIds();
-          const teams = yield* countedFetch(`${base}/teams`, PsdTeamsSchema);
+          const visibleTeams = yield* getVisibleTeams();
           const season = yield* getCurrentSeason();
           const competitionLabels = yield* getCompetitionLabels();
 
@@ -840,10 +845,6 @@ export const PsdServiceLive = Layer.effect(
           const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
           const startOfTodayMs = startOfBrusselsDayMs(now);
           const windowEndMs = now + SEVEN_DAYS_MS;
-
-          const visibleTeams = visiblePsdIds
-            ? teams.filter((t) => visiblePsdIds.includes(String(t.id)))
-            : teams;
 
           const teamWindowMatches = yield* Effect.all(
             visibleTeams.map((team) =>
