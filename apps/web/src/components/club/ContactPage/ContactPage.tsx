@@ -347,11 +347,13 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
               />
               <span className={ICON_TITLE}>Parking</span>
             </div>
-            {/* TODO: add gemeente Zemst parking plan URL once confirmed */}
             <p className={`mt-3 ${CARD_BODY}`}>
               Parkeren kan aan het voetbalveld en rondom het Van Innis
-              sportpark. Een gedetailleerd parkeerplan vind je op de website van
-              de gemeente Zemst.
+              sportpark. Je parkeert er samen met de hondenschool, het
+              jeugdhuis, de curling en de judozaal.
+            </p>
+            <p className={`mt-2 ${CARD_BODY}`}>
+              Parkeer niet op gele lijnen, op private plaatsen of in opritten.
             </p>
           </TapedCard>
 
@@ -371,6 +373,10 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
               trustedHtml={PRICES_TABLE_HTML}
               className="mt-3! mb-0!"
             />
+            <p className={`mt-3 ${CARD_BODY}`}>
+              Betalen kan met kaart (geen Mastercard of kredietkaarten), met de
+              KNIP-app of cash.
+            </p>
           </TapedCard>
 
           {/* Kantine */}
@@ -387,11 +393,11 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
               De kantine is open op trainingsdagen:
             </p>
             <ul className={`mt-1 list-disc space-y-1 pl-5 ${CARD_BODY}`}>
-              <li>Woensdag &amp; vrijdag: vanaf 18u00</li>
-              <li>Donderdag: vanaf 20u00</li>
+              <li>Woensdag &amp; vrijdag: 17u45 – 21u00</li>
+              <li>Donderdag: 20u00 – 22u00</li>
             </ul>
             <p className={`mt-2 ${CARD_BODY}`}>
-              Op wedstrijddagen zijn er geen vaste uren.
+              Op thuiswedstrijddagen open, zonder vaste uren.
             </p>
           </TapedCard>
 
