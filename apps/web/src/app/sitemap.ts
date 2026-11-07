@@ -122,14 +122,14 @@ async function fetchFromSanity<T>(
   }
 }
 
-type RecentMatch = Pick<Match, "id" | "date" | "status">;
+type TeamMatch = Pick<Match, "id" | "date" | "status">;
 
-async function fetchRecentMatches(
-  teamPsdIds: string[],
-): Promise<RecentMatch[]> {
-  const ninetyDaysAgo = new Date();
-  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+type TeamMatches = { teamPsdId: string; matches: TeamMatch[] };
 
+// One entry per Team, in `teamPsdIds` order, carrying every Match the BFF
+// returned for it. The window and past filters and the cross-Team dedupe
+// belong to the caller: they need the Team <-> Match link.
+async function fetchTeamMatches(teamPsdIds: string[]): Promise<TeamMatches[]> {
   // Intentional try/catch around runPromise: sitemap generation must degrade
   // gracefully rather than fail entirely. Inner Effect.catchTag("HttpNotFound")
   // silently handles missing teams; the inner Effect.catchAll logs unexpected
@@ -142,11 +142,11 @@ async function fetchRecentMatches(
     const { BffService, BFF_FAN_OUT_CONCURRENCY } =
       await import("@/lib/effect/services/BffService");
 
-    const validTeamIds = teamPsdIds
-      .map((id) => parseInt(id, 10))
-      .filter((id) => !isNaN(id));
+    const validTeams = teamPsdIds
+      .map((teamPsdId) => ({ teamPsdId, teamId: parseInt(teamPsdId, 10) }))
+      .filter(({ teamId }) => !isNaN(teamId));
 
-    const effects = validTeamIds.map((teamId) =>
+    const effects = validTeams.map(({ teamId }) =>
       Effect.gen(function* () {
         const bff = yield* BffService;
         return yield* bff.getMatches(teamId);
@@ -179,20 +179,12 @@ async function fetchRecentMatches(
       Effect.all(effects, { concurrency: BFF_FAN_OUT_CONCURRENCY }),
     );
 
-    // Keyed by id: the same Match returned for two Teams is one entry.
-    const byId = new Map<number, RecentMatch>();
-    const now = new Date();
-    for (const matches of results) {
-      for (const { id, date, status } of matches) {
-        if (date >= ninetyDaysAgo && date <= now && !byId.has(id)) {
-          byId.set(id, { id, date, status });
-        }
-      }
-    }
-
-    return [...byId.values()];
+    return validTeams.map(({ teamPsdId }, i) => ({
+      teamPsdId,
+      matches: results[i].map(({ id, date, status }) => ({ id, date, status })),
+    }));
   } catch (error) {
-    console.error("[sitemap] fetchRecentMatches failed:", error);
+    console.error("[sitemap] fetchTeamMatches failed:", error);
     return [];
   }
 }
@@ -298,8 +290,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const teamPsdIds = teams
     .map((t) => t.psdId)
     .filter((id): id is string => id !== null && id !== "");
-  const recentMatches = await fetchRecentMatches(teamPsdIds);
-  const matchEntries = recentMatches.map(({ id }) => ({
+  const teamMatches = await fetchTeamMatches(teamPsdIds);
+
+  // Last 90 days up to now; the same Match carried by two Teams is one entry
+  // (first Team wins).
+  const ninetyDaysAgo = new Date();
+  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+  const now = new Date();
+  const recentMatches = new Map<number, TeamMatch>();
+  for (const { matches } of teamMatches) {
+    for (const match of matches) {
+      if (
+        match.date >= ninetyDaysAgo &&
+        match.date <= now &&
+        !recentMatches.has(match.id)
+      ) {
+        recentMatches.set(match.id, match);
+      }
+    }
+  }
+  const matchEntries = [...recentMatches.keys()].map((id) => ({
     url: `${SITE_CONFIG.siteUrl}/wedstrijd/${id}`,
     lastModified,
     changeFrequency: "weekly" as const,
