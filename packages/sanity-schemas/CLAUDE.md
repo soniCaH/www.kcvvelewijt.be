@@ -137,32 +137,9 @@ When adding a new schema:
 
 Keep `schemaTypes` order stable — reordering changes Studio sidebar ordering for editors.
 
-## A `readOnly` Field Needs a Named Writer
+## Migrations
 
-Before declaring a field `readOnly: true` (typically described "gesynchroniseerd vanuit PSD"), confirm a named writer for it exists in `apps/api/src/sync/psd-sanity-sync.ts` and that the upstream PSD shape actually carries the value — do not declare a synced field speculatively, "for when the sync catches up." `team.season` shipped exactly that way and was never written by anything (#2535/#2567). See root `.claude/CLAUDE.md` → **A `readOnly` Field Needs a Named Writer** for the full rule.
-
-## Migration Script Expectations
-
-When renaming or restructuring a field (not just adding a new optional one), a Sanity migration script is required:
-
-- Place migration scripts in `apps/studio/migrations/<migration-name>/index.ts` — they run against the dataset, not a package concern
-- Reference the migration in the PR body and list it as a manual step
-- Run staging migration before merging; production migration before or immediately after deploy
-
-### Running a Migration
-
-```bash
-# Dry-run on staging (review patch output, no writes)
-npx sanity@latest migration run <migration-name> --dataset=staging --dry-run
-
-# Run on staging
-npx sanity@latest migration run <migration-name> --dataset=staging
-
-# Run on production (after staging is verified)
-npx sanity@latest migration run <migration-name> --dataset=production
-```
-
-Migrations must be idempotent: re-running them on already-migrated documents must be a no-op.
+Renaming or restructuring a field (not adding an optional one) needs a Sanity migration. See `apps/studio/CLAUDE.md` → Migrations (logic in `@kcvv/sanity-studio/migrations`, a facade in both studios).
 
 ## No Duplication With Root CLAUDE.md
 

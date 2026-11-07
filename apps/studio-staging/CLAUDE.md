@@ -22,7 +22,7 @@ The dataset is hardcoded to `'staging'`, so no env var or `.env` file can repoin
 
 ## structure.ts — Must Mirror Production
 
-`structure.ts` must stay identical to `apps/studio/structure.ts`. When editing either file, apply the equivalent change to the other in the same PR. Drift between the two is tracked in issue #1462.
+`structure.ts` must stay identical to `apps/studio/structure.ts`. When editing either file, apply the equivalent change to the other in the same PR.
 
 ## Deploy Workflow
 

@@ -59,7 +59,7 @@ The `✨ Create` card grid in the top nav. Reads launcher-eligible templates fro
 2. Re-export the manifest from `src/templates/index.ts`, **append it to the `launcherTemplates` aggregate** in that same file, and re-export it from the package barrel.
 3. **No `sanity.config.ts` edit.** Both studios register the grid once via `schema.templates: (prev) => [...prev, ...launcherTemplates]`, so appending to the aggregate (step 2) is the only registration step.
 
-The `ui.icon` is a **Lucide icon name string** (kebab-case, e.g. `'mic'`, `'help-circle'`, `'arrow-left-right'`) — the same vocabulary the public site uses. It is currently stored on the template but not yet rendered on the card (the icon slot lands with the icon-name registry); set it correctly now so cards light up when it ships. Do **not** use `@sanity/icons` PascalCase component names here — those are for Tool/Action `icon` slots (e.g. `launcherTool`'s `ComposeSparklesIcon`), not the launcher card `ui.icon`.
+The `ui.icon` is a kebab-case icon name string (e.g. `'mic'`, `'help-circle'`, `'arrow-left-right'`). It is stored on the template but not yet rendered on the card; pick the card icon set when the icon slot renders (the public site uses Phosphor, and no Lucide package is installed). Do **not** use `@sanity/icons` PascalCase component names here — those are for Tool/Action `icon` slots (e.g. `launcherTool`'s `ComposeSparklesIcon`), not the launcher card `ui.icon`.
 
 **Filtering rules** (enforced by `filterLauncherTemplates`):
 
@@ -108,7 +108,7 @@ Everything public is exported by name from `src/index.ts`. Rules:
 - Export the component and its registration helper separately (`ArticleTagsInput` + `applyArticleTagsInput`)
 - Export types with `export type { ... }` to avoid runtime leakage
 - No default exports from the barrel — named only
-- **Migrations are an exception**: they live in the separate `src/migrations/index.ts` sub-barrel (consumed as `@kcvv/sanity-studio/migrations`). See the **Migrations** section below for why mixing them into the root barrel breaks the deployed Studio
+- **Migrations are an exception**: they live in the separate `src/migrations/index.ts` sub-barrel (consumed as `@kcvv/sanity-studio/migrations`). See the **Migrations** section above for why mixing them into the root barrel breaks the deployed Studio
 
 ## Editor-UX Rework — Adding a New Doc Type (Checklist)
 
