@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { Effect, Layer } from "effect";
 import { HttpNotFound, type Match } from "@kcvv/api-contract";
 
-// `fetchRecentMatchIds` resolves the Effect runtime unconditionally, so this
+// `fetchTeamMatches` resolves the Effect runtime unconditionally, so this
 // keeps ~800 ms of module loading out of the timed test body. See CLAUDE.md
 // "Import the module under test at module scope".
 import "@/lib/effect/runtime";
