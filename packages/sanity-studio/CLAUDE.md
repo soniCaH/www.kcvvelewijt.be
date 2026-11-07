@@ -51,7 +51,7 @@ Custom Studio Tools live under `src/tools/<name>/`. Each Tool exports:
 
 The `✨ Create` card grid in the top nav. Reads launcher-eligible templates from the workspace via `useTemplates()` and dispatches `router.navigateIntent('create', { type, template })` when an editor picks a card. Sanity routes the intent to a new draft seeded by the template's `value`.
 
-**When a doc type earns a launcher card (IVT):** add one only when there is **shape variation worth seeding** — a field whose value changes which groups/fields the form shows (e.g. `article`'s `articleType` → 4 cards), or a single zero-prefill card that is the teaching on-ramp for a hand-created type (e.g. `responsibility`). **Skip** singletons (`homePage`, `jeugdLandingPage`) and data-driven / rarely-created types (`matchPreview`/`matchRecap` are generated from match data) — those keep working through Sanity's default `+ Create` button.
+**When a doc type earns a launcher card (IVT):** add one only when there is **shape variation worth seeding** — a field whose value changes which groups/fields the form shows (e.g. `article`'s `articleType` → 4 cards), or a single zero-prefill card that is the teaching on-ramp for a hand-created type (e.g. `responsibility`). **Skip** singletons (`homePage`, `jeugdLandingPage`) and rarely-created types (`matchPreview`/`matchRecap`: the editor picks the type and pastes the PSD match id) — those keep working through Sanity's default `+ Create` button.
 
 **Adding a launcher card** for an existing schema type:
 
