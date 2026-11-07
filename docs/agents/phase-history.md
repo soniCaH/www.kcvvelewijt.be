@@ -118,6 +118,121 @@ The legacy tabbed `<TeamDetail>` and its children `<TeamStandings>` / `<TeamSche
 
 ---
 
+## Visual regression: Phase 2 and 3 contracts
+
+Moved out of `docs/agents/testing-ops.md` (#3716). These were the rules of the redesign rollout; the rules that still apply are in testing-ops under "Baselines are surgical, and every changed PNG is listed" and "Opt-in via the `vr` tag". Where a rule here conflicts with those (deferring consumer baselines through `vr.disable`), the testing-ops rule wins.
+
+### Atom reskin PRs — surgical baselines, defer consumers via `vr.disable`
+
+Phase 2+ atom reskins (Button, Input, Alert, …) intentionally change the visual
+of every story that consumes them. The contract for these PRs:
+
+1. **Update the atom's own baselines surgically.** Run `vr:update:story` with a
+   tight positional regex anchored to the atom's story-ID prefix — e.g.
+   `pnpm vr:update:story -- ui-button` (see "Scoping a VR run" above; a
+   `--testPathPatterns=` flag is rejected outright). The pattern matches the
+   synthetic test file paths derived from story IDs (e.g. `ui-button.test.js`),
+   not the source `.stories.tsx` paths. The PR's `## VR baselines` section
+   enumerates every changed baseline file with a one-line rationale.
+2. **Defer consumer baselines via `parameters.vr.disable: true`, not `vr-skip`.**
+   A consumer story that has the `vr` tag and visually changes because it
+   imports the redesigned atom should NOT have its baseline auto-updated in the
+   atom's PR — that bleeds half-redesigned state into the consumer's committed
+   baseline before the consumer itself is redesigned. The right opt-out is the
+   per-story escape hatch documented under "Per-story escape hatch" below
+   (`parameters: { vr: { disable: true } }` on the affected story export). Use
+   the same annotation template that section requires (reason, repro, approver,
+   re-evaluate date) — pointing the re-evaluate date at the consumer's redesign
+   issue. **Do not use `tags: ["vr-skip"]` for this.** `vr-skip` is reserved
+   for stories that crash during render or `play()` (see `vr-skip` section
+   below); using it for deferred-redesign opt-outs would prevent the test
+   runner from even visiting the story, masking unrelated crashes from the
+   moment the tag lands.
+
+   **Carve-out for structural twins** — atoms that share the same
+   source-of-truth style file as the reskinned atom (e.g. `<LinkButton>`
+   imports `getButtonClasses` directly from `Button/button-styles.ts` and
+   cannot visually drift from `<Button>` without editing that same file)
+   update _alongside_ the atom, not deferred. Their baselines belong in the
+   atom's PR. This carve-out is narrow and structural: it requires a literal
+   shared style module, not a shared design language. Composed consumers that
+   render the atom (feature components, page sections) always defer via
+   `vr.disable`.
+
+3. **PR `## VR baselines` section** lists the atom's updated baselines, plus
+   any consumer stories transitioned to `vr.disable` and the issue/phase they
+   re-acquire VR coverage in. Example:
+
+   ```markdown
+   ## VR baselines
+
+   - Updated `ui-button--*` (16 baselines × 3 viewports) — primary variant
+     reskinned to jersey-on-cream (PRD §6.1).
+   - First-degree consumers opted out via `vr.disable` until their phase:
+     - `features-homepage-matchesslideremptystate--*` → re-baselined in #<NN>
+     - `features-homepage-webshopsection--*` → re-baselined in #<NN>
+   ```
+
+This precedent was established in the Phase 2 tracer-bullet PR (#1568).
+
+Phase 2 covers every `UI/*`, `Foundation/*`, and `Layout/*` story file.
+Phase 3 (`docs/prd/archive/2026/visual-regression-testing.md` §12 Phase 3 appendix)
+defines a 36-file Include list of `Features/*` components that **must**
+adopt the `vr` tag — but adoption is staged with the upcoming full
+component redesign rather than landed in one big capture. See the next
+section for the per-redesign contract.
+
+Tagging is the only filter — the `PHASE1_STORIES` allowlist that previously
+gated specific exports has been removed.
+
+### Definition of Ready / Done — `Features/*` redesign PRs
+
+A PR that redesigns a `Features/*` component named in the **Phase 3
+Include list** (PRD §12 Phase 3 appendix) is **not done** until VR coverage
+lands with the redesign. This is the contract that keeps Phase 3 honest
+without paying the throwaway-baseline cost up front.
+
+**Definition of Ready** — before opening the redesign PR:
+
+- Confirm the component's story file is in the Phase 3 Include list (see
+  `docs/prd/archive/2026/visual-regression-testing.md` §12 Phase 3 appendix). If it is
+  in the Defer list, no VR adoption is required by this redesign.
+- If the redesign splits or renames an Included story file (e.g.
+  `MatchDetailView.stories.tsx` becomes `MatchDetailHero.stories.tsx` +
+  `MatchDetailBody.stories.tsx`), every resulting story file inherits the
+  `vr` obligation, and the Phase 3 Include list in
+  `docs/prd/archive/2026/visual-regression-testing.md` is updated in the same PR to
+  reflect the new file names.
+- Confirm Docker Desktop is running locally (required for `pnpm vr:update:story`).
+
+**Definition of Done** — before requesting review on the redesign PR:
+
+1. The redesigned story file's meta has `"vr"` in its `tags` array
+   (`tags: ["autodocs", "vr"]`, or `"vr"` merged into whatever array
+   already exists).
+2. Baselines were captured by running `pnpm vr:update:story -- <story-id-prefix>`
+   from `apps/web/` inside the pinned Docker container (never native macOS —
+   see anti-patterns below).
+3. The new
+   `apps/web/test/vr/__snapshots__/features-<area>-<component>--<story>--<viewport>.png`
+   files are committed alongside the redesign code.
+4. CI's `visual-regression` job is green.
+5. Any story that genuinely cannot be made deterministic has
+   `parameters: { vr: { disable: true } }` on **that specific story export
+   only** (never the whole file), with an inline comment explaining the
+   precise non-determinism that fixture pinning could not fix. Crashing
+   stories use `tags: ["vr-skip"]` on the story export instead — see the
+   `vr-skip` section below.
+6. The PR description's "VR baselines" section enumerates which baselines
+   are first-time captures (acceptable) versus updates to existing
+   baselines (must be justified per §10 of the PRD).
+
+If the redesign touches a component **not** in the Include list, no VR
+adoption is required — but the criterion in §12 Phase 3 of the PRD still
+applies: if the failure mode is visual-structural rather than
+data-presentational, propose adding the component to Phase 3 in the same
+PR (doc edit + tag + baselines).
+
 ## Analytics taxonomy — per-prefix history
 
 Which phase/issue introduced each event-name prefix, and what GTM/GA4 wiring it

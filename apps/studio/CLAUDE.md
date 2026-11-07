@@ -54,6 +54,7 @@ npx sanity@latest migration run <name> --project vhb33jaz --dataset <staging|pro
 
 Then apply with `--no-dry-run` (add `--no-confirm` when non-interactive). Run against staging first, then production. Document the migration as a manual step in the PR body.
 
+- **Migrations are idempotent**: re-running one on already-migrated documents is a no-op.
 - **Always pass `--dataset`.** `apps/studio/sanity.cli.ts` defaults to `production`; `apps/studio-staging/sanity.cli.ts` defaults to `staging` (#3210). Relying on either default is fragile — pass the flag explicitly every time.
 - **Every migration has a facade in both folders** — `apps/studio/migrations/<name>/` and `apps/studio-staging/migrations/<name>/`, differing only in the docblock. A migration in one folder only is drift ([#3120](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3120)). Being rollback-only is not an exemption.
 - **The folders are not a run ledger.** Sanity records no history of which migration ran against which dataset. To know, dry-run it against both datasets and query the data for the old shape — zero patches on staging can mean "no such documents" rather than "already ran".
@@ -73,7 +74,7 @@ pnpm --filter @kcvv/studio run deploy
 
 ## Sync With Staging
 
-`apps/studio-staging` is the staging counterpart. `sanity.config.ts` and `structure.ts` in both apps must stay in sync. When editing either file here, apply the equivalent change to `apps/studio-staging` in the same PR or a follow-up before merging. See issue #1462 for the sync-tracking work.
+`apps/studio-staging` is the staging counterpart. `sanity.config.ts` and `structure.ts` in both apps must stay in sync. When editing either file here, apply the equivalent change to `apps/studio-staging` in the same PR or a follow-up before merging.
 
 ## No Duplication With Root CLAUDE.md
 
