@@ -373,10 +373,6 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
               trustedHtml={PRICES_TABLE_HTML}
               className="mt-3! mb-0!"
             />
-            <p className={`mt-3 ${CARD_BODY}`}>
-              Betalen kan met kaart (geen Mastercard of kredietkaarten), met de
-              KNIP-app of cash.
-            </p>
           </TapedCard>
 
           {/* Kantine */}
@@ -398,6 +394,10 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
             </ul>
             <p className={`mt-2 ${CARD_BODY}`}>
               Op thuiswedstrijddagen open, zonder vaste uren.
+            </p>
+            <p className={`mt-2 ${CARD_BODY}`}>
+              Betalen kan met kaart (geen Mastercard of kredietkaarten), met de
+              KNIP-app of cash.
             </p>
           </TapedCard>
 

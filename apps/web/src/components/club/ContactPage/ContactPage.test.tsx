@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { ContactPage } from "./ContactPage";
 import type { KeyContactVM } from "@/lib/repositories/staff.repository";
@@ -204,10 +204,12 @@ describe("ContactPage — Kom naar ons section", () => {
     expect(screen.queryByText(/gemeente Zemst/i)).not.toBeInTheDocument();
   });
 
-  it("prints the payment line without Payconiq", () => {
+  it("prints the payment line inside the Kantine card, without Payconiq", () => {
     render(<ContactPage />);
+    const kantineCard =
+      screen.getByText("Kantine").parentElement!.parentElement!;
     expect(
-      screen.getByText(
+      within(kantineCard).getByText(
         "Betalen kan met kaart (geen Mastercard of kredietkaarten), met de KNIP-app of cash.",
       ),
     ).toBeInTheDocument();
