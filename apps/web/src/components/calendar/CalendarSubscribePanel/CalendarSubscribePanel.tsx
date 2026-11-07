@@ -51,6 +51,15 @@ function computeInitialSelection(
   return new Set(teams.map((t) => t.id));
 }
 
+/** Surface the subscribe events came from (`source` is a registered GA4
+ * dimension; the Team page panel will pass "team"). */
+const SOURCE = "kalender";
+
+/** The classes the iPhone link and the copy button share, so the equal-height
+ * pair cannot drift apart. */
+const ACTION_BUTTON_CLASSES =
+  "border-ink bg-jersey-deep text-cream text-mono-sm min-h-11 border-2 px-3 py-1.5 font-mono font-semibold uppercase shadow-[2px_2px_0_0_var(--color-ink)] transition-[translate,box-shadow,opacity] duration-300";
+
 const subscribeNever = () => () => {};
 
 export function CalendarSubscribePanel({
@@ -109,6 +118,15 @@ export function CalendarSubscribePanel({
     setSelectedTeamIds((prev) => new Set(prev).add(teamId));
   }
 
+  const canSubscribe = selectedPsdIds.length > 0;
+  // Counts only — no team ids or names leave the page.
+  const subscribeParams = () => ({
+    teams_count: selectedPsdIds.length,
+    side,
+    events: includeEvents,
+    source: SOURCE,
+  });
+
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(webcalUrl);
@@ -128,11 +146,7 @@ export function CalendarSubscribePanel({
         () => setCopiedUrl((prev) => (prev === webcalUrl ? null : prev)),
         2000,
       );
-      trackEvent("kalender_subscribe_copy", {
-        teams_count: selectedPsdIds.length,
-        side,
-        events: includeEvents,
-      });
+      trackEvent("kalender_subscribe_copy", subscribeParams());
     } catch (err) {
       // The caught error goes to the console only — the visitor sees the
       // locked Dutch copy below, never `err`'s own text (#2580 rule 6).
@@ -153,7 +167,7 @@ export function CalendarSubscribePanel({
     >
       {/* Seizoenskaart — a perforated "abonnement" ticket (6d5 lock). The QR
           lives in the always-visible left stub; the body carries the team
-          chips + thuis/uit segmented control + a single copy button. The raw
+          chips + thuis/uit segmented control + the iPhone one-tap link and a copy button. The raw
           webcal URL is intentionally not surfaced. */}
       <div className="border-ink bg-cream flex flex-col border-2 sm:flex-row">
         {/* Stub — QR (always visible) */}
@@ -277,11 +291,40 @@ export function CalendarSubscribePanel({
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* One-tap subscribe for iPhone (#3643): the same `webcalUrl` as the
+              QR and the copy button, never shown as text (6d lock). Without a
+              team it loses its `href`, so it is not a working link. */}
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <a
+              href={canSubscribe ? webcalUrl : undefined}
+              role={canSubscribe ? undefined : "link"}
+              aria-disabled={canSubscribe ? undefined : true}
+              onClick={
+                canSubscribe
+                  ? () =>
+                      trackEvent("kalender_subscribe_webcal", subscribeParams())
+                  : undefined
+              }
+              className={cn(
+                ACTION_BUTTON_CLASSES,
+                "inline-flex items-center",
+                canSubscribe
+                  ? "hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none"
+                  : "cursor-not-allowed opacity-50",
+              )}
+            >
+              Zet in je agenda (iPhone)
+            </a>
             <button
               type="button"
               onClick={handleCopy}
-              disabled={selectedPsdIds.length === 0}
-              className="border-ink bg-jersey-deep text-cream border-2 px-3 py-1.5 font-mono text-[11px] font-semibold tracking-wide uppercase shadow-[2px_2px_0_0_var(--color-ink)] transition-[translate,box-shadow,opacity] duration-300 hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[2px_2px_0_0_var(--color-ink)]"
+              disabled={!canSubscribe}
+              className={cn(
+                ACTION_BUTTON_CLASSES,
+                "hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-x-0 disabled:hover:translate-y-0 disabled:hover:shadow-[2px_2px_0_0_var(--color-ink)]",
+              )}
             >
               {copiedUrl === webcalUrl ? "Gekopieerd" : "Kopieer link"}
             </button>

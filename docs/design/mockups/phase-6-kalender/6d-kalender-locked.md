@@ -104,9 +104,10 @@ ticket-stub:**
   it from the body. The raw `webcal://` URL is **not surfaced** (it was technical noise).
 - **Body** = `"Volg je ploeg(en)."` italic-display headline → selected-team tokens → a
   **`Clubactiviteiten`** on/off switch (#2705, on by default) → a `Alle / Thuis / Uit` segmented
-  control + a single **`Kopieer link`** button. The segmented control and the copy button are
-  **equal height** (owner refinement); the activities switch sits on its own row above that pair
-  and does not disturb it.
+  control, then a row with **`Zet in je agenda (iPhone)`** (#3643, a `webcal://` link to the same
+  URL as the QR and the copy, ≥ 44 px tall, never shown as text; no `href` when no team is
+  selected) followed by **`Kopieer link`**. The two buttons are **equal height** (44 px); the
+  activities switch sits on its own row above the segmented control.
 - **Selected-team tokens use the new `<RemovableChip>` design-system primitive** (label + ×).
   Extracted here because the "chip with a cross" pattern was hand-rolled in ~6 places
   (organigram search bars, nav) and never consolidated — those are follow-up migrations.

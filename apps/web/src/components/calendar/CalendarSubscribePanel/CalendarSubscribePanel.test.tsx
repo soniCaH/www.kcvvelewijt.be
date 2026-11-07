@@ -392,6 +392,7 @@ describe("CalendarSubscribePanel", () => {
         teams_count: 3,
         side: "home",
         events: true,
+        source: "kalender",
       });
     });
 
@@ -406,6 +407,84 @@ describe("CalendarSubscribePanel", () => {
         teams_count: 3,
         side: "all",
         events: false,
+        source: "kalender",
+      });
+    });
+  });
+
+  describe("iPhone one-tap link (#3643)", () => {
+    const getLink = () =>
+      screen.getByRole("link", { name: /Zet in je agenda/ });
+
+    it("is a webcal link whose href equals the QR value", () => {
+      render(<CalendarSubscribePanel {...defaultProps} />);
+      expect(getLink()).toHaveAttribute(
+        "href",
+        screen.getByTestId("qr-value").getAttribute("data-value"),
+      );
+      expect(getLink().getAttribute("href")).toMatch(/^webcal:\/\//);
+    });
+
+    it("equals the copied URL", async () => {
+      const user = userEvent.setup();
+      render(<CalendarSubscribePanel {...defaultProps} />);
+      await user.click(screen.getByRole("button", { name: /Kopieer link/ }));
+      expect(mockWriteText).toHaveBeenCalledWith(
+        getLink().getAttribute("href"),
+      );
+    });
+
+    it("follows team, side and club-activities changes", async () => {
+      const user = userEvent.setup();
+      render(<CalendarSubscribePanel {...defaultProps} />);
+      await user.click(
+        screen.getAllByRole("button", { name: /Verwijder/ })[0]!,
+      );
+      await user.click(screen.getByRole("button", { name: "Uit" }));
+      await user.click(
+        screen.getByRole("switch", { name: /clubactiviteiten/i }),
+      );
+      const href = getLink().getAttribute("href");
+      expect(href).toContain("teamIds=102,103");
+      expect(href).toContain("side=away");
+      expect(href).not.toContain("events");
+      expect(href).toBe(
+        screen.getByTestId("qr-value").getAttribute("data-value"),
+      );
+    });
+
+    it("is placed before 'Kopieer link' and never shows the URL as text", () => {
+      render(<CalendarSubscribePanel {...defaultProps} />);
+      expect(
+        getLink().compareDocumentPosition(
+          screen.getByRole("button", { name: /Kopieer link/ }),
+        ) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+      expect(getLink()).not.toHaveTextContent("webcal");
+    });
+
+    it("is not a working link when no team is selected", async () => {
+      const user = userEvent.setup();
+      render(<CalendarSubscribePanel {...defaultProps} />);
+      for (const chip of screen.getAllByRole("button", { name: /Verwijder/ })) {
+        await user.click(chip);
+      }
+      expect(getLink()).not.toHaveAttribute("href");
+      expect(getLink()).toHaveAttribute("aria-disabled", "true");
+      await user.click(getLink());
+      expect(trackEvent).not.toHaveBeenCalled();
+    });
+
+    it("fires kalender_subscribe_webcal with counts only, no ids or names", async () => {
+      const user = userEvent.setup();
+      render(<CalendarSubscribePanel {...defaultProps} />);
+      await user.click(screen.getByRole("button", { name: "Thuis" }));
+      await user.click(getLink());
+      expect(trackEvent).toHaveBeenCalledWith("kalender_subscribe_webcal", {
+        teams_count: 3,
+        side: "home",
+        events: true,
+        source: "kalender",
       });
     });
   });
