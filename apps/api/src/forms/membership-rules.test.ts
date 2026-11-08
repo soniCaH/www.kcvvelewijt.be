@@ -1,18 +1,11 @@
 import { describe, it, expect } from "vitest";
-import type { MembershipRequest } from "@kcvv/api-contract";
+import {
+  decodeMembership,
+  validMembershipRaw,
+} from "../test-helpers/membership-request";
 import { validateMembershipRules } from "./membership-rules";
 
-const base: MembershipRequest = {
-  role: "vrijwilliger",
-  firstName: "Jan",
-  lastName: "Peeters",
-  birthDate: "1990-06-15",
-  gender: "m",
-  municipality: "Elewijt",
-  email: "jan@example.com",
-  privacyAccepted: true,
-  turnstileToken: "tok",
-} as MembershipRequest;
+const base = decodeMembership(validMembershipRaw);
 
 const SUBMIT = new Date("2026-06-21T10:00:00Z");
 

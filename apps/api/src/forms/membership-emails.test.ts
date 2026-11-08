@@ -1,22 +1,15 @@
 import { describe, it, expect } from "vitest";
-import type { MembershipRequest } from "@kcvv/api-contract";
+import {
+  decodeMembership,
+  validMembershipRaw,
+} from "../test-helpers/membership-request";
 import { buildMembershipEmails } from "./membership-emails";
 
-const payload = {
-  role: "vrijwilliger",
-  firstName: "Jan",
-  lastName: "Peeters",
-  birthDate: "1990-06-15",
-  gender: "m",
-  municipality: "Elewijt",
-  email: "jan@example.com",
-  privacyAccepted: true,
-  turnstileToken: "tok",
-} as MembershipRequest;
+const payload = decodeMembership(validMembershipRaw);
 
 function build(remark?: string) {
   const [applicant, admin] = buildMembershipEmails({
-    payload: { ...payload, remark } as MembershipRequest,
+    payload: decodeMembership({ ...validMembershipRaw, remark }),
     isMinor: false,
     adminRecipient: "bestuur@example.com",
   });
@@ -49,11 +42,11 @@ describe("buildMembershipEmails — remark", () => {
 });
 
 describe("buildMembershipEmails — interesse copy", () => {
-  const minor = {
-    ...payload,
+  const minor = decodeMembership({
+    ...validMembershipRaw,
     parentEmail: "ouder@example.com",
     parentalConsent: true,
-  } as MembershipRequest;
+  });
 
   it("uses the interesse subjects for an adult (applicant + admin)", () => {
     const [applicant, admin, ...rest] = buildMembershipEmails({
@@ -93,7 +86,10 @@ describe("buildMembershipEmails — interesse copy", () => {
 
   it("sends an explicit plain-text part with one Label: value per line", () => {
     const [, admin] = buildMembershipEmails({
-      payload: { ...payload, remark: "regel 1\nregel 2" } as MembershipRequest,
+      payload: decodeMembership({
+        ...validMembershipRaw,
+        remark: "regel 1\nregel 2",
+      }),
       isMinor: false,
       adminRecipient: "bestuur@example.com",
     });

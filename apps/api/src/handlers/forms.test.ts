@@ -15,20 +15,17 @@ import {
 } from "../email/resend";
 import type { WorkerEnv } from "../env";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
+import {
+  decodeMembership,
+  validMembershipRaw,
+} from "../test-helpers/membership-request";
 import { makeSanityProjectionStub } from "../test-helpers/sanity-projection-stub";
 import { handleMembership } from "./forms";
 
-const validPayload: MembershipRequest = {
-  role: "vrijwilliger",
-  firstName: "Jan",
-  lastName: "Peeters",
-  birthDate: "1990-06-15",
-  gender: "m",
-  municipality: "Elewijt",
-  email: "jan@example.com",
-  privacyAccepted: true,
-  turnstileToken: "tok",
-} as MembershipRequest;
+const validRaw = validMembershipRaw;
+const decode = decodeMembership;
+
+const validPayload = decode(validRaw);
 
 function makeMutationMock(
   writeImpl?: SanityMutationInterface["writeMembershipApplication"],
@@ -138,17 +135,18 @@ describe("handleMembership", () => {
     const write = vi.fn<SanityMutationInterface["writeMembershipApplication"]>(
       () => Effect.succeed(undefined),
     );
-    await run({ ...validPayload, remark: "Mijn zoon is keeper." }, { write });
+    await run(decode({ ...validRaw, remark: "Mijn zoon is keeper." }), {
+      write,
+    });
 
     expect(write.mock.calls[0]![0].remark).toBe("Mijn zoon is keeper.");
   });
 
   it("drops a honeypot submission without persisting", async () => {
     const write = vi.fn(() => Effect.succeed(undefined as void));
-    const exit = await run(
-      { ...validPayload, company: "spam-bot" } as MembershipRequest,
-      { write },
-    );
+    const exit = await run(decode({ ...validRaw, company: "spam-bot" }), {
+      write,
+    });
 
     expect(Exit.isSuccess(exit)).toBe(true);
     expect(write).not.toHaveBeenCalled();
@@ -156,10 +154,9 @@ describe("handleMembership", () => {
 
   it("rejects a minor without parent fields (400 with field errors)", async () => {
     const write = vi.fn(() => Effect.succeed(undefined as void));
-    const exit = await run(
-      { ...validPayload, birthDate: "2012-01-01" } as MembershipRequest,
-      { write },
-    );
+    const exit = await run(decode({ ...validRaw, birthDate: "2012-01-01" }), {
+      write,
+    });
 
     expect(Exit.isFailure(exit)).toBe(true);
     expect(write).not.toHaveBeenCalled();
@@ -172,12 +169,12 @@ describe("handleMembership", () => {
   it("sends a parent acknowledgment for a consenting minor", async () => {
     const dispatch = vi.fn(() => Effect.succeed(undefined as void));
     const exit = await run(
-      {
-        ...validPayload,
+      decode({
+        ...validRaw,
         birthDate: "2012-01-01",
         parentEmail: "ouder@example.com",
         parentalConsent: true,
-      } as MembershipRequest,
+      }),
       { dispatch },
     );
 
@@ -188,10 +185,9 @@ describe("handleMembership", () => {
 
   it("rejects an implausible birth year with a birthDate field error", async () => {
     const write = vi.fn(() => Effect.succeed(undefined as void));
-    const exit = await run(
-      { ...validPayload, birthDate: "0010-05-01" } as MembershipRequest,
-      { write },
-    );
+    const exit = await run(decode({ ...validRaw, birthDate: "0010-05-01" }), {
+      write,
+    });
 
     expect(Exit.isFailure(exit)).toBe(true);
     expect(write).not.toHaveBeenCalled();
