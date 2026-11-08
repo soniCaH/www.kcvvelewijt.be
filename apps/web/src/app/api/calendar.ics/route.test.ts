@@ -27,12 +27,16 @@ const {
   mockFindUpcomingForList,
   mockFindAllTeams,
   unstableCacheCalls,
+  draftModeMock,
 } = vi.hoisted(() => ({
   mockGetMatches: vi.fn(),
   mockFindUpcomingForList: vi.fn(),
   mockFindAllTeams: vi.fn(),
   unstableCacheCalls: [] as UnstableCacheCall[],
+  draftModeMock: vi.fn(),
 }));
+
+vi.mock("next/headers", () => ({ draftMode: () => draftModeMock() }));
 
 vi.mock("next/cache", () => ({
   unstable_cache: (
@@ -169,6 +173,7 @@ describe("GET /api/calendar.ics", () => {
     // `eventsCacheCallAtImport` was captured once, above, before this ever
     // runs, and the events cache is never re-registered per request.
     unstableCacheCalls.length = 0;
+    draftModeMock.mockReset().mockResolvedValue({ isEnabled: false });
     mockGetMatches.mockReset().mockReturnValue(Effect.succeed([makeMatch()]));
     mockFindUpcomingForList.mockReset().mockReturnValue(Effect.succeed([]));
     mockFindAllTeams
@@ -188,6 +193,18 @@ describe("GET /api/calendar.ics", () => {
     expect(response.headers.get("Content-Disposition")).toBe(
       'attachment; filename="kcvv-wedstrijden.ics"',
     );
+  });
+
+  it("is publicly cacheable outside preview mode", async () => {
+    const response = await GET(makeRequest("teamIds=1235"));
+    expect(response.headers.get("Cache-Control")).toMatch(/s-maxage=\d+/);
+  });
+
+  it("is private and uncached in preview mode, which reads unpublished changes (#3619)", async () => {
+    draftModeMock.mockResolvedValue({ isEnabled: true });
+    const response = await GET(makeRequest("teamIds=1235&events=1"));
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store");
   });
 
   it("events=0 behaves the same as omitting the flag", async () => {

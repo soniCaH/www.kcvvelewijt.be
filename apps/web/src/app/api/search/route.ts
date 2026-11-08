@@ -7,6 +7,7 @@ import { teamHref } from "@/lib/utils/team-href";
 import { NextRequest, NextResponse } from "next/server";
 import { Effect } from "effect";
 import { unstable_cache } from "next/cache";
+import { draftMode } from "next/headers";
 import { proxyPostToBff } from "@/lib/server/bff-proxy";
 import { runPromise } from "@/lib/effect/runtime";
 import { ArticleRepository } from "@/lib/repositories/article.repository";
@@ -346,6 +347,9 @@ export async function GET(request: NextRequest) {
     // Public, CDN-cacheable per query: repeated/popular terms hit the edge
     // instead of re-running the Sanity+BFF fan-out. Short TTL + SWR keeps
     // freshly-published content surfacing quickly. Errors stay uncached.
+    // In preview mode the Sanity reads above returned unpublished changes, so
+    // the answer must never reach a shared cache (#3619).
+    const preview = (await draftMode()).isEnabled;
     return NextResponse.json(
       {
         query,
@@ -354,7 +358,9 @@ export async function GET(request: NextRequest) {
       },
       {
         headers: {
-          "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300",
+          "Cache-Control": preview
+            ? "private, no-store"
+            : "public, s-maxage=60, stale-while-revalidate=300",
         },
       },
     );

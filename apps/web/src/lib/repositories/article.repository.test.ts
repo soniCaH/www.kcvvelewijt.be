@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Effect } from "effect";
 import type { SanityReadError } from "../sanity/fetch-groq";
 import type {
@@ -6,13 +6,18 @@ import type {
   ARTICLE_BY_SLUG_QUERY_RESULT,
 } from "../sanity/sanity.types";
 
+const { draftModeMock } = vi.hoisted(() => ({ draftModeMock: vi.fn() }));
+vi.mock("next/headers", () => ({ draftMode: () => draftModeMock() }));
 vi.mock("../sanity/client", () => ({
   sanityClient: {
     fetch: vi.fn(),
   },
+  sanityPreviewClient: {
+    fetch: vi.fn(),
+  },
 }));
 
-import { sanityClient } from "../sanity/client";
+import { sanityClient, sanityPreviewClient } from "../sanity/client";
 import {
   ArticleRepository,
   ArticleRepositoryLive,
@@ -22,6 +27,16 @@ import {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const mockPreviewFetch = sanityPreviewClient.fetch as any as ReturnType<
+  typeof vi.fn
+>;
+
+beforeEach(() => {
+  draftModeMock.mockReset();
+  draftModeMock.mockResolvedValue({ isEnabled: false });
+  mockPreviewFetch.mockReset();
+});
 
 function runWithRepo<A>(
   effect: Effect.Effect<A, SanityReadError, ArticleRepository>,
@@ -563,6 +578,41 @@ describe("ArticleRepository", () => {
   });
 
   describe("findBySlug", () => {
+    it("sends preview=false outside preview mode (the publication window stays)", async () => {
+      mockFetch.mockResolvedValueOnce(makeArticleDetailRow());
+
+      await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findBySlug("test-article-detail");
+        }),
+      );
+
+      expect(mockFetch).toHaveBeenLastCalledWith(
+        expect.any(String),
+        { slug: "test-article-detail", preview: false },
+        expect.anything(),
+      );
+    });
+
+    it("sends preview=true in preview mode (the window is skipped)", async () => {
+      draftModeMock.mockResolvedValue({ isEnabled: true });
+      mockPreviewFetch.mockResolvedValueOnce(makeArticleDetailRow());
+
+      const result = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findBySlug("test-article-detail");
+        }),
+      );
+
+      expect(result).not.toBeNull();
+      expect(mockPreviewFetch).toHaveBeenCalledWith(expect.any(String), {
+        slug: "test-article-detail",
+        preview: true,
+      });
+    });
+
     it("maps all ArticleDetailVM fields correctly", async () => {
       const row = makeArticleDetailRow();
       mockFetch.mockResolvedValueOnce(row);

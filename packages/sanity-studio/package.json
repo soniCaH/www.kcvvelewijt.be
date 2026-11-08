@@ -24,7 +24,8 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@kcvv/sanity-schemas": "workspace:*"
+    "@kcvv/sanity-schemas": "workspace:*",
+    "@sanity/preview-url-secret": "4.1.5"
   },
   "peerDependencies": {
     "@sanity/icons": "5.2.3",
