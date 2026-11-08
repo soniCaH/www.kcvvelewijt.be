@@ -24,3 +24,5 @@ jobs:
           stale-pr-message: "This pull request has had no activity for a while and will be closed soon if it remains inactive. Comment to keep it open."
           stale-issue-label: "no-issue-activity"
           stale-pr-label: "no-pr-activity"
+          # Parked on purpose or waiting on someone outside: silence is expected, not abandonment.
+          exempt-issue-labels: "postponed,blocked,needs-info"
