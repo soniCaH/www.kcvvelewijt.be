@@ -292,16 +292,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .filter((id): id is string => id !== null && id !== "");
   const teamMatches = await fetchTeamMatches(teamPsdIds);
 
-  // Last 90 days up to now; the same Match carried by two Teams is one entry
+  // Last 7 days up to now; the same Match carried by two Teams is one entry
   // (first Team wins).
-  const ninetyDaysAgo = new Date();
-  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
   const now = new Date();
   const recentMatches = new Map<number, TeamMatch>();
   for (const { matches } of teamMatches) {
     for (const match of matches) {
       if (
-        match.date >= ninetyDaysAgo &&
+        match.date >= sevenDaysAgo &&
         match.date <= now &&
         !recentMatches.has(match.id)
       ) {

@@ -106,9 +106,11 @@ below, plus one real staging player (`/spelers/778`) and team
 no pages at start-up.
 
 **Matches stay discovered.** A match is a PSD record, not a Sanity document,
-and the sitemap lists only matches of the last 90 days — every match ages out
-of its own window, so no match id can be pinned. `discoverMatchId()` reads one
-off `/sitemap.xml` each run; with no match in the window, that test fails.
+so no match id can be pinned. `discoverMatchId()` reads one off the pinned
+team's season list (`/ploegen/eerste-elftallen-a/wedstrijden`) each run. That
+list keeps the whole season, past and future, so a week or a winter break
+without a match does not turn the test red. Not the sitemap: it lists only the
+last 7 days (#3625).
 
 **A missing subject is a red, never a skip (#3149).** Against pinned data,
 missing data is a regression, so no spec in this suite uses a data-shaped
@@ -118,7 +120,7 @@ red, add the content to `staging` or delete the test (#3087 §6). A skip that
 depends on the viewport, not on data, is fine.
 
 Two of these reds read PSD match data, which `staging` cannot pin: the match
-smoke test (a match in the last 90 days) and the MatchStrip toggle tap target
+smoke test (a match in the first team's season list) and the MatchStrip toggle tap target
 (a result and a fixture). The homepage "expand" test was the third; it
 duplicated `UpcomingMatches.test.tsx`, so it was deleted instead (#3131 §0.4). In the summer break they can go red with no code change. That is
 the accepted cost of the ruling: the fix then is to rework or delete the
@@ -144,7 +146,7 @@ E2E data contract (#3087): one `article` per type
 events (the event article's fact is dated 2099 too), and one `photoGallery`
 (`e2e-photo-gallery`). Slugs start with
 `e2e-`, titles say `E2E-fixture, niet verwijderen`. Matches cannot be pinned —
-they come from PSD in a rolling 90-day window.
+they are PSD records, read off the first team's season list (see "Matches stay discovered" above).
 
 `apps/studio/scripts/seed-e2e-fixtures.ts` writes them. It uses fixed `_id`s,
 rewrites only a fixture that drifted, deletes a pending Studio draft of one,

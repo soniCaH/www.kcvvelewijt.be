@@ -33,25 +33,24 @@ export const FIXTURES = {
 } as const;
 
 /**
- * The one subject that cannot be pinned. A match is a PSD record, not a
- * Sanity document, and the sitemap only lists matches of the last 90 days
- * (`apps/web/src/app/sitemap.ts`) — every match ages out of its own window.
- * So it is read off the sitemap each run: one GET, no page probing.
+ * The one subject that cannot be pinned: a match is a PSD record, not a
+ * Sanity document. It is read off the pinned team's season list each run —
+ * one GET, no page probing. Not the sitemap: that lists only the last 7 days
+ * (`apps/web/src/app/sitemap.ts`), so any week without a match turned this red
+ * (#3625). The season list keeps past and future matches, winter break included.
  */
 export async function discoverMatchId(
   request: APIRequestContext,
 ): Promise<string | null> {
-  const response = await request.get("/sitemap.xml");
+  const path = `/ploegen/${FIXTURES.teamSlug}/wedstrijden`;
+  const response = await request.get(path);
   if (!response.ok()) {
-    throw new Error(`Failed to fetch sitemap.xml: ${response.status()}`);
+    throw new Error(`Failed to fetch ${path}: ${response.status()}`);
   }
   return matchIdIn(await response.text());
 }
 
-/** The first `/wedstrijd/<id>` in a sitemap body, or `null`. */
-export function matchIdIn(sitemapXml: string): string | null {
-  return (
-    sitemapXml.match(/<loc>[^<]*\/wedstrijd\/([^/<\s?#]+)\/?\s*<\/loc>/)?.[1] ??
-    null
-  );
+/** The first `/wedstrijd/<id>` link in an HTML body, or `null`. */
+export function matchIdIn(html: string): string | null {
+  return html.match(/href="\/wedstrijd\/([^/"?#]+)/)?.[1] ?? null;
 }
