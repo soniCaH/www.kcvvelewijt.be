@@ -146,7 +146,7 @@ E2E data contract (#3087): one `article` per type
 events (the event article's fact is dated 2099 too), and one `photoGallery`
 (`e2e-photo-gallery`). Slugs start with
 `e2e-`, titles say `E2E-fixture, niet verwijderen`. Matches cannot be pinned —
-they come from PSD in a rolling 7-day window.
+they are PSD records, read off the first team's season list (see "Matches stay discovered" above).
 
 `apps/studio/scripts/seed-e2e-fixtures.ts` writes them. It uses fixed `_id`s,
 rewrites only a fixture that drifted, deletes a pending Studio draft of one,
