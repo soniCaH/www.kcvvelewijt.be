@@ -1,15 +1,13 @@
 /**
- * `scripts/vercel-ignore-build.sh` is Vercel's Ignored Build Step (#3597,
- * #3743): exit 0 skips the deployment, exit 1 builds it, and any other code
- * FAILS it (#3604 — a force-push left the previous SHA out of the clone,
- * `git diff` exited 128 and the deploy errored). Fixtures are throwaway
- * `git init` repos under `os.tmpdir()`, run from their `apps/web` like Vercel
- * does; `origin` is the fixture itself, so `git fetch origin main` stays
- * local. `curl` is a stub first on PATH, so no case touches the network.
+ * Pins every case of `scripts/vercel-ignore-build.sh`; its header says what it
+ * skips and why. Fixtures are throwaway `git init` repos run from their
+ * `apps/web`; `origin` is the fixture itself, and `curl` is a stub first on
+ * PATH, so no case touches the network.
  */
 import { spawnSync } from "node:child_process";
 import {
   chmodSync,
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -19,12 +17,14 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 const SCRIPT = join(__dirname, "..", "..", "scripts", "vercel-ignore-build.sh");
 
+const stubs = mkdtempSync(join(tmpdir(), "vercel-ignore-stubs-"));
+const curlLog = join(stubs, "curl.log");
+
 let repo: string;
-let stubs: string;
 let base: string;
 let docsOnly: string;
 let apiOnly: string;
@@ -41,7 +41,9 @@ const commit = (path: string, body: string) => {
   return git("rev-parse", "HEAD");
 };
 
-const curlLog = () => join(stubs, "curl.log");
+/** What the stub `curl` was called with; "" when it never ran. */
+const curlCalls = () =>
+  existsSync(curlLog) ? readFileSync(curlLog, "utf8") : "";
 
 const run = (env: Record<string, string>, at: string) => {
   git("checkout", "-q", at);
@@ -91,10 +93,9 @@ const pulls = (...names: string[]) =>
 
 beforeAll(() => {
   repo = mkdtempSync(join(tmpdir(), "vercel-ignore-"));
-  stubs = mkdtempSync(join(tmpdir(), "vercel-ignore-stubs-"));
   writeFileSync(
     join(stubs, "curl"),
-    `#!/bin/sh\necho "$@" >> "${curlLog()}"\nprintf '%s' "$STUB_CURL_BODY"\nexit "$STUB_CURL_EXIT"\n`,
+    `#!/bin/sh\necho "$@" >> "${curlLog}"\nprintf '%s' "$STUB_CURL_BODY"\nexit "$STUB_CURL_EXIT"\n`,
   );
   chmodSync(join(stubs, "curl"), 0o755);
   mkdirSync(join(repo, "apps", "web"), { recursive: true });
@@ -110,6 +111,8 @@ beforeAll(() => {
   git("checkout", "-q", "--detach");
   git("branch", "-f", "main", base);
 });
+
+beforeEach(() => rmSync(curlLog, { force: true }));
 
 afterAll(() => {
   rmSync(repo, { recursive: true, force: true });
@@ -158,22 +161,19 @@ describe("vercel-ignore-build.sh", () => {
   });
 
   describe("first push of a branch (compared against main)", () => {
-    it("skips (0) when it changes only docs/", () => {
-      expect(firstPush(docsOnly)).toBe(0);
-    });
-
-    it("skips (0) when it changes only docs/ and apps/api/", () => {
-      expect(firstPush(apiOnly)).toBe(0);
-    });
-
-    it("builds (1) when it changes the web app", () => {
-      expect(firstPush(webChange)).toBe(1);
-    });
-
-    it("skips (0) again on Redeploy of a skipped first push (still no previous SHA)", () => {
-      expect(
-        firstPush(docsOnly, { VERCEL_GIT_COMMIT_REF: "feat/docs-only" }),
-      ).toBe(0);
+    it.each([
+      [0, "only docs/ changed", () => docsOnly, {}],
+      [0, "only docs/ and apps/api/ changed", () => apiOnly, {}],
+      [1, "the web app changed", () => webChange, {}],
+      [
+        0,
+        "a Redeploy of a skipped first push (still no previous SHA)",
+        () => docsOnly,
+        { VERCEL_GIT_COMMIT_REF: "feat/docs-only" },
+      ],
+      [1, "main itself", () => base, { VERCEL_GIT_COMMIT_REF: "main" }],
+    ])("exits %i for %s", (expected, _name, at, env) => {
+      expect(firstPush(at(), env)).toBe(expected);
     });
 
     it("builds (1) when main cannot be fetched", () => {
@@ -183,10 +183,6 @@ describe("vercel-ignore-build.sh", () => {
       } finally {
         git("remote", "rename", "gone", "origin");
       }
-    });
-
-    it("builds (1) on main itself", () => {
-      expect(firstPush(base, { VERCEL_GIT_COMMIT_REF: "main" })).toBe(1);
     });
   });
 
@@ -204,72 +200,53 @@ describe("vercel-ignore-build.sh", () => {
     it.each(["💥 chore(deps): update x", "🔒 fix(deps): update x"])(
       "builds (1) a renovate push starting with %j, without asking GitHub",
       (message) => {
-        rmSync(curlLog(), { force: true });
         expect(
           botPush("renovate/x", { VERCEL_GIT_COMMIT_MESSAGE: message }),
         ).toBe(1);
-        expect(() => readFileSync(curlLog())).toThrow();
+        expect(curlCalls()).toBe("");
       },
     );
 
-    it("builds (1) when the PR has the preview label, reading it from the public API", () => {
-      rmSync(curlLog(), { force: true });
+    it.each([
+      [
+        1,
+        "has the preview label",
+        "renovate/x",
+        pulls("dependencies", "preview"),
+        "0",
+      ],
+      [1, "has the preview label (imgbot)", "imgbot", pulls("preview"), "0"],
+      [
+        0,
+        "has other labels only",
+        "dependabot/npm_and_yarn/x",
+        pulls("previewed"),
+        "0",
+      ],
+      [0, "has no open PR yet (empty list)", "renovate/x", "[]", "0"],
+      [1, "cannot be read (API error, rate limit)", "renovate/x", "[]", "22"],
+    ])("exits %i when the PR %s", (expected, _name, ref, body, curlExit) => {
       expect(
-        botPush("dependabot/npm_and_yarn/x", {
-          STUB_CURL_BODY: pulls("dependencies", "preview"),
-        }),
-      ).toBe(1);
-      const call = readFileSync(curlLog(), "utf8");
-      expect(call).toContain(
+        botPush(ref, { STUB_CURL_BODY: body, STUB_CURL_EXIT: curlExit }),
+      ).toBe(expected);
+    });
+
+    it("reads the labels from the public API, by branch", () => {
+      botPush("dependabot/npm_and_yarn/x");
+      expect(curlCalls()).toContain(
         "https://api.github.com/repos/soniCaH/www.kcvvelewijt.be/pulls?head=soniCaH:dependabot/npm_and_yarn/x&state=open",
       );
-      expect(call).toMatch(/-\w*L/);
+      expect(curlCalls()).toMatch(/-\w*L/);
     });
 
     it("takes the owner and repo from Vercel's env", () => {
-      rmSync(curlLog(), { force: true });
       botPush("renovate/x", {
         VERCEL_GIT_REPO_OWNER: "acme",
         VERCEL_GIT_REPO_SLUG: "site",
       });
-      expect(readFileSync(curlLog(), "utf8")).toContain(
+      expect(curlCalls()).toContain(
         "https://api.github.com/repos/acme/site/pulls?head=acme:renovate/x&state=open",
       );
-    });
-
-    it("builds (1) a labelled imgbot PR", () => {
-      expect(botPush("imgbot", { STUB_CURL_BODY: pulls("preview") })).toBe(1);
-    });
-
-    it("builds (1) a labelled Renovate PR on Redeploy (no previous successful deploy)", () => {
-      expect(botPush("renovate/x", { STUB_CURL_BODY: pulls("preview") })).toBe(
-        1,
-      );
-    });
-
-    it("skips (0) when the PR has other labels only", () => {
-      expect(
-        botPush("dependabot/npm_and_yarn/x", {
-          STUB_CURL_BODY: pulls("dependencies", "previewed"),
-        }),
-      ).toBe(0);
-    });
-
-    it("skips (0) when the branch has no open PR yet (empty list)", () => {
-      expect(botPush("renovate/x", { STUB_CURL_BODY: "[]" })).toBe(0);
-    });
-
-    it("finds the PR by branch, whatever VERCEL_GIT_PULL_REQUEST_ID says", () => {
-      expect(
-        botPush("renovate/x", {
-          VERCEL_GIT_PULL_REQUEST_ID: "",
-          STUB_CURL_BODY: pulls("preview"),
-        }),
-      ).toBe(1);
-    });
-
-    it("builds (1) when the GitHub API fails (rate limit, outage)", () => {
-      expect(botPush("renovate/x", { STUB_CURL_EXIT: "22" })).toBe(1);
     });
 
     it("skips (0) an unlabelled bot push even when the web app changed", () => {

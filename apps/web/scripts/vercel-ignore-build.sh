@@ -31,9 +31,10 @@ case "$ref" in
   vr-diffs/*) exit 0 ;;
 esac
 
-# A redeploy of the same commit (an env-var change, a manual "Redeploy") is
-# always meant to build.
-[ -z "$previous" ] || [ "$previous" != "${VERCEL_GIT_COMMIT_SHA:-}" ] || exit 1
+# A redeploy of the same commit (an env-var change, a manual "Redeploy") builds.
+if [ -n "$previous" ] && [ "$previous" = "${VERCEL_GIT_COMMIT_SHA:-}" ]; then
+  exit 1
+fi
 
 # ImgBot's branch is named exactly `imgbot`.
 case "$ref" in
@@ -43,23 +44,17 @@ case "$ref" in
     esac
     owner="${VERCEL_GIT_REPO_OWNER:-soniCaH}"
     slug="${VERCEL_GIT_REPO_SLUG:-www.kcvvelewijt.be}"
-    # Public repo, no token; -L follows the 301 of a renamed repo. The reply
-    # lists the open PRs of this branch with their labels: an empty list (no PR
-    # yet) has no `preview` label and skips. An API error or rate limit builds.
+    # Open PRs of this branch with their labels; no token (public repo), -L
+    # follows a renamed repo's 301. An API error or rate limit builds.
     prs=$(curl -fsSL --max-time 10 \
       "https://api.github.com/repos/$owner/$slug/pulls?head=$owner:$ref&state=open") || exit 1
-    if printf '%s' "$prs" | grep -Eq '"name": ?"preview"'; then
-      exit 1
-    fi
+    printf '%s' "$prs" | grep -Eq '"name": ?"preview"' && exit 1
     exit 0
     ;;
 esac
 
-# First push of a branch: no previous successful deploy, so compare against
-# main. Vercel's clone is shallow and may not hold main: fetch it, and build
-# if that fails or stalls (the low-speed limits stop a hung network from
-# hanging the step). Main itself always builds. A branch that is behind main on
-# web paths also builds, which is the safe direction.
+# First push: compare against main, fetched because the clone is shallow. The
+# low-speed limits make a stalled fetch fail open; main itself always builds.
 if [ -z "$previous" ]; then
   [ "$ref" != "main" ] || exit 1
   GIT_TERMINAL_PROMPT=0 git -c http.lowSpeedLimit=1000 -c http.lowSpeedTime=10 \
@@ -67,9 +62,8 @@ if [ -z "$previous" ]; then
   previous=FETCH_HEAD
 fi
 
-# No change to the web app or anything it builds from: skip. Anything else
-# builds — including a git error (the previous SHA gone after a force-push),
-# which exits 128.
+# Skip when nothing the web app builds from changed. A git error (exit 128)
+# builds.
 if git diff --quiet "$previous" HEAD -- \
   . ../../packages ../../package.json ../../pnpm-lock.yaml \
   ../../pnpm-workspace.yaml ../../turbo.json ../../.npmrc; then
