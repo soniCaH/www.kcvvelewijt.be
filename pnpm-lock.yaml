@@ -4,8 +4,15 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@sanity/client':
+      specifier: 8.11.0
+      version: 8.11.0
+
 overrides:
   joi@<17.13.8: 18.3.2
+  '@sanity/client@^8': 8.11.0
 
 importers:
 
@@ -51,7 +58,7 @@ importers:
         specifier: workspace:*
         version: link:../../packages/api-contract
       '@sanity/client':
-        specifier: 8.11.0
+        specifier: 'catalog:'
         version: 8.11.0(vitest@4.1.12)
       '@sanity/webhook':
         specifier: 4.0.4
@@ -198,7 +205,7 @@ importers:
         specifier: 8.0.1
         version: 8.0.1(react@19.3.0)
       '@sanity/client':
-        specifier: 8.11.0
+        specifier: 'catalog:'
         version: 8.11.0(vitest@4.1.12)
       '@sanity/preview-url-secret':
         specifier: 4.1.5
@@ -443,7 +450,7 @@ importers:
         specifier: workspace:*
         version: link:../sanity-schemas
       '@sanity/client':
-        specifier: 8.11.0
+        specifier: 'catalog:'
         version: 8.11.0(vitest@4.1.12)
       '@sanity/preview-url-secret':
         specifier: 4.1.5
@@ -498,7 +505,7 @@ importers:
   scripts/sanity-ops:
     dependencies:
       '@sanity/client':
-        specifier: 8.11.0
+        specifier: 'catalog:'
         version: 8.11.0(vitest@4.1.12)
     devDependencies:
       '@types/node':
@@ -3690,7 +3697,7 @@ packages:
     resolution: {integrity: sha512-HE9ES1kezNFgc8eN6bxNvT0r/BFGvIa8mKKHaDCz2IhD095LhdxhvmdqL3Lb3MXG0L/vi686OMABA4Dw2AG5JA==}
     engines: {node: '>=22.12.0'}
     peerDependencies:
-      '@sanity/client': ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0
+      '@sanity/client': 8.11.0
 
   '@sanity/json-match@1.0.5':
     resolution: {integrity: sha512-skhIX8gT/hLritEBkjfc7+TBlJNu/NLisyA8noKceCk28OatFK0wX7dIuFawkt3pfhTYVomVPykAYFcIm2OqJg==}
@@ -3738,7 +3745,7 @@ packages:
     resolution: {integrity: sha512-XDmLWn734GI0ssfegDjp24LwSKkPqwPkzwg9klApVfUFFWqfWt9o/WTN2+Vc940TV6fzD7hmVcWCwccMrPXGvQ==}
     engines: {node: '>=20.19 <22 || >=22.12'}
     peerDependencies:
-      '@sanity/client': ^7.26.2 || ^8.0.0
+      '@sanity/client': 8.11.0
 
   '@sanity/prism-groq@1.1.2':
     resolution: {integrity: sha512-McMw9U5kuYAgIwyNodhFKdarM0cPme6UYBR6ms6YBNEO8Qqu5zGHydUeORaJ/w4qdFKGB1oWjBjy525ed6LXaQ==}
@@ -3836,7 +3843,7 @@ packages:
     resolution: {integrity: sha512-t/Aa2HclwUHzNY/CGeQMEVDb4Dc5izI7SwdqwTeSSMc+f0hRgAa2PG3PuBOmpyCta0GGMm7febk4FMWqF+iwaA==}
     engines: {node: '>=20.19 <22 || >=22.12'}
     peerDependencies:
-      '@sanity/client': ^7.26.2 || ^8.0.0
+      '@sanity/client': 8.11.0
       '@sanity/types': '*'
     peerDependenciesMeta:
       '@sanity/types':
@@ -15927,7 +15934,7 @@ snapshots:
       eslint: 10.14.0(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(eslint@10.14.0(jiti@2.7.0)))(eslint@10.14.0(jiti@2.7.0))
-      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1)(eslint@10.14.0(jiti@2.7.0))
+      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@10.14.0(jiti@2.7.0)))(eslint@10.14.0(jiti@2.7.0)))(eslint@10.14.0(jiti@2.7.0))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@10.14.0(jiti@2.7.0))
       eslint-plugin-react: 7.37.5(eslint@10.14.0(jiti@2.7.0))
       eslint-plugin-react-hooks: 7.1.1(eslint@10.14.0(jiti@2.7.0))
@@ -15960,7 +15967,7 @@ snapshots:
       tinyglobby: 0.2.17
       unrs-resolver: 1.12.2
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1)(eslint@10.14.0(jiti@2.7.0))
+      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@10.14.0(jiti@2.7.0)))(eslint@10.14.0(jiti@2.7.0)))(eslint@10.14.0(jiti@2.7.0))
     transitivePeerDependencies:
       - supports-color
 
@@ -15974,7 +15981,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.32.0(eslint-import-resolver-typescript@3.10.1)(eslint@10.14.0(jiti@2.7.0)):
+  eslint-plugin-import@2.32.0(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@10.14.0(jiti@2.7.0)))(eslint@10.14.0(jiti@2.7.0)))(eslint@10.14.0(jiti@2.7.0)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
