@@ -55,7 +55,8 @@ const run = (env: Record<string, string>, at: string) => {
       VERCEL_GIT_PREVIOUS_SHA: "",
       VERCEL_GIT_COMMIT_SHA: "",
       VERCEL_GIT_COMMIT_MESSAGE: "",
-      VERCEL_GIT_PULL_REQUEST_ID: "",
+      VERCEL_GIT_REPO_OWNER: "",
+      VERCEL_GIT_REPO_SLUG: "",
       STUB_CURL_BODY: "[]",
       STUB_CURL_EXIT: "0",
       ...env,
@@ -78,15 +79,15 @@ const botPush = (
     {
       VERCEL_GIT_COMMIT_REF: ref,
       VERCEL_GIT_COMMIT_SHA: at,
-      VERCEL_GIT_PULL_REQUEST_ID: "42",
       VERCEL_GIT_COMMIT_MESSAGE: "⬆️ chore(deps): update x",
       ...env,
     },
     at,
   );
 
-const labels = (...names: string[]) =>
-  JSON.stringify(names.map((name) => ({ id: 1, name })));
+/** GitHub's reply to `pulls?head=…`: the open PRs of a branch, with labels. */
+const pulls = (...names: string[]) =>
+  JSON.stringify([{ number: 42, labels: names.map((name) => ({ name })) }]);
 
 beforeAll(() => {
   repo = mkdtempSync(join(tmpdir(), "vercel-ignore-"));
@@ -169,6 +170,12 @@ describe("vercel-ignore-build.sh", () => {
       expect(firstPush(webChange)).toBe(1);
     });
 
+    it("skips (0) again on Redeploy of a skipped first push (still no previous SHA)", () => {
+      expect(
+        firstPush(docsOnly, { VERCEL_GIT_COMMIT_REF: "feat/docs-only" }),
+      ).toBe(0);
+    });
+
     it("builds (1) when main cannot be fetched", () => {
       git("remote", "rename", "origin", "gone");
       try {
@@ -189,7 +196,7 @@ describe("vercel-ignore-build.sh", () => {
       ["renovate/x", "📌 chore(deps): pin x"],
       ["renovate/x", "🔧 chore(config): migrate renovate config"],
       ["dependabot/npm_and_yarn/x", "chore(deps): bump x"],
-      ["imgbot/optimize", "[ImgBot] Optimize images"],
+      ["imgbot", "[ImgBot] Optimize images"],
     ])("skips (0) %s with %j", (ref, message) => {
       expect(botPush(ref, { VERCEL_GIT_COMMIT_MESSAGE: message })).toBe(0);
     });
@@ -209,22 +216,33 @@ describe("vercel-ignore-build.sh", () => {
       rmSync(curlLog(), { force: true });
       expect(
         botPush("dependabot/npm_and_yarn/x", {
-          STUB_CURL_BODY: labels("dependencies", "preview"),
+          STUB_CURL_BODY: pulls("dependencies", "preview"),
         }),
       ).toBe(1);
+      const call = readFileSync(curlLog(), "utf8");
+      expect(call).toContain(
+        "https://api.github.com/repos/soniCaH/www.kcvvelewijt.be/pulls?head=soniCaH:dependabot/npm_and_yarn/x&state=open",
+      );
+      expect(call).toMatch(/-\w*L/);
+    });
+
+    it("takes the owner and repo from Vercel's env", () => {
+      rmSync(curlLog(), { force: true });
+      botPush("renovate/x", {
+        VERCEL_GIT_REPO_OWNER: "acme",
+        VERCEL_GIT_REPO_SLUG: "site",
+      });
       expect(readFileSync(curlLog(), "utf8")).toContain(
-        "https://api.github.com/repos/soniCaH/www.kcvvelewijt.be/issues/42/labels",
+        "https://api.github.com/repos/acme/site/pulls?head=acme:renovate/x&state=open",
       );
     });
 
     it("builds (1) a labelled imgbot PR", () => {
-      expect(
-        botPush("imgbot/optimize", { STUB_CURL_BODY: labels("preview") }),
-      ).toBe(1);
+      expect(botPush("imgbot", { STUB_CURL_BODY: pulls("preview") })).toBe(1);
     });
 
     it("builds (1) a labelled Renovate PR on Redeploy (no previous successful deploy)", () => {
-      expect(botPush("renovate/x", { STUB_CURL_BODY: labels("preview") })).toBe(
+      expect(botPush("renovate/x", { STUB_CURL_BODY: pulls("preview") })).toBe(
         1,
       );
     });
@@ -232,13 +250,22 @@ describe("vercel-ignore-build.sh", () => {
     it("skips (0) when the PR has other labels only", () => {
       expect(
         botPush("dependabot/npm_and_yarn/x", {
-          STUB_CURL_BODY: labels("dependencies", "previewed"),
+          STUB_CURL_BODY: pulls("dependencies", "previewed"),
         }),
       ).toBe(0);
     });
 
-    it("skips (0) when there is no PR yet", () => {
-      expect(botPush("renovate/x", { VERCEL_GIT_PULL_REQUEST_ID: "" })).toBe(0);
+    it("skips (0) when the branch has no open PR yet (empty list)", () => {
+      expect(botPush("renovate/x", { STUB_CURL_BODY: "[]" })).toBe(0);
+    });
+
+    it("finds the PR by branch, whatever VERCEL_GIT_PULL_REQUEST_ID says", () => {
+      expect(
+        botPush("renovate/x", {
+          VERCEL_GIT_PULL_REQUEST_ID: "",
+          STUB_CURL_BODY: pulls("preview"),
+        }),
+      ).toBe(1);
     });
 
     it("builds (1) when the GitHub API fails (rate limit, outage)", () => {
@@ -252,7 +279,6 @@ describe("vercel-ignore-build.sh", () => {
             VERCEL_GIT_COMMIT_REF: "renovate/x",
             VERCEL_GIT_PREVIOUS_SHA: base,
             VERCEL_GIT_COMMIT_SHA: webChange,
-            VERCEL_GIT_PULL_REQUEST_ID: "42",
             VERCEL_GIT_COMMIT_MESSAGE: "⬆️ chore(deps): update x",
           },
           webChange,

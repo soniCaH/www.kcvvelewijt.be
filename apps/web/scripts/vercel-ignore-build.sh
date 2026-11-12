@@ -9,13 +9,19 @@
 # functions (Functions Storage filled up on Hobby on 2026-10-19). So we skip
 # what nobody opens or what ships nothing new:
 #   - the VR bot's diff branches (screenshots for review only);
-#   - bot branches (renovate/, dependabot/, imgbot/), which GitHub CI already
+#   - bot branches (renovate/, dependabot/, imgbot), which GitHub CI already
 #     tests. They build only when the commit starts with 💥 (major) or 🔒
-#     (security), or when the PR has the `preview` label (#3743). Add the label,
-#     then Redeploy the skipped deployment: Redeploy re-runs this script.
+#     (security), or when the branch's open PR has the `preview` label (#3743).
+#     The PR is looked up by branch name, not by VERCEL_GIT_PULL_REQUEST_ID:
+#     Renovate pushes before it opens the PR, and a Redeploy may keep an empty
+#     id. Add the label, then Redeploy the skipped deployment: Redeploy re-runs
+#     this script.
 #   - a push that changes nothing the web app builds from (apps/api, research
 #     notes, docs), compared against the branch's last successful deploy, or
-#     against main on a branch's first push.
+#     against main on a branch's first push. A skipped first push has no
+#     successful deploy, so a Redeploy compares against main again and skips
+#     again: to build it, uncheck "Use project's Ignore Build Step" in the
+#     Redeploy dialog, or push a commit that touches web paths.
 set -u
 
 ref="${VERCEL_GIT_COMMIT_REF:-}"
@@ -29,17 +35,20 @@ esac
 # always meant to build.
 [ -z "$previous" ] || [ "$previous" != "${VERCEL_GIT_COMMIT_SHA:-}" ] || exit 1
 
+# ImgBot's branch is named exactly `imgbot`.
 case "$ref" in
-  renovate/* | dependabot/* | imgbot/*)
+  renovate/* | dependabot/* | imgbot | imgbot/*)
     case "${VERCEL_GIT_COMMIT_MESSAGE:-}" in
       💥* | 🔒*) exit 1 ;;
     esac
-    # Renovate pushes the branch before it opens the PR: nothing to label yet.
-    [ -n "${VERCEL_GIT_PULL_REQUEST_ID:-}" ] || exit 0
-    # Public repo, no token. An API error or rate limit builds.
-    labels=$(curl -fsS --max-time 10 \
-      "https://api.github.com/repos/soniCaH/www.kcvvelewijt.be/issues/$VERCEL_GIT_PULL_REQUEST_ID/labels") || exit 1
-    if printf '%s' "$labels" | grep -Eq '"name": ?"preview"'; then
+    owner="${VERCEL_GIT_REPO_OWNER:-soniCaH}"
+    slug="${VERCEL_GIT_REPO_SLUG:-www.kcvvelewijt.be}"
+    # Public repo, no token; -L follows the 301 of a renamed repo. The reply
+    # lists the open PRs of this branch with their labels: an empty list (no PR
+    # yet) has no `preview` label and skips. An API error or rate limit builds.
+    prs=$(curl -fsSL --max-time 10 \
+      "https://api.github.com/repos/$owner/$slug/pulls?head=$owner:$ref&state=open") || exit 1
+    if printf '%s' "$prs" | grep -Eq '"name": ?"preview"'; then
       exit 1
     fi
     exit 0
@@ -48,11 +57,13 @@ esac
 
 # First push of a branch: no previous successful deploy, so compare against
 # main. Vercel's clone is shallow and may not hold main: fetch it, and build
-# if that fails. Main itself always builds. A branch that is behind main on
+# if that fails or stalls (the low-speed limits stop a hung network from
+# hanging the step). Main itself always builds. A branch that is behind main on
 # web paths also builds, which is the safe direction.
 if [ -z "$previous" ]; then
   [ "$ref" != "main" ] || exit 1
-  GIT_TERMINAL_PROMPT=0 git fetch -q --depth=1 origin main 2>/dev/null || exit 1
+  GIT_TERMINAL_PROMPT=0 git -c http.lowSpeedLimit=1000 -c http.lowSpeedTime=10 \
+    fetch -q --depth=1 origin main 2>/dev/null || exit 1
   previous=FETCH_HEAD
 fi
 
