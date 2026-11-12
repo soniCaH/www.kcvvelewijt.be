@@ -37,10 +37,10 @@ minimumReleaseAgeExclude:
   - "@vitest/coverage-v8@4.1.12"
   # Renovate security update: @vitest/ui@4.1.12
   - "@vitest/ui@4.1.12"
-  # Renovate security update: postcss@8.5.31
-  - postcss@8.5.31
-  # Renovate security update: vite@8.3.5
-  - vite@8.3.5
+  # Renovate security update: postcss@8.5.31 || 8.5.32
+  - postcss@8.5.31 || 8.5.32
+  # Renovate security update: vite@8.3.5 || 8.3.6
+  - vite@8.3.5 || 8.3.6
   # Renovate security update: @commitlint/cli@21.2.4
   - "@commitlint/cli@21.2.4"
   # Renovate security update: @commitlint/config-conventional@21.2.4
@@ -69,3 +69,11 @@ minimumReleaseAgeExclude:
   - eslint-plugin-storybook@10.6.5 || 10.6.6
   # Renovate security update: storybook@10.6.5 || 10.6.6
   - storybook@10.6.5 || 10.6.6
+  # Renovate security update: groq-js@2.0.1
+  - groq-js@2.0.1
+  # Renovate security update: @tailwindcss/postcss@4.3.5
+  - "@tailwindcss/postcss@4.3.5"
+  # Renovate security update: concurrently@10.0.7
+  - concurrently@10.0.7
+  # Renovate security update: tailwindcss@4.3.5
+  - tailwindcss@4.3.5
