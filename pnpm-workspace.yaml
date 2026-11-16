@@ -77,3 +77,5 @@ minimumReleaseAgeExclude:
   - concurrently@10.0.7
   # Renovate security update: tailwindcss@4.3.5
   - tailwindcss@4.3.5
+  # Renovate security update: eslint-config-next@16.4.6
+  - eslint-config-next@16.4.6
