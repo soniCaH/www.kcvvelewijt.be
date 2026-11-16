@@ -7,9 +7,17 @@ packages:
 # `minimumReleaseAgeExclude` (same PR), or pnpm refuses to resolve it.
 minimumReleaseAge: 4320
 
+# One version for every workspace: each package.json says "catalog:", so Renovate bumps this line only.
+catalog:
+  "@sanity/client": 8.11.0
+
 overrides:
   # Remove once lockfile maintenance resolves joi >= 17.13.8 on its own, or @storybook/test-runner drops wait-on@7 (#3475).
   "joi@<17.13.8": "18.3.2"
+  # Forces sanity's own client (and preview-url-secret's peer) onto the catalog copy. Two copies
+  # break the Studio type-check at createPreviewSecret(useClient()). Client v7 users stay untouched.
+  # A client MAJOR bump must change "^8" here in the same PR, or sanity gets pushed onto the new major.
+  "@sanity/client@^8": "catalog:"
 minimumReleaseAgeExclude:
   # Renovate security update: @sanity/ui@4.4.9 || 4.4.10
   - "@sanity/ui@4.4.9 || 4.4.10"
