@@ -7,13 +7,13 @@ import { GoogleTagManagerLoader } from "@/components/layout/GoogleTagManagerLoad
  * visitor. With no `dataLayer` created, `trackEvent` stays a no-op, so no
  * GTM or GA4 request leaves the browser.
  */
-export function TagManagerScripts({
+export const TagManagerScripts = ({
   gtmId,
   preview,
 }: {
   gtmId?: string;
   preview: boolean;
-}) {
+}) => {
   if (preview) return null;
 
   return (
@@ -24,4 +24,4 @@ export function TagManagerScripts({
       <GoogleTagManagerLoader gtmId={gtmId} />
     </>
   );
-}
+};

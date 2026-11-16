@@ -9,7 +9,7 @@ import { urlSearchParamPreviewPathname } from "@sanity/preview-url-secret/consta
  * gets it. A client component only to read the current path: the link hands it
  * to the disable endpoint so the editor lands back on the same page.
  */
-export function PreviewBanner() {
+export const PreviewBanner = () => {
   const pathname = usePathname();
   const href = `/api/preview/disable?${new URLSearchParams({
     [urlSearchParamPreviewPathname]: pathname,
@@ -28,4 +28,4 @@ export function PreviewBanner() {
       </a>
     </div>
   );
-}
+};
