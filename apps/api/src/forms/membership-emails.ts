@@ -36,11 +36,33 @@ function shell(title: string, body: string): string {
 </div>`;
 }
 
-function applicantText(payload: MembershipRequest): string {
+/** The box holder the applicant and parent mails name; absent/vacant → today's wording. */
+export interface MembershipContact {
+  readonly name: string;
+  readonly functionTitle: string | null;
+}
+
+const contactLabel = (c: MembershipContact): string =>
+  c.functionTitle ? `${c.name} (${c.functionTitle})` : c.name;
+
+/** `you` is " met je" (applicant) or "" (parent). Names a holder, never a time. */
+const followUp = (
+  contact: MembershipContact | null | undefined,
+  you: string,
+  escape: (value: string) => string = (v) => v,
+): string =>
+  contact
+    ? `${escape(contactLabel(contact))} neemt contact${you} op.`
+    : `Iemand van de club neemt binnenkort contact${you} op.`;
+
+function applicantText(
+  payload: MembershipRequest,
+  contact?: MembershipContact | null,
+): string {
   return [
     `Beste ${payload.firstName},`,
     "",
-    `We hebben je bericht goed ontvangen: je hebt interesse als ${ROLE_LABELS[payload.role]}. Iemand van de club neemt binnenkort contact met je op.`,
+    `We hebben je bericht goed ontvangen: je hebt interesse als ${ROLE_LABELS[payload.role]}. ${followUp(contact, " met je")}`,
     "",
     "Er is maar 1 plezante compagnie. Tot snel!",
     "",
@@ -48,11 +70,14 @@ function applicantText(payload: MembershipRequest): string {
   ].join("\n");
 }
 
-function parentText(payload: MembershipRequest): string {
+function parentText(
+  payload: MembershipRequest,
+  contact?: MembershipContact | null,
+): string {
   return [
     "Beste ouder/voogd,",
     "",
-    `We hebben de interesse van ${payload.firstName} ${payload.lastName} als ${ROLE_LABELS[payload.role]} bij KCVV Elewijt ontvangen, met jouw toestemming. Iemand van de club neemt binnenkort contact op.`,
+    `We hebben de interesse van ${payload.firstName} ${payload.lastName} als ${ROLE_LABELS[payload.role]} bij KCVV Elewijt ontvangen, met jouw toestemming. ${followUp(contact, "")}`,
     "",
     FOOTER_TEXT,
   ].join("\n");
@@ -95,23 +120,29 @@ function adminText(payload: MembershipRequest, isMinor: boolean): string {
   ].join("\n");
 }
 
-function applicantHtml(payload: MembershipRequest): string {
+function applicantHtml(
+  payload: MembershipRequest,
+  contact?: MembershipContact | null,
+): string {
   return shell(
     "Bedankt voor je interesse!",
     `<p>Beste ${esc(payload.firstName)},</p>
      <p>We hebben je bericht goed ontvangen: je hebt interesse als <strong>${ROLE_LABELS[payload.role]}</strong>.
-        Iemand van de club neemt binnenkort contact met je op.</p>
+        ${followUp(contact, " met je", esc)}</p>
      <p>Er is maar 1 plezante compagnie. Tot snel!</p>`,
   );
 }
 
-function parentHtml(payload: MembershipRequest): string {
+function parentHtml(
+  payload: MembershipRequest,
+  contact?: MembershipContact | null,
+): string {
   return shell(
     "Interesse ontvangen",
     `<p>Beste ouder/voogd,</p>
      <p>We hebben de interesse van <strong>${esc(payload.firstName)} ${esc(payload.lastName)}</strong>
         als <strong>${ROLE_LABELS[payload.role]}</strong> bij KCVV Elewijt ontvangen, met jouw toestemming.
-        Iemand van de club neemt binnenkort contact op.</p>`,
+        ${followUp(contact, "", esc)}</p>`,
   );
 }
 
@@ -138,16 +169,18 @@ export function buildMembershipEmails(input: {
   payload: MembershipRequest;
   isMinor: boolean;
   adminRecipient: string;
+  /** Holder of the role's contact box; omit when the box is missing or vacant. */
+  contact?: MembershipContact | null;
 }): EmailMessage[] {
-  const { payload, isMinor, adminRecipient } = input;
+  const { payload, isMinor, adminRecipient, contact } = input;
   const fullName = `${payload.firstName} ${payload.lastName}`;
 
   const messages: EmailMessage[] = [
     {
       to: payload.email,
       subject: "Bedankt voor je interesse in KCVV Elewijt",
-      html: applicantHtml(payload),
-      text: applicantText(payload),
+      html: applicantHtml(payload, contact),
+      text: applicantText(payload, contact),
     },
   ];
 
@@ -155,8 +188,8 @@ export function buildMembershipEmails(input: {
     messages.push({
       to: payload.parentEmail,
       subject: `Interesse van ${fullName} in KCVV Elewijt`,
-      html: parentHtml(payload),
-      text: parentText(payload),
+      html: parentHtml(payload, contact),
+      text: parentText(payload, contact),
     });
   }
 

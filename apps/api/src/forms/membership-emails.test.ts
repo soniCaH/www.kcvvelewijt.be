@@ -111,3 +111,59 @@ describe("buildMembershipEmails — interesse copy", () => {
     expect(parent!.text).not.toContain("<");
   });
 });
+
+describe("buildMembershipEmails — named contact", () => {
+  const minor = decodeMembership({
+    ...validMembershipRaw,
+    parentEmail: "ouder@example.com",
+    parentalConsent: true,
+  });
+  const contact = { name: "An <Peeters>", functionTitle: "Voorzitter" };
+  const build = (c?: { name: string; functionTitle: string | null } | null) =>
+    buildMembershipEmails({
+      payload: minor,
+      isMinor: true,
+      adminRecipient: "bestuur@example.com",
+      contact: c,
+    });
+
+  it("names the holder and function title in applicant and parent mails, promising no time", () => {
+    const [applicant, parent] = build(contact);
+    for (const m of [applicant!, parent!]) {
+      expect(m.text).toContain("An <Peeters> (Voorzitter)");
+      expect(m.html).toContain("An &lt;Peeters&gt; (Voorzitter)");
+      expect(m.html).not.toContain("An <Peeters>");
+      expect(`${m.text} ${m.html}`).not.toMatch(
+        /binnenkort|binnen \d+|dagen|uur/i,
+      );
+    }
+  });
+
+  it("names the holder without a title when the function title is missing", () => {
+    const [applicant] = build({ name: "An Peeters", functionTitle: null });
+    expect(applicant!.text).toContain("An Peeters neemt contact");
+    expect(applicant!.text).not.toContain("()");
+  });
+
+  it.each([undefined, null])(
+    "keeps today's binnenkort sentence when the contact is %s",
+    (c) => {
+      const [applicant, parent] = build(c);
+      expect(applicant!.text).toContain(
+        "Iemand van de club neemt binnenkort contact met je op.",
+      );
+      expect(parent!.text).toContain(
+        "Iemand van de club neemt binnenkort contact op.",
+      );
+      expect(applicant!.html).toContain("binnenkort contact met je op");
+      expect(parent!.html).toContain("binnenkort contact op");
+    },
+  );
+
+  it("leaves the admin mail and its recipient untouched by the contact", () => {
+    const withContact = build(contact);
+    const without = build(null);
+    expect(withContact.at(-1)).toEqual(without.at(-1));
+    expect(withContact.at(-1)!.to).toBe("bestuur@example.com");
+  });
+});

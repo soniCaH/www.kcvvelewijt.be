@@ -15,14 +15,17 @@ import { KvCacheService } from "../cache/kv-cache";
 import { EmailTransport } from "../email/resend";
 import { verifyTurnstile } from "../forms/turnstile";
 import { validateMembershipRules } from "../forms/membership-rules";
-import { buildMembershipEmails } from "../forms/membership-emails";
+import {
+  buildMembershipEmails,
+  type MembershipContact,
+} from "../forms/membership-emails";
 
 const DEFAULT_ADMIN_RECIPIENT = "info@kcvvelewijt.be";
 const ROUTING_CACHE_KEY = "forms:routing-config";
 const ROUTING_CACHE_TTL = 60 * 60; // 1h — config changes rarely; submissions are sparse
 
-/** Cached per-role admin recipient; falls back to info@ on any miss/error. */
-const resolveAdminRecipient = (role: MembershipRole) =>
+/** Cached per-role admin recipient + contact; falls back to info@ / no contact on any miss/error. */
+const resolveRouting = (role: MembershipRole) =>
   Effect.gen(function* () {
     const cache = yield* KvCacheService;
     const projection = yield* SanityProjection;
@@ -50,9 +53,22 @@ const resolveAdminRecipient = (role: MembershipRole) =>
 
     // A blank or malformed Studio value would send the admin mail nowhere.
     const configured = config?.[role]?.trim();
-    return configured && EMAIL_PATTERN.test(configured)
-      ? configured
-      : DEFAULT_ADMIN_RECIPIENT;
+    const adminRecipient =
+      configured && EMAIL_PATTERN.test(configured)
+        ? configured
+        : DEFAULT_ADMIN_RECIPIENT;
+
+    // A box without a nameable holder is vacant: no contact, today's wording.
+    const box = config?.contacts?.[role];
+    const name = [box?.holder?.firstName, box?.holder?.lastName]
+      .map((part) => part?.trim())
+      .filter(Boolean)
+      .join(" ");
+    const contact: MembershipContact | null = name
+      ? { name, functionTitle: box?.functionTitle?.trim() || null }
+      : null;
+
+    return { adminRecipient, contact };
   });
 
 /**
@@ -127,12 +143,13 @@ export const handleMembership = (payload: MembershipRequest) =>
       );
 
     // 5. Send acknowledgments + admin notification — best-effort.
-    const adminRecipient = yield* resolveAdminRecipient(payload.role);
+    const { adminRecipient, contact } = yield* resolveRouting(payload.role);
     const transport = yield* EmailTransport;
     const messages = buildMembershipEmails({
       payload,
       isMinor,
       adminRecipient,
+      contact,
     });
     yield* Effect.forEach(
       messages,

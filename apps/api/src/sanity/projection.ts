@@ -22,13 +22,26 @@ export class SanityQueryError extends Error {
   }
 }
 
-/** Per-role admin-notification recipients from the formRoutingConfig singleton. */
+/** A role's contact box; `holder` is null for a vacant or inactive box. */
+export interface FormRoutingContactBox {
+  functionTitle: string | null;
+  holder: { firstName: string | null; lastName: string | null } | null;
+}
+
+/** Per-role admin-notification recipients and contact boxes from the formRoutingConfig singleton. */
 export interface FormRoutingConfig {
   speler: string | null;
   jeugdspeler: string | null;
   vrijwilliger: string | null;
   trainer: string | null;
   scheidsrechter: string | null;
+  /** Absent in a config cached before the contact boxes existed. */
+  contacts?: Partial<
+    Record<
+      keyof Omit<FormRoutingConfig, "contacts">,
+      FormRoutingContactBox | null
+    >
+  >;
 }
 
 /** The weekly staff-gaps nudge's read (#3561) — see `sync/staff-gaps-check.ts`. */
@@ -76,6 +89,12 @@ const ACTIVE_PSD_TEAM = `_type == "team" && archived != true && defined(psdId) &
 
 /** A node's members the web shows (`members[@->archived != true]->`, minus dangling refs). */
 const LIVE_MEMBERS = `coalesce(members[defined(@->_id) && @->archived != true], [])`;
+
+// Inactive boxes count as vacant (same rule as the staff-gaps check below). First live member only.
+const CONTACT_BOX = (role: string) =>
+  `"${role}": ${role}Contact->{ "functionTitle": title, "holder": select(active == true => ${LIVE_MEMBERS}[0]->{ firstName, lastName }) }`;
+
+export const FORM_ROUTING_QUERY = `*[_type == "formRoutingConfig"][0]{ speler, jeugdspeler, vrijwilliger, trainer, scheidsrechter, "contacts": { ${["speler", "jeugdspeler", "vrijwilliger", "trainer", "scheidsrechter"].map(CONTACT_BOX).join(", ")} } }`;
 
 const STAFF_GAPS_QUERY = `{
   "emptyRoles": *[${ACTIVE_PSD_TEAM}] | order(name asc) {
@@ -394,10 +413,7 @@ export const SanityProjectionLive = Layer.effect(
 
       getFormRoutingConfig: () =>
         Effect.tryPromise({
-          try: () =>
-            client.fetch<FormRoutingConfig | null>(
-              `*[_type == "formRoutingConfig"][0]{ speler, jeugdspeler, vrijwilliger, trainer, scheidsrechter }`,
-            ),
+          try: () => client.fetch<FormRoutingConfig | null>(FORM_ROUTING_QUERY),
           catch: (cause) =>
             new SanityQueryError("Failed to fetch form routing config", cause),
         }),
