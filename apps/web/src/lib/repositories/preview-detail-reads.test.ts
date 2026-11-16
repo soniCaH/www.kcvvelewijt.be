@@ -24,12 +24,8 @@ import {
   PhotoGalleryRepositoryLive,
 } from "./photoGallery.repository";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mockPreviewFetch = sanityPreviewClient.fetch as any as ReturnType<
-  typeof vi.fn
->;
+const mockFetch = vi.mocked(sanityClient.fetch);
+const mockPreviewFetch = vi.mocked(sanityPreviewClient.fetch);
 
 /** Anything that would hide a never-published or not-yet-live document. */
 const HIDING_FILTER = /publishedAt\s*<|unpublishAt|now\(\)|drafts\./;
@@ -72,7 +68,7 @@ describe.each(CASES)("$type by slug", ({ type, read, layer }) => {
 
   it("reads the unpublished change through the drafts client in preview mode", async () => {
     draftModeMock.mockResolvedValue({ isEnabled: true });
-    mockPreviewFetch.mockResolvedValueOnce(null);
+    mockPreviewFetch.mockResolvedValueOnce(null as never);
 
     await run();
 
@@ -86,7 +82,7 @@ describe.each(CASES)("$type by slug", ({ type, read, layer }) => {
 
   it("carries no filter that hides a never-published document", async () => {
     draftModeMock.mockResolvedValue({ isEnabled: true });
-    mockPreviewFetch.mockResolvedValueOnce(null);
+    mockPreviewFetch.mockResolvedValueOnce(null as never);
 
     await run();
 
@@ -96,7 +92,7 @@ describe.each(CASES)("$type by slug", ({ type, read, layer }) => {
 
   it("keeps the published read for visitors", async () => {
     draftModeMock.mockResolvedValue({ isEnabled: false });
-    mockFetch.mockResolvedValueOnce(null);
+    mockFetch.mockResolvedValueOnce(null as never);
 
     await run();
 
