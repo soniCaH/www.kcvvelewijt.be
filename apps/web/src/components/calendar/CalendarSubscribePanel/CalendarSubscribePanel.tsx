@@ -337,6 +337,13 @@ export function CalendarSubscribePanel({
             </button>
           </div>
 
+          {/* Google Agenda has no webcal handler: plain text, no link, no
+              button, no event (#3646). */}
+          <p className="text-ink-muted text-mono-sm mt-3 font-mono">
+            Werkt het niet? Kopieer de link en kies in Google Agenda (browser)
+            &apos;Agenda toevoegen → Via URL&apos;.
+          </p>
+
           {/* Tier 2, no action (#2470 resolution rule 7): the copy button
               above is its own retry, and the QR stub already carries the
               same URL. Direction-neutral copy ("om te abonneren", not

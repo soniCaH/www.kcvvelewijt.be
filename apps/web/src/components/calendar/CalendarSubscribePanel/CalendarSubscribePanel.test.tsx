@@ -530,4 +530,29 @@ describe("CalendarSubscribePanel", () => {
       });
     });
   });
+
+  describe("Google Agenda hint (#3646)", () => {
+    const HINT =
+      "Werkt het niet? Kopieer de link en kies in Google Agenda (browser) 'Agenda toevoegen → Via URL'.";
+
+    it("renders the hint as plain text after 'Kopieer link'", () => {
+      render(<CalendarSubscribePanel {...defaultProps} />);
+      const hint = screen.getByText(HINT);
+      expect(
+        screen
+          .getByRole("button", { name: /Kopieer link/ })
+          .compareDocumentPosition(hint) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
+      expect(hint.closest("a, button")).toBeNull();
+      expect(hint.querySelector("a, button")).toBeNull();
+    });
+
+    it("adds no new link, button or event", async () => {
+      const user = userEvent.setup();
+      render(<CalendarSubscribePanel {...defaultProps} />);
+      expect(screen.getAllByRole("link")).toHaveLength(1);
+      await user.click(screen.getByText(HINT));
+      expect(trackEvent).not.toHaveBeenCalled();
+    });
+  });
 });
