@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
+import { draftMode } from "next/headers";
 import "./globals.css";
 import { RootDocument } from "./root-document";
 import { AccentStrip } from "@/components/layout/AccentStrip";
@@ -9,7 +9,8 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { HashHistorySync } from "@/components/layout/HashHistorySync";
 import { CookieConsentBanner } from "@/components/layout/CookieConsentBanner";
-import { GoogleTagManagerLoader } from "@/components/layout/GoogleTagManagerLoader";
+import { TagManagerScripts } from "./tag-manager-scripts";
+import { PreviewBanner } from "@/components/layout/PreviewBanner";
 // Deep import, not the `@/components/analytics` barrel — deliberately: the
 // barrel also re-exports PageViewTracker/ErrorAnalytics, and importing it
 // here would drag both into every route's root chunk.
@@ -88,6 +89,10 @@ export default async function RootLayout({
     allTeams = [];
   }
 
+  // Preview mode ("Voorbeeld", #3619). Next reads the draft-mode cookie only on
+  // a request that carries it; the static/ISR build of a route is unchanged.
+  const { isEnabled: preview } = await draftMode();
+
   // Only the senior sides get their own nav entry; `Jeugd` is a plain link to
   // the directory that indexes the rest (#2415).
   const seniorTeams = allTeams.filter((t) => !isUnderJeugd(t));
@@ -102,10 +107,11 @@ export default async function RootLayout({
       >
         Naar de inhoud
       </a>
-      <Script id="gtm-consent-default" strategy="beforeInteractive">
-        {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{'analytics_storage':'denied','wait_for_update':500});`}
-      </Script>
-      <GoogleTagManagerLoader gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
+      {preview && <PreviewBanner />}
+      <TagManagerScripts
+        gtmId={process.env.NEXT_PUBLIC_GTM_ID}
+        preview={preview}
+      />
       <ScrollToTop />
       {/* Lets Back leave a page after a plain #hash link (#3501). */}
       <HashHistorySync />
