@@ -94,8 +94,12 @@ function adminRows(
     ["Rol", ROLE_LABELS[payload.role]],
     ["Naam", `${payload.firstName} ${payload.lastName}`],
     ["Geboortedatum", `${payload.birthDate}${isMinor ? " (minderjarig)" : ""}`],
-    ["Geslacht", GENDER_LABELS[payload.gender] ?? payload.gender],
-    ["Gemeente", payload.municipality],
+    ...(payload.gender
+      ? [["Geslacht", GENDER_LABELS[payload.gender] ?? payload.gender] as const]
+      : []),
+    ...(payload.municipality
+      ? [["Gemeente", payload.municipality] as const]
+      : []),
     ["E-mail", payload.email],
     ...(payload.priorClub ? [["Vorige club", payload.priorClub] as const] : []),
     ...(isMinor && payload.parentEmail

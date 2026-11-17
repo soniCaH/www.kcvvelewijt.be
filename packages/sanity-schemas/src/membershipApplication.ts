@@ -90,7 +90,6 @@ export const membershipApplication = defineType({
           {title: 'X', value: 'x'},
         ],
       },
-      validation: (Rule) => Rule.required().error('Verplicht.'),
     }),
     defineField({
       name: 'municipality',
@@ -98,7 +97,6 @@ export const membershipApplication = defineType({
       type: 'string',
       group: 'aanvraag',
       readOnly: true,
-      validation: (Rule) => Rule.required().error('Verplicht.'),
     }),
     defineField({
       name: 'email',

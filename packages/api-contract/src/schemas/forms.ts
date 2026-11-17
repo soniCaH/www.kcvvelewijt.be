@@ -88,9 +88,10 @@ export class MembershipRequest extends S.Class<MembershipRequest>(
   lastName: S.Trim.pipe(S.minLength(1), S.maxLength(100)),
   /** Full date `YYYY-MM-DD` — needed to compute the minor flag. */
   birthDate: S.String.pipe(S.pattern(/^\d{4}-\d{2}-\d{2}$/)),
-  gender: MembershipGender,
-  /** City only — no street, no postal code. */
-  municipality: S.Trim.pipe(S.minLength(1), S.maxLength(100)),
+  /** Optional at the interest stage — absent means "not given". */
+  gender: S.optional(MembershipGender),
+  /** City only — no street, no postal code. Optional; absent means "not given". */
+  municipality: S.optional(S.Trim.pipe(S.minLength(1), S.maxLength(100))),
   email: Email,
   priorClub: S.optional(S.Trim.pipe(S.maxLength(200))),
   /** Free remark for the club — longer than 1000 is a 400, never a silent cut. */

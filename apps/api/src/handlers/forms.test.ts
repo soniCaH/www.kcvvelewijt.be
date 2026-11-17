@@ -142,6 +142,46 @@ describe("handleMembership", () => {
     expect(write.mock.calls[0]![0].remark).toBe("Mijn zoon is keeper.");
   });
 
+  it("persists and mails a submission without gender and municipality, with no empty rows", async () => {
+    const write = vi.fn<SanityMutationInterface["writeMembershipApplication"]>(
+      () => Effect.succeed(undefined),
+    );
+    const dispatch = vi.fn<EmailTransportInterface["dispatchEmail"]>(() =>
+      Effect.succeed(undefined),
+    );
+    const { gender: _g, municipality: _m, ...rest } = validRaw;
+    const exit = await run(decode(rest), { write, dispatch });
+
+    expect(Exit.isSuccess(exit)).toBe(true);
+    expect(write).toHaveBeenCalledTimes(1);
+    const doc = write.mock.calls[0]![0];
+    expect(doc.gender).toBeUndefined();
+    expect(doc.municipality).toBeUndefined();
+    const admin = dispatch.mock.calls.at(-1)![0];
+    for (const body of [admin.text, admin.html]) {
+      expect(body).not.toContain("Geslacht");
+      expect(body).not.toContain("Gemeente");
+    }
+  });
+
+  it("persists and mails gender and municipality when a client still sends them", async () => {
+    const write = vi.fn<SanityMutationInterface["writeMembershipApplication"]>(
+      () => Effect.succeed(undefined),
+    );
+    const dispatch = vi.fn<EmailTransportInterface["dispatchEmail"]>(() =>
+      Effect.succeed(undefined),
+    );
+    await run(validPayload, { write, dispatch });
+
+    expect(write.mock.calls[0]![0]).toMatchObject({
+      gender: "m",
+      municipality: "Elewijt",
+    });
+    const admin = dispatch.mock.calls.at(-1)![0];
+    expect(admin.text).toContain("Man");
+    expect(admin.text).toContain("Elewijt");
+  });
+
   it("drops a honeypot submission without persisting", async () => {
     const write = vi.fn(() => Effect.succeed(undefined as void));
     const exit = await run(decode({ ...validRaw, company: "spam-bot" }), {

@@ -128,8 +128,8 @@ export interface SanityMembershipApplicationDoc {
   firstName: string;
   lastName: string;
   birthDate: string; // "YYYY-MM-DD"
-  gender: string;
-  municipality: string;
+  gender?: string;
+  municipality?: string;
   email: string;
   priorClub?: string;
   remark?: string;
@@ -723,8 +723,8 @@ export const SanityMutationLive = Layer.effect(
               firstName: doc.firstName,
               lastName: doc.lastName,
               birthDate: doc.birthDate,
-              gender: doc.gender,
-              municipality: doc.municipality,
+              ...(doc.gender ? { gender: doc.gender } : {}),
+              ...(doc.municipality ? { municipality: doc.municipality } : {}),
               email: doc.email,
               ...(doc.priorClub ? { priorClub: doc.priorClub } : {}),
               ...(doc.remark ? { remark: doc.remark } : {}),
