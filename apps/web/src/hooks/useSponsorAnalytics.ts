@@ -4,24 +4,27 @@ import { hashMemberId } from "@/lib/analytics/hash-member-id";
 
 export type SponsorTier = "hoofdsponsor" | "sponsor" | "sympathisant";
 
+export type SponsorSource = "homepage" | "sponsors";
+
 interface SponsorClickInput {
   /** Internal Sanity sponsor id — hashed before it leaves the client. */
   sponsorId: string;
   tier?: SponsorTier;
   /**
-   * Which surface the tile sat on — `homepage` for `<SponsorsBlock>`, omitted
-   * on `/sponsors` (#2400). Set by `<SponsorWallTracker>` (#3649). Without it
-   * the two surfaces are indistinguishable in GA4 and neither can be judged on
-   * its own.
+   * Which surface the tile sat on — `homepage` for `<SponsorsBlock>`,
+   * `sponsors` on `/sponsors`. Set by `<SponsorWallTracker>` (#3649, #3650).
+   * Without it the surfaces are indistinguishable in GA4 and none can be
+   * judged on its own.
    */
-  source?: "homepage";
+  source?: SponsorSource;
 }
 
 /**
  * Analytics for the `/sponsors` page (PRD redesign-phase-7 §6):
  * `sponsor_view` (page view), `sponsor_click` (any tier/wall tile),
- * `sponsor_featured_click` (the "In de kijker" marquee) and `sponsor_cta_click`
- * (the "Word sponsor +" band button).
+ * `sponsor_featured_click` (the "In de kijker" marquee), `sponsor_impression`
+ * (a tile seen for 1 s) and `sponsor_cta_click` (the "Word sponsor +" band
+ * button).
  *
  * No PII: the internal Sanity sponsor id is hashed via `hashMemberId`, never
  * sent raw; sponsor `url`s are never sent.
@@ -43,10 +46,23 @@ export function useSponsorAnalytics() {
   );
 
   const trackSponsorFeaturedClick = useCallback(
-    ({ sponsorId, tier }: SponsorClickInput) => {
+    ({ sponsorId, tier, source }: SponsorClickInput) => {
       trackEvent("sponsor_featured_click", {
         sponsor_id: hashMemberId(sponsorId),
         ...(tier ? { tier } : {}),
+        ...(source ? { source } : {}),
+      });
+    },
+    [],
+  );
+
+  /** One Sponsor's logo was seen: half visible for 1 s, tab visible (#3650). */
+  const trackSponsorImpression = useCallback(
+    ({ sponsorId, tier, source }: SponsorClickInput) => {
+      trackEvent("sponsor_impression", {
+        sponsor_id: hashMemberId(sponsorId),
+        ...(tier ? { tier } : {}),
+        ...(source ? { source } : {}),
       });
     },
     [],
@@ -60,6 +76,7 @@ export function useSponsorAnalytics() {
     trackSponsorView,
     trackSponsorClick,
     trackSponsorFeaturedClick,
+    trackSponsorImpression,
     trackSponsorCtaClick,
   };
 }

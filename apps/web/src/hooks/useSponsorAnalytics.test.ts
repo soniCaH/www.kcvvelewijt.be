@@ -65,11 +65,18 @@ describe("useSponsorAnalytics", () => {
     });
   });
 
-  it("omits source on the /sponsors page", () => {
+  it("carries the sponsors surface on a /sponsors click", () => {
     const { result } = renderHook(() => useSponsorAnalytics());
-    act(() => result.current.trackSponsorClick({ sponsorId: "sp-1" }));
-    const params = mockTrackEvent.mock.calls[0]?.[1] as Record<string, unknown>;
-    expect(params).not.toHaveProperty("source");
+    act(() =>
+      result.current.trackSponsorClick({
+        sponsorId: "sp-1",
+        source: "sponsors",
+      }),
+    );
+    expect(mockTrackEvent).toHaveBeenCalledWith("sponsor_click", {
+      sponsor_id: hashMemberId("sp-1"),
+      source: "sponsors",
+    });
   });
 
   it("omits tier when absent", () => {
@@ -92,6 +99,37 @@ describe("useSponsorAnalytics", () => {
       sponsor_id: hashMemberId("feat-1"),
       tier: "hoofdsponsor",
     });
+  });
+
+  it("carries the surface on sponsor_featured_click", () => {
+    const { result } = renderHook(() => useSponsorAnalytics());
+    act(() =>
+      result.current.trackSponsorFeaturedClick({
+        sponsorId: "feat-1",
+        source: "sponsors",
+      }),
+    );
+    expect(mockTrackEvent).toHaveBeenCalledWith("sponsor_featured_click", {
+      sponsor_id: hashMemberId("feat-1"),
+      source: "sponsors",
+    });
+  });
+
+  it("fires sponsor_impression with a hashed id, tier and source, never the raw id", () => {
+    const { result } = renderHook(() => useSponsorAnalytics());
+    act(() =>
+      result.current.trackSponsorImpression({
+        sponsorId: "imp-1",
+        tier: "sympathisant",
+        source: "homepage",
+      }),
+    );
+    expect(mockTrackEvent).toHaveBeenCalledWith("sponsor_impression", {
+      sponsor_id: hashMemberId("imp-1"),
+      tier: "sympathisant",
+      source: "homepage",
+    });
+    expect(JSON.stringify(mockTrackEvent.mock.calls)).not.toContain("imp-1");
   });
 
   it("fires sponsor_cta_click with no params", () => {
