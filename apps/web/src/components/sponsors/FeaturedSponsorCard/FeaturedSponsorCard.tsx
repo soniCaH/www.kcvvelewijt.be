@@ -101,5 +101,13 @@ export function FeaturedSponsorCard({ sponsor }: FeaturedSponsorCardProps) {
     );
   }
 
-  return <div className={frameClass}>{content}</div>;
+  return (
+    <div
+      data-sponsor-id={sponsor.id}
+      data-sponsor-tier={sponsor.tier}
+      className={frameClass}
+    >
+      {content}
+    </div>
+  );
 }

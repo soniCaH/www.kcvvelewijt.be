@@ -472,12 +472,7 @@ export default async function HomePage() {
     key: "sponsors",
     bg: "transparent",
     content: (
-      // The block sits near the bottom of the spine, so a mount-time event
-      // would count every homepage load as a sponsor impression (#2400).
-      <TrackInView
-        eventName="sponsor_impression"
-        params={{ source: "homepage" }}
-      >
+      <>
         {/* Homepage air is #2402's call, still open — keep the pre-#2571
             value here rather than following <SponsorsBlock>'s own literal
             down to py-12 sm:py-16. `sm:py-16` is repeated even though it
@@ -485,12 +480,13 @@ export default async function HomePage() {
             future change to <SponsorsBlock>'s base value can't silently
             widen the gap this override pins. */}
         {/* The tracker lives here, not inside <SponsorsSection>: the team
-            page renders that too and must keep sending no sponsor click
-            (#3649). */}
+            page renders that too and must keep sending no sponsor event
+            (#3649). It counts a Sponsor's impression once seen for 1 s
+            (#3650); a mount-time event would count every homepage load. */}
         <SponsorWallTracker source="homepage">
           <SponsorsSection className="py-16 sm:py-16 md:py-20" />
         </SponsorWallTracker>
-      </TrackInView>
+      </>
     ),
     paddingTop: "pt-0",
     paddingBottom: "pb-0",

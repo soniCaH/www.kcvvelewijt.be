@@ -30,7 +30,7 @@ const homepage = (wall: ReactNode) => (
 );
 const sponsorsPage = (wall: ReactNode) => (
   <SponsorsAnalytics>
-    <SponsorWallTracker>{wall}</SponsorWallTracker>
+    <SponsorWallTracker source="sponsors">{wall}</SponsorWallTracker>
   </SponsorsAnalytics>
 );
 
@@ -102,7 +102,7 @@ describe("sponsor wall clicks", () => {
     expect(params.sponsor_id).toBe(hashMemberId("raw-secret"));
   });
 
-  it("/sponsors tile: one sponsor_click without a source", async () => {
+  it("/sponsors tile: one sponsor_click with source sponsors", async () => {
     render(sponsorsPage(tile));
     await userEvent.click(screen.getByRole("link", { name: "Tile" }));
 
@@ -110,7 +110,14 @@ describe("sponsor wall clicks", () => {
       ([name]) => name === "sponsor_click",
     );
     expect(clicks).toEqual([
-      ["sponsor_click", { sponsor_id: hashMemberId("s-1"), tier: "sponsor" }],
+      [
+        "sponsor_click",
+        {
+          sponsor_id: hashMemberId("s-1"),
+          tier: "sponsor",
+          source: "sponsors",
+        },
+      ],
     ]);
   });
 
@@ -124,7 +131,11 @@ describe("sponsor wall clicks", () => {
     expect(clicks).toEqual([
       [
         "sponsor_featured_click",
-        { sponsor_id: hashMemberId("f-1"), tier: "hoofdsponsor" },
+        {
+          sponsor_id: hashMemberId("f-1"),
+          tier: "hoofdsponsor",
+          source: "sponsors",
+        },
       ],
     ]);
   });

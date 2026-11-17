@@ -223,6 +223,32 @@ describe("/ — a failed placeholder read keeps the page (#2505 review finding 1
   });
 });
 
+describe("/ — the sponsor wall sends no section-level impression (#3650)", () => {
+  beforeEach(() => {
+    mockGetNextMatches.mockReturnValue(Effect.succeed([]));
+    mockTeamsFindAll.mockReturnValue(Effect.succeed([]));
+    mockFindNextFeatured.mockReturnValue(Effect.succeed(null));
+    mockGetHomepage.mockReturnValue(
+      Effect.succeed({
+        banners: { bannerSlotA: null, bannerSlotB: null, bannerSlotC: null },
+        placeholder: null,
+      }),
+    );
+  });
+
+  // The per-tile dwell impression lives in <SponsorWallTracker>; a
+  // <TrackInView eventName="sponsor_impression"> around the section would
+  // count the wall again, without a sponsor id.
+  it("wraps no section in a sponsor_impression in-view tracker", async () => {
+    const element = await HomePage();
+    const { container } = render(element);
+
+    expect(
+      container.querySelector('[data-track-event="sponsor_impression"]'),
+    ).toBeNull();
+  });
+});
+
 // One senior team, so the per-team fan-out (`getTeamMatches` → `bff.getMatches`)
 // actually fires — needed to discriminate `upcomingMatchesReadFailed` from
 // the combined `firstTeamsReadFailed` (#2505 round-3 review finding M2: with zero
