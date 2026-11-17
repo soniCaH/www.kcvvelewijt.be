@@ -29,7 +29,7 @@ export const page = defineType({
       group: 'inhoud',
       options: {source: 'title'},
       description:
-        'Het URL-pad van de pagina (`/{slug}`). Eens gepubliceerd: niet meer wijzigen — externe links breken anders. Klik "Generate" om hem uit de titel af te leiden.',
+        'Het URL-pad van de pagina (`/club/{slug}`). Eens gepubliceerd: niet meer wijzigen — externe links breken anders. Klik "Generate" om hem uit de titel af te leiden.',
       validation: (r) =>
         r.required().error(
           'Verplicht. De slug bepaalt de URL waarop de pagina bereikbaar is — zonder slug verschijnt ze niet op de site.',
