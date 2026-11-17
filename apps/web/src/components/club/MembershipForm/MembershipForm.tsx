@@ -234,8 +234,6 @@ function MembershipFormFields({
     if (!birthDate) errors.birthDate = REQUIRED_MSG;
     else if (!isPlausibleBirthDate(birthDate, new Date()))
       errors.birthDate = INVALID_BIRTH_DATE_MESSAGE;
-    if (!gender) errors.gender = REQUIRED_MSG;
-    if (!municipality.trim()) errors.municipality = REQUIRED_MSG;
     if (!EMAIL_PATTERN.test(email))
       errors.email = "Vul een geldig e-mailadres in.";
     if (isPlayer && !medicalCertAcknowledged) {
@@ -282,8 +280,8 @@ function MembershipFormFields({
           firstName,
           lastName,
           birthDate,
-          gender,
-          municipality,
+          gender: gender || undefined,
+          municipality: municipality.trim() || undefined,
           email,
           priorClub: priorClub || undefined,
           remark: remark || undefined,
@@ -464,7 +462,21 @@ function MembershipFormFields({
             />
           </div>
           <div>
-            <Label htmlFor={fieldId("gender")} required>
+            <Label htmlFor={fieldId("email")} required>
+              E-mail
+            </Label>
+            <Input
+              id={fieldId("email")}
+              name="email"
+              type="email"
+              value={email}
+              onChange={(e) => setField("email", e.target.value)}
+              error={fieldErrors.email}
+              autoComplete="email"
+            />
+          </div>
+          <div>
+            <Label htmlFor={fieldId("gender")} optional>
               Geslacht
             </Label>
             <Select
@@ -483,7 +495,7 @@ function MembershipFormFields({
             </Select>
           </div>
           <div>
-            <Label htmlFor={fieldId("municipality")} required>
+            <Label htmlFor={fieldId("municipality")} optional>
               Gemeente
             </Label>
             <Input
@@ -493,20 +505,6 @@ function MembershipFormFields({
               onChange={(e) => setField("municipality", e.target.value)}
               error={fieldErrors.municipality}
               autoComplete="address-level2"
-            />
-          </div>
-          <div>
-            <Label htmlFor={fieldId("email")} required>
-              E-mail
-            </Label>
-            <Input
-              id={fieldId("email")}
-              name="email"
-              type="email"
-              value={email}
-              onChange={(e) => setField("email", e.target.value)}
-              error={fieldErrors.email}
-              autoComplete="email"
             />
           </div>
           <div className="md:col-span-2">

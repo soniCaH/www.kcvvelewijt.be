@@ -164,6 +164,56 @@ describe("MembershipForm", () => {
     );
   });
 
+  describe("gender and municipality are optional (#3638)", () => {
+    it.each(["Geslacht", "Gemeente"])(
+      "marks %s optional, with no asterisk",
+      (name) => {
+        render(<MembershipForm />);
+        const label = screen.getByText(name, { selector: "label" });
+        expect(label).toHaveTextContent(/Optioneel/);
+        expect(label).not.toHaveTextContent("*");
+      },
+    );
+
+    it("places both fields below e-mail", () => {
+      render(<MembershipForm />);
+      const email = screen.getByLabelText(/^E-mail(?! ouder)/);
+      for (const name of [/Geslacht/, /Gemeente/]) {
+        expect(
+          email.compareDocumentPosition(screen.getByLabelText(name)) &
+            Node.DOCUMENT_POSITION_FOLLOWING,
+        ).toBeTruthy();
+      }
+    });
+
+    it("submits with both empty and leaves them out of the payload", async () => {
+      const fetchMock = vi.fn((_url: string, _init: RequestInit) =>
+        Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve({ ok: true }),
+        }),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      fireEvent.change(screen.getByLabelText(/Geslacht/), {
+        target: { value: "" },
+      });
+      fireEvent.change(screen.getByLabelText(/Gemeente/), {
+        target: { value: "   " },
+      });
+      fireEvent.submit(screen.getByText(/Verstuur aanvraag/).closest("form")!);
+
+      await screen.findByText(/Bedankt voor je interesse/i);
+      const body = JSON.parse(
+        (fetchMock.mock.calls[0] as [string, RequestInit])[1].body as string,
+      );
+      expect(body).not.toHaveProperty("gender");
+      expect(body).not.toHaveProperty("municipality");
+    });
+  });
+
   describe("remark (#3433)", () => {
     const postedBody = (fetchMock: ReturnType<typeof vi.fn>) =>
       JSON.parse(
