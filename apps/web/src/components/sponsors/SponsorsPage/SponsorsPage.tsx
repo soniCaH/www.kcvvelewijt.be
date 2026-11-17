@@ -35,7 +35,7 @@ export function SponsorsPage({ sponsors }: SponsorsPageProps) {
     <SponsorsAnalytics>
       {/* Plain top (the hero opens the page); the bottom sits above the
           `<SponsorCtaBand>` seam, so it gives one step back (#3306). */}
-      <SponsorWallTracker>
+      <SponsorWallTracker source="sponsors">
         <PageContainer width="index" className="pt-12 pb-10 sm:pt-16 sm:pb-14">
           <SponsorHero featured={featured} />
 

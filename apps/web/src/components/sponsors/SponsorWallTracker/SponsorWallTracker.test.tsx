@@ -3,9 +3,14 @@ import { render, screen, fireEvent } from "@testing-library/react";
 
 const trackSponsorClick = vi.fn();
 const trackSponsorFeaturedClick = vi.fn();
+const trackSponsorImpression = vi.fn();
 
 vi.mock("@/hooks/useSponsorAnalytics", () => ({
-  useSponsorAnalytics: () => ({ trackSponsorClick, trackSponsorFeaturedClick }),
+  useSponsorAnalytics: () => ({
+    trackSponsorClick,
+    trackSponsorFeaturedClick,
+    trackSponsorImpression,
+  }),
 }));
 
 import { SponsorWallTracker } from "./SponsorWallTracker";
@@ -67,6 +72,19 @@ describe("SponsorWallTracker", () => {
       tier: "hoofdsponsor",
     });
     expect(trackSponsorClick).not.toHaveBeenCalled();
+  });
+
+  it("sends no click for a marked tile that is not a link", () => {
+    render(
+      <SponsorWallTracker>
+        <div data-sponsor-id="u1" data-sponsor-tier="sponsor">
+          Unlinked
+        </div>
+      </SponsorWallTracker>,
+    );
+    fireEvent.click(screen.getByText("Unlinked"));
+    expect(trackSponsorClick).not.toHaveBeenCalled();
+    expect(trackSponsorFeaturedClick).not.toHaveBeenCalled();
   });
 
   it("ignores clicks outside any sponsor element", () => {
