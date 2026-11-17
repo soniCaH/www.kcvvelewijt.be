@@ -7,8 +7,10 @@
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Effect, Layer } from "effect";
-import { render } from "@testing-library/react";
+import { render, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { FakeIntersectionObserver } from "@/../tests/helpers/fake-observers.helpers";
+import { hashMemberId } from "@/lib/analytics/hash-member-id";
 
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
@@ -44,7 +46,7 @@ describe("SponsorsSection", () => {
   it("survives a sponsors read that dies (real Sanity defect shape) instead of rejecting", async () => {
     mockFindAll.mockReturnValue(Effect.die(new Error("Sanity is unreachable")));
 
-    await expect(SponsorsSection({})).resolves.toBeTruthy();
+    await expect(SponsorsSection({ source: "team" })).resolves.toBeTruthy();
   });
 
   it("still renders sponsors when the read succeeds", async () => {
@@ -61,32 +63,66 @@ describe("SponsorsSection", () => {
       ]),
     );
 
-    const element = await SponsorsSection({});
+    const element = await SponsorsSection({ source: "team" });
     expect(element).toBeTruthy();
   });
 
-  // The team page renders <SponsorsSection> with no tracker around it, and a
-  // tile click there sends nothing today. Only the homepage call site wraps it
-  // in <SponsorWallTracker> (#3649).
-  it("sends no analytics event on a tile click without a wall tracker around it", async () => {
-    mockFindAll.mockReturnValue(
-      Effect.succeed([
-        {
-          id: "s1",
-          name: "Hoofdsponsor BV",
-          logoUrl: "https://cdn.example.com/logo.png",
-          url: "https://example.com",
-          tier: "hoofdsponsor" as const,
-          type: null,
-        },
-      ]),
-    );
+  // The section owns its wall tracker and sends its surface on every event, so
+  // the team page's wall reports like the homepage's (#3651).
+  describe.each(["team", "homepage"] as const)(
+    "on the %s surface",
+    (source) => {
+      const sponsor = {
+        id: "s1",
+        name: "Hoofdsponsor BV",
+        logoUrl: "https://cdn.example.com/logo.png",
+        url: "https://example.com",
+        tier: "hoofdsponsor" as const,
+        type: null,
+      };
 
-    const { container } = render(await SponsorsSection({}));
-    const tile = container.querySelector<HTMLElement>("[data-sponsor-id]");
-    expect(tile).not.toBeNull();
-    await userEvent.click(tile!);
+      beforeEach(() => {
+        vi.useFakeTimers({ shouldAdvanceTime: true });
+        FakeIntersectionObserver.reset();
+        vi.stubGlobal("IntersectionObserver", FakeIntersectionObserver);
+        vi.mocked(mockTrackEvent).mockClear();
+        mockFindAll.mockReturnValue(Effect.succeed([sponsor]));
+      });
 
-    expect(mockTrackEvent).not.toHaveBeenCalled();
-  });
+      afterEach(() => {
+        vi.useRealTimers();
+        vi.unstubAllGlobals();
+      });
+
+      it("sends sponsor_click with the surface", async () => {
+        const { container } = render(await SponsorsSection({ source }));
+        const tile = container.querySelector<HTMLElement>("[data-sponsor-id]");
+        expect(tile).not.toBeNull();
+        await userEvent.click(tile!);
+
+        expect(mockTrackEvent).toHaveBeenCalledWith("sponsor_click", {
+          sponsor_id: hashMemberId("s1"),
+          tier: "hoofdsponsor",
+          source,
+        });
+      });
+
+      it("sends sponsor_impression with the surface after 1 s in view", async () => {
+        const { container } = render(await SponsorsSection({ source }));
+        const tile = container.querySelector<HTMLElement>("[data-sponsor-id]");
+        act(() => {
+          FakeIntersectionObserver.latest()!.trigger([
+            { target: tile!, isIntersecting: true, intersectionRatio: 1 },
+          ]);
+        });
+        act(() => void vi.advanceTimersByTime(1000));
+
+        expect(mockTrackEvent).toHaveBeenCalledWith("sponsor_impression", {
+          sponsor_id: hashMemberId("s1"),
+          tier: "hoofdsponsor",
+          source,
+        });
+      });
+    },
+  );
 });

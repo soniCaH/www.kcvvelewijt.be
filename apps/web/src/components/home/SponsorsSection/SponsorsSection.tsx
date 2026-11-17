@@ -4,12 +4,19 @@ import { degradeSection } from "@/lib/effect/degrade";
 import { SponsorRepository } from "@/lib/repositories/sponsor.repository";
 import { SponsorsBlock } from "@/components/sponsors";
 import type { Sponsor } from "@/components/sponsors";
+import { SponsorWallTracker } from "@/components/sponsors/SponsorWallTracker";
+import type { SponsorSource } from "@/hooks/useSponsorAnalytics";
 
 export interface SponsorsSectionProps {
+  /** The surface this wall sits on; sent on every sponsor event it fires (#3651). */
+  source: SponsorSource;
   className?: string;
 }
 
-export async function SponsorsSection({ className }: SponsorsSectionProps) {
+export async function SponsorsSection({
+  source,
+  className,
+}: SponsorsSectionProps) {
   const sponsors = await runPromise(
     // `degradeSection`, not `Effect.catchAll` — `SponsorRepository.findAll()`
     // carries a typed `SanityReadError` (#2864), and a `catchAll` would only
@@ -41,5 +48,9 @@ export async function SponsorsSection({ className }: SponsorsSectionProps) {
     ),
   );
 
-  return <SponsorsBlock sponsors={sponsors} className={className} />;
+  return (
+    <SponsorWallTracker source={source}>
+      <SponsorsBlock sponsors={sponsors} className={className} />
+    </SponsorWallTracker>
+  );
 }

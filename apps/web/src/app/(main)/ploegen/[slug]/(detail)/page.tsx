@@ -804,7 +804,7 @@ export default async function TeamPage({ params }: TeamPageProps) {
       {/* Sponsor logo wall now renders BEFORE the onward-navigation row
           (#2443 resolution) — the page's last word is a "keep going"
           slot, not a sponsor band. */}
-      <SponsorsSection />
+      <SponsorsSection source="team" />
 
       {/* Full-bleed cream "Blijf nog even hangen." slider — auto-hides when
           empty (#2443/#2581). Last section on the page. */}

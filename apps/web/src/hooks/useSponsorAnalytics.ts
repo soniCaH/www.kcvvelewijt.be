@@ -4,7 +4,7 @@ import { hashMemberId } from "@/lib/analytics/hash-member-id";
 
 export type SponsorTier = "hoofdsponsor" | "sponsor" | "sympathisant";
 
-export type SponsorSource = "homepage" | "sponsors";
+export type SponsorSource = "homepage" | "sponsors" | "team";
 
 interface SponsorClickInput {
   /** Internal Sanity sponsor id — hashed before it leaves the client. */
@@ -12,7 +12,7 @@ interface SponsorClickInput {
   tier?: SponsorTier;
   /**
    * Which surface the tile sat on — `homepage` for `<SponsorsBlock>`,
-   * `sponsors` on `/sponsors`. Set by `<SponsorWallTracker>` (#3649, #3650).
+   * `sponsors` on `/sponsors`, `team` on a team page. Set by `<SponsorWallTracker>` (#3649, #3650).
    * Without it the surfaces are indistinguishable in GA4 and none can be
    * judged on its own.
    */
