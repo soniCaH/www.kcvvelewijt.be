@@ -355,7 +355,19 @@ describe("root package.json's lint-staged wiring for apps/web (#2418)", () => {
       },
     });
 
-  const probeDir = join(repoRoot, "apps", "web", "src");
+  // Must stay under web `src/` (the type-ramp rule only applies to
+  // `**/src/**`), but in a folder the web tsconfig `exclude`s, the `lint`
+  // script ignores and .gitignore lists — a parallel tsgo/next build/eslint
+  // must never see a probe mid-test (#3723).
+  const probeDir = join(repoRoot, "apps", "web", "src", "__wiring-probes__");
+
+  beforeAll(() => {
+    mkdirSync(probeDir, { recursive: true });
+  });
+
+  afterAll(() => {
+    rmSync(probeDir, { recursive: true, force: true });
+  });
 
   it("passes a real frozen violation, linted the way lint-staged lints it", () => {
     const suppressions = JSON.parse(

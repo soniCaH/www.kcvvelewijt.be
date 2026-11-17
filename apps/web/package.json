@@ -9,7 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint .",
+    "lint": "eslint . --ignore-pattern 'src/__wiring-probes__/'",
     "lint:fix": "eslint --fix .",
     "lint:prune": "eslint . --prune-suppressions",
     "type-check": "tsgo --noEmit",

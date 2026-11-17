@@ -92,3 +92,6 @@ ds-bundle/
 .design-sync/dist-types/
 .design-sync/sb-compiled.css
 .design-sync/*.log
+
+# pre-commit wiring-test probes (apps/web/test/hooks/pre-commit.test.ts, #3723)
+apps/web/src/__wiring-probes__/

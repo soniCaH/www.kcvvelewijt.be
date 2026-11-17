@@ -34,6 +34,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "../../docs/archive"],
+  "exclude": ["node_modules", "../../docs/archive", "src/__wiring-probes__"],
   "references": [{ "path": "../../packages/api-contract" }]
 }
