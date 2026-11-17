@@ -34,9 +34,9 @@ export function useSponsorAnalytics() {
     trackEvent("sponsor_view");
   }, []);
 
-  const trackSponsorClick = useCallback(
-    ({ sponsorId, tier, source }: SponsorClickInput) => {
-      trackEvent("sponsor_click", {
+  const send = useCallback(
+    (eventName: string, { sponsorId, tier, source }: SponsorClickInput) => {
+      trackEvent(eventName, {
         sponsor_id: hashMemberId(sponsorId),
         ...(tier ? { tier } : {}),
         ...(source ? { source } : {}),
@@ -45,27 +45,20 @@ export function useSponsorAnalytics() {
     [],
   );
 
+  const trackSponsorClick = useCallback(
+    (input: SponsorClickInput) => send("sponsor_click", input),
+    [send],
+  );
+
   const trackSponsorFeaturedClick = useCallback(
-    ({ sponsorId, tier, source }: SponsorClickInput) => {
-      trackEvent("sponsor_featured_click", {
-        sponsor_id: hashMemberId(sponsorId),
-        ...(tier ? { tier } : {}),
-        ...(source ? { source } : {}),
-      });
-    },
-    [],
+    (input: SponsorClickInput) => send("sponsor_featured_click", input),
+    [send],
   );
 
   /** One Sponsor's logo was seen: half visible for 1 s, tab visible (#3650). */
   const trackSponsorImpression = useCallback(
-    ({ sponsorId, tier, source }: SponsorClickInput) => {
-      trackEvent("sponsor_impression", {
-        sponsor_id: hashMemberId(sponsorId),
-        ...(tier ? { tier } : {}),
-        ...(source ? { source } : {}),
-      });
-    },
-    [],
+    (input: SponsorClickInput) => send("sponsor_impression", input),
+    [send],
   );
 
   const trackSponsorCtaClick = useCallback(() => {

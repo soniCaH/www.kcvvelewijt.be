@@ -21,7 +21,7 @@ const IMPRESSION_THRESHOLD = 0.5;
 /**
  * The one tracker for a sponsor wall (#3649, #3650). Reads the inert
  * `data-sponsor-id` / `data-sponsor-tier` markers every tile root emits, linked
- * or not.
+ * or not, collected once at mount.
  *
  * - Click: a marked link → `sponsor_click`; the same plus
  *   `data-sponsor-featured` on the marquee link → `sponsor_featured_click`. A
@@ -93,10 +93,13 @@ export function SponsorWallTracker({
     );
 
     const onVisibility = () => {
-      if (document.hidden) timers.forEach((_, el) => stop(el));
-      else inView.forEach(start);
+      if (document.hidden) {
+        timers.forEach(clearTimeout);
+        timers.clear();
+      } else inView.forEach(start);
     };
 
+    // shortcut: tiles are collected once at mount (every wall is server-rendered today); observe additions if a wall ever renders tiles on the client.
     node
       .querySelectorAll("[data-sponsor-id]")
       .forEach((el) => observer.observe(el));
