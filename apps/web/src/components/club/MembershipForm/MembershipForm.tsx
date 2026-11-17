@@ -483,10 +483,13 @@ function MembershipFormFields({
               id={fieldId("gender")}
               name="gender"
               value={gender}
-              placeholder="Maak een keuze…"
               error={fieldErrors.gender}
               onChange={(e) => setField("gender", e.target.value)}
+              // The empty option stays selectable (#3638): `Select`'s own
+              // placeholder is disabled, so a mistaken pick could not be undone.
+              className={gender === "" ? "text-ink/40 [&>option]:text-ink" : ""}
             >
+              <option value="">Maak een keuze…</option>
               {GENDER_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}

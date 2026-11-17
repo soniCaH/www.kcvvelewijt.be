@@ -132,10 +132,11 @@ export default function PrivacyPage() {
           <ul>
             <li>Voornaam en achternaam</li>
             <li>Geboortedatum (om te bepalen of je minderjarig bent)</li>
-            <li>Geslacht</li>
-            <li>Gemeente</li>
+            <li>Geslacht (optioneel)</li>
+            <li>Gemeente (optioneel)</li>
             <li>E-mailadres</li>
             <li>Vorige club (optioneel)</li>
+            <li>Opmerking (optioneel)</li>
             <li>
               E-mailadres van een ouder/voogd (enkel bij minderjarigen, samen
               met hun toestemming)

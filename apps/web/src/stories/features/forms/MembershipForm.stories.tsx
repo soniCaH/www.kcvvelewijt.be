@@ -45,7 +45,7 @@ function stubFetch(impl: typeof fetch) {
   };
 }
 
-/** Fill the required fields and press submit — shared by the submit-state stories. */
+/** Fill every field a visitor can fill (gender and municipality are optional, #3638) and press submit — shared by the submit-state stories. */
 async function fillAndSubmit(canvasElement: HTMLElement) {
   const canvas = within(canvasElement);
   await userEvent.type(canvas.getByLabelText(/Voornaam/), "Jan");

@@ -171,8 +171,9 @@ describe("handleMembership", () => {
     const dispatch = vi.fn<EmailTransportInterface["dispatchEmail"]>(() =>
       Effect.succeed(undefined),
     );
-    await run(validPayload, { write, dispatch });
+    const exit = await run(validPayload, { write, dispatch });
 
+    expect(Exit.isSuccess(exit)).toBe(true);
     expect(write.mock.calls[0]![0]).toMatchObject({
       gender: "m",
       municipality: "Elewijt",

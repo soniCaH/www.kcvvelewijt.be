@@ -6,6 +6,7 @@ import {
   waitFor,
   act,
 } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { renderToString } from "react-dom/server";
 import { hydrateRoot } from "react-dom/client";
 import { useEffect } from "react";
@@ -38,12 +39,6 @@ function fillRequiredFields() {
   });
   fireEvent.change(screen.getByLabelText(/Geboortedatum/), {
     target: { value: "1990-06-15" },
-  });
-  fireEvent.change(screen.getByLabelText(/Geslacht/), {
-    target: { value: "m" },
-  });
-  fireEvent.change(screen.getByLabelText(/Gemeente/), {
-    target: { value: "Elewijt" },
   });
   fireEvent.change(screen.getByLabelText(/^E-mail/), {
     target: { value: "jan@example.com" },
@@ -186,6 +181,31 @@ describe("MembershipForm", () => {
       }
     });
 
+    it("lets a visitor take a picked gender back to not given", async () => {
+      const fetchMock = vi.fn((_url: string, _init: RequestInit) =>
+        Promise.resolve({
+          ok: true,
+          status: 200,
+          json: () => Promise.resolve({ ok: true }),
+        }),
+      );
+      vi.stubGlobal("fetch", fetchMock);
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      const gender = screen.getByLabelText(/Geslacht/);
+      await userEvent.selectOptions(gender, "m");
+      expect(gender).toHaveValue("m");
+      await userEvent.selectOptions(gender, "");
+      expect(gender).toHaveValue("");
+      fireEvent.submit(screen.getByText(/Verstuur aanvraag/).closest("form")!);
+
+      await screen.findByText(/Bedankt voor je interesse/i);
+      const body = JSON.parse(
+        (fetchMock.mock.calls[0] as [string, RequestInit])[1].body as string,
+      );
+      expect(body).not.toHaveProperty("gender");
+    });
+
     it("submits with both empty and leaves them out of the payload", async () => {
       const fetchMock = vi.fn((_url: string, _init: RequestInit) =>
         Promise.resolve({
@@ -197,9 +217,6 @@ describe("MembershipForm", () => {
       vi.stubGlobal("fetch", fetchMock);
       render(<MembershipForm defaultRole="vrijwilliger" />);
       fillRequiredFields();
-      fireEvent.change(screen.getByLabelText(/Geslacht/), {
-        target: { value: "" },
-      });
       fireEvent.change(screen.getByLabelText(/Gemeente/), {
         target: { value: "   " },
       });
