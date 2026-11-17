@@ -9,7 +9,7 @@ minimumReleaseAge: 4320
 
 # One version for every workspace: each package.json says "catalog:", so Renovate bumps this line only.
 catalog:
-  "@sanity/client": 8.11.0
+  "@sanity/client": 8.16.0
 
 overrides:
   # Remove once lockfile maintenance resolves joi >= 17.13.8 on its own, or @storybook/test-runner drops wait-on@7 (#3475).
