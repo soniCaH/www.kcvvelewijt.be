@@ -10,6 +10,7 @@ import {
   curatedNewDocumentOptions,
   GuideFormInput,
   createPreviewAction,
+  hasPreviewPath,
 } from '@kcvv/sanity-studio'
 import {schemaTypes} from './schemaTypes'
 import {structure} from './structure'
@@ -40,8 +41,8 @@ export default defineConfig({
       ),
       LinkToPsdAction,
       RemovePsdImageAction,
-      // Article only for now (#3658); Event, Page and photo gallery follow in #3660.
-      ...(schemaType === 'article' ? [PreviewAction] : []),
+      // Article, Event, Page and photo gallery (#3658, #3660): one table in `buildPreviewPath`.
+      ...(hasPreviewPath(schemaType) ? [PreviewAction] : []),
     ],
     newDocumentOptions: curatedNewDocumentOptions,
   },

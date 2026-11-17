@@ -10,7 +10,7 @@ Schemas are not defined here — they are imported from the shared [`@kcvv/sanit
 pnpm --filter @kcvv/studio-staging dev   # starts Studio at http://localhost:3333
 ```
 
-"Voorbeeld" on an Article opens `http://localhost:3000`, so it works only while the web app runs locally on port 3000 against the staging dataset.
+"Voorbeeld" opens `http://localhost:3000`, so it works only while the web app runs locally on port 3000 against the staging dataset.
 
 ## Deploy
 
