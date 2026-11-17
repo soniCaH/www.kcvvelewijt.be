@@ -27,8 +27,8 @@ minimumReleaseAgeExclude:
   - sanitize-html@2.18.0 || 2.18.1
   # Renovate security update: happy-dom@21.0.4
   - happy-dom@21.0.4
-  # Renovate security update: @cloudflare/vitest-plugin@1.4.7
-  - "@cloudflare/vitest-plugin@1.4.7"
+  # Renovate security update: @cloudflare/vitest-plugin@1.4.7 || 1.8.2
+  - "@cloudflare/vitest-plugin@1.4.7 || 1.8.2"
   # Renovate security update: @vitest/coverage-istanbul@4.1.12
   - "@vitest/coverage-istanbul@4.1.12"
   # Renovate security update: vitest@4.1.12
@@ -45,8 +45,8 @@ minimumReleaseAgeExclude:
   - "@vitest/coverage-v8@4.1.12"
   # Renovate security update: @vitest/ui@4.1.12
   - "@vitest/ui@4.1.12"
-  # Renovate security update: postcss@8.5.31 || 8.5.32
-  - postcss@8.5.31 || 8.5.32
+  # Renovate security update: postcss@8.5.31 || 8.5.32 || 8.5.33
+  - postcss@8.5.31 || 8.5.32 || 8.5.33
   # Renovate security update: vite@8.3.5 || 8.3.6 || 8.3.7 || 8.3.8
   - vite@8.3.5 || 8.3.6 || 8.3.7 || 8.3.8
   # Renovate security update: @commitlint/cli@21.2.4
