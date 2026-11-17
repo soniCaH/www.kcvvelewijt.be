@@ -12,6 +12,9 @@ import { hydrateRoot } from "react-dom/client";
 import { useEffect } from "react";
 import { MembershipForm } from "./MembershipForm";
 import { DRAFT_STORAGE_KEY, EMPTY_DRAFT } from "./membership-draft";
+import { trackEvent } from "@/lib/analytics/track-event";
+
+vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
 // Stands in for Cloudflare's widget: a token on mount, and a fresh single-use
 // one each time `resetKey` changes — what `turnstile.reset()` does for real.
@@ -53,6 +56,85 @@ describe("MembershipForm", () => {
   });
   afterEach(() => {
     vi.unstubAllGlobals();
+  });
+
+  describe("membership_form_start (#3636)", () => {
+    const startCalls = () =>
+      vi
+        .mocked(trackEvent)
+        .mock.calls.filter(([name]) => name === "membership_form_start");
+
+    beforeEach(() => vi.mocked(trackEvent).mockClear());
+
+    it("does not fire on mount", () => {
+      render(<MembershipForm />);
+      expect(startCalls()).toHaveLength(0);
+    });
+
+    it("fires once for two field changes, with no form values", () => {
+      render(<MembershipForm />);
+      fireEvent.change(screen.getByLabelText(/Voornaam/), {
+        target: { value: "Jan" },
+      });
+      fireEvent.change(screen.getByLabelText(/Achternaam/), {
+        target: { value: "Peeters" },
+      });
+      expect(startCalls()).toEqual([
+        ["membership_form_start", { restored_draft: false }],
+      ]);
+    });
+
+    it("carries the role when the role is the first change", () => {
+      render(<MembershipForm />);
+      fireEvent.change(screen.getByLabelText(/interesse als/i), {
+        target: { value: "trainer" },
+      });
+      expect(startCalls()).toEqual([
+        ["membership_form_start", { role: "trainer", restored_draft: false }],
+      ]);
+    });
+
+    it("carries the role chosen from the link defaults", () => {
+      render(<MembershipForm defaultRole="speler" />);
+      fireEvent.change(screen.getByLabelText(/Voornaam/), {
+        target: { value: "Jan" },
+      });
+      expect(startCalls()).toEqual([
+        ["membership_form_start", { role: "speler", restored_draft: false }],
+      ]);
+    });
+
+    it("reports restored_draft true after a Draft remount, and fires once", async () => {
+      window.sessionStorage.setItem(
+        DRAFT_STORAGE_KEY,
+        JSON.stringify({
+          ...EMPTY_DRAFT,
+          role: "vrijwilliger",
+          email: "a@b.be",
+        }),
+      );
+      const container = document.createElement("div");
+      document.body.appendChild(container);
+      container.innerHTML = renderToString(<MembershipForm />);
+      let root!: ReturnType<typeof hydrateRoot>;
+      await act(async () => {
+        root = hydrateRoot(container, <MembershipForm />);
+      });
+      // The remount alone is no field change.
+      expect(startCalls()).toHaveLength(0);
+
+      const first = container.querySelector("input[name=firstName]")!;
+      fireEvent.change(first, { target: { value: "Jan" } });
+      fireEvent.change(first, { target: { value: "Jann" } });
+      expect(startCalls()).toEqual([
+        [
+          "membership_form_start",
+          { role: "vrijwilliger", restored_draft: true },
+        ],
+      ]);
+      await act(async () => root.unmount());
+      container.remove();
+    });
   });
 
   it("renders the base fields", () => {

@@ -152,6 +152,9 @@ function MembershipFormFields({
       },
   );
   const [draftRestored, setDraftRestored] = useState(draft !== null);
+  // One start event per mount. The remount on a found draft is safe: it
+  // happens before any field change, and the new mount starts with a fresh ref.
+  const startedRef = useRef(false);
   const {
     role,
     firstName,
@@ -172,6 +175,14 @@ function MembershipFormFields({
     name: K,
     value: MembershipDraft[K],
   ) => {
+    if (!startedRef.current) {
+      startedRef.current = true;
+      const startRole = name === "role" ? value : role;
+      trackEvent("membership_form_start", {
+        ...(startRole ? { role: startRole } : {}),
+        restored_draft: draftRestored,
+      });
+    }
     // Functional, so two changes in one batch (browser autofill) both land.
     setValues((prev) => {
       if (prev[name] === value) return prev;
