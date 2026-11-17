@@ -727,6 +727,27 @@ const config: TestRunnerConfig = {
         }
         throw err;
       });
+    // `load` fires when the bundle has run, NOT when the preview has fetched
+    // `index.json` and built its Story Store. `preVisit` below reads that store
+    // (`getStoryContext`) BEFORE test-runner's own `__test` gets to wait for
+    // Storybook, so on a slow cold start the first story of a file threw
+    // `SB_PREVIEW_API_0011` "Cannot access the Story Store until the index is
+    // ready" (main run 44127185781, FullTimeTemplate > Win). `ready()` resolves
+    // once the store is initialised, and rejects if initialisation failed.
+    await page.waitForFunction(
+      () =>
+        !!(globalThis as { __STORYBOOK_PREVIEW__?: unknown })
+          .__STORYBOOK_PREVIEW__,
+      null,
+      { timeout: INITIAL_NAVIGATION_TIMEOUT_MS },
+    );
+    await page.evaluate(() =>
+      (
+        globalThis as unknown as {
+          __STORYBOOK_PREVIEW__: { ready: () => Promise<unknown> };
+        }
+      ).__STORYBOOK_PREVIEW__.ready(),
+    );
     defaultViewport = page.viewportSize();
   },
   // Re-seed the PRNG before each story so consumption order is independent of
@@ -761,8 +782,8 @@ const config: TestRunnerConfig = {
     // `getStoryContext` reads Storybook's own `storyStore.loadStory()` —
     // safe to call here even though "the story is not rendered in the
     // browser" yet (test-runner's own preVisit doc comment): that ONLY
-    // means not mounted, not that the preview bundle (loaded once by
-    // `prepare()`'s `page.goto`) hasn't registered the story's context.
+    // means not mounted. It does need the Story Store to exist, which
+    // `prepare()` awaits (`__STORYBOOK_PREVIEW__.ready()`) after its `goto`.
     const story = await getStoryContext(page, context);
     const storyGlobals = (
       story as { storyGlobals?: { viewport?: { value?: string } } }
