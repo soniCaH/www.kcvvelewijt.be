@@ -90,4 +90,24 @@ describe("SponsorTile", () => {
     expect(unframedTile).not.toHaveClass("group-hover:shadow-none");
     expect(unframedTile).not.toHaveClass("transition-[translate,box-shadow]");
   });
+
+  it("carries the sponsor markers on exactly one element, the link when linked", () => {
+    const { container } = render(<SponsorTile sponsor={base} />);
+    const marked = container.querySelectorAll("[data-sponsor-id]");
+    expect(marked).toHaveLength(1);
+    expect(marked[0].tagName).toBe("A");
+    expect(marked[0]).toHaveAttribute("data-sponsor-id", base.id);
+    expect(marked[0]).toHaveAttribute("data-sponsor-tier", base.tier);
+  });
+
+  it("carries the markers on its root when unlinked, so its impression counts", () => {
+    const { container } = render(
+      <SponsorTile sponsor={{ ...base, url: undefined }} />,
+    );
+    const marked = container.querySelectorAll("[data-sponsor-id]");
+    expect(marked).toHaveLength(1);
+    expect(marked[0].tagName).not.toBe("A");
+    expect(marked[0]).toHaveAttribute("data-sponsor-id", base.id);
+    expect(marked[0]).toHaveAttribute("data-sponsor-tier", base.tier);
+  });
 });

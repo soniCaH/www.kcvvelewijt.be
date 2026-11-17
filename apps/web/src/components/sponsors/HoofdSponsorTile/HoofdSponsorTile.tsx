@@ -29,6 +29,16 @@ export function HoofdSponsorTile({ sponsor }: HoofdSponsorTileProps) {
       shadow="sm"
       padding="none"
       interactive={sponsor.url ? "press" : false}
+      // Unlinked: the card root carries the markers, for its impression. A
+      // linked card carries them on its link, below.
+      dataAttrs={
+        sponsor.url
+          ? undefined
+          : {
+              "data-sponsor-id": sponsor.id,
+              ...(sponsor.tier && { "data-sponsor-tier": sponsor.tier }),
+            }
+      }
       className="px-3 pt-4 pb-2.5 text-center"
     >
       <div className="flex min-h-[56px] items-center justify-center">

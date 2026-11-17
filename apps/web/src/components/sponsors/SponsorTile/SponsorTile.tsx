@@ -70,6 +70,13 @@ export const SponsorTile = ({
 
   const tile = (
     <div
+      // An unlinked tile carries the markers on its own root, for its
+      // impression; the tracker sends no click for a non-link. A linked tile
+      // carries them on its link, below.
+      {...(!sponsor.url && {
+        "data-sponsor-id": sponsor.id,
+        "data-sponsor-tier": sponsor.tier,
+      })}
       className={cn(
         "bg-cream-soft flex min-h-[70px] items-center justify-center px-3.5 py-2",
         framed && "border-ink shadow-paper-sm-soft border-[1.5px]",
