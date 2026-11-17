@@ -20,6 +20,7 @@ and at least one real user session with analytics consent given.
    - [4c. Organigram Usage Exploration](#4c-organigram-usage-exploration)
    - [4d. Related Content Funnel](#4d-related-content-funnel)
    - [4e. Homepage Match Widget Clicks](#4e-homepage-match-widget-clicks)
+   - [4f. Kalender abonnementen Exploration](#4f-kalender-abonnementen-exploration)
 5. [Create custom reports](#5-create-custom-reports)
    - [5a. Responsibility Finder Success Rate](#5a-responsibility-finder-success-rate)
    - [5b. Responsibility No-Results (Content Gaps)](#5b-responsibility-no-results-content-gaps)
@@ -390,6 +391,89 @@ over checking upcoming fixtures.
 
 ---
 
+### 4f. Kalender abonnementen Exploration
+
+**Key question**: How many visitors subscribe to the club calendar each week, by which route (iPhone one-tap or copied link), and from which surface (`/kalender` or a Team page)?
+
+This is a **Free form** exploration, not a funnel.
+
+**Events it is built on** (each one fires in code today):
+
+| Event                       | Fires when                                                                         | Code                                            |
+| --------------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `kalender_subscribe_webcal` | tap on "Zet in je agenda (iPhone)" (only with a team selected)                     | `CalendarSubscribePanel.tsx:314`                |
+| `kalender_subscribe_copy`   | the link reached the clipboard (a failed copy fires nothing)                       | `CalendarSubscribePanel.tsx:152`                |
+| `kalender_subscribe_open`   | the panel is opened on `/kalender` (no params; the Team page panel is always open) | `CalendarWidget.tsx:222`                        |
+| `kalender_view`             | page view of `/kalender` (denominator for "subscribes per visit")                  | `apps/web/src/app/(main)/kalender/page.tsx:197` |
+
+Both subscribe events carry `teams_count`, `side`, `events` and `source` (`kalender` on `/kalender`, `team` on a Team page panel) — see `subscribeParams()` in `CalendarSubscribePanel.tsx`. No team ids or names are sent.
+
+**Which params can be a breakdown** (per `scripts/analytics-taxonomy.mjs`):
+
+| Param         | GA4 dimension      | Usable as breakdown?                                                                                                                 |
+| ------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `source`      | Interaction source | Yes, registered                                                                                                                      |
+| `teams_count` | Teams count        | Yes, registered                                                                                                                      |
+| `side`        | Match side         | Yes, registered                                                                                                                      |
+| `events`      | —                  | **No.** Not in the taxonomy at all, so the GA4 tag does not forward it: it is not visible in DebugView either, only in the dataLayer |
+
+> **Reading `source`**: the two subscribe events only carry `source` since #3644
+> (2026-11-07). Earlier `kalender_subscribe_copy` events (the baseline) show as
+> `(not set)` — read them as `/kalender`, the only surface then. `kalender_view`
+> and `kalender_subscribe_open` never carry `source`.
+
+1. **Explore** → **+** → leave Technique as **Free form**.
+2. Rename to **"Kalender abonnementen"**.
+
+**Add variables** (left panel):
+
+Dimensions to add:
+
+- Event name
+- Interaction source
+- Teams count
+- Match side
+- Week
+
+Metrics to add:
+
+- Event count
+
+**Tab 1 — Route by surface:**
+
+- Rows: **Event name**
+- Columns: **Interaction source**
+- Values: **Event count**
+- Filter: Event name → matches regex → `^kalender_subscribe_(webcal|copy)$`
+
+Each row is a subscribe route (iPhone tap vs copied link), each column a surface.
+The `team` column over the `kalender` column answers whether the Team page panel
+earns its place.
+
+**Tab 2 — Per week:** Click **+** at the top of the canvas. Name it "Per week".
+
+- Rows: **Week**
+- Columns: **Event name**
+- Values: **Event count**
+- Filter: Event name → matches regex → `^kalender_subscribe_(webcal|copy)$`
+
+The sum of the two columns is the weekly subscribe count. Compare it against the
+pre-#3643 `kalender_subscribe_copy` baseline.
+
+**Tab 3 — Subscribe intent:** Click **+**. Name it "Panel to subscribe".
+
+- Rows: **Event name**
+- Values: **Event count**
+- Filter: Event name → matches regex → `^kalender_(view|subscribe_(open|webcal|copy))$`
+
+`kalender_subscribe_open` against the two subscribe events shows how many panel
+opens end in a subscribe. A webcal tap counts the tap, not a completed subscribe:
+the OS calendar app takes over and GA4 never sees the outcome.
+
+**Share the exploration.**
+
+---
+
 ## 5. Create custom reports
 
 All of these are **Free form** explorations.
@@ -607,6 +691,7 @@ download context is needed.
 | Organigram            | `organigram_view_changed`, `organigram_member_clicked`, `organigram_search_used`, `organigram_department_filtered`, `organigram_export_png`, `organigram_team_card_shown`, `organigram_team_not_found`, `organigram_team_guess_answered`                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | Related content       | `related_content_shown`, `related_content_click`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | Homepage              | `homepage_match_widget_clicked`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| Kalender              | `kalender_view`, `kalender_filter`, `kalender_view_toggle`, `kalender_item_click`, `kalender_subscribe_open`, `kalender_subscribe_webcal`, `kalender_subscribe_copy`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | Match strip           | `firstteam_strip_clicked`, `firstteam_strip_dismissed`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | Share tool (`/share`) | `share_image_saved` — one per story that left the tool (share sheet resolved, or download clicked); none on a cancelled share. Params: `content_type`, `article_type` / `event_type`, `template` (match), `look`, `theme` (not W), `wash` (look C), `format`, `cover_mode` (article/event, only while the Omslag row shows: the item has a cover and no own photo), `blocks_moved`, `fallback_used`. No ids, slugs, names or titles. `article_type` / `event_type` are registered dimensions; the other nine are forwarded by the GA4 tag as unregistered params (`registered: false` in the taxonomy): visible in DebugView, no custom dimension (the 50-dimension cap is full) |
 | Downloads (auto)      | `file_download` (GA4 Enhanced Measurement)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
@@ -628,6 +713,7 @@ download context is needed.
 | Related Content — Type Engagement    | Explore → Related Content Type Engagement     | Click counts per target_type                 |
 | Related Content — Position Bias      | Explore → Related Content Position Bias       | Click distribution by position               |
 | Homepage Match Widget Clicks         | Explore → Homepage Match Widget Clicks        | Click distribution by match status           |
+| Kalender abonnementen                | Explore → Kalender abonnementen               | Weekly subscribes by route and surface       |
 | Match Strip Engagement               | Explore → Match Strip Engagement              | Strip clicks vs dismissals, by match status  |
 | All events overview                  | Reports → Engagement → Events                 | Raw event counts (24–72h delay)              |
 | Realtime events                      | Reports → Realtime                            | Live event counts                            |
