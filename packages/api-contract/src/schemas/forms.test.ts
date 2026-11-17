@@ -21,6 +21,21 @@ const valid = {
 
 const decode = S.decodeUnknownEither(MembershipRequest);
 
+describe("MembershipRequest gender and municipality", () => {
+  it("are optional", () => {
+    const { gender: _g, municipality: _m, ...rest } = valid;
+    expect(Either.isRight(decode(rest))).toBe(true);
+  });
+
+  it("are still accepted when sent", () => {
+    expect(Either.isRight(decode(valid))).toBe(true);
+  });
+
+  it("still rejects an unknown gender", () => {
+    expect(Either.isLeft(decode({ ...valid, gender: "z" }))).toBe(true);
+  });
+});
+
 describe("MembershipRequest.remark", () => {
   it("is optional", () => {
     const result = decode(valid);

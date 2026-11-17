@@ -234,8 +234,6 @@ function MembershipFormFields({
     if (!birthDate) errors.birthDate = REQUIRED_MSG;
     else if (!isPlausibleBirthDate(birthDate, new Date()))
       errors.birthDate = INVALID_BIRTH_DATE_MESSAGE;
-    if (!gender) errors.gender = REQUIRED_MSG;
-    if (!municipality.trim()) errors.municipality = REQUIRED_MSG;
     if (!EMAIL_PATTERN.test(email))
       errors.email = "Vul een geldig e-mailadres in.";
     if (isPlayer && !medicalCertAcknowledged) {
@@ -282,8 +280,8 @@ function MembershipFormFields({
           firstName,
           lastName,
           birthDate,
-          gender,
-          municipality,
+          gender: gender || undefined,
+          municipality: municipality.trim() || undefined,
           email,
           priorClub: priorClub || undefined,
           remark: remark || undefined,
@@ -464,38 +462,6 @@ function MembershipFormFields({
             />
           </div>
           <div>
-            <Label htmlFor={fieldId("gender")} required>
-              Geslacht
-            </Label>
-            <Select
-              id={fieldId("gender")}
-              name="gender"
-              value={gender}
-              placeholder="Maak een keuze…"
-              error={fieldErrors.gender}
-              onChange={(e) => setField("gender", e.target.value)}
-            >
-              {GENDER_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </Select>
-          </div>
-          <div>
-            <Label htmlFor={fieldId("municipality")} required>
-              Gemeente
-            </Label>
-            <Input
-              id={fieldId("municipality")}
-              name="municipality"
-              value={municipality}
-              onChange={(e) => setField("municipality", e.target.value)}
-              error={fieldErrors.municipality}
-              autoComplete="address-level2"
-            />
-          </div>
-          <div>
             <Label htmlFor={fieldId("email")} required>
               E-mail
             </Label>
@@ -507,6 +473,41 @@ function MembershipFormFields({
               onChange={(e) => setField("email", e.target.value)}
               error={fieldErrors.email}
               autoComplete="email"
+            />
+          </div>
+          <div>
+            <Label htmlFor={fieldId("gender")} optional>
+              Geslacht
+            </Label>
+            <Select
+              id={fieldId("gender")}
+              name="gender"
+              value={gender}
+              error={fieldErrors.gender}
+              onChange={(e) => setField("gender", e.target.value)}
+              // The empty option stays selectable (#3638): `Select`'s own
+              // placeholder is disabled, so a mistaken pick could not be undone.
+              className={gender === "" ? "text-ink/40 [&>option]:text-ink" : ""}
+            >
+              <option value="">Maak een keuze…</option>
+              {GENDER_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor={fieldId("municipality")} optional>
+              Gemeente
+            </Label>
+            <Input
+              id={fieldId("municipality")}
+              name="municipality"
+              value={municipality}
+              onChange={(e) => setField("municipality", e.target.value)}
+              error={fieldErrors.municipality}
+              autoComplete="address-level2"
             />
           </div>
           <div className="md:col-span-2">

@@ -83,6 +83,7 @@ export const membershipApplication = defineType({
       type: 'string',
       group: 'aanvraag',
       readOnly: true,
+      description: 'Optioneel opgegeven door de aanvrager.',
       options: {
         list: [
           {title: 'Man', value: 'm'},
@@ -90,7 +91,6 @@ export const membershipApplication = defineType({
           {title: 'X', value: 'x'},
         ],
       },
-      validation: (Rule) => Rule.required().error('Verplicht.'),
     }),
     defineField({
       name: 'municipality',
@@ -98,7 +98,7 @@ export const membershipApplication = defineType({
       type: 'string',
       group: 'aanvraag',
       readOnly: true,
-      validation: (Rule) => Rule.required().error('Verplicht.'),
+      description: 'Optioneel opgegeven door de aanvrager.',
     }),
     defineField({
       name: 'email',
