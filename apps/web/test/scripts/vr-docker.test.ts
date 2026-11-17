@@ -50,12 +50,21 @@ const SCRIPT = join(
 );
 
 /** Run the wrapper with a PATH that has no `docker`/`pnpm`, so an allowed run
- *  fails loudly instead of starting a 2.5 h suite on the developer's machine. */
-const runScript = (args: string[]) =>
-  spawnSync(process.execPath, [SCRIPT, ...args], {
-    encoding: "utf8",
-    env: { ...process.env, PATH: "/nonexistent" },
-  });
+ *  fails loudly instead of starting a 2.5 h suite on the developer's machine.
+ *  The child gets its own empty `TMPDIR` (the script takes its machine-wide
+ *  lock in `os.tmpdir()`), so a real VR run in another worktree never makes
+ *  this test see the lock refusal (#3774). */
+const runScript = (args: string[]) => {
+  const privateTmp = mkdtempSync(join(tmpdir(), "kcvv-vr-cli-test-"));
+  try {
+    return spawnSync(process.execPath, [SCRIPT, ...args], {
+      encoding: "utf8",
+      env: { ...process.env, PATH: "/nonexistent", TMPDIR: privateTmp },
+    });
+  } finally {
+    rmSync(privateTmp, { recursive: true, force: true });
+  }
+};
 
 describe("decide", () => {
   it("refuses check mode even with a pattern — check mode cannot be scoped", () => {
