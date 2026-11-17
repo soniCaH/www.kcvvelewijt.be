@@ -232,4 +232,67 @@ describe("handleMembership", () => {
       );
     });
   });
+
+  describe("named contact", () => {
+    const base = {
+      speler: null,
+      jeugdspeler: null,
+      vrijwilliger: null,
+      trainer: null,
+      scheidsrechter: null,
+    };
+    const applicantText = async (routing: FormRoutingConfig) => {
+      const dispatch = vi.fn<EmailTransportInterface["dispatchEmail"]>(() =>
+        Effect.succeed(undefined),
+      );
+      await run(validPayload, { dispatch, routing });
+      return dispatch.mock.calls[0]![0].text!;
+    };
+
+    it("names the holder and function title of the role's box", async () => {
+      const text = await applicantText({
+        ...base,
+        contacts: {
+          vrijwilliger: {
+            functionTitle: "Voorzitter",
+            holder: { firstName: "An", lastName: "Peeters" },
+          },
+        },
+      });
+      expect(text).toContain(
+        "An Peeters (Voorzitter) neemt contact met je op.",
+      );
+      expect(text).not.toContain("binnenkort");
+    });
+
+    it.each([
+      ["no config", undefined],
+      ["no reference", {}],
+      [
+        "a reference without a holder",
+        { vrijwilliger: { functionTitle: "Voorzitter", holder: null } },
+      ],
+      [
+        "a holder without a name",
+        {
+          vrijwilliger: {
+            functionTitle: "Voorzitter",
+            holder: { firstName: null, lastName: " " },
+          },
+        },
+      ],
+      [
+        "another role's box only",
+        {
+          trainer: {
+            functionTitle: "T",
+            holder: { firstName: "A", lastName: "B" },
+          },
+        },
+      ],
+    ])("keeps today's sentence for %s", async (_label, contacts) => {
+      const text = await applicantText({ ...base, contacts });
+      expect(text).toContain("Iemand van de club neemt binnenkort contact");
+    });
+  });
 });

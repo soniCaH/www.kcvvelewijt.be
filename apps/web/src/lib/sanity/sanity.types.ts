@@ -31,6 +31,13 @@ export type ShortLink = {
   target?: string;
 };
 
+export type OrganigramNodeReference = {
+  _ref: string;
+  _type: "reference";
+  _weak?: boolean;
+  [internalGroqTypeReferenceTo]?: "organigramNode";
+};
+
 export type FormRoutingConfig = {
   _id: string;
   _type: "formRoutingConfig";
@@ -42,6 +49,11 @@ export type FormRoutingConfig = {
   vrijwilliger?: string;
   trainer?: string;
   scheidsrechter?: string;
+  spelerContact?: OrganigramNodeReference;
+  jeugdspelerContact?: OrganigramNodeReference;
+  vrijwilligerContact?: OrganigramNodeReference;
+  trainerContact?: OrganigramNodeReference;
+  scheidsrechterContact?: OrganigramNodeReference;
 };
 
 export type MembershipApplication = {
@@ -732,13 +744,6 @@ export type Page = {
   };
 };
 
-export type OrganigramNodeReference = {
-  _ref: string;
-  _type: "reference";
-  _weak?: boolean;
-  [internalGroqTypeReferenceTo]?: "organigramNode";
-};
-
 export type ResponsibilityReference = {
   _ref: string;
   _type: "reference";
@@ -1115,6 +1120,7 @@ export type Geopoint = {
 
 export type AllSanitySchemaTypes =
   | ShortLink
+  | OrganigramNodeReference
   | FormRoutingConfig
   | MembershipApplication
   | SanityImageAssetReference
@@ -1150,7 +1156,6 @@ export type AllSanitySchemaTypes =
   | PageReference
   | Article
   | Page
-  | OrganigramNodeReference
   | ResponsibilityReference
   | Responsibility
   | OrganigramNode

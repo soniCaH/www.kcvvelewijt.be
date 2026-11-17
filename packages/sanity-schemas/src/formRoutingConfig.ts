@@ -18,10 +18,22 @@ const roleRecipient = (name: string, title: string, helper: string) =>
         ),
   })
 
+const roleContact = (name: string, title: string) =>
+  defineField({
+    name,
+    title: `Contactpersoon ${title}`,
+    type: 'reference',
+    to: [{type: 'organigramNode'}],
+    group: 'ontvangers',
+    description: `Organigram-positie waarvan de titularis in de bevestigingsmail aan een geïnteresseerde ${title.toLowerCase()} genoemd wordt (naam + functietitel). Leeg, een inactieve positie of een vacante positie (geen leden) = de mail zegt enkel dat iemand van de club contact opneemt. Geen belofte over een termijn.`,
+  })
+
 /**
  * Singleton: per-role recipient for membership-form admin notifications. The
  * BFF reads this (cached) when an application comes in and routes the notice to
- * the matching role address — all default to info@kcvvelewijt.be.
+ * the matching role address — all default to info@kcvvelewijt.be. Each role can
+ * also point at the organigram box whose holder the applicant's confirmation
+ * mail names; the admin mail is not affected.
  */
 export const formRoutingConfig = defineType({
   name: 'formRoutingConfig',
@@ -36,6 +48,11 @@ export const formRoutingConfig = defineType({
     roleRecipient('vrijwilliger', 'Vrijwilliger', 'Ontvanger van interesse van vrijwilligers.'),
     roleRecipient('trainer', 'Trainer', 'Ontvanger van interesse van trainers.'),
     roleRecipient('scheidsrechter', 'Scheidsrechter', 'Ontvanger van interesse van scheidsrechters.'),
+    roleContact('spelerContact', 'Speler'),
+    roleContact('jeugdspelerContact', 'Jeugdspeler'),
+    roleContact('vrijwilligerContact', 'Vrijwilliger'),
+    roleContact('trainerContact', 'Trainer'),
+    roleContact('scheidsrechterContact', 'Scheidsrechter'),
   ],
   preview: {
     prepare() {
