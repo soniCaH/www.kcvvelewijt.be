@@ -108,14 +108,15 @@ export function TeamMatchesSection({
 
         {subscribeTeam ? (
           // `/kalender`'s "Abonneer" toggle (CalendarWidget) without the glyph,
-          // on the `text-label` step instead of its frozen `text-[11px]` (#3786).
+          // on the `text-label` step instead of its frozen `text-[11px]` (line-height 1,
+          // so `py-2` keeps the height close) (#3786).
           <button
             type="button"
             onClick={toggleSubscribe}
             aria-expanded={subscribeOpen}
             aria-controls={subscribePanelId}
             className={cn(
-              "border-ink text-label inline-flex items-center gap-1.5 border-2 px-3 py-1.5 font-mono uppercase transition-colors",
+              "border-ink text-label inline-flex items-center gap-1.5 border-2 px-3 py-2 font-mono uppercase transition-colors",
               subscribeOpen
                 ? "bg-ink text-cream"
                 : "text-ink hover:bg-cream-soft",
@@ -127,20 +128,19 @@ export function TeamMatchesSection({
       </div>
 
       {subscribeTeam ? (
-        <div id={subscribePanelId}>
-          <CalendarSubscribePanel
-            teams={[
-              {
-                id: String(subscribeTeam.psdId),
-                name: subscribeTeam.label,
-                psdId: subscribeTeam.psdId,
-                label: subscribeTeam.label,
-              },
-            ]}
-            isOpen={subscribeOpen}
-            source="team"
-          />
-        </div>
+        <CalendarSubscribePanel
+          teams={[
+            {
+              id: String(subscribeTeam.psdId),
+              name: subscribeTeam.label,
+              psdId: subscribeTeam.psdId,
+              label: subscribeTeam.label,
+            },
+          ]}
+          isOpen={subscribeOpen}
+          source="team"
+          id={subscribePanelId}
+        />
       ) : null}
     </section>
   );

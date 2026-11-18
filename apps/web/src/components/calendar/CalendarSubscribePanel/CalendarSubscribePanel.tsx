@@ -19,6 +19,8 @@ export interface CalendarSubscribePanelProps {
   /** Surface the subscribe events came from (`source` is a registered GA4
    * dimension). Defaults to the `/kalender` widget. */
   source?: "kalender" | "team";
+  /** Root id, for a toggle's `aria-controls` (#3786). */
+  id?: string;
 }
 
 type Side = "all" | "home" | "away";
@@ -66,6 +68,7 @@ export function CalendarSubscribePanel({
   preselectedTeamLabel,
   isOpen,
   source = "kalender",
+  id,
 }: CalendarSubscribePanelProps) {
   const [selectedTeamIds, setSelectedTeamIds] = useState(() =>
     computeInitialSelection(teams, preselectedTeamLabel),
@@ -170,6 +173,7 @@ export function CalendarSubscribePanel({
           ? undefined
           : "border-paper-edge bg-cream-soft border-b-2 border-dashed p-4",
       )}
+      id={id}
       data-testid="subscribe-panel"
     >
       {/* Seizoenskaart — a perforated "abonnement" ticket (6d5 lock). The QR

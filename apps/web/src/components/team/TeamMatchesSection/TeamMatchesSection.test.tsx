@@ -228,13 +228,11 @@ describe("TeamMatchesSection", () => {
       renderWithTeam();
       expect(screen.getByTestId("subscribe-panel")).toHaveAttribute("hidden");
       expect(toggle()).toHaveAttribute("aria-expanded", "false");
-      const panelId = toggle().getAttribute("aria-controls");
-      expect(panelId).toBeTruthy();
-      expect(
-        document
-          .getElementById(panelId ?? "")
-          ?.contains(screen.getByTestId("subscribe-panel")),
-      ).toBe(true);
+      expect(toggle()).toHaveAttribute(
+        "aria-controls",
+        screen.getByTestId("subscribe-panel").id,
+      );
+      expect(screen.getByTestId("subscribe-panel").id).not.toBe("");
     });
 
     it("opens the panel for the given team on click, with only its id in the feed", () => {
