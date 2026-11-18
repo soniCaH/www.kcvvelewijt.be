@@ -176,12 +176,18 @@ that quietly matched nothing, has gone onto a ticket as a finding.
   (`NEXT_PUBLIC_SANITY_DATASET`; `apps/web/src/lib/sanity/client.ts` defaults to
   `production` when it is unset): check a finding against production, with the
   token, before it goes on a ticket.
-- **GROQ returns a number where you expect an error.** Three traps:
+- **GROQ returns a number where you expect an error.** Three traps. Check every
+  GROQ count with a second method before you act on it:
   - A misspelled field or type returns `0`. Add a nonzero control to the same
     query, for example `"total": count(*[_type=="event"])`, and check the names in
-    `packages/sanity-schemas/src/<type>.ts`.
+    `packages/sanity-schemas/src/<type>.ts`. Two real misses: `matchPreview` and
+    `matchRecap` are not types but `articleType` values on `article`
+    (`*[_type=="article" && articleType=="matchPreview"]`), and the event start
+    field is `dateStart`, not `startDate`.
   - A nested filter like `count(players[]->[pred])` matches every item.
-    Cross-check with a flat `count(*[_type=="player" && pred])`.
+    Cross-check with a flat `count(*[_type=="player" && pred])`. Or project the
+    referenced docs (`players[]->{archived, …}`) and count in `jq` or `python3`.
+    When the two counts differ, trust the flat one.
   - `match` splits text into tokens, so it finds false positives. Count stored URL
     shapes with an exact or substring test instead.
 - **After a write, count the changed ids in both datasets.** A count that differs
