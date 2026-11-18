@@ -22,7 +22,7 @@ The dataset is hardcoded to `'staging'`, so no env var or `.env` file can repoin
 
 ## sanity.config.ts — "Voorbeeld" Origin
 
-"Voorbeeld" (`createPreviewAction`) is registered exactly as in `apps/studio/sanity.config.ts`; only the web origin differs: `http://localhost:3000`, the web app run locally against the staging dataset (#3661). Known limit: the button works only while the web app runs locally on port 3000. Never point it at the production site.
+"Voorbeeld" (`createPreviewAction`) is registered exactly as in `apps/studio/sanity.config.ts`; only the web origin differs: `http://localhost:3000`, the web app run locally against the staging dataset (#3661). Known limit: the button works only while the web app runs locally on port 3000. Start the web app with `NEXT_PUBLIC_SANITY_DATASET=staging pnpm --filter @kcvv/web dev`: the web client defaults to the production dataset when the variable is unset. Never point it at the production site.
 
 ## structure.ts — Must Mirror Production
 

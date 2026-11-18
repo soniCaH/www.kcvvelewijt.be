@@ -16,6 +16,7 @@ import {schemaTypes} from './schemaTypes'
 import {structure} from './structure'
 
 // "Voorbeeld" opens the web app run locally (port 3000) against the staging dataset; never the production site.
+// Start it with NEXT_PUBLIC_SANITY_DATASET=staging: the web client defaults to production when unset.
 const PreviewAction = createPreviewAction({webOrigin: 'http://localhost:3000'})
 
 export default defineConfig({
