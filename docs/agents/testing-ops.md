@@ -50,6 +50,20 @@ BASE_URL=https://<a-staging-built-deployment> pnpm --filter @kcvv/web run test:e
 When `BASE_URL` is set, the config's `webServer` block stays inactive and the
 suite hits the supplied URL directly.
 
+### Local traps
+
+- Run the suite through `test:e2e` (it passes `-c test/e2e/playwright.config.ts`).
+  A bare `playwright test <spec>` uses a default config with no `baseURL`, so
+  every `page.goto("/x")` fails with `Cannot navigate to invalid URL`.
+- `pnpm --filter @kcvv/api dev` needs a Cloudflare login: the `[ai]` binding in
+  `apps/api/wrangler.toml` is remote-only, and `--local` does not bypass it.
+  Without a login, comment out `[ai]` and `[[vectorize]]` together; only
+  `/zoeken` needs them. Commit before you start the worker: `wrangler dev`
+  reloads on `wrangler.toml`, and lint-staged's stash during a commit briefly
+  restores the file.
+- `NEXT_PUBLIC_SANITY_DATASET` is inlined at build time. To test another
+  dataset, rebuild with it set; restarting `next start` does not switch it.
+
 ### Running against an already-started server
 
 `webServer.reuseExistingServer` is hard-coded `false` (#3141 finding 9): a
