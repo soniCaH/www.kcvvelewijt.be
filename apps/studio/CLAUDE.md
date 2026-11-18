@@ -43,6 +43,8 @@ pnpm --filter @kcvv/studio typegen
 
 Commit the updated `sanity.types.ts` alongside the schema change. **CI enforces this** (`.github/workflows/ci.yml`, the "Sanity types in sync" step in `quality-checks`): it regenerates the types and fails the build if that produces a diff, so a forgotten regeneration is caught on the PR, not discovered later (#2862).
 
+The local gate runs typegen too: `turbo.json` makes web `build` and `type-check` depend on `@kcvv/studio#typegen`, so commit the regenerated file with the query change. Nothing type-checks the query string itself (`fetchGroq` takes a plain `string`): a projection change moves the `*_QUERY_RESULT` type and is caught, but a filter or slice change is not.
+
 ## Migrations
 
 One-off data migrations live in `apps/studio/migrations/`. **Rule: a migration with logic lives in `@kcvv/sanity-studio/migrations` with a test; the `index.ts` here may only re-export it** ([#3153](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3153)). A facade holds a docblock, one import, one `export default` — nothing else. Every facade in both studio folders follows this today.
