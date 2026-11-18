@@ -42,7 +42,6 @@ import {
   type BannerSlotVM,
 } from "@/lib/repositories/homepage.repository";
 import { TrackInView } from "@/components/analytics";
-import { SponsorWallTracker } from "@/components/sponsors/SponsorWallTracker";
 import {
   EventRepository,
   type EventVM,
@@ -479,13 +478,10 @@ export default async function HomePage() {
             already equals the new py-16 base (harmless either way) so a
             future change to <SponsorsBlock>'s base value can't silently
             widen the gap this override pins. */}
-        {/* The tracker lives here, not inside <SponsorsSection>: the team
-            page renders that too and must keep sending no sponsor event
-            (#3649). It counts a Sponsor's impression once seen for 1 s
-            (#3650); a mount-time event would count every homepage load. */}
-        <SponsorWallTracker source="homepage">
-          <SponsorsSection className="py-16 sm:py-16 md:py-20" />
-        </SponsorWallTracker>
+        <SponsorsSection
+          source="homepage"
+          className="py-16 sm:py-16 md:py-20"
+        />
       </>
     ),
     paddingTop: "pt-0",
