@@ -175,7 +175,19 @@ that quietly matched nothing, has gone onto a ticket as a finding.
   never "no data". `apps/web/.env.local` points at `staging`
   (`NEXT_PUBLIC_SANITY_DATASET`; `apps/web/src/lib/sanity/client.ts` defaults to
   `production` when it is unset): check a finding against production, with the
-  token, before it goes on a ticket.
+  token, before it goes on a ticket. A token query:
+
+  ```bash
+  curl -s --get "https://vhb33jaz.apicdn.sanity.io/v2024-01-01/data/query/production" \
+    -H "Authorization: Bearer $SANITY_API_READ_TOKEN" \
+    --data-urlencode 'query=count(*[_type=="team"])'
+  ```
+
+- **Staging has no youth teams.** A local page like `/ploegen/kcvve-u9/…` shows
+  "Team niet gevonden" on the staging dataset. To see youth data, set
+  `NEXT_PUBLIC_SANITY_DATASET=production` and `SANITY_API_READ_TOKEN` in
+  `apps/web/.env.local` (git-ignored). When a local page is empty or 404s while
+  production is fine, read `.env.local` before you debug the code.
 - **GROQ returns a number where you expect an error.** Three traps. Check every
   GROQ count with a second method before you act on it:
   - A misspelled field or type returns `0`. Add a nonzero control to the same
