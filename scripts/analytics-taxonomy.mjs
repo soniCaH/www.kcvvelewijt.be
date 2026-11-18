@@ -190,6 +190,13 @@ export const params = [
   // keeps `create-ga4-dimensions.mjs` from minting a dimension while the
   // 50-dimension cap is already exceeded.
   { parameterName: "has_remark", displayName: "Has remark", registered: false },
+  // #3636 — `membership_form_start`, also carries `role` (above). Forwarded
+  // unregistered (DebugView only) while the 50-dimension cap is full.
+  {
+    parameterName: "restored_draft",
+    displayName: "Restored draft",
+    registered: false,
+  },
   // ── /hulp team card (#3558, #3559) ─────────────────────────────────────
   // `organigram_team_card_shown`, `organigram_team_not_found`,
   // `organigram_team_guess_answered`. Forwarded unregistered (DebugView
