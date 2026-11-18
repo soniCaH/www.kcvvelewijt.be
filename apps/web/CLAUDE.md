@@ -41,6 +41,8 @@ Audit/spec generators sometimes flag features as "missing" because no top-level 
 - **Story type:** `StoryObj<typeof meta>`, not `StoryObj<typeof ComponentName>`.
 - **No non-null assertions** on fixture lookups — use `?? fallback` so the story never crashes at import time.
 - **Non-serialisable props** (e.g. `Set<string>`): define a `StoryArgs` type override with a serialisable equivalent and convert in a named render helper. No `as unknown as` casts in `args`.
+- **`Features/` stories set `tags: ["autodocs"]`** on `meta`, like `UI/` ones.
+- **Story imagery uses local `/images/*` assets**, never external URLs: an external image flakes VR. Fix the asset, never `vr: { disable: true }`.
 
 ### Storybook navigation structure (MANDATORY)
 
@@ -218,7 +220,7 @@ The addon-vitest config rationale (why it is a separate config file, never folde
 
 ### Drive the viewport with `setViewport`, never `innerWidth =`
 
-Never write `window.innerWidth`/`innerHeight` in a test; use `window.happyDOM.setViewport({ width, height })`. ESLint enforces it (`eslint.config.mjs`, #3142); the rule's message gives the reason. A `matchMedia` `change` on the first narrow of an already-matching query still needs a stub (a happy-dom bug, flake ledger class L).
+Never write `window.innerWidth`/`innerHeight` in a test; use `window.happyDOM.setViewport({ width, height })`. ESLint enforces it (`eslint.config.mjs`, #3142); the rule's message gives the reason. A `matchMedia` `change` on the first narrow of an already-matching query still needs a stub (a happy-dom bug, flake ledger class L). Copy the stub in `CalendarWidget.test.tsx`.
 
 ### A test may not use more than half its own timeout
 
