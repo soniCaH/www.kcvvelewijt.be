@@ -88,7 +88,11 @@ export const MidSeason: Story = {
 export const WithSubscribePanel: Story = {
   args: {
     matches: midSeason,
-    subscribeTeam: { psdId: 9401, label: "U13" },
+    subscribeTeam: {
+      psdId: 9401,
+      label: "U13",
+      moreTeamsHref: "/kalender?abonneer=9401",
+    },
   },
 };
 
