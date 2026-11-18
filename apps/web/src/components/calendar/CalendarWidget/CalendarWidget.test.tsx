@@ -6,7 +6,7 @@
  * and the subscribe toggle.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderToString } from "react-dom/server";
 import { CalendarWidget } from "./CalendarWidget";
@@ -320,15 +320,11 @@ describe("CalendarWidget", () => {
       Element.prototype.scrollIntoView = scrollIntoView;
     });
 
-    it("scrolls the opened panel into view on load, and only then", () => {
+    it("scrolls the opened panel into view on load", () => {
       setUrl("?abonneer=102");
       render(<CalendarWidget {...defaultProps} initialAbonneer="102" />);
       expect(scrollIntoView).toHaveBeenCalledTimes(1);
       expect(scrollIntoView.mock.contexts[0]).toBe(panel());
-      scrollIntoView.mockClear();
-      cleanup();
-      render(<CalendarWidget {...defaultProps} initialAbonneer="abc" />);
-      expect(scrollIntoView).not.toHaveBeenCalled();
     });
 
     it("a valid Team id opens the panel with only that Team selected", () => {
@@ -384,10 +380,12 @@ describe("CalendarWidget", () => {
     it.each([["abc"], ["999999"], ["0102"], [undefined]])(
       "%s leaves the panel closed with all Teams selected and fires nothing",
       (raw) => {
+        setUrl(raw ? `?abonneer=${raw}` : "");
         render(<CalendarWidget {...defaultProps} initialAbonneer={raw} />);
         expect(panel()).toHaveAttribute("hidden");
         expect(chips()).toHaveLength(2);
         expect(trackEvent).not.toHaveBeenCalled();
+        expect(scrollIntoView).not.toHaveBeenCalled();
       },
     );
   });

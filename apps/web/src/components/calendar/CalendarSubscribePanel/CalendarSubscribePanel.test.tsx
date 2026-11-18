@@ -448,9 +448,14 @@ describe("CalendarSubscribePanel", () => {
       expect(screen.queryByRole("link", { name: /Meer ploegen/ })).toBeNull();
     });
 
-    it("the Team ticket says Volg je ploeg. and links to /kalender with this Team", () => {
+    it("the Team ticket says Volg je ploeg. and shows the link it is given", () => {
       render(
-        <CalendarSubscribePanel teams={[teams[1]]} isOpen source="team" />,
+        <CalendarSubscribePanel
+          teams={[teams[1]]}
+          isOpen
+          source="team"
+          moreTeamsHref="/kalender?abonneer=102"
+        />,
       );
       expect(screen.getByText("Volg je ploeg.")).toBeInTheDocument();
       expect(screen.queryByText("Volg je ploeg(en).")).toBeNull();
@@ -459,14 +464,9 @@ describe("CalendarSubscribePanel", () => {
       ).toHaveAttribute("href", "/kalender?abonneer=102");
     });
 
-    it("the Team ticket drops the link for a Team /kalender does not list", () => {
+    it("the Team ticket without a link renders none", () => {
       render(
-        <CalendarSubscribePanel
-          teams={[teams[1]]}
-          isOpen
-          source="team"
-          showMoreTeamsLink={false}
-        />,
+        <CalendarSubscribePanel teams={[teams[1]]} isOpen source="team" />,
       );
       expect(screen.getByText("Volg je ploeg.")).toBeInTheDocument();
       expect(screen.queryByRole("link", { name: /Meer ploegen/ })).toBeNull();

@@ -1,5 +1,2 @@
-export {
-  CalendarSubscribePanel,
-  KALENDER_SUBSCRIBE_PANEL_ID,
-} from "./CalendarSubscribePanel";
+export { CalendarSubscribePanel } from "./CalendarSubscribePanel";
 export type { CalendarSubscribePanelProps } from "./CalendarSubscribePanel";

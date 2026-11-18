@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils/cn";
 import { clubToday, toDisplayZone } from "@/lib/utils/dates";
 import { trackEvent } from "@/lib/analytics/track-event";
 import { useHistoryFilterParam } from "@/hooks/useHistoryFilterParam";
+import { readParam } from "@/hooks/filterParam";
 import {
   EmptyState,
   FilterTabs,
@@ -21,10 +22,8 @@ import {
 import { CalendarMonth } from "../CalendarMonth";
 import { CalendarWeek } from "../CalendarWeek";
 import { CalendarAgenda } from "../CalendarAgenda";
-import {
-  CalendarSubscribePanel,
-  KALENDER_SUBSCRIBE_PANEL_ID,
-} from "../CalendarSubscribePanel";
+import { CalendarSubscribePanel } from "../CalendarSubscribePanel";
+import { KALENDER_ABONNEER_PARAM } from "./abonneer";
 import {
   formatMonthNavLabel,
   formatWeekRangeLabel,
@@ -64,6 +63,10 @@ const KALENDER_FILTER_TABS: FilterTab[] = [
  *  back to "all". */
 const KALENDER_FILTER_VALUES: readonly KalenderFilterValue[] =
   KALENDER_FILTER_TABS.map((tab) => tab.value as KalenderFilterValue);
+
+/** The subscribe panel's DOM id: scrolled to when the Team ticket's link
+ * opened it (#3788). */
+const SUBSCRIBE_PANEL_ID = "abonneren";
 
 export interface CalendarWidgetProps {
   /**
@@ -199,16 +202,19 @@ export function CalendarWidget({
   // Gating on the live URL also makes a remount or a StrictMode re-run a no-op.
   useEffect(() => {
     if (!linkedTeam) return;
-    const url = new URL(window.location.href);
-    if (!url.searchParams.has("abonneer")) return;
+    if (readParam(KALENDER_ABONNEER_PARAM) === null) return;
     trackEvent("kalender_subscribe_open", { source: "team_link" });
-    url.searchParams.delete("abonneer");
+    // Not `writeHistoryFilterParam`: it would drop the hash.
+    const url = new URL(window.location.href);
+    url.searchParams.delete(KALENDER_ABONNEER_PARAM);
     window.history.replaceState(window.history.state, "", url);
     // The panel sits below the hero and the agenda band, screens down on a
     // phone. A `#` anchor would not land: the route streams in behind
     // `loading.tsx`, after the browser's own fragment scroll has run.
+    // Raw `scrollIntoView`, not `scrollIntoViewMotionSafe`: on load there is
+    // nothing to animate, and a smooth scroll does not run in a hidden tab.
     document
-      .getElementById(KALENDER_SUBSCRIBE_PANEL_ID)
+      .getElementById(SUBSCRIBE_PANEL_ID)
       ?.scrollIntoView({ behavior: "instant", block: "start" });
   }, [linkedTeam]);
 
@@ -366,7 +372,7 @@ export function CalendarWidget({
           teams={teams}
           preselectedTeamId={linkedTeam?.id}
           isOpen={subscribePanelOpen}
-          id={KALENDER_SUBSCRIBE_PANEL_ID}
+          id={SUBSCRIBE_PANEL_ID}
         />
 
         {/* View content */}

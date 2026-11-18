@@ -27,7 +27,7 @@ export const TEAMS_QUERY =
 export const TEAM_BY_SLUG_QUERY =
   defineQuery(`*[_type == "team" && slug.current == $slug && archived != true][0] {
   _id, psdId, name, displayName, "slug": slug.current, age, gender, footbelId, division, divisionFull,
-  showInNavigation, tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,
+  "onKalender": showInNavigation != false, tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,
   "teamImageUrl": teamImage.asset->url + "?w=1200&h=800&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(teamImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(teamImage.hotspot.y, 0.5)),
   // Uncropped, for the full-screen viewer (#3447): the crop above cuts off
   // the players at the edges of a wide team photo.
@@ -145,9 +145,9 @@ export interface TeamDetailVM {
   slug: string;
   age: string | null;
   psdId: string | null;
-  /** `false` hides the team club-wide, `/kalender` included (#3788). Anything
-   * else (unset too) lists it, as `showInNavigation != false` in GROQ. */
-  showInNavigation: boolean | null;
+  /** Whether `/kalender` lists this team: `showInNavigation != false`, the
+   * rule `TEAMS_QUERY` filters on (#3788). */
+  onKalender: boolean;
   footbelId: number | null;
   division: string | null;
   divisionFull: string | null;
@@ -250,7 +250,7 @@ function toTeamDetailVM(row: TEAM_BY_SLUG_DETAIL): TeamDetailVM {
     slug,
     age: row.age,
     psdId: row.psdId,
-    showInNavigation: row.showInNavigation,
+    onKalender: row.onKalender,
     footbelId: row.footbelId,
     division: row.division,
     divisionFull: row.divisionFull,

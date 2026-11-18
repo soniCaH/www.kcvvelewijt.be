@@ -25,6 +25,7 @@ import { buildItemListJsonLd } from "@/lib/seo/jsonld";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import { SITE_CONFIG } from "@/lib/constants";
 import { CalendarWidget } from "@/components/calendar/CalendarWidget";
+import { KALENDER_ABONNEER_PARAM } from "@/components/calendar/CalendarWidget/abonneer";
 import { UpcomingMatches } from "@/components/home/UpcomingMatches";
 import { mapMatchesToUpcomingMatches } from "@/lib/mappers";
 import { fetchUpcomingMatchesOrNull } from "@/lib/server/match-data";
@@ -170,14 +171,18 @@ export default async function CalendarPage({
   searchParams: Promise<{
     type?: string | string[];
     view?: string | string[];
-    abonneer?: string | string[];
+    [KALENDER_ABONNEER_PARAM]?: string | string[];
   }>;
 }) {
   // Reading the query costs nothing here (`force-dynamic`). It only seeds the
   // widget's first render so a deep link is not painted as month/"all" and then
   // flipped after hydration; the widget narrows both, and the URL stays the
   // source of truth after mount.
-  const { type, view, abonneer } = await searchParams;
+  const {
+    type,
+    view,
+    [KALENDER_ABONNEER_PARAM]: abonneer,
+  } = await searchParams;
   // Likewise the phone guess (#3480): without an explicit `?view=` a phone's
   // first paint is the agenda, not the month grid it flips away from after
   // mount. Per-request is safe here — `force-dynamic`, never CDN-cached.

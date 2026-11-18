@@ -198,33 +198,24 @@ describe("/kalender — phone first paint (#3480)", () => {
 
 describe("/kalender — ?abonneer= (#3788)", () => {
   beforeEach(() => {
-    vi.spyOn(console, "warn").mockImplementation(() => {});
     mockRequestHeaders.mockReturnValue({});
     mockGetNextMatches.mockReturnValue(Effect.succeed([]));
   });
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
 
-  it("hands the raw value to the widget, which validates it", async () => {
-    await renderPage({ abonneer: "102" });
-    expect(screen.getByTestId("calendar-widget")).toHaveAttribute(
-      "data-initial-abonneer",
+  it.each([
+    [
+      "a single value, handed over raw for the widget to validate",
       "102",
-    );
-  });
-
-  it("drops a repeated param", async () => {
-    await renderPage({ abonneer: ["1", "2"] });
-    expect(screen.getByTestId("calendar-widget")).not.toHaveAttribute(
-      "data-initial-abonneer",
-    );
-  });
-
-  it("passes nothing when the param is absent", async () => {
-    await renderPage();
-    expect(screen.getByTestId("calendar-widget")).not.toHaveAttribute(
-      "data-initial-abonneer",
-    );
+      "102",
+    ],
+    ["a repeated param, dropped", ["1", "2"], null],
+    ["an absent param", undefined, null],
+  ])("%s", async (_label, abonneer, expected) => {
+    await renderPage({ abonneer });
+    expect(
+      screen
+        .getByTestId("calendar-widget")
+        .getAttribute("data-initial-abonneer"),
+    ).toBe(expected);
   });
 });

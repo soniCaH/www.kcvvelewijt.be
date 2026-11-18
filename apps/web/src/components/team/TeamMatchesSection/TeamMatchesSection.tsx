@@ -42,9 +42,9 @@ export interface TeamMatchesSectionProps {
   subscribeTeam?: {
     psdId: number;
     label: string;
-    /** Whether `/kalender` lists this team; off drops the `Meer ploegen`
-     * link, which would open nothing (#3788). Defaults to on. */
-    onKalender?: boolean;
+    /** The ticket's `Meer ploegen` link; absent for a team `/kalender` does
+     * not list, where it would open nothing (#3788). */
+    moreTeamsHref?: string;
   };
   className?: string;
 }
@@ -146,7 +146,7 @@ export function TeamMatchesSection({
           isOpen={subscribeOpen}
           source="team"
           id={subscribePanelId}
-          showMoreTeamsLink={subscribeTeam.onKalender ?? true}
+          moreTeamsHref={subscribeTeam.moreTeamsHref}
         />
       ) : null}
     </section>

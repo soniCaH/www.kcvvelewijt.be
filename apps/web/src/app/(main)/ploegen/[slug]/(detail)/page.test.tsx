@@ -149,7 +149,7 @@ function teamFixture(psdId: string): TeamDetailVM {
     slug: "kcvv-elewijt-u13",
     age: "U13",
     psdId,
-    showInNavigation: null,
+    onKalender: true,
     footbelId: null,
     division: null,
     divisionFull: null,
@@ -298,7 +298,7 @@ function headingSweepTeamFixture(): TeamDetailVM {
     slug: "kcvv-elewijt-u8",
     age: "U8",
     psdId: "9501",
-    showInNavigation: null,
+    onKalender: true,
     footbelId: null,
     division: null,
     divisionFull: null,
@@ -608,9 +608,9 @@ describe("/ploegen/[slug] subscribe panel (#3644)", () => {
     ).toHaveAttribute("href", "/kalender?abonneer=9401");
   });
 
-  it("drops the Meer ploegen link for a team /kalender does not list (showInNavigation false, #3788)", async () => {
+  it("drops the Meer ploegen link for a team /kalender does not list (#3788)", async () => {
     mockFindBySlug.mockReturnValue(
-      Effect.succeed({ ...teamFixture("9401"), showInNavigation: false }),
+      Effect.succeed({ ...teamFixture("9401"), onKalender: false }),
     );
     render(
       await TeamPage({ params: Promise.resolve({ slug: "kcvv-elewijt-u13" }) }),
