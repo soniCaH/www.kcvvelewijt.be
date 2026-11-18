@@ -303,3 +303,24 @@ While drifting: `ERROR` on every stale serve (the `wrangler tail` trace), Slack 
 | any TypedKvCache key, not-found      | 1 h (`NOT_FOUND_TTL` marker in place of the value, #3468)                                                                                                                                                                                                                                                                                                                                                                                                                                              | 1 h      |
 | `stale-since:{key}`                  | none — written on a key's first stale read, deleted by every successful write; TTL = that key's hard TTL (#3566)                                                                                                                                                                                                                                                                                                                                                                                       | hard TTL |
 | `ai:answers:YYYY-MM-DD`              | 48 h (daily AI-answer counter, #3468)                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | —        |
+
+## What is actually deployed
+
+- `ci.yml` never names `wrangler`: the deploy jobs call `pnpm --filter @kcvv/api deploy:staging` and `pnpm --filter @kcvv/api run deploy`. Grep for `deploy`, not `wrangler`.
+- A production deploy takes minutes. A live version older than a merge you just made is not a missed deploy: check that merge's run first, `gh run list --branch main --workflow ci.yml --limit 1`.
+- Staging redeploys only on a pull request. After a merge, staging keeps the last pull request's build until the next one opens, or until `pnpm --filter @kcvv/api deploy:staging` runs by hand.
+- Config on `main` is not evidence. Read the deployed version:
+
+  ```bash
+  wrangler deployments list --env staging
+  wrangler versions view <version-id> --env staging
+  ```
+
+- Black-box check: send a request with a timestamp in the query, so it cannot be cached, to staging and to production. The same answer from both means staging reads a production resource. Staging sets `CACHE_LONG_TTL="true"`, so a repeated query proves nothing.
+- Vectorize upserts are asynchronous: `vectorize info` can lag about 20 s behind a webhook that answered `indexed`.
+
+## `wrangler dev --env staging` reads `.dev.vars`
+
+- It loads `.dev.vars.staging`, else `.dev.vars`, and every key there overrides `[env.staging.vars]`. The main checkout's `.dev.vars` sets `SANITY_DATASET=production`, so a "staging" dev worker reads production. In the bindings table, `(hidden)` means the value came from the file.
+- Fix: pass `--env-file <a copy without those keys>`. Wrangler then skips `.dev.vars`; it expands `$` in values. `scripts/backfill-staging-search.sh` does this.
+- A fresh worktree has no `.dev.vars`.
