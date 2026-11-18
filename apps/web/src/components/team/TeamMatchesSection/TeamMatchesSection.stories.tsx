@@ -95,6 +95,8 @@ export const WithSubscribePanel: Story = {
 /** The same section after one click on the toggle: the ticket is open. */
 export const WithSubscribePanelOpen: Story = {
   args: WithSubscribePanel.args,
+  // Docs pages skip `play` by default; without this the open story renders closed there.
+  parameters: { docs: { story: { autoplay: true } } },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(
