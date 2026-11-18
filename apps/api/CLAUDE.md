@@ -141,6 +141,8 @@ Every request reaches the worker through the website, so these ceilings bound wh
 - **Staging** (on pull requests from this repository): `wrangler deploy --env staging` → `kcvv-api-staging`
 - **Production** (on merge to main): `wrangler deploy` → `kcvv-api`
 
+What runs where, and why staging can lag main: `docs/agents/api-ops.md` → "What is actually deployed".
+
 Staging secrets must be set separately:
 
 ```bash
