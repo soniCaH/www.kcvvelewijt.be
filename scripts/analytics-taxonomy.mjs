@@ -197,6 +197,10 @@ export const params = [
     displayName: "Restored draft",
     registered: false,
   },
+  // #3637 — `membership_form_error`: comma-joined field names, never values;
+  // also carries `role` and `source` (both registered above). Unregistered
+  // (DebugView only) while the 50-dimension cap is full.
+  { parameterName: "fields", displayName: "Error fields", registered: false },
   // ── /hulp team card (#3558, #3559) ─────────────────────────────────────
   // `organigram_team_card_shown`, `organigram_team_not_found`,
   // `organigram_team_guess_answered`. Forwarded unregistered (DebugView
