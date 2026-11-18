@@ -154,6 +154,116 @@ describe("MembershipForm", () => {
     });
   });
 
+  describe("membership_form_error (#3637)", () => {
+    const errorCalls = () =>
+      vi
+        .mocked(trackEvent)
+        .mock.calls.filter(([name]) => name === "membership_form_error");
+    const submit = () =>
+      fireEvent.submit(screen.getByText(/Verstuur aanvraag/).closest("form")!);
+    const reply = (status: number, body: unknown) =>
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(() =>
+          Promise.resolve({
+            ok: false,
+            status,
+            json: () => Promise.resolve(body),
+          }),
+        ),
+      );
+
+    beforeEach(() => vi.mocked(trackEvent).mockClear());
+
+    it("fires for a blocked client submit, with the field names and the role, no values", () => {
+      vi.stubGlobal("fetch", vi.fn());
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fireEvent.change(screen.getByLabelText(/Voornaam/), {
+        target: { value: "Jan" },
+      });
+      submit();
+      expect(errorCalls()).toEqual([
+        [
+          "membership_form_error",
+          {
+            fields: "lastName,birthDate,email,privacyAccepted",
+            source: "client",
+            role: "vrijwilliger",
+          },
+        ],
+      ]);
+      expect(JSON.stringify(errorCalls())).not.toContain("Jan");
+    });
+
+    it("omits the role until one is chosen", () => {
+      vi.stubGlobal("fetch", vi.fn());
+      render(<MembershipForm />);
+      submit();
+      expect(errorCalls()).toHaveLength(1);
+      const [, params] = errorCalls()[0];
+      expect(params).toMatchObject({ source: "client" });
+      expect(params).not.toHaveProperty("role");
+      expect(params?.fields).toMatch(/^role,/);
+    });
+
+    it("fires for a server 400 with field errors, marked server", async () => {
+      reply(400, {
+        error: "Controleer de gemarkeerde velden.",
+        fields: { birthDate: "Ongeldig.", parentEmail: "jan@example.com" },
+      });
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      submit();
+      await screen.findByText("Controleer de gemarkeerde velden.");
+      expect(errorCalls()).toEqual([
+        [
+          "membership_form_error",
+          {
+            fields: "birthDate,parentEmail",
+            source: "server",
+            role: "vrijwilliger",
+          },
+        ],
+      ]);
+      expect(JSON.stringify(errorCalls())).not.toContain("jan@example.com");
+    });
+
+    it("fires nothing for a Turnstile failure (400 without field errors)", async () => {
+      reply(400, {
+        error: "Verificatie mislukt. Vernieuw de pagina en probeer opnieuw.",
+      });
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      submit();
+      await screen.findByText(/Verificatie mislukt/);
+      expect(errorCalls()).toHaveLength(0);
+    });
+
+    it("fires nothing for a 400 with an empty fields object", async () => {
+      reply(400, { error: "Controleer je gegevens.", fields: {} });
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      submit();
+      await screen.findByText("Controleer je gegevens.");
+      expect(errorCalls()).toHaveLength(0);
+    });
+
+    it("fires nothing for a transport failure", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(() => Promise.reject(new Error("offline"))),
+      );
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      submit();
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        /Verzenden mislukt/,
+      );
+      expect(errorCalls()).toHaveLength(0);
+    });
+  });
+
   it("renders the base fields", () => {
     render(<MembershipForm />);
     expect(screen.getByLabelText(/Voornaam/)).toBeInTheDocument();

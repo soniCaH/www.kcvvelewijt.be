@@ -268,12 +268,24 @@ function MembershipFormFields({
     return errors;
   };
 
+  // Field names only, never values. `role` is omitted until one is chosen.
+  const trackFormError = (
+    errors: Record<string, string>,
+    source: "client" | "server",
+  ) =>
+    trackEvent("membership_form_error", {
+      fields: Object.keys(errors).join(","),
+      source,
+      ...(role ? { role } : {}),
+    });
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (state === "submitting") return;
 
     const clientErrors = validate();
     if (Object.keys(clientErrors).length > 0) {
+      trackFormError(clientErrors, "client");
       setFieldErrors(clientErrors);
       setGeneralError("Controleer de gemarkeerde velden.");
       setState("invalid");
@@ -332,6 +344,10 @@ function MembershipFormFields({
       // covers a body with no `error` at all.
       if (response.status === 400 && data.fields) {
         setFieldErrors(data.fields);
+        // A Turnstile failure is a 400 without `fields`: no form field is to blame.
+        if (Object.keys(data.fields).length > 0) {
+          trackFormError(data.fields, "server");
+        }
       }
       setGeneralError(
         data.error ??
