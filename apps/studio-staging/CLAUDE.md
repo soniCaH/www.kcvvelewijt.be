@@ -40,6 +40,8 @@ pnpm --filter @kcvv/studio-staging run deploy
 
 `deploy` pushes to the hosted Studio at sanity.io and uploads the schema and manifest. Never use bare `pnpm --filter @kcvv/studio-staging deploy` (pnpm's built-in).
 
+Staging has no CI deploy: run it by hand (it goes to https://kcvv-elewijt-staging.sanity.studio). Deploy reads the schema packages from source, so run it from a checkout that has the merged schema change (for example `main`), not from whatever branch you are on.
+
 ## Migrations
 
 `migrations/` mirrors `apps/studio/migrations/`: every migration has a facade in **both** folders. Adding or removing one here means doing the same there, in the same PR. A facade here may only re-export from `@kcvv/sanity-studio/migrations`. The rules, the run command, and the rollback-only exception live in `apps/studio/CLAUDE.md` → **Migrations**.
