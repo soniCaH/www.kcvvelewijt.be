@@ -458,6 +458,19 @@ describe("CalendarSubscribePanel", () => {
         screen.getByRole("link", { name: /Meer ploegen/ }),
       ).toHaveAttribute("href", "/kalender?abonneer=102");
     });
+
+    it("the Team ticket drops the link for a Team /kalender does not list", () => {
+      render(
+        <CalendarSubscribePanel
+          teams={[teams[1]]}
+          isOpen
+          source="team"
+          showMoreTeamsLink={false}
+        />,
+      );
+      expect(screen.getByText("Volg je ploeg.")).toBeInTheDocument();
+      expect(screen.queryByRole("link", { name: /Meer ploegen/ })).toBeNull();
+    });
   });
 
   describe("source (#3644)", () => {

@@ -149,6 +149,7 @@ function teamFixture(psdId: string): TeamDetailVM {
     slug: "kcvv-elewijt-u13",
     age: "U13",
     psdId,
+    showInNavigation: null,
     footbelId: null,
     division: null,
     divisionFull: null,
@@ -297,6 +298,7 @@ function headingSweepTeamFixture(): TeamDetailVM {
     slug: "kcvv-elewijt-u8",
     age: "U8",
     psdId: "9501",
+    showInNavigation: null,
     footbelId: null,
     division: null,
     divisionFull: null,
@@ -594,5 +596,29 @@ describe("/ploegen/[slug] subscribe panel (#3644)", () => {
     expect(href).toMatch(
       /^webcal:\/\/[^/]+\/api\/calendar\.ics\?teamIds=9401&/,
     );
+  });
+
+  it("links to /kalender with this team", async () => {
+    mockFindBySlug.mockReturnValue(Effect.succeed(teamFixture("9401")));
+    render(
+      await TeamPage({ params: Promise.resolve({ slug: "kcvv-elewijt-u13" }) }),
+    );
+    expect(
+      screen.getByRole("link", { name: /Meer ploegen/, hidden: true }),
+    ).toHaveAttribute("href", "/kalender?abonneer=9401");
+  });
+
+  it("drops the Meer ploegen link for a team /kalender does not list (showInNavigation false, #3788)", async () => {
+    mockFindBySlug.mockReturnValue(
+      Effect.succeed({ ...teamFixture("9401"), showInNavigation: false }),
+    );
+    render(
+      await TeamPage({ params: Promise.resolve({ slug: "kcvv-elewijt-u13" }) }),
+    );
+    // The ticket itself stays: only the link to `/kalender` goes.
+    expect(screen.getByTestId("subscribe-panel")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /Meer ploegen/, hidden: true }),
+    ).toBeNull();
   });
 });

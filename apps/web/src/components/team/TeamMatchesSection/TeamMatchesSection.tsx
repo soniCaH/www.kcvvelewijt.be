@@ -39,7 +39,13 @@ export interface TeamMatchesSectionProps {
    * without it no panel renders. The panel lives in this section, so it hides
    * with it between seasons. It starts closed behind a toggle (#3786).
    */
-  subscribeTeam?: { psdId: number; label: string };
+  subscribeTeam?: {
+    psdId: number;
+    label: string;
+    /** Whether `/kalender` lists this team; off drops the `Meer ploegen`
+     * link, which would open nothing (#3788). Defaults to on. */
+    onKalender?: boolean;
+  };
   className?: string;
 }
 
@@ -140,6 +146,7 @@ export function TeamMatchesSection({
           isOpen={subscribeOpen}
           source="team"
           id={subscribePanelId}
+          showMoreTeamsLink={subscribeTeam.onKalender ?? true}
         />
       ) : null}
     </section>

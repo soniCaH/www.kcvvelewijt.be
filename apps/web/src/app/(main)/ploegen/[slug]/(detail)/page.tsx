@@ -681,7 +681,11 @@ export default async function TeamPage({ params }: TeamPageProps) {
                     now={now}
                     subscribeTeam={
                       psdTeamId !== null
-                        ? { psdId: psdTeamId, label: displayName }
+                        ? {
+                            psdId: psdTeamId,
+                            label: displayName,
+                            onKalender: team.showInNavigation !== false,
+                          }
                         : undefined
                     }
                   />

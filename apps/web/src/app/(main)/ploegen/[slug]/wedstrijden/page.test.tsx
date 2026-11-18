@@ -90,6 +90,7 @@ function teamFixture(psdId: string): TeamDetailVM {
     slug: "kcvv-elewijt-u13",
     age: "U13",
     psdId,
+    showInNavigation: null,
     footbelId: null,
     division: null,
     divisionFull: null,

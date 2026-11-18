@@ -6,7 +6,7 @@
  * and the subscribe toggle.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { act, render, screen } from "@testing-library/react";
+import { act, cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderToString } from "react-dom/server";
 import { CalendarWidget } from "./CalendarWidget";
@@ -314,9 +314,28 @@ describe("CalendarWidget", () => {
     const chips = () =>
       screen.queryAllByRole("button", { name: /Verwijder/, hidden: true });
 
+    const scrollIntoView = vi.fn();
+    beforeEach(() => {
+      scrollIntoView.mockClear();
+      Element.prototype.scrollIntoView = scrollIntoView;
+    });
+
+    it("scrolls the opened panel into view on load, and only then", () => {
+      setUrl("?abonneer=102");
+      render(<CalendarWidget {...defaultProps} initialAbonneer="102" />);
+      expect(scrollIntoView).toHaveBeenCalledTimes(1);
+      expect(scrollIntoView.mock.contexts[0]).toBe(panel());
+      scrollIntoView.mockClear();
+      cleanup();
+      render(<CalendarWidget {...defaultProps} initialAbonneer="abc" />);
+      expect(scrollIntoView).not.toHaveBeenCalled();
+    });
+
     it("a valid Team id opens the panel with only that Team selected", () => {
+      setUrl("?abonneer=102");
       render(<CalendarWidget {...defaultProps} initialAbonneer="102" />);
       expect(panel()).not.toHaveAttribute("hidden");
+      expect(panel()).toHaveAttribute("id", "abonneren");
       expect(chips()).toHaveLength(1);
       expect(
         screen.getByRole("link", { name: /Zet in je agenda/ }),
@@ -327,6 +346,7 @@ describe("CalendarWidget", () => {
     });
 
     it("fires kalender_subscribe_open with source team_link once on load", () => {
+      setUrl("?abonneer=102");
       const { rerender } = render(
         <CalendarWidget {...defaultProps} initialAbonneer="102" />,
       );
@@ -335,6 +355,30 @@ describe("CalendarWidget", () => {
       expect(trackEvent).toHaveBeenCalledWith("kalender_subscribe_open", {
         source: "team_link",
       });
+    });
+
+    it("drops abonneer from the URL after mount, keeping the other params and the hash", () => {
+      window.history.replaceState(
+        {},
+        "",
+        "/kalender?view=agenda&abonneer=102&type=Wedstrijden#top",
+      );
+      render(<CalendarWidget {...defaultProps} initialAbonneer="102" />);
+      expect(window.location.search).toBe("?view=agenda&type=Wedstrijden");
+      expect(window.location.hash).toBe("#top");
+      // The panel stays open: the state outlives the param.
+      expect(panel()).not.toHaveAttribute("hidden");
+    });
+
+    it("a remount after the param is gone fires nothing", () => {
+      setUrl("?abonneer=102");
+      const first = render(
+        <CalendarWidget {...defaultProps} initialAbonneer="102" />,
+      );
+      first.unmount();
+      vi.mocked(trackEvent).mockClear();
+      render(<CalendarWidget {...defaultProps} initialAbonneer="102" />);
+      expect(trackEvent).not.toHaveBeenCalled();
     });
 
     it.each([["abc"], ["999999"], ["0102"], [undefined]])(

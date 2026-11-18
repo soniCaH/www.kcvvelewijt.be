@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils/cn";
 import { clubToday, toDisplayZone } from "@/lib/utils/dates";
 import { trackEvent } from "@/lib/analytics/track-event";
-import { parsePsdId } from "@/lib/utils/psd-id";
 import { useHistoryFilterParam } from "@/hooks/useHistoryFilterParam";
 import {
   EmptyState,
@@ -22,7 +21,10 @@ import {
 import { CalendarMonth } from "../CalendarMonth";
 import { CalendarWeek } from "../CalendarWeek";
 import { CalendarAgenda } from "../CalendarAgenda";
-import { CalendarSubscribePanel } from "../CalendarSubscribePanel";
+import {
+  CalendarSubscribePanel,
+  KALENDER_SUBSCRIBE_PANEL_ID,
+} from "../CalendarSubscribePanel";
 import {
   formatMonthNavLabel,
   formatWeekRangeLabel,
@@ -186,17 +188,28 @@ export function CalendarWidget({
   const seedDay = today ?? clubToday();
   const [cursor, setCursor] = useState<string>(seedDay);
   const [selectedDate, setSelectedDate] = useState(seedDay);
-  const linkedPsdId = parsePsdId(initialAbonneer ?? "");
-  const linkedTeam = teams.find((t) => t.psdId === linkedPsdId);
+  // `String()`, not `parsePsdId`: only an exact id of a listed Team matches,
+  // so `abc`, `0102` and an unknown id all fall through to no Team.
+  const linkedTeam = teams.find((t) => String(t.psdId) === initialAbonneer);
   const [subscribePanelOpen, setSubscribePanelOpen] = useState(
     linkedTeam !== undefined,
   );
-  // Once per load: the Team page link opened the panel (#3788).
-  const linkOpenTracked = useRef(false);
+  // The Team page link opened the panel (#3788): count it, then drop the param
+  // so Back, a reload or a shared URL neither reopen the panel nor count again.
+  // Gating on the live URL also makes a remount or a StrictMode re-run a no-op.
   useEffect(() => {
-    if (!linkedTeam || linkOpenTracked.current) return;
-    linkOpenTracked.current = true;
+    if (!linkedTeam) return;
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("abonneer")) return;
     trackEvent("kalender_subscribe_open", { source: "team_link" });
+    url.searchParams.delete("abonneer");
+    window.history.replaceState(window.history.state, "", url);
+    // The panel sits below the hero and the agenda band, screens down on a
+    // phone. A `#` anchor would not land: the route streams in behind
+    // `loading.tsx`, after the browser's own fragment scroll has run.
+    document
+      .getElementById(KALENDER_SUBSCRIBE_PANEL_ID)
+      ?.scrollIntoView({ behavior: "instant", block: "start" });
   }, [linkedTeam]);
 
   const cursorDt = toDisplayZone(cursor);
@@ -353,6 +366,7 @@ export function CalendarWidget({
           teams={teams}
           preselectedTeamId={linkedTeam?.id}
           isOpen={subscribePanelOpen}
+          id={KALENDER_SUBSCRIBE_PANEL_ID}
         />
 
         {/* View content */}

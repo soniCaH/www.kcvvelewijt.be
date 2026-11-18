@@ -249,6 +249,19 @@ describe("TeamMatchesSection", () => {
       expect(screen.getByTestId("subscribe-panel")).toHaveAttribute("hidden");
     });
 
+    it("hides the Meer ploegen link when /kalender does not list the team (#3788)", () => {
+      render(
+        <TeamMatchesSection
+          matches={matches}
+          teamSlug="kcvv-a"
+          subscribeTeam={{ psdId: 9401, label: "U13", onKalender: false }}
+        />,
+      );
+      expect(
+        screen.queryByRole("link", { name: /Meer ploegen/, hidden: true }),
+      ).toBeNull();
+    });
+
     it("fires kalender_subscribe_open with source team on open only", () => {
       renderWithTeam();
       fireEvent.click(toggle()); // open

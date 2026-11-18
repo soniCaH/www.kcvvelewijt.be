@@ -401,10 +401,10 @@ This is a **Free form** exploration, not a funnel.
 
 | Event                       | Fires when                                                                                                                                                              | Code                                                                            |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `kalender_subscribe_webcal` | tap on "Zet in je agenda (iPhone)" (only with a team selected)                                                                                                          | `CalendarSubscribePanel.tsx:314`                                                |
-| `kalender_subscribe_copy`   | the link reached the clipboard (a failed copy fires nothing)                                                                                                            | `CalendarSubscribePanel.tsx:152`                                                |
-| `kalender_subscribe_open`   | the panel is opened (`source`: `kalender` on `/kalender`, `team` on a Team page, #3786; `team_link` when `/kalender` opens it on load from a valid `?abonneer=`, #3788) | `CalendarWidget.tsx:241`, `CalendarWidget.tsx:199`, `TeamMatchesSection.tsx:61` |
-| `kalender_view`             | page view of `/kalender` (denominator for "subscribes per visit")                                                                                                       | `apps/web/src/app/(main)/kalender/page.tsx:197`                                 |
+| `kalender_subscribe_webcal` | tap on "Zet in je agenda (iPhone)" (only with a team selected)                                                                                                          | `CalendarSubscribePanel.tsx:343`                                                |
+| `kalender_subscribe_copy`   | the link reached the clipboard (a failed copy fires nothing)                                                                                                            | `CalendarSubscribePanel.tsx:167`                                                |
+| `kalender_subscribe_open`   | the panel is opened (`source`: `kalender` on `/kalender`, `team` on a Team page, #3786; `team_link` when `/kalender` opens it on load from a valid `?abonneer=`, #3788) | `CalendarWidget.tsx:248`, `CalendarWidget.tsx:204`, `TeamMatchesSection.tsx:67` |
+| `kalender_view`             | page view of `/kalender` (denominator for "subscribes per visit")                                                                                                       | `apps/web/src/app/(main)/kalender/page.tsx:201`                                 |
 
 Both subscribe events carry `teams_count`, `side`, `events` and `source` (`kalender` on `/kalender`, `team` on a Team page panel) — see `subscribeParams()` in `CalendarSubscribePanel.tsx`. No team ids or names are sent.
 
@@ -424,7 +424,9 @@ Both subscribe events carry `teams_count`, `side`, `events` and `source` (`kalen
 > on `/kalender` only, read `(not set)` as `kalender`). Since #3788 it also
 > fires once on load of `/kalender?abonneer=<Team id>` with `source` =
 > `team_link`: a parent who followed "Meer ploegen" from a Team ticket. A param
-> that is not a Team id opens nothing and fires nothing. Count `team_link`
+> that is not a Team id opens nothing and fires nothing. The widget removes the
+> param from the URL after that read, so Back, a reload or a shared link does
+> not count a second time. Count `team_link`
 > against `team` for how many Team-page visitors follow the link.
 > `kalender_view` never carries `source`.
 

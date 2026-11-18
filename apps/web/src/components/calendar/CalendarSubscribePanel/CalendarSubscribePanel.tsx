@@ -27,6 +27,10 @@ export interface CalendarSubscribePanelProps {
   source?: "kalender" | "team";
   /** Root id, for a toggle's `aria-controls` (#3786). */
   id?: string;
+  /** Team ticket only: show the `Meer ploegen` link. Off for a Team that
+   * `/kalender` does not list (`showInNavigation: false`), whose link would
+   * open nothing (#3788). Defaults to on. */
+  showMoreTeamsLink?: boolean;
 }
 
 type Side = "all" | "home" | "away";
@@ -51,13 +55,17 @@ function buildWebcalUrl(
     : base;
 }
 
-function computeInitialSelection(
+const computeInitialSelection = (
   teams: CalendarTeamInfo[],
   preselectedTeamId?: string,
-): Set<string> {
+): Set<string> => {
   const match = teams.find((t) => t.id === preselectedTeamId);
   return match ? new Set([match.id]) : new Set(teams.map((t) => t.id));
-}
+};
+
+/** The `/kalender` panel's DOM id: the widget scrolls to it when the Team
+ * ticket's link opened it (#3788). */
+export const KALENDER_SUBSCRIBE_PANEL_ID = "abonneren";
 
 /** The classes the iPhone link and the copy button share, so the equal-height
  * pair cannot drift apart. */
@@ -72,6 +80,7 @@ export function CalendarSubscribePanel({
   isOpen,
   source = "kalender",
   id,
+  showMoreTeamsLink = true,
 }: CalendarSubscribePanelProps) {
   const [selectedTeamIds, setSelectedTeamIds] = useState(() =>
     computeInitialSelection(teams, preselectedTeamId),
@@ -212,7 +221,7 @@ export function CalendarSubscribePanel({
             <p className="font-display text-ink text-lg font-bold italic">
               {isTeamPanel ? "Volg je ploeg." : "Volg je ploeg(en)."}
             </p>
-            {isTeamPanel && teams[0] ? (
+            {isTeamPanel && showMoreTeamsLink && teams[0] ? (
               // For a parent with children in two Teams: `/kalender` opens
               // its panel with only this Team picked (#3788).
               <EditorialLink href={`/kalender?abonneer=${teams[0].psdId}`}>

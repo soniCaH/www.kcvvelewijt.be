@@ -214,8 +214,15 @@ describe("/kalender — ?abonneer= (#3788)", () => {
     );
   });
 
-  it("drops a repeated param and an absent one", async () => {
+  it("drops a repeated param", async () => {
     await renderPage({ abonneer: ["1", "2"] });
+    expect(screen.getByTestId("calendar-widget")).not.toHaveAttribute(
+      "data-initial-abonneer",
+    );
+  });
+
+  it("passes nothing when the param is absent", async () => {
+    await renderPage();
     expect(screen.getByTestId("calendar-widget")).not.toHaveAttribute(
       "data-initial-abonneer",
     );

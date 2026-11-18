@@ -153,6 +153,10 @@ describe("TeamRepository", () => {
 
     // The full-screen viewer shows the whole photo; the hero's own URL is a
     // 3:2 hotspot crop that cuts off the players at the edges (#3447).
+    it("selects showInNavigation, so the page knows whether /kalender lists the team (#3788)", () => {
+      expect(TEAM_BY_SLUG_QUERY).toMatch(/\bshowInNavigation\b/);
+    });
+
     it("selects the team photo uncropped for the full-screen viewer", () => {
       const full = TEAM_BY_SLUG_QUERY.match(/"teamImageFullUrl":[^\n]*/)?.[0];
       expect(full).toContain("fit=max");
@@ -178,6 +182,7 @@ describe("TeamRepository", () => {
         age: "A",
         gender: "male",
         footbelId: 12345,
+        showInNavigation: null,
         division: "3de Afdeling",
         divisionFull: "3de Afdeling VFV A",
         tagline: "Er is maar 1 plezante compagnie",
@@ -238,6 +243,7 @@ describe("TeamRepository", () => {
       expect(t.name).toBe("Eerste Elftallen A");
       expect(t.slug).toBe("eerste-elftallen-a");
       expect(t.psdId).toBe("100");
+      expect(t.showInNavigation).toBeNull();
       expect(t.teamImageUrl).toBe("https://cdn.sanity.io/team.webp");
       expect(t.teamImageFullUrl).toBe("https://cdn.sanity.io/team-full.webp");
 
