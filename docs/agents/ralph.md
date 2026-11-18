@@ -60,7 +60,7 @@ The gate is `.claude/CLAUDE.md` → Git Workflow 3. `CHECK_CMD` (§ Config) is i
 
 - Port **3000** is Kevin's. Never kill or reuse a server on it.
 - To look at a page: `pnpm -C <worktree>/apps/web build && pnpm -C <worktree>/apps/web exec next start -p 3100`, then stop only that PID (`kill <pid>`), never `pkill`.
-- Pages that call the BFF need it on **:8787** (`KCVV_API_URL` in `.env.local`). Without it they 500 — not a bug in your change.
+- Pages that call the BFF need it on **:8787** (`KCVV_API_URL` in `.env.local`). Without it they 500 — not a bug in your change. Never point a worktree at the production BFF: it needs the production secret (#3485).
 - Playwright e2e derives its own dev port per worktree (`apps/web/scripts/e2e-dev-port.mjs`) with `reuseExistingServer: false`; never hard-code one.
 
 ## Long runs
