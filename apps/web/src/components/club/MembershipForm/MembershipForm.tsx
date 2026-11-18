@@ -268,16 +268,20 @@ function MembershipFormFields({
     return errors;
   };
 
-  // Field names only, never values. `role` is omitted until one is chosen.
+  // Field names only, never values; sorted, so client and server agree on one
+  // problem. `role` is omitted until one is chosen. No names, no event (#3637).
   const trackFormError = (
     errors: Record<string, string>,
     source: "client" | "server",
-  ) =>
+  ) => {
+    const names = Object.keys(errors).sort();
+    if (names.length === 0) return;
     trackEvent("membership_form_error", {
-      fields: Object.keys(errors).join(","),
+      fields: names.join(","),
       source,
       ...(role ? { role } : {}),
     });
+  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -344,10 +348,7 @@ function MembershipFormFields({
       // covers a body with no `error` at all.
       if (response.status === 400 && data.fields) {
         setFieldErrors(data.fields);
-        // A 400 with an empty `fields` names no field, so there is nothing to report.
-        if (Object.keys(data.fields).length > 0) {
-          trackFormError(data.fields, "server");
-        }
+        trackFormError(data.fields, "server");
       }
       setGeneralError(
         data.error ??

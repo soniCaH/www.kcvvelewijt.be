@@ -186,7 +186,7 @@ describe("MembershipForm", () => {
         [
           "membership_form_error",
           {
-            fields: "lastName,birthDate,email,privacyAccepted",
+            fields: "birthDate,email,lastName,privacyAccepted",
             source: "client",
             role: "vrijwilliger",
           },
@@ -203,13 +203,13 @@ describe("MembershipForm", () => {
       const [, params] = errorCalls()[0];
       expect(params).toMatchObject({ source: "client" });
       expect(params).not.toHaveProperty("role");
-      expect(params?.fields).toMatch(/^role,/);
+      expect(params?.fields).toContain("role");
     });
 
     it("fires for a server 400 with field errors, marked server", async () => {
       reply(400, {
         error: "Controleer de gemarkeerde velden.",
-        fields: { birthDate: "Ongeldig.", parentEmail: "jan@example.com" },
+        fields: { parentEmail: "jan@example.com", birthDate: "Ongeldig." },
       });
       render(<MembershipForm defaultRole="vrijwilliger" />);
       fillRequiredFields();
@@ -245,6 +245,15 @@ describe("MembershipForm", () => {
       fillRequiredFields();
       submit();
       await screen.findByText("Controleer je gegevens.");
+      expect(errorCalls()).toHaveLength(0);
+    });
+
+    it("fires nothing for a 5xx response", async () => {
+      reply(503, { error: "Het formulier is momenteel niet beschikbaar." });
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      submit();
+      await screen.findByText("Het formulier is momenteel niet beschikbaar.");
       expect(errorCalls()).toHaveLength(0);
     });
 

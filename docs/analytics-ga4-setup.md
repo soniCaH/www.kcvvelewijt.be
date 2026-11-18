@@ -142,7 +142,7 @@ Repeat for each row in the table below.
 
 | Dimension name     | Event parameter      | Where it appears                                                                      |
 | ------------------ | -------------------- | ------------------------------------------------------------------------------------- |
-| Role               | `role`               | Responsibility finder events                                                          |
+| Role               | `role`               | Responsibility finder events, `membership_form_start` / `_submit` / `_error`          |
 | Query text         | `query_text`         | Search & responsibility no-results events                                             |
 | Query length       | `query_length`       | Search & responsibility events                                                        |
 | Results count      | `results_count`      | `search_results_shown`, `responsibility_search`                                       |
@@ -156,7 +156,7 @@ Repeat for each row in the table below.
 | Result type        | `result_type`        | `search_result_clicked`, `related_content_click`                                      |
 | Result title       | `result_title`       | `search_result_clicked`                                                               |
 | Organigram view    | `view`               | Organigram events                                                                     |
-| Interaction source | `source`             | `organigram_view_changed`, `related_content_*`                                        |
+| Interaction source | `source`             | `organigram_view_changed`, `related_content_*`, `membership_form_error`               |
 | Department         | `department`         | `organigram_department_filtered`                                                      |
 | Member ID          | `member_id`          | `organigram_member_clicked`                                                           |
 | Team match kind    | `match_kind`         | `organigram_team_card_shown` ("u-code" / "old-name" / "age" / "birth-year" / "ai")    |
@@ -499,6 +499,10 @@ how many send it, and does a field error make them give up?
 
 - Condition: Event name → `membership_form_start` (one per form mount, on the first field change)
 
+`membership_form_start` fires only on a field change: a restored draft submitted
+without an edit, and a submit on an untouched form, have no start event, so step 2
+undercounts those visitors.
+
 **Step 3 — Form submitted**
 
 - Condition: Event name → `membership_form_submit`
@@ -509,9 +513,13 @@ step 2. A start with no role means the visitor changed another field before pick
 
 **Segment comparison — with vs without an error:** Segments → **+** → **Session segment**.
 
-- Segment "With error": include sessions where Event name → exactly matches → `membership_form_error`.
-- Segment "Without error": include sessions where Event name → exactly matches → `membership_form_start`,
+- Segment "With error": include sessions with a `page_view` of Page path → exactly matches → `/club/word-lid`,
+  **and** Event name → exactly matches → `membership_form_error`.
+- Segment "Without error": include sessions with a `page_view` of Page path → exactly matches → `/club/word-lid`,
   and **exclude** sessions where Event name → exactly matches → `membership_form_error`.
+
+Both are based on the page view, not on `membership_form_start`, so a visitor who
+never changed a field is still counted.
 
 Drag both into **Segment comparisons**. The step 3 completion rate of the two shows
 what an error costs. A session with an error that still submits counts as completed
@@ -526,9 +534,10 @@ on the "With error" segment, with Event name → `membership_form_error`.
 in **DebugView** on a `membership_form_error` event. Register it by hand once a slot
 frees up.
 
-**Not an error:** a Turnstile failure or a transport failure (network, 5xx) fires no
-`membership_form_error`; a visitor who hits one shows as started, not submitted, and
-without an error event.
+**Not an error:** a Turnstile failure, a transport failure (a rejected fetch) and any
+400 or 5xx response without a `fields` object (including a request-schema 400, such as
+a name over 100 characters) fire no `membership_form_error`. A visitor who hits one
+shows as started, not submitted, and without an error event.
 
 **Set date range:** Top-right corner → **Last 28 days**. **Share the exploration.**
 
