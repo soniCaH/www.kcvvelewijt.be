@@ -215,6 +215,15 @@ export const SubscribePanelOpen: Story = {
 };
 
 /**
+ * `/kalender?abonneer=<psdId>` — the link from a Team page's ticket (#3788):
+ * the panel starts open with only that Team selected.
+ */
+export const SubscribePanelFromTeamLink: Story = {
+  args: { initialAbonneer: "103" },
+  beforeEach: seedUrl("?view=month&abonneer=103"),
+};
+
+/**
  * A pitch-reservation placeholder (#2606) on the agenda view — the row a
  * parent scrolling `/kalender` in list mode actually reads. No opponent, no
  * link, the club crest and the competition subject instead (#2688). Own

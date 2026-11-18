@@ -13,10 +13,17 @@ import { HttpBadGateway, type Match } from "@kcvv/api-contract";
 // The widget is a client island with its own tests; this suite is about what
 // sits above it, so a stub proves "the calendar still renders".
 vi.mock("@/components/calendar/CalendarWidget", () => ({
-  CalendarWidget: ({ initialIsPhone }: { initialIsPhone?: boolean }) => (
+  CalendarWidget: ({
+    initialIsPhone,
+    initialAbonneer,
+  }: {
+    initialIsPhone?: boolean;
+    initialAbonneer?: string;
+  }) => (
     <div
       data-testid="calendar-widget"
       data-initial-is-phone={String(initialIsPhone)}
+      data-initial-abonneer={initialAbonneer}
     />
   ),
 }));
@@ -83,7 +90,9 @@ vi.mock("@/lib/repositories/event.repository", async (importOriginal) => {
 
 const { default: CalendarPage } = await import("../page");
 
-const renderPage = async (searchParams: { view?: string } = {}) =>
+const renderPage = async (
+  searchParams: { view?: string; abonneer?: string | string[] } = {},
+) =>
   render(await CalendarPage({ searchParams: Promise.resolve(searchParams) }));
 
 const nextMatch = {
@@ -183,6 +192,32 @@ describe("/kalender — phone first paint (#3480)", () => {
     expect(screen.getByTestId("calendar-widget")).toHaveAttribute(
       "data-initial-is-phone",
       "false",
+    );
+  });
+});
+
+describe("/kalender — ?abonneer= (#3788)", () => {
+  beforeEach(() => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    mockRequestHeaders.mockReturnValue({});
+    mockGetNextMatches.mockReturnValue(Effect.succeed([]));
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("hands the raw value to the widget, which validates it", async () => {
+    await renderPage({ abonneer: "102" });
+    expect(screen.getByTestId("calendar-widget")).toHaveAttribute(
+      "data-initial-abonneer",
+      "102",
+    );
+  });
+
+  it("drops a repeated param and an absent one", async () => {
+    await renderPage({ abonneer: ["1", "2"] });
+    expect(screen.getByTestId("calendar-widget")).not.toHaveAttribute(
+      "data-initial-abonneer",
     );
   });
 });

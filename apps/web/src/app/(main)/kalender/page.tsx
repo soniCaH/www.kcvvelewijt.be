@@ -167,13 +167,17 @@ async function fetchCalendarData(): Promise<CalendarData> {
 export default async function CalendarPage({
   searchParams,
 }: {
-  searchParams: Promise<{ type?: string | string[]; view?: string | string[] }>;
+  searchParams: Promise<{
+    type?: string | string[];
+    view?: string | string[];
+    abonneer?: string | string[];
+  }>;
 }) {
   // Reading the query costs nothing here (`force-dynamic`). It only seeds the
   // widget's first render so a deep link is not painted as month/"all" and then
   // flipped after hydration; the widget narrows both, and the URL stays the
   // source of truth after mount.
-  const { type, view } = await searchParams;
+  const { type, view, abonneer } = await searchParams;
   // Likewise the phone guess (#3480): without an explicit `?view=` a phone's
   // first paint is the agenda, not the month grid it flips away from after
   // mount. Per-request is safe here — `force-dynamic`, never CDN-cached.
@@ -224,6 +228,7 @@ export default async function CalendarPage({
           teams={data.teams}
           initialType={typeof type === "string" ? type : undefined}
           initialView={typeof view === "string" ? view : undefined}
+          initialAbonneer={typeof abonneer === "string" ? abonneer : undefined}
           initialIsPhone={initialIsPhone}
         />
       </PageContainer>

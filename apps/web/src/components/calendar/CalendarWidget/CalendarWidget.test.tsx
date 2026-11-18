@@ -309,6 +309,45 @@ describe("CalendarWidget", () => {
     });
   });
 
+  describe("?abonneer= deep link (#3788)", () => {
+    const panel = () => screen.getByTestId("subscribe-panel");
+    const chips = () =>
+      screen.queryAllByRole("button", { name: /Verwijder/, hidden: true });
+
+    it("a valid Team id opens the panel with only that Team selected", () => {
+      render(<CalendarWidget {...defaultProps} initialAbonneer="102" />);
+      expect(panel()).not.toHaveAttribute("hidden");
+      expect(chips()).toHaveLength(1);
+      expect(
+        screen.getByRole("link", { name: /Zet in je agenda/ }),
+      ).toHaveAttribute(
+        "href",
+        expect.stringMatching(/^webcal:\/\/.*teamIds=102&/),
+      );
+    });
+
+    it("fires kalender_subscribe_open with source team_link once on load", () => {
+      const { rerender } = render(
+        <CalendarWidget {...defaultProps} initialAbonneer="102" />,
+      );
+      rerender(<CalendarWidget {...defaultProps} initialAbonneer="102" />);
+      expect(trackEvent).toHaveBeenCalledTimes(1);
+      expect(trackEvent).toHaveBeenCalledWith("kalender_subscribe_open", {
+        source: "team_link",
+      });
+    });
+
+    it.each([["abc"], ["999999"], ["0102"], [undefined]])(
+      "%s leaves the panel closed with all Teams selected and fires nothing",
+      (raw) => {
+        render(<CalendarWidget {...defaultProps} initialAbonneer={raw} />);
+        expect(panel()).toHaveAttribute("hidden");
+        expect(chips()).toHaveLength(2);
+        expect(trackEvent).not.toHaveBeenCalled();
+      },
+    );
+  });
+
   describe("history-backed URL state (#3382)", () => {
     it("a chip tap and a view-tab tap each pushState and never router.push", async () => {
       const user = userEvent.setup();

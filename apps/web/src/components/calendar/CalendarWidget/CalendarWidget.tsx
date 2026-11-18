@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils/cn";
 import { clubToday, toDisplayZone } from "@/lib/utils/dates";
 import { trackEvent } from "@/lib/analytics/track-event";
+import { parsePsdId } from "@/lib/utils/psd-id";
 import { useHistoryFilterParam } from "@/hooks/useHistoryFilterParam";
 import {
   EmptyState,
@@ -87,6 +88,12 @@ export interface CalendarWidgetProps {
   initialType?: string;
   initialView?: string;
   /**
+   * The request's `?abonneer=` (a Team's PSD id), passed through untrusted. A
+   * valid id that matches one of `teams` opens the subscribe panel with only
+   * that Team selected (#3788); anything else is ignored.
+   */
+  initialAbonneer?: string;
+  /**
    * The page's guess that the request came from a phone (`sec-ch-ua-mobile`,
    * else the user agent — #3480). The starting value of the phone check, so
    * the server HTML for a phone holds the agenda. Defaults to `false`.
@@ -137,6 +144,7 @@ export function CalendarWidget({
   today,
   initialType,
   initialView,
+  initialAbonneer,
   initialIsPhone = false,
 }: CalendarWidgetProps) {
   // No explicit `?view=` → branch the default on the md breakpoint: agenda on
@@ -178,7 +186,18 @@ export function CalendarWidget({
   const seedDay = today ?? clubToday();
   const [cursor, setCursor] = useState<string>(seedDay);
   const [selectedDate, setSelectedDate] = useState(seedDay);
-  const [subscribePanelOpen, setSubscribePanelOpen] = useState(false);
+  const linkedPsdId = parsePsdId(initialAbonneer ?? "");
+  const linkedTeam = teams.find((t) => t.psdId === linkedPsdId);
+  const [subscribePanelOpen, setSubscribePanelOpen] = useState(
+    linkedTeam !== undefined,
+  );
+  // Once per load: the Team page link opened the panel (#3788).
+  const linkOpenTracked = useRef(false);
+  useEffect(() => {
+    if (!linkedTeam || linkOpenTracked.current) return;
+    linkOpenTracked.current = true;
+    trackEvent("kalender_subscribe_open", { source: "team_link" });
+  }, [linkedTeam]);
 
   const cursorDt = toDisplayZone(cursor);
   const currentMonth = cursorDt.month;
@@ -330,7 +349,11 @@ export function CalendarWidget({
         </div>
 
         {/* Subscribe panel — a team-match feed, orthogonal to the type filter */}
-        <CalendarSubscribePanel teams={teams} isOpen={subscribePanelOpen} />
+        <CalendarSubscribePanel
+          teams={teams}
+          preselectedTeamId={linkedTeam?.id}
+          isOpen={subscribePanelOpen}
+        />
 
         {/* View content */}
         <div className="p-4">
