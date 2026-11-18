@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils/cn";
 import { clubToday, toDisplayZone } from "@/lib/utils/dates";
 import { trackEvent } from "@/lib/analytics/track-event";
 import { useHistoryFilterParam } from "@/hooks/useHistoryFilterParam";
+import { readParam } from "@/hooks/filterParam";
 import {
   EmptyState,
   FilterTabs,
@@ -22,6 +23,7 @@ import { CalendarMonth } from "../CalendarMonth";
 import { CalendarWeek } from "../CalendarWeek";
 import { CalendarAgenda } from "../CalendarAgenda";
 import { CalendarSubscribePanel } from "../CalendarSubscribePanel";
+import { KALENDER_ABONNEER_PARAM } from "./abonneer";
 import {
   formatMonthNavLabel,
   formatWeekRangeLabel,
@@ -62,6 +64,10 @@ const KALENDER_FILTER_TABS: FilterTab[] = [
 const KALENDER_FILTER_VALUES: readonly KalenderFilterValue[] =
   KALENDER_FILTER_TABS.map((tab) => tab.value as KalenderFilterValue);
 
+/** The subscribe panel's DOM id: scrolled to when the Team ticket's link
+ * opened it (#3788). */
+const SUBSCRIBE_PANEL_ID = "abonneren";
+
 export interface CalendarWidgetProps {
   /**
    * Unified, chronologically-sorted calendar feed — PSD matches + the 6.E event
@@ -86,6 +92,12 @@ export interface CalendarWidgetProps {
    */
   initialType?: string;
   initialView?: string;
+  /**
+   * The request's `?abonneer=` (a Team's PSD id), passed through untrusted. A
+   * valid id that matches one of `teams` opens the subscribe panel with only
+   * that Team selected (#3788); anything else is ignored.
+   */
+  initialAbonneer?: string;
   /**
    * The page's guess that the request came from a phone (`sec-ch-ua-mobile`,
    * else the user agent — #3480). The starting value of the phone check, so
@@ -137,6 +149,7 @@ export function CalendarWidget({
   today,
   initialType,
   initialView,
+  initialAbonneer,
   initialIsPhone = false,
 }: CalendarWidgetProps) {
   // No explicit `?view=` → branch the default on the md breakpoint: agenda on
@@ -178,7 +191,32 @@ export function CalendarWidget({
   const seedDay = today ?? clubToday();
   const [cursor, setCursor] = useState<string>(seedDay);
   const [selectedDate, setSelectedDate] = useState(seedDay);
-  const [subscribePanelOpen, setSubscribePanelOpen] = useState(false);
+  // `String()`, not `parsePsdId`: only an exact id of a listed Team matches,
+  // so `abc`, `0102` and an unknown id all fall through to no Team.
+  const linkedTeam = teams.find((t) => String(t.psdId) === initialAbonneer);
+  const [subscribePanelOpen, setSubscribePanelOpen] = useState(
+    linkedTeam !== undefined,
+  );
+  // The Team page link opened the panel (#3788): count it, then drop the param
+  // so Back, a reload or a shared URL neither reopen the panel nor count again.
+  // Gating on the live URL also makes a remount or a StrictMode re-run a no-op.
+  useEffect(() => {
+    if (!linkedTeam) return;
+    if (readParam(KALENDER_ABONNEER_PARAM) === null) return;
+    trackEvent("kalender_subscribe_open", { source: "team_link" });
+    // Not `writeHistoryFilterParam`: it would drop the hash.
+    const url = new URL(window.location.href);
+    url.searchParams.delete(KALENDER_ABONNEER_PARAM);
+    window.history.replaceState(window.history.state, "", url);
+    // The panel sits below the hero and the agenda band, screens down on a
+    // phone. A `#` anchor would not land: the route streams in behind
+    // `loading.tsx`, after the browser's own fragment scroll has run.
+    // Raw `scrollIntoView`, not `scrollIntoViewMotionSafe`: on load there is
+    // nothing to animate, and a smooth scroll does not run in a hidden tab.
+    document
+      .getElementById(SUBSCRIBE_PANEL_ID)
+      ?.scrollIntoView({ behavior: "instant", block: "start" });
+  }, [linkedTeam]);
 
   const cursorDt = toDisplayZone(cursor);
   const currentMonth = cursorDt.month;
@@ -330,7 +368,12 @@ export function CalendarWidget({
         </div>
 
         {/* Subscribe panel — a team-match feed, orthogonal to the type filter */}
-        <CalendarSubscribePanel teams={teams} isOpen={subscribePanelOpen} />
+        <CalendarSubscribePanel
+          teams={teams}
+          preselectedTeamId={linkedTeam?.id}
+          isOpen={subscribePanelOpen}
+          id={SUBSCRIBE_PANEL_ID}
+        />
 
         {/* View content */}
         <div className="p-4">

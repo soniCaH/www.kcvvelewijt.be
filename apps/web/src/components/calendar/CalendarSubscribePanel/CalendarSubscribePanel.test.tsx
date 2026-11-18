@@ -36,7 +36,7 @@ const teams: CalendarTeamInfo[] = [
 const defaultProps = {
   teams,
   isOpen: true,
-  preselectedTeamLabel: undefined as string | undefined,
+  preselectedTeamId: undefined as string | undefined,
 };
 
 describe("CalendarSubscribePanel", () => {
@@ -87,15 +87,44 @@ describe("CalendarSubscribePanel", () => {
       expect(chips).toHaveLength(3);
     });
 
-    it("pre-selects only the matching team when preselectedTeamLabel is set", () => {
+    it("pre-selects only the Team with that id when preselectedTeamId is set", () => {
+      render(
+        <CalendarSubscribePanel {...defaultProps} preselectedTeamId="t2" />,
+      );
+      expect(screen.getAllByRole("button", { name: /Verwijder/ })).toHaveLength(
+        1,
+      );
+      expect(
+        screen.getByRole("button", { name: /Verwijder B-ploeg/ }),
+      ).toBeInTheDocument();
+    });
+
+    it("selects by id, so two Teams sharing a label do not both match", () => {
       render(
         <CalendarSubscribePanel
           {...defaultProps}
-          preselectedTeamLabel="A-ploeg"
+          teams={[
+            { id: "x1", name: "U15", psdId: 1, label: "U15" },
+            { id: "x2", name: "U15", psdId: 2, label: "U15" },
+          ]}
+          preselectedTeamId="x2"
         />,
       );
       expect(screen.getAllByRole("button", { name: /Verwijder/ })).toHaveLength(
         1,
+      );
+      expect(screen.getByTestId("qr-value")).toHaveAttribute(
+        "data-value",
+        expect.stringContaining("teamIds=2&"),
+      );
+    });
+
+    it("falls back to all Teams when the id matches none", () => {
+      render(
+        <CalendarSubscribePanel {...defaultProps} preselectedTeamId="zzz" />,
+      );
+      expect(screen.getAllByRole("button", { name: /Verwijder/ })).toHaveLength(
+        3,
       );
     });
 
@@ -412,15 +441,42 @@ describe("CalendarSubscribePanel", () => {
     });
   });
 
+  describe("Team ticket title and link (#3788)", () => {
+    it("/kalender says Volg je ploeg(en). and has no Meer ploegen link", () => {
+      render(<CalendarSubscribePanel {...defaultProps} />);
+      expect(screen.getByText("Volg je ploeg(en).")).toBeInTheDocument();
+      expect(screen.queryByRole("link", { name: /Meer ploegen/ })).toBeNull();
+    });
+
+    it("the Team ticket says Volg je ploeg. and shows the link it is given", () => {
+      render(
+        <CalendarSubscribePanel
+          teams={[teams[1]]}
+          isOpen
+          source="team"
+          moreTeamsHref="/kalender?abonneer=102"
+        />,
+      );
+      expect(screen.getByText("Volg je ploeg.")).toBeInTheDocument();
+      expect(screen.queryByText("Volg je ploeg(en).")).toBeNull();
+      expect(
+        screen.getByRole("link", { name: /Meer ploegen/ }),
+      ).toHaveAttribute("href", "/kalender?abonneer=102");
+    });
+
+    it("the Team ticket without a link renders none", () => {
+      render(
+        <CalendarSubscribePanel teams={[teams[1]]} isOpen source="team" />,
+      );
+      expect(screen.getByText("Volg je ploeg.")).toBeInTheDocument();
+      expect(screen.queryByRole("link", { name: /Meer ploegen/ })).toBeNull();
+    });
+  });
+
   describe("source (#3644)", () => {
     it("on the Team page the only team has no remove control and no widget frame", () => {
       render(
-        <CalendarSubscribePanel
-          teams={[teams[0]]}
-          preselectedTeamLabel="A-ploeg"
-          isOpen
-          source="team"
-        />,
+        <CalendarSubscribePanel teams={[teams[0]]} isOpen source="team" />,
       );
       expect(screen.queryByRole("button", { name: /Verwijder/ })).toBeNull();
       expect(screen.getByTestId("subscribe-panel").className).not.toMatch(

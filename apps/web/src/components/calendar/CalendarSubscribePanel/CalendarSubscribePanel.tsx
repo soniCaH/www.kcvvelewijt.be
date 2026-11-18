@@ -4,7 +4,11 @@ import { useRef, useState, useSyncExternalStore } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { cn } from "@/lib/utils/cn";
 import { trackEvent } from "@/lib/analytics/track-event";
-import { EmptyState, RemovableChip } from "@/components/design-system";
+import {
+  EditorialLink,
+  EmptyState,
+  RemovableChip,
+} from "@/components/design-system";
 import {
   CALENDAR_EVENTS_PARAM,
   CALENDAR_EVENTS_PARAM_VALUE,
@@ -14,13 +18,18 @@ import type { CalendarTeamInfo } from "@/app/(main)/kalender/utils";
 
 export interface CalendarSubscribePanelProps {
   teams: CalendarTeamInfo[];
-  preselectedTeamLabel?: string;
+  /** `CalendarTeamInfo.id` of the one Team to start with; none or unknown
+   * selects them all. By id because labels are not unique per Team (#3788). */
+  preselectedTeamId?: string;
   isOpen: boolean;
   /** Surface the subscribe events came from (`source` is a registered GA4
    * dimension). Defaults to the `/kalender` widget. */
   source?: "kalender" | "team";
   /** Root id, for a toggle's `aria-controls` (#3786). */
   id?: string;
+  /** Where the Team ticket's `Meer ploegen` link goes; without it the link
+   * is not rendered (#3788). */
+  moreTeamsHref?: string;
 }
 
 type Side = "all" | "home" | "away";
@@ -45,16 +54,13 @@ function buildWebcalUrl(
     : base;
 }
 
-function computeInitialSelection(
+const computeInitialSelection = (
   teams: CalendarTeamInfo[],
-  preselectedTeamLabel?: string,
-): Set<string> {
-  if (preselectedTeamLabel) {
-    const match = teams.find((t) => t.label === preselectedTeamLabel);
-    return match ? new Set([match.id]) : new Set(teams.map((t) => t.id));
-  }
-  return new Set(teams.map((t) => t.id));
-}
+  preselectedTeamId?: string,
+): Set<string> => {
+  const match = teams.find((t) => t.id === preselectedTeamId);
+  return match ? new Set([match.id]) : new Set(teams.map((t) => t.id));
+};
 
 /** The classes the iPhone link and the copy button share, so the equal-height
  * pair cannot drift apart. */
@@ -65,13 +71,14 @@ const subscribeNever = () => () => {};
 
 export function CalendarSubscribePanel({
   teams,
-  preselectedTeamLabel,
+  preselectedTeamId,
   isOpen,
   source = "kalender",
   id,
+  moreTeamsHref,
 }: CalendarSubscribePanelProps) {
   const [selectedTeamIds, setSelectedTeamIds] = useState(() =>
-    computeInitialSelection(teams, preselectedTeamLabel),
+    computeInitialSelection(teams, preselectedTeamId),
   );
   const [side, setSide] = useState<Side>("all");
   // On by default (#2705) — deliberately not the same as the route's own
@@ -203,9 +210,18 @@ export function CalendarSubscribePanel({
           <p className="text-ink-muted font-mono text-[10px] font-semibold tracking-widest uppercase">
             Abonnement
           </p>
-          <p className="font-display text-ink mb-3 text-lg font-bold italic">
-            Volg je ploeg(en).
-          </p>
+          {/* `items-baseline`, not `SectionHeader`'s `items-end`: at this
+              title size `items-end` drops the link below the text line. */}
+          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+            <p className="font-display text-ink text-lg font-bold italic">
+              {isTeamPanel ? "Volg je ploeg." : "Volg je ploeg(en)."}
+            </p>
+            {moreTeamsHref ? (
+              // For a parent with children in two Teams: `/kalender` opens
+              // its panel with only this Team picked (#3788).
+              <EditorialLink href={moreTeamsHref}>Meer ploegen</EditorialLink>
+            ) : null}
+          </div>
 
           {/* Team chips */}
           <div className="mb-3 flex flex-wrap gap-2">

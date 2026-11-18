@@ -66,6 +66,7 @@ import { UpLink } from "@/components/design-system/UpLink";
 import { EmptyState } from "@/components/design-system/EmptyState";
 import { TeamHero } from "@/components/team/TeamHero";
 import { StandingsSection } from "@/components/team/StandingsSection";
+import { KALENDER_ABONNEER_PARAM } from "@/components/calendar/CalendarWidget/abonneer";
 import { TeamMatchesSection } from "@/components/team/TeamMatchesSection";
 // Deep import, not the `TeamMatchesSection` barrel: that barrel also
 // re-exports a `"use client"` component, and this is a server-side read of a
@@ -681,7 +682,13 @@ export default async function TeamPage({ params }: TeamPageProps) {
                     now={now}
                     subscribeTeam={
                       psdTeamId !== null
-                        ? { psdId: psdTeamId, label: displayName }
+                        ? {
+                            psdId: psdTeamId,
+                            label: displayName,
+                            moreTeamsHref: team.onKalender
+                              ? `/kalender?${KALENDER_ABONNEER_PARAM}=${psdTeamId}`
+                              : undefined,
+                          }
                         : undefined
                     }
                   />

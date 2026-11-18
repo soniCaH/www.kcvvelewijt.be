@@ -13,10 +13,17 @@ import { HttpBadGateway, type Match } from "@kcvv/api-contract";
 // The widget is a client island with its own tests; this suite is about what
 // sits above it, so a stub proves "the calendar still renders".
 vi.mock("@/components/calendar/CalendarWidget", () => ({
-  CalendarWidget: ({ initialIsPhone }: { initialIsPhone?: boolean }) => (
+  CalendarWidget: ({
+    initialIsPhone,
+    initialAbonneer,
+  }: {
+    initialIsPhone?: boolean;
+    initialAbonneer?: string;
+  }) => (
     <div
       data-testid="calendar-widget"
       data-initial-is-phone={String(initialIsPhone)}
+      data-initial-abonneer={initialAbonneer}
     />
   ),
 }));
@@ -83,7 +90,9 @@ vi.mock("@/lib/repositories/event.repository", async (importOriginal) => {
 
 const { default: CalendarPage } = await import("../page");
 
-const renderPage = async (searchParams: { view?: string } = {}) =>
+const renderPage = async (
+  searchParams: { view?: string; abonneer?: string | string[] } = {},
+) =>
   render(await CalendarPage({ searchParams: Promise.resolve(searchParams) }));
 
 const nextMatch = {
@@ -184,5 +193,29 @@ describe("/kalender — phone first paint (#3480)", () => {
       "data-initial-is-phone",
       "false",
     );
+  });
+});
+
+describe("/kalender — ?abonneer= (#3788)", () => {
+  beforeEach(() => {
+    mockRequestHeaders.mockReturnValue({});
+    mockGetNextMatches.mockReturnValue(Effect.succeed([]));
+  });
+
+  it.each([
+    [
+      "a single value, handed over raw for the widget to validate",
+      "102",
+      "102",
+    ],
+    ["a repeated param, dropped", ["1", "2"], null],
+    ["an absent param", undefined, null],
+  ])("%s", async (_label, abonneer, expected) => {
+    await renderPage({ abonneer });
+    expect(
+      screen
+        .getByTestId("calendar-widget")
+        .getAttribute("data-initial-abonneer"),
+    ).toBe(expected);
   });
 });

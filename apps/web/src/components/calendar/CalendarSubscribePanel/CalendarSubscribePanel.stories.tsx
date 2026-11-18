@@ -44,7 +44,7 @@ export const ActivitiesOff: Story = {
 
 export const PrefilledSingleTeam: Story = {
   args: {
-    preselectedTeamLabel: "A-ploeg",
+    preselectedTeamId: "t1",
   },
 };
 

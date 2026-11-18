@@ -39,7 +39,13 @@ export interface TeamMatchesSectionProps {
    * without it no panel renders. The panel lives in this section, so it hides
    * with it between seasons. It starts closed behind a toggle (#3786).
    */
-  subscribeTeam?: { psdId: number; label: string };
+  subscribeTeam?: {
+    psdId: number;
+    label: string;
+    /** The ticket's `Meer ploegen` link; absent for a team `/kalender` does
+     * not list, where it would open nothing (#3788). */
+    moreTeamsHref?: string;
+  };
   className?: string;
 }
 
@@ -140,6 +146,7 @@ export function TeamMatchesSection({
           isOpen={subscribeOpen}
           source="team"
           id={subscribePanelId}
+          moreTeamsHref={subscribeTeam.moreTeamsHref}
         />
       ) : null}
     </section>
