@@ -58,8 +58,10 @@ Then apply with `--no-dry-run` (add `--no-confirm` when non-interactive). Run ag
 - **Migrations are idempotent**: re-running one on already-migrated documents is a no-op.
 - **Always pass `--dataset`.** `apps/studio/sanity.cli.ts` defaults to `production`; `apps/studio-staging/sanity.cli.ts` defaults to `staging` (#3210). Relying on either default is fragile — pass the flag explicitly every time.
 - **Every migration has a facade in both folders** — `apps/studio/migrations/<name>/` and `apps/studio-staging/migrations/<name>/`, differing only in the docblock. A migration in one folder only is drift ([#3120](https://github.com/soniCaH/www.kcvvelewijt.be/issues/3120)). Being rollback-only is not an exemption.
-- **The folders are not a run ledger.** Sanity records no history of which migration ran against which dataset. To know, dry-run it against both datasets and query the data for the old shape — zero patches on staging can mean "no such documents" rather than "already ran".
+- **The folders are not a run ledger.** Sanity records no history of which migration ran against which dataset. To know, dry-run it against both datasets and query the data for the old shape — zero patches on staging can mean "no such documents" rather than "already ran" (staging once had no `homePage` at all).
 - **`title-portable-text-to-string` is rollback-only.** Never run it as a sync: it flattens every article title backwards.
+- **Finding unrun migrations:** dry-run every folder in `apps/studio/migrations/` against `production` and count the lines that start with `[patch]`. A non-zero count is not proof that a migration is unrun: read its docblock first. A rollback-only migration always shows patches.
+- **A migration can change behaviour beyond its own fields.** Before you run one that unsets a field, grep the web app for code that reads that field.
 
 ## Dev / Deploy Workflow
 
@@ -70,6 +72,8 @@ pnpm --filter @kcvv/studio dev
 # Deploy to sanity.io (production) — CI does this on merge to main
 pnpm --filter @kcvv/studio run deploy
 ```
+
+Production: let CI deploy it, never from a laptop. CI deploys exactly what is on `main`.
 
 `deploy` pushes to the hosted Studio at sanity.io and uploads the schema and manifest. Never use bare `pnpm --filter @kcvv/studio deploy` (pnpm's built-in).
 
