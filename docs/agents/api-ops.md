@@ -324,3 +324,19 @@ While drifting: `ERROR` on every stale serve (the `wrangler tail` trace), Slack 
 - It loads `.dev.vars.staging`, else `.dev.vars`, and every key there overrides `[env.staging.vars]`. The main checkout's `.dev.vars` sets `SANITY_DATASET=production`, so a "staging" dev worker reads production. In the bindings table, `(hidden)` means the value came from the file.
 - Fix: pass `--env-file <a copy without those keys>`. Wrangler then skips `.dev.vars`; it expands `$` in values. `scripts/backfill-staging-search.sh` does this.
 - A fresh worktree has no `.dev.vars`.
+
+## Debugging stale BFF data
+
+- Read the cache entry before you reason about TTLs. `--remote` is required: without it wrangler reads the local dev store and says "Value not found". Match keys carry a `CACHE_VERSION` suffix, so list them first.
+
+  ```bash
+  pnpm --filter @kcvv/api exec wrangler kv key get --binding=PSD_CACHE --remote "match:detail:<id>"
+  ```
+
+  `fetchedAt` in the stored wrapper is the write time. Compare it with the key's soft TTL.
+
+- Read related keys together: `matches:team:{id}` (one PSD call), `matches:window` and `matches:next` (about 19 calls), `match:detail:{id}`, `psd:match-team-index:v2` (about 20 calls). A fresh one-call key next to a frozen fan-out key means the gate is starving, not that a TTL is wrong.
+- Watch a live request with `wrangler tail --format json`. Look for `waitUntil() tasks did not complete` and `PsdGate` RPC events with `outcome: canceled` and a long `wallTime`.
+- Take route paths from `packages/api-contract/src/api/*.ts`; never guess them.
+- The BFF is correct but the page is stale: the bug is in the web app. Compare a `force-dynamic` page (`/kalender`) with an ISR page (`/`). Do not use the `age` header as a clock. Sequential requests stay stale but a parallel burst fixes them: a stale `unstable_cache` entry whose background refresh was dropped.
+- **A deploy does not refresh old entries.** After a transform change, entries written before the deploy keep the old shape until their soft TTL ends. Date a key without reading it: `wrangler kv key list --remote --prefix "matches:"` returns `expiration`, and the write time is `expiration − 604800` (`HARD_TTL_DEFAULT`, 7 days). Delete the keys written before the deploy; they fill again on the next request.
