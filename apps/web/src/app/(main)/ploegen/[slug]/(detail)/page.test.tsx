@@ -35,7 +35,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { Effect, Layer } from "effect";
 import { HttpNotFound } from "@kcvv/api-contract";
 import type { Match } from "@kcvv/api-contract";
@@ -586,6 +586,8 @@ describe("/ploegen/[slug] subscribe panel (#3644)", () => {
     const section = document.getElementById("wedstrijden");
     const panel = screen.getByTestId("subscribe-panel");
     expect(section).toContainElement(panel);
+    // The ticket starts closed behind its toggle (#3786).
+    fireEvent.click(screen.getByRole("button", { name: "Zet in je agenda" }));
     const href = screen
       .getByRole("link", { name: /Zet in je agenda/ })
       .getAttribute("href");

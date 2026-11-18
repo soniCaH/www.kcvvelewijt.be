@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { within, userEvent } from "storybook/test";
 import { TeamMatchesSection } from "./TeamMatchesSection";
 import type { ScheduleMatch, ScheduleRow } from "@/components/match/types";
 import { VR_FROZEN_NOW_ISO } from "../../../../test/vr/frozen-clock";
@@ -80,11 +81,25 @@ export const MidSeason: Story = {
   args: { matches: midSeason },
 };
 
-/** A team with a valid PSD id: the subscribe panel closes the section (#3644). */
+/**
+ * A team with a valid PSD id (#3644): the subscribe ticket starts closed
+ * behind the "Zet in je agenda" toggle, beside the calendar link (#3786).
+ */
 export const WithSubscribePanel: Story = {
   args: {
     matches: midSeason,
     subscribeTeam: { psdId: 9401, label: "U13" },
+  },
+};
+
+/** The same section after one click on the toggle: the ticket is open. */
+export const WithSubscribePanelOpen: Story = {
+  args: WithSubscribePanel.args,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole("button", { name: "Zet in je agenda" }),
+    );
   },
 };
 

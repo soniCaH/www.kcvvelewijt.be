@@ -219,7 +219,7 @@ export function CalendarWidget({
     const next = !subscribePanelOpen;
     setSubscribePanelOpen(next);
     // Fire only on open (the panel revealing), not on collapse.
-    if (next) trackEvent("kalender_subscribe_open");
+    if (next) trackEvent("kalender_subscribe_open", { source: "kalender" });
   }
 
   function setType(value: KalenderFilterValue) {

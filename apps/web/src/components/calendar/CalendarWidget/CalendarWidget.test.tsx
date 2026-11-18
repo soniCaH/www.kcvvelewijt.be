@@ -300,7 +300,9 @@ describe("CalendarWidget", () => {
       render(<CalendarWidget {...defaultProps} />);
       const btn = screen.getByRole("button", { name: /Abonneer/ });
       await user.click(btn); // open
-      expect(trackEvent).toHaveBeenCalledWith("kalender_subscribe_open");
+      expect(trackEvent).toHaveBeenCalledWith("kalender_subscribe_open", {
+        source: "kalender",
+      });
       vi.mocked(trackEvent).mockClear();
       await user.click(btn); // collapse — no event
       expect(trackEvent).not.toHaveBeenCalled();
