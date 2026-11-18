@@ -94,6 +94,23 @@ describe("MembershipForm", () => {
       ]);
     });
 
+    it("ignores a change that carries the field's current value", () => {
+      render(<MembershipForm defaultRole="speler" />);
+      // A <select> change event is not de-duplicated by React, so the handler
+      // really runs with the value the field already has.
+      fireEvent.change(screen.getByLabelText(/interesse als/i), {
+        target: { value: "speler" },
+      });
+      expect(startCalls()).toHaveLength(0);
+
+      fireEvent.change(screen.getByLabelText(/Voornaam/), {
+        target: { value: "Jan" },
+      });
+      expect(startCalls()).toEqual([
+        ["membership_form_start", { role: "speler", restored_draft: false }],
+      ]);
+    });
+
     it("carries the role chosen from the link defaults", () => {
       render(<MembershipForm defaultRole="speler" />);
       fireEvent.change(screen.getByLabelText(/Voornaam/), {

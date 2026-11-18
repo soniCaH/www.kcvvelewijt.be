@@ -175,7 +175,9 @@ function MembershipFormFields({
     name: K,
     value: MembershipDraft[K],
   ) => {
-    if (!startedRef.current) {
+    // Render-time value: a change that carries the current value (autofill
+    // re-filling the same text) is no field change and must not spend the event.
+    if (!startedRef.current && values[name] !== value) {
       startedRef.current = true;
       const startRole = name === "role" ? value : role;
       trackEvent("membership_form_start", {
