@@ -135,7 +135,8 @@ parameter in GA4 Admin and turn off (or verify) Enhanced Measurement site search
    - **Event parameter**: the exact parameter name from the code
 4. Click **Save**.
 
-Repeat for each row in the table below.
+Register a row only while a slot is free; the cap is full, so check the free count
+first. Skip every parameter the taxonomy marks `registered: false`.
 
 ### Dimensions to register
 
@@ -506,9 +507,12 @@ undercounts those visitors.
 
 - Condition: Event name → `membership_form_submit`
 
-**Breakdown by role:** Breakdown → **Role**. `role` is on the start and submit events
-only (the page view has none), so step 1 reads `(not set)` and the split begins at
-step 2. A start with no role means the visitor changed another field before picking one.
+**By role:** do not break this funnel down by **Role**. GA4 gives each visitor one
+breakdown value for the whole funnel, and the page view has no `role`. Add a
+**Free form** tab instead: rows **Event name** and **Role**, value **Event count**,
+filter Event name → matches regex → `membership_form_(start|submit)`. A start with no
+role means the visitor changed another field before picking one. A visitor who picks
+`trainer` and submits as `vrijwilliger` counts once under each role, per event.
 
 **Segment comparison — with vs without an error:** Segments → **+** → **Session segment**.
 
@@ -520,17 +524,21 @@ step 2. A start with no role means the visitor changed another field before pick
 Both are based on the page view, not on `membership_form_start`, so a visitor who
 never changed a field is still counted.
 
-Drag both into **Segment comparisons**. The step 3 completion rate of the two shows
-what an error costs. A session with an error that still submits counts as completed
+Drag both into **Segment comparisons**, and compare the step 3 completion rate of the
+two. The gap is an association, not proof that the error caused the drop. A session with an error that still submits counts as completed
 in "With error": the gap between the two segments is the signal, not either rate alone.
 
 **Client vs server rejections:** `source` (`client` blocked the submit, `server`
-rejected it) is a registered dimension (**Interaction source**). Add it as a breakdown
-on the "With error" segment, with Event name → `membership_form_error`.
+rejected it) is a registered dimension (**Interaction source**). Read it on a separate **Free form**
+tab: rows **Interaction source**, value **Event count**, filter Event name → exactly
+matches → `membership_form_error`. Never put that filter on the funnel tab: it removes
+the events of all three steps.
 
 **Which fields stop people:** `fields` (comma-joined field names, e.g.
 `email,birthDate`) is unregistered: there is no GA4 dimension to break down by. Read it
-in **DebugView** on a `membership_form_error` event. Register it by hand once a slot
+in **DebugView** on a `membership_form_error` event. First apply the GTM sync (#3789:
+`scripts/sync-gtm.mjs`, then publish the container) and check `fields` in GTM Preview:
+until then the GA4 tag drops it. Register it by hand once a slot
 frees up.
 
 **Not an error:** a Turnstile failure, a transport failure (a rejected fetch) and any
@@ -768,27 +776,27 @@ download context is needed.
 
 ### Where to find each report
 
-| Report name                          | Location in GA4                               | Key metric                                   |
-| ------------------------------------ | --------------------------------------------- | -------------------------------------------- |
-| Responsibility Finder Funnel         | Explore → Responsibility Finder Funnel        | Step-to-step completion rate                 |
-| Search Funnel                        | Explore → Search Funnel                       | search_submitted → result_clicked drop-off   |
-| Organigram Usage                     | Explore → Organigram Usage                    | View mode distribution, member engagement    |
-| Related Content Funnel               | Explore → Related Content Funnel              | CTR by source (AI vs editorial vs reference) |
-| Responsibility Finder — Success Rate | Explore → Responsibility Finder Success Rate  | (contact_clicked + dwell) / search           |
-| Responsibility — No Results Queries  | Explore → Responsibility No Results Queries   | Queries with zero results (content gaps)     |
-| Search — Click-Through Rate          | Explore → Search Click-Through Rate           | result_clicked / submitted                   |
-| Search — No Results Queries          | Explore → Search No Results Queries           | Queries with zero results (index gaps)       |
-| Organigram — View Preference         | Explore → Organigram View Preference          | Which view is used most                      |
-| Related Content — CTR by Source      | Explore → Related Content CTR by Source       | Clicks / impressions per source              |
-| Related Content — Type Engagement    | Explore → Related Content Type Engagement     | Click counts per target_type                 |
-| Related Content — Position Bias      | Explore → Related Content Position Bias       | Click distribution by position               |
-| Homepage Match Widget Clicks         | Explore → Homepage Match Widget Clicks        | Click distribution by match status           |
-| Kalender abonnementen                | Explore → Kalender abonnementen               | Weekly subscribes by route and surface       |
-| Match Strip Engagement               | Explore → Match Strip Engagement              | Strip clicks vs dismissals, by match status  |
-| Membership Funnel                    | Explore → Membership Funnel                   | Page view → start → submit, by role          |
-| All events overview                  | Reports → Engagement → Events                 | Raw event counts (24–72h delay)              |
-| Realtime events                      | Reports → Realtime                            | Live event counts                            |
-| DebugView                            | Configure → DebugView                         | Individual session event timeline            |
-| File downloads                       | Reports → Engagement → Events → file_download | file_name, file_extension breakdown          |
-| Traffic sources                      | Reports → Acquisition → Traffic acquisition   | Where visitors come from                     |
-| Top pages                            | Reports → Engagement → Pages and screens      | Most visited pages, bounce rate              |
+| Report name                          | Location in GA4                               | Key metric                                       |
+| ------------------------------------ | --------------------------------------------- | ------------------------------------------------ |
+| Responsibility Finder Funnel         | Explore → Responsibility Finder Funnel        | Step-to-step completion rate                     |
+| Search Funnel                        | Explore → Search Funnel                       | search_submitted → result_clicked drop-off       |
+| Organigram Usage                     | Explore → Organigram Usage                    | View mode distribution, member engagement        |
+| Related Content Funnel               | Explore → Related Content Funnel              | CTR by source (AI vs editorial vs reference)     |
+| Responsibility Finder — Success Rate | Explore → Responsibility Finder Success Rate  | (contact_clicked + dwell) / search               |
+| Responsibility — No Results Queries  | Explore → Responsibility No Results Queries   | Queries with zero results (content gaps)         |
+| Search — Click-Through Rate          | Explore → Search Click-Through Rate           | result_clicked / submitted                       |
+| Search — No Results Queries          | Explore → Search No Results Queries           | Queries with zero results (index gaps)           |
+| Organigram — View Preference         | Explore → Organigram View Preference          | Which view is used most                          |
+| Related Content — CTR by Source      | Explore → Related Content CTR by Source       | Clicks / impressions per source                  |
+| Related Content — Type Engagement    | Explore → Related Content Type Engagement     | Click counts per target_type                     |
+| Related Content — Position Bias      | Explore → Related Content Position Bias       | Click distribution by position                   |
+| Homepage Match Widget Clicks         | Explore → Homepage Match Widget Clicks        | Click distribution by match status               |
+| Kalender abonnementen                | Explore → Kalender abonnementen               | Weekly subscribes by route and surface           |
+| Match Strip Engagement               | Explore → Match Strip Engagement              | Strip clicks vs dismissals, by match status      |
+| Membership Funnel                    | Explore → Membership Funnel                   | Page view → start → submit; role and source tabs |
+| All events overview                  | Reports → Engagement → Events                 | Raw event counts (24–72h delay)                  |
+| Realtime events                      | Reports → Realtime                            | Live event counts                                |
+| DebugView                            | Configure → DebugView                         | Individual session event timeline                |
+| File downloads                       | Reports → Engagement → Events → file_download | file_name, file_extension breakdown              |
+| Traffic sources                      | Reports → Acquisition → Traffic acquisition   | Where visitors come from                         |
+| Top pages                            | Reports → Engagement → Pages and screens      | Most visited pages, bounce rate                  |
