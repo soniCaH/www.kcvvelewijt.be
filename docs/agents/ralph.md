@@ -44,6 +44,9 @@ git status --short pnpm-lock.yaml                              # lockfile guard:
 - A dirty lockfile after install: `git checkout -- pnpm-lock.yaml && corepack pnpm install --frozen-lockfile`.
 - Start every later shell command with `source ~/.nvm/nvm.sh && nvm use --silent &&`. A fresh shell defaults to Node 16, which breaks commitlint and Playwright with misleading errors.
 - Type-check shows TS6305 ("has not been built from source"): a Turbo cache replay from another worktree. Re-run once with `--force`.
+- Wrong pnpm, the symptom: `pnpm --filter @kcvv/studio typegen` dies with `getWorkspace is not a function` (pnpm 8 bumps `@sanity/cli`). `head -1 pnpm-lock.yaml` must print `lockfileVersion: '9.0'`.
+- A worktree with no `pnpm install` has no husky hooks: lint-staged does not run, so `.md` and `.html` commits land unformatted. Install first, or run `pnpm exec prettier --check <file>` from the main checkout before you push.
+- Never run `prettier --write` on a wide glob over `docs/design/mockups/`. Those files are not prettier-clean on `main`, and one run rewrote about 250 tracked files. Pass an explicit list of the files you added.
 
 ## Checks
 
