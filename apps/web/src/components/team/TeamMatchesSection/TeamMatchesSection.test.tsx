@@ -16,9 +16,12 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { TeamMatchesSection } from "./TeamMatchesSection";
 import type { ScheduleMatch } from "@/components/match/types";
+import { trackEvent } from "@/lib/analytics/track-event";
+
+vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
 const NOW = new Date("2026-09-15T12:00:00.000Z");
 
@@ -204,10 +207,9 @@ describe("TeamMatchesSection", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  describe("subscribe panel (#3644)", () => {
+  describe("subscribe panel (#3644, #3786)", () => {
     const matches = [makeMatch({ id: 1, status: "scheduled" })];
-
-    it("shows the panel for the given team, preselected, with only its id in the feed", () => {
+    const renderWithTeam = () =>
       render(
         <TeamMatchesSection
           matches={matches}
@@ -215,17 +217,55 @@ describe("TeamMatchesSection", () => {
           subscribeTeam={{ psdId: 9401, label: "U13" }}
         />,
       );
+    const toggle = () =>
+      screen.getByRole("button", { name: "Zet in je agenda" });
+
+    beforeEach(() => {
+      vi.mocked(trackEvent).mockClear();
+    });
+
+    it("starts closed behind the toggle", () => {
+      renderWithTeam();
+      expect(screen.getByTestId("subscribe-panel")).toHaveAttribute("hidden");
+      expect(toggle()).toHaveAttribute("aria-expanded", "false");
+      expect(toggle()).toHaveAttribute(
+        "aria-controls",
+        screen.getByTestId("subscribe-panel").id,
+      );
+      expect(screen.getByTestId("subscribe-panel").id).not.toBe("");
+    });
+
+    it("opens the panel for the given team on click, with only its id in the feed", () => {
+      renderWithTeam();
+      fireEvent.click(toggle());
+      expect(toggle()).toHaveAttribute("aria-expanded", "true");
       expect(screen.getByTestId("subscribe-panel")).not.toHaveAttribute(
         "hidden",
       );
       expect(screen.getByTestId("qr-code")).toBeInTheDocument();
       const link = screen.getByRole("link", { name: /Zet in je agenda/ });
       expect(link.getAttribute("href")).toMatch(/[?&]teamIds=9401&/);
+      fireEvent.click(toggle());
+      expect(screen.getByTestId("subscribe-panel")).toHaveAttribute("hidden");
     });
 
-    it("shows no panel without a subscribe team", () => {
+    it("fires kalender_subscribe_open with source team on open only", () => {
+      renderWithTeam();
+      fireEvent.click(toggle()); // open
+      expect(trackEvent).toHaveBeenCalledTimes(1);
+      expect(trackEvent).toHaveBeenCalledWith("kalender_subscribe_open", {
+        source: "team",
+      });
+      fireEvent.click(toggle()); // close — no event
+      expect(trackEvent).toHaveBeenCalledTimes(1);
+    });
+
+    it("shows no toggle and no panel without a subscribe team", () => {
       render(<TeamMatchesSection matches={matches} teamSlug="kcvv-a" />);
       expect(screen.queryByTestId("subscribe-panel")).toBeNull();
+      expect(
+        screen.queryByRole("button", { name: "Zet in je agenda" }),
+      ).toBeNull();
     });
   });
 });

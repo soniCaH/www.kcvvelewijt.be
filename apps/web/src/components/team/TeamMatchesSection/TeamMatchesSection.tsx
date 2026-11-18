@@ -5,7 +5,9 @@
 // Phosphor icon — @phosphor-icons/react is ESM-only (calls
 // React.createContext at module init), so a server component importing it
 // breaks Next.js's build-time config collection.
+import { useId, useState } from "react";
 import { cn } from "@/lib/utils/cn";
+import { trackEvent } from "@/lib/analytics/track-event";
 import { MonoLabel } from "@/components/design-system/MonoLabel";
 import { EditorialLink } from "@/components/design-system/EditorialLink";
 import { CalendarSubscribePanel } from "@/components/calendar/CalendarSubscribePanel";
@@ -35,7 +37,7 @@ export interface TeamMatchesSectionProps {
    * The team the "Volg je ploeg" subscribe panel offers (#3644). The caller
    * passes it only for a team with a strictly parsed PSD id (`parsePsdId`);
    * without it no panel renders. The panel lives in this section, so it hides
-   * with it between seasons.
+   * with it between seasons. It starts closed behind a toggle (#3786).
    */
   subscribeTeam?: { psdId: number; label: string };
   className?: string;
@@ -49,6 +51,16 @@ export function TeamMatchesSection({
   subscribeTeam,
   className,
 }: TeamMatchesSectionProps) {
+  const [subscribeOpen, setSubscribeOpen] = useState(false);
+  const subscribePanelId = useId();
+
+  const toggleSubscribe = () => {
+    const nextOpen = !subscribeOpen;
+    setSubscribeOpen(nextOpen);
+    // Fire only on open (the panel revealing), not on collapse.
+    if (nextOpen) trackEvent("kalender_subscribe_open", { source: "team" });
+  };
+
   const next = findNextMatch(matches, now);
   const recent = recentResults(matches, next?.id, now);
 
@@ -86,12 +98,34 @@ export function TeamMatchesSection({
         </div>
       ) : null}
 
-      <EditorialLink
-        href={calendarHref}
-        data-testid="team-matches-calendar-link"
-      >
-        Volledige kalender
-      </EditorialLink>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <EditorialLink
+          href={calendarHref}
+          data-testid="team-matches-calendar-link"
+        >
+          Volledige kalender
+        </EditorialLink>
+
+        {subscribeTeam ? (
+          // `/kalender`'s "Abonneer" toggle (CalendarWidget) without the glyph,
+          // on the `text-label` step instead of its frozen `text-[11px]` (line-height 1,
+          // so `py-2` keeps the height close) (#3786).
+          <button
+            type="button"
+            onClick={toggleSubscribe}
+            aria-expanded={subscribeOpen}
+            aria-controls={subscribePanelId}
+            className={cn(
+              "border-ink text-label inline-flex items-center gap-1.5 border-2 px-3 py-2 font-mono uppercase transition-colors",
+              subscribeOpen
+                ? "bg-ink text-cream"
+                : "text-ink hover:bg-cream-soft",
+            )}
+          >
+            Zet in je agenda
+          </button>
+        ) : null}
+      </div>
 
       {subscribeTeam ? (
         <CalendarSubscribePanel
@@ -103,8 +137,9 @@ export function TeamMatchesSection({
               label: subscribeTeam.label,
             },
           ]}
-          isOpen
+          isOpen={subscribeOpen}
           source="team"
+          id={subscribePanelId}
         />
       ) : null}
     </section>
