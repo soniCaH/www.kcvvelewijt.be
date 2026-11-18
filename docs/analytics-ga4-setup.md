@@ -517,10 +517,13 @@ Drag both into **Segment comparisons**. The step 3 completion rate of the two sh
 what an error costs. A session with an error that still submits counts as completed
 in "With error": the gap between the two segments is the signal, not either rate alone.
 
+**Client vs server rejections:** `source` (`client` blocked the submit, `server`
+rejected it) is a registered dimension (**Interaction source**). Add it as a breakdown
+on the "With error" segment, with Event name → `membership_form_error`.
+
 **Which fields stop people:** `fields` (comma-joined field names, e.g.
-`email,birthDate`) and `source` (`client` blocked the submit, `server` rejected it)
-are unregistered parameters: there is no GA4 dimension to break down by. Read them in
-**DebugView** on a `membership_form_error` event. Register them by hand once a slot
+`email,birthDate`) is unregistered: there is no GA4 dimension to break down by. Read it
+in **DebugView** on a `membership_form_error` event. Register it by hand once a slot
 frees up.
 
 **Not an error:** a Turnstile failure or a transport failure (network, 5xx) fires no

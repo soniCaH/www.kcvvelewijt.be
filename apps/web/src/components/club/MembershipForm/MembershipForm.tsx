@@ -344,7 +344,7 @@ function MembershipFormFields({
       // covers a body with no `error` at all.
       if (response.status === 400 && data.fields) {
         setFieldErrors(data.fields);
-        // A Turnstile failure is a 400 without `fields`: no form field is to blame.
+        // A 400 with an empty `fields` names no field, so there is nothing to report.
         if (Object.keys(data.fields).length > 0) {
           trackFormError(data.fields, "server");
         }
