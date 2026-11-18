@@ -49,6 +49,12 @@ function fillRequiredFields() {
   fireEvent.click(screen.getByLabelText(/privacyverklaring/i));
 }
 
+const submitForm = () =>
+  fireEvent.submit(screen.getByText(/Verstuur aanvraag/).closest("form")!);
+
+const callsOf = (eventName: string) =>
+  vi.mocked(trackEvent).mock.calls.filter(([name]) => name === eventName);
+
 describe("MembershipForm", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -59,16 +65,11 @@ describe("MembershipForm", () => {
   });
 
   describe("membership_form_start (#3636)", () => {
-    const startCalls = () =>
-      vi
-        .mocked(trackEvent)
-        .mock.calls.filter(([name]) => name === "membership_form_start");
-
     beforeEach(() => vi.mocked(trackEvent).mockClear());
 
     it("does not fire on mount", () => {
       render(<MembershipForm />);
-      expect(startCalls()).toHaveLength(0);
+      expect(callsOf("membership_form_start")).toHaveLength(0);
     });
 
     it("fires once for two field changes, with no form values", () => {
@@ -79,7 +80,7 @@ describe("MembershipForm", () => {
       fireEvent.change(screen.getByLabelText(/Achternaam/), {
         target: { value: "Peeters" },
       });
-      expect(startCalls()).toEqual([
+      expect(callsOf("membership_form_start")).toEqual([
         ["membership_form_start", { restored_draft: false }],
       ]);
     });
@@ -89,7 +90,7 @@ describe("MembershipForm", () => {
       fireEvent.change(screen.getByLabelText(/interesse als/i), {
         target: { value: "trainer" },
       });
-      expect(startCalls()).toEqual([
+      expect(callsOf("membership_form_start")).toEqual([
         ["membership_form_start", { role: "trainer", restored_draft: false }],
       ]);
     });
@@ -101,12 +102,12 @@ describe("MembershipForm", () => {
       fireEvent.change(screen.getByLabelText(/interesse als/i), {
         target: { value: "speler" },
       });
-      expect(startCalls()).toHaveLength(0);
+      expect(callsOf("membership_form_start")).toHaveLength(0);
 
       fireEvent.change(screen.getByLabelText(/Voornaam/), {
         target: { value: "Jan" },
       });
-      expect(startCalls()).toEqual([
+      expect(callsOf("membership_form_start")).toEqual([
         ["membership_form_start", { role: "speler", restored_draft: false }],
       ]);
     });
@@ -116,7 +117,7 @@ describe("MembershipForm", () => {
       fireEvent.change(screen.getByLabelText(/Voornaam/), {
         target: { value: "Jan" },
       });
-      expect(startCalls()).toEqual([
+      expect(callsOf("membership_form_start")).toEqual([
         ["membership_form_start", { role: "speler", restored_draft: false }],
       ]);
     });
@@ -138,12 +139,12 @@ describe("MembershipForm", () => {
         root = hydrateRoot(container, <MembershipForm />);
       });
       // The remount alone is no field change.
-      expect(startCalls()).toHaveLength(0);
+      expect(callsOf("membership_form_start")).toHaveLength(0);
 
       const first = container.querySelector("input[name=firstName]")!;
       fireEvent.change(first, { target: { value: "Jan" } });
       fireEvent.change(first, { target: { value: "Jann" } });
-      expect(startCalls()).toEqual([
+      expect(callsOf("membership_form_start")).toEqual([
         [
           "membership_form_start",
           { role: "vrijwilliger", restored_draft: true },
@@ -151,6 +152,121 @@ describe("MembershipForm", () => {
       ]);
       await act(async () => root.unmount());
       container.remove();
+    });
+  });
+
+  describe("membership_form_error (#3637)", () => {
+    const reply = (status: number, body: unknown) =>
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(() =>
+          Promise.resolve({
+            ok: false,
+            status,
+            json: () => Promise.resolve(body),
+          }),
+        ),
+      );
+
+    beforeEach(() => vi.mocked(trackEvent).mockClear());
+
+    it("fires for a blocked client submit, with the field names and the role, no values", () => {
+      vi.stubGlobal("fetch", vi.fn());
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fireEvent.change(screen.getByLabelText(/Voornaam/), {
+        target: { value: "Jan" },
+      });
+      submitForm();
+      expect(callsOf("membership_form_error")).toEqual([
+        [
+          "membership_form_error",
+          {
+            fields: "birthDate,email,lastName,privacyAccepted",
+            source: "client",
+            role: "vrijwilliger",
+          },
+        ],
+      ]);
+      expect(JSON.stringify(callsOf("membership_form_error"))).not.toContain(
+        "Jan",
+      );
+    });
+
+    it("omits the role until one is chosen", () => {
+      vi.stubGlobal("fetch", vi.fn());
+      render(<MembershipForm />);
+      submitForm();
+      expect(callsOf("membership_form_error")).toHaveLength(1);
+      const [, params] = callsOf("membership_form_error")[0];
+      expect(params).toMatchObject({ source: "client" });
+      expect(params).not.toHaveProperty("role");
+      expect(params?.fields).toContain("role");
+    });
+
+    it("fires for a server 400 with field errors, marked server", async () => {
+      reply(400, {
+        error: "Controleer de gemarkeerde velden.",
+        fields: { parentEmail: "jan@example.com", birthDate: "Ongeldig." },
+      });
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      submitForm();
+      await screen.findByText("Controleer de gemarkeerde velden.");
+      expect(callsOf("membership_form_error")).toEqual([
+        [
+          "membership_form_error",
+          {
+            fields: "birthDate,parentEmail",
+            source: "server",
+            role: "vrijwilliger",
+          },
+        ],
+      ]);
+      expect(JSON.stringify(callsOf("membership_form_error"))).not.toContain(
+        "jan@example.com",
+      );
+    });
+
+    it.each([
+      [
+        "a Turnstile failure (400 without field errors)",
+        400,
+        {
+          error: "Verificatie mislukt. Vernieuw de pagina en probeer opnieuw.",
+        },
+      ],
+      [
+        "a 400 with an empty fields object",
+        400,
+        { error: "Controleer je gegevens.", fields: {} },
+      ],
+      [
+        "a 5xx response",
+        503,
+        { error: "Het formulier is momenteel niet beschikbaar." },
+      ],
+    ])("fires nothing for %s", async (_label, status, body) => {
+      reply(status, body);
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      submitForm();
+      await screen.findByText(body.error);
+      expect(callsOf("membership_form_error")).toHaveLength(0);
+    });
+
+    it("fires nothing for a transport failure", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(() => Promise.reject(new Error("offline"))),
+      );
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      submitForm();
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        /Verzenden mislukt/,
+      );
+      expect(callsOf("membership_form_error")).toHaveLength(0);
     });
   });
 
@@ -385,8 +501,6 @@ describe("MembershipForm", () => {
   });
 
   describe("submitting and success (#3384)", () => {
-    const submitForm = () =>
-      fireEvent.submit(screen.getByText(/Verstuur aanvraag/).closest("form")!);
     const stubSuccessFetch = () =>
       vi.stubGlobal(
         "fetch",
@@ -500,9 +614,6 @@ describe("MembershipForm", () => {
           JSON.parse((call[1] as RequestInit).body as string).turnstileToken,
       );
 
-    const submit = () =>
-      fireEvent.submit(screen.getByText(/Verstuur aanvraag/).closest("form")!);
-
     it("sends a fresh token on the retry after a server rejection", async () => {
       const fetchMock = vi
         .fn()
@@ -520,11 +631,11 @@ describe("MembershipForm", () => {
 
       render(<MembershipForm defaultRole="vrijwilliger" />);
       fillRequiredFields();
-      submit();
+      submitForm();
       await screen.findByText("Verificatie mislukt.");
       // Wait for the widget's fresh token to land before retrying.
       await act(async () => {});
-      submit();
+      submitForm();
       await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
 
       expect(submittedTokens(fetchMock)).toEqual(["token-0", "token-1"]);
@@ -544,10 +655,10 @@ describe("MembershipForm", () => {
 
       render(<MembershipForm defaultRole="vrijwilliger" />);
       fillRequiredFields();
-      submit();
+      submitForm();
       await screen.findByRole("alert");
       await act(async () => {});
-      submit();
+      submitForm();
       await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
 
       expect(submittedTokens(fetchMock)).toEqual(["token-0", "token-1"]);
@@ -656,8 +767,6 @@ describe("MembershipForm", () => {
           ...overrides,
         }),
       );
-    const submit = () =>
-      fireEvent.submit(screen.getByText(/Verstuur aanvraag/).closest("form")!);
 
     it("shows no note on a fresh visit", () => {
       render(<MembershipForm />);
@@ -907,7 +1016,7 @@ describe("MembershipForm", () => {
       });
       render(<MembershipForm />);
       await screen.findByText(RESTORED_NOTE);
-      submit();
+      submitForm();
       await screen.findByRole("alert");
 
       fireEvent.click(screen.getByText("Wis formulier"));
@@ -965,7 +1074,7 @@ describe("MembershipForm", () => {
       render(<MembershipForm defaultRole="vrijwilliger" />);
       fillRequiredFields();
       expect(storedDraft()).not.toBeNull();
-      submit();
+      submitForm();
 
       await screen.findByText(/Bedankt voor je interesse/i);
       expect(window.sessionStorage.getItem(DRAFT_STORAGE_KEY)).toBeNull();
@@ -979,7 +1088,7 @@ describe("MembershipForm", () => {
       );
       render(<MembershipForm defaultRole="vrijwilliger" />);
       fillRequiredFields();
-      submit();
+      submitForm();
 
       await screen.findByRole("alert");
       expect(storedDraft()).toMatchObject({ firstName: "Jan" });

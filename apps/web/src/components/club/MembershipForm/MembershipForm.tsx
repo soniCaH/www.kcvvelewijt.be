@@ -268,12 +268,28 @@ function MembershipFormFields({
     return errors;
   };
 
+  // Field names only, never values; sorted, so client and server agree on one
+  // problem. `role` is omitted until one is chosen. No names, no event (#3637).
+  const trackFormError = (
+    errors: Record<string, string>,
+    source: "client" | "server",
+  ) => {
+    const names = Object.keys(errors).sort();
+    if (names.length === 0) return;
+    trackEvent("membership_form_error", {
+      fields: names.join(","),
+      source,
+      ...(role ? { role } : {}),
+    });
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (state === "submitting") return;
 
     const clientErrors = validate();
     if (Object.keys(clientErrors).length > 0) {
+      trackFormError(clientErrors, "client");
       setFieldErrors(clientErrors);
       setGeneralError("Controleer de gemarkeerde velden.");
       setState("invalid");
@@ -332,6 +348,7 @@ function MembershipFormFields({
       // covers a body with no `error` at all.
       if (response.status === 400 && data.fields) {
         setFieldErrors(data.fields);
+        trackFormError(data.fields, "server");
       }
       setGeneralError(
         data.error ??

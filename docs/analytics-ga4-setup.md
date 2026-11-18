@@ -21,6 +21,7 @@ and at least one real user session with analytics consent given.
    - [4d. Related Content Funnel](#4d-related-content-funnel)
    - [4e. Homepage Match Widget Clicks](#4e-homepage-match-widget-clicks)
    - [4f. Kalender abonnementen Exploration](#4f-kalender-abonnementen-exploration)
+   - [4g. Membership Funnel](#4g-membership-funnel)
 5. [Create custom reports](#5-create-custom-reports)
    - [5a. Responsibility Finder Success Rate](#5a-responsibility-finder-success-rate)
    - [5b. Responsibility No-Results (Content Gaps)](#5b-responsibility-no-results-content-gaps)
@@ -105,7 +106,10 @@ GA4 automatically tracks standard parameters (`page_location`, `session_id`, etc
 but **custom event parameters are invisible in reports unless you register them first**
 as Custom Dimensions.
 
-You have 50 custom dimension slots. We will use 23.
+You have 50 custom dimension slots, and they are full. `scripts/analytics-taxonomy.mjs`
+is the authority: it lists more parameters than the slots hold, and the ones marked
+`registered: false` are forwarded by GTM and visible in DebugView, with no custom
+dimension. The table below is therefore not the full list: read the taxonomy.
 
 **Every event carries only its own parameters.** `trackEvent` pushes a function
 that calls GTM's `reset()` onto `window.dataLayer` before each event, because the
@@ -131,13 +135,14 @@ parameter in GA4 Admin and turn off (or verify) Enhanced Measurement site search
    - **Event parameter**: the exact parameter name from the code
 4. Click **Save**.
 
-Repeat for each row in the table below.
+Register a row only while a slot is free; the cap is full, so check the free count
+first. Skip every parameter the taxonomy marks `registered: false`.
 
 ### Dimensions to register
 
 | Dimension name     | Event parameter      | Where it appears                                                                      |
 | ------------------ | -------------------- | ------------------------------------------------------------------------------------- |
-| Role               | `role`               | Responsibility finder events                                                          |
+| Role               | `role`               | Responsibility finder events, `membership_form_start` / `_submit` / `_error`          |
 | Query text         | `query_text`         | Search & responsibility no-results events                                             |
 | Query length       | `query_length`       | Search & responsibility events                                                        |
 | Results count      | `results_count`      | `search_results_shown`, `responsibility_search`                                       |
@@ -151,7 +156,7 @@ Repeat for each row in the table below.
 | Result type        | `result_type`        | `search_result_clicked`, `related_content_click`                                      |
 | Result title       | `result_title`       | `search_result_clicked`                                                               |
 | Organigram view    | `view`               | Organigram events                                                                     |
-| Interaction source | `source`             | `organigram_view_changed`, `related_content_*`                                        |
+| Interaction source | `source`             | `organigram_view_changed`, `related_content_*`, `membership_form_error`               |
 | Department         | `department`         | `organigram_department_filtered`                                                      |
 | Member ID          | `member_id`          | `organigram_member_clicked`                                                           |
 | Team match kind    | `match_kind`         | `organigram_team_card_shown` ("u-code" / "old-name" / "age" / "birth-year" / "ai")    |
@@ -479,6 +484,75 @@ the OS calendar app takes over and GA4 never sees the outcome.
 
 ---
 
+### 4g. Membership Funnel
+
+**Key question**: Of the visitors who reach `/club/word-lid`, how many start the form,
+how many send it, and does a field error make them give up?
+
+1. **Explore** → **+** → Technique: **Funnel exploration**.
+2. Rename to **"Membership Funnel"**.
+
+**Steps:**
+
+**Step 1 — Form page viewed**
+
+- Condition: Event name → `page_view`, **And** Page path → exactly matches → `/club/word-lid`
+
+**Step 2 — Form started**
+
+- Condition: Event name → `membership_form_start` (one per form mount, on the first field change)
+
+`membership_form_start` fires only on a field change: a restored draft submitted
+without an edit, and a submit on an untouched form, have no start event, so step 2
+undercounts those visitors.
+
+**Step 3 — Form submitted**
+
+- Condition: Event name → `membership_form_submit`
+
+**By role:** do not break this funnel down by **Role**. GA4 gives each visitor one
+breakdown value for the whole funnel, and the page view has no `role`. Add a
+**Free form** tab instead: rows **Event name** and **Role**, value **Event count**,
+filter Event name → matches regex → `membership_form_(start|submit)`. A start with no
+role means the visitor changed another field before picking one. A visitor who picks
+`trainer` and submits as `vrijwilliger` counts once under each role, per event.
+
+**Segment comparison — with vs without an error:** Segments → **+** → **Session segment**.
+
+- Segment "With error": include sessions with a `page_view` of Page path → exactly matches → `/club/word-lid`,
+  **and** Event name → exactly matches → `membership_form_error`.
+- Segment "Without error": include sessions with a `page_view` of Page path → exactly matches → `/club/word-lid`,
+  and **exclude** sessions where Event name → exactly matches → `membership_form_error`.
+
+Both are based on the page view, not on `membership_form_start`, so a visitor who
+never changed a field is still counted.
+
+Drag both into **Segment comparisons**, and compare the step 3 completion rate of the
+two. The gap is an association, not proof that the error caused the drop. A session with an error that still submits counts as completed
+in "With error": the gap between the two segments is the signal, not either rate alone.
+
+**Client vs server rejections:** `source` (`client` blocked the submit, `server`
+rejected it) is a registered dimension (**Interaction source**). Read it on a separate **Free form**
+tab: rows **Interaction source**, value **Event count**, filter Event name → exactly
+matches → `membership_form_error`. Never put that filter on the funnel tab: it removes
+the events of all three steps.
+
+**Which fields stop people:** `fields` (comma-joined field names, e.g.
+`email,birthDate`) is unregistered: there is no GA4 dimension to break down by. Read it
+in **DebugView** on a `membership_form_error` event. First apply the GTM sync (#3789:
+`scripts/sync-gtm.mjs`, then publish the container) and check `fields` in GTM Preview:
+until then the GA4 tag drops it. Register it by hand once a slot
+frees up.
+
+**Not an error:** a Turnstile failure, a transport failure (a rejected fetch) and any
+400 or 5xx response without a `fields` object (including a request-schema 400, such as
+a name over 100 characters) fire no `membership_form_error`. A visitor who hits one
+shows as started, not submitted, and without an error event.
+
+**Set date range:** Top-right corner → **Last 28 days**. **Share the exploration.**
+
+---
+
 ## 5. Create custom reports
 
 All of these are **Free form** explorations.
@@ -689,42 +763,43 @@ download context is needed.
 
 ### Events by feature area
 
-| Feature area                       | Event names                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Responsibility finder              | `responsibility_role_selected`, `responsibility_search`, `responsibility_no_results`, `responsibility_suggestion_clicked`, `responsibility_contact_clicked`, `responsibility_organigram_link`, `responsibility_step_link_clicked`, `responsibility_dwell`, `responsibility_abandon`                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| Search                             | `search_submitted`, `search_results_shown`, `search_no_results`, `search_filter_changed`, `search_result_clicked`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| Organigram                         | `organigram_view_changed`, `organigram_member_clicked`, `organigram_search_used`, `organigram_department_filtered`, `organigram_export_png`, `organigram_team_card_shown`, `organigram_team_not_found`, `organigram_team_guess_answered`                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| Related content                    | `related_content_shown`, `related_content_click`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| Homepage                           | `homepage_match_widget_clicked`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| Kalender                           | `kalender_view`, `kalender_filter`, `kalender_view_toggle`, `kalender_item_click`, `kalender_subscribe_open`, `kalender_subscribe_webcal`, `kalender_subscribe_copy`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| Match strip                        | `firstteam_strip_clicked`, `firstteam_strip_dismissed`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| Share tool (`/share`)              | `share_image_saved` — one per story that left the tool (share sheet resolved, or download clicked); none on a cancelled share. Params: `content_type`, `article_type` / `event_type`, `template` (match), `look`, `theme` (not W), `wash` (look C), `format`, `cover_mode` (article/event, only while the Omslag row shows: the item has a cover and no own photo), `blocks_moved`, `fallback_used`. No ids, slugs, names or titles. `article_type` / `event_type` are registered dimensions; the other nine are forwarded by the GA4 tag as unregistered params (`registered: false` in the taxonomy): visible in DebugView, no custom dimension (the 50-dimension cap is full)                                 |
-| Membership form (`/club/word-lid`) | `membership_form_start` (#3636) — one per form mount, on the first field change (never on mount). Params: `role` (registered; omitted until a role is chosen) and `restored_draft` (whether the Draft was restored). No form values. `restored_draft` is forwarded by the GA4 tag as an unregistered param (`registered: false` in the taxonomy): visible in DebugView, no custom dimension (the 50-dimension cap is full). The `membership_` prefix is already in the GTM trigger, so the sync adds one Data Layer Variable and one tag row. `membership_form_submit` (`role`, `is_minor`, `has_prior_club`, `has_remark`) fires on a successful submit.                                                        |
-| Sponsors                           | `sponsor_view`, `sponsor_cta_click`, `sponsor_click`, `sponsor_featured_click`, `sponsor_impression` — the last three come from `<SponsorWallTracker>` with `sponsor_id` (hashed), `tier` and `source` (`homepage`, `sponsors` or `team`, the surface the wall sits on; `<SponsorsSection source>` passes it through, so the team page's wall reports like the homepage's). `sponsor_impression`: one per Sponsor per page view, once a tile was at least half visible for 1 s in a visible tab, unlinked tiles included; an unlinked tile never sends a click. All parameters are already registered; the `sponsor_` prefix is already in the GTM trigger, so the GTM sync dry-run lists nothing new to create. |
-| Downloads (auto)                   | `file_download` (GA4 Enhanced Measurement)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Feature area                       | Event names                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Responsibility finder              | `responsibility_role_selected`, `responsibility_search`, `responsibility_no_results`, `responsibility_suggestion_clicked`, `responsibility_contact_clicked`, `responsibility_organigram_link`, `responsibility_step_link_clicked`, `responsibility_dwell`, `responsibility_abandon`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Search                             | `search_submitted`, `search_results_shown`, `search_no_results`, `search_filter_changed`, `search_result_clicked`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Organigram                         | `organigram_view_changed`, `organigram_member_clicked`, `organigram_search_used`, `organigram_department_filtered`, `organigram_export_png`, `organigram_team_card_shown`, `organigram_team_not_found`, `organigram_team_guess_answered`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Related content                    | `related_content_shown`, `related_content_click`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Homepage                           | `homepage_match_widget_clicked`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Kalender                           | `kalender_view`, `kalender_filter`, `kalender_view_toggle`, `kalender_item_click`, `kalender_subscribe_open`, `kalender_subscribe_webcal`, `kalender_subscribe_copy`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| Match strip                        | `firstteam_strip_clicked`, `firstteam_strip_dismissed`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Share tool (`/share`)              | `share_image_saved` — one per story that left the tool (share sheet resolved, or download clicked); none on a cancelled share. Params: `content_type`, `article_type` / `event_type`, `template` (match), `look`, `theme` (not W), `wash` (look C), `format`, `cover_mode` (article/event, only while the Omslag row shows: the item has a cover and no own photo), `blocks_moved`, `fallback_used`. No ids, slugs, names or titles. `article_type` / `event_type` are registered dimensions; the other nine are forwarded by the GA4 tag as unregistered params (`registered: false` in the taxonomy): visible in DebugView, no custom dimension (the 50-dimension cap is full)                                                                                                            |
+| Membership form (`/club/word-lid`) | `membership_form_start` (#3636) — one per form mount, on the first field change (never on mount). Params: `role` (registered; omitted until a role is chosen) and `restored_draft` (whether the Draft was restored). No form values. `restored_draft` is forwarded by the GA4 tag as an unregistered param (`registered: false` in the taxonomy): visible in DebugView, no custom dimension (the 50-dimension cap is full). The `membership_` prefix is already in the GTM trigger, so the sync adds one Data Layer Variable and one tag row. `membership_form_submit` (`role`, `is_minor`, `has_prior_club`, `has_remark`) fires on a successful submit. `membership_form_error` (#3637): params `fields` (unregistered), `source`, `role`; when it fires and what it leaves out: see §4g. |
+| Sponsors                           | `sponsor_view`, `sponsor_cta_click`, `sponsor_click`, `sponsor_featured_click`, `sponsor_impression` — the last three come from `<SponsorWallTracker>` with `sponsor_id` (hashed), `tier` and `source` (`homepage`, `sponsors` or `team`, the surface the wall sits on; `<SponsorsSection source>` passes it through, so the team page's wall reports like the homepage's). `sponsor_impression`: one per Sponsor per page view, once a tile was at least half visible for 1 s in a visible tab, unlinked tiles included; an unlinked tile never sends a click. All parameters are already registered; the `sponsor_` prefix is already in the GTM trigger, so the GTM sync dry-run lists nothing new to create.                                                                            |
+| Downloads (auto)                   | `file_download` (GA4 Enhanced Measurement)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 ### Where to find each report
 
-| Report name                          | Location in GA4                               | Key metric                                   |
-| ------------------------------------ | --------------------------------------------- | -------------------------------------------- |
-| Responsibility Finder Funnel         | Explore → Responsibility Finder Funnel        | Step-to-step completion rate                 |
-| Search Funnel                        | Explore → Search Funnel                       | search_submitted → result_clicked drop-off   |
-| Organigram Usage                     | Explore → Organigram Usage                    | View mode distribution, member engagement    |
-| Related Content Funnel               | Explore → Related Content Funnel              | CTR by source (AI vs editorial vs reference) |
-| Responsibility Finder — Success Rate | Explore → Responsibility Finder Success Rate  | (contact_clicked + dwell) / search           |
-| Responsibility — No Results Queries  | Explore → Responsibility No Results Queries   | Queries with zero results (content gaps)     |
-| Search — Click-Through Rate          | Explore → Search Click-Through Rate           | result_clicked / submitted                   |
-| Search — No Results Queries          | Explore → Search No Results Queries           | Queries with zero results (index gaps)       |
-| Organigram — View Preference         | Explore → Organigram View Preference          | Which view is used most                      |
-| Related Content — CTR by Source      | Explore → Related Content CTR by Source       | Clicks / impressions per source              |
-| Related Content — Type Engagement    | Explore → Related Content Type Engagement     | Click counts per target_type                 |
-| Related Content — Position Bias      | Explore → Related Content Position Bias       | Click distribution by position               |
-| Homepage Match Widget Clicks         | Explore → Homepage Match Widget Clicks        | Click distribution by match status           |
-| Kalender abonnementen                | Explore → Kalender abonnementen               | Weekly subscribes by route and surface       |
-| Match Strip Engagement               | Explore → Match Strip Engagement              | Strip clicks vs dismissals, by match status  |
-| All events overview                  | Reports → Engagement → Events                 | Raw event counts (24–72h delay)              |
-| Realtime events                      | Reports → Realtime                            | Live event counts                            |
-| DebugView                            | Configure → DebugView                         | Individual session event timeline            |
-| File downloads                       | Reports → Engagement → Events → file_download | file_name, file_extension breakdown          |
-| Traffic sources                      | Reports → Acquisition → Traffic acquisition   | Where visitors come from                     |
-| Top pages                            | Reports → Engagement → Pages and screens      | Most visited pages, bounce rate              |
+| Report name                          | Location in GA4                               | Key metric                                       |
+| ------------------------------------ | --------------------------------------------- | ------------------------------------------------ |
+| Responsibility Finder Funnel         | Explore → Responsibility Finder Funnel        | Step-to-step completion rate                     |
+| Search Funnel                        | Explore → Search Funnel                       | search_submitted → result_clicked drop-off       |
+| Organigram Usage                     | Explore → Organigram Usage                    | View mode distribution, member engagement        |
+| Related Content Funnel               | Explore → Related Content Funnel              | CTR by source (AI vs editorial vs reference)     |
+| Responsibility Finder — Success Rate | Explore → Responsibility Finder Success Rate  | (contact_clicked + dwell) / search               |
+| Responsibility — No Results Queries  | Explore → Responsibility No Results Queries   | Queries with zero results (content gaps)         |
+| Search — Click-Through Rate          | Explore → Search Click-Through Rate           | result_clicked / submitted                       |
+| Search — No Results Queries          | Explore → Search No Results Queries           | Queries with zero results (index gaps)           |
+| Organigram — View Preference         | Explore → Organigram View Preference          | Which view is used most                          |
+| Related Content — CTR by Source      | Explore → Related Content CTR by Source       | Clicks / impressions per source                  |
+| Related Content — Type Engagement    | Explore → Related Content Type Engagement     | Click counts per target_type                     |
+| Related Content — Position Bias      | Explore → Related Content Position Bias       | Click distribution by position                   |
+| Homepage Match Widget Clicks         | Explore → Homepage Match Widget Clicks        | Click distribution by match status               |
+| Kalender abonnementen                | Explore → Kalender abonnementen               | Weekly subscribes by route and surface           |
+| Match Strip Engagement               | Explore → Match Strip Engagement              | Strip clicks vs dismissals, by match status      |
+| Membership Funnel                    | Explore → Membership Funnel                   | Page view → start → submit; role and source tabs |
+| All events overview                  | Reports → Engagement → Events                 | Raw event counts (24–72h delay)                  |
+| Realtime events                      | Reports → Realtime                            | Live event counts                                |
+| DebugView                            | Configure → DebugView                         | Individual session event timeline                |
+| File downloads                       | Reports → Engagement → Events → file_download | file_name, file_extension breakdown              |
+| Traffic sources                      | Reports → Acquisition → Traffic acquisition   | Where visitors come from                         |
+| Top pages                            | Reports → Engagement → Pages and screens      | Most visited pages, bounce rate                  |
