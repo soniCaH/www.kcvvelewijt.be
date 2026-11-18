@@ -12,5 +12,5 @@ KCVV-only notes kept from the retired `design-an-interface` and `triage-issue` c
 - **PSD dates.** A PSD `date` field always carries `00:00`; the kick-off time is in the separate `time` field.
 - **Cache reads.** Decode a KV cache read with a schema (`S.decodeUnknown`), never `JSON.parse(...) as T`.
 - **Barrel duplicates.** A type that vanishes or turns `any` usually means a duplicate export in the `api-contract` barrel.
-- **Type-check is not build.** `tsgo` passing does not mean `next build` passes. When a symptom shows only on Vercel, run `pnpm turbo run build --filter=@kcvv/web`.
+- **Type-check is not build.** `tsgo` passing does not mean `next build` passes. When a symptom shows only on Vercel, run `pnpm turbo run build --filter=@kcvv/web`. `tsgo` can pass a nested literal that `tsc` rejects. After a `defineQuery` projection change and typegen, run `pnpm exec tsc --noEmit -p .` in `apps/web` (about 1 min): it lists every fixture that now lacks the field.
 - **Wrong worktree.** Code that looks right locally but fails in CI: check where you are with `git branch --show-current`.
