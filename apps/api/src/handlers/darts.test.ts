@@ -93,12 +93,39 @@ describe("handleDartsSignup", () => {
     ]);
   });
 
+  it("puts a new signup on the wachtlijst while anyone is already there, even with a spot free", async () => {
+    const write = vi.fn<SanityMutationInterface["writeDartsSignup"]>(() =>
+      Effect.succeed(undefined),
+    );
+    const dispatch = vi.fn<EmailTransportInterface["dispatchEmail"]>(() =>
+      Effect.succeed(undefined),
+    );
+    const exit = await signup({
+      counts: { teams: 23, waitlist: 1 },
+      write,
+      dispatch,
+    });
+
+    expect(exit).toEqual(Exit.succeed({ ok: true, waitlist: true }));
+    expect(write.mock.calls[0]![0].waitlist).toBe(true);
+    expect(dispatch.mock.calls.map(([m]) => m.subject)).toEqual([
+      "EK Darts: De Pijlenjagers staat op de wachtlijst",
+      "EK Darts: De Pijlenjagers — wachtlijst 2",
+    ]);
+  });
+
   it("still gives spot 24 to the 24th team", async () => {
     const write = vi.fn<SanityMutationInterface["writeDartsSignup"]>(() =>
       Effect.succeed(undefined),
     );
-    await signup({ counts: { teams: 23, waitlist: 0 }, write });
+    const dispatch = vi.fn<EmailTransportInterface["dispatchEmail"]>(() =>
+      Effect.succeed(undefined),
+    );
+    await signup({ counts: { teams: 23, waitlist: 0 }, write, dispatch });
     expect(write.mock.calls[0]![0].waitlist).toBe(false);
+    expect(dispatch.mock.calls[1]![0].subject).toBe(
+      "EK Darts: De Pijlenjagers — ploeg 24/24",
+    );
   });
 
   it("saves team 25 as wachtlijst and sends mail 3 with its place", async () => {
@@ -192,6 +219,10 @@ describe("handleDartsSpots", () => {
 
   it("is 24 minus the teams holding a spot", async () => {
     expect(await spots({ teams: 5, waitlist: 0 })).toEqual({ spotsLeft: 19 });
+  });
+
+  it("is 0 while anyone is on the wachtlijst, even with a spot free", async () => {
+    expect(await spots({ teams: 23, waitlist: 1 })).toEqual({ spotsLeft: 0 });
   });
 
   it("never goes below zero", async () => {

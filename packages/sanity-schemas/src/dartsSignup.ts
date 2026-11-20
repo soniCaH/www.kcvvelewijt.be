@@ -73,7 +73,7 @@ export const dartsSignup = defineType({
       group: 'beheer',
       initialValue: false,
       description:
-        'Aan = de ploeg telt niet mee voor de 24 plaatsen. Wordt er een plaats vrij, dan zet je dit zelf uit: er schuift niets automatisch op. Staat Betaald dan al aan, dan vertrekt de bevestigingsmail op het moment dat je dit uitzet (een ploeg op de wachtlijst krijgt die mail niet).',
+        'Aan = de ploeg telt niet mee voor de 24 plaatsen. Wordt er een plaats vrij, dan zet je dit zelf uit: er schuift niets automatisch op. Zolang er een ploeg op de wachtlijst staat, komt elke nieuwe inschrijving ook op de wachtlijst, ook als er een plaats vrij is. Staat Betaald dan al aan, dan vertrekt de bevestigingsmail op het moment dat je dit uitzet (een ploeg op de wachtlijst krijgt die mail niet).',
     }),
     defineField({
       name: 'paidMailSentAt',

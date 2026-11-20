@@ -14,6 +14,16 @@ import { EmailTransport } from "../email/resend";
 import { verifyTurnstile } from "../forms/turnstile";
 import { buildDartsSignupEmails } from "../forms/darts-emails";
 
+type Counts = { teams: number; waitlist: number };
+
+/**
+ * Wachtlijst first (Kevin, 2026-11-20): while anyone is on the wachtlijst a
+ * spot is not free, even when fewer than 24 teams hold one. Kevin moves
+ * wachtlijst teams up by hand.
+ */
+const hasFreeSpot = (counts: Counts): boolean =>
+  counts.teams < DARTS_TEAM_LIMIT && counts.waitlist === 0;
+
 const countsUnavailable = () =>
   new HttpServiceUnavailable({
     error:
@@ -27,10 +37,12 @@ const countsUnavailable = () =>
 export const handleDartsSpots = () =>
   Effect.gen(function* () {
     const projection = yield* SanityProjection;
-    const { teams } = yield* projection
+    const counts = yield* projection
       .getDartsCounts()
       .pipe(Effect.mapError(countsUnavailable));
-    return { spotsLeft: Math.max(0, DARTS_TEAM_LIMIT - teams) };
+    return {
+      spotsLeft: hasFreeSpot(counts) ? DARTS_TEAM_LIMIT - counts.teams : 0,
+    };
   });
 
 /**
@@ -77,7 +89,7 @@ export const handleDartsSignup = (
     const counts = yield* projection
       .getDartsCounts()
       .pipe(Effect.mapError(countsUnavailable));
-    const waitlist = counts.teams >= DARTS_TEAM_LIMIT;
+    const waitlist = !hasFreeSpot(counts);
     const number = waitlist ? counts.waitlist + 1 : counts.teams + 1;
 
     // 5. Persist first — failure here is the only one that fails the request.
