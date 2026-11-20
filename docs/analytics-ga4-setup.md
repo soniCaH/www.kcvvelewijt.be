@@ -7,6 +7,17 @@ instrumentation. All steps are manual — done in the GA4 web UI at
 **Prerequisite**: GA4 property linked to GTM, GTM deployed to production,
 and at least one real user session with analytics consent given.
 
+## What GA4 numbers mean
+
+Every claim in this guide says only what GA4 measures:
+
+- An event count is not visitors.
+- A gap between segments is an association, not a cause.
+- A funnel breakdown gives one value per visitor for the whole funnel.
+- An event-name filter on a funnel tab removes its other steps.
+
+Why: #3770 and #3790 each cost a CodeRabbit round on these.
+
 ---
 
 ## Table of Contents
