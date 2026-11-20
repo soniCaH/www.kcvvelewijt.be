@@ -21,6 +21,23 @@ type ArrayOf<T> = Array<
 >;
 
 // Source: schema.json
+export type DartsSignup = {
+  _id: string;
+  _type: "dartsSignup";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  teamName?: string;
+  captainName?: string;
+  captainEmail?: string;
+  captainPhone?: string;
+  remark?: string;
+  paid?: boolean;
+  waitlist?: boolean;
+  paidMailSentAt?: string;
+  submittedAt?: string;
+};
+
 export type ShortLink = {
   _id: string;
   _type: "shortLink";
@@ -54,23 +71,6 @@ export type FormRoutingConfig = {
   vrijwilligerContact?: OrganigramNodeReference;
   trainerContact?: OrganigramNodeReference;
   scheidsrechterContact?: OrganigramNodeReference;
-};
-
-export type DartsSignup = {
-  _id: string;
-  _type: "dartsSignup";
-  _createdAt: string;
-  _updatedAt: string;
-  _rev: string;
-  teamName?: string;
-  captainName?: string;
-  captainEmail?: string;
-  captainPhone?: string;
-  remark?: string;
-  paid?: boolean;
-  waitlist?: boolean;
-  paidMailSentAt?: string;
-  submittedAt?: string;
 };
 
 export type MembershipApplication = {
@@ -1136,10 +1136,10 @@ export type Geopoint = {
 };
 
 export type AllSanitySchemaTypes =
+  | DartsSignup
   | ShortLink
   | OrganigramNodeReference
   | FormRoutingConfig
-  | DartsSignup
   | MembershipApplication
   | SanityImageAssetReference
   | MatchesSliderPlaceholder
