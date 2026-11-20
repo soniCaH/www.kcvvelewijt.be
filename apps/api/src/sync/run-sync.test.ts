@@ -101,6 +101,7 @@ function makeSanityMocks() {
     archiveStaff,
     archiveTeams,
     writeMembershipApplication,
+    writeDartsSignup: () => Effect.succeed(undefined),
   };
 
   const readerMock: SanityProjectionInterface = {
@@ -115,6 +116,7 @@ function makeSanityMocks() {
     getFormRoutingConfig,
     getStaffGaps: makeSanityProjectionStub().getStaffGaps,
     getBirthdayPeople: makeSanityProjectionStub().getBirthdayPeople,
+    getDartsCounts: makeSanityProjectionStub().getDartsCounts,
   };
 
   return {
@@ -506,6 +508,7 @@ describe("runSync", () => {
       writeMembershipApplication: vi.fn(() =>
         Effect.succeed(undefined as void),
       ),
+      writeDartsSignup: vi.fn(() => Effect.succeed(undefined as void)),
     };
     const readerMock: SanityProjectionInterface = {
       getPlayersImageState: vi.fn(() =>
@@ -533,6 +536,7 @@ describe("runSync", () => {
       getFormRoutingConfig: vi.fn(() => Effect.succeed(null)),
       getStaffGaps: makeSanityProjectionStub().getStaffGaps,
       getBirthdayPeople: makeSanityProjectionStub().getBirthdayPeople,
+      getDartsCounts: makeSanityProjectionStub().getDartsCounts,
     };
     const psdMock = makePsdTeamClientMock(
       [ONE_TEAM],

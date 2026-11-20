@@ -186,6 +186,15 @@ export interface SanityProjectionInterface {
     FormRoutingConfig | null,
     SanityQueryError
   >;
+  /**
+   * Live EK Darts signup counts (#3812): published documents only (the client
+   * reads the `published` perspective), never cached, never stored.
+   * `teams` are the ones holding one of the 24 spots; `waitlist` the rest.
+   */
+  readonly getDartsCounts: () => Effect.Effect<
+    { teams: number; waitlist: number },
+    SanityQueryError
+  >;
 }
 
 export class SanityProjection extends Context.Tag("SanityProjection")<
@@ -416,6 +425,19 @@ export const SanityProjectionLive = Layer.effect(
           try: () => client.fetch<FormRoutingConfig | null>(FORM_ROUTING_QUERY),
           catch: (cause) =>
             new SanityQueryError("Failed to fetch form routing config", cause),
+        }),
+
+      getDartsCounts: () =>
+        Effect.tryPromise({
+          try: () =>
+            client.fetch<{ teams: number; waitlist: number }>(
+              `{
+                "teams": count(*[_type == "dartsSignup" && waitlist != true]),
+                "waitlist": count(*[_type == "dartsSignup" && waitlist == true])
+              }`,
+            ),
+          catch: (cause) =>
+            new SanityQueryError("Failed to count darts signups", cause),
         }),
     };
   }),
