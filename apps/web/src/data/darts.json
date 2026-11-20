@@ -1,5 +1,5 @@
 {
-  "_readme": "The single source of facts for BOTH /darts pages. Copied verbatim into each repo; never edited in a repo. A field with todo:true renders its dummy value dimmed and italic, so nobody reads a placeholder as a decision — the same convention affiche-copy.md already uses. Owned by .scratch/darts-tournament/issues/21-two-darts-pages-one-truth.md.",
+  "_readme": "The single source of facts for the /darts page on www.kcvvelewijt.be (Next.js on Vercel). Copied verbatim to apps/web/src/data/darts.json; never edited in the repo. A field with todo:true renders its dummy value dimmed and italic, so nobody reads a placeholder as a decision — the same convention affiche-copy.md already uses. Owned by .scratch/darts-tournament/issues/21-two-darts-pages-one-truth.md.",
   "_updated": "2026-11-20",
 
   "titel": "EK Darts",

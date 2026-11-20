@@ -1,15 +1,12 @@
 /**
  * /darts — EK Darts 2026, zaterdag 19 december.
  *
- * The affiche carries a QR to this URL, so it exists on both club sites: the
- * Gatsby build serves the printed one today, this one serves it after the
- * switch. Same facts, deliberately not the same design.
+ * The affiche carries a QR to this URL, so it must always answer 200.
  *
  * ⚠️ `darts.json` is a COPY. The source of truth is
- * personal-development/.scratch/darts-tournament/content/darts.json and the
- * Gatsby site holds the other copy. Never edit facts here — edit the source and
- * copy it to both, in the same session. Two pages that disagree are worse than
- * one page.
+ * personal-development/.scratch/darts-tournament/content/darts.json. Never edit
+ * facts here — edit the source and copy it in. The start and end hour also live
+ * in the Sanity event `EK Darts`; change both together.
  *
  * Layout decided by prototype 2026-09-10 (branch `prototype/darts-page`,
  * `/darts-prototype?variant=P|Q|R|S`), issue 21 in the darts map: taped poster
