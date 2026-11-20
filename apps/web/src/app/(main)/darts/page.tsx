@@ -3,10 +3,13 @@
  *
  * The affiche carries a QR to this URL, so it must always answer 200.
  *
- * ⚠️ `darts.json` is a COPY. The source of truth is
+ * ⚠️ `darts.json` is a COPY of Kevin's source file
  * personal-development/.scratch/darts-tournament/content/darts.json. Never edit
- * facts here — edit the source and copy it in. The start and end hour also live
- * in the Sanity event `EK Darts`; change both together.
+ * facts here — edit the source and copy it in. This repo holds the only copy on
+ * the web side (the old Gatsby site is gone). The BFF reads the very same file for
+ * the signup mails and the closing date (#3812), so the form, the page and the
+ * mails cannot disagree. The start and end hour also live in the Sanity event
+ * `EK Darts`; change both together.
  *
  * Layout decided by prototype 2026-09-10 (branch `prototype/darts-page`,
  * `/darts-prototype?variant=P|Q|R|S`), issue 21 in the darts map: taped poster
@@ -30,6 +33,7 @@ import {
 } from "@/components/design-system";
 import { PageHero } from "@/components/layout/PageHero";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
+import { DartsSignup } from "@/components/darts/DartsSignup/DartsSignup";
 import darts from "@/data/darts.json";
 
 const POSTER = "/darts/poster-liggend-v2.jpg";
@@ -132,18 +136,19 @@ export default function DartsPage() {
           </ul>
         </section>
 
-        <section className="mt-4" id="inschrijven" aria-label="Inschrijven">
-          <SectionHeader title="Inschrijven" as="h2" ruled />
-          <p className="text-ink">{open(darts.inschrijven.dummy)}</p>
-        </section>
+        {/* The page stays static. The block closes itself after the event day
+            and reads the spots left per request — both in the browser. */}
+        <DartsSignup />
 
         <section className="mt-14">
           <SectionHeader title="Reglement" as="h2" ruled />
           <p className="text-ink">{open(darts.reglement.dummy)}</p>
         </section>
 
-        {/* Featured 2 — the one rule that costs €70 a board when it is missed. */}
-        <div className="my-10">
+        {/* Featured 2 — the one rule that costs €70 a board when it is missed.
+            `darts.wettelijk.regel` ("Verboden op de openbare weg te gooien") is
+            for print only: it stays in the JSON and is not rendered here. */}
+        <div className="mt-10 mb-16">
           <PullQuote
             placement="flow"
             rotation={1}
@@ -152,8 +157,6 @@ export default function DartsPage() {
             {darts.reglement.vast[0]}
           </PullQuote>
         </div>
-
-        <p className="text-ink-muted mb-16 text-sm">{darts.wettelijk.regel}</p>
       </PageContainer>
     </>
   );

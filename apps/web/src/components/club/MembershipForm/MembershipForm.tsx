@@ -70,7 +70,7 @@ interface MembershipFormProps {
 type SubmitState =
   "idle" | "submitting" | "success" | "invalid" | "transport-error";
 
-function CheckboxField({
+export function CheckboxField({
   id,
   checked,
   onChange,
