@@ -1,6 +1,6 @@
 # Ralph — this repo's values
 
-`/ralph-once` and `/ralph-afk` run from the shared core in `~/personal-skills/ralph-once/` and `~/personal-skills/ralph-afk/`. This file holds only what is true for www.kcvvelewijt.be. Its sections follow `~/personal-skills/ralph-afk/REPO-CONFIG.md`; the shared rules (branches, commits, labels, who merges) are in `~/Sites/KCVV/CLAUDE.md`.
+`/ralph-afk` runs from the shared core in `~/personal-skills/ralph-afk/`. This file holds only what is true for www.kcvvelewijt.be. Its sections follow `~/personal-skills/ralph-afk/REPO-CONFIG.md`; the shared rules (branches, commits, labels, who merges) are in `~/Sites/KCVV/CLAUDE.md`.
 
 ## Config
 
