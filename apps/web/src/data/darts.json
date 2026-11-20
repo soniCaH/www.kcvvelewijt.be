@@ -1,5 +1,5 @@
 {
-  "_readme": "The single source of facts for the /darts page on www.kcvvelewijt.be (Next.js on Vercel). Copied verbatim to apps/web/src/data/darts.json; never edited in the repo. A field with todo:true renders its dummy value dimmed and italic, so nobody reads a placeholder as a decision — the same convention affiche-copy.md already uses. Owned by .scratch/darts-tournament/issues/21-two-darts-pages-one-truth.md.",
+  "_readme": "The single source of facts for the /darts page on www.kcvvelewijt.be (Next.js on Vercel). Copied verbatim to apps/web/src/data/darts.json; never edited in the repo. A field with todo:true renders its dummy value behind the words “nog te beslissen —”, so nobody reads a placeholder as a decision — the same convention affiche-copy.md already uses. Owned by .scratch/darts-tournament/issues/21-two-darts-pages-one-truth.md.",
   "_updated": "2026-11-20",
 
   "titel": "EK Darts",
@@ -23,7 +23,7 @@
     "deuren": "10.00 u",
     "eersteWorp": "11.00 u",
     "prijsuitreiking": "20.00 u",
-    "einde": "00.00 u",
+    "einde": "middernacht",
     "_bron": "vergadering 27/10 (drafts/vergadering-kristof/verslag-27-10.md) en drafts/draaiboek.md: alles een uur later, eerste pijl 11:00, prijsuitreiking 20:00 (nooit na 20:30), einde 00:00"
   },
 
@@ -49,7 +49,7 @@
   },
 
   "muziek": {
-    "tekst": "Ambiancemuziek de hele dag — na de prijsuitreiking wat luider, tot 00.00 u",
+    "tekst": "Ambiancemuziek de hele dag — na de prijsuitreiking wat luider, tot middernacht",
     "_bron": "Geen fuif, geen DJ, einde 00:00 (Kevin, 2026-10-28). Muziek van Kevins laptop op de kantinespeakers — ticket 22 en 23."
   },
 
