@@ -33,7 +33,15 @@ src/
 │   ├── config.ts             ← Sanity client config (project ID, dataset, token)
 │   ├── mutation.ts           ← SanityMutation — write ops (upsert, archive, image upload / unset)
 │   └── projection.ts         ← SanityProjection — read ops (GROQ queries → typed results)
+├── forms/
+│   ├── turnstile.ts          ← verifyTurnstile (fail closed, #3464)
+│   ├── membership-emails.ts  ← membership mail builders + the `esc` / `shell` HTML helpers darts reuses
+│   └── darts-emails.ts       ← EK Darts mails 1–4 (#3812); reads `apps/web/src/data/darts.json`
+├── webhooks/
+│   ├── index-handler.ts      ← `POST /webhooks/index` — Sanity → Vectorize sync
+│   └── darts-paid-handler.ts ← `POST /webhooks/darts-paid` — mail 2 when a darts signup's `Betaald` turns on, once (#3812)
 ├── handlers/
+│   ├── darts.ts              ← `POST /forms/darts` + `GET /forms/darts/spots` (#3812): live count, spot or wachtlijst, persist, mail
 │   ├── matches.ts            ← MatchesApi HttpApiGroup
 │   ├── ranking.ts            ← RankingApi HttpApiGroup
 │   ├── opponent.ts           ← OpponentApi HttpApiGroup
@@ -109,9 +117,10 @@ KV, DO, PSD, Sanity or AI work. The comparison is constant-time
   `[auth] BFF_SHARED_SECRET not set` error log. No dev bypass: local dev puts
   the same value in `apps/api/.dev.vars` and `apps/web/.env.local` (both
   `.example` files carry `local-dev-secret`).
-- **Webhook exemption.** `POST /webhooks/index` is routed before the check and
-  keeps its own Sanity HMAC (`SANITY_WEBHOOK_SECRET`). The `scheduled()` crons
-  are not requests and are unaffected.
+- **Webhook exemption.** `POST /webhooks/index` and `POST /webhooks/darts-paid`
+  are routed before the check and keep their own Sanity HMAC
+  (`SANITY_WEBHOOK_SECRET`). The `scheduled()` crons are not requests and are
+  unaffected.
 - **Calendar redirect exemption.** `GET`/`HEAD /calendar` is also answered
   before the check, with a `308` to `https://www.kcvvelewijt.be/api/calendar.ics`
   (`teams` → `teamIds`, `side` kept, other params dropped), because old
@@ -119,7 +128,7 @@ KV, DO, PSD, Sanity or AI work. The comparison is constant-time
   No service is built for it.
 - **No CORS.** `HttpMiddleware.cors()` is gone on purpose — do not add it back.
 - **The web side.** `BffService` (every `HttpApiClient` request) and the
-  `api/search` / `api/membership` route handlers send the header from the
+  `api/search` / `api/membership` / `api/darts` route handlers send the header from the
   server-only `BFF_SHARED_SECRET` env var — never `NEXT_PUBLIC_`, never in a
   `"use client"` file. CI passes `secrets.BFF_SHARED_SECRET` (GitHub
   environment secret in `Production` and `Preview`) to the Next build and E2E.
@@ -131,6 +140,14 @@ KV, DO, PSD, Sanity or AI work. The comparison is constant-time
   for a few minutes; ISR pages serve their cached copy. A PR built from older
   code gets `401` from the staging worker until it is rebased. Rotating the
   secret follows the same order: worker and Vercel together, then redeploy.
+
+## EK Darts signup (#3812)
+
+`POST /forms/darts` saves a `dartsSignup` document and mails the captain plus the club; `GET /forms/darts/spots` answers the spots left. Both count **live from Sanity** (published `dartsSignup` documents, `waitlist != true`, 24 spots, `DARTS_TEAM_LIMIT`): the count is never stored and never cached. Deleting a document frees its spot; a freed spot does not move a wachtlijst team up (Kevin unticks `Wachtlijst` by hand). The date, hours, price and account all come from `apps/web/src/data/darts.json`, imported straight into the worker bundle (`handlers/darts.ts`, `forms/darts-emails.ts`): one file, no second copy. After the event day (`datum.iso`, Brussels calendar day, checked per request) the endpoint answers 400.
+
+**Mail 2 (`Betaald` turns on)** comes from `POST /webhooks/darts-paid`. The Sanity hook only says a document changed; the handler reads it fresh and sends only when `paid == true`, `waitlist != true` and `paidMailSentAt` is empty. `paidMailSentAt` is written by that handler alone (named writer), after the mail went out. A failed send writes nothing and answers 500 so Sanity retries; a claim-first design would re-fire the hook on every clear and loop while Resend is down. Known limit (`shortcut:` in the handler): two deliveries reading in the same instant can both send.
+
+Hook settings (configured by hand in sanity.io, per dataset): URL `https://<worker>/webhooks/darts-paid`, trigger on create and update, dataset of that worker, filter `_type == "dartsSignup" && paid == true && !defined(paidMailSentAt) && !(_id in path("drafts.**"))`, projection `{_id, _type, _rev}`, secret = the worker's `SANITY_WEBHOOK_SECRET`, HTTP method POST.
 
 ## Ceilings inside the worker (#3468)
 

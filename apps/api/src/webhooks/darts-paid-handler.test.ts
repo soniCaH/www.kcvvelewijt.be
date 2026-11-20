@@ -11,14 +11,10 @@ import { TEST_SECRET, signPayload } from "../test-helpers/webhook-signing";
 
 const mockFetch = vi.fn();
 const mockCommit = vi.fn();
-const mockIfRevisionId = vi.fn();
-const mockSet = vi.fn();
-const mockUnset = vi.fn();
+const mockSetIfMissing = vi.fn();
 // A chainable patch builder over the commit spy.
 const patchBuilder = {
-  ifRevisionId: (rev: string) => (mockIfRevisionId(rev), patchBuilder),
-  set: (fields: unknown) => (mockSet(fields), patchBuilder),
-  unset: (fields: unknown) => (mockUnset(fields), patchBuilder),
+  setIfMissing: (fields: unknown) => (mockSetIfMissing(fields), patchBuilder),
   commit: () => mockCommit(),
 };
 vi.mock("@sanity/client", () => ({
@@ -29,7 +25,6 @@ const env = makeTestEnv({ SANITY_WEBHOOK_SECRET: TEST_SECRET });
 
 const paidDoc = {
   _id: "abc123",
-  _rev: "rev1",
   teamName: "De Pijlenjagers",
   captainName: "Jan Peeters",
   captainEmail: "jan@example.com",
@@ -89,11 +84,10 @@ describe("handleDartsPaidWebhook", () => {
     });
   });
 
-  it("records the send against the revision it read, before sending", async () => {
+  it("records the send after the mail went out", async () => {
     await call();
 
-    expect(mockIfRevisionId).toHaveBeenCalledWith("rev1");
-    expect(mockSet).toHaveBeenCalledWith({
+    expect(mockSetIfMissing).toHaveBeenCalledWith({
       paidMailSentAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
     });
   });
@@ -126,22 +120,22 @@ describe("handleDartsPaidWebhook", () => {
     expect(dispatch).not.toHaveBeenCalled();
   });
 
-  it("sends nothing when another delivery changed the document first (409)", async () => {
-    mockCommit.mockRejectedValue({ statusCode: 409 });
-
-    const res = await call();
-
-    expect(await res.json()).toEqual({ ok: true, action: "skipped_stale" });
-    expect(dispatch).not.toHaveBeenCalled();
-  });
-
-  it("releases the claim and answers 500 when the mail fails, so Sanity retries", async () => {
+  it("answers 500 and records nothing when the mail fails, so Sanity retries", async () => {
     dispatchFails = true;
 
     const res = await call();
 
     expect(res.status).toBe(500);
-    expect(mockUnset).toHaveBeenCalledWith(["paidMailSentAt"]);
+    expect(mockCommit).not.toHaveBeenCalled();
+  });
+
+  it("still answers ok when only the record write fails: the mail is out", async () => {
+    mockCommit.mockRejectedValue(new Error("sanity down"));
+
+    const res = await call();
+
+    expect(await res.json()).toEqual({ ok: true, action: "sent" });
+    expect(dispatch).toHaveBeenCalledTimes(1);
   });
 
   it("skips a document that is gone (a draft id reads as null)", async () => {
