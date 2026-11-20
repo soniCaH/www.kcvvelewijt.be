@@ -1,6 +1,6 @@
 {
-  "_readme": "The single source of facts for BOTH /darts pages. Copied verbatim into each repo; never edited in a repo. A field with todo:true renders its dummy value dimmed and italic, so nobody reads a placeholder as a decision — the same convention affiche-copy.md already uses. Owned by .scratch/darts-tournament/issues/21-two-darts-pages-one-truth.md.",
-  "_updated": "2026-09-10",
+  "_readme": "The single source of facts for the /darts page on www.kcvvelewijt.be (Next.js on Vercel). Copied verbatim to apps/web/src/data/darts.json; never edited in the repo. A field with todo:true renders its dummy value behind the words “nog te beslissen —”, so nobody reads a placeholder as a decision — the same convention affiche-copy.md already uses. Owned by the darts map, .scratch/darts-tournament/MAP.md.",
+  "_updated": "2026-11-20",
 
   "titel": "EK Darts",
   "tagline": "Elewijts Kampioenschap",
@@ -20,19 +20,16 @@
   },
 
   "uren": {
-    "todo": true,
-    "dummy": {
-      "deuren": "10.00 u",
-      "eersteWorp": "11.00 u",
-      "prijsuitreiking": "19.00 u"
-    },
-    "_bron": "ticket 07 — de zaterdagochtend kwam vrij omdat Slisse vrijdag om 14u opbouwt"
+    "deuren": "10.00 u",
+    "eersteWorp": "11.00 u",
+    "prijsuitreiking": "20.00 u",
+    "einde": "middernacht",
+    "_bron": "vergadering 27/10 (drafts/vergadering-kristof/verslag-27-10.md) en drafts/draaiboek.md: alles een uur later, eerste pijl 11:00, prijsuitreiking 20:00 (nooit na 20:30), einde 00:00"
   },
 
   "prijs": {
-    "todo": true,
-    "dummy": "€ 40 per ploeg",
-    "_bron": "ticket 08 → ticket 10, beide ready-for-human"
+    "tekst": "€ 30 per ploeg",
+    "_bron": "vergadering 27/10 — €30 per ploeg, ingeschreven = betaald"
   },
 
   "inschrijven": {
@@ -47,17 +44,13 @@
       "Gegarandeerd meerdere wedstrijden",
       "Kwalificatie én eindronde voor iedereen",
       "Mooie prijzen en een zuipbeker",
-      "Ambiance en een vette afterparty"
+      "Ambiancemuziek de hele dag"
     ]
   },
 
-  "dj": {
-    "tekst": "DJ vanaf 19.15 u — gratis inkom. Muziek tot 03.00 u",
-    "naam": {
-      "todo": true,
-      "dummy": "DJ nog te bevestigen",
-      "_bron": "ticket 19"
-    }
+  "muziek": {
+    "tekst": "Ambiancemuziek — na de prijsuitreiking wat luider",
+    "_bron": "Geen fuif, geen DJ, einde 00:00 (Kevin, 2026-10-28). Muziek van Kevins laptop op de kantinespeakers — ticket 22 en 23."
   },
 
   "eten": {
@@ -85,7 +78,6 @@
 
   "media": {
     "hero": "EK Darts 2026 - AFFICHE FINAL - LIGGEND 1920x1080.jpg",
-    "_bron": "~/Documents/KCVV/Graphics/Darts 2026/ — de TV-versie MET tekst, niet de kale PLAAT. Kevin, 2026-09-10. Bestond alleen als .psd; op 2026-09-10 geflattend naar .jpg (1920x1080, 913 KB) en naast de bron gezet. Dient ook als OG-image.",
-    "_alt": "De tekst staat IN het beeld, dus de alt-tekst moet ze dragen — een lege alt verliest de datum, de formule en de afterparty voor iedereen die het beeld niet ziet."
+    "_bron": "~/Documents/KCVV/Graphics/Darts 2026/ — de TV-versie MET tekst, niet de kale PLAAT. Kevin, 2026-09-10. Bestond alleen als .psd; op 2026-09-10 geflattend naar .jpg (1920x1080, 913 KB) en naast de bron gezet. Dient ook als OG-image."
   }
 }
