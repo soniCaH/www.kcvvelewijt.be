@@ -7,11 +7,18 @@ import { trackEvent } from "@/lib/analytics/track-event";
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
 vi.mock("@/components/club/MembershipForm/TurnstileWidget", () => ({
-  TurnstileWidget: ({ onToken }: { onToken: (token: string) => void }) => {
+  // A token on mount, and a fresh single-use one each time `resetKey` changes.
+  TurnstileWidget: ({
+    onToken,
+    resetKey,
+  }: {
+    onToken: (token: string) => void;
+    resetKey: number;
+  }) => {
     useEffect(() => {
-      onToken("token-0");
-    }, [onToken]);
-    return null;
+      onToken(`token-${resetKey}`);
+    }, [onToken, resetKey]);
+    return <span data-testid="turnstile" data-reset-key={resetKey} />;
   },
 }));
 
@@ -208,6 +215,105 @@ describe("DartsSignupForm", () => {
     expect(
       await screen.findByText("De inschrijvingen zijn gesloten."),
     ).toBeInTheDocument();
+  });
+
+  const postedBody = (fetchMock: ReturnType<typeof stubBackend>) => {
+    const posts = fetchMock.mock.calls.filter(([url]) => url === "/api/darts");
+    return JSON.parse((posts.at(-1)![1] as RequestInit).body as string);
+  };
+
+  it("shows the field errors the BFF returns and reports them as a server error", async () => {
+    stubBackend({
+      submit: () =>
+        json(
+          {
+            error: "Sommige velden ontbreken of zijn ongeldig.",
+            fields: { captainEmail: "Dit e-mailadres klopt niet." },
+          },
+          400,
+        ),
+    });
+    render(<DartsSignupForm />);
+    fillRequired();
+    submit();
+
+    expect(
+      await screen.findByText("Dit e-mailadres klopt niet."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Sommige velden ontbreken of zijn ongeldig."),
+    ).toBeInTheDocument();
+    expect(trackEvent).toHaveBeenCalledWith("darts_signup_error", {
+      fields: "captainEmail",
+      source: "server",
+    });
+  });
+
+  it("falls back to a generic message when the refusal carries none", async () => {
+    stubBackend({ submit: () => json({}, 500) });
+    render(<DartsSignupForm />);
+    fillRequired();
+    submit();
+
+    expect(
+      await screen.findByText(
+        "Er ging iets mis. Controleer je gegevens en probeer opnieuw.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("shows the network failure notice and gives the retry a fresh Turnstile token", async () => {
+    const fetchMock = stubBackend({
+      submit: () => {
+        throw new Error("offline");
+      },
+    });
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    render(<DartsSignupForm />);
+    fillRequired();
+    submit();
+
+    expect(
+      await screen.findByText(/Controleer je internetverbinding/),
+    ).toBeInTheDocument();
+
+    // The failed attempt used up its token: the widget was asked for a new one.
+    await waitFor(() =>
+      expect(screen.getByTestId("turnstile")).toHaveAttribute(
+        "data-reset-key",
+        "1",
+      ),
+    );
+    submit();
+    await waitFor(() =>
+      expect(
+        fetchMock.mock.calls.filter(([url]) => url === "/api/darts"),
+      ).toHaveLength(2),
+    );
+    expect(postedBody(fetchMock).turnstileToken).toBe("token-1");
+  });
+
+  it("submits the remark and the honeypot value as typed", async () => {
+    const fetchMock = stubBackend({});
+    const { container } = render(<DartsSignupForm />);
+    fillRequired();
+    fireEvent.change(screen.getByLabelText(/Opmerking/), {
+      target: { value: "Eén speler komt later." },
+    });
+    fireEvent.change(container.querySelector('input[name="company"]')!, {
+      target: { value: "bot" },
+    });
+    submit();
+
+    await screen.findByText(/Ingeschreven!/);
+    expect(postedBody(fetchMock)).toMatchObject({
+      remark: "Eén speler komt later.",
+      company: "bot",
+    });
+    expect(trackEvent).toHaveBeenCalledWith("darts_signup_submit", {
+      waitlist: false,
+      has_remark: true,
+    });
   });
 
   it("fires one start event for several field changes, with no values", () => {
