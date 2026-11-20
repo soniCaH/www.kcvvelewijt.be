@@ -37,6 +37,6 @@ fi
 
 # Block everything else on main
 cat <<JSON
-{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"BLOCKED: Editing source files on main. Use /ralph-afk <N> to create a worktree. (docs/, .claude/, scripts/ are allowed on main)"}}
+{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"BLOCKED: Editing source files on main. Create a worktree first: ~/personal-skills/ralph-afk/scripts/new-worktree.sh <N>. (docs/, .claude/, scripts/ are allowed on main)"}}
 JSON
 exit 0

@@ -20,7 +20,7 @@ if [ -n "$GIT_DIR" ] && [ "$GIT_DIR" != "$GIT_COMMON_DIR" ]; then
 fi
 
 if [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ]; then
-  OUTPUT="$OUTPUT | WARNING: on main — use /ralph-afk to pick an issue and create a worktree"
+  OUTPUT="$OUTPUT | WARNING: on main — create a worktree first: ~/personal-skills/ralph-afk/scripts/new-worktree.sh <N>"
 fi
 
 echo "$OUTPUT"
