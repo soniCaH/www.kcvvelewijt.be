@@ -50,6 +50,15 @@ describe("buildDartsSignupEmails — a team with a spot", () => {
     expect(captain?.text).toContain("zaterdag 19 december in de kantine");
   });
 
+  it("mail 1 keeps a team name with replacement tokens literal in the payment reference", () => {
+    const [mail] = buildDartsSignupEmails({
+      payload: { ...payload, teamName: "Team $&" },
+      waitlist: false,
+      number: 1,
+    });
+    expect(mail?.text).toContain("met als mededeling: EK Darts - Team $&");
+  });
+
   it("mail 1 names the bank transfer only — no cash", () => {
     expect(captain?.text.toLowerCase()).not.toContain("cash");
     expect(captain?.text.toLowerCase()).not.toContain("café");

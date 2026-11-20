@@ -42,12 +42,10 @@ const paidDoc = {
 };
 
 const dispatch = vi.fn<(m: EmailMessage) => void>();
-const mail = { fails: false };
+const mail: { fails: EmailDeliveryError | false } = { fails: false };
 const layer = Layer.succeed(EmailTransport, {
   dispatchEmail: (m: EmailMessage) =>
-    mail.fails
-      ? Effect.fail(new EmailDeliveryError("Resend down"))
-      : Effect.sync(() => dispatch(m)),
+    mail.fails ? Effect.fail(mail.fails) : Effect.sync(() => dispatch(m)),
 });
 
 const call = async (
@@ -152,7 +150,7 @@ describe("handleDartsPaidWebhook", () => {
   });
 
   it("answers 500 and records nothing when the mail fails, so Sanity retries", async () => {
-    mail.fails = true;
+    mail.fails = new EmailDeliveryError("Resend down");
 
     const res = await call();
 
@@ -160,13 +158,44 @@ describe("handleDartsPaidWebhook", () => {
     expect(mockCommit).not.toHaveBeenCalled();
   });
 
-  it("still answers ok when only the record write fails: the mail is out", async () => {
-    mockCommit.mockRejectedValue(new Error("sanity down"));
+  it("answers 500 when only the record write fails, and the retry sends under the same key and records", async () => {
+    mockCommit.mockRejectedValueOnce(new Error("sanity down"));
+
+    const first = await call();
+    const retry = await call();
+
+    expect(first.status).toBe(500);
+    expect(await retry.json()).toEqual({ ok: true, action: "sent" });
+    expect(dispatch).toHaveBeenCalledTimes(2);
+    expect(dispatch.mock.calls.map(([m]) => m.idempotencyKey)).toEqual([
+      "darts-paid-abc123",
+      "darts-paid-abc123",
+    ]);
+    expect(mockCommit).toHaveBeenCalledTimes(2);
+  });
+
+  it("treats Resend's idempotency conflict as already sent and records it", async () => {
+    mail.fails = new EmailDeliveryError("conflict", undefined, {
+      status: 409,
+      code: "invalid_idempotent_request",
+    });
 
     const res = await call();
 
     expect(await res.json()).toEqual({ ok: true, action: "sent" });
-    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(mockCommit).toHaveBeenCalledTimes(1);
+  });
+
+  it("still fails on a Resend 409 that is not an idempotency conflict", async () => {
+    mail.fails = new EmailDeliveryError("busy", undefined, {
+      status: 409,
+      code: "concurrent_idempotent_requests",
+    });
+
+    const res = await call();
+
+    expect(res.status).toBe(500);
+    expect(mockCommit).not.toHaveBeenCalled();
   });
 
   it("skips a document that is gone (a draft id reads as null)", async () => {

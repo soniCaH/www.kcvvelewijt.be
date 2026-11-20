@@ -33,7 +33,10 @@ import {
 } from "@/components/design-system";
 import { PageHero } from "@/components/layout/PageHero";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
-import { DartsSignup } from "@/components/darts/DartsSignup/DartsSignup";
+import {
+  DartsSignup,
+  DartsSignupCta,
+} from "@/components/darts/DartsSignup/DartsSignup";
 import darts from "@/data/darts.json";
 
 const POSTER = "/darts/poster-liggend-v2.jpg";
@@ -98,8 +101,9 @@ export default function DartsPage() {
           headline={darts.titel}
           lead={`${darts.datum.tekst} — ${darts.waar.naam}`}
           image={POSTER}
-          cta={{ label: "Inschrijven", href: "#inschrijven" }}
-        />
+        >
+          <DartsSignupCta />
+        </PageHero>
       </PageContainer>
 
       <PageContainer width="default">

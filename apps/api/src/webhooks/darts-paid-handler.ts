@@ -42,6 +42,9 @@ interface DartsSignupDoc {
   readonly paidMailSentAt?: string | null;
 }
 
+/** Resend's answer to a repeated `Idempotency-Key` carrying a different payload. */
+const IDEMPOTENCY_CONFLICT = "invalid_idempotent_request";
+
 const QUERY = `*[_id == $id && _type == "dartsSignup"][0]{
   _id, teamName, captainName, captainEmail, paid, waitlist, paidMailSentAt
 }`;
@@ -105,14 +108,22 @@ const webhookEffect = (request: Request, env: WorkerEnv) =>
         idempotencyKey: `darts-paid-${doc._id}`,
       })
       .pipe(
-        Effect.mapError(
-          (err) => new WebhookServiceError("email_failed", errorMessage(err)),
+        Effect.catchAll((err) =>
+          // Same key, different payload: an earlier attempt was accepted by
+          // Resend (its answer got lost) and the team name changed since. The
+          // mail is out, so only the record below is still owed.
+          err.resend?.code === IDEMPOTENCY_CONFLICT
+            ? Effect.void
+            : Effect.fail(
+                new WebhookServiceError("email_failed", errorMessage(err)),
+              ),
         ),
       );
 
     // Recorded after the send, without a revision check: an unrelated edit in
-    // between must not lose the record. A failed record is logged, not retried:
-    // the mail is out, and the idempotency key covers a retry anyway.
+    // between must not lose the record. A failed record answers 500 so Sanity
+    // retries; the retry carries the same idempotency key, which Resend dedupes
+    // for 24 hours, so only the record write is repeated.
     yield* Effect.tryPromise({
       try: async () => {
         const draftId = `drafts.${doc._id}`;
@@ -129,14 +140,12 @@ const webhookEffect = (request: Request, env: WorkerEnv) =>
             : transaction
         ).commit();
       },
-      catch: (err) => err,
-    }).pipe(
-      Effect.catchAll((err) =>
-        Effect.logError(
-          `[webhook:darts-paid] mail sent but paidMailSentAt not recorded on ${doc._id}: ${errorMessage(err)}`,
+      catch: (err) =>
+        new WebhookServiceError(
+          "record_failed",
+          `mail sent but paidMailSentAt not recorded on ${doc._id}: ${errorMessage(err)}`,
         ),
-      ),
-    );
+    });
 
     return Response.json({ ok: true, action: "sent" });
   });

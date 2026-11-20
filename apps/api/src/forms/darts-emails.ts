@@ -77,7 +77,7 @@ const captainMail = (p: DartsSignupRequest): EmailMessage =>
     [
       `Hallo ${p.captainName},`,
       `Top: ${p.teamName} staat op de lijst voor het EK Darts, ${formatEventDay(darts.datum.iso)} in de kantine van KCVV Elewijt.`,
-      `Nog één ding: jullie plaats is pas zeker als de ${dartsPriceAmount(darts.prijs.tekst)} betaald is. Schrijf het bedrag over naar ${darts.betaling.iban} (${darts.betaling.rekeninghouder}), met als mededeling: ${darts.betaling.mededeling.replace("{ploegnaam}", p.teamName)}`,
+      `Nog één ding: jullie plaats is pas zeker als de ${dartsPriceAmount(darts.prijs.tekst)} betaald is. Schrijf het bedrag over naar ${darts.betaling.iban} (${darts.betaling.rekeninghouder}), met als mededeling: ${darts.betaling.mededeling.replace("{ploegnaam}", () => p.teamName)}`,
       "Zodra we de betaling zien, krijg je een tweede mail met de uren van de dag.",
       `Alle info en het reglement: ${INFO_LINK}\nIets veranderen of een vraag? Antwoord gewoon op deze mail.`,
       `Tot op het EK!\n${SIGN_OFF}`,

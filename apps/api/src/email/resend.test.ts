@@ -1,10 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { Cause, Effect, Logger } from "effect";
+import { Cause, Effect, Exit, Logger, Option } from "effect";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
 import type { WorkerEnv } from "../env";
 import {
   EmailTransport,
   EmailTransportLive,
+  type EmailDeliveryError,
   type EmailMessage,
 } from "./resend";
 
@@ -105,6 +106,29 @@ describe("EmailTransportLive.dispatchEmail (#3464)", () => {
     );
     expect(headers[0]).toMatchObject({ "Idempotency-Key": "darts-paid-abc" });
     expect(headers[1]).not.toHaveProperty("Idempotency-Key");
+  });
+
+  it("carries Resend's status and error name on a non-2xx response", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(
+        async () =>
+          new Response(JSON.stringify({ name: "invalid_idempotent_request" }), {
+            status: 409,
+          }),
+      ),
+    );
+    const { exit } = dispatch(withKey);
+
+    const result = await exit;
+    expect(result._tag).toBe("Failure");
+    const error = Cause.failureOption(
+      (result as Exit.Failure<void, EmailDeliveryError>).cause,
+    );
+    expect(Option.getOrThrow(error).resend).toEqual({
+      status: 409,
+      code: "invalid_idempotent_request",
+    });
   });
 
   it("fails with EmailDeliveryError on a non-2xx response", async () => {

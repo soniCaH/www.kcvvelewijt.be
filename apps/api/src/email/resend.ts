@@ -18,11 +18,23 @@ export class EmailDeliveryError extends Error {
   constructor(
     message: string,
     readonly cause?: unknown,
+    /** Resend's HTTP status and error `name`, when it answered with an error. */
+    readonly resend?: { readonly status: number; readonly code?: string },
   ) {
     super(message);
     this.name = "EmailDeliveryError";
   }
 }
+
+/** Resend's error `name` (e.g. `invalid_idempotent_request`) out of an error body. */
+const errorName = (body: string): string | undefined => {
+  try {
+    const name = (JSON.parse(body) as { name?: unknown }).name;
+    return typeof name === "string" ? name : undefined;
+  } catch {
+    return undefined;
+  }
+};
 
 export interface EmailMessage {
   readonly to: string | string[];
@@ -105,6 +117,8 @@ export const EmailTransportLive = Layer.effect(
             return yield* Effect.fail(
               new EmailDeliveryError(
                 `Resend responded ${response.status}: ${body}`,
+                undefined,
+                { status: response.status, code: errorName(body) },
               ),
             );
           }

@@ -19,6 +19,7 @@ import {
   EmptyState,
   Input,
   Label,
+  LinkButton,
   SectionHeader,
   Textarea,
 } from "@/components/design-system";
@@ -68,15 +69,29 @@ const subscribeNever = () => () => {};
  * once on mount through `/api/darts/spots` (a dynamic route handler: no ISR
  * write). The BFF re-checks both at submit time; this is only the display.
  */
-export const DartsSignup = () => {
-  // The server render keeps the block (so `#inschrijven` exists on first
-  // paint); the browser takes it away once the event day is over.
-  const closed = useSyncExternalStore(
+// The server render keeps the block (so `#inschrijven` exists on first paint);
+// the browser takes it away once the event day is over.
+const useSignupClosed = () =>
+  useSyncExternalStore(
     subscribeNever,
     () => isDartsSignupClosed(darts.datum.iso, new Date()),
     () => false,
   );
-  if (closed) return null;
+
+/** The hero's "Inschrijven" button: gone together with the block it points at. */
+export const DartsSignupCta = () => {
+  if (useSignupClosed()) return null;
+  return (
+    <div className="mt-4">
+      <LinkButton href="#inschrijven" variant="primary" withArrow>
+        Inschrijven
+      </LinkButton>
+    </div>
+  );
+};
+
+export const DartsSignup = () => {
+  if (useSignupClosed()) return null;
   return (
     <section className="mt-4" id="inschrijven" aria-label="Inschrijven">
       <SectionHeader title="Inschrijven" as="h2" ruled />
@@ -130,20 +145,28 @@ export const DartsSignupForm = () => {
   >(null);
   useEffect(() => {
     if (!report) return;
-    if (report.kind === "submit") {
-      trackEvent("darts_signup_submit", {
-        waitlist: report.waitlist,
-        has_remark: report.hasRemark,
-      });
-      return;
+    switch (report.kind) {
+      case "submit":
+        trackEvent("darts_signup_submit", {
+          waitlist: report.waitlist,
+          has_remark: report.hasRemark,
+        });
+        return;
+      case "error": {
+        // Field names only, never values, sorted so client and server agree.
+        const names = Object.keys(report.errors).sort();
+        if (names.length === 0) return;
+        trackEvent("darts_signup_error", {
+          fields: names.join(","),
+          source: report.source,
+        });
+        return;
+      }
+      default: {
+        const unreachable: never = report;
+        throw new Error(`Unhandled report: ${JSON.stringify(unreachable)}`);
+      }
     }
-    // Field names only, never values, sorted so client and server agree.
-    const names = Object.keys(report.errors).sort();
-    if (names.length === 0) return;
-    trackEvent("darts_signup_error", {
-      fields: names.join(","),
-      source: report.source,
-    });
   }, [report]);
 
   const setField = <K extends keyof Values>(name: K, value: Values[K]) => {

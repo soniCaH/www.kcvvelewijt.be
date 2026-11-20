@@ -195,6 +195,19 @@ export interface SanityProjectionInterface {
     { teams: number; waitlist: number },
     SanityQueryError
   >;
+  /**
+   * A published signup with this team name (case and whitespace insensitive)
+   * AND this captain e-mail, or null. A resubmit after a timed-out request is
+   * then a no-op (#3812). `number` is its spot, or its place on the wachtlijst,
+   * in submission order.
+   */
+  readonly findDartsSignup: (input: {
+    teamName: string;
+    captainEmail: string;
+  }) => Effect.Effect<
+    { waitlist: boolean; number: number } | null,
+    SanityQueryError
+  >;
 }
 
 export class SanityProjection extends Context.Tag("SanityProjection")<
@@ -438,6 +451,40 @@ export const SanityProjectionLive = Layer.effect(
             ),
           catch: (cause) =>
             new SanityQueryError("Failed to count darts signups", cause),
+        }),
+
+      findDartsSignup: ({ teamName, captainEmail }) =>
+        Effect.tryPromise({
+          try: async () => {
+            const normalize = (value: string) =>
+              value.trim().replace(/\s+/g, " ").toLowerCase();
+            const rows = await client.fetch<
+              Array<{
+                teamName: string | null;
+                waitlist: boolean | null;
+                submittedAt: string | null;
+              }>
+            >(
+              `*[_type == "dartsSignup" && lower(captainEmail) == $email]{ teamName, waitlist, submittedAt }`,
+              { email: normalize(captainEmail) },
+            );
+            const match = rows.find(
+              (row) => normalize(row.teamName ?? "") === normalize(teamName),
+            );
+            if (!match) return null;
+            const waitlist = match.waitlist === true;
+            // Rank among the signups in the same list; one without a
+            // `submittedAt` (made by hand in the Studio) counts as first.
+            const number = match.submittedAt
+              ? await client.fetch<number>(
+                  `count(*[_type == "dartsSignup" && (waitlist == true) == $waitlist && submittedAt <= $at])`,
+                  { waitlist, at: match.submittedAt },
+                )
+              : 1;
+            return { waitlist, number: Math.max(1, number) };
+          },
+          catch: (cause) =>
+            new SanityQueryError("Failed to look up a darts signup", cause),
         }),
     };
   }),

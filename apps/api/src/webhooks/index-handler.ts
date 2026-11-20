@@ -51,7 +51,8 @@ export class WebhookServiceError {
       | "delete_failed"
       | "invalid_document"
       | "dataset_mismatch"
-      | "email_failed",
+      | "email_failed"
+      | "record_failed",
     readonly detail: string,
   ) {}
 }

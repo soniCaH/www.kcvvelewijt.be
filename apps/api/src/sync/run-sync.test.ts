@@ -117,6 +117,7 @@ function makeSanityMocks() {
     getStaffGaps: makeSanityProjectionStub().getStaffGaps,
     getBirthdayPeople: makeSanityProjectionStub().getBirthdayPeople,
     getDartsCounts: makeSanityProjectionStub().getDartsCounts,
+    findDartsSignup: makeSanityProjectionStub().findDartsSignup,
   };
 
   return {
@@ -537,6 +538,7 @@ describe("runSync", () => {
       getStaffGaps: makeSanityProjectionStub().getStaffGaps,
       getBirthdayPeople: makeSanityProjectionStub().getBirthdayPeople,
       getDartsCounts: makeSanityProjectionStub().getDartsCounts,
+      findDartsSignup: makeSanityProjectionStub().findDartsSignup,
     };
     const psdMock = makePsdTeamClientMock(
       [ONE_TEAM],

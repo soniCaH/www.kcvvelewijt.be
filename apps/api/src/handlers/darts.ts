@@ -48,8 +48,8 @@ export const handleDartsSpots = () =>
 /**
  * Handle a public EK Darts signup.
  *
- * Order: honeypot → Turnstile → closed after the event day → fresh count (spot
- * or wachtlijst) → persist (Sanity) → send (Resend, best-effort). Persist-then-send
+ * Order: honeypot → Turnstile → closed after the event day → resubmit check →
+ * fresh count (spot or wachtlijst) → persist (Sanity) → send (Resend, best-effort). Persist-then-send
  * means a captured signup is never lost to an email failure.
  *
  * shortcut: count-then-write is not atomic, so two signups in the same moment can
@@ -84,15 +84,32 @@ export const handleDartsSignup = (
       );
     }
 
-    // 4. Fresh count decides spot or wachtlijst.
+    // 4. The same team signed up by the same captain already: the earlier
+    // request was saved but its answer never arrived (the web proxy gives up
+    // after 10 s, the mails take longer). Answer with that signup's status and
+    // write and mail nothing, or a resubmit would take a second place.
     const projection = yield* SanityProjection;
+    const existing = yield* projection
+      .findDartsSignup({
+        teamName: payload.teamName,
+        captainEmail: payload.captainEmail,
+      })
+      .pipe(Effect.mapError(countsUnavailable));
+    if (existing) {
+      yield* Effect.logInfo(
+        `[darts] resubmit of a saved signup, no write (${existing.waitlist ? "wachtlijst" : "spot"} ${existing.number})`,
+      );
+      return { ok: true as const, waitlist: existing.waitlist };
+    }
+
+    // 5. Fresh count decides spot or wachtlijst.
     const counts = yield* projection
       .getDartsCounts()
       .pipe(Effect.mapError(countsUnavailable));
     const waitlist = !hasFreeSpot(counts);
     const number = waitlist ? counts.waitlist + 1 : counts.teams + 1;
 
-    // 5. Persist first — failure here is the only one that fails the request.
+    // 6. Persist first — failure here is the only one that fails the request.
     const sanity = yield* SanityMutation;
     yield* sanity
       .writeDartsSignup({
@@ -114,7 +131,7 @@ export const handleDartsSignup = (
         ),
       );
 
-    // 6. Captain mail + club copy — best-effort.
+    // 7. Captain mail + club copy — best-effort.
     const transport = yield* EmailTransport;
     yield* Effect.forEach(
       buildDartsSignupEmails({ payload, waitlist, number }),

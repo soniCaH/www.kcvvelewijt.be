@@ -27,5 +27,6 @@ export const makeSanityProjectionStub = (
     }),
   getBirthdayPeople: () => Effect.succeed([]),
   getDartsCounts: () => Effect.succeed({ teams: 0, waitlist: 0 }),
+  findDartsSignup: () => Effect.succeed(null),
   ...overrides,
 });

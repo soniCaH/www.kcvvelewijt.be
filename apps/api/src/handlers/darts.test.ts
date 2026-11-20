@@ -33,6 +33,8 @@ const BEFORE_EVENT = new Date("2026-11-25T10:00:00Z");
 const layerFor = (opts: {
   counts?: Counts;
   countsFail?: boolean;
+  existing?: { waitlist: boolean; number: number } | null;
+  find?: (input: { teamName: string; captainEmail: string }) => void;
   write?: SanityMutationInterface["writeDartsSignup"];
   dispatch?: EmailTransportInterface["dispatchEmail"];
 }) =>
@@ -43,6 +45,11 @@ const layerFor = (opts: {
     Layer.succeed(
       SanityProjection,
       makeSanityProjectionStub({
+        findDartsSignup: (input) =>
+          Effect.sync(() => {
+            opts.find?.(input);
+            return opts.existing ?? null;
+          }),
         getDartsCounts: () =>
           opts.countsFail
             ? Effect.fail(new SanityQueryError("boom"))
@@ -180,6 +187,41 @@ describe("handleDartsSignup", () => {
     const exit = await signup({ countsFail: true, write });
     expect(Exit.isFailure(exit)).toBe(true);
     expect(write).not.toHaveBeenCalled();
+  });
+
+  it("answers a resubmit of a saved signup with its status and writes and mails nothing", async () => {
+    const write = vi.fn<SanityMutationInterface["writeDartsSignup"]>(() =>
+      Effect.succeed(undefined),
+    );
+    const dispatch = vi.fn<EmailTransportInterface["dispatchEmail"]>(() =>
+      Effect.succeed(undefined),
+    );
+    const find = vi.fn();
+    const exit = await signup({
+      existing: { waitlist: true, number: 3 },
+      find,
+      write,
+      dispatch,
+    });
+
+    expect(exit).toEqual(Exit.succeed({ ok: true, waitlist: true }));
+    expect(find).toHaveBeenCalledWith({
+      teamName: "De Pijlenjagers",
+      captainEmail: "jan@example.com",
+    });
+    expect(write).not.toHaveBeenCalled();
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it("takes a signup from the same captain under another team name as a normal one", async () => {
+    const write = vi.fn<SanityMutationInterface["writeDartsSignup"]>(() =>
+      Effect.succeed(undefined),
+    );
+    // The lookup matches on team name and captain together: no match here.
+    const exit = await signup({ existing: null, write });
+
+    expect(exit).toEqual(Exit.succeed({ ok: true, waitlist: false }));
+    expect(write).toHaveBeenCalledTimes(1);
   });
 
   it("refuses a signup after the event day, saving nothing", async () => {
