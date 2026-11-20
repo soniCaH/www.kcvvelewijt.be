@@ -56,6 +56,23 @@ export type FormRoutingConfig = {
   scheidsrechterContact?: OrganigramNodeReference;
 };
 
+export type DartsSignup = {
+  _id: string;
+  _type: "dartsSignup";
+  _createdAt: string;
+  _updatedAt: string;
+  _rev: string;
+  teamName?: string;
+  captainName?: string;
+  captainEmail?: string;
+  captainPhone?: string;
+  remark?: string;
+  paid?: boolean;
+  waitlist?: boolean;
+  paidMailSentAt?: string;
+  submittedAt?: string;
+};
+
 export type MembershipApplication = {
   _id: string;
   _type: "membershipApplication";
@@ -1122,6 +1139,7 @@ export type AllSanitySchemaTypes =
   | ShortLink
   | OrganigramNodeReference
   | FormRoutingConfig
+  | DartsSignup
   | MembershipApplication
   | SanityImageAssetReference
   | MatchesSliderPlaceholder

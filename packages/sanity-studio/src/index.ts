@@ -21,6 +21,7 @@ export {schemaTypes} from './schema-types'
 export {staffStructure} from './structure/staff'
 export {responsibilityStructure} from './structure/responsibility'
 export {membershipApplicationStructure} from './structure/membershipApplication'
+export {dartsSignupStructure} from './structure/dartsSignup'
 // Public LauncherTool surface. `useTemplates` and `filterLauncherTemplates`
 // are intentionally NOT re-exported — they would shadow Sanity's own
 // `useTemplates` hook for any consumer importing from `@kcvv/sanity-studio`.

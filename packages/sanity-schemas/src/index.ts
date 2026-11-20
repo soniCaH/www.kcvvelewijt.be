@@ -76,6 +76,7 @@ export {homePage} from './homePage'
 export {jeugdLandingPage} from './jeugdLandingPage'
 export {matchesSliderPlaceholder} from './matchesSliderPlaceholder'
 export {membershipApplication} from './membershipApplication'
+export {dartsSignup} from './dartsSignup'
 export {formRoutingConfig} from './formRoutingConfig'
 export {shortLink} from './shortLink'
 export {RESERVED_SHORT_LINK_NAMES} from './reserved-short-link-names'
@@ -111,6 +112,7 @@ import {homePage} from './homePage'
 import {jeugdLandingPage} from './jeugdLandingPage'
 import {matchesSliderPlaceholder} from './matchesSliderPlaceholder'
 import {membershipApplication} from './membershipApplication'
+import {dartsSignup} from './dartsSignup'
 import {formRoutingConfig} from './formRoutingConfig'
 import {shortLink} from './shortLink'
 
@@ -142,6 +144,7 @@ export const schemaTypes = [
   jeugdLandingPage,
   matchesSliderPlaceholder,
   membershipApplication,
+  dartsSignup,
   formRoutingConfig,
   shortLink,
 ]

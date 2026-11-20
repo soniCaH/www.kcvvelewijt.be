@@ -3,6 +3,7 @@ import {
   staffStructure,
   responsibilityStructure,
   membershipApplicationStructure,
+  dartsSignupStructure,
 } from '@kcvv/sanity-studio'
 
 export const structure: StructureResolver = (S) =>
@@ -91,4 +92,5 @@ export const structure: StructureResolver = (S) =>
       responsibilityStructure(S),
       S.divider(),
       membershipApplicationStructure(S),
+      dartsSignupStructure(S),
     ])
