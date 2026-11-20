@@ -15,7 +15,8 @@ src/
 │   ├── related.ts      ← RelatedItem
 │   ├── player-stats.ts ← PlayerSeasonStats, PlayerTeamStats
 │   ├── search.ts       ← SearchRequest, SearchResponse, TeamGuessRequest, TeamGuessResponse (#3559)
-│   ├── forms.ts        ← MembershipRequest, MembershipResponse
+│   ├── forms.ts        ← MembershipRequest, MembershipResponse, EmailAddress
+│   ├── darts.ts        ← DartsSignupRequest, DartsSignupResponse, DartsSpotsResponse, DARTS_TEAM_LIMIT (#3812)
 │   └── index.ts        ← barrel
 ├── api/
 │   ├── matches.ts      ← MatchesApi HttpApiGroup
@@ -25,6 +26,7 @@ src/
 │   ├── search.ts       ← SearchApi HttpApiGroup (`/search`, `/search/team-guess`)
 │   ├── forms.ts        ← FormsApi HttpApiGroup
 │   └── index.ts        ← PsdApi root export + BFF_KEY_HEADER (`x-kcvv-bff-key`, #3485) + CLIENT_IP_HEADER (`x-kcvv-client-ip`, #3468)
+├── darts-facts.ts      ← isDartsSignupClosed, dartsPriceAmount — helpers over `apps/web/src/data/darts.json` (#3812) — plain functions, not schemas
 ├── organigram.ts       ← YOUTH_COORDINATOR_ROLE_CODES, TVJO_ROLE_CODE (#3420) — plain constants, not schemas
 ├── wire.test.ts        ← the BFF seam: every schema round-trips encode → JSON → decode
 └── index.ts            ← re-exports everything

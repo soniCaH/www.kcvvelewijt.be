@@ -443,3 +443,67 @@ describe("getBirthdayPeople", () => {
     ]);
   });
 });
+
+// ─── findDartsSignup (#3812) ─────────────────────────────────────────────────
+
+describe("findDartsSignup", () => {
+  const find = (teamName: string, captainEmail = "Jan@Example.com") =>
+    run(
+      Effect.gen(function* () {
+        const projection = yield* SanityProjection;
+        return yield* projection.findDartsSignup({ teamName, captainEmail });
+      }),
+    );
+
+  it("finds the same team by the same captain, ignoring case and spacing, with its place", async () => {
+    mockFetch
+      .mockResolvedValueOnce([
+        {
+          teamName: "De  Pijlenjagers ",
+          waitlist: null,
+          submittedAt: "2026-11-21T10:00:00Z",
+        },
+      ])
+      .mockResolvedValueOnce(3);
+
+    expect(await find("de pijlenjagers")).toEqual({
+      waitlist: false,
+      number: 3,
+    });
+    expect(mockFetch.mock.calls[0]![1]).toEqual({ email: "jan@example.com" });
+    expect(mockFetch.mock.calls[1]![1]).toEqual({
+      waitlist: false,
+      at: "2026-11-21T10:00:00Z",
+    });
+  });
+
+  it("finds nothing when the same captain signed up another team", async () => {
+    mockFetch.mockResolvedValueOnce([
+      {
+        teamName: "Andere Ploeg",
+        waitlist: false,
+        submittedAt: "2026-11-21T10:00:00Z",
+      },
+    ]);
+
+    expect(await find("De Pijlenjagers")).toBeNull();
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports a wachtlijst signup as such", async () => {
+    mockFetch
+      .mockResolvedValueOnce([
+        {
+          teamName: "De Pijlenjagers",
+          waitlist: true,
+          submittedAt: "2026-11-21T10:00:00Z",
+        },
+      ])
+      .mockResolvedValueOnce(2);
+
+    expect(await find("De Pijlenjagers")).toEqual({
+      waitlist: true,
+      number: 2,
+    });
+  });
+});

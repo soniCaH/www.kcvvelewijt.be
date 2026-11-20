@@ -141,6 +141,17 @@ export interface SanityMembershipApplicationDoc {
   submittedAt: string; // ISO timestamp set by the BFF
 }
 
+/** Public EK Darts signup (#3812), persisted before email dispatch. */
+export interface SanityDartsSignupDoc {
+  teamName: string;
+  captainName: string;
+  captainEmail: string;
+  captainPhone: string;
+  remark?: string;
+  waitlist: boolean;
+  submittedAt: string; // ISO timestamp set by the BFF
+}
+
 // ─── Error ────────────────────────────────────────────────────────────────────
 
 export class SanityMutationError extends Error {
@@ -209,6 +220,10 @@ export interface SanityMutationInterface {
   /** Create a membershipApplication document (status defaults to "new"). */
   readonly writeMembershipApplication: (
     doc: SanityMembershipApplicationDoc,
+  ) => Effect.Effect<void, SanityMutationError>;
+  /** Create a dartsSignup document: not paid, no payment mail sent yet. */
+  readonly writeDartsSignup: (
+    doc: SanityDartsSignupDoc,
   ) => Effect.Effect<void, SanityMutationError>;
 }
 
@@ -740,6 +755,24 @@ export const SanityMutationLive = Layer.effect(
               "Failed to write membership application",
               cause,
             ),
+        }).pipe(Effect.asVoid),
+
+      writeDartsSignup: (doc) =>
+        Effect.tryPromise({
+          try: () =>
+            client.create({
+              _type: "dartsSignup",
+              teamName: doc.teamName,
+              captainName: doc.captainName,
+              captainEmail: doc.captainEmail,
+              captainPhone: doc.captainPhone,
+              ...(doc.remark ? { remark: doc.remark } : {}),
+              paid: false,
+              waitlist: doc.waitlist,
+              submittedAt: doc.submittedAt,
+            }),
+          catch: (cause) =>
+            new SanityMutationError("Failed to write darts signup", cause),
         }).pipe(Effect.asVoid),
     };
   }),

@@ -6,3 +6,6 @@ export * from "./api/index";
 
 // Organigram role codes both apps read (#3420)
 export * from "./organigram";
+
+// EK Darts date/price helpers both apps read (#3812)
+export * from "./darts-facts";

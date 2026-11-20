@@ -21,6 +21,7 @@
 
   "uren": {
     "deuren": "10.00 u",
+    "aanmeldenTot": "10.40 u",
     "eersteWorp": "11.00 u",
     "prijsuitreiking": "20.00 u",
     "einde": "middernacht",
@@ -30,6 +31,13 @@
   "prijs": {
     "tekst": "€ 30 per ploeg",
     "_bron": "vergadering 27/10 — €30 per ploeg, ingeschreven = betaald"
+  },
+
+  "betaling": {
+    "iban": "BE33 0020 2810 0046",
+    "rekeninghouder": "KCVV Elewijt vzw",
+    "mededeling": "EK Darts - {ploegnaam}",
+    "_bron": "Kevin, 2026-11-20. NIET de hoofdrekening van de club: een tweede rekening, opgezet voor de jeugd en nog nooit gebruikt. Per evenement kan het een andere rekening zijn — daarom staat ze hier, bij de feiten van dit evenement, en niet in de code."
   },
 
   "inschrijven": {

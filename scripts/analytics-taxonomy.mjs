@@ -73,6 +73,11 @@ export const prefixes = [
   // other params stay unregistered (DebugView only) — no new custom
   // definitions.
   "share_",
+  // EK Darts signup on `/darts` (#3812). `darts_signup_start`,
+  // `darts_signup_submit` (`waitlist`, `has_remark`), `darts_signup_error`
+  // (`fields`, `source`). Only `waitlist` is new, and it is unregistered
+  // (DebugView only) while the 50-dimension cap is full.
+  "darts_",
 ];
 
 /** The canonical GTM Custom-Event trigger RegEx (prefixes joined with `|`). */
@@ -252,4 +257,8 @@ export const params = [
     displayName: "Share fallback used",
     registered: false,
   },
+  // ── EK Darts signup (#3812) ─────────────────────────────────────────────
+  // `darts_signup_submit`: whether the team landed on the wachtlijst. Forwarded
+  // unregistered (DebugView only) while the 50-dimension cap is full.
+  { parameterName: "waitlist", displayName: "On waitlist", registered: false },
 ];

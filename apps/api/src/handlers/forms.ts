@@ -19,6 +19,7 @@ import {
   buildMembershipEmails,
   type MembershipContact,
 } from "../forms/membership-emails";
+import { handleDartsSignup, handleDartsSpots } from "./darts";
 
 const DEFAULT_ADMIN_RECIPIENT = "info@kcvvelewijt.be";
 const ROUTING_CACHE_KEY = "forms:routing-config";
@@ -170,5 +171,8 @@ export const handleMembership = (payload: MembershipRequest) =>
   });
 
 export const FormsApiLive = HttpApiBuilder.group(PsdApi, "forms", (handlers) =>
-  handlers.handle("membershipForm", ({ payload }) => handleMembership(payload)),
+  handlers
+    .handle("membershipForm", ({ payload }) => handleMembership(payload))
+    .handle("dartsSignup", ({ payload }) => handleDartsSignup(payload))
+    .handle("dartsSpots", () => handleDartsSpots()),
 );

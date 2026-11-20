@@ -16,7 +16,7 @@ const GENDER_LABELS: Record<string, string> = {
 };
 
 /** Minimal escaping for the user-supplied strings we interpolate into HTML. */
-function esc(value: string): string {
+export function esc(value: string): string {
   return value
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -27,7 +27,7 @@ function esc(value: string): string {
 const FOOTER_TEXT =
   "KCVV Elewijt · Driesstraat 32, 1982 Elewijt · https://www.kcvvelewijt.be";
 
-function shell(title: string, body: string): string {
+export function shell(title: string, body: string): string {
   return `<div style="font-family:Arial,Helvetica,sans-serif;color:#1a1a1a;max-width:560px;margin:0 auto;line-height:1.5">
   <h1 style="font-size:18px;color:#005c2e">${title}</h1>
   ${body}

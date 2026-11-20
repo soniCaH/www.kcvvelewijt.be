@@ -72,7 +72,10 @@ export type MembershipGender = S.Schema.Type<typeof MembershipGender>;
 /** Permissive single-line email check — full RFC validation is not worth it. */
 export const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
-const Email = S.Trim.pipe(S.minLength(1), S.pattern(EMAIL_PATTERN));
+export const EmailAddress = S.Trim.pipe(
+  S.minLength(1),
+  S.pattern(EMAIL_PATTERN),
+);
 
 /**
  * Public membership-intake payload. Shape/type rules live here (a decode
@@ -92,12 +95,12 @@ export class MembershipRequest extends S.Class<MembershipRequest>(
   gender: S.optional(MembershipGender),
   /** City only — no street, no postal code. Optional; absent means "not given". */
   municipality: S.optional(S.Trim.pipe(S.minLength(1), S.maxLength(100))),
-  email: Email,
+  email: EmailAddress,
   priorClub: S.optional(S.Trim.pipe(S.maxLength(200))),
   /** Free remark for the club — longer than 1000 is a 400, never a silent cut. */
   remark: S.optional(S.Trim.pipe(S.maxLength(1000))),
   /** Parent/guardian email — required server-side only when the applicant is a minor. */
-  parentEmail: S.optional(Email),
+  parentEmail: S.optional(EmailAddress),
   parentalConsent: S.optional(S.Boolean),
   /** Medical-cert acknowledgment — required server-side only for player roles. */
   medicalCertAcknowledged: S.optional(S.Boolean),

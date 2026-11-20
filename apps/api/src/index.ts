@@ -52,6 +52,7 @@ import {
   STAFF_GAPS_JOB,
 } from "./sync/staff-gaps-check";
 import { handleIndexWebhook } from "./webhooks/index-handler";
+import { handleDartsPaidWebhook } from "./webhooks/darts-paid-handler";
 import { reportScheduledJobOutcome } from "./psd/job-alert";
 import { refuseUnlessBffKey } from "./auth/bff-key";
 
@@ -117,6 +118,22 @@ export default {
     ) {
       try {
         return await handleIndexWebhook(request, env);
+      } catch (err) {
+        console.error("[webhook] unhandled error:", err);
+        return Response.json(
+          { ok: false, code: "internal_error" },
+          { status: 500 },
+        );
+      }
+    }
+
+    // Darts `Betaald` mail (#3812): same signed-webhook shape as /webhooks/index.
+    if (
+      request.method === "POST" &&
+      new URL(request.url).pathname === "/webhooks/darts-paid"
+    ) {
+      try {
+        return await handleDartsPaidWebhook(request, env);
       } catch (err) {
         console.error("[webhook] unhandled error:", err);
         return Response.json(
