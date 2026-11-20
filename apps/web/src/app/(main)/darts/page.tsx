@@ -35,7 +35,7 @@ import { PageHero } from "@/components/layout/PageHero";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
 import darts from "@/data/darts.json";
 
-const POSTER = "/darts/poster-liggend.jpg";
+const POSTER = "/darts/poster-liggend-v2.jpg";
 
 /* ⚠️ This describes the affiche for the OG image ONLY — it is the `ogImage.alt`
    below, and nothing else. `<PageHero>` renders its image with a hard-coded
@@ -51,9 +51,9 @@ const POSTER = "/darts/poster-liggend.jpg";
 const POSTER_ALT =
   "Affiche EK Darts 2026 — zaterdag 19 december 2026, kantine KCVV Elewijt. " +
   "Teams van vier personen, gegarandeerd meerdere wedstrijden, kwalificatie en " +
-  "eindronde voor iedereen, mooie prijzen en een vette afterparty.";
+  "eindronde voor iedereen, mooie prijzen, een zuipbeker en ambiancemuziek.";
 
-const uren = darts.uren.dummy;
+const uren = darts.uren;
 
 /* An undecided fact is marked in place, never hidden — the convention
    affiche-copy.md already uses, so poster and page mark a missing decision the
@@ -76,11 +76,12 @@ const ROWS: Array<{ label: string; value: string }> = [
     value: `${darts.formule.ploeg} · ${darts.formule.ontmoeting}`,
   },
   { label: "Verloop", value: darts.formule.verloop },
-  { label: "Deuren", value: open(uren.deuren) },
-  { label: "Eerste worp", value: open(uren.eersteWorp) },
-  { label: "Prijsuitreiking", value: open(uren.prijsuitreiking) },
+  { label: "Deuren", value: uren.deuren },
+  { label: "Eerste worp", value: uren.eersteWorp },
+  { label: "Prijsuitreiking", value: uren.prijsuitreiking },
+  { label: "Einde", value: uren.einde },
   { label: "Eten en drank", value: open(darts.eten.dummy) },
-  { label: "Afterparty", value: darts.dj.tekst },
+  { label: "Muziek", value: darts.muziek.tekst },
 ];
 
 export default function DartsPage() {
@@ -113,14 +114,14 @@ export default function DartsPage() {
           </dl>
         </section>
 
-        {/* Featured 1 — the number everybody asks first, and it is still open. */}
+        {/* Featured 1 — the number everybody asks first. */}
         <div className="my-10">
           <PullQuote
             placement="flow"
             rotation={-1}
             labels={[{ label: "Prijs per ploeg" }]}
           >
-            {`${darts.prijs.dummy} voor een ploeg van vier. Nog niet beslist — dit cijfer staat er om de pagina te kunnen lezen, niet om op te rekenen.`}
+            {`${darts.prijs.tekst} — een ploeg is vier spelers.`}
           </PullQuote>
         </div>
 
