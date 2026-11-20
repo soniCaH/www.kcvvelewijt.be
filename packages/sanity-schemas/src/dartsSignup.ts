@@ -1,4 +1,5 @@
 import {defineField, defineType} from 'sanity'
+import {dartsSignupPreviewSelect, prepareDartsSignupPreview} from './preview/dartsSignup-preview'
 
 /**
  * EK Darts team signup, created by the public `/darts` form via the BFF (#3812),
@@ -39,7 +40,8 @@ export const dartsSignup = defineType({
       type: 'string',
       group: 'ploeg',
       description: 'Alle mails van het EK gaan naar dit adres.',
-      validation: (Rule) => Rule.required().error('Verplicht.'),
+      validation: (Rule) =>
+        Rule.required().email().error('Verplicht: een geldig e-mailadres. De mails van het EK gaan hierheen.'),
     }),
     defineField({
       name: 'captainPhone',
@@ -71,7 +73,7 @@ export const dartsSignup = defineType({
       group: 'beheer',
       initialValue: false,
       description:
-        'Aan = de ploeg telt niet mee voor de 24 plaatsen. Wordt er een plaats vrij, dan zet je dit zelf uit: er schuift niets automatisch op.',
+        'Aan = de ploeg telt niet mee voor de 24 plaatsen. Wordt er een plaats vrij, dan zet je dit zelf uit: er schuift niets automatisch op. Staat Betaald dan al aan, dan vertrekt de bevestigingsmail op het moment dat je dit uitzet (een ploeg op de wachtlijst krijgt die mail niet).',
     }),
     defineField({
       name: 'paidMailSentAt',
@@ -88,7 +90,7 @@ export const dartsSignup = defineType({
       type: 'datetime',
       group: 'beheer',
       readOnly: true,
-      description: 'Tijdstip waarop het formulier werd ingediend.',
+      description: 'Ingevuld door de API (apps/api/src/handlers/darts.ts) op het moment dat de ploeg zich inschreef.',
     }),
   ],
   orderings: [
@@ -99,14 +101,7 @@ export const dartsSignup = defineType({
     },
   ],
   preview: {
-    select: {teamName: 'teamName', captainName: 'captainName', paid: 'paid', waitlist: 'waitlist'},
-    prepare({teamName, captainName, paid, waitlist}) {
-      return {
-        title: teamName || '(naamloos)',
-        subtitle: [captainName, waitlist ? 'Wachtlijst' : null, paid ? 'Betaald' : 'Niet betaald']
-          .filter(Boolean)
-          .join(' · '),
-      }
-    },
+    select: dartsSignupPreviewSelect,
+    prepare: prepareDartsSignupPreview,
   },
 })

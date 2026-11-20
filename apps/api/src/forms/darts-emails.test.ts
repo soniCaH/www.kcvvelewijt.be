@@ -22,6 +22,7 @@ const payload = S.decodeUnknownSync(DartsSignupRequest)({
 describe("formatEventDay", () => {
   it("writes the day the way the approved copy does", () => {
     expect(formatEventDay("2026-12-19")).toBe("zaterdag 19 december");
+    expect(formatEventDay("2026-03-01")).toBe("zondag 1 maart");
   });
 });
 
@@ -80,6 +81,18 @@ describe("buildDartsSignupEmails — a team with a spot", () => {
     expect(withRemark?.text).toContain(
       "Opmerking: Eén speler komt later. Graag bij de bar.",
     );
+  });
+
+  it("keeps a team name on one line in the subjects", () => {
+    const [mail1, mail4] = buildDartsSignupEmails({
+      payload: { ...payload, teamName: "De\nPijlenjagers" },
+      waitlist: false,
+      number: 7,
+    });
+    expect(mail1?.subject).toBe(
+      "EK Darts: De Pijlenjagers is ingeschreven — nog even betalen",
+    );
+    expect(mail4?.subject).toBe("EK Darts: De Pijlenjagers — ploeg 7/24");
   });
 
   it("escapes what the captain typed in the HTML part", () => {

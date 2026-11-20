@@ -5,6 +5,13 @@ import { WorkerEnvTag } from "../env";
 import { EmailTransport, EmailTransportLive } from "../email/resend";
 import { buildDartsPaidEmail } from "../forms/darts-emails";
 import { sanityClientConfig } from "../sanity/config";
+import {
+  WebhookAuthError,
+  WebhookParseError,
+  WebhookServiceError,
+  errorMessage,
+  toErrorResponse,
+} from "./index-handler";
 import { WebhookPayload } from "./schemas";
 import { verifySanitySignature } from "./sanity-signature";
 
@@ -14,31 +21,16 @@ import { verifySanitySignature } from "./sanity-signature";
  *
  * The hook only says "this document changed". The handler reads the published
  * document fresh and decides itself, so a replayed or reordered delivery can
- * never send on stale data. "Once" is the `paidMailSentAt` field: this handler
- * is its only writer, and it writes it after the mail went out. A failed send
- * writes nothing and answers 500, so Sanity retries the delivery; writing a
- * claim first and clearing it on failure would re-fire this very hook on every
- * clear and loop for as long as Resend is down.
- *
- * shortcut: two deliveries that read the document in the same instant can both
- * send. Sanity sends one delivery per mutation and the record write below drops
- * the document out of the hook's filter, so that needs a double toggle within
- * milliseconds; upgrade to a Durable Object lock if it ever shows.
+ * never send on stale data. "Once" is two things working together:
+ * - the `paidMailSentAt` field, written by this handler alone, after the mail
+ *   went out (on the published document and on its draft, if one exists, so
+ *   publishing an older draft later cannot erase it);
+ * - an `Idempotency-Key` on the mail, so a retry of a delivery whose send
+ *   succeeded but whose answer was lost (a timeout) does not mail twice.
+ * A failed send writes nothing and answers 500, so Sanity retries the
+ * delivery; writing a claim first and clearing it on failure would re-fire this
+ * very hook on every clear and loop for as long as Resend is down.
  */
-
-class WebhookParseError {
-  readonly _tag = "WebhookParseError";
-}
-class WebhookAuthError {
-  readonly _tag = "WebhookAuthError";
-}
-class WebhookServiceError {
-  readonly _tag = "WebhookServiceError";
-  constructor(readonly detail: string) {}
-}
-
-const errorMessage = (err: unknown) =>
-  err instanceof Error ? err.message : String(err);
 
 interface DartsSignupDoc {
   readonly _id: string;
@@ -60,7 +52,7 @@ const webhookEffect = (request: Request, env: WorkerEnv) =>
 
     const rawBody = yield* Effect.tryPromise({
       try: () => request.text(),
-      catch: () => new WebhookParseError(),
+      catch: () => new WebhookParseError("invalid_json", "failed to read body"),
     });
 
     const valid = yield* Effect.tryPromise({
@@ -76,10 +68,13 @@ const webhookEffect = (request: Request, env: WorkerEnv) =>
 
     const parsed = yield* Effect.try({
       try: () => JSON.parse(rawBody) as unknown,
-      catch: () => new WebhookParseError(),
+      catch: () => new WebhookParseError("invalid_json", "malformed JSON body"),
     });
     const { _id, _type } = yield* S.decodeUnknown(WebhookPayload)(parsed).pipe(
-      Effect.mapError(() => new WebhookParseError()),
+      Effect.mapError(
+        () =>
+          new WebhookParseError("invalid_shape", "schema validation failed"),
+      ),
     );
 
     // The operation header is not covered by the signature; deletes and other
@@ -94,7 +89,8 @@ const webhookEffect = (request: Request, env: WorkerEnv) =>
     const client = createClient({ ...sanityClientConfig(env), useCdn: false });
     const doc = yield* Effect.tryPromise({
       try: () => client.fetch<DartsSignupDoc | null>(QUERY, { id: _id }),
-      catch: (err) => new WebhookServiceError(errorMessage(err)),
+      catch: (err) =>
+        new WebhookServiceError("sanity_fetch_failed", errorMessage(err)),
     });
 
     // A draft id reads as null from the published perspective: nothing to do.
@@ -104,20 +100,35 @@ const webhookEffect = (request: Request, env: WorkerEnv) =>
     }
 
     yield* transport
-      .dispatchEmail(buildDartsPaidEmail(doc))
+      .dispatchEmail({
+        ...buildDartsPaidEmail(doc),
+        idempotencyKey: `darts-paid-${doc._id}`,
+      })
       .pipe(
-        Effect.mapError((err) => new WebhookServiceError(errorMessage(err))),
+        Effect.mapError(
+          (err) => new WebhookServiceError("email_failed", errorMessage(err)),
+        ),
       );
 
     // Recorded after the send, without a revision check: an unrelated edit in
     // between must not lose the record. A failed record is logged, not retried:
-    // the mail is out, and failing the delivery would send it again.
+    // the mail is out, and the idempotency key covers a retry anyway.
     yield* Effect.tryPromise({
-      try: () =>
-        client
-          .patch(doc._id)
-          .setIfMissing({ paidMailSentAt: new Date().toISOString() })
-          .commit(),
+      try: async () => {
+        const draftId = `drafts.${doc._id}`;
+        const recorded = { paidMailSentAt: new Date().toISOString() };
+        // A patch on a missing document fails the whole transaction, so the
+        // draft is only patched when it exists.
+        const hasDraft = (await client.getDocument(draftId)) != null;
+        const transaction = client
+          .transaction()
+          .patch(doc._id, { setIfMissing: recorded });
+        return (
+          hasDraft
+            ? transaction.patch(draftId, { setIfMissing: recorded })
+            : transaction
+        ).commit();
+      },
       catch: (err) => err,
     }).pipe(
       Effect.catchAll((err) =>
@@ -132,11 +143,11 @@ const webhookEffect = (request: Request, env: WorkerEnv) =>
 
 export type DartsPaidWebhookLayer = Layer.Layer<EmailTransport>;
 
-export async function handleDartsPaidWebhook(
+export const handleDartsPaidWebhook = async (
   request: Request,
   env: WorkerEnv,
   layer?: DartsPaidWebhookLayer,
-): Promise<Response> {
+): Promise<Response> => {
   const envLayer = Layer.succeed(WorkerEnvTag, env);
   const serviceLayer =
     layer ?? EmailTransportLive.pipe(Layer.provide(envLayer));
@@ -148,25 +159,13 @@ export async function handleDartsPaidWebhook(
       Effect.tapError((error) =>
         Effect.sync(() => {
           if (error._tag === "WebhookServiceError") {
-            console.error(`[webhook:darts-paid] ${error.detail}`);
+            console.error(
+              `[webhook:darts-paid] ${error.code}: ${error.detail}`,
+            );
           }
         }),
       ),
-      Effect.catchAll((error) =>
-        Effect.succeed(
-          error._tag === "WebhookAuthError"
-            ? new Response("Unauthorized", { status: 401 })
-            : error._tag === "WebhookParseError"
-              ? Response.json(
-                  { ok: false, code: "parse_failed" },
-                  { status: 400 },
-                )
-              : Response.json(
-                  { ok: false, error: "Internal server error" },
-                  { status: 500 },
-                ),
-        ),
-      ),
+      Effect.catchAll((error) => Effect.succeed(toErrorResponse(error))),
       Effect.catchAllDefect(() =>
         Effect.succeed(
           Response.json({ ok: false, code: "internal" }, { status: 500 }),
@@ -174,4 +173,4 @@ export async function handleDartsPaidWebhook(
       ),
     ),
   );
-}
+};

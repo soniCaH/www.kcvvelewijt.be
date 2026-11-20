@@ -13,8 +13,8 @@ const VIEWS = [
  * EK Darts desk structure (#3812): every signup plus a view for the ones still
  * to pay, the paid ones and the wachtlijst. Labels in Dutch.
  */
-export function dartsSignupStructure(S: StructureBuilder) {
-  return S.listItem()
+export const dartsSignupStructure = (S: StructureBuilder) =>
+  S.listItem()
     .title('EK Darts')
     .child(
       S.list()
@@ -32,4 +32,3 @@ export function dartsSignupStructure(S: StructureBuilder) {
           ),
         ),
     )
-}

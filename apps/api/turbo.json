@@ -4,8 +4,21 @@
   "tasks": {
     "test": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**", "vitest*.config.ts", "wrangler.workerd-test.jsonc"],
+      // The worker bundles apps/web/src/data/darts.json (the EK Darts facts:
+      // handlers/darts.ts, forms/darts-emails.ts). It lives outside this
+      // package, so without it here an edit to that file replays a cached
+      // green and a renamed key ships as "undefined" in the mails (#3812).
+      "inputs": [
+        "src/**",
+        "vitest*.config.ts",
+        "wrangler.workerd-test.jsonc",
+        "$TURBO_ROOT$/apps/web/src/data/darts.json"
+      ],
       "outputs": []
+    },
+    "type-check": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/apps/web/src/data/darts.json"]
     }
   }
 }

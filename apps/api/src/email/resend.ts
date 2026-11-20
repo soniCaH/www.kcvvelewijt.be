@@ -33,6 +33,8 @@ export interface EmailMessage {
   /** Defaults to {@link DEFAULT_FROM}. */
   readonly from?: string;
   readonly replyTo?: string;
+  /** Sent as Resend's `Idempotency-Key`: a retry of the same key never mails twice. */
+  readonly idempotencyKey?: string;
 }
 
 export interface EmailTransportInterface {
@@ -79,6 +81,9 @@ export const EmailTransportLive = Layer.effect(
                 headers: {
                   Authorization: `Bearer ${env.RESEND_API_KEY}`,
                   "Content-Type": "application/json",
+                  ...(msg.idempotencyKey
+                    ? { "Idempotency-Key": msg.idempotencyKey }
+                    : {}),
                 },
                 body: JSON.stringify({
                   from: msg.from ?? DEFAULT_FROM,

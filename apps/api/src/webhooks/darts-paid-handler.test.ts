@@ -10,15 +10,23 @@ import { makeTestEnv } from "../test-helpers/env-layer";
 import { TEST_SECRET, signPayload } from "../test-helpers/webhook-signing";
 
 const mockFetch = vi.fn();
+const mockGetDocument = vi.fn();
 const mockCommit = vi.fn();
-const mockSetIfMissing = vi.fn();
-// A chainable patch builder over the commit spy.
-const patchBuilder = {
-  setIfMissing: (fields: unknown) => (mockSetIfMissing(fields), patchBuilder),
+const mockTransactionPatch = vi.fn();
+// A chainable transaction builder over the commit spy.
+const transactionBuilder = {
+  patch: (id: string, ops: unknown) => (
+    mockTransactionPatch(id, ops),
+    transactionBuilder
+  ),
   commit: () => mockCommit(),
 };
 vi.mock("@sanity/client", () => ({
-  createClient: () => ({ fetch: mockFetch, patch: () => patchBuilder }),
+  createClient: () => ({
+    fetch: mockFetch,
+    getDocument: mockGetDocument,
+    transaction: () => transactionBuilder,
+  }),
 }));
 
 const env = makeTestEnv({ SANITY_WEBHOOK_SECRET: TEST_SECRET });
@@ -34,10 +42,10 @@ const paidDoc = {
 };
 
 const dispatch = vi.fn<(m: EmailMessage) => void>();
-let dispatchFails = false;
+const mail = { fails: false };
 const layer = Layer.succeed(EmailTransport, {
   dispatchEmail: (m: EmailMessage) =>
-    dispatchFails
+    mail.fails
       ? Effect.fail(new EmailDeliveryError("Resend down"))
       : Effect.sync(() => dispatch(m)),
 });
@@ -66,7 +74,8 @@ const call = async (
 
 beforeEach(() => {
   vi.clearAllMocks();
-  dispatchFails = false;
+  mail.fails = false;
+  mockGetDocument.mockResolvedValue(undefined);
   mockFetch.mockResolvedValue(paidDoc);
   mockCommit.mockResolvedValue({});
   vi.spyOn(console, "error").mockImplementation(() => {});
@@ -84,12 +93,34 @@ describe("handleDartsPaidWebhook", () => {
     });
   });
 
-  it("records the send after the mail went out", async () => {
+  it("sends the mail with an idempotency key, so a retried delivery cannot mail twice", async () => {
     await call();
 
-    expect(mockSetIfMissing).toHaveBeenCalledWith({
-      paidMailSentAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+    expect(dispatch.mock.calls[0]![0].idempotencyKey).toBe("darts-paid-abc123");
+  });
+
+  it("records the send on the published document after the mail went out", async () => {
+    await call();
+
+    expect(mockTransactionPatch).toHaveBeenCalledTimes(1);
+    expect(mockTransactionPatch).toHaveBeenCalledWith("abc123", {
+      setIfMissing: {
+        paidMailSentAt: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/),
+      },
     });
+  });
+
+  it("records it on an existing draft in the same transaction, so publishing the draft later keeps it", async () => {
+    mockGetDocument.mockResolvedValue({ _id: "drafts.abc123" });
+
+    await call();
+
+    expect(mockGetDocument).toHaveBeenCalledWith("drafts.abc123");
+    expect(mockTransactionPatch.mock.calls.map(([id]) => id)).toEqual([
+      "abc123",
+      "drafts.abc123",
+    ]);
+    expect(mockCommit).toHaveBeenCalledTimes(1);
   });
 
   it("sends nothing when the mail already went out", async () => {
@@ -121,7 +152,7 @@ describe("handleDartsPaidWebhook", () => {
   });
 
   it("answers 500 and records nothing when the mail fails, so Sanity retries", async () => {
-    dispatchFails = true;
+    mail.fails = true;
 
     const res = await call();
 

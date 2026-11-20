@@ -120,6 +120,24 @@ describe("DartsSignupForm", () => {
     ).toBeInTheDocument();
   });
 
+  it("caps the text fields at the lengths the BFF accepts", () => {
+    stubBackend({});
+    render(<DartsSignupForm />);
+
+    expect(screen.getByLabelText(/Ploegnaam/)).toHaveAttribute(
+      "maxlength",
+      "100",
+    );
+    expect(screen.getByLabelText(/Naam kapitein/)).toHaveAttribute(
+      "maxlength",
+      "100",
+    );
+    expect(screen.getByLabelText(/Gsm kapitein/)).toHaveAttribute(
+      "maxlength",
+      "30",
+    );
+  });
+
   it("does not post while required fields are empty, and marks them", () => {
     const fetchMock = stubBackend({});
     render(<DartsSignupForm />);

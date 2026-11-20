@@ -15,35 +15,16 @@ export const DARTS_CLUB_EMAIL = "kevin@kcvvelewijt.be";
 const SIGN_OFF = "KCVV Elewijt — er is maar 1 plezante compagnie";
 const INFO_LINK = "kcvvelewijt.be/darts";
 
-const WEEKDAYS = [
-  "zondag",
-  "maandag",
-  "dinsdag",
-  "woensdag",
-  "donderdag",
-  "vrijdag",
-  "zaterdag",
-];
-const MONTHS = [
-  "januari",
-  "februari",
-  "maart",
-  "april",
-  "mei",
-  "juni",
-  "juli",
-  "augustus",
-  "september",
-  "oktober",
-  "november",
-  "december",
-];
+const EVENT_DAY = new Intl.DateTimeFormat("nl-BE", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  timeZone: "Europe/Brussels",
+});
 
-/** "2026-12-19" → "zaterdag 19 december". A table, not `Intl`: no ICU assumptions in the worker. */
-export const formatEventDay = (iso: string): string => {
-  const date = new Date(`${iso}T12:00:00Z`);
-  return `${WEEKDAYS[date.getUTCDay()]} ${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]}`;
-};
+/** "2026-12-19" → "zaterdag 19 december", the way the approved copy writes it. */
+export const formatEventDay = (iso: string): string =>
+  EVENT_DAY.format(new Date(`${iso}T12:00:00Z`));
 
 /** A paragraph (lines split by `\n`) or a bullet list. */
 type Block = string | { readonly list: ReadonlyArray<string> };
@@ -92,7 +73,7 @@ const oneLine = (value: string): string => value.replace(/\s*\r?\n\s*/g, " ");
 const captainMail = (p: DartsSignupRequest): EmailMessage =>
   toMessage(
     p.captainEmail,
-    `EK Darts: ${p.teamName} is ingeschreven — nog even betalen`,
+    `EK Darts: ${oneLine(p.teamName)} is ingeschreven — nog even betalen`,
     [
       `Hallo ${p.captainName},`,
       `Top: ${p.teamName} staat op de lijst voor het EK Darts, ${formatEventDay(darts.datum.iso)} in de kantine van KCVV Elewijt.`,
@@ -111,7 +92,7 @@ const waitlistMail = (
 ): EmailMessage =>
   toMessage(
     p.captainEmail,
-    `EK Darts: ${p.teamName} staat op de wachtlijst`,
+    `EK Darts: ${oneLine(p.teamName)} staat op de wachtlijst`,
     [
       `Hallo ${p.captainName},`,
       `Merci voor jullie inschrijving! Alle ${DARTS_TEAM_LIMIT} plaatsen zijn op dit moment ingenomen, dus ${p.teamName} staat als ${waitNumber}e op de wachtlijst. Betalen hoeft nog niet.`,
@@ -125,12 +106,23 @@ const waitlistMail = (
 const clubMail = (
   p: DartsSignupRequest,
   place: { waitlist: boolean; number: number },
-): EmailMessage =>
-  toMessage(
+): EmailMessage => {
+  const { number } = place;
+  // The place, worded once for the subject, the Status line and the closing line.
+  const status = place.waitlist
+    ? {
+        subject: `wachtlijst ${number}`,
+        line: `wachtlijst ${number}`,
+        closing: "Komt er een plaats vrij? Laat het deze ploeg zelf weten.",
+      }
+    : {
+        subject: `ploeg ${number}/${DARTS_TEAM_LIMIT}`,
+        line: `ploeg ${number} van ${DARTS_TEAM_LIMIT}`,
+        closing: `Zet "Betaald" aan in de Studio zodra de ${dartsPriceAmount(darts.prijs.tekst)} binnen is: dan vertrekt mail 2.`,
+      };
+  return toMessage(
     DARTS_CLUB_EMAIL,
-    place.waitlist
-      ? `EK Darts: ${p.teamName} — wachtlijst ${place.number}`
-      : `EK Darts: ${p.teamName} — ploeg ${place.number}/${DARTS_TEAM_LIMIT}`,
+    `EK Darts: ${oneLine(p.teamName)} — ${status.subject}`,
     [
       "Nieuwe inschrijving via kcvvelewijt.be/darts",
       [
@@ -139,16 +131,13 @@ const clubMail = (
         `E-mail: ${p.captainEmail}`,
         `Gsm: ${p.captainPhone}`,
         ...(p.remark ? [`Opmerking: ${oneLine(p.remark)}`] : []),
-        place.waitlist
-          ? `Status: wachtlijst ${place.number}`
-          : `Status: ploeg ${place.number} van ${DARTS_TEAM_LIMIT}`,
+        `Status: ${status.line}`,
       ].join("\n"),
-      place.waitlist
-        ? "Komt er een plaats vrij? Laat het deze ploeg zelf weten."
-        : `Zet "Betaald" aan in de Studio zodra de ${dartsPriceAmount(darts.prijs.tekst)} binnen is: dan vertrekt mail 2.`,
+      status.closing,
     ],
     p.captainEmail,
   );
+};
 
 /**
  * The mails that go out at signup: captain (mail 1, or mail 3 on the
@@ -174,7 +163,7 @@ export const buildDartsPaidEmail = (input: {
 }): EmailMessage =>
   toMessage(
     input.captainEmail,
-    `EK Darts: ${input.teamName} is er zeker bij`,
+    `EK Darts: ${oneLine(input.teamName)} is er zeker bij`,
     [
       `Hallo ${input.captainName},`,
       `Betaling ontvangen, merci! ${input.teamName} is er zeker bij op ${formatEventDay(darts.datum.iso)}.`,

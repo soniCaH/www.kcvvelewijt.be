@@ -33,10 +33,10 @@ const json = (body: unknown, status = 200) =>
   });
 
 /** Swap `fetch`: the spots read answers `spotsLeft`, the signup POST `submit`. */
-function stubBackend(opts: {
+const stubBackend = (opts: {
   spotsLeft: number;
   submit?: () => Promise<Response>;
-}) {
+}) => {
   const original = globalThis.fetch;
   globalThis.fetch = ((url: RequestInfo | URL) =>
     String(url).endsWith("/api/darts/spots")
@@ -46,10 +46,10 @@ function stubBackend(opts: {
   return () => {
     globalThis.fetch = original;
   };
-}
+};
 
 /** Fill every required field, tick both boxes and press submit. */
-async function fillAndSubmit(canvasElement: HTMLElement) {
+const fillAndSubmit = async (canvasElement: HTMLElement) => {
   const canvas = within(canvasElement);
   await userEvent.type(canvas.getByLabelText(/Ploegnaam/), "De Pijlenjagers");
   await userEvent.type(canvas.getByLabelText(/Naam kapitein/), "Jan Peeters");
@@ -61,7 +61,7 @@ async function fillAndSubmit(canvasElement: HTMLElement) {
   await userEvent.click(canvas.getByLabelText(/Ik ken het reglement/));
   await userEvent.click(canvas.getByLabelText(/pas definitief/));
   await userEvent.click(canvas.getByText("Schrijf onze ploeg in"));
-}
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;

@@ -72,7 +72,10 @@ export type MembershipGender = S.Schema.Type<typeof MembershipGender>;
 /** Permissive single-line email check — full RFC validation is not worth it. */
 export const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
-export const EmailAddress = S.Trim.pipe(S.minLength(1), S.pattern(EMAIL_PATTERN));
+export const EmailAddress = S.Trim.pipe(
+  S.minLength(1),
+  S.pattern(EMAIL_PATTERN),
+);
 
 /**
  * Public membership-intake payload. Shape/type rules live here (a decode

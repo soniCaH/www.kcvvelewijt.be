@@ -77,6 +77,7 @@ export {jeugdLandingPage} from './jeugdLandingPage'
 export {matchesSliderPlaceholder} from './matchesSliderPlaceholder'
 export {membershipApplication} from './membershipApplication'
 export {dartsSignup} from './dartsSignup'
+export {dartsSignupPreviewSelect, prepareDartsSignupPreview} from './preview/dartsSignup-preview'
 export {formRoutingConfig} from './formRoutingConfig'
 export {shortLink} from './shortLink'
 export {RESERVED_SHORT_LINK_NAMES} from './reserved-short-link-names'
@@ -144,7 +145,7 @@ export const schemaTypes = [
   jeugdLandingPage,
   matchesSliderPlaceholder,
   membershipApplication,
-  dartsSignup,
   formRoutingConfig,
   shortLink,
+  dartsSignup,
 ]

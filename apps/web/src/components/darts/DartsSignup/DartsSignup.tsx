@@ -57,6 +57,8 @@ const EMPTY: Values = {
   paymentAccepted: false,
 };
 
+type Source = "client" | "server";
+
 const subscribeNever = () => () => {};
 
 /**
@@ -66,7 +68,7 @@ const subscribeNever = () => () => {};
  * once on mount through `/api/darts/spots` (a dynamic route handler: no ISR
  * write). The BFF re-checks both at submit time; this is only the display.
  */
-export function DartsSignup() {
+export const DartsSignup = () => {
   // The server render keeps the block (so `#inschrijven` exists on first
   // paint); the browser takes it away once the event day is over.
   const closed = useSyncExternalStore(
@@ -81,9 +83,9 @@ export function DartsSignup() {
       <DartsSignupForm />
     </section>
   );
-}
+};
 
-export function DartsSignupForm() {
+export const DartsSignupForm = () => {
   const uid = useId();
   const fieldId = (name: string) => `${uid}-${name}`;
   const confirmationRef = useRef<HTMLParagraphElement>(null);
@@ -117,6 +119,32 @@ export function DartsSignupForm() {
   const [waitlisted, setWaitlisted] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState("");
+
+  // What just happened, for analytics only. Set where the outcome is known and
+  // reported from an effect (a fresh object per outcome), never from the async
+  // submit handler, which cannot see derived state.
+  const [report, setReport] = useState<
+    | { kind: "submit"; waitlist: boolean; hasRemark: boolean }
+    | { kind: "error"; errors: Record<string, string>; source: Source }
+    | null
+  >(null);
+  useEffect(() => {
+    if (!report) return;
+    if (report.kind === "submit") {
+      trackEvent("darts_signup_submit", {
+        waitlist: report.waitlist,
+        has_remark: report.hasRemark,
+      });
+      return;
+    }
+    // Field names only, never values, sorted so client and server agree.
+    const names = Object.keys(report.errors).sort();
+    if (names.length === 0) return;
+    trackEvent("darts_signup_error", {
+      fields: names.join(","),
+      source: report.source,
+    });
+  }, [report]);
 
   const setField = <K extends keyof Values>(name: K, value: Values[K]) => {
     // A change that carries the current value is no field change and must not
@@ -153,23 +181,13 @@ export function DartsSignupForm() {
     return errors;
   };
 
-  // Field names only, never values, sorted so client and server agree.
-  const trackFormError = (
-    errors: Record<string, string>,
-    source: "client" | "server",
-  ) => {
-    const names = Object.keys(errors).sort();
-    if (names.length === 0) return;
-    trackEvent("darts_signup_error", { fields: names.join(","), source });
-  };
-
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (state === "submitting") return;
 
     const clientErrors = validate();
     if (Object.keys(clientErrors).length > 0) {
-      trackFormError(clientErrors, "client");
+      setReport({ kind: "error", errors: clientErrors, source: "client" });
       setFieldErrors(clientErrors);
       setGeneralError("Controleer de gemarkeerde velden.");
       setState("invalid");
@@ -206,9 +224,10 @@ export function DartsSignupForm() {
 
       if (response.ok && data.ok) {
         const onWaitlist = data.waitlist === true;
-        trackEvent("darts_signup_submit", {
+        setReport({
+          kind: "submit",
           waitlist: onWaitlist,
-          has_remark: values.remark.trim() !== "",
+          hasRemark: values.remark.trim() !== "",
         });
         setWaitlisted(onWaitlist);
         setState("success");
@@ -218,7 +237,7 @@ export function DartsSignupForm() {
       // `data.error` is authored Dutch copy from the BFF, never a raw error.
       if (response.status === 400 && data.fields) {
         setFieldErrors(data.fields);
-        trackFormError(data.fields, "server");
+        setReport({ kind: "error", errors: data.fields, source: "server" });
       }
       setGeneralError(
         data.error ??
@@ -286,6 +305,7 @@ export function DartsSignupForm() {
             <Input
               id={fieldId("teamName")}
               name="teamName"
+              maxLength={100}
               value={values.teamName}
               onChange={(e) => setField("teamName", e.target.value)}
               error={fieldErrors.teamName}
@@ -299,6 +319,7 @@ export function DartsSignupForm() {
             <Input
               id={fieldId("captainName")}
               name="captainName"
+              maxLength={100}
               value={values.captainName}
               onChange={(e) => setField("captainName", e.target.value)}
               error={fieldErrors.captainName}
@@ -312,6 +333,7 @@ export function DartsSignupForm() {
             <Input
               id={fieldId("captainPhone")}
               name="captainPhone"
+              maxLength={30}
               type="tel"
               value={values.captainPhone}
               onChange={(e) => setField("captainPhone", e.target.value)}
@@ -415,4 +437,4 @@ export function DartsSignupForm() {
       </form>
     </ClippedCard>
   );
-}
+};

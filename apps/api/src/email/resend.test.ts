@@ -16,7 +16,7 @@ const message: EmailMessage = {
   replyTo: "info@kcvvelewijt.be",
 };
 
-function dispatch(env: Partial<WorkerEnv>) {
+function dispatch(env: Partial<WorkerEnv>, msg: EmailMessage = message) {
   const logs: { level: string; message: string }[] = [];
   const logger = Logger.replace(
     Logger.defaultLogger,
@@ -25,7 +25,7 @@ function dispatch(env: Partial<WorkerEnv>) {
     }),
   );
   const exit = Effect.runPromiseExit(
-    Effect.flatMap(EmailTransport, (t) => t.dispatchEmail(message)).pipe(
+    Effect.flatMap(EmailTransport, (t) => t.dispatchEmail(msg)).pipe(
       Effect.provide(EmailTransportLive),
       Effect.provide(makeTestEnvLayer(env)),
       Effect.provide(logger),
@@ -90,6 +90,21 @@ describe("EmailTransportLive.dispatchEmail (#3464)", () => {
       text: "Hallo",
       reply_to: "info@kcvvelewijt.be",
     });
+  });
+
+  it("sends an Idempotency-Key header only when the message has one (#3812)", async () => {
+    const fetchMock = vi.fn(async () => Response.json({ id: "1" }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await dispatch(withKey, { ...message, idempotencyKey: "darts-paid-abc" })
+      .exit;
+    await dispatch(withKey).exit;
+
+    const headers = fetchMock.mock.calls.map(
+      (call) => (call as unknown as [string, RequestInit])[1].headers,
+    );
+    expect(headers[0]).toMatchObject({ "Idempotency-Key": "darts-paid-abc" });
+    expect(headers[1]).not.toHaveProperty("Idempotency-Key");
   });
 
   it("fails with EmailDeliveryError on a non-2xx response", async () => {

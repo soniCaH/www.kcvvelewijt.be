@@ -29,7 +29,7 @@ import { verifySanitySignature } from "./sanity-signature";
 
 // ─── Error types ───────────────────────────────────────────────────────────
 
-class WebhookParseError {
+export class WebhookParseError {
   readonly _tag = "WebhookParseError";
   constructor(
     readonly code: "invalid_json" | "invalid_shape",
@@ -37,11 +37,11 @@ class WebhookParseError {
   ) {}
 }
 
-class WebhookAuthError {
+export class WebhookAuthError {
   readonly _tag = "WebhookAuthError";
 }
 
-class WebhookServiceError {
+export class WebhookServiceError {
   readonly _tag = "WebhookServiceError";
   constructor(
     readonly code:
@@ -50,7 +50,8 @@ class WebhookServiceError {
       | "upsert_failed"
       | "delete_failed"
       | "invalid_document"
-      | "dataset_mismatch",
+      | "dataset_mismatch"
+      | "email_failed",
     readonly detail: string,
   ) {}
 }
@@ -173,12 +174,12 @@ function queryForType(type: AllowedType): string {
   return typeDescriptors[type].query;
 }
 
-const errorMessage = (err: unknown) =>
+export const errorMessage = (err: unknown) =>
   err instanceof Error ? err.message : String(err);
 
 // ─── Error → Response mapping ──────────────────────────────────────────────
 
-const toErrorResponse = (
+export const toErrorResponse = (
   error: WebhookParseError | WebhookAuthError | WebhookServiceError,
 ): Response => {
   switch (error._tag) {
