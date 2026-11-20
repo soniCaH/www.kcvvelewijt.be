@@ -1,5 +1,5 @@
 {
-  "_readme": "The single source of facts for the /darts page on www.kcvvelewijt.be (Next.js on Vercel). Copied verbatim to apps/web/src/data/darts.json; never edited in the repo. A field with todo:true renders its dummy value behind the words “nog te beslissen —”, so nobody reads a placeholder as a decision — the same convention affiche-copy.md already uses. Owned by .scratch/darts-tournament/issues/21-two-darts-pages-one-truth.md.",
+  "_readme": "The single source of facts for the /darts page on www.kcvvelewijt.be (Next.js on Vercel). Copied verbatim to apps/web/src/data/darts.json; never edited in the repo. A field with todo:true renders its dummy value behind the words “nog te beslissen —”, so nobody reads a placeholder as a decision — the same convention affiche-copy.md already uses. Owned by the darts map, .scratch/darts-tournament/MAP.md.",
   "_updated": "2026-11-20",
 
   "titel": "EK Darts",
@@ -49,7 +49,7 @@
   },
 
   "muziek": {
-    "tekst": "Ambiancemuziek de hele dag — na de prijsuitreiking wat luider, tot middernacht",
+    "tekst": "Ambiancemuziek — na de prijsuitreiking wat luider",
     "_bron": "Geen fuif, geen DJ, einde 00:00 (Kevin, 2026-10-28). Muziek van Kevins laptop op de kantinespeakers — ticket 22 en 23."
   },
 
@@ -78,7 +78,6 @@
 
   "media": {
     "hero": "EK Darts 2026 - AFFICHE FINAL - LIGGEND 1920x1080.jpg",
-    "_bron": "~/Documents/KCVV/Graphics/Darts 2026/ — de TV-versie MET tekst, niet de kale PLAAT. Kevin, 2026-09-10. Bestond alleen als .psd; op 2026-09-10 geflattend naar .jpg (1920x1080, 913 KB) en naast de bron gezet. Dient ook als OG-image.",
-    "_alt": "De tekst staat IN het beeld, dus de alt-tekst moet ze dragen — een lege alt verliest de datum, de formule en de beloftes voor iedereen die het beeld niet ziet."
+    "_bron": "~/Documents/KCVV/Graphics/Darts 2026/ — de TV-versie MET tekst, niet de kale PLAAT. Kevin, 2026-09-10. Bestond alleen als .psd; op 2026-09-10 geflattend naar .jpg (1920x1080, 913 KB) en naast de bron gezet. Dient ook als OG-image."
   }
 }

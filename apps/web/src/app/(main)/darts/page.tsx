@@ -47,10 +47,7 @@ const POSTER = "/darts/poster-liggend-v2.jpg";
    one. Found by a reviewer on PR #2908. */
 const POSTER_ALT =
   "Affiche EK Darts 2026 — zaterdag 19 december 2026, kantine KCVV Elewijt. " +
-  "Teams van vier personen, gegarandeerd meerdere wedstrijden, kwalificatie en " +
-  "eindronde voor iedereen, mooie prijzen, een zuipbeker en ambiancemuziek.";
-
-const uren = darts.uren;
+  `Teams van vier personen, ${darts.watJeKrijgt.punten.join(", ").toLowerCase()}.`;
 
 /* An undecided fact is marked in place, never hidden — the convention
    affiche-copy.md already uses, so poster and page mark a missing decision the
@@ -73,10 +70,10 @@ const ROWS: Array<{ label: string; value: string }> = [
     value: `${darts.formule.ploeg} · ${darts.formule.ontmoeting}`,
   },
   { label: "Verloop", value: darts.formule.verloop },
-  { label: "Deuren", value: uren.deuren },
-  { label: "Eerste worp", value: uren.eersteWorp },
-  { label: "Prijsuitreiking", value: uren.prijsuitreiking },
-  { label: "Einde", value: uren.einde },
+  { label: "Deuren", value: darts.uren.deuren },
+  { label: "Eerste worp", value: darts.uren.eersteWorp },
+  { label: "Prijsuitreiking", value: darts.uren.prijsuitreiking },
+  { label: "Einde", value: darts.uren.einde },
   { label: "Eten en drank", value: open(darts.eten.dummy) },
   { label: "Muziek", value: darts.muziek.tekst },
 ];
