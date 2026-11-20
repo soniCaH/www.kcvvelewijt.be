@@ -7,6 +7,18 @@ instrumentation. All steps are manual — done in the GA4 web UI at
 **Prerequisite**: GA4 property linked to GTM, GTM deployed to production,
 and at least one real user session with analytics consent given.
 
+## What GA4 numbers mean
+
+Write each claim in this guide to say only what GA4 measures:
+
+- An event count is not visitors.
+- A gap between segments is an association, not a cause.
+- A funnel breakdown gives one value per visitor for the whole funnel.
+- An event count is not a conversion: separate event totals do not show that one event led to another.
+- A filter on a funnel tab keeps only the events that match it. A step whose event does not match loses its data.
+
+Why: #3770 and #3790 each cost a CodeRabbit round on these.
+
 ---
 
 ## Table of Contents
@@ -476,8 +488,8 @@ pre-#3643 `kalender_subscribe_copy` baseline.
 - Values: **Event count**
 - Filter: Event name → matches regex → `^kalender_(view|subscribe_(open|webcal|copy))$`
 
-`kalender_subscribe_open` against the two subscribe events shows how many panel
-opens end in a subscribe. A webcal tap counts the tap, not a completed subscribe:
+`kalender_subscribe_open` next to the two subscribe events compares their totals.
+Separate totals do not show that an open led to a subscribe. A webcal tap counts the tap, not a completed subscribe:
 the OS calendar app takes over and GA4 never sees the outcome.
 
 **Share the exploration.**
@@ -559,7 +571,7 @@ All of these are **Free form** explorations.
 
 ### 5a. Responsibility Finder Success Rate
 
-**Goal**: % of searches that end in a contact click or 5s+ dwell.
+**Goal**: contact clicks and 5s+ dwells per 100 searches. This is a ratio of event totals, not the share of searches that ended in one: a single search can count twice.
 
 1. **Explore** → **+** → Free form.
 2. Rename to **"Responsibility Finder — Success Rate"**.

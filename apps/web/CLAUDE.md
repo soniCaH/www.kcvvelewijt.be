@@ -153,7 +153,7 @@ A feature that adds interactive UI needs analytics. Before closing its issue, ve
 - [ ] **`trackEvent` calls added**: all interactive components call `trackEvent` with the correct parameters
 - [ ] **GTM updated** — add any new event-name prefix to `<repo-root>/scripts/analytics-taxonomy.mjs` (`prefixes`), then run `node scripts/sync-gtm.mjs` (`--dump` / `--dry-run` to preview) to sync the trigger RegEx + DLVs + GA4 Event-tag rows to the live container. That creates an unpublished version — **events do not fire to GA4 until it is published.** Never hand-edit the live trigger, and never create a second one: `buildTriggerRegex()` in the taxonomy is the single source of truth, so read the current prefix list there rather than from any doc. Per-prefix history and outstanding wiring: `docs/agents/phase-history.md`.
 - [ ] **GA4 custom dimensions registered**: any new event parameters registered in GA4 → Admin → Data display → Custom definitions (run `node scripts/create-ga4-dimensions.mjs` or add manually)
-- [ ] **GA4 explorations updated**: existing explorations updated, or new exploration created, if the feature introduces a new funnel or metric worth tracking
+- [ ] **GA4 explorations updated**: existing explorations updated, or new exploration created, if the feature introduces a new funnel or metric worth tracking. Claims in `docs/analytics-ga4-setup.md` say only what GA4 measures: read its "What GA4 numbers mean" section first.
 - [ ] **No PII**: no email addresses, phone numbers, names, or raw internal IDs in event parameters (hash internal IDs via `hashMemberId`)
 
 A spec for such a feature includes an **Analytics** section with:
