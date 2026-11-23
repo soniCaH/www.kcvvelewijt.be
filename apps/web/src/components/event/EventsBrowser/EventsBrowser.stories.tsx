@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { within, userEvent } from "storybook/test";
+import { blurActive } from "@test-storybook/blurActive";
 import type { EventListItemVM } from "@/lib/repositories/event.repository";
 import { EventsBrowser } from "./EventsBrowser";
 
@@ -105,6 +106,7 @@ export const FilteredToZero: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole("button", { name: "Jeugdwerking" }));
+    blurActive(canvasElement);
   },
 };
 
