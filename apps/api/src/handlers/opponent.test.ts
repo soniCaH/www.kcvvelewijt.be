@@ -90,6 +90,43 @@ describe("opponentHistoryTtl", () => {
     ).toBe(TTL.MATCH_DETAIL_MATCHDAY);
   });
 
+  it("does not refresh while a match is in play, only from kickoff + 2 h (#3669)", () => {
+    const upcoming: [number, "scheduled"] = [118 * 24 * H, "scheduled"];
+    for (const offset of [-1, -1 * H, -2 * H + 1]) {
+      expect(
+        opponentHistoryTtl(withMatches([offset, "scheduled"], upcoming), now),
+      ).toBe(TTL.OPPONENT_HISTORY);
+    }
+    expect(
+      opponentHistoryTtl(withMatches([-2 * H, "scheduled"], upcoming), now),
+    ).toBe(TTL.MATCH_DETAIL_MATCHDAY);
+    // The daily tier starts at kickoff + 48 h as before; in play it never does.
+    expect(opponentHistoryTtl(withMatches([-48 * H, "scheduled"]), now)).toBe(
+      TTL.MATCHES_TEAM,
+    );
+  });
+
+  it("flips at kickoff + 2 h in real time on a DST night (2026-10-25)", () => {
+    const wire = new Date("2026-10-25T01:30:00.000Z");
+    const k = Date.parse("2026-10-24T23:30:00.000Z");
+    const h = {
+      ...history,
+      matches: [
+        {
+          id: 1,
+          date: wire,
+          time: "01:30",
+          home_team: { id: 456, name: "Opponent FC" },
+          away_team: { id: 123, name: "KCVV Elewijt" },
+          status: "scheduled",
+          competition: "LEAGUE",
+        },
+      ],
+    } as unknown as OpponentHistory;
+    expect(opponentHistoryTtl(h, k + 2 * H - 1)).toBe(TTL.OPPONENT_HISTORY);
+    expect(opponentHistoryTtl(h, k + 2 * H)).toBe(TTL.MATCH_DETAIL_MATCHDAY);
+  });
+
   it("still catches a result on a page nobody opened for days, once a day", () => {
     // A refresh is a whole season fan-out: never every 15 min for a week.
     expect(
