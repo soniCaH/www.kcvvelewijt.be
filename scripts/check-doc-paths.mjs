@@ -40,8 +40,9 @@ const TOP_LEVEL_DIRS = new Set([
   ".husky",
 ]);
 
-// Installed or generated, never tracked: a doc may name them without a CI checkout holding them.
-const IGNORED_PREFIXES = [
+// Named by a doc but never in git: installed, generated, gitignored or not yet created, so a CI
+// checkout cannot resolve them. An entry matches itself and everything under it.
+const NOT_IN_GIT = [
   "node_modules/",
   ".next/",
   "dist/",
@@ -49,25 +50,31 @@ const IGNORED_PREFIXES = [
   "next/dist/",
   // Playwright's diff output, written by a failing VR run.
   "apps/web/test/vr/__diff_output__",
-];
-
-// Paths a doc names that only exist after a build, a typegen or a local setup, so a CI
-// checkout cannot resolve them. Each needs its one-line why.
-export const GENERATED_OR_LOCAL = new Set([
   // Gitignored, copied in by hand per machine.
   "apps/web/.env.local",
   "apps/api/.dev.vars",
   // The ADR folder is created with the first ADR (.claude/CLAUDE.md → Domain docs).
   "docs/adr",
-]);
+];
+
+const isNotInGit = (candidate) =>
+  NOT_IN_GIT.some((entry) => {
+    const dir = entry.replace(/\/$/, "");
+    return candidate === dir || candidate.startsWith(`${dir}/`);
+  });
 
 // An allowlist, not "any dot": `soniCaH/www.kcvvelewijt.be` is a GitHub slug, not a file.
 const FILE_EXTENSION =
   /\.(tsx?|jsx?|mjs|cjs|json|jsonc|md|mdx|ya?ml|css|sh|html|txt|xlsx?|png|jpe?g|webp|svg|py)$/;
 
 // Fenced blocks hold trees, command output and samples, not claims about the tree.
+// A fence closes at a line of the same character at least as long as its opening, so a
+// four-backtick block may hold a three-backtick example.
 const stripFences = (markdown) =>
-  markdown.replace(/^[ \t]*(```|~~~)[^\n]*\n[\s\S]*?^[ \t]*\1[ \t]*$/gm, "");
+  markdown.replace(
+    /^[ \t]*((`|~)\2{2,})[^\n]*\n[\s\S]*?^[ \t]*\1\2*[ \t]*$/gm,
+    "",
+  );
 
 // Turns one backticked token into a repo path candidate, or null when it is not one.
 export const toCandidate = (token) => {
@@ -75,8 +82,9 @@ export const toCandidate = (token) => {
   // regex/JSX fragments are not files.
   if (/[\s<>*?{}$|=,;!"'`\\^]/.test(token)) return null;
   if (/^(https?:|~|\/|\.+$|\.{3}|@)/.test(token)) return null;
-  // `file.ts:42` and `file.ts#L10` point into a file; the file is the claim.
-  const file = token.replace(/(:\d+(-\d+)?|#.*)$/, "").replace(/\/$/, "");
+  // `file.ts:42`, `file.ts:12:5`, `file.ts:12-20` and `file.ts#L10` point into a file; the
+  // file is the claim.
+  const file = token.replace(/((:\d+)+(-\d+)?|#.*)$/, "").replace(/\/$/, "");
   if (!file.includes("/")) return null;
   const segments = file.split("/");
   const hasExtension = FILE_EXTENSION.test(segments.at(-1));
@@ -96,6 +104,12 @@ export const extractCandidates = (markdown) => {
   return [...spans].map((m) => toCandidate(m[1])).filter(Boolean);
 };
 
+// `a/b/c.md` -> ["a/b", "a", "."]
+const ancestors = (file) => {
+  const parent = path.posix.dirname(file);
+  return parent === "." ? ["."] : [parent, ...ancestors(parent)];
+};
+
 // Docs write paths from the repo root (`apps/web/src/...`), from their own workspace
 // (`src/lib/...`), relative to themselves (`../x`) or as a shorthand under a source dir
 // (`webhooks/index-handler.ts` in apps/api/CLAUDE.md means apps/api/src/webhooks/...).
@@ -104,17 +118,17 @@ export const extractCandidates = (markdown) => {
 // shortcut: the suffix match can pass a stale path when a same-named file lives elsewhere;
 // tighten if a real stale path slips through.
 export const resolves = (docFile, candidate, tracked) => {
-  if (GENERATED_OR_LOCAL.has(candidate)) return true;
-  if (IGNORED_PREFIXES.some((prefix) => candidate.startsWith(prefix)))
+  if (isNotInGit(candidate)) return true;
+  if (
+    ancestors(docFile).some((dir) =>
+      tracked.set.has(path.posix.normalize(path.posix.join(dir, candidate))),
+    )
+  ) {
     return true;
-  for (let dir = path.dirname(docFile); ; dir = path.dirname(dir)) {
-    if (tracked.has(path.posix.normalize(path.posix.join(dir, candidate))))
-      return true;
-    if (dir === ".") break;
   }
   if (TOP_LEVEL_DIRS.has(candidate.split("/")[0])) return false;
   const tail = `/${candidate.replace(/^\.\.\//, "")}`;
-  return [...tracked].some((entry) => entry.endsWith(tail));
+  return tracked.list.some((entry) => entry.endsWith(tail));
 };
 
 export const findMissing = (docFile, markdown, tracked) =>
@@ -123,13 +137,15 @@ export const findMissing = (docFile, markdown, tracked) =>
   );
 
 // Every tracked file plus every directory above one, so a doc may name a folder too.
+// `list` is the same paths as an array, built once for the suffix match.
 export const trackedPaths = (files) => {
-  const all = new Set();
-  for (const file of files) {
-    for (let p = file; p !== "." && !all.has(p); p = path.posix.dirname(p))
-      all.add(p);
-  }
-  return all;
+  const set = new Set(
+    files.flatMap((file) => [
+      file,
+      ...ancestors(file).filter((dir) => dir !== "."),
+    ]),
+  );
+  return { set, list: [...set] };
 };
 
 export const isChecked = (file) =>

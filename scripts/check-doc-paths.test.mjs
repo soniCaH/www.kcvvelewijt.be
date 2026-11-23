@@ -24,6 +24,9 @@ test("toCandidate keeps repo paths and strips line suffixes", () => {
     toCandidate("apps/web/src/lib/icons.ts:42"),
     "apps/web/src/lib/icons.ts",
   );
+  assert.equal(toCandidate("apps/web/a.ts:12:5"), "apps/web/a.ts");
+  assert.equal(toCandidate("apps/web/a.ts:12-20"), "apps/web/a.ts");
+  assert.equal(toCandidate("apps/web/a.ts#L10"), "apps/web/a.ts");
   assert.equal(toCandidate("docs/agents/"), "docs/agents");
   assert.equal(
     toCandidate("app/(main)/club/page.tsx"),
@@ -58,6 +61,19 @@ test("extractCandidates ignores fenced blocks", () => {
     "`docs/b.md`",
   ].join("\n");
   assert.deepEqual(extractCandidates(md), ["apps/web/a.ts", "docs/b.md"]);
+});
+
+test("extractCandidates ends a fence at a closing fence as long as its opening", () => {
+  const md = [
+    "````md",
+    "```text",
+    "`apps/web/in-fence.ts`",
+    "```",
+    "`apps/web/still-in-fence.ts`",
+    "````",
+    "`docs/b.md`",
+  ].join("\n");
+  assert.deepEqual(extractCandidates(md), ["docs/b.md"]);
 });
 
 test("findMissing passes a path from the root, the doc's workspace or a source-dir shorthand", () => {
