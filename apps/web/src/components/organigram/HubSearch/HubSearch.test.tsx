@@ -1220,10 +1220,12 @@ describe('HubSearch — the AI "Bedoel je …?" fallback (#3559)', () => {
       answer: "yes",
       team_age: "U9",
     });
-    expect(trackEvent).toHaveBeenCalledWith("organigram_team_card_shown", {
-      match_kind: "ai",
-      team_ages: "U9",
-    });
+    await waitFor(() =>
+      expect(trackEvent).toHaveBeenCalledWith("organigram_team_card_shown", {
+        match_kind: "ai",
+        team_ages: "U9",
+      }),
+    );
   });
 
   it('"Nee" hides the question and fires the event, no card', async () => {

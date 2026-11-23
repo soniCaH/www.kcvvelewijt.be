@@ -185,10 +185,12 @@ describe("DartsSignupForm", () => {
       turnstileToken: "token-0",
       company: "",
     });
-    expect(trackEvent).toHaveBeenCalledWith("darts_signup_submit", {
-      waitlist: false,
-      has_remark: false,
-    });
+    await waitFor(() =>
+      expect(trackEvent).toHaveBeenCalledWith("darts_signup_submit", {
+        waitlist: false,
+        has_remark: false,
+      }),
+    );
   });
 
   it("confirms the wachtlijst when the BFF put the team there", async () => {
@@ -243,10 +245,12 @@ describe("DartsSignupForm", () => {
     expect(
       screen.getByText("Sommige velden ontbreken of zijn ongeldig."),
     ).toBeInTheDocument();
-    expect(trackEvent).toHaveBeenCalledWith("darts_signup_error", {
-      fields: "captainEmail",
-      source: "server",
-    });
+    await waitFor(() =>
+      expect(trackEvent).toHaveBeenCalledWith("darts_signup_error", {
+        fields: "captainEmail",
+        source: "server",
+      }),
+    );
   });
 
   it("falls back to a generic message when the refusal carries none", async () => {
@@ -310,10 +314,12 @@ describe("DartsSignupForm", () => {
       remark: "Eén speler komt later.",
       company: "bot",
     });
-    expect(trackEvent).toHaveBeenCalledWith("darts_signup_submit", {
-      waitlist: false,
-      has_remark: true,
-    });
+    await waitFor(() =>
+      expect(trackEvent).toHaveBeenCalledWith("darts_signup_submit", {
+        waitlist: false,
+        has_remark: true,
+      }),
+    );
   });
 
   it("fires one start event for several field changes, with no values", () => {
