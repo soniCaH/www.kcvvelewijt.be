@@ -3,12 +3,12 @@
 # apps/web. Exit 0 skips the deployment, exit 1 builds it. Vercel fails the
 # deploy on any other code (#3604), so every path below ends in `exit 0` or
 # `exit 1`, and every case the script cannot decide builds (fail open).
+# vr-diffs/pr-N branches never reach it: see ci.yml, "Push diffs to orphan branch" (#3835).
 #
 # Each build costs money. The team is on Vercel Pro (since 2026-11-08), which
 # bills build CPU minutes, and every deployment also keeps its own copy of the
 # functions (Functions Storage filled up on Hobby on 2026-10-19). So we skip
 # what nobody opens or what ships nothing new:
-#   - the VR bot's diff branches (screenshots for review only);
 #   - bot branches (renovate/, dependabot/, imgbot), which GitHub CI already
 #     tests. They build only when the commit starts with 💥 (major) or 🔒
 #     (security), or when the branch's open PR has the `preview` label (#3743).
@@ -26,10 +26,6 @@ set -u
 
 ref="${VERCEL_GIT_COMMIT_REF:-}"
 previous="${VERCEL_GIT_PREVIOUS_SHA:-}"
-
-case "$ref" in
-  vr-diffs/*) exit 0 ;;
-esac
 
 # A redeploy of the same commit (an env-var change, a manual "Redeploy") builds.
 if [ -n "$previous" ] && [ "$previous" = "${VERCEL_GIT_COMMIT_SHA:-}" ]; then
