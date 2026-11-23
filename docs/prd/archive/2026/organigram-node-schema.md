@@ -37,7 +37,7 @@ A single `organigramNode` document created manually in Studio (title: "Voorzitte
 
 ## 4. Phases
 
-```
+```text
 Phase 1: Tracer bullet — organigramNode schema + OrgChartNode type + GROQ query (#1115)
 Phase 2: Full renderer — vacant and shared node states + ContactOverlay/MemberDetailsModal (#1116)
 Phase 3: staffMember cleanup — remove organigram fields, regenerate sanity.types (#1117)

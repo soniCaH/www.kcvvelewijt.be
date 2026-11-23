@@ -48,7 +48,7 @@ This single handler exercises all error branches and validates the pattern befor
 
 ## 4. Phases
 
-```
+```text
 Phase 1: Typed error taxonomy + tracer bullet (matches handler) → #944
 Phase 2: Migrate remaining handlers (ranking, stats, match-detail, search) → #945
 Phase 3: Logging cleanup — replace all console.warn with Effect.log → #946

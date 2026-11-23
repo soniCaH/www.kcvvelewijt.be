@@ -190,7 +190,7 @@ GTM script integration + consent gating + one test event:
 
 ## 5. Phases
 
-```
+```text
 Phase 0 (tracer bullet): GTM integration + consent gating + trackEvent helper + one test event → #896
 Phase 1: Responsibility finder funnel — all events from taxonomy table above → #897
 Phase 2: Search funnel — all events from taxonomy table above → #898

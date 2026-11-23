@@ -35,7 +35,7 @@ Proves: route works, hero-with-bleed-through-diagonal renders correctly, `Sectio
 
 ## 4. Phases
 
-```
+```text
 Phase 1: Tracer bullet — hero + single card at /club (#1030)
 Phase 2: Full editorial grid + mission banner + contact CTA (#1031)
 Phase 3: Storybook stories for all components (#1032)
@@ -264,7 +264,7 @@ Layout: `grid grid-cols-[1fr_auto] items-center gap-8` (collapses to `grid-cols-
 
 ## 8. Component File Structure
 
-```
+```text
 apps/web/src/
 ├── app/(main)/club/
 │   └── page.tsx                              # Server component, static, SectionStack

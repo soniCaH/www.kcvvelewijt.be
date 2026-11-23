@@ -11,10 +11,7 @@ import "vanilla-cookieconsent/dist/cookieconsent.css";
 import { bracketAffordanceHtml } from "@/components/design-system/BracketAffordance";
 import { updateConsentState } from "@/lib/analytics/gtm-consent";
 import { X } from "@/lib/icons.redesign";
-
-// Tracks whether CookieConsent.run() has resolved; used by CookiePreferencesButton
-// to guard showPreferences() calls before initialization completes.
-export let cookieConsentReady = false;
+import { cookieConsentState } from "./cookieConsentState";
 
 // D4 bracket affordance (#2620). The library assigns its label strings with
 // `innerHTML`, so the mono `[×]` can ride along; the span is `aria-hidden`, so
@@ -116,7 +113,7 @@ export function CookieConsentBanner() {
     })
       .then(() => {
         if (isMounted) {
-          cookieConsentReady = true;
+          cookieConsentState.ready = true;
         }
       })
       .catch((error: unknown) => {
@@ -125,7 +122,7 @@ export function CookieConsentBanner() {
 
     return () => {
       isMounted = false;
-      cookieConsentReady = false;
+      cookieConsentState.ready = false;
       CookieConsent.reset(false);
     };
   }, []);

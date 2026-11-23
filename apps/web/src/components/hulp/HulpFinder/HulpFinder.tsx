@@ -54,9 +54,9 @@ import {
   ACCENT_GLYPH_CLASS,
   CATEGORY_META,
   CATEGORY_ORDER,
-  groupPathsByCategory,
   type CategoryKey,
 } from "./categoryMeta";
+import { groupPathsByCategory } from "./groupPathsByCategory";
 import { QuestionCard } from "./QuestionCard";
 import { PRESS_DOWN_TRANSITION } from "@/components/design-system/press-down";
 import { scrollIntoViewMotionSafe } from "@/lib/utils/scroll-into-view";

@@ -18,10 +18,8 @@ import userEvent from "@testing-library/user-event";
 import { useEffect } from "react";
 import { FakeIntersectionObserver } from "@/../tests/helpers/fake-observers.helpers";
 import { HubSearch } from "./HubSearch";
-import {
-  HubSearchQueryProvider,
-  useHubSearchTopInsetPublisher,
-} from "./HubSearchQueryProvider";
+import { HubSearchQueryProvider } from "./HubSearchQueryProvider";
+import { useHubSearchTopInsetPublisher } from "./useHubSearchQuery";
 import {
   HUB_SEARCH_MEMBERS,
   HUB_SEARCH_PATHS,

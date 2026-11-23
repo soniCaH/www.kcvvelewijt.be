@@ -34,7 +34,7 @@ Relocate `NewsCard` to `src/components/article/NewsCard/`, add the `listing` var
 
 ## 4. Phases
 
-```
+```text
 Phase 1: NewsCard relocation + listing variant (tracer bullet)         — #957
 Phase 2: News listing page redesign (featured split, infinite scroll)  — #958 (blocked by #957)
 Phase 3: Article detail page redesign (hero, metadata, breadcrumb)     — #959 (blocked by #957)

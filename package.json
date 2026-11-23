@@ -12,6 +12,9 @@
     "lint": "turbo lint",
     "type-check": "turbo type-check",
     "lint:sh": "git ls-files -z '*.sh' '.husky/*' | xargs -0 shellcheck",
+    "lint:md": "markdownlint-cli2",
+    "lint:doc-paths": "node scripts/check-doc-paths.mjs",
+    "test:doc-paths": "node --test scripts/check-doc-paths.test.mjs",
     "knip": "knip --include dependencies,devDependencies,optionalPeerDependencies,unlisted,binaries",
     "knip:code": "knip",
     "prepare": "husky"
@@ -23,6 +26,7 @@
     "husky": "9.1.7",
     "knip": "6.47.0",
     "lint-staged": "17.6.1",
+    "markdownlint-cli2": "0.24.2",
     "playwright": "1.64.1",
     "prettier": "3.10.1",
     "prettier-plugin-tailwindcss": "0.8.1",

@@ -1,0 +1,18 @@
+{
+  // Only MD040 (a fenced code block names its language) is enforced (#3839).
+  // Every other markdownlint rule stays off: the repo's prose style is not a CI gate.
+  "config": { "default": false, "MD040": true },
+  "globs": ["**/*.md"],
+  // A local run skips gitignored files, worktrees and generated folders included.
+  "gitignore": true,
+  // `**/` form so nested copies are skipped too: dependencies, build output, generated reports.
+  "ignores": [
+    "**/node_modules/**",
+    "**/.next/**",
+    "**/dist/**",
+    "**/storybook-static/**",
+    "**/playwright-report/**",
+    "**/test-results/**",
+    "**/coverage/**",
+  ],
+}

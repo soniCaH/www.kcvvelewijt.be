@@ -14,6 +14,7 @@ Turborepo monorepo (pnpm). TypeScript strict, Effect, Tailwind v4.
 | API contract        | `packages/api-contract/`   | (library)          | Static, Vitest, Build                                                          |
 | BFF (CF Workers)    | `apps/api/`                | Cloudflare Workers | Static, Vitest, Contract (real workerd)                                        |
 | Sanity ops scripts  | `scripts/sanity-ops/`      | (run by hand)      | Static, Vitest                                                                 |
+| Root scripts        | `scripts/*.mjs`            | (run by hand, CI)  | Static, node:test (`pnpm test:doc-paths`)                                      |
 
 App-specific rules → `apps/web/CLAUDE.md` | api-contract conventions → `packages/api-contract/CLAUDE.md`
 
@@ -69,7 +70,9 @@ Run `pnpm lint:sh` after touching a `*.sh` or `.husky/` file; CI runs it with no
 
 ### Documentation Standards
 
-- **Always add language identifiers to fenced code blocks** in plan/doc/markdown files (e.g. ` ```typescript `, ` ```json `, ` ```bash `, ` ```text `). Bare ` ``` ` blocks fail MD040 and are consistently flagged in code review.
+- **Fenced code blocks name their language** (` ```typescript `, ` ```json `, ` ```bash `, ` ```text `). `pnpm lint:md` (markdownlint, MD040 only) fails a bare fence in CI.
+- **A path in backticks in a `CLAUDE.md` or `docs/` file must exist.** `pnpm lint:doc-paths` (`scripts/check-doc-paths.mjs`) fails CI on a missing one; the archived and point-in-time docs it skips are listed in the script.
+- **A `'use client'` file exports components and types only.** ESLint rule `kcvv/use-client-exports` (`apps/web/eslint-rules/use-client-exports.mjs`, background in `docs/research/use-client-exports-lint-rule.md`) fails `lint` on any other export: a Server Component importing it gets a client reference, not the value, so a constant or object read on the server is silently `undefined`. A React context (`createContext(...)`) is allowed whatever its name. A component is a PascalCase name, so what still slips through is a PascalCase non-component (an object, a class instance, a `memo(...)` of a non-component); default exports always pass. Review those by hand.
 
 ### TypeScript Compiler — Dual-Install (tsgo + tsc)
 

@@ -1,7 +1,7 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { useWebfontSwap } from "@/hooks/useWebfontSwap";
 import { DISPLAY_FONT, GRAIN_DATA_URL, MONO_FONT, TOKENS } from "../constants";
-import { useSharePalette } from "./ShareFrame";
+import { useSharePalette } from "./sharePalette";
 import { formatScore, toSameOriginImage, type CrestEntry } from "./theme";
 
 /**

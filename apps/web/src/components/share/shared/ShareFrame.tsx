@@ -21,15 +21,11 @@ import {
   overlayGradient,
   resolvePalette,
   toSameOriginImage,
-  type SharePalette,
   type ShareOverlay,
   type ShareRegister,
   type ShareSentiment,
 } from "./theme";
-
-const SharePaletteContext = createContext<SharePalette>(
-  resolvePalette("cream", "neutral"),
-);
+import { SharePaletteContext, useSharePalette } from "./sharePalette";
 
 /**
  * How the image register paints its photo. `"portrait"` — a player photo in
@@ -41,11 +37,6 @@ export type SharePhotoLayout = "portrait" | "backdrop";
 // The layout of the photo the enclosing frame paints, or null without one:
 // ShareMid reads it to place its content.
 const SharePhotoContext = createContext<SharePhotoLayout | null>(null);
-
-/** Read the resolved palette of the enclosing {@link ShareFrame}. */
-export function useSharePalette(): SharePalette {
-  return useContext(SharePaletteContext);
-}
 
 /**
  * Squad badge text (e.g. `"A"`, `"U21"`, `"U13A"`) for the enclosing render.

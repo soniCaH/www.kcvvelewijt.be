@@ -30,6 +30,15 @@ export function listedByVitest(output) {
     .filter(Boolean);
 }
 
+/**
+ * `node --test` has no list mode, so the layer reads the root `test:doc-paths` script and takes
+ * the `*.test.mjs` files it names: `"node --test scripts/check-doc-paths.test.mjs"` (what
+ * `pnpm exec node -p` prints for it).
+ */
+export function listedByNodeTestScript(output) {
+  return output.split(/\s+/).filter((t) => /\.test\.mjs$/.test(t));
+}
+
 /** `playwright test --list --reporter=json`: `file` sits on every suite, relative to `testDir`. */
 export function listedByPlaywright(json, testDir) {
   const files = new Set();
@@ -105,6 +114,18 @@ export const LAYERS = {
   "api-contract (Vitest)": vitest("packages/api-contract"),
   "sanity-studio (Vitest)": vitest("packages/sanity-studio"),
   "sanity-ops (Vitest)": vitest("scripts/sanity-ops"),
+  // Root `scripts/*.test.mjs` run by `node --test` through `pnpm test:doc-paths`.
+  "root scripts (node:test)": {
+    cwd: ".",
+    args: [
+      "exec",
+      "node",
+      "-p",
+      "require('./package.json').scripts['test:doc-paths']",
+    ],
+    parse: listedByNodeTestScript,
+    owns: (f) => /^scripts\/[^/]+\.test\.mjs$/.test(f),
+  },
 };
 
 const run = (cmd, args, cwd) =>
@@ -120,8 +141,8 @@ function main() {
       let listed = [];
       let why = "";
       try {
-        listed = parse(run("pnpm", args, `${root}${cwd}`)).map(
-          (f) => `${cwd}/${f}`,
+        listed = parse(run("pnpm", args, `${root}${cwd}`)).map((f) =>
+          cwd === "." ? f : `${cwd}/${f}`,
         );
       } catch (e) {
         why = String(e.message).split("\n")[0];

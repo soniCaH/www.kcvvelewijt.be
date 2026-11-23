@@ -3,8 +3,8 @@ import {
   ACCENT_GLYPH_CLASS,
   CATEGORY_META,
   CATEGORY_ORDER,
-  groupPathsByCategory,
 } from "./categoryMeta";
+import { groupPathsByCategory } from "./groupPathsByCategory";
 import type { ResponsibilityPath } from "@/types/responsibility";
 
 function mk(id: string, category: ResponsibilityPath["category"]) {

@@ -1,5 +1,3 @@
-"use client";
-
 import { useRef, useState, useEffect, useCallback } from "react";
 import { useWebfontSwap } from "@/hooks/useWebfontSwap";
 

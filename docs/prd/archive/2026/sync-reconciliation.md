@@ -63,7 +63,7 @@ defineField({
 
 Runs once per full sync cycle, when `nextCursor` wraps to `0`:
 
-```
+```text
 1. Collect all PSD member IDs seen during this cycle (players + staff, across all teams)
 2. Fetch all Sanity player docs where archived != true → get their psdIds
 3. Fetch all Sanity staffMember docs where archived != true → get their psdIds
@@ -122,7 +122,7 @@ Add `archived` field to `player` schema + reconciliation for players only (not s
 
 ## 5. Phases
 
-```
+```text
 Phase 0 (tracer bullet): archived field on player + player reconciliation + GROQ filter → #900
 Phase 1: Staff reconciliation + team reconciliation + GROQ filters → #901
 ```

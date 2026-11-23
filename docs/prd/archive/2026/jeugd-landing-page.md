@@ -54,7 +54,7 @@ Proves: hero bleed-through works (same pattern as `/club`), `TeamOverview` 3-tie
 
 ## 4. Phases
 
-```
+```text
 Phase 1: Tracer bullet — hero + single card + refactored team listing (#1038)
 Phase 2: Full editorial grid with dynamic articles + nav cards (#1039)
 Phase 3: Youth quote section + final polish (#1040)
@@ -211,7 +211,7 @@ Since `EditorialCard` is now used by both `/club` and `/jeugd`, keep in `compone
 
 #### Responsive grid behavior
 
-```
+```text
 ≤960px: grid-cols-2, all cards col-auto row-auto min-h-[260px], featured col-span-full min-h-[320px]
 ≤640px: grid-cols-1, featured min-h-[280px]
 ```
@@ -284,7 +284,7 @@ The `MissionBanner` component from `/club` (#1031) renders a quote section with 
 
 ## 8. Component File Structure
 
-```
+```text
 apps/web/src/
 ├── app/(main)/jeugd/
 │   └── page.tsx                          # Rewritten: SectionStack, data fetching

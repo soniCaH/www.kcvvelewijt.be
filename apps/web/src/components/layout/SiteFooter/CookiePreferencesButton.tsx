@@ -1,14 +1,14 @@
 "use client";
 
 import * as CookieConsent from "vanilla-cookieconsent";
-import { cookieConsentReady } from "../CookieConsentBanner/CookieConsentBanner";
+import { cookieConsentState } from "../CookieConsentBanner/cookieConsentState";
 
 export function CookiePreferencesButton() {
   return (
     <button
       type="button"
       onClick={() => {
-        if (cookieConsentReady) {
+        if (cookieConsentState.ready) {
           CookieConsent.showPreferences();
         }
       }}

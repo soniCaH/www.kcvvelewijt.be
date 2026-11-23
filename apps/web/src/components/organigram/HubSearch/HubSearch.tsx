@@ -50,7 +50,7 @@ import { openStructureRow } from "@/components/organigram/ClubBook";
 import { RoundAvatar } from "@/components/design-system/RoundAvatar";
 import { CHIP_LINK_CLASSES } from "@/components/design-system/press-down";
 import { CLUB_ROOT_ID } from "@/components/organigram/OrganigramExplorer/spotlight-tree";
-import { useHubSearchQuery } from "./HubSearchQueryProvider";
+import { useHubSearchQuery } from "./useHubSearchQuery";
 import {
   SECTION_NAV_CHIP_SHADOW_CLASS,
   SECTION_NAV_TRAILING_SLOT_CLASSES,

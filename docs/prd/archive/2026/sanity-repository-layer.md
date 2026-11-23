@@ -63,7 +63,7 @@ This is safe, zero-risk, and immediately proves the tooling before any repositor
 
 ## 4. Phases
 
-```
+```text
 Phase 0 (tracer bullet): Setup sanity typegen; annotate PLAYERS_QUERY; wire into turbo + CI → #881
 Phase 1: PlayerRepository — findAll(), findByPsdId() → PlayerVM; migrate pages; delete SanityService methods → #882
 Phase 2: TeamRepository — findAll(), findBySlug() → TeamVM; migrate nav + team page; delete SanityService methods → #883

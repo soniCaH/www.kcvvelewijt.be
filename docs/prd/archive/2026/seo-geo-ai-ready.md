@@ -50,7 +50,7 @@ This proves the infrastructure layer works before adding any JSON-LD.
 
 ## 4. Phases
 
-```
+```text
 Phase 1: Foundation — metadataBase + robots.ts + sitemap.ts + Twitter cards    (tracer bullet)  — #1125
 Phase 2: Canonical URLs — alternates.canonical on all dynamic pages                             — #1126 (blocked by #1125)
 Phase 3: JSON-LD Organization + NewsArticle — homepage and article pages                        — #1127 (blocked by #1125)
@@ -199,6 +199,6 @@ SEO/GEO is a discovery layer, not a tracked interaction layer. No new GTM events
 
 _(Filled during implementation — leave blank now)_
 
-```
+```text
 - [date] Discovered: [what was found] → [action taken: new issue #N / PRD updated / resolved inline]
 ```
