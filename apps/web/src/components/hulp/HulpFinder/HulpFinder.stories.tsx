@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { within, userEvent } from "storybook/test";
+import { blurActive } from "@test-storybook/blurActive";
 import { HulpFinder } from "./HulpFinder";
 import { FINDER_FIXTURE_PATHS } from "./__fixtures__/paths.fixture";
 
@@ -35,6 +36,7 @@ export const WithOpenAnswer: Story = {
         name: /mijn kind is geblesseerd tijdens de match/i,
       }),
     );
+    blurActive(canvasElement);
   },
 };
 

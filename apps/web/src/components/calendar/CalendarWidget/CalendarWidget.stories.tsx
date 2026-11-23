@@ -9,6 +9,7 @@ import { buildCalendarFeed } from "@/app/(main)/kalender/utils";
 import type { EventListItemVM } from "@/lib/repositories/event.repository";
 import CalendarLoading from "@/app/(main)/kalender/loading";
 import { fixtureImage } from "@test-fixtures/images";
+import { blurActive } from "@test-storybook/blurActive";
 import { reservationMatch } from "../calendar-mocks";
 
 const kcvv = {
@@ -211,6 +212,7 @@ export const SubscribePanelOpen: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await userEvent.click(canvas.getByRole("button", { name: /Abonneer/i }));
+    blurActive(canvasElement);
   },
 };
 

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect, fireEvent, userEvent, within } from "storybook/test";
+import { blurActive } from "@test-storybook/blurActive";
 import { ClubBook } from "./ClubBook";
 import { clubBookNodes, clubBookPaths } from "./club-book.fixture";
 import { CLUB_BOOK_PRINT_CSS } from "./print-style";
@@ -84,6 +85,7 @@ export const OnAPhone: Story = {
   parameters: { vr: { viewports: ["mobile"] } },
   play: async ({ canvasElement }) => {
     await userEvent.click(within(canvasElement).getByText("Lid Jeugdbestuur"));
+    blurActive(canvasElement);
   },
 };
 

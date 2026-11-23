@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { userEvent, within } from "storybook/test";
+import { blurActive } from "@test-storybook/blurActive";
 import { DartsSignupForm } from "@/components/darts/DartsSignup/DartsSignup";
 
 /**
@@ -92,6 +93,7 @@ export const Submitting: Story = {
   play: async ({ canvasElement }) => {
     await fillAndSubmit(canvasElement);
     await within(canvasElement).findByRole("button", { name: "Versturen…" });
+    blurActive(canvasElement);
   },
 };
 
@@ -136,5 +138,6 @@ export const ServerError: Story = {
   play: async ({ canvasElement }) => {
     await fillAndSubmit(canvasElement);
     await within(canvasElement).findByRole("alert");
+    blurActive(canvasElement);
   },
 };

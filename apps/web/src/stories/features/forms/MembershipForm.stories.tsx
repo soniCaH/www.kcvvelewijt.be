@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { userEvent, within } from "storybook/test";
+import { blurActive } from "@test-storybook/blurActive";
 import { MembershipForm } from "@/components/club/MembershipForm/MembershipForm";
 import {
   DRAFT_STORAGE_KEY,
@@ -91,6 +92,7 @@ export const TransportFailure: Story = {
   play: async ({ canvasElement }) => {
     await fillAndSubmit(canvasElement);
     await within(canvasElement).findByRole("alert");
+    blurActive(canvasElement);
   },
 };
 
@@ -105,6 +107,7 @@ export const Submitting: Story = {
   play: async ({ canvasElement }) => {
     await fillAndSubmit(canvasElement);
     await within(canvasElement).findByRole("button", { name: "Versturen…" });
+    blurActive(canvasElement);
   },
 };
 
