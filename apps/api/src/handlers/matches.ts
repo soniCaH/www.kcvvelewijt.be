@@ -157,21 +157,29 @@ export function teamMatchesTtl(
 }
 
 /**
- * Soft cache TTL (seconds) for the club-wide next-matches list.
+ * Soft cache TTL (seconds) for the club-wide next-matches list (#3628).
  *
  * getNextMatches computes "next" per team AT FETCH TIME (kickoff >= now), so
  * once a cached entry's kickoff passes, the list advertises a match that
- * already started — the homepage agenda and MatchStrip kept it for up to the
- * flat 4h window. Cap at matchday cadence while any listed kickoff is in the
- * past; the refetch recomputes the list to future-only, so the condition
- * clears itself after one refresh (no grace window needed).
+ * already started. Three tiers, all ≥15 min (#2321):
+ *   any listed kickoff in the past → 15 min (matchday cadence; the refetch
+ *                                     recomputes to future-only, so this
+ *                                     clears itself after one refresh)
+ *   nearest kickoff < 24 h away    → 4 h
+ *   otherwise                      → 12 h (quiet: nothing changes sooner)
+ *
+ * An empty list has no nearest kickoff (Math.min() is Infinity): it takes the
+ * quiet tier, the one that costs the fewest PSD calls.
  */
 export function nextMatchesTtl(
   matches: readonly Match[],
   now: number = Date.now(),
 ): number {
-  const started = matches.some((m) => kickoffMs(m.date) < now);
-  return started ? TTL.MATCH_DETAIL_MATCHDAY : TTL.NEXT_MATCHES;
+  const kickoffs = matches.map((m) => kickoffMs(m.date));
+  if (kickoffs.some((k) => k < now)) return TTL.MATCH_DETAIL_MATCHDAY;
+  return Math.min(...kickoffs) - now < 24 * HOUR_MS
+    ? TTL.NEXT_MATCHES
+    : TTL.NEXT_MATCHES_QUIET;
 }
 
 /** True when the detail already carries report data (a non-empty lineup or events). */

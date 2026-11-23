@@ -181,6 +181,7 @@ describe("TTL constants", () => {
     for (const ttl of [
       TTL.MATCHES_TEAM,
       TTL.NEXT_MATCHES,
+      TTL.NEXT_MATCHES_QUIET,
       TTL.MATCHES_WINDOW,
       TTL.MATCH_DETAIL_LIVE,
       TTL.MATCH_DETAIL_MATCHDAY,

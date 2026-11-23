@@ -647,8 +647,49 @@ describe("nextMatchesTtl", () => {
     expect(nextMatchesTtl(list, now)).toBe(TTL.NEXT_MATCHES);
   });
 
-  it("returns the 4h TTL for an empty list", () => {
-    expect(nextMatchesTtl([], now)).toBe(TTL.NEXT_MATCHES);
+  it("returns the quiet 12h TTL for an empty list", () => {
+    expect(nextMatchesTtl([], now)).toBe(TTL.NEXT_MATCHES_QUIET);
+  });
+
+  it("flips from 4h to 12h at 24h before the nearest kickoff", () => {
+    const at2359 = [match(at(23 * H + 59 * 60_000)), match(at(5 * 24 * H))];
+    const at2401 = [match(at(24 * H + 60_000)), match(at(5 * 24 * H))];
+    expect(nextMatchesTtl(at2359, now)).toBe(TTL.NEXT_MATCHES);
+    expect(nextMatchesTtl(at2401, now)).toBe(TTL.NEXT_MATCHES_QUIET);
+  });
+
+  it("measures the nearest kickoff, whatever the list order", () => {
+    const list = [match(at(5 * 24 * H)), match(at(2 * H))];
+    expect(nextMatchesTtl(list, now)).toBe(TTL.NEXT_MATCHES);
+  });
+
+  it("pins active tier <= quiet tier <= per-team list TTL", () => {
+    expect(TTL.MATCH_DETAIL_MATCHDAY).toBeLessThanOrEqual(TTL.NEXT_MATCHES);
+    expect(TTL.NEXT_MATCHES).toBeLessThanOrEqual(TTL.NEXT_MATCHES_QUIET);
+    expect(TTL.NEXT_MATCHES_QUIET).toBeLessThanOrEqual(TTL.MATCHES_TEAM);
+  });
+
+  // Wire dates are Brussels wall-clock-as-UTC. On a DST night the wall-clock
+  // gap to a 15:00 kickoff differs from the real gap by an hour, so a naive
+  // subtraction would flip the tier at the wrong instant.
+  it.each([
+    [
+      "spring-forward 29 March 2026",
+      "2026-03-29T15:00:00.000Z",
+      "2026-03-29T13:00:00.000Z",
+    ],
+    [
+      "fall-back 25 October 2026",
+      "2026-10-25T15:00:00.000Z",
+      "2026-10-25T14:00:00.000Z",
+    ],
+  ])("flips at the real 24h mark on %s", (_l, wire, kickoffZ) => {
+    const m = match(new Date(wire));
+    const k = Date.parse(kickoffZ);
+    expect(nextMatchesTtl([m], k - 24 * H + 60_000)).toBe(TTL.NEXT_MATCHES);
+    expect(nextMatchesTtl([m], k - 24 * H - 60_000)).toBe(
+      TTL.NEXT_MATCHES_QUIET,
+    );
   });
 });
 
