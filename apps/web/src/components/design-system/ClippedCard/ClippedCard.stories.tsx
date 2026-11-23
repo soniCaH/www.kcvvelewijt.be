@@ -43,9 +43,9 @@ export const RegistrationFormShell: Story = {
   render: () => (
     // Definite width (#3830): 8rem = 1rem root padding + the decorator's p-12, both sides.
     <ClippedCard className="w-[min(640px,calc(100vw-8rem))] max-w-full">
-      <div className="text-ink-muted border-paper-edge mb-5 flex items-center justify-between gap-3 border-b pb-2 font-mono text-[11px] tracking-[0.08em] uppercase">
+      <div className="text-ink-muted border-paper-edge mb-5 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b pb-2 font-mono text-[11px] tracking-[0.08em] uppercase">
         <span>Inschrijfformulier</span>
-        <span>Veld 5 / 7</span>
+        <span className="shrink-0 whitespace-nowrap">Veld 5 / 7</span>
       </div>
       <h2 className="font-display mb-6 text-[40px] leading-[1.05] font-black">
         Welkom op de tribune.
