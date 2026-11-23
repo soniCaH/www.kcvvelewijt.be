@@ -131,6 +131,22 @@ export const Success: Story = {
 };
 
 /**
+ * The request succeeded and the role's contact box has a holder (#3640) — the
+ * card names them with their function title and promises no time. Compare
+ * `Success` above, which keeps today's sentence.
+ */
+export const SuccessNamedContact: Story = {
+  args: {
+    defaultRole: "vrijwilliger",
+    contacts: {
+      vrijwilliger: { name: "An Peeters", functionTitle: "Voorzitter" },
+    },
+  },
+  beforeEach: Success.beforeEach,
+  play: Success.play,
+};
+
+/**
  * A visitor comes back to a half-filled application (#3326) — the draft is
  * restored, one line above the first field says so, and **Wis formulier**
  * empties it. The draft beats `defaultRole`, so the volunteer role below is

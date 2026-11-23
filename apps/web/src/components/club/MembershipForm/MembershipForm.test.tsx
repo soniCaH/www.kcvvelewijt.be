@@ -629,6 +629,67 @@ describe("MembershipForm", () => {
     });
   });
 
+  describe("named contact on the confirmation card (#3640)", () => {
+    const contacts = {
+      vrijwilliger: { name: "An Peeters", functionTitle: "Voorzitter" },
+      trainer: { name: "Jan Janssens", functionTitle: null },
+    };
+    const TODAY = /Iemand van de club neemt binnenkort contact op\./;
+
+    const submitAs = async (
+      role: "vrijwilliger" | "scheidsrechter" | "trainer",
+      props: Parameters<typeof MembershipForm>[0] = {},
+    ) => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(() =>
+          Promise.resolve({
+            ok: true,
+            status: 200,
+            json: () => Promise.resolve({ ok: true }),
+          }),
+        ),
+      );
+      render(<MembershipForm defaultRole={role} {...props} />);
+      fillRequiredFields();
+      submitForm();
+      return screen.findByRole("heading", {
+        name: "Bedankt voor je interesse!",
+      });
+    };
+
+    it("names the holder and function title of the submitted role, promising no time", async () => {
+      const heading = await submitAs("vrijwilliger", { contacts });
+
+      const card = heading.closest("section")!;
+      expect(card).toHaveTextContent(
+        "An Peeters (Voorzitter) neemt contact op.",
+      );
+      expect(card).not.toHaveTextContent(/binnenkort|binnen \d+|dagen|uur/);
+      await waitFor(() => expect(document.activeElement).toBe(heading));
+    });
+
+    it("names the holder without parentheses when the box has no title", async () => {
+      const heading = await submitAs("trainer", { contacts });
+
+      const card = heading.closest("section")!;
+      expect(card).toHaveTextContent("Jan Janssens neemt contact op.");
+      expect(card).not.toHaveTextContent("(");
+    });
+
+    it("keeps today's sentence for a role with no contact", async () => {
+      const heading = await submitAs("scheidsrechter", { contacts });
+
+      expect(heading.closest("section")).toHaveTextContent(TODAY);
+    });
+
+    it("keeps today's sentence when the page passes no contacts", async () => {
+      const heading = await submitAs("vrijwilliger");
+
+      expect(heading.closest("section")).toHaveTextContent(TODAY);
+    });
+  });
+
   describe("transport failure (#2580)", () => {
     it("shows the locked notice and logs the caught error to the console only", async () => {
       const consoleError = vi

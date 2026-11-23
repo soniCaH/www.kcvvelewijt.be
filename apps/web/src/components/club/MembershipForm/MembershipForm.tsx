@@ -30,6 +30,7 @@ import {
   Textarea,
 } from "@/components/design-system";
 import { trackEvent } from "@/lib/analytics/track-event";
+import type { MembershipContacts } from "@/lib/repositories/form-routing.repository";
 import { scrollIntoViewMotionSafe } from "@/lib/utils/scroll-into-view";
 import {
   clearDraft,
@@ -59,6 +60,8 @@ interface MembershipFormProps {
   defaultRole?: MembershipRole | "";
   /** Storybook/testing: seed the birth date to render the minor flow. */
   defaultBirthDate?: string;
+  /** Box holder per role, read by the page; the card names the submitted role's holder. */
+  contacts?: MembershipContacts;
 }
 
 // "invalid" covers both client-side validation and a server rejection —
@@ -134,6 +137,7 @@ export function MembershipForm(props: MembershipFormProps) {
 function MembershipFormFields({
   defaultRole = "",
   defaultBirthDate = "",
+  contacts,
   draft,
 }: MembershipFormProps & { draft: MembershipDraft | null }) {
   const uid = useId();
@@ -414,6 +418,11 @@ function MembershipFormFields({
   };
 
   if (state === "success") {
+    // Writer Rule: a role with no nameable holder keeps today's sentence.
+    const contact = role ? contacts?.[role] : undefined;
+    const followUp = contact
+      ? `${contact.functionTitle ? `${contact.name} (${contact.functionTitle})` : contact.name} neemt contact op.`
+      : "Iemand van de club neemt binnenkort contact op.";
     return (
       <ClippedCard as="section">
         <StampBadge tone="jersey" rotation={-2} position="top-right">
@@ -428,7 +437,7 @@ function MembershipFormFields({
         </h2>
         <p className="text-ink text-body-md">
           We hebben je aanvraag goed ontvangen en sturen je een
-          bevestigingsmail. Iemand van de club neemt binnenkort contact op.
+          bevestigingsmail. {followUp}
         </p>
       </ClippedCard>
     );
