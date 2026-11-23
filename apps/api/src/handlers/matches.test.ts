@@ -257,7 +257,12 @@ describe("getNextMatchesHandler", () => {
 
 describe("getMatchesWindowHandler", () => {
   it("returns windowed matches from PsdService", async () => {
-    const result = await Effect.runPromise(provide(getMatchesWindowHandler()));
+    const today = { ...baseMatch, date: wireDate(Date.now() + 60 * 60 * 1000) };
+    const result = await Effect.runPromise(
+      provide(getMatchesWindowHandler(), {
+        getMatchesWindow: () => Effect.succeed([today]),
+      }),
+    );
     expect(result).toHaveLength(1);
     expect(result[0]?.id).toBe(1);
     expect(() => S.decodeUnknownSync(MatchesArray)(result)).not.toThrow();
@@ -311,6 +316,21 @@ describe("getMatchesWindowHandler", () => {
       expect(result.map((m) => m.id)).toEqual([21]);
       expect(fanout).not.toHaveBeenCalled();
     });
+
+    // The window's lower bound is fixed at fetch time and the 12 h tier lets a
+    // list outlive its day, so yesterday's matches are dropped on every serve.
+    it.each([
+      ["fresh", 0],
+      ["stale", 13 * HOUR],
+    ])(
+      "never serves a match from before today (Brussels): %s",
+      async (_l, ageMs) => {
+        const yesterday = at(-30 * HOUR, 23);
+        const upcoming = at(30 * HOUR, 24);
+        const { result } = await run([yesterday, upcoming], ageMs);
+        expect(result.map((m) => m.id)).toEqual([24]);
+      },
+    );
 
     it("kickoff 10 h away, entry 5 h old: stale, triggers the fan-out", async () => {
       const { result, fanout } = await run([at(10 * HOUR, 22)], 5 * HOUR);

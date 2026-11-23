@@ -10,7 +10,7 @@ import {
 } from "@kcvv/api-contract";
 import { PsdService, isPartialFanout } from "../psd/service";
 import { isSettledMatchStatus } from "../psd/transforms";
-import { kickoffMs } from "../psd/wall-clock";
+import { kickoffMs, startOfBrusselsDayMs } from "../psd/wall-clock";
 import { shouldServeStale, type BffError } from "../psd/errors";
 import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
 import { WorkerEnvTag } from "../env";
@@ -112,13 +112,22 @@ export const getMatchesWindowHandler = (): Effect.Effect<
     return yield* service.getMatchesWindow();
   });
 
-  return matchesCache.getOrFetch(
-    cacheKey,
-    fetchMatches,
-    (matches) => matchesWindowTtl(matches),
-    undefined,
-    { shouldServeStale, isPartial: isPartialFanout },
-  );
+  return matchesCache
+    .getOrFetch(cacheKey, fetchMatches, matchesWindowTtl, undefined, {
+      shouldServeStale,
+      isPartial: isPartialFanout,
+    })
+    .pipe(
+      // Serve-time filter (#3629): the window's lower bound (start of the
+      // Brussels day) is fixed at fetch time, and the 12 h tier lets a list
+      // outlive its day: yesterday's matches would keep showing. Drop them on
+      // every serve (fresh, stale or just fetched). The stored value stays
+      // unfiltered, so `matchesWindowTtl` still sees it.
+      Effect.map((matches) => {
+        const startOfToday = startOfBrusselsDayMs(Date.now());
+        return matches.filter((m) => kickoffMs(m.date) >= startOfToday);
+      }),
+    );
 };
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -196,10 +205,10 @@ export function nextMatchesTtl(
  * kickoff picks 4 h (< 24 h away) or 12 h; past kickoffs are ignored. A list
  * with no future kickoff (empty, or only finished matches) takes 4 h, as before.
  */
-export function matchesWindowTtl(
+export const matchesWindowTtl = (
   matches: readonly Match[],
   now: number = Date.now(),
-): number {
+): number => {
   const valid = matches.filter(hasValidKickoff);
   if (valid.some((m) => isResultPending(m, now))) {
     return TTL.MATCH_DETAIL_MATCHDAY;
@@ -208,7 +217,7 @@ export function matchesWindowTtl(
     valid.map((m) => kickoffMs(m.date)).filter((k) => k >= now),
     now,
   );
-}
+};
 
 // `kickoffMs` throws a RangeError on an invalid date, so drop those first.
 const hasValidKickoff = (m: Match): boolean =>
