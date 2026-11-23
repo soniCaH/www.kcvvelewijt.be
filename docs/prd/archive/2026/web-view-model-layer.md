@@ -40,7 +40,7 @@ This is safe, mechanical, and immediately adds test coverage to an untested tran
 
 ## 4. Phases
 
-```
+```text
 Phase 1: Extract calendar inline transform to calendar/utils.ts with tests → #864
 Phase 2: Create src/lib/utils/match-display.ts — shared score/status/result display logic → #865
 Phase 3: Consolidate StatusBadge into shared component; remove CalendarView and TeamSchedule inline duplicates → #866

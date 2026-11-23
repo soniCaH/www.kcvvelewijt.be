@@ -34,7 +34,7 @@ Change `NEXT_MATCHES` TTL from 30 minutes to 4 hours in `cache/kv-cache.ts`. Dep
 
 ## 4. Phases
 
-```
+```text
 Phase 1: NEXT_MATCHES TTL 30min → 4h — tracer bullet → #877
 Phase 2: All remaining TTL increases — MATCHES_TEAM, RANKING, STATS → 24h → #878
 Phase 3: Stale-on-error — extend TypedKvCache with hard/soft TTL + stale fallback → #879

@@ -43,7 +43,7 @@ Stats is the simplest handler (one raw call, one transform, no business rules) �
 
 ## 4. Phases
 
-```
+```text
 Phase 1: FootbalistoService tracer bullet — getTeamStats → #855
 Phase 2: Migrate matches — getTeamMatches, getNextMatches, getMatchById, getMatchDetail → #856
 Phase 3: Migrate ranking — getRanking → #857

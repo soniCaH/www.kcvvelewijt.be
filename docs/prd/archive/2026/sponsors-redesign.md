@@ -34,7 +34,7 @@ Update the Sanity `sponsor` schema (add `tier` + `featured` fields, deprecate `t
 
 ## 4. Phases
 
-```
+```text
 Phase 1: Sanity schema + homepage sponsors dark section (tracer bullet)         — #1013
 Phase 2: Sponsors page redesign (intro, spotlight restyle, size-differentiated grid, CTA) — #1014 (blocked by #1013)
 Phase 3: Component cleanup + diagonal transitions                               — #1015 (blocked by #1014)

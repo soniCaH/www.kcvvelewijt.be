@@ -6,7 +6,7 @@
 
 ## Composition
 
-```
+```text
 [ 1px ink rule ]  ✦  De jaren tussen de lijnen.  ✦  [ 1px ink rule ]
                           AKTE 02 · DE OVERSTAP
 ```

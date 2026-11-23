@@ -43,7 +43,7 @@ This immediately proves the mock pattern is viable and that `runSync` is testabl
 
 ## 4. Phases
 
-```
+```text
 Phase 1: Tracer bullet — one runSync test with mocked SanityWriteClient → #869
 Phase 2: Full runSync test suite — cursor behavior, player/staff/team upsert ordering, image upload triggering → #870
 Phase 3: Extract and test image upload decision logic as pure functions → #871

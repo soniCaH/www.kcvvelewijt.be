@@ -41,7 +41,7 @@ Test all keyboard shortcuts work as expected:
 
 2. **Navigation Order**:
 
-   ```
+   ```text
    Tab Order:
    1. Skip Link
    2. Search Input

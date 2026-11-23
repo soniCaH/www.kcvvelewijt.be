@@ -44,7 +44,7 @@ This proves the pattern is viable (transforms.test.ts can import from api-contra
 
 ## 4. Phases
 
-```
+```text
 Phase 1: Tracer bullet — schema assertion in transformPsdGame test → #859
 Phase 2: api-contract schema tests — Match, MatchDetail, RankingEntry, TeamStats → #860
 Phase 3: Upgrade all transform tests to schema-validate output → #861

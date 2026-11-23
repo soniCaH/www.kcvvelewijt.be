@@ -57,7 +57,7 @@ Acceptance: `getTeamStatsHandler` uses `typedCache.getOrFetch(...)`, existing `s
 
 ## 4. Phases
 
-```
+```text
 Phase 1: TypedKvCache factory + tracer bullet (stats handler) → #850
 Phase 2: Migrate remaining 4 handlers (matches ×2, match-detail, ranking) → #851
 Phase 3: Delete redundant decode tests from handler test files → #852

@@ -23,7 +23,7 @@ Remove `MatchCountdown` (dead component + story + test), verify `pnpm turbo run 
 
 ## 4. Phases
 
-```
+```text
 Phase 1: Dead code removal — tracer bullet + all component deletions (#979)
 Phase 2: MatchResultRow extraction from TeamSchedule (#980)
 Phase 3: SponsorGrid refactoring — make Sponsors delegate to SponsorGrid (#981)

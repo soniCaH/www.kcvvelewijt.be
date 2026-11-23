@@ -186,6 +186,6 @@ None. This is a pure frontend component refactor.
 
 ## 8. Discovered Unknowns (filled during implementation)
 
-```
+```text
 (none yet)
 ```

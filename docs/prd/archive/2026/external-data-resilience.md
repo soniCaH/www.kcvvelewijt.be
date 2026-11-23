@@ -50,7 +50,7 @@ The tracer bullet proves:
 
 ## 4. Phases
 
-```
+```text
 Phase 1: Tracer bullet — resilient match list decoding (Effect.partition + S.decodeUnknown) → #940
 Phase 2: PsdTeamStatsResponse + FootbalistoRankingArray resilient decoding → #941
 Phase 3: FootbalistoMatchDetailResponse resilient decoding → #942
