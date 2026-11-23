@@ -1,11 +1,15 @@
 // Run with `pnpm test:doc-paths` (node:test, no dependencies).
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { test } from "node:test";
 import {
   extractCandidates,
   findMissing,
   isChecked,
-  splitNul,
+  listTracked,
   toCandidate,
   trackedPaths,
 } from "./check-doc-paths.mjs";
@@ -121,9 +125,15 @@ test("a root-anchored path resolves only at the repo root", () => {
   );
 });
 
-test("splitNul keeps a non-ASCII file name whole", () => {
-  assert.deepEqual(splitNul("docs/Café.md\0docs/b.md\0"), [
-    "docs/Café.md",
-    "docs/b.md",
-  ]);
+test("listTracked returns a non-ASCII file name whole, not C-quoted", () => {
+  const repo = mkdtempSync(path.join(tmpdir(), "doc-paths-"));
+  try {
+    mkdirSync(path.join(repo, "docs"));
+    writeFileSync(path.join(repo, "docs", "Café.md"), "# x\n");
+    execFileSync("git", ["init", "-q"], { cwd: repo });
+    execFileSync("git", ["add", "docs/Café.md"], { cwd: repo });
+    assert.deepEqual(listTracked(repo), ["docs/Café.md"]);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
 });

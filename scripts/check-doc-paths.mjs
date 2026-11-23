@@ -113,8 +113,8 @@ const ancestors = (file) => {
 // Docs write paths from the repo root (`apps/web/src/...`), from their own workspace
 // (`src/lib/...`), relative to themselves (`../x`) or as a shorthand under a source dir
 // (`webhooks/index-handler.ts` in apps/api/CLAUDE.md means apps/api/src/webhooks/...).
-// So a path resolves when an ancestor directory of the doc holds it, or, for a path that
-// does not start at a top-level dir, when any tracked path ends in it.
+// A path that starts at a top-level dir resolves at the repo root only. Any other path
+// resolves when an ancestor directory of the doc holds it, or when any tracked path ends in it.
 // shortcut: the suffix match can pass a stale path when a same-named file lives elsewhere;
 // tighten if a real stale path slips through.
 export const resolves = (docFile, candidate, tracked) => {
@@ -152,8 +152,16 @@ export const trackedPaths = (files) => {
   return { set, list: [...set] };
 };
 
-// `git ls-files -z` output to paths; `-z` because git C-quotes non-ASCII names otherwise.
-export const splitNul = (output) => output.split("\0").filter(Boolean);
+// Tracked paths of the repo at `cwd`. `-z` and a NUL split, because git C-quotes non-ASCII
+// names otherwise and the quoted name matches no file.
+export const listTracked = (cwd) =>
+  execFileSync("git", ["ls-files", "-z"], {
+    cwd,
+    encoding: "utf8",
+    maxBuffer: 64 * 1024 * 1024,
+  })
+    .split("\0")
+    .filter(Boolean);
 
 export const isChecked = (file) =>
   /(^|\/)CLAUDE\.md$/.test(file) ||
@@ -162,13 +170,7 @@ export const isChecked = (file) =>
     !EXCLUDED_PREFIXES.some((prefix) => file.startsWith(prefix)));
 
 const main = () => {
-  const tracked = splitNul(
-    execFileSync("git", ["ls-files", "-z"], {
-      cwd: repoRoot,
-      encoding: "utf8",
-      maxBuffer: 64 * 1024 * 1024,
-    }),
-  );
+  const tracked = listTracked(repoRoot);
   const files = tracked.filter(isChecked);
   const known = trackedPaths(tracked);
   const failures = files.flatMap((file) =>

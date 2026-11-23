@@ -40,6 +40,11 @@ const ALLOWED = [
   `${CLIENT}const ThingContext = createContext(null);\nexport { ThingContext };`,
   `${CLIENT}const thingContext = createContext(null);\nexport { thingContext };`,
   `${CLIENT}const ThingContext = createContext(null);\nexport const Card = () => null;`,
+  // A re-export names a binding from another module, not the local enum of the same name.
+  `${CLIENT}enum Status { Ready }\nexport { Status } from "./other";`,
+  // An imported enum is not caught without type information.
+  `${CLIENT}import { Status } from "./status";\nexport { Status };`,
+  `${CLIENT}export { Status } from "./status";`,
   `${CLIENT}export type Props = { a: string };`,
   `${CLIENT}export interface Props { a: string }`,
   `${CLIENT}const Card = () => null;\nexport { Card };`,

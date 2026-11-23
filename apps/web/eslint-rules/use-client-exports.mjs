@@ -12,8 +12,10 @@
 // shortcut: "component" means a PascalCase name. A camelCase component is flagged; rename
 // it or move it out. A PascalCase value passes, so a PascalCase object, class instance or
 // `memo(...)` of a non-component still slips through. A default export always passes: Next
-// pages, layouts and a lone component file default-export. Upgrade to type information if
-// one slips through.
+// pages, layouts and a lone component file default-export. An enum or context that is
+// imported and re-exported (`import { Status } from "./status"; export { Status };`, or
+// `export { Status } from "./status"`) passes too: only an enum or context declared in the
+// same file is known, and catching the rest needs type information.
 // A lowercase letter somewhere keeps SCREAMING_CASE constants (`CATEGORY_META`) out.
 const isComponentName = (name) =>
   /^[A-Z]/.test(name) && (/[a-z]/.test(name) || name.length === 1);
@@ -80,9 +82,10 @@ export const useClientExports = {
           const name = specifier.exported.name ?? specifier.exported.value;
           if (specifier.exportKind === "type" || name === "default") continue;
           const localName = specifier.local.name ?? specifier.local.value;
-          if (state.enums.has(localName)) {
-            report(specifier, name);
-          } else if (!isComponentName(name) && !state.contexts.has(localName)) {
+          // `export { X } from "./m"` names a binding of that module, not a local `X`.
+          const isLocalEnum = !node.source && state.enums.has(localName);
+          const isLocalContext = !node.source && state.contexts.has(localName);
+          if (isLocalEnum || (!isComponentName(name) && !isLocalContext)) {
             report(specifier, name);
           }
         }
