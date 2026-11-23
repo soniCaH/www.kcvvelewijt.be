@@ -20,7 +20,7 @@
     "@kcvv/api-contract": "workspace:*",
     "@sanity/client": "catalog:",
     "@sanity/webhook": "4.0.4",
-    "effect": "3.22.4"
+    "effect": "3.22.5"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "1.8.2",
