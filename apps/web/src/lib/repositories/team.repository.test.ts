@@ -656,7 +656,6 @@ describe("TeamRepository", () => {
         makeLandingRow({
           name: null,
           slug: null,
-          age: null,
           division: null,
           divisionFull: null,
           tagline: null,
@@ -674,7 +673,6 @@ describe("TeamRepository", () => {
 
       expect(t.name).toBe("");
       expect(t.slug).toBe("");
-      expect(t.age).toBe("");
       expect(t.staff).toBeNull();
     });
   });

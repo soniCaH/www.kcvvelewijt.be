@@ -1976,7 +1976,7 @@ export type ARTICLE_BY_SLUG_QUERY_RESULT = {
 // Query: {  "list": *[_type == "article" && defined(slug.current) && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())] | order(publishedAt desc) [0...20] {  "slug": coalesce(slug.current, ""), articleType, publishedAt,  "title": coalesce(pt::text(title), title, ""),  "spans": title[0].children[]{ "text": coalesce(text, ""), "accent": "accent" in coalesce(marks, []) },  "coverUrl": coverImage.asset->url, "hotspot": coverImage.hotspot{ x, y },  "crop": coverImage.crop{ top, bottom, left, right },  "dimensions": coverImage.asset->metadata.dimensions{ width, height },  "eventFact": body[_type == "eventFact"][0]{ date, endDate, startTime, location }},  "picked": *[_type == "article" && slug.current == $slug && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now())][0] {  "slug": coalesce(slug.current, ""), articleType, publishedAt,  "title": coalesce(pt::text(title), title, ""),  "spans": title[0].children[]{ "text": coalesce(text, ""), "accent": "accent" in coalesce(marks, []) },  "coverUrl": coverImage.asset->url, "hotspot": coverImage.hotspot{ x, y },  "crop": coverImage.crop{ top, bottom, left, right },  "dimensions": coverImage.asset->metadata.dimensions{ width, height },  "eventFact": body[_type == "eventFact"][0]{ date, endDate, startTime, location }}}
 export type SHARE_ARTICLES_QUERY_RESULT = {
   list: Array<{
-    slug: string | "";
+    slug: string;
     articleType:
       | "announcement"
       | "event"
@@ -2073,19 +2073,34 @@ export type EVENTS_QUERY_RESULT = Array<{
 // Source: ../web/src/lib/repositories/event.repository.ts
 // Variable: NEXT_FEATURED_EVENT_QUERY
 // Query: coalesce(    *[_type == "event" && featuredOnHome == true && dateStart > $now] | order(dateStart asc) [0] {      "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), eventType, "dateStart": coalesce(dateStart, ""), dateEnd, location, "featuredOnHome": coalesce(featuredOnHome, false),      "href": coalesce(externalLink.url, "#"),      "coverImageUrl": coverImage.asset->url + "?w=1200&h=675&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5))    },    *[_type == "event" && dateStart > $now] | order(dateStart asc) [0] {      "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""), eventType, "dateStart": coalesce(dateStart, ""), dateEnd, location, "featuredOnHome": coalesce(featuredOnHome, false),      "href": coalesce(externalLink.url, "#"),      "coverImageUrl": coverImage.asset->url + "?w=1200&h=675&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5))    }  )
-export type NEXT_FEATURED_EVENT_QUERY_RESULT = {
-  id: string;
-  title: string | "";
-  slug: string | "";
-  eventType:
-    "Andere" | "Clubevent" | "Jeugdwerking" | "Supportersactiviteit" | null;
-  dateStart: string | "";
-  dateEnd: string | null;
-  location: string | null;
-  featuredOnHome: boolean | false;
-  href: string | "#";
-  coverImageUrl: string | null;
-} | null;
+export type NEXT_FEATURED_EVENT_QUERY_RESULT =
+  | {
+      id: string;
+      title: string | "";
+      slug: string | "";
+      eventType:
+        "Andere" | "Clubevent" | "Jeugdwerking" | "Supportersactiviteit" | null;
+      dateStart: string | "";
+      dateEnd: string | null;
+      location: string | null;
+      featuredOnHome: boolean | false;
+      href: string | "#";
+      coverImageUrl: string | null;
+    }
+  | {
+      id: string;
+      title: string | "";
+      slug: string | "";
+      eventType:
+        "Andere" | "Clubevent" | "Jeugdwerking" | "Supportersactiviteit" | null;
+      dateStart: string | "";
+      dateEnd: string | null;
+      location: string | null;
+      featuredOnHome: true;
+      href: string | "#";
+      coverImageUrl: string | null;
+    }
+  | null;
 
 // Source: ../web/src/lib/repositories/event.repository.ts
 // Variable: EVENT_BY_SLUG_QUERY
@@ -2130,7 +2145,7 @@ export type EVENT_ARTICLES_QUERY_RESULT = Array<{
 // Query: {  "list": *[_type == "event" && defined(slug.current) && dateTime(coalesce(dateEnd, dateStart)) >= dateTime($since)] | order(dateStart asc) [0...30] {  "slug": coalesce(slug.current, ""), "title": coalesce(title, ""), eventType,  "dateStart": coalesce(dateStart, ""), dateEnd, location,  "coverUrl": coverImage.asset->url, "hotspot": coverImage.hotspot{ x, y },  "crop": coverImage.crop{ top, bottom, left, right },  "dimensions": coverImage.asset->metadata.dimensions{ width, height }},  "picked": *[_type == "event" && slug.current == $slug][0] {  "slug": coalesce(slug.current, ""), "title": coalesce(title, ""), eventType,  "dateStart": coalesce(dateStart, ""), dateEnd, location,  "coverUrl": coverImage.asset->url, "hotspot": coverImage.hotspot{ x, y },  "crop": coverImage.crop{ top, bottom, left, right },  "dimensions": coverImage.asset->metadata.dimensions{ width, height }}}
 export type SHARE_EVENTS_QUERY_RESULT = {
   list: Array<{
-    slug: string | "";
+    slug: string;
     title: string | "";
     eventType:
       "Andere" | "Clubevent" | "Jeugdwerking" | "Supportersactiviteit" | null;
@@ -2248,7 +2263,7 @@ export type JEUGD_LANDING_PAGE_QUERY_RESULT = {
 export type PAGES_QUERY_RESULT = Array<{
   id: string;
   title: string | "";
-  slug: string | "";
+  slug: string;
   updatedAt: string;
 }>;
 
@@ -2337,7 +2352,7 @@ export type PAGE_BY_SLUG_QUERY_RESULT = {
 export type GALLERIES_QUERY_RESULT = Array<{
   id: string;
   title: string | "";
-  slug: string | "";
+  slug: string;
   publishedAt: string | "";
   imageCount: number | 0;
   coverUrl: string | null;
@@ -2395,7 +2410,7 @@ export type GALLERY_BY_SLUG_QUERY_RESULT = {
 export type GALLERIES_BY_MATCH_QUERY_RESULT = Array<{
   id: string;
   title: string | "";
-  slug: string | "";
+  slug: string;
   publishedAt: string | "";
   imageCount: number | 0;
   coverUrl: string | null;
@@ -2408,7 +2423,7 @@ export type GALLERIES_BY_MATCH_QUERY_RESULT = Array<{
 export type GALLERIES_BY_EVENT_QUERY_RESULT = Array<{
   id: string;
   title: string | "";
-  slug: string | "";
+  slug: string;
   publishedAt: string | "";
   imageCount: number | 0;
   coverUrl: string | null;
@@ -2666,7 +2681,7 @@ export type STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT = {
   }>;
   responsibilityPaths: Array<{
     title: string | null;
-    slug: string | null;
+    slug: string;
     category:
       | "administratief"
       | "algemeen"
@@ -2800,7 +2815,7 @@ export type TEAMS_LANDING_QUERY_RESULT = Array<{
   name: string | null;
   displayName: string | null;
   slug: string | null;
-  age: string | null;
+  age: string;
   division: string | null;
   divisionFull: string | null;
   tagline: string | null;
