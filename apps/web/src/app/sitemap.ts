@@ -190,12 +190,11 @@ async function fetchTeamMatches(teamPsdIds: string[]): Promise<TeamMatches[]> {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const lastModified = new Date();
-
+  // No lastmod on static routes: a hand-listed route has no real change date,
+  // and "today" would be a false claim (#3623).
   const staticEntries = staticRoutes.map(
     ({ path, priority, changeFrequency }) => ({
       url: `${SITE_CONFIG.siteUrl}${path}`,
-      lastModified,
       changeFrequency,
       priority,
     }),
@@ -226,6 +225,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const articleEntries = articles.map((article) => ({
     url: `${SITE_CONFIG.siteUrl}/nieuws/${article.slug}`,
+    // Sanity `_updatedAt`: the editor's last save of the Article.
     lastModified: new Date(article.updatedAt),
     changeFrequency: "monthly" as const,
     priority: 0.7,
@@ -233,6 +233,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const eventEntries = events.map((event) => ({
     url: `${SITE_CONFIG.siteUrl}/evenementen/${event.slug}`,
+    // Sanity `_updatedAt`: the editor's last save of the Event.
     lastModified: new Date(event.updatedAt),
     changeFrequency: "weekly" as const,
     priority: 0.6,
@@ -242,9 +243,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const galleryEntries = galleries.map((gallery) => ({
     url: `${SITE_CONFIG.siteUrl}/galerij/${gallery.slug}`,
-    lastModified: gallery.publishedAt
-      ? new Date(gallery.publishedAt)
-      : lastModified,
+    // The Gallery's publish date; none without one - never "today" (#3623).
+    ...(gallery.publishedAt
+      ? { lastModified: new Date(gallery.publishedAt) }
+      : {}),
     changeFrequency: "monthly" as const,
     priority: 0.5,
     // Google image-sitemap extension — only when the cover image resolved.
@@ -261,28 +263,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .filter((page) => !redirectedSources.has(`/club/${page.slug}`))
     .map((page) => ({
       url: `${SITE_CONFIG.siteUrl}/club/${page.slug}`,
+      // Sanity `_updatedAt`: the editor's last save of the Page.
       lastModified: new Date(page.updatedAt),
       changeFrequency: "monthly" as const,
       priority: 0.6,
     }));
 
   const playerEntries = players.map((p) => ({
+    // No lastmod: the nightly PSD sync touches every Player document, so its
+    // `_updatedAt` is not an honest change date (#3623).
     url: `${SITE_CONFIG.siteUrl}/spelers/${p.slug}`,
-    lastModified,
     changeFrequency: "monthly" as const,
     priority: 0.5,
   }));
 
   const staffEntries = staff.map((s) => ({
+    // No lastmod: same nightly-sync reason as Players (#3623).
     url: `${SITE_CONFIG.siteUrl}/staf/${s.slug}`,
-    lastModified,
     changeFrequency: "monthly" as const,
     priority: 0.5,
   }));
 
   const teamEntries = teams.map((t) => ({
     url: `${SITE_CONFIG.siteUrl}/ploegen/${t.slug}`,
-    lastModified,
+    // Unchanged for now; Team and Match lastmod is #3624.
+    lastModified: new Date(),
     changeFrequency: "weekly" as const,
     priority: 0.6,
   }));
@@ -311,7 +316,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
   const matchEntries = [...recentMatches.keys()].map((id) => ({
     url: `${SITE_CONFIG.siteUrl}/wedstrijd/${id}`,
-    lastModified,
+    // Unchanged for now; Team and Match lastmod is #3624.
+    lastModified: new Date(),
     changeFrequency: "weekly" as const,
     priority: 0.5,
   }));
