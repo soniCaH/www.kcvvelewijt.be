@@ -534,8 +534,8 @@ describe("matchDetailTtl", () => {
     );
   });
 
-  it("in play (kickoff to kickoff + 2h) → 2h, never the 15 min live tier (#3669)", () => {
-    const ttl = IN_PLAY_MS / 1000;
+  it("in play (kickoff to kickoff + 2h) → 2h15, never the 15 min live tier (#3669)", () => {
+    const ttl = IN_PLAY_MS / 1000 + TTL.MATCH_DETAIL_LIVE;
     expect(ttl).toBeGreaterThanOrEqual(TTL.MATCH_DETAIL_LIVE);
     expect(matchDetailTtl(at(-1), "scheduled", settled, now)).toBe(ttl);
     expect(
@@ -548,6 +548,16 @@ describe("matchDetailTtl", () => {
     expect(
       matchDetailTtl(at(-2 * H), "scheduled", previewReportless, now),
     ).toBe(TTL.MATCH_DETAIL_MATCHDAY);
+  });
+
+  it("keeps an entry fetched up to 15 min before kickoff fresh until kickoff + 2h (#3669)", () => {
+    // Fetched at kickoff − 15 min (the latest a 15 min pre-kickoff entry can
+    // still be fresh at kickoff), read at kickoff + 1h59: the in-play TTL must
+    // still cover it.
+    const fetchedAt = now - 15 * 60_000;
+    const readAt = now + 1 * H + 59 * 60_000;
+    const ttl = matchDetailTtl(at(0), "scheduled", previewReportless, readAt);
+    expect(fetchedAt + ttl * 1000).toBeGreaterThanOrEqual(readAt);
   });
 
   it("3h–24h from kickoff → matchday (900s)", () => {
@@ -949,12 +959,11 @@ describe("kickoff boundary — wire date is Brussels wall-clock-as-UTC (#3491)",
 });
 
 describe("in-play window on a DST night (#3669)", () => {
-  // Fall-back night, 25 October 2026: a 01:30 Brussels kickoff is still CEST
-  // (23:30Z the day before); 02:00 CEST falls back to 02:00 CET. Two real
-  // hours later is 01:30Z, which is 02:30 CET on the wall clock: wall-clock
-  // arithmetic (03:30) would flip the edge an hour late.
-  const wire = new Date("2026-10-25T01:30:00.000Z");
-  const k = Date.parse("2026-10-24T23:30:00.000Z");
+  // Fall-back day, 25 October 2026 (03:00 CEST -> 02:00 CET at 01:00Z): a
+  // 15:00 Brussels kickoff is CET (14:00Z), but the wire date reads 15:00Z.
+  // The edge sits at 16:00Z, not at the wire date + 2 h (17:00Z).
+  const wire = new Date("2026-10-25T15:00:00.000Z");
+  const k = Date.parse("2026-10-25T14:00:00.000Z");
   const m = { ...baseMatch, date: wire, status: "scheduled" as const };
   const detail = { date: wire, status: "scheduled" as const };
 
@@ -970,10 +979,35 @@ describe("in-play window on a DST night (#3669)", () => {
     expect(needsInlineRefresh(detail, k + IN_PLAY_MS)).toBe(true);
     const preview = { hasReportData: false, hasReport: false };
     expect(matchDetailTtl(wire, "scheduled", preview, k + IN_PLAY_MS - 1)).toBe(
-      IN_PLAY_MS / 1000,
+      IN_PLAY_MS / 1000 + TTL.MATCH_DETAIL_LIVE,
     );
     expect(matchDetailTtl(wire, "scheduled", preview, k + IN_PLAY_MS)).toBe(
       TTL.MATCH_DETAIL_MATCHDAY,
+    );
+  });
+});
+
+describe("an Invalid Date match must not break a TTL callback (#3669)", () => {
+  const now = new Date("2025-06-01T12:00:00.000Z").getTime();
+  const H = 60 * 60 * 1000;
+  const bad = new Date(Number.NaN);
+  const pending = {
+    ...baseMatch,
+    date: wireDate(now - 5 * H),
+    status: "scheduled" as const,
+  };
+
+  it("teamMatchesTtl skips it and still sees a valid pending match", () => {
+    const list = [{ ...baseMatch, date: bad, status: "scheduled" as const }];
+    expect(teamMatchesTtl(list, now)).toBe(TTL.MATCHES_TEAM);
+    expect(teamMatchesTtl([...list, pending], now)).toBe(
+      TTL.MATCH_DETAIL_MATCHDAY,
+    );
+  });
+
+  it("needsInlineRefresh is false for it", () => {
+    expect(needsInlineRefresh({ date: bad, status: "scheduled" }, now)).toBe(
+      false,
     );
   });
 });

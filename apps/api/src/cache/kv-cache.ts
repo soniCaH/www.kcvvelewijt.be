@@ -384,7 +384,7 @@ export const TypedKvCache = <A, I>(
         /** True when a stale value is worth the visitor's wait: the refresh
          * then runs inline (same single-flight, same bounds) and its result
          * is served, instead of the stale value. Match detail uses it for a
-         * match past kickoff with no result yet (2026-10-19: a forfeit kept
+         * match from kickoff + 2 h on with no result yet (2026-10-19: a forfeit kept
          * its preview for 36 h on a page that is only read once in a while,
          * because every read served stale and refreshed behind it). */
         refreshInline?: (value: A) => boolean;

@@ -7,7 +7,7 @@ import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
 import { WorkerEnvTag } from "../env";
 import { PsdGateService } from "../psd/gate";
 import { withErrorMapping } from "./error-mapping";
-import { CACHE_VERSION, IN_PLAY_MS } from "./matches";
+import { CACHE_VERSION, hasValidKickoff, isPastInPlay } from "./matches";
 import { kickoffMs } from "../psd/wall-clock";
 
 const opponentHistoryCache = TypedKvCache(OpponentHistory);
@@ -38,9 +38,10 @@ export function opponentHistoryTtl(
   now: number = Date.now(),
 ): number {
   const pendingFor = history.matches
-    .filter((m) => m.status === "scheduled")
-    .map((m) => now - kickoffMs(m.date))
-    .filter((ms) => ms >= IN_PLAY_MS);
+    .filter((m) => m.status === "scheduled" && hasValidKickoff(m))
+    .map((m) => kickoffMs(m.date))
+    .filter((kickoff) => isPastInPlay(kickoff, now))
+    .map((kickoff) => now - kickoff);
   if (pendingFor.some((ms) => ms < 48 * HOUR_MS)) {
     return TTL.MATCH_DETAIL_MATCHDAY;
   }

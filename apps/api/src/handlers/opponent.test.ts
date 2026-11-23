@@ -106,16 +106,33 @@ describe("opponentHistoryTtl", () => {
     );
   });
 
-  it("flips at kickoff + 2 h in real time on a DST night (2026-10-25)", () => {
-    const wire = new Date("2026-10-25T01:30:00.000Z");
-    const k = Date.parse("2026-10-24T23:30:00.000Z");
+  it("skips an Invalid Date match and still sees a valid pending one (#3669)", () => {
+    const withBad = (h: OpponentHistory): OpponentHistory => ({
+      ...h,
+      matches: [
+        ...h.matches,
+        { ...h.matches[0]!, id: 99, date: new Date(Number.NaN) },
+      ],
+    });
+    expect(
+      opponentHistoryTtl(withBad(withMatches([0, "scheduled"])), now),
+    ).toBe(TTL.OPPONENT_HISTORY);
+    expect(
+      opponentHistoryTtl(withBad(withMatches([-5 * H, "scheduled"])), now),
+    ).toBe(TTL.MATCH_DETAIL_MATCHDAY);
+  });
+
+  it("flips at kickoff + 2 h in real time on the fall-back day (2026-10-25)", () => {
+    // 15:00 Brussels is CET (14:00Z); the wire date reads 15:00Z.
+    const wire = new Date("2026-10-25T15:00:00.000Z");
+    const k = Date.parse("2026-10-25T14:00:00.000Z");
     const h = {
       ...history,
       matches: [
         {
           id: 1,
           date: wire,
-          time: "01:30",
+          time: "15:00",
           home_team: { id: 456, name: "Opponent FC" },
           away_team: { id: 123, name: "KCVV Elewijt" },
           status: "scheduled",

@@ -135,22 +135,25 @@ const HOUR_MS = 60 * 60 * 1000;
 /**
  * A match is "in play" from kickoff until kickoff + 2 h (#3669): 90 min,
  * half-time and stoppage, rounded up. PSD has no live scores, so a refetch in
- * that window returns the same score-less "scheduled" match: no refresh then.
- * Every "past kickoff, still scheduled" rule starts at the end of this window.
+ * that window returns the same score-less "scheduled" match. An entry fetched
+ * at or after kickoff is therefore not refreshed before kickoff + 2 h; one
+ * already stale at kickoff may refresh once. Every "past kickoff, still
+ * scheduled" rule starts at the end of this window.
  */
 export const IN_PLAY_MS = 2 * HOUR_MS;
+
+/** True from kickoff + 2 h on: the in-play window is over (`IN_PLAY_MS`). */
+export const isPastInPlay = (kickoff: number, now: number): boolean =>
+  now - kickoff >= IN_PLAY_MS;
 
 /**
  * A "scheduled" match from kickoff + 2 h (`IN_PLAY_MS`) up to kickoff + 48 h:
  * its result is still pending.
  */
 const isResultPending = (m: Match, now: number): boolean => {
-  const sinceKickoff = now - kickoffMs(m.date);
-  return (
-    m.status === "scheduled" &&
-    sinceKickoff >= IN_PLAY_MS &&
-    sinceKickoff < 48 * HOUR_MS
-  );
+  if (m.status !== "scheduled" || !hasValidKickoff(m)) return false;
+  const kickoff = kickoffMs(m.date);
+  return isPastInPlay(kickoff, now) && now - kickoff < 48 * HOUR_MS;
 };
 
 /**
@@ -235,7 +238,7 @@ export const matchesWindowTtl = (
 };
 
 // `kickoffMs` throws a RangeError on an invalid date, so drop those first.
-const hasValidKickoff = (m: Match): boolean =>
+export const hasValidKickoff = (m: Pick<Match, "date">): boolean =>
   Number.isFinite(new Date(m.date).getTime());
 
 const validKickoffs = (matches: readonly Match[]): number[] =>
@@ -260,10 +263,13 @@ function hasMatchReportData(detail: MatchDetail): boolean {
 function proximityTtl(kickoff: number, finished: boolean, now: number): number {
   if (finished && now - kickoff >= 48 * HOUR_MS) return TTL.MATCH_DETAIL_PAST;
 
-  // In play (#3669): a refetch shows nothing new. Any TTL ≥ 2 h keeps an entry
-  // fetched at or after kickoff fresh until kickoff + 2 h; from then the
-  // ladder below (15 min) re-evaluates against `fetchedAt`.
-  if (now > kickoff && now - kickoff < IN_PLAY_MS) return IN_PLAY_MS / 1000;
+  // In play (#3669): a refetch shows nothing new. The extra 15 min covers an
+  // entry fetched up to 15 min before kickoff (the pre-kickoff ladder), so it
+  // too stays fresh until kickoff + 2 h. From then the ladder below (15 min)
+  // re-evaluates against `fetchedAt`, so the longer value costs nothing later.
+  if (now > kickoff && !isPastInPlay(kickoff, now)) {
+    return IN_PLAY_MS / 1000 + TTL.MATCH_DETAIL_LIVE;
+  }
 
   const distanceMs = Math.abs(kickoff - now);
   if (distanceMs < 3 * HOUR_MS) return TTL.MATCH_DETAIL_LIVE;
@@ -286,7 +292,8 @@ interface MatchReportState {
  * matters (live / matchday) and rarely for distant or settled matches.
  *
  *   finished ≥48h ago (with report) → 7d   (immutable)
- *   kickoff < now < kickoff + 2h → 2h (in play, #3669: no refresh mid-match)
+ *   kickoff < now < kickoff + 2h → 2h15 (in play, #3669: an entry fetched at or
+ *                   after kickoff is not refreshed before kickoff + 2h)
  *   |kickoff − now| < 3h → 900s  (live)
  *                   < 24h → 900s  (matchday)
  *                   < 7d  → 3600s (this week)
@@ -313,7 +320,7 @@ export function matchDetailTtl(
   const natural = proximityTtl(kickoff, isSettledMatchStatus(status), now);
 
   const reportPending =
-    now - kickoff >= IN_PLAY_MS &&
+    isPastInPlay(kickoff, now) &&
     !report.hasReportData &&
     (report.hasReport || now - kickoff < 48 * HOUR_MS);
 
@@ -332,7 +339,9 @@ export function needsInlineRefresh(
   now: number = Date.now(),
 ): boolean {
   return (
-    detail.status === "scheduled" && now - kickoffMs(detail.date) >= IN_PLAY_MS
+    detail.status === "scheduled" &&
+    hasValidKickoff(detail) &&
+    isPastInPlay(kickoffMs(detail.date), now)
   );
 }
 
