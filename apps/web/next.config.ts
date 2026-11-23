@@ -62,6 +62,15 @@ const nextConfig: NextConfig = {
         permanent: false,
       },
 
+      // The darts poster was replaced under a new name: the old file had an
+      // inverted QR that phones could not read. Link previews made before the
+      // swap still ask for the old path.
+      {
+        source: "/darts/poster-liggend.jpg",
+        destination: "/darts/poster-liggend-v2.jpg",
+        permanent: true,
+      },
+
       // ── #2960 — Gatsby's content-hashed asset URLs for two PDFs that are
       // already migrated to `public/downloads/` at identical byte sizes. Only
       // the old hashed path was unrouted.

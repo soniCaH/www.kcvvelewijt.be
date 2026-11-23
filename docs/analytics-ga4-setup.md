@@ -7,6 +7,18 @@ instrumentation. All steps are manual — done in the GA4 web UI at
 **Prerequisite**: GA4 property linked to GTM, GTM deployed to production,
 and at least one real user session with analytics consent given.
 
+## What GA4 numbers mean
+
+Write each claim in this guide to say only what GA4 measures:
+
+- An event count is not visitors.
+- A gap between segments is an association, not a cause.
+- A funnel breakdown gives one value per visitor for the whole funnel.
+- An event count is not a conversion: separate event totals do not show that one event led to another.
+- A filter on a funnel tab keeps only the events that match it. A step whose event does not match loses its data.
+
+Why: #3770 and #3790 each cost a CodeRabbit round on these.
+
 ---
 
 ## Table of Contents
@@ -476,8 +488,8 @@ pre-#3643 `kalender_subscribe_copy` baseline.
 - Values: **Event count**
 - Filter: Event name → matches regex → `^kalender_(view|subscribe_(open|webcal|copy))$`
 
-`kalender_subscribe_open` against the two subscribe events shows how many panel
-opens end in a subscribe. A webcal tap counts the tap, not a completed subscribe:
+`kalender_subscribe_open` next to the two subscribe events compares their totals.
+Separate totals do not show that an open led to a subscribe. A webcal tap counts the tap, not a completed subscribe:
 the OS calendar app takes over and GA4 never sees the outcome.
 
 **Share the exploration.**
@@ -559,7 +571,7 @@ All of these are **Free form** explorations.
 
 ### 5a. Responsibility Finder Success Rate
 
-**Goal**: % of searches that end in a contact click or 5s+ dwell.
+**Goal**: contact clicks and 5s+ dwells per 100 searches. This is a ratio of event totals, not the share of searches that ended in one: a single search can count twice.
 
 1. **Explore** → **+** → Free form.
 2. Rename to **"Responsibility Finder — Success Rate"**.
@@ -774,6 +786,7 @@ download context is needed.
 | Match strip                        | `firstteam_strip_clicked`, `firstteam_strip_dismissed`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | Share tool (`/share`)              | `share_image_saved` — one per story that left the tool (share sheet resolved, or download clicked); none on a cancelled share. Params: `content_type`, `article_type` / `event_type`, `template` (match), `look`, `theme` (not W), `wash` (look C), `format`, `cover_mode` (article/event, only while the Omslag row shows: the item has a cover and no own photo), `blocks_moved`, `fallback_used`. No ids, slugs, names or titles. `article_type` / `event_type` are registered dimensions; the other nine are forwarded by the GA4 tag as unregistered params (`registered: false` in the taxonomy): visible in DebugView, no custom dimension (the 50-dimension cap is full)                                                                                                            |
 | Membership form (`/club/word-lid`) | `membership_form_start` (#3636) — one per form mount, on the first field change (never on mount). Params: `role` (registered; omitted until a role is chosen) and `restored_draft` (whether the Draft was restored). No form values. `restored_draft` is forwarded by the GA4 tag as an unregistered param (`registered: false` in the taxonomy): visible in DebugView, no custom dimension (the 50-dimension cap is full). The `membership_` prefix is already in the GTM trigger, so the sync adds one Data Layer Variable and one tag row. `membership_form_submit` (`role`, `is_minor`, `has_prior_club`, `has_remark`) fires on a successful submit. `membership_form_error` (#3637): params `fields` (unregistered), `source`, `role`; when it fires and what it leaves out: see §4g. |
+| EK Darts signup (`/darts`)         | `darts_signup_start` (#3812) — one per form mount, on the first field change (never on mount), no params. `darts_signup_submit` fires on a successful submit: `waitlist` (whether the team landed on the wachtlijst) and `has_remark`. `darts_signup_error`: `fields` (comma-joined field names, never values) and `source` (`client` or `server`). `waitlist` is forwarded by the GA4 tag as an unregistered param (`registered: false` in the taxonomy): visible in DebugView, no custom dimension (the 50-dimension cap is full); the other params are already registered or forwarded. The `darts_` prefix is new in the GTM trigger, so the sync adds the trigger prefix, one Data Layer Variable and the tag rows.                                                                    |
 | Sponsors                           | `sponsor_view`, `sponsor_cta_click`, `sponsor_click`, `sponsor_featured_click`, `sponsor_impression` — the last three come from `<SponsorWallTracker>` with `sponsor_id` (hashed), `tier` and `source` (`homepage`, `sponsors` or `team`, the surface the wall sits on; `<SponsorsSection source>` passes it through, so the team page's wall reports like the homepage's). `sponsor_impression`: one per Sponsor per page view, once a tile was at least half visible for 1 s in a visible tab, unlinked tiles included; an unlinked tile never sends a click. All parameters are already registered; the `sponsor_` prefix is already in the GTM trigger, so the GTM sync dry-run lists nothing new to create.                                                                            |
 | Downloads (auto)                   | `file_download` (GA4 Enhanced Measurement)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 

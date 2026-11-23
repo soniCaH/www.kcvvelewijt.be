@@ -125,9 +125,9 @@ describe("sitemap.ts", () => {
     expect(inhoud!.priority).toBe(0.4);
     expect(inhoud!.changeFrequency).toBe("daily");
 
-    // All entries should have lastModified as a Date
+    // A static route has no real modification date: no `lastmod` at all (#3623)
     for (const entry of result) {
-      expect(entry.lastModified).toBeInstanceOf(Date);
+      expect(entry).not.toHaveProperty("lastModified");
     }
 
     // All URLs should be absolute
@@ -159,6 +159,78 @@ describe("sitemap.ts", () => {
     );
     expect(articleEntries[0].changeFrequency).toBe("monthly");
     expect(articleEntries[0].priority).toBe(0.7);
+  });
+
+  describe("lastmod only where a real date exists (#3623)", () => {
+    const lastModifiedOf = (
+      result: Awaited<ReturnType<typeof sitemap>>,
+      path: string,
+    ) =>
+      result.find((e) => e.url === `https://www.kcvvelewijt.be${path}`) as
+        { lastModified?: unknown } | undefined;
+
+    beforeEach(() => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      mockFetch.mockImplementation(async (query: string) => {
+        if (query.includes('_type == "photoGallery"'))
+          return [
+            { slug: "dated", publishedAt: "2026-04-01T09:00:00Z", image: null },
+            { slug: "undated", publishedAt: null, image: null },
+            {
+              slug: "scheduled",
+              publishedAt: new Date(Date.now() + 86_400_000).toISOString(),
+              image: null,
+            },
+          ];
+        if (query.includes('_type == "player"')) return [{ slug: "101" }];
+        if (query.includes('_type == "staffMember"')) return [{ slug: "202" }];
+        if (query.includes('_type == "article"'))
+          return [{ slug: "a", updatedAt: "2026-03-15T10:00:00Z" }];
+        if (query.includes('_type == "event"'))
+          return [
+            { slug: "e", updatedAt: "2026-03-16T10:00:00Z", image: null },
+          ];
+        return [];
+      });
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it("leaves lastmod off Player and Staff Member entries", async () => {
+      const result = await sitemap();
+      expect(lastModifiedOf(result, "/spelers/101")).not.toHaveProperty(
+        "lastModified",
+      );
+      expect(lastModifiedOf(result, "/staf/202")).not.toHaveProperty(
+        "lastModified",
+      );
+    });
+
+    it("gives a Gallery its publish date, or no lastmod without one", async () => {
+      const result = await sitemap();
+      expect(lastModifiedOf(result, "/galerij/dated")?.lastModified).toEqual(
+        new Date("2026-04-01T09:00:00Z"),
+      );
+      expect(lastModifiedOf(result, "/galerij/undated")).not.toHaveProperty(
+        "lastModified",
+      );
+      // A scheduled (future) publish date is not a change that has happened.
+      expect(lastModifiedOf(result, "/galerij/scheduled")).not.toHaveProperty(
+        "lastModified",
+      );
+    });
+
+    it("keeps Article and Event dates unchanged", async () => {
+      const result = await sitemap();
+      expect(lastModifiedOf(result, "/nieuws/a")?.lastModified).toEqual(
+        new Date("2026-03-15T10:00:00Z"),
+      );
+      expect(lastModifiedOf(result, "/evenementen/e")?.lastModified).toEqual(
+        new Date("2026-03-16T10:00:00Z"),
+      );
+    });
   });
 
   // Next writes `<loc>` and `<image:loc>` unescaped, so a bare `&` from an

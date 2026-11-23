@@ -1,15 +1,15 @@
 /**
  * /darts — EK Darts 2026, zaterdag 19 december.
  *
- * The affiche carries a QR to this URL, so it exists on both club sites: the
- * Gatsby build serves the printed one today, this one serves it after the
- * switch. Same facts, deliberately not the same design.
+ * The affiche carries a QR to this URL, so it must always answer 200.
  *
- * ⚠️ `darts.json` is a COPY. The source of truth is
- * personal-development/.scratch/darts-tournament/content/darts.json and the
- * Gatsby site holds the other copy. Never edit facts here — edit the source and
- * copy it to both, in the same session. Two pages that disagree are worse than
- * one page.
+ * ⚠️ `darts.json` is a COPY of Kevin's source file
+ * personal-development/.scratch/darts-tournament/content/darts.json. Never edit
+ * facts here — edit the source and copy it in. This repo holds the only copy on
+ * the web side (the old Gatsby site is gone). The BFF reads the very same file for
+ * the signup mails and the closing date (#3812), so the form, the page and the
+ * mails cannot disagree. The start and end hour also live in the Sanity event
+ * `EK Darts`; change both together.
  *
  * Layout decided by prototype 2026-09-10 (branch `prototype/darts-page`,
  * `/darts-prototype?variant=P|Q|R|S`), issue 21 in the darts map: taped poster
@@ -33,9 +33,13 @@ import {
 } from "@/components/design-system";
 import { PageHero } from "@/components/layout/PageHero";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
+import {
+  DartsSignup,
+  DartsSignupCta,
+} from "@/components/darts/DartsSignup/DartsSignup";
 import darts from "@/data/darts.json";
 
-const POSTER = "/darts/poster-liggend.jpg";
+const POSTER = "/darts/poster-liggend-v2.jpg";
 
 /* ⚠️ This describes the affiche for the OG image ONLY — it is the `ogImage.alt`
    below, and nothing else. `<PageHero>` renders its image with a hard-coded
@@ -50,10 +54,7 @@ const POSTER = "/darts/poster-liggend.jpg";
    one. Found by a reviewer on PR #2908. */
 const POSTER_ALT =
   "Affiche EK Darts 2026 — zaterdag 19 december 2026, kantine KCVV Elewijt. " +
-  "Teams van vier personen, gegarandeerd meerdere wedstrijden, kwalificatie en " +
-  "eindronde voor iedereen, mooie prijzen en een vette afterparty.";
-
-const uren = darts.uren.dummy;
+  `Teams van vier personen, ${darts.watJeKrijgt.punten.join(", ").toLowerCase()}.`;
 
 /* An undecided fact is marked in place, never hidden — the convention
    affiche-copy.md already uses, so poster and page mark a missing decision the
@@ -76,11 +77,12 @@ const ROWS: Array<{ label: string; value: string }> = [
     value: `${darts.formule.ploeg} · ${darts.formule.ontmoeting}`,
   },
   { label: "Verloop", value: darts.formule.verloop },
-  { label: "Deuren", value: open(uren.deuren) },
-  { label: "Eerste worp", value: open(uren.eersteWorp) },
-  { label: "Prijsuitreiking", value: open(uren.prijsuitreiking) },
+  { label: "Deuren", value: darts.uren.deuren },
+  { label: "Eerste worp", value: darts.uren.eersteWorp },
+  { label: "Prijsuitreiking", value: darts.uren.prijsuitreiking },
+  { label: "Einde", value: darts.uren.einde },
   { label: "Eten en drank", value: open(darts.eten.dummy) },
-  { label: "Afterparty", value: darts.dj.tekst },
+  { label: "Muziek", value: darts.muziek.tekst },
 ];
 
 export default function DartsPage() {
@@ -99,8 +101,9 @@ export default function DartsPage() {
           headline={darts.titel}
           lead={`${darts.datum.tekst} — ${darts.waar.naam}`}
           image={POSTER}
-          cta={{ label: "Inschrijven", href: "#inschrijven" }}
-        />
+        >
+          <DartsSignupCta />
+        </PageHero>
       </PageContainer>
 
       <PageContainer width="default">
@@ -113,14 +116,14 @@ export default function DartsPage() {
           </dl>
         </section>
 
-        {/* Featured 1 — the number everybody asks first, and it is still open. */}
+        {/* Featured 1 — the number everybody asks first. */}
         <div className="my-10">
           <PullQuote
             placement="flow"
             rotation={-1}
             labels={[{ label: "Prijs per ploeg" }]}
           >
-            {`${darts.prijs.dummy} voor een ploeg van vier. Nog niet beslist — dit cijfer staat er om de pagina te kunnen lezen, niet om op te rekenen.`}
+            {`${darts.prijs.tekst} — een ploeg is vier spelers.`}
           </PullQuote>
         </div>
 
@@ -137,18 +140,19 @@ export default function DartsPage() {
           </ul>
         </section>
 
-        <section className="mt-4" id="inschrijven" aria-label="Inschrijven">
-          <SectionHeader title="Inschrijven" as="h2" ruled />
-          <p className="text-ink">{open(darts.inschrijven.dummy)}</p>
-        </section>
+        {/* The page stays static. The block closes itself after the event day
+            and reads the spots left per request — both in the browser. */}
+        <DartsSignup />
 
         <section className="mt-14">
           <SectionHeader title="Reglement" as="h2" ruled />
           <p className="text-ink">{open(darts.reglement.dummy)}</p>
         </section>
 
-        {/* Featured 2 — the one rule that costs €70 a board when it is missed. */}
-        <div className="my-10">
+        {/* Featured 2 — the one rule that costs €70 a board when it is missed.
+            `darts.wettelijk.regel` ("Verboden op de openbare weg te gooien") is
+            for print only: it stays in the JSON and is not rendered here. */}
+        <div className="mt-10 mb-16">
           <PullQuote
             placement="flow"
             rotation={1}
@@ -157,8 +161,6 @@ export default function DartsPage() {
             {darts.reglement.vast[0]}
           </PullQuote>
         </div>
-
-        <p className="text-ink-muted mb-16 text-sm">{darts.wettelijk.regel}</p>
       </PageContainer>
     </>
   );

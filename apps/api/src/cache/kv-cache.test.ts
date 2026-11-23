@@ -160,6 +160,10 @@ describe("TTL constants", () => {
     expect(TTL.NEXT_MATCHES).toBe(60 * 60 * 4);
   });
 
+  it("NEXT_MATCHES_QUIET is 12 hours", () => {
+    expect(TTL.NEXT_MATCHES_QUIET).toBe(60 * 60 * 12);
+  });
+
   it("MATCHES_TEAM is 24 hours", () => {
     expect(TTL.MATCHES_TEAM).toBe(60 * 60 * 24);
   });
@@ -181,6 +185,7 @@ describe("TTL constants", () => {
     for (const ttl of [
       TTL.MATCHES_TEAM,
       TTL.NEXT_MATCHES,
+      TTL.NEXT_MATCHES_QUIET,
       TTL.MATCHES_WINDOW,
       TTL.MATCH_DETAIL_LIVE,
       TTL.MATCH_DETAIL_MATCHDAY,

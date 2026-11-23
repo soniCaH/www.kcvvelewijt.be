@@ -1,6 +1,6 @@
 # Ralph — this repo's values
 
-`/ralph-once` and `/ralph-afk` run from the shared core in `~/personal-skills/ralph-once/` and `~/personal-skills/ralph-afk/`. This file holds only what is true for www.kcvvelewijt.be. Its sections follow `~/personal-skills/ralph-afk/REPO-CONFIG.md`; the shared rules (branches, commits, labels, who merges) are in `~/Sites/KCVV/CLAUDE.md`.
+`/ralph-afk` runs from the shared core in `~/personal-skills/ralph-afk/`. This file holds only what is true for www.kcvvelewijt.be. Its sections follow `~/personal-skills/ralph-afk/REPO-CONFIG.md`; the shared rules (branches, commits, labels, who merges) are in `~/personal-skills/ralph-afk/SKILL.md` § Shared rules.
 
 ## Config
 
@@ -27,8 +27,6 @@ EXCLUDE_TITLE_PREFIX=''
 5. Any ADR (`docs/adr/`) or design doc the issue names.
 6. Reads Sanity, calls the BFF, runs an Effect in a page, or changes `packages/api-contract` or `apps/api`: `.claude/skills/kcvv-stack/SKILL.md` (`fetchGroq`, `runPromise`, `degradeSection`, the wrangler commands).
 7. Designs an interface or chases a bug: `docs/agents/code-patterns.md`.
-
-Before code, re-validate each acceptance criterion against the repo today. A criterion already met, or contradicted by the code, goes in the PR body, never silently reinterpreted.
 
 ## Bootstrap
 
@@ -65,7 +63,7 @@ The gate is `.claude/CLAUDE.md` → Git Workflow 3. `CHECK_CMD` (§ Config) is i
 
 ## Long runs
 
-- A full visual-regression capture or check (`vr:check`, `vr:update*`) can pass 10 minutes. The core's long-run handoff applies.
+- A full visual-regression capture or check (`vr:check`, `vr:update*`) can pass 10 minutes. The core's long-run rule applies (run it in the background and end the turn; the agent is woken when it exits).
 
 ## Pre-flight
 

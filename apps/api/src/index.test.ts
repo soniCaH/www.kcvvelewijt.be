@@ -180,6 +180,49 @@ describe("worker fetch — /webhooks/index is exempt and keeps its HMAC", () => 
   });
 });
 
+describe("worker fetch — /webhooks/darts-paid is exempt and keeps its HMAC (#3812)", () => {
+  const webhook = (headers: Record<string, string>, body: string) =>
+    new Request("https://kcvv-api.workers.dev/webhooks/darts-paid", {
+      method: "POST",
+      headers,
+      body,
+    });
+
+  it("refuses an unsigned webhook with its own HMAC check, without the BFF key", async () => {
+    const res = await worker.fetch(
+      webhook({ "content-type": "application/json" }, "{}"),
+      env({ BFF_SHARED_SECRET: undefined }),
+      ctx,
+    );
+    expect(res.status).toBe(401);
+    expect(await res.text()).toBe("Unauthorized");
+    expect(handlerSpy).not.toHaveBeenCalled();
+  });
+
+  it("lets a signed webhook past the shared-secret check without the header", async () => {
+    // A 401 above could also be the BFF gate; this 200 can only come from the
+    // webhook route's own HMAC path (another type: no Sanity read, no mail).
+    const body = JSON.stringify({ _id: "a", _type: "article" });
+    const res = await worker.fetch(
+      webhook(
+        {
+          "content-type": "application/json",
+          "sanity-webhook-signature": await signPayload(body),
+        },
+        body,
+      ),
+      env({ BFF_SHARED_SECRET: undefined }),
+      ctx,
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      ok: true,
+      action: "skipped_not_applicable",
+    });
+    expect(handlerSpy).not.toHaveBeenCalled();
+  });
+});
+
 describe("worker fetch — /calendar redirects old subscribers (#3578)", () => {
   const calendar = (query: string, method = "GET") =>
     new Request(`https://footbalisto.be/calendar${query}`, { method });

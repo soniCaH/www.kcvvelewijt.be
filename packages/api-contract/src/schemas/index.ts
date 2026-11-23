@@ -7,3 +7,4 @@ export * from "./related";
 export * from "./player-stats";
 export * from "./search";
 export * from "./forms";
+export * from "./darts";

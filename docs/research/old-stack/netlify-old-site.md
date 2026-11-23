@@ -107,7 +107,8 @@ The site's forms are Google Forms (`forms.gle`).
 | `/evenementen` → `/events/` (302)                                      | route             | **yes** — `/evenementen` is the new route                                                           |
 | `https://sponsoring.kcvvelewijt.be/*` → workers.dev `/:splat` (`302!`) | **sponsoring**    | **no** — and it cannot be, see §4                                                                   |
 
-`static/darts/poster-liggend.jpg` is also served by the new site (`200`).
+`static/darts/poster-liggend.jpg` now redirects (308) to `/darts/poster-liggend-v2.jpg` on the new
+site: the old poster had an inverted QR and was replaced under a new name.
 
 **Netlify-side env vars:** not readable without the dashboard. The repo's builds take every value
 from GitHub secrets, so Netlify env vars matter only to Netlify-side builds from the build hook.

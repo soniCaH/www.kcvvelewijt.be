@@ -70,7 +70,7 @@ interface MembershipFormProps {
 type SubmitState =
   "idle" | "submitting" | "success" | "invalid" | "transport-error";
 
-function CheckboxField({
+export function CheckboxField({
   id,
   checked,
   onChange,
@@ -268,20 +268,55 @@ function MembershipFormFields({
     return errors;
   };
 
-  // Field names only, never values; sorted, so client and server agree on one
-  // problem. `role` is omitted until one is chosen. No names, no event (#3637).
-  const trackFormError = (
-    errors: Record<string, string>,
-    source: "client" | "server",
-  ) => {
-    const names = Object.keys(errors).sort();
-    if (names.length === 0) return;
-    trackEvent("membership_form_error", {
-      fields: names.join(","),
-      source,
-      ...(role ? { role } : {}),
-    });
-  };
+  // What just happened, for analytics only. The submit handler records the
+  // outcome here (a fresh object per outcome, built from the values it
+  // submitted) and the effect below fires the event from it (#3817).
+  const [report, setReport] = useState<
+    | {
+        kind: "submit";
+        role: MembershipRole | "";
+        isMinor: boolean;
+        hasPriorClub: boolean;
+        hasRemark: boolean;
+      }
+    | {
+        kind: "error";
+        errors: Record<string, string>;
+        source: "client" | "server";
+        role: MembershipRole | "";
+      }
+    | null
+  >(null);
+  useEffect(() => {
+    if (!report) return;
+    switch (report.kind) {
+      case "submit":
+        trackEvent("membership_form_submit", {
+          role: report.role,
+          is_minor: report.isMinor,
+          has_prior_club: report.hasPriorClub,
+          has_remark: report.hasRemark,
+        });
+        return;
+      case "error": {
+        // Field names only, never values; sorted, so client and server agree on
+        // one problem. `role` is omitted until one is chosen. No names, no event
+        // (#3637).
+        const names = Object.keys(report.errors).sort();
+        if (names.length === 0) return;
+        trackEvent("membership_form_error", {
+          fields: names.join(","),
+          source: report.source,
+          ...(report.role ? { role: report.role } : {}),
+        });
+        return;
+      }
+      default: {
+        const unreachable: never = report;
+        throw new Error(`Unhandled report: ${JSON.stringify(unreachable)}`);
+      }
+    }
+  }, [report]);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -289,7 +324,12 @@ function MembershipFormFields({
 
     const clientErrors = validate();
     if (Object.keys(clientErrors).length > 0) {
-      trackFormError(clientErrors, "client");
+      setReport({
+        kind: "error",
+        errors: clientErrors,
+        source: "client",
+        role,
+      });
       setFieldErrors(clientErrors);
       setGeneralError("Controleer de gemarkeerde velden.");
       setState("invalid");
@@ -332,11 +372,12 @@ function MembershipFormFields({
       };
 
       if (response.ok && data.ok) {
-        trackEvent("membership_form_submit", {
+        setReport({
+          kind: "submit",
           role,
-          is_minor: minor,
-          has_prior_club: priorClub.trim() !== "",
-          has_remark: remark.trim() !== "",
+          isMinor: minor,
+          hasPriorClub: priorClub.trim() !== "",
+          hasRemark: remark.trim() !== "",
         });
         clearDraft();
         setState("success");
@@ -348,7 +389,12 @@ function MembershipFormFields({
       // covers a body with no `error` at all.
       if (response.status === 400 && data.fields) {
         setFieldErrors(data.fields);
-        trackFormError(data.fields, "server");
+        setReport({
+          kind: "error",
+          errors: data.fields,
+          source: "server",
+          role,
+        });
       }
       setGeneralError(
         data.error ??
