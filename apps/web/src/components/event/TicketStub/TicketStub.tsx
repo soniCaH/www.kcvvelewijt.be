@@ -135,7 +135,7 @@ export function TicketStub({
           </span>
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col items-start gap-1 px-4 py-3 sm:pr-28">
+        <div className="flex min-w-0 flex-1 flex-col items-start gap-1 px-4 py-3">
           <MonoLabel variant="pill-ink" size="sm">
             {type}
           </MonoLabel>
@@ -150,22 +150,23 @@ export function TicketStub({
               {meta}
             </span>
           )}
+          {/* In flow, like NewsCard's "Lees verder": opacity-only, so its row
+              is reserved and can never sit on top of a wrapping meta. */}
+          <span
+            aria-hidden="true"
+            className={cn(
+              MONO_LABEL_CLASS,
+              // `reveal-on-hover` (globals.css, #2393) carries the resting
+              // `opacity: 0` *and* an `@media (hover: none)` fallback to
+              // `opacity: 1` — a bare `opacity-0` had no such fallback, so
+              // "Meer details →" never appeared on touch (#2474 rule 9).
+              "text-jersey-deep reveal-on-hover pointer-events-none self-end",
+              "group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none",
+            )}
+          >
+            Meer details →
+          </span>
         </div>
-
-        <span
-          aria-hidden="true"
-          className={cn(
-            MONO_LABEL_CLASS,
-            // `reveal-on-hover` (globals.css, #2393) carries the resting
-            // `opacity: 0` *and* an `@media (hover: none)` fallback to
-            // `opacity: 1` — a bare `opacity-0` had no such fallback, so
-            // "Meer details →" never appeared on touch (#2474 rule 9).
-            "text-jersey-deep reveal-on-hover pointer-events-none absolute right-3 bottom-3",
-            "group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none",
-          )}
-        >
-          Meer details →
-        </span>
       </div>
       <LinkPendingDots placement="corner" />
     </Link>

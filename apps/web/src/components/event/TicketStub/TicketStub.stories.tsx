@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect } from "storybook/test";
 import { TicketStub } from "./TicketStub";
 
 const meta = {
@@ -55,6 +56,29 @@ export const AllDay: Story = {
 
 export const NoLocation: Story = {
   args: { location: null },
+};
+
+/**
+ * Phone width with a location long enough to wrap: the "Meer details →" cue
+ * (always shown on touch) must sit clear of the meta line, never on top of it.
+ * `!vr`: assertion-only geometry, like `MatchHero`'s viewport play stories.
+ */
+export const MobileLongLocation: Story = {
+  args: {
+    title: "Spaghetti + Croques",
+    dateStart: "2026-11-28T17:00:00Z",
+    dateEnd: "2026-11-29T22:00:00Z",
+    location: "Kantine KCVV Elewijt, Driesstraat 32 - 1982 Elewijt",
+  },
+  globals: { viewport: { value: "kcvvMobile" } },
+  tags: ["!vr"],
+  play: async ({ canvas }) => {
+    const metaBox = canvas
+      .getByTestId("ticket-stub-meta")
+      .getBoundingClientRect();
+    const cue = canvas.getByText("Meer details →").getBoundingClientRect();
+    await expect(cue.top).toBeGreaterThanOrEqual(metaBox.bottom);
+  },
 };
 
 /**
