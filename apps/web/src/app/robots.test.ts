@@ -22,12 +22,16 @@ describe("robots.ts", () => {
     }
   });
 
-  it("allows full crawl in production", () => {
+  it("allows the site and disallows the opponent pages in production", () => {
     process.env.VERCEL_ENV = "production";
     const result = robots();
 
     expect(result).toEqual({
-      rules: { userAgent: "*", allow: ["/", "/llms.txt"] },
+      rules: {
+        userAgent: "*",
+        allow: ["/", "/llms.txt"],
+        disallow: ["/tegenstander/"],
+      },
       sitemap: "https://www.kcvvelewijt.be/sitemap.xml",
     });
   });
