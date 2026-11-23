@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { within, userEvent, spyOn } from "storybook/test";
+import { blurActive } from "@test-storybook/blurActive";
 import { CalendarSubscribePanel } from "./CalendarSubscribePanel";
 import type { CalendarTeamInfo } from "@/app/(main)/kalender/utils";
 
@@ -39,6 +40,7 @@ export const ActivitiesOff: Story = {
     await userEvent.click(
       canvas.getByRole("switch", { name: /clubactiviteiten/i }),
     );
+    blurActive(canvasElement);
   },
 };
 
@@ -58,6 +60,7 @@ export const CopiedFeedback: Story = {
     await userEvent.click(
       canvas.getByRole("button", { name: /Kopieer link/i }),
     );
+    blurActive(canvasElement);
   },
 };
 
@@ -79,5 +82,6 @@ export const CopyFailed: Story = {
       canvas.getByRole("button", { name: /Kopieer link/i }),
     );
     await canvas.findByRole("alert");
+    blurActive(canvasElement);
   },
 };

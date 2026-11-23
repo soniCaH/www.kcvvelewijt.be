@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { within, userEvent } from "storybook/test";
+import { blurActive } from "@test-storybook/blurActive";
 import { TeamMatchesSection } from "./TeamMatchesSection";
 import type { ScheduleMatch, ScheduleRow } from "@/components/match/types";
 import { VR_FROZEN_NOW_ISO } from "../../../../test/vr/frozen-clock";
@@ -106,6 +107,7 @@ export const WithSubscribePanelOpen: Story = {
     await userEvent.click(
       canvas.getByRole("button", { name: "Zet in je agenda" }),
     );
+    blurActive(canvasElement);
   },
 };
 

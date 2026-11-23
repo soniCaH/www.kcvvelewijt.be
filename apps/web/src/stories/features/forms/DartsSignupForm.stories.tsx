@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { userEvent, within } from "storybook/test";
+import { blurActive } from "@test-storybook/blurActive";
 import { DartsSignupForm } from "@/components/darts/DartsSignup/DartsSignup";
 
 /**
@@ -63,10 +64,6 @@ const fillAndSubmit = async (canvasElement: HTMLElement) => {
   await userEvent.click(canvas.getByLabelText(/pas definitief/));
   await userEvent.click(canvas.getByText("Schrijf onze ploeg in"));
 };
-
-/** Drop focus so the submit button's `:focus-visible` ring never paints: Chromium paints it only when the capture frame holds OS focus, which varies per run. */
-const blurActive = (canvasElement: HTMLElement) =>
-  (canvasElement.ownerDocument.activeElement as HTMLElement | null)?.blur();
 
 export default meta;
 type Story = StoryObj<typeof meta>;
