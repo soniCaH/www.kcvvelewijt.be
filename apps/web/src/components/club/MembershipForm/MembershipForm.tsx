@@ -268,9 +268,9 @@ function MembershipFormFields({
     return errors;
   };
 
-  // What just happened, for analytics only. Set where the outcome is known and
-  // reported from an effect (a fresh object per outcome), never from the async
-  // submit handler, which cannot see derived state (#3817).
+  // What just happened, for analytics only. The submit handler records the
+  // outcome here (a fresh object per outcome, built from the values it
+  // submitted) and the effect below fires the event from it (#3817).
   const [report, setReport] = useState<
     | {
         kind: "submit";

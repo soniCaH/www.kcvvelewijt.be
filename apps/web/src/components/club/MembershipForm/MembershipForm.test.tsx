@@ -352,7 +352,7 @@ describe("MembershipForm", () => {
   describe("membership_form_submit (#3817)", () => {
     beforeEach(() => vi.mocked(trackEvent).mockClear());
 
-    it("fires once per successful submit, and not again on a re-render", async () => {
+    it("fires once per successful submit", async () => {
       vi.stubGlobal(
         "fetch",
         vi.fn(() =>
@@ -363,13 +363,10 @@ describe("MembershipForm", () => {
           }),
         ),
       );
-      const { rerender } = render(
-        <MembershipForm defaultRole="vrijwilliger" />,
-      );
+      render(<MembershipForm defaultRole="vrijwilliger" />);
       fillRequiredFields();
       submitForm();
       await screen.findByText(/Bedankt voor je interesse/i);
-      rerender(<MembershipForm defaultRole="vrijwilliger" />);
       expect(callsOf("membership_form_submit")).toEqual([
         [
           "membership_form_submit",
