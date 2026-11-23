@@ -34,7 +34,8 @@ const meta: Meta<StoryArgs> = {
   parameters: { layout: "centered" },
   decorators: [
     (Story) => (
-      <div className="bg-cream w-[760px] max-w-full p-12">
+      // Definite width (#3830): the centered root is shrink-to-fit. 100vw includes a classic scrollbar; 2rem mirrors the 1rem padding on #storybook-root.
+      <div className="bg-cream w-[min(760px,calc(100vw-2rem))] max-w-full p-4 sm:p-12">
         <Story />
       </div>
     ),
