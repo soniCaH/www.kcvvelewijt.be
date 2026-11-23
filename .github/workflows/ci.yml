@@ -175,6 +175,17 @@ jobs:
           tar -xJf "$RUNNER_TEMP/shellcheck.tar.xz" -C "$RUNNER_TEMP"
           PATH="$RUNNER_TEMP/shellcheck-v0.11.0:$PATH" pnpm run lint:sh
 
+      # MD040: a fenced code block names its language (#3839). Only that rule is
+      # on; `.markdownlint-cli2.jsonc` says so.
+      - name: Lint markdown (MD040)
+        run: pnpm run lint:md
+
+      # A backticked path in a CLAUDE.md or docs/ file must exist (#3839).
+      - name: Check doc paths
+        run: |
+          pnpm run test:doc-paths
+          pnpm run lint:doc-paths
+
       - name: Unused dependencies (knip)
         run: pnpm run knip
 
