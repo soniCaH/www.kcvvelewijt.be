@@ -2194,6 +2194,47 @@ export type SHARE_EVENTS_QUERY_RESULT = {
   } | null;
 };
 
+// Source: ../web/src/lib/repositories/form-routing.repository.ts
+// Variable: FORM_ROUTING_CONTACTS_QUERY
+// Query: *[_type == "formRoutingConfig"][0]{  "speler": spelerContact->{    "functionTitle": title,    "holder": select(active == true => coalesce(members[defined(@->_id) && @->archived != true], [])[0]->{ firstName, lastName })  },  "jeugdspeler": jeugdspelerContact->{    "functionTitle": title,    "holder": select(active == true => coalesce(members[defined(@->_id) && @->archived != true], [])[0]->{ firstName, lastName })  },  "vrijwilliger": vrijwilligerContact->{    "functionTitle": title,    "holder": select(active == true => coalesce(members[defined(@->_id) && @->archived != true], [])[0]->{ firstName, lastName })  },  "trainer": trainerContact->{    "functionTitle": title,    "holder": select(active == true => coalesce(members[defined(@->_id) && @->archived != true], [])[0]->{ firstName, lastName })  },  "scheidsrechter": scheidsrechterContact->{    "functionTitle": title,    "holder": select(active == true => coalesce(members[defined(@->_id) && @->archived != true], [])[0]->{ firstName, lastName })  }}
+export type FORM_ROUTING_CONTACTS_QUERY_RESULT = {
+  speler: {
+    functionTitle: string | null;
+    holder: {
+      firstName: string | null;
+      lastName: string | null;
+    } | null;
+  } | null;
+  jeugdspeler: {
+    functionTitle: string | null;
+    holder: {
+      firstName: string | null;
+      lastName: string | null;
+    } | null;
+  } | null;
+  vrijwilliger: {
+    functionTitle: string | null;
+    holder: {
+      firstName: string | null;
+      lastName: string | null;
+    } | null;
+  } | null;
+  trainer: {
+    functionTitle: string | null;
+    holder: {
+      firstName: string | null;
+      lastName: string | null;
+    } | null;
+  } | null;
+  scheidsrechter: {
+    functionTitle: string | null;
+    holder: {
+      firstName: string | null;
+      lastName: string | null;
+    } | null;
+  } | null;
+} | null;
+
 // Source: ../web/src/lib/repositories/homepage.repository.ts
 // Variable: HOMEPAGE_QUERY
 // Query: *[_type == "homePage"][0] {    "bannerSlotA": bannerSlotA-> {      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",      "imageDimensions": image.asset->metadata.dimensions{width, height},      alt,      href    },    "bannerSlotB": bannerSlotB-> {      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",      "imageDimensions": image.asset->metadata.dimensions{width, height},      alt,      href    },    "bannerSlotC": bannerSlotC-> {      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",      "imageDimensions": image.asset->metadata.dimensions{width, height},      alt,      href    },    "matchesSliderPlaceholder": matchesSliderPlaceholder {      nextSeasonKickoff,      announcementText,      announcementHref,      "highlightImage": highlightImage {        alt,        "asset": asset->{          "url": url + "?w=1344&h=320&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(^.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(^.hotspot.y, 0.5)),          "lqip": metadata.lqip        }      }    },    "youthPlayerCount": youthPlayerCount,    "youthTeamCount": youthTeamCount  }
@@ -2846,6 +2887,7 @@ declare global {
     '*[_type == "event" && slug.current == $slug][0] {\n  "id": _id,\n  "updatedAt": _updatedAt,\n  "title": coalesce(title, ""),\n  "slug": coalesce(slug.current, ""),\n  eventType,\n  "dateStart": coalesce(dateStart, ""),\n  dateEnd,\n  location,\n  "coverImageUrl": coverImage.asset->url + "?w=1600&h=900&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(coverImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(coverImage.hotspot.y, 0.5)),\n  "coverImageAlt": coverImage.alt,\n  externalLink\n}': EVENT_BY_SLUG_QUERY_RESULT;
     '*[_type == "article" && articleType == "event" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && coalesce(body[_type == "eventFact"][0].endDate, body[_type == "eventFact"][0].date) >= $today] {\n  "id": _id,\n  "title": coalesce(pt::text(title), title, ""),\n  "slug": coalesce(slug.current, ""),\n  "fact": body[_type == "eventFact"][0]{ date, endDate, startTime, location, eventType }\n}': EVENT_ARTICLES_QUERY_RESULT;
     '{\n  "list": *[_type == "event" && defined(slug.current) && dateTime(coalesce(dateEnd, dateStart)) >= dateTime($since)] | order(dateStart asc) [0...30] {\n  "slug": coalesce(slug.current, ""), "title": coalesce(title, ""), eventType,\n  "dateStart": coalesce(dateStart, ""), dateEnd, location,\n  "coverUrl": coverImage.asset->url, "hotspot": coverImage.hotspot{ x, y },\n  "crop": coverImage.crop{ top, bottom, left, right },\n  "dimensions": coverImage.asset->metadata.dimensions{ width, height }\n},\n  "picked": *[_type == "event" && slug.current == $slug][0] {\n  "slug": coalesce(slug.current, ""), "title": coalesce(title, ""), eventType,\n  "dateStart": coalesce(dateStart, ""), dateEnd, location,\n  "coverUrl": coverImage.asset->url, "hotspot": coverImage.hotspot{ x, y },\n  "crop": coverImage.crop{ top, bottom, left, right },\n  "dimensions": coverImage.asset->metadata.dimensions{ width, height }\n}\n}': SHARE_EVENTS_QUERY_RESULT;
+    '*[_type == "formRoutingConfig"][0]{\n  "speler": spelerContact->{\n    "functionTitle": title,\n    "holder": select(active == true => coalesce(members[defined(@->_id) && @->archived != true], [])[0]->{ firstName, lastName })\n  },\n  "jeugdspeler": jeugdspelerContact->{\n    "functionTitle": title,\n    "holder": select(active == true => coalesce(members[defined(@->_id) && @->archived != true], [])[0]->{ firstName, lastName })\n  },\n  "vrijwilliger": vrijwilligerContact->{\n    "functionTitle": title,\n    "holder": select(active == true => coalesce(members[defined(@->_id) && @->archived != true], [])[0]->{ firstName, lastName })\n  },\n  "trainer": trainerContact->{\n    "functionTitle": title,\n    "holder": select(active == true => coalesce(members[defined(@->_id) && @->archived != true], [])[0]->{ firstName, lastName })\n  },\n  "scheidsrechter": scheidsrechterContact->{\n    "functionTitle": title,\n    "holder": select(active == true => coalesce(members[defined(@->_id) && @->archived != true], [])[0]->{ firstName, lastName })\n  }\n}': FORM_ROUTING_CONTACTS_QUERY_RESULT;
     '*[_type == "homePage"][0] {\n    "bannerSlotA": bannerSlotA-> {\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      "imageDimensions": image.asset->metadata.dimensions{width, height},\n      alt,\n      href\n    },\n    "bannerSlotB": bannerSlotB-> {\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      "imageDimensions": image.asset->metadata.dimensions{width, height},\n      alt,\n      href\n    },\n    "bannerSlotC": bannerSlotC-> {\n      "imageUrl": image.asset->url + "?w=1200&q=80&fm=webp&fit=max",\n      "imageDimensions": image.asset->metadata.dimensions{width, height},\n      alt,\n      href\n    },\n    "matchesSliderPlaceholder": matchesSliderPlaceholder {\n      nextSeasonKickoff,\n      announcementText,\n      announcementHref,\n      "highlightImage": highlightImage {\n        alt,\n        "asset": asset->{\n          "url": url + "?w=1344&h=320&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(^.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(^.hotspot.y, 0.5)),\n          "lqip": metadata.lqip\n        }\n      }\n    },\n    "youthPlayerCount": youthPlayerCount,\n    "youthTeamCount": youthTeamCount\n  }': HOMEPAGE_QUERY_RESULT;
     '*[_type == "jeugdLandingPage"][0] {\n  editorialCards[] {\n    tag, title, description, arrowText, href,\n    "imageUrl": image.asset->url + "?w=900&q=80&fm=webp",\n    position, cardType\n  }\n}': JEUGD_LANDING_PAGE_QUERY_RESULT;
     '*[_type == "page" && defined(slug.current)] | order(title asc) {\n  "id": _id, "title": coalesce(title, ""), "slug": coalesce(slug.current, ""),\n  "updatedAt": _updatedAt\n}': PAGES_QUERY_RESULT;
