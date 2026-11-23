@@ -132,12 +132,28 @@ export const getMatchesWindowHandler = (): Effect.Effect<
 
 const HOUR_MS = 60 * 60 * 1000;
 
-/** A "scheduled" match past kickoff by under 48 h: its result is still pending. */
+/**
+ * A match is "in play" from kickoff until kickoff + 2 h (#3669): 90 min,
+ * half-time and stoppage, rounded up. PSD has no live scores, so a refetch in
+ * that window returns the same score-less "scheduled" match. An entry fetched
+ * at or after kickoff is therefore not refreshed before kickoff + 2 h; one
+ * already stale at kickoff may refresh once. Every "past kickoff, still
+ * scheduled" rule starts at the end of this window.
+ */
+export const IN_PLAY_MS = 2 * HOUR_MS;
+
+/** True from kickoff + 2 h on: the in-play window is over (`IN_PLAY_MS`). */
+export const isPastInPlay = (kickoff: number, now: number): boolean =>
+  now - kickoff >= IN_PLAY_MS;
+
+/**
+ * A "scheduled" match from kickoff + 2 h (`IN_PLAY_MS`) up to kickoff + 48 h:
+ * its result is still pending.
+ */
 const isResultPending = (m: Match, now: number): boolean => {
+  if (m.status !== "scheduled" || !hasValidKickoff(m)) return false;
   const kickoff = kickoffMs(m.date);
-  return (
-    m.status === "scheduled" && now > kickoff && now - kickoff < 48 * HOUR_MS
-  );
+  return isPastInPlay(kickoff, now) && now - kickoff < 48 * HOUR_MS;
 };
 
 /**
@@ -150,12 +166,14 @@ const isResultPending = (m: Match, now: number): boolean => {
  * to a day after kickoff — while the match-detail page, on its own
  * proximity-aware TTL, already showed the final score.
  *
- * Evaluated against the CACHED list on read: while any match is past kickoff
- * but still "scheduled" — result pending — refresh at matchday cadence (15 min)
- * so the score lands minutes after PSD publishes it. The 48h grace window
- * bounds the churn for matches that never settle (e.g. silently dropped
- * fixtures). Statuses that already changed (postponed/cancelled/stopped) need
- * no faster refresh — the list is correct for them.
+ * Evaluated against the CACHED list on read: while any match is past
+ * kickoff + 2 h but still "scheduled" — result pending — refresh at matchday
+ * cadence (15 min) so the score lands minutes after PSD publishes it. While the
+ * match is in play (kickoff to kickoff + 2 h, `IN_PLAY_MS`) there is nothing
+ * to fetch, so the daily tier holds. The 48h grace window bounds the churn for
+ * matches that never settle (e.g. silently dropped fixtures). Statuses that
+ * already changed (postponed/cancelled/stopped) need no faster refresh — the
+ * list is correct for them.
  */
 export function teamMatchesTtl(
   matches: readonly Match[],
@@ -200,8 +218,8 @@ export function nextMatchesTtl(
  * ladder as `nextMatchesTtl`, with the pending test of `teamMatchesTtl`.
  *
  * The window also holds finished matches earlier today, so a past kickoff does
- * NOT mean "refresh fast": only a past kickoff still `scheduled` inside the 48 h
- * grace window (`isResultPending`) does → 15 min. Otherwise the nearest FUTURE
+ * NOT mean "refresh fast": only a kickoff 2 h or more past (`IN_PLAY_MS`), still
+ * `scheduled` inside the 48 h grace window (`isResultPending`), does → 15 min. Otherwise the nearest FUTURE
  * kickoff picks 4 h (< 24 h away) or 12 h; past kickoffs are ignored. A list
  * with no future kickoff (empty, or only finished matches) takes 4 h, as before.
  */
@@ -220,7 +238,7 @@ export const matchesWindowTtl = (
 };
 
 // `kickoffMs` throws a RangeError on an invalid date, so drop those first.
-const hasValidKickoff = (m: Match): boolean =>
+export const hasValidKickoff = (m: Pick<Match, "date">): boolean =>
   Number.isFinite(new Date(m.date).getTime());
 
 const validKickoffs = (matches: readonly Match[]): number[] =>
@@ -245,6 +263,14 @@ function hasMatchReportData(detail: MatchDetail): boolean {
 function proximityTtl(kickoff: number, finished: boolean, now: number): number {
   if (finished && now - kickoff >= 48 * HOUR_MS) return TTL.MATCH_DETAIL_PAST;
 
+  // In play (#3669): a refetch shows nothing new. The extra 15 min covers an
+  // entry fetched up to 15 min before kickoff (the pre-kickoff ladder), so it
+  // too stays fresh until kickoff + 2 h. From then the ladder below (15 min)
+  // re-evaluates against `fetchedAt`, so the longer value costs nothing later.
+  if (now > kickoff && !isPastInPlay(kickoff, now)) {
+    return IN_PLAY_MS / 1000 + TTL.MATCH_DETAIL_LIVE;
+  }
+
   const distanceMs = Math.abs(kickoff - now);
   if (distanceMs < 3 * HOUR_MS) return TTL.MATCH_DETAIL_LIVE;
   if (distanceMs < 24 * HOUR_MS) return TTL.MATCH_DETAIL_MATCHDAY;
@@ -266,6 +292,8 @@ interface MatchReportState {
  * matters (live / matchday) and rarely for distant or settled matches.
  *
  *   finished ≥48h ago (with report) → 7d   (immutable)
+ *   kickoff < now < kickoff + 2h → 2h15 (in play, #3669: an entry fetched at or
+ *                   after kickoff is not refreshed before kickoff + 2h)
  *   |kickoff − now| < 3h → 900s  (live)
  *                   < 24h → 900s  (matchday)
  *                   < 7d  → 3600s (this week)
@@ -292,7 +320,7 @@ export function matchDetailTtl(
   const natural = proximityTtl(kickoff, isSettledMatchStatus(status), now);
 
   const reportPending =
-    now > kickoff &&
+    isPastInPlay(kickoff, now) &&
     !report.hasReportData &&
     (report.hasReport || now - kickoff < 48 * HOUR_MS);
 
@@ -300,15 +328,21 @@ export function matchDetailTtl(
 }
 
 /**
- * Past kickoff and still "scheduled" (no result yet): a stale preview is the
- * wrong answer, not just an old one, so the read fetches it now (one `/info`
- * call). Postponed / stopped / cancelled never settle, so they never wait.
+ * Kickoff + 2 h or more past (`IN_PLAY_MS`) and still "scheduled" (no result
+ * yet): a stale preview is the wrong answer, not just an old one, so the read
+ * fetches it now (one `/info` call). While the match is in play there is no
+ * result to fetch. Postponed / stopped / cancelled never settle, so they never
+ * wait.
  */
 export function needsInlineRefresh(
   detail: Pick<MatchDetail, "date" | "status">,
   now: number = Date.now(),
 ): boolean {
-  return detail.status === "scheduled" && kickoffMs(detail.date) < now;
+  return (
+    detail.status === "scheduled" &&
+    hasValidKickoff(detail) &&
+    isPastInPlay(kickoffMs(detail.date), now)
+  );
 }
 
 export const getMatchDetailHandler = (

@@ -11,6 +11,7 @@ import {
   needsInlineRefresh,
   nextMatchesTtl,
   matchesWindowTtl,
+  IN_PLAY_MS,
   CACHE_VERSION,
 } from "./matches";
 import { HARD_TTL_DEFAULT, TTL } from "../cache/kv-cache";
@@ -528,9 +529,35 @@ describe("matchDetailTtl", () => {
     expect(matchDetailTtl(at(0), "in_progress", settled, now)).toBe(
       TTL.MATCH_DETAIL_LIVE,
     );
-    expect(matchDetailTtl(at(-1 * H), "finished", settled, now)).toBe(
+    expect(matchDetailTtl(at(-2 * H), "finished", settled, now)).toBe(
       TTL.MATCH_DETAIL_LIVE,
     );
+  });
+
+  it("in play (kickoff to kickoff + 2h) → 2h15, never the 15 min live tier (#3669)", () => {
+    const ttl = IN_PLAY_MS / 1000 + TTL.MATCH_DETAIL_LIVE;
+    expect(ttl).toBeGreaterThanOrEqual(TTL.MATCH_DETAIL_LIVE);
+    expect(matchDetailTtl(at(-1), "scheduled", settled, now)).toBe(ttl);
+    expect(
+      matchDetailTtl(at(-1 * H), "scheduled", previewReportless, now),
+    ).toBe(ttl);
+    expect(
+      matchDetailTtl(at(-2 * H + 1), "scheduled", previewFlagged, now),
+    ).toBe(ttl);
+    // From kickoff + 2 h the report-pending override takes over, as before.
+    expect(
+      matchDetailTtl(at(-2 * H), "scheduled", previewReportless, now),
+    ).toBe(TTL.MATCH_DETAIL_MATCHDAY);
+  });
+
+  it("keeps an entry fetched up to 15 min before kickoff fresh until kickoff + 2h (#3669)", () => {
+    // Fetched at kickoff − 15 min (the latest a 15 min pre-kickoff entry can
+    // still be fresh at kickoff), read at kickoff + 1h59: the in-play TTL must
+    // still cover it.
+    const fetchedAt = now - 15 * 60_000;
+    const readAt = now + 1 * H + 59 * 60_000;
+    const ttl = matchDetailTtl(at(0), "scheduled", previewReportless, readAt);
+    expect(fetchedAt + ttl * 1000).toBeGreaterThanOrEqual(readAt);
   });
 
   it("3h–24h from kickoff → matchday (900s)", () => {
@@ -620,9 +647,9 @@ describe("matchDetailTtl", () => {
     });
 
     it("does not over-shorten a live match already under matchday (keeps 900s)", () => {
-      // 1h after kickoff, no report yet → still LIVE (min(900s, 900s) = 900s).
+      // 2h after kickoff, no report yet → still LIVE (min(900s, 900s) = 900s).
       expect(
-        matchDetailTtl(at(-1 * H), "finished", previewReportless, now),
+        matchDetailTtl(at(-2 * H), "finished", previewReportless, now),
       ).toBe(TTL.MATCH_DETAIL_LIVE);
     });
 
@@ -682,11 +709,17 @@ describe("teamMatchesTtl", () => {
     );
   });
 
-  it("starts fast-polling the instant after kickoff, not at kickoff", () => {
+  it("starts fast-polling at kickoff + 2h, not while the match is in play (#3669)", () => {
     expect(teamMatchesTtl([match(at(0), "scheduled")], now)).toBe(
       TTL.MATCHES_TEAM,
     );
     expect(teamMatchesTtl([match(at(-1), "scheduled")], now)).toBe(
+      TTL.MATCHES_TEAM,
+    );
+    expect(teamMatchesTtl([match(at(-2 * H + 1), "scheduled")], now)).toBe(
+      TTL.MATCHES_TEAM,
+    );
+    expect(teamMatchesTtl([match(at(-2 * H), "scheduled")], now)).toBe(
       TTL.MATCH_DETAIL_MATCHDAY,
     );
   });
@@ -800,9 +833,13 @@ describe("matchesWindowTtl", () => {
     expect(matchesWindowTtl(list, now)).toBe(TTL.MATCH_DETAIL_MATCHDAY);
   });
 
-  it("starts the pending cap the instant after kickoff and ends it at the 48h edge", () => {
+  it("starts the pending cap at kickoff + 2h (not in play, #3669) and ends it at the 48h edge", () => {
     expect(matchesWindowTtl([match(at(0))], now)).toBe(TTL.NEXT_MATCHES);
-    expect(matchesWindowTtl([match(at(-1))], now)).toBe(
+    expect(matchesWindowTtl([match(at(-1))], now)).toBe(TTL.NEXT_MATCHES);
+    expect(matchesWindowTtl([match(at(-2 * H + 1))], now)).toBe(
+      TTL.NEXT_MATCHES,
+    );
+    expect(matchesWindowTtl([match(at(-2 * H))], now)).toBe(
       TTL.MATCH_DETAIL_MATCHDAY,
     );
     expect(matchesWindowTtl([match(at(-48 * H + 1))], now)).toBe(
@@ -895,8 +932,15 @@ describe("kickoff boundary — wire date is Brussels wall-clock-as-UTC (#3491)",
     const m = { ...baseMatch, date, status: "scheduled" as const };
     expect(nextMatchesTtl([m], before)).toBe(TTL.NEXT_MATCHES);
     expect(nextMatchesTtl([m], after)).toBe(TTL.MATCH_DETAIL_MATCHDAY);
+    // teamMatchesTtl: the result-pending tier starts at kickoff + 2 h (#3669).
+    expect(teamMatchesTtl([m], after)).toBe(TTL.MATCHES_TEAM);
+    expect(teamMatchesTtl([m], Date.parse(kickoffZ) + IN_PLAY_MS - 1)).toBe(
+      TTL.MATCHES_TEAM,
+    );
+    expect(teamMatchesTtl([m], Date.parse(kickoffZ) + IN_PLAY_MS)).toBe(
+      TTL.MATCH_DETAIL_MATCHDAY,
+    );
     expect(teamMatchesTtl([m], before)).toBe(TTL.MATCHES_TEAM);
-    expect(teamMatchesTtl([m], after)).toBe(TTL.MATCH_DETAIL_MATCHDAY);
     // 48 h grace window is also measured from the real kickoff.
     const k = Date.parse(kickoffZ);
     expect(teamMatchesTtl([m], k + 48 * 3_600_000 - 1)).toBe(
@@ -911,6 +955,84 @@ describe("kickoff boundary — wire date is Brussels wall-clock-as-UTC (#3491)",
     expect(
       matchDetailTtl(date, "finished", done, k + 48 * 3_600_000 + 60_000),
     ).toBe(TTL.MATCH_DETAIL_PAST);
+  });
+});
+
+describe("in-play window on a DST night (#3669)", () => {
+  // Fall-back day, 25 October 2026 (03:00 CEST -> 02:00 CET at 01:00Z): a
+  // 15:00 Brussels kickoff is CET (14:00Z), but the wire date reads 15:00Z.
+  // The edge sits at 16:00Z, not at the wire date + 2 h (17:00Z).
+  const wire = new Date("2026-10-25T15:00:00.000Z");
+  const k = Date.parse("2026-10-25T14:00:00.000Z");
+  const m = { ...baseMatch, date: wire, status: "scheduled" as const };
+  const detail = { date: wire, status: "scheduled" as const };
+
+  it("flips every site at kickoff + 2 h in real time", () => {
+    expect(IN_PLAY_MS).toBe(2 * 3_600_000);
+    expect(teamMatchesTtl([m], k + IN_PLAY_MS - 1)).toBe(TTL.MATCHES_TEAM);
+    expect(teamMatchesTtl([m], k + IN_PLAY_MS)).toBe(TTL.MATCH_DETAIL_MATCHDAY);
+    expect(matchesWindowTtl([m], k + IN_PLAY_MS - 1)).toBe(TTL.NEXT_MATCHES);
+    expect(matchesWindowTtl([m], k + IN_PLAY_MS)).toBe(
+      TTL.MATCH_DETAIL_MATCHDAY,
+    );
+    expect(needsInlineRefresh(detail, k + IN_PLAY_MS - 1)).toBe(false);
+    expect(needsInlineRefresh(detail, k + IN_PLAY_MS)).toBe(true);
+    const preview = { hasReportData: false, hasReport: false };
+    expect(matchDetailTtl(wire, "scheduled", preview, k + IN_PLAY_MS - 1)).toBe(
+      IN_PLAY_MS / 1000 + TTL.MATCH_DETAIL_LIVE,
+    );
+    expect(matchDetailTtl(wire, "scheduled", preview, k + IN_PLAY_MS)).toBe(
+      TTL.MATCH_DETAIL_MATCHDAY,
+    );
+  });
+});
+
+describe("an Invalid Date match must not break a TTL callback (#3669)", () => {
+  const now = new Date("2025-06-01T12:00:00.000Z").getTime();
+  const H = 60 * 60 * 1000;
+  const bad = new Date(Number.NaN);
+  const pending = {
+    ...baseMatch,
+    date: wireDate(now - 5 * H),
+    status: "scheduled" as const,
+  };
+
+  it("teamMatchesTtl skips it and still sees a valid pending match", () => {
+    const list = [{ ...baseMatch, date: bad, status: "scheduled" as const }];
+    expect(teamMatchesTtl(list, now)).toBe(TTL.MATCHES_TEAM);
+    expect(teamMatchesTtl([...list, pending], now)).toBe(
+      TTL.MATCH_DETAIL_MATCHDAY,
+    );
+  });
+
+  it("needsInlineRefresh is false for it", () => {
+    expect(needsInlineRefresh({ date: bad, status: "scheduled" }, now)).toBe(
+      false,
+    );
+  });
+});
+
+describe("needsInlineRefresh", () => {
+  const now = new Date("2025-06-01T12:00:00.000Z").getTime();
+  const at = (offsetMs: number) => wireDate(now + offsetMs);
+  const H = 60 * 60 * 1000;
+  const d = (offsetMs: number, status: MatchType["status"] = "scheduled") => ({
+    date: at(offsetMs),
+    status,
+  });
+
+  it("is false before kickoff and while the match is in play (#3669)", () => {
+    expect(needsInlineRefresh(d(H), now)).toBe(false);
+    expect(needsInlineRefresh(d(0), now)).toBe(false);
+    expect(needsInlineRefresh(d(-1), now)).toBe(false);
+    expect(needsInlineRefresh(d(-2 * H + 1), now)).toBe(false);
+  });
+
+  it("is true from kickoff + 2 h for a scheduled match only", () => {
+    expect(needsInlineRefresh(d(-2 * H), now)).toBe(true);
+    expect(needsInlineRefresh(d(-30 * H), now)).toBe(true);
+    expect(needsInlineRefresh(d(-3 * H, "finished"), now)).toBe(false);
+    expect(needsInlineRefresh(d(-3 * H, "postponed"), now)).toBe(false);
   });
 });
 

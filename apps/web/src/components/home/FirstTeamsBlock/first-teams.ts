@@ -160,10 +160,12 @@ function matchSlot(match: Match, now: Date): "result" | "fixture" | null {
       // — rather than staying in the fixture slot, where it would read as
       // future-tense hours after kickoff and hide the genuinely next match.
       //
-      // The BFF sees the same window from the other side: `teamMatchesTtl`
+      // The BFF sees the window from the other side, and later: this slot
+      // shows "Uitslag volgt" from kickoff, while `teamMatchesTtl`
       // (`apps/api/src/handlers/matches.ts`) drops the team-matches cache to
-      // the matchday TTL while a match is in it, which is what makes this slot
-      // heal quickly once the score lands. Deliberately mirrored in prose, not
+      // the matchday TTL only from kickoff + 2 h (`IN_PLAY_MS`, #3669; PSD has
+      // no live score before then), which is what makes this slot heal
+      // quickly once the score lands. Deliberately mirrored in prose, not
       // shared: separate deployables, and `@kcvv/api-contract` carries schemas,
       // not status predicates — the same split `isSettledMatch` documents. They
       // differ on purpose too, in that the BFF stops widening at 48 h to bound
