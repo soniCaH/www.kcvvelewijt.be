@@ -349,6 +349,56 @@ describe("MembershipForm", () => {
     }
   });
 
+  describe("membership_form_submit (#3817)", () => {
+    beforeEach(() => vi.mocked(trackEvent).mockClear());
+
+    it("fires once per successful submit", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(() =>
+          Promise.resolve({
+            ok: true,
+            status: 200,
+            json: () => Promise.resolve({ ok: true }),
+          }),
+        ),
+      );
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      submitForm();
+      await screen.findByText(/Bedankt voor je interesse/i);
+      expect(callsOf("membership_form_submit")).toEqual([
+        [
+          "membership_form_submit",
+          {
+            role: "vrijwilliger",
+            is_minor: false,
+            has_prior_club: false,
+            has_remark: false,
+          },
+        ],
+      ]);
+    });
+
+    it("fires nothing for a rejected submit", async () => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(() =>
+          Promise.resolve({
+            ok: false,
+            status: 503,
+            json: () => Promise.resolve({ error: "Niet beschikbaar." }),
+          }),
+        ),
+      );
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      submitForm();
+      await screen.findByText("Niet beschikbaar.");
+      expect(callsOf("membership_form_submit")).toHaveLength(0);
+    });
+  });
+
   it("posts to /api/membership and shows a success message", async () => {
     const fetchMock = vi.fn(() =>
       Promise.resolve({
