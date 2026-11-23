@@ -24,6 +24,10 @@ const VIOLATIONS = [
   `${CLIENT}export * from "./other";`,
   `${CLIENT}export enum Mode { A }`,
   `${CLIENT}export const Card = () => null;\nexport const SIZE = 4;`,
+  // A context is a value however it is named.
+  `${CLIENT}export const ThingContext = createContext(null);`,
+  `${CLIENT}export const ThingContext = React.createContext<string>("a");`,
+  `${CLIENT}const ThingContext = createContext(null);\nexport { ThingContext };`,
 ];
 
 const ALLOWED = [
@@ -31,7 +35,7 @@ const ALLOWED = [
   `${CLIENT}export function Card() { return null; }`,
   `${CLIENT}export class Card {}`,
   `${CLIENT}export const X = () => null;`,
-  `${CLIENT}export const ThingContext = createContext(null);`,
+  `${CLIENT}const ThingContext = createContext(null);\nexport const Card = () => null;`,
   `${CLIENT}export type Props = { a: string };`,
   `${CLIENT}export interface Props { a: string }`,
   `${CLIENT}const Card = () => null;\nexport { Card };`,
@@ -44,12 +48,14 @@ const ALLOWED = [
   'const a = 1;\n"use client";\nexport const SIZE = 4;',
 ];
 
-let messages: Map<string, string[]>;
+const fixtures: { messages: Map<string, string[]> } = {
+  messages: new Map(),
+};
 
 // Loading the Next ESLint config takes seconds; pay it here, once, outside
 // every test's timeout.
 beforeAll(async () => {
-  messages = await lintFixtures(
+  fixtures.messages = await lintFixtures(
     eslint,
     [...VIOLATIONS, ...ALLOWED],
     join(webDir, "src", "fixture.tsx"),
@@ -58,12 +64,12 @@ beforeAll(async () => {
 
 describe("'use client' exports", () => {
   it.each(VIOLATIONS)("forbids a value export: %s", (source) => {
-    expect(messages.get(source)).toEqual([
+    expect(fixtures.messages.get(source)).toEqual([
       expect.stringContaining("components and types only"),
     ]);
   });
 
   it.each(ALLOWED)("allows %s", (source) => {
-    expect(messages.get(source)).toEqual([]);
+    expect(fixtures.messages.get(source)).toEqual([]);
   });
 });

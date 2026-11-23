@@ -71,7 +71,7 @@ Run `pnpm lint:sh` after touching a `*.sh` or `.husky/` file; CI runs it with no
 
 - **Fenced code blocks name their language** (` ```typescript `, ` ```json `, ` ```bash `, ` ```text `). `pnpm lint:md` (markdownlint, MD040 only) fails a bare fence in CI.
 - **A path in backticks in a `CLAUDE.md` or `docs/` file must exist.** `pnpm lint:doc-paths` (`scripts/check-doc-paths.mjs`) fails CI on a missing one; the archived and point-in-time docs it skips are listed in the script.
-- **A `'use client'` file exports components and types only.** ESLint rule `kcvv/use-client-exports` (`apps/web/eslint-rules/use-client-exports.mjs`) fails `lint` on any other export: a Server Component importing it gets a client reference, not the value.
+- **A `'use client'` file exports components and types only.** ESLint rule `kcvv/use-client-exports` (`apps/web/eslint-rules/use-client-exports.mjs`) fails `lint` on any other export: a Server Component importing it gets a client reference, not the value. A component is a PascalCase name, so what still slips through is a PascalCase non-component that is not a `createContext(...)` declared in the same file (an object, a class instance, a `memo(...)` of a non-component); default exports always pass. Review those by hand.
 
 ### TypeScript Compiler — Dual-Install (tsgo + tsc)
 

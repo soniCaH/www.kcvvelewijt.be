@@ -5,9 +5,9 @@ import { CATEGORY_META, type CategoryKey } from "./categoryMeta";
  * Group a flat list of paths by category, keyed by `CategoryKey` with matching
  * paths in their original input order. Empty categories get an empty array.
  */
-export function groupPathsByCategory(
+export const groupPathsByCategory = (
   paths: ReadonlyArray<ResponsibilityPath>,
-): Record<CategoryKey, ResponsibilityPath[]> {
+): Record<CategoryKey, ResponsibilityPath[]> => {
   // Seed a bucket for every category in CATEGORY_META (the Record<CategoryKey>
   // source of truth) — not CATEGORY_ORDER, which is presentation order only and
   // could omit a key. Callers order the output via CATEGORY_ORDER.
@@ -22,4 +22,4 @@ export function groupPathsByCategory(
     grouped[path.category]?.push(path);
   }
   return grouped;
-}
+};

@@ -44,7 +44,7 @@ export interface HubSearchQuery {
  * This never returns `null`: a lone `<HubSearch>` is a working search box,
  * not a degraded one.
  */
-export function useHubSearchQuery(): HubSearchQuery {
+export const useHubSearchQuery = (): HubSearchQuery => {
   const shared = useContext(HubSearchQueryContext);
   const [localQuery, setLocalQuery] = useState("");
   const [localOpen, setLocalOpen] = useState(false);
@@ -64,16 +64,16 @@ export function useHubSearchQuery(): HubSearchQuery {
         setOpen: setLocalOpen,
         topInset: 0,
       };
-}
+};
+
+const noop = () => {};
 
 /**
  * Publishes the pinned strip's height for the hub's searches. Called by the
  * section nav, which is the only component that measures its own bar. No-op
  * outside a provider.
  */
-export function useHubSearchTopInsetPublisher(): (next: number) => void {
+export const useHubSearchTopInsetPublisher = (): ((next: number) => void) => {
   const shared = useContext(HubSearchQueryContext);
   return shared?.setTopInset ?? noop;
-}
-
-function noop() {}
+};

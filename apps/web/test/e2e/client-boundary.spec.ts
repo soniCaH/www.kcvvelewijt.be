@@ -2,13 +2,15 @@ import { expect, test } from "@playwright/test";
 import { gotoBounded } from "./helpers/goto";
 import { waitForHydrated } from "./helpers/hydration";
 
-// A 'use client' file exports components and types only (#3839, lint rule
-// `kcvv/use-client-exports`). The footer's "Cookie-instellingen" button is the
-// one place two client modules share a runtime value: the button reads
-// `cookieConsentState.ready`, which the banner sets once CookieConsent.run()
-// resolves. This runs against `next build && next start` (the e2e webServer),
-// the only build where a value that went through a client reference instead of
-// the module itself would show: the click would do nothing.
+// Smoke test for the modules split out of 'use client' files in #3839: the footer's
+// "Cookie-instellingen" button reads `cookieConsentState.ready`, which the banner sets once
+// CookieConsent.run() resolves, and both now import it from a plain module. This runs
+// against `next build && next start` (the e2e webServer) and proves the production bundle
+// still wires the two together. It does NOT prove the server-to-client boundary: the button
+// and the banner are both client components, so moving the flag back into the banner would
+// still pass. The lint rule `kcvv/use-client-exports` guards that; no route renders a
+// Server Component that reads one of these values reliably enough for e2e (the one case,
+// `UP_LINK_TOP_AIR` in `PageHeroSkeleton`, only renders in a `loading.tsx` fallback).
 
 test("the footer's Cookie-instellingen button opens the preferences modal", async ({
   page,

@@ -5,8 +5,8 @@ import { CookiePreferencesButton } from "./CookiePreferencesButton";
 /**
  * `<CookiePreferencesButton>` is the footer link that re-opens the
  * vanilla-cookieconsent preferences modal. It takes no props: its click
- * handler guards on the module-level `cookieConsentState.ready` flag exported by
- * `<CookieConsentBanner>`, which only flips to `true` once `CookieConsent.run()`
+ * handler guards on the `cookieConsentState.ready` flag from
+ * `cookieConsentState.ts`, which `<CookieConsentBanner>` sets and which only flips to `true` once `CookieConsent.run()`
  * has resolved. Until then the button renders identically but the click is a
  * no-op (it cannot show preferences for a consent system that has not booted).
  *
@@ -25,7 +25,7 @@ const meta = {
         component:
           "Footer link that re-opens the cookie preferences modal. No props — " +
           "the click guards on the `cookieConsentState.ready` flag from " +
-          "`<CookieConsentBanner>`.",
+          "`cookieConsentState.ts`, set by `<CookieConsentBanner>`.",
       },
     },
   },

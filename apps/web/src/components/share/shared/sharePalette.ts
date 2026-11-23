@@ -8,6 +8,6 @@ export const SharePaletteContext = createContext<SharePalette>(
 );
 
 /** Read the resolved palette of the enclosing `<ShareFrame>`. */
-export function useSharePalette(): SharePalette {
+export const useSharePalette = (): SharePalette => {
   return useContext(SharePaletteContext);
-}
+};
