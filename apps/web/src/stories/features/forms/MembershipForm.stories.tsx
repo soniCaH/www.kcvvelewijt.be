@@ -29,9 +29,8 @@ const meta: Meta<typeof MembershipForm> = {
   },
   decorators: [
     (Story) => (
-      // Definite width: the centered body makes #storybook-root shrink-to-fit,
-      // so `w-full`/`max-w-full` collapse to content width; 2rem = root padding.
-      <div className="bg-cream w-[min(760px,calc(100vw-2rem))] p-4 sm:p-12">
+      // Definite width (#3830): the centered root is shrink-to-fit. 100vw includes a classic scrollbar; 2rem mirrors the 1rem padding on #storybook-root.
+      <div className="bg-cream w-[min(760px,calc(100vw-2rem))] max-w-full p-4 sm:p-12">
         <Story />
       </div>
     ),

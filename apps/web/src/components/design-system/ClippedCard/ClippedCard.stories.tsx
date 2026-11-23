@@ -41,15 +41,16 @@ export const Playground: Story = {
 
 export const RegistrationFormShell: Story = {
   render: () => (
-    <ClippedCard className="w-[640px] max-w-full">
-      <div className="text-ink-muted border-paper-edge mb-5 flex items-center justify-between border-b pb-2 font-mono text-[11px] tracking-[0.08em] uppercase">
+    // Definite width (#3830): 8rem = 1rem root padding + the decorator's p-12, both sides.
+    <ClippedCard className="w-[min(640px,calc(100vw-8rem))] max-w-full">
+      <div className="text-ink-muted border-paper-edge mb-5 flex items-center justify-between gap-3 border-b pb-2 font-mono text-[11px] tracking-[0.08em] uppercase">
         <span>Inschrijfformulier</span>
         <span>Veld 5 / 7</span>
       </div>
       <h2 className="font-display mb-6 text-[40px] leading-[1.05] font-black">
         Welkom op de tribune.
       </h2>
-      <div className="grid grid-cols-2 gap-x-5 gap-y-[18px]">
+      <div className="grid grid-cols-1 gap-x-5 gap-y-[18px] md:grid-cols-2">
         <PreviewField label="Voornaam" value="Lieve" />
         <PreviewField label="Achternaam" placeholder="Bv. Janssens" />
         <PreviewField label="E-mail" placeholder="naam@voorbeeld.be" />
@@ -136,7 +137,7 @@ function PreviewField({
   span2,
 }: PreviewFieldProps) {
   return (
-    <label className={span2 ? "col-span-2 block" : "block"}>
+    <label className={span2 ? "block md:col-span-2" : "block"}>
       <span className="mb-1 flex items-center gap-2 font-mono text-[11px] tracking-[0.08em] uppercase">
         {label}
         {optional && (
