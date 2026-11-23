@@ -736,7 +736,13 @@ jobs:
             [ -f "$f" ] && cp "$f" "vr-diffs/actual-$(basename "$f")"
           done
 
-          git add vr-diffs/
+          # Vercel builds every pushed branch; this one has no apps/web (the
+          # project's Root Directory), so the build would fail. Its own
+          # vercel.json tells Vercel to skip it (#3835).
+          mkdir -p apps/web
+          printf '%s\n' '{ "git": { "deploymentEnabled": false } }' > apps/web/vercel.json
+
+          git add vr-diffs/ apps/web/vercel.json
           git commit -m "vr: diff snapshots for PR #${PR_NUMBER} [skip ci]"
           git push "https://x-access-token:${TOKEN}@github.com/${REPO}.git" \
             "HEAD:refs/heads/${BRANCH}" --force

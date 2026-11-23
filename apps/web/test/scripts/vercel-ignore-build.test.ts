@@ -263,17 +263,4 @@ describe("vercel-ignore-build.sh", () => {
       ).toBe(0);
     });
   });
-
-  it("skips (0) the VR bot's diff branches", () => {
-    expect(
-      run(
-        {
-          VERCEL_GIT_COMMIT_REF: "vr-diffs/pr-1",
-          VERCEL_GIT_PREVIOUS_SHA: base,
-          VERCEL_GIT_COMMIT_SHA: webChange,
-        },
-        webChange,
-      ),
-    ).toBe(0);
-  });
 });

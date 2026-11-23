@@ -903,6 +903,8 @@ exact render: crop `x >= width * 2/3` to verify — or replace — a locally
 regenerated baseline (#2370). The orphan branch (and the sticky comment) are
 cleaned up automatically when the PR closes via `vr-diff-cleanup.yml`.
 
+The orphan branch also carries `apps/web/vercel.json` with `git.deploymentEnabled: false`, so Vercel skips it instead of failing on the missing Root Directory (#3835).
+
 Locally, `pnpm --filter @kcvv/web run vr:diff <story-id>` prints the on-disk
 path(s) under `apps/web/test/vr/__diff_output__/`. Since #3138 shards the job
 3x, the fallback artifact for programmatic access is uploaded per shard as
