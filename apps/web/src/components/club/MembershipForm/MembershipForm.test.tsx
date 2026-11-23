@@ -212,16 +212,19 @@ describe("MembershipForm", () => {
       fillRequiredFields();
       submitForm();
       await screen.findByText("Controleer de gemarkeerde velden.");
-      expect(callsOf("membership_form_error")).toEqual([
-        [
-          "membership_form_error",
-          {
-            fields: "birthDate,parentEmail",
-            source: "server",
-            role: "vrijwilliger",
-          },
-        ],
-      ]);
+      // The event fires from an effect that can run after the notice renders.
+      await waitFor(() =>
+        expect(callsOf("membership_form_error")).toEqual([
+          [
+            "membership_form_error",
+            {
+              fields: "birthDate,parentEmail",
+              source: "server",
+              role: "vrijwilliger",
+            },
+          ],
+        ]),
+      );
       expect(JSON.stringify(callsOf("membership_form_error"))).not.toContain(
         "jan@example.com",
       );
@@ -251,6 +254,7 @@ describe("MembershipForm", () => {
       fillRequiredFields();
       submitForm();
       await screen.findByText(body.error);
+      await act(async () => {}); // flush the report effect before asserting nothing fired
       expect(callsOf("membership_form_error")).toHaveLength(0);
     });
 
@@ -266,6 +270,7 @@ describe("MembershipForm", () => {
       expect(await screen.findByRole("alert")).toHaveTextContent(
         /Verzenden mislukt/,
       );
+      await act(async () => {}); // flush the report effect before asserting nothing fired
       expect(callsOf("membership_form_error")).toHaveLength(0);
     });
   });
@@ -367,17 +372,19 @@ describe("MembershipForm", () => {
       fillRequiredFields();
       submitForm();
       await screen.findByText(/Bedankt voor je interesse/i);
-      expect(callsOf("membership_form_submit")).toEqual([
-        [
-          "membership_form_submit",
-          {
-            role: "vrijwilliger",
-            is_minor: false,
-            has_prior_club: false,
-            has_remark: false,
-          },
-        ],
-      ]);
+      await waitFor(() =>
+        expect(callsOf("membership_form_submit")).toEqual([
+          [
+            "membership_form_submit",
+            {
+              role: "vrijwilliger",
+              is_minor: false,
+              has_prior_club: false,
+              has_remark: false,
+            },
+          ],
+        ]),
+      );
     });
 
     it("fires nothing for a rejected submit", async () => {
@@ -395,6 +402,7 @@ describe("MembershipForm", () => {
       fillRequiredFields();
       submitForm();
       await screen.findByText("Niet beschikbaar.");
+      await act(async () => {}); // flush the report effect before asserting nothing fired
       expect(callsOf("membership_form_submit")).toHaveLength(0);
     });
   });
