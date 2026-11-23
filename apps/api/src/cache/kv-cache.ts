@@ -29,9 +29,8 @@ import { oncePerDay, parseCeiling, utcDay } from "./daily-ceiling";
  */
 export const TTL = {
   MATCHES_TEAM: 60 * 60 * 24, // 24 hours — season schedule rarely changes mid-week
-  NEXT_MATCHES: 60 * 60 * 4, // 4 hours — nearest kickoff <24 h away; no live scores, schedule is stable for hours
+  NEXT_MATCHES: 60 * 60 * 4, // 4 hours — nearest kickoff <24 h away (or no future kickoff); no live scores, schedule is stable for hours
   NEXT_MATCHES_QUIET: 60 * 60 * 12, // 12 hours — nearest kickoff ≥24 h away (or empty list): nothing to refresh sooner (#3628)
-  MATCHES_WINDOW: 60 * 60 * 4, // 4 hours — matchday picker; in-window matches stay listed regardless of refresh
   MATCH_DETAIL_PAST: 60 * 60 * 24 * 7, // 7 days — historical, never changes
   MATCH_DETAIL_DEFAULT: 60 * 60 * 24, // 24 hours — distant (kickoff >7d away)
   MATCH_DETAIL_LIVE: 60 * 15, // 15 min — floor: no live scores, SWR serves stale instantly
