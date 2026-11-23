@@ -285,26 +285,39 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
-  // Team and Match keep "today" until their own lastmod is decided (#3624).
-  const teamAndMatchLastModified = new Date();
-
-  const teamEntries = teams.map((t) => ({
-    url: `${SITE_CONFIG.siteUrl}/ploegen/${t.slug}`,
-    lastModified: teamAndMatchLastModified,
-    changeFrequency: "weekly" as const,
-    priority: 0.6,
-  }));
-
   const teamPsdIds = teams
     .map((t) => t.psdId)
     .filter((id): id is string => id !== null && id !== "");
   const teamMatches = await fetchTeamMatches(teamPsdIds);
+  const now = new Date();
+
+  // A Team changes when it plays: its lastmod is the kickoff of its latest past
+  // Match. A Team without a past Match (or whose matches could not be fetched)
+  // gets no lastmod rather than an invented one (#3624).
+  const latestPastKickoff = new Map<string, Date>();
+  for (const { teamPsdId, matches } of teamMatches) {
+    for (const { date } of matches) {
+      const latest = latestPastKickoff.get(teamPsdId);
+      if (date <= now && (!latest || date > latest)) {
+        latestPastKickoff.set(teamPsdId, date);
+      }
+    }
+  }
+
+  const teamEntries = teams.map((t) => {
+    const lastModified = t.psdId ? latestPastKickoff.get(t.psdId) : undefined;
+    return {
+      url: `${SITE_CONFIG.siteUrl}/ploegen/${t.slug}`,
+      ...(lastModified && { lastModified }),
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    };
+  });
 
   // Last 7 days up to now; the same Match carried by two Teams is one entry
   // (first Team wins).
-  const sevenDaysAgo = new Date();
+  const sevenDaysAgo = new Date(now);
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-  const now = new Date();
   const recentMatches = new Map<number, TeamMatch>();
   for (const { matches } of teamMatches) {
     for (const match of matches) {
@@ -317,12 +330,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }
     }
   }
-  const matchEntries = [...recentMatches.keys()].map((id) => ({
-    url: `${SITE_CONFIG.siteUrl}/wedstrijd/${id}`,
-    lastModified: teamAndMatchLastModified,
-    changeFrequency: "weekly" as const,
-    priority: 0.5,
-  }));
+  // A scheduled Match is dated by its kickoff. Once played (or postponed,
+  // cancelled, ...) the page can still change for 48 h after kickoff (score,
+  // report), and never in the future.
+  const MATCH_SETTLE_MS = 48 * 60 * 60 * 1000;
+  const matchEntries = [...recentMatches.values()].map(
+    ({ id, date, status }) => ({
+      url: `${SITE_CONFIG.siteUrl}/wedstrijd/${id}`,
+      lastModified:
+        status === "scheduled"
+          ? date
+          : new Date(Math.min(date.getTime() + MATCH_SETTLE_MS, now.getTime())),
+      changeFrequency: "weekly" as const,
+      priority: 0.5,
+    }),
+  );
 
   // A page document can share its slug with a hand-listed `/club/*` route
   // (`word-lid`, the board pages): the first entry wins, so the static route's

@@ -382,7 +382,11 @@ describe("sitemap.ts", () => {
     const matchUrl = (id: number) =>
       `https://www.kcvvelewijt.be/wedstrijd/${id}`;
 
-    const makeMatch = (id: number, date: Date) => ({ id, date }) as Match;
+    const makeMatch = (
+      id: number,
+      date: Date,
+      status: Match["status"] = "finished",
+    ) => ({ id, date, status }) as Match;
 
     /** Answers the team query with the given psdIds and every other query with []. */
     function stubTeams(...psdIds: string[]) {
@@ -449,6 +453,106 @@ describe("sitemap.ts", () => {
       );
 
       expect(await matchUrls()).toEqual([matchUrl(7)]);
+    });
+
+    describe("lastmod from match records (#3624)", () => {
+      const HOUR_MS = 60 * 60 * 1000;
+      const hoursFromNow = (hours: number) =>
+        new Date(NOW.getTime() + hours * HOUR_MS);
+
+      // One `sitemap()` call per test: each call issues all seven Sanity queries.
+      const entryAt = (
+        result: Awaited<ReturnType<typeof sitemap>>,
+        path: string,
+      ) =>
+        result.find((e) => e.url === `https://www.kcvvelewijt.be${path}`) as
+          { lastModified?: unknown } | undefined;
+
+      it("dates a scheduled Match by its kickoff", async () => {
+        stubTeams("1");
+        const kickoff = hoursFromNow(-3);
+        mockGetMatches.mockReturnValue(
+          Effect.succeed([makeMatch(50, kickoff, "scheduled")]),
+        );
+
+        expect(entryAt(await sitemap(), "/wedstrijd/50")?.lastModified).toEqual(
+          kickoff,
+        );
+      });
+
+      it("dates a settled Match by kickoff + 48 h, capped at now", async () => {
+        stubTeams("1");
+        const recent = hoursFromNow(-10);
+        mockGetMatches.mockReturnValue(
+          Effect.succeed([
+            makeMatch(51, recent), // kickoff + 48 h is in the future: capped at now
+            makeMatch(52, hoursFromNow(-72), "postponed"), // 48 h long gone
+            makeMatch(53, hoursFromNow(-60), "cancelled"), // 48 h long gone
+          ]),
+        );
+
+        const result = await sitemap();
+        expect(entryAt(result, "/wedstrijd/51")?.lastModified).toEqual(NOW);
+        expect(entryAt(result, "/wedstrijd/52")?.lastModified).toEqual(
+          hoursFromNow(-24),
+        );
+        expect(entryAt(result, "/wedstrijd/53")?.lastModified).toEqual(
+          hoursFromNow(-12),
+        );
+      });
+
+      it("dates a Team by the kickoff of its latest past Match, however old", async () => {
+        stubTeams("1");
+        const latestPast = daysFromNow(-30);
+        mockGetMatches.mockReturnValue(
+          Effect.succeed([
+            makeMatch(60, daysFromNow(-90)),
+            makeMatch(61, latestPast),
+            makeMatch(62, daysFromNow(5), "scheduled"), // future: ignored
+          ]),
+        );
+
+        expect(
+          entryAt(await sitemap(), "/ploegen/team-1")?.lastModified,
+        ).toEqual(latestPast);
+      });
+
+      it("leaves lastmod off a Team with no past Match, no psdId or no fetched matches", async () => {
+        mockFetch.mockImplementation(async (query: string) =>
+          query.includes('_type == "team"')
+            ? [
+                { slug: "team-1", psdId: "1" },
+                { slug: "team-2", psdId: "2" },
+                { slug: "team-3", psdId: null },
+              ]
+            : [],
+        );
+        mockGetMatches.mockImplementation((teamId: number) =>
+          teamId === 1
+            ? Effect.succeed([makeMatch(70, daysFromNow(3), "scheduled")])
+            : Effect.succeed([]),
+        );
+
+        const result = await sitemap();
+        for (const slug of ["team-1", "team-2", "team-3"]) {
+          expect(entryAt(result, `/ploegen/${slug}`)).not.toHaveProperty(
+            "lastModified",
+          );
+        }
+      });
+
+      it("lists a Match carried by two Teams once, with the same lastmod", async () => {
+        stubTeams("1", "2");
+        mockGetMatches.mockReturnValue(
+          Effect.succeed([makeMatch(80, hoursFromNow(-3), "scheduled")]),
+        );
+
+        const entries = (await sitemap()).filter((e) =>
+          e.url.endsWith("/wedstrijd/80"),
+        );
+        expect(entries).toHaveLength(1);
+        expect(entries[0].lastModified).toEqual(hoursFromNow(-3));
+      });
     });
 
     it("resolves a team's HttpNotFound to no entries without logging an error", async () => {
