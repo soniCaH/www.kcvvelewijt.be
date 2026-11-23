@@ -25,7 +25,8 @@ const playerStatsCache = TypedKvCache(PlayerSeasonStats);
 // `apps/web/src/lib/utils/ical.ts` lost the local fallback that used to
 // synthesise one — so a cached pre-#2491 entry under the OLD key would ship
 // with no `LOCATION` line on a home fixture for up to its full TTL (24h for
-// `matches:team`, 4h for `matches:next`/`matches:window`, up to 7d for
+// `matches:team`, up to 12h for `matches:next` (15 min / 4h / 12h tiers), 4h for
+// `matches:window`, up to 7d for
 // `match:detail`/`opponent:team`) after this deploys. Every cache key these
 // handlers write is versioned here so a stale pre-#2491 entry is never read
 // as current — see the review that caught this on the first pass.
@@ -157,21 +158,39 @@ export function teamMatchesTtl(
 }
 
 /**
- * Soft cache TTL (seconds) for the club-wide next-matches list.
+ * Soft cache TTL (seconds) for the club-wide next-matches list (#3628).
  *
  * getNextMatches computes "next" per team AT FETCH TIME (kickoff >= now), so
  * once a cached entry's kickoff passes, the list advertises a match that
- * already started — the homepage agenda and MatchStrip kept it for up to the
- * flat 4h window. Cap at matchday cadence while any listed kickoff is in the
- * past; the refetch recomputes the list to future-only, so the condition
- * clears itself after one refresh (no grace window needed).
+ * already started. Three tiers, all ≥15 min (#2321):
+ *   any listed kickoff in the past → 15 min (matchday cadence; the refetch
+ *                                     recomputes to future-only, so this
+ *                                     clears itself after one refresh)
+ *   nearest kickoff < 24 h away    → 4 h
+ *   otherwise                      → 12 h (quiet: nothing changes sooner)
+ *
+ * An empty list (or one with no parseable kickoff) has no nearest kickoff: it
+ * takes the 4 h tier, as before #3628. PSD returns nothing before it publishes
+ * fixtures (season rollover) or briefly on a hiccup, and a 12 h tier would keep
+ * the homepage agenda empty for up to 12 h after fixtures appear.
+ *
+ * Trade-off: in the 12 h tier a fixture added sooner than the cached nearest
+ * kickoff (a new cup match, a match moved earlier) stays hidden until the next
+ * refresh, up to 12 h.
  */
 export function nextMatchesTtl(
   matches: readonly Match[],
   now: number = Date.now(),
 ): number {
-  const started = matches.some((m) => kickoffMs(m.date) < now);
-  return started ? TTL.MATCH_DETAIL_MATCHDAY : TTL.NEXT_MATCHES;
+  // `kickoffMs` throws a RangeError on an invalid date, so drop those first.
+  const kickoffs = matches
+    .filter((m) => Number.isFinite(new Date(m.date).getTime()))
+    .map((m) => kickoffMs(m.date));
+  if (kickoffs.some((k) => k < now)) return TTL.MATCH_DETAIL_MATCHDAY;
+  if (kickoffs.length === 0) return TTL.NEXT_MATCHES;
+  return Math.min(...kickoffs) - now < 24 * HOUR_MS
+    ? TTL.NEXT_MATCHES
+    : TTL.NEXT_MATCHES_QUIET;
 }
 
 /** True when the detail already carries report data (a non-empty lineup or events). */
