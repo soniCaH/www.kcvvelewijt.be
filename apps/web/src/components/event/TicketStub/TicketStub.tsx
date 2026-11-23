@@ -135,7 +135,9 @@ export function TicketStub({
           </span>
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col items-start gap-1 px-4 py-3 sm:pr-28">
+        {/* Room for the absolute "Meer details →" cue: a bottom row on phones
+            (the meta wraps full-width there), a right gutter from `sm` up. */}
+        <div className="flex min-w-0 flex-1 flex-col items-start gap-1 px-4 pt-3 pb-8 sm:pr-28 sm:pb-3">
           <MonoLabel variant="pill-ink" size="sm">
             {type}
           </MonoLabel>
