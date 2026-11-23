@@ -283,7 +283,8 @@ function toTeamLandingItem(
     name,
     displayName: teamDisplayName({ displayName: row.displayName, slug, name }),
     slug,
-    age: row.age ?? "",
+    // TEAMS_LANDING_QUERY filters on defined(age), so groq-js types it `string`.
+    age: row.age,
     psdId: row.psdId,
     division: row.division,
     divisionFull: row.divisionFull,
