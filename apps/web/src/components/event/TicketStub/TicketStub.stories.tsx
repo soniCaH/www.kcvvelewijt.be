@@ -77,12 +77,7 @@ export const MobileLongLocation: Story = {
       .getByTestId("ticket-stub-meta")
       .getBoundingClientRect();
     const cue = canvas.getByText("Meer details →").getBoundingClientRect();
-    const overlaps =
-      cue.left < metaBox.right &&
-      metaBox.left < cue.right &&
-      cue.top < metaBox.bottom &&
-      metaBox.top < cue.bottom;
-    await expect(overlaps).toBe(false);
+    await expect(cue.top).toBeGreaterThanOrEqual(metaBox.bottom);
   },
 };
 
