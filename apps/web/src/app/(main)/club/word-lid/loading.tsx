@@ -1,12 +1,13 @@
 /**
  * Word lid — Loading Skeleton.
  *
- * `/club/word-lid` is fully static (`page.tsx`'s own docblock: "The page is
- * static") — no data fetch, no CMS read, so per #2432 §2 this reuses the
- * real composition unshimmered rather than drawing bars for content that
- * never varies: `<PageHero>` (kicker, headline, lead and up-link are all
- * fixed copy) and `<MembershipForm>` (its own fields have no server data
- * dependency; the one `fetch` it owns runs on submit, not on mount).
+ * `/club/word-lid` is ISR, hourly (`page.tsx`): its one read is the contact
+ * boxes, which only the confirmation card shown after a submit uses. So per
+ * #2432 §2 this reuses the real composition unshimmered rather than drawing
+ * bars for content that never varies: `<PageHero>` (kicker, headline, lead and
+ * up-link are all fixed copy) and `<MembershipForm>`, rendered without
+ * `contacts` on purpose (its fields have no server data dependency; the one
+ * `fetch` it owns runs on submit, not on mount).
  *
  * Exists because this route previously had no `loading.tsx` of its own and
  * so inherited `/club/loading.tsx` — the `/club` INDEX's skeleton, wrong

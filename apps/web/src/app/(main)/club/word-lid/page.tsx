@@ -4,8 +4,19 @@
  * Static sibling under `club/` that beats the `club/[slug]` CMS catch-all.
  * The structured membership-signup entry point, reached from the "Word lid"
  * CTAs. The CMS "Praktische Informatie" page (`/club/praktische-informatie`) stays as the
- * practical-info hub. The page is static; the form POSTs to `/api/membership`.
+ * practical-info hub. The page is ISR (hourly): it reads who holds each role's
+ * contact box so the confirmation card can name them (#3640). The form POSTs
+ * to `/api/membership`.
  */
+
+import { Effect } from "effect";
+import { runPromise } from "@/lib/effect/runtime";
+import { degradeSection } from "@/lib/effect/degrade";
+import {
+  FormRoutingRepository,
+  FormRoutingRepositoryLive,
+  type MembershipContacts,
+} from "@/lib/repositories/form-routing.repository";
 
 import { SITE_CONFIG, INTERN_REGLEMENT_JEUGD_PDF } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
@@ -35,7 +46,38 @@ export const metadata = buildPageMetadata({
   ],
 });
 
-export default function WordLidPage() {
+// An editor's change to a contact box reaches the card within the hour.
+export const revalidate = 3600;
+
+/**
+ * The contacts are a section of the page, not its subject: a failed read
+ * degrades to no contacts, which the card renders as today's generic sentence,
+ * and never blocks the form (#2433 rule 3).
+ *
+ * The outer try/catch covers `AppLayer` construction failing, which happens
+ * outside the effect `degradeSection` wraps (same as `/jeugd`).
+ */
+const fetchContacts = async (): Promise<MembershipContacts> => {
+  try {
+    return await runPromise(
+      degradeSection(
+        Effect.gen(function* () {
+          const repo = yield* FormRoutingRepository;
+          return yield* repo.getContacts();
+        }).pipe(Effect.provide(FormRoutingRepositoryLive)),
+        {},
+        "[word-lid] contact-box lookup failed; the card keeps the generic sentence.",
+      ),
+    );
+  } catch (error) {
+    console.error("[word-lid] contact-box lookup failed:", error);
+    return {};
+  }
+};
+
+export default async function WordLidPage() {
+  const contacts = await fetchContacts();
+
   return (
     <div className="bg-cream pb-12 lg:pb-16">
       <JsonLd
@@ -69,7 +111,7 @@ export default function WordLidPage() {
         {/* The cream band owns no bottom margin (unlike \`register="minimal"\`'s
             baked-in \`mb-10\`) — same gap /kalender puts under its hero. */}
         <div className="mt-10">
-          <MembershipForm />
+          <MembershipForm contacts={contacts} />
         </div>
       </PageContainer>
     </div>
