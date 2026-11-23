@@ -10,7 +10,7 @@ import {
 } from "@kcvv/api-contract";
 import { PsdService, isPartialFanout } from "../psd/service";
 import { isSettledMatchStatus } from "../psd/transforms";
-import { kickoffMs } from "../psd/wall-clock";
+import { kickoffMs, startOfBrusselsDayMs } from "../psd/wall-clock";
 import { shouldServeStale, type BffError } from "../psd/errors";
 import { KvCacheService, TTL, TypedKvCache } from "../cache/kv-cache";
 import { WorkerEnvTag } from "../env";
@@ -25,8 +25,7 @@ const playerStatsCache = TypedKvCache(PlayerSeasonStats);
 // `apps/web/src/lib/utils/ical.ts` lost the local fallback that used to
 // synthesise one — so a cached pre-#2491 entry under the OLD key would ship
 // with no `LOCATION` line on a home fixture for up to its full TTL (24h for
-// `matches:team`, up to 12h for `matches:next` (15 min / 4h / 12h tiers), 4h for
-// `matches:window`, up to 7d for
+// `matches:team`, up to 12h for `matches:next` and `matches:window` (15 min / 4h / 12h tiers), up to 7d for
 // `match:detail`/`opponent:team`) after this deploys. Every cache key these
 // handlers write is versioned here so a stale pre-#2491 entry is never read
 // as current — see the review that caught this on the first pass.
@@ -113,13 +112,22 @@ export const getMatchesWindowHandler = (): Effect.Effect<
     return yield* service.getMatchesWindow();
   });
 
-  return matchesCache.getOrFetch(
-    cacheKey,
-    fetchMatches,
-    TTL.MATCHES_WINDOW,
-    undefined,
-    { shouldServeStale, isPartial: isPartialFanout },
-  );
+  return matchesCache
+    .getOrFetch(cacheKey, fetchMatches, matchesWindowTtl, undefined, {
+      shouldServeStale,
+      isPartial: isPartialFanout,
+    })
+    .pipe(
+      // Serve-time filter (#3629): the window's lower bound (start of the
+      // Brussels day) is fixed at fetch time, and the 12 h tier lets a list
+      // outlive its day: yesterday's matches would keep showing. Drop them on
+      // every serve (fresh, stale or just fetched). The stored value stays
+      // unfiltered, so `matchesWindowTtl` still sees it.
+      Effect.map((matches) => {
+        const startOfToday = startOfBrusselsDayMs(Date.now());
+        return matches.filter((m) => kickoffMs(m.date) >= startOfToday);
+      }),
+    );
 };
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -182,16 +190,47 @@ export function nextMatchesTtl(
   matches: readonly Match[],
   now: number = Date.now(),
 ): number {
-  // `kickoffMs` throws a RangeError on an invalid date, so drop those first.
-  const kickoffs = matches
-    .filter((m) => Number.isFinite(new Date(m.date).getTime()))
-    .map((m) => kickoffMs(m.date));
+  const kickoffs = validKickoffs(matches);
   if (kickoffs.some((k) => k < now)) return TTL.MATCH_DETAIL_MATCHDAY;
-  if (kickoffs.length === 0) return TTL.NEXT_MATCHES;
-  return Math.min(...kickoffs) - now < 24 * HOUR_MS
-    ? TTL.NEXT_MATCHES
-    : TTL.NEXT_MATCHES_QUIET;
+  return proximityListTtl(kickoffs, now);
 }
+
+/**
+ * Soft cache TTL (seconds) for the matches-window list (#3629): the same
+ * ladder as `nextMatchesTtl`, with the pending test of `teamMatchesTtl`.
+ *
+ * The window also holds finished matches earlier today, so a past kickoff does
+ * NOT mean "refresh fast": only a past kickoff still `scheduled` inside the 48 h
+ * grace window (`isResultPending`) does → 15 min. Otherwise the nearest FUTURE
+ * kickoff picks 4 h (< 24 h away) or 12 h; past kickoffs are ignored. A list
+ * with no future kickoff (empty, or only finished matches) takes 4 h, as before.
+ */
+export const matchesWindowTtl = (
+  matches: readonly Match[],
+  now: number = Date.now(),
+): number => {
+  const valid = matches.filter(hasValidKickoff);
+  if (valid.some((m) => isResultPending(m, now))) {
+    return TTL.MATCH_DETAIL_MATCHDAY;
+  }
+  return proximityListTtl(
+    valid.map((m) => kickoffMs(m.date)).filter((k) => k >= now),
+    now,
+  );
+};
+
+// `kickoffMs` throws a RangeError on an invalid date, so drop those first.
+const hasValidKickoff = (m: Match): boolean =>
+  Number.isFinite(new Date(m.date).getTime());
+
+const validKickoffs = (matches: readonly Match[]): number[] =>
+  matches.filter(hasValidKickoff).map((m) => kickoffMs(m.date));
+
+/** 4 h when the nearest of `kickoffs` is < 24 h away or there is none, else 12 h. */
+const proximityListTtl = (kickoffs: readonly number[], now: number): number =>
+  kickoffs.length > 0 && Math.min(...kickoffs) - now >= 24 * HOUR_MS
+    ? TTL.NEXT_MATCHES_QUIET
+    : TTL.NEXT_MATCHES;
 
 /** True when the detail already carries report data (a non-empty lineup or events). */
 function hasMatchReportData(detail: MatchDetail): boolean {

@@ -71,6 +71,14 @@ describe("sitemap.ts", () => {
     );
   });
 
+  // One `sitemap()` call per test: each call issues all seven Sanity queries.
+  const lastModifiedOf = (
+    result: Awaited<ReturnType<typeof sitemap>>,
+    path: string,
+  ) =>
+    result.find((e) => e.url === `https://www.kcvvelewijt.be${path}`) as
+      { lastModified?: unknown } | undefined;
+
   it("returns all static routes with correct metadata", async () => {
     mockFetch.mockResolvedValue([]);
 
@@ -162,13 +170,6 @@ describe("sitemap.ts", () => {
   });
 
   describe("lastmod only where a real date exists (#3623)", () => {
-    const lastModifiedOf = (
-      result: Awaited<ReturnType<typeof sitemap>>,
-      path: string,
-    ) =>
-      result.find((e) => e.url === `https://www.kcvvelewijt.be${path}`) as
-        { lastModified?: unknown } | undefined;
-
     beforeEach(() => {
       vi.spyOn(console, "error").mockImplementation(() => {});
       mockFetch.mockImplementation(async (query: string) => {
@@ -382,7 +383,20 @@ describe("sitemap.ts", () => {
     const matchUrl = (id: number) =>
       `https://www.kcvvelewijt.be/wedstrijd/${id}`;
 
-    const makeMatch = (id: number, date: Date) => ({ id, date }) as Match;
+    // `Match.date` is Brussels wall-clock in UTC fields (#3491). NOW is in June
+    // (UTC+2), so a real kickoff instant becomes the date the BFF would send by
+    // adding 2 h; reading the raw date would run 2 h late.
+    const BRUSSELS_SUMMER_OFFSET_MS = 2 * 60 * 60 * 1000;
+    const makeMatch = (
+      id: number,
+      kickoff: Date,
+      status: Match["status"] = "finished",
+    ) =>
+      ({
+        id,
+        date: new Date(kickoff.getTime() + BRUSSELS_SUMMER_OFFSET_MS),
+        status,
+      }) as Match;
 
     /** Answers the team query with the given psdIds and every other query with []. */
     function stubTeams(...psdIds: string[]) {
@@ -449,6 +463,173 @@ describe("sitemap.ts", () => {
       );
 
       expect(await matchUrls()).toEqual([matchUrl(7)]);
+    });
+
+    describe("lastmod from match records (#3624)", () => {
+      const HOUR_MS = 60 * 60 * 1000;
+      const hoursFromNow = (hours: number) =>
+        new Date(NOW.getTime() + hours * HOUR_MS);
+
+      it("dates a scheduled Match by its real kickoff, not the raw wall-clock date", async () => {
+        stubTeams("1");
+        const kickoff = hoursFromNow(-3);
+        mockGetMatches.mockReturnValue(
+          Effect.succeed([makeMatch(50, kickoff, "scheduled")]),
+        );
+
+        expect(
+          lastModifiedOf(await sitemap(), "/wedstrijd/50")?.lastModified,
+        ).toEqual(kickoff);
+      });
+
+      it("dates a settled Match by kickoff + 48 h, capped at now", async () => {
+        stubTeams("1");
+        mockGetMatches.mockReturnValue(
+          Effect.succeed([
+            makeMatch(51, hoursFromNow(-10)), // kickoff + 48 h is in the future: capped at now
+            makeMatch(52, hoursFromNow(-72), "postponed"), // 48 h long gone
+            makeMatch(53, hoursFromNow(-60), "cancelled"), // 48 h long gone
+          ]),
+        );
+
+        const result = await sitemap();
+        expect(lastModifiedOf(result, "/wedstrijd/51")?.lastModified).toEqual(
+          NOW,
+        );
+        expect(lastModifiedOf(result, "/wedstrijd/52")?.lastModified).toEqual(
+          hoursFromNow(-24),
+        );
+        expect(lastModifiedOf(result, "/wedstrijd/53")?.lastModified).toEqual(
+          hoursFromNow(-12),
+        );
+      });
+
+      it("counts a Match that kicked off 1 h ago as past, though its raw date is 1 h ahead", async () => {
+        stubTeams("1");
+        mockGetMatches.mockReturnValue(
+          Effect.succeed([makeMatch(55, hoursFromNow(-1))]),
+        );
+
+        const result = await sitemap();
+        expect(lastModifiedOf(result, "/wedstrijd/55")).toBeDefined();
+        expect(lastModifiedOf(result, "/ploegen/team-1")?.lastModified).toEqual(
+          hoursFromNow(-1),
+        );
+      });
+
+      it("reads a winter kickoff as UTC+1", async () => {
+        vi.setSystemTime(new Date("2026-01-15T12:00:00.000Z"));
+        stubTeams("1");
+        // 11:00 Brussels wall-clock is 10:00Z.
+        mockGetMatches.mockReturnValue(
+          Effect.succeed([
+            {
+              id: 56,
+              date: new Date(Date.UTC(2026, 0, 15, 11, 0)),
+              status: "scheduled",
+            } as Match,
+          ]),
+        );
+
+        expect(
+          lastModifiedOf(await sitemap(), "/wedstrijd/56")?.lastModified,
+        ).toEqual(new Date("2026-01-15T10:00:00.000Z"));
+      });
+
+      it("dates a Team by the kickoff of its latest past Match, however old", async () => {
+        stubTeams("1");
+        const latestPast = daysFromNow(-30);
+        mockGetMatches.mockReturnValue(
+          Effect.succeed([
+            makeMatch(60, daysFromNow(-90)),
+            makeMatch(61, latestPast),
+            makeMatch(62, daysFromNow(5), "scheduled"), // future: ignored
+          ]),
+        );
+
+        expect(
+          lastModifiedOf(await sitemap(), "/ploegen/team-1")?.lastModified,
+        ).toEqual(latestPast);
+      });
+
+      it("dates each Team by its own latest past Match", async () => {
+        stubTeams("1", "2");
+        mockGetMatches.mockImplementation((teamId: number) =>
+          Effect.succeed(
+            teamId === 1
+              ? [
+                  makeMatch(61, daysFromNow(-30)),
+                  makeMatch(62, daysFromNow(-3)),
+                ]
+              : [
+                  makeMatch(63, daysFromNow(-12)),
+                  makeMatch(64, daysFromNow(4)),
+                ],
+          ),
+        );
+
+        const result = await sitemap();
+        expect(lastModifiedOf(result, "/ploegen/team-1")?.lastModified).toEqual(
+          daysFromNow(-3),
+        );
+        expect(lastModifiedOf(result, "/ploegen/team-2")?.lastModified).toEqual(
+          daysFromNow(-12),
+        );
+      });
+
+      it("leaves lastmod off a Team with no past Match or no psdId", async () => {
+        mockFetch.mockImplementation(async (query: string) =>
+          query.includes('_type == "team"')
+            ? [
+                { slug: "team-1", psdId: "1" },
+                { slug: "team-2", psdId: "2" },
+                { slug: "team-3", psdId: null },
+              ]
+            : [],
+        );
+        mockGetMatches.mockImplementation((teamId: number) =>
+          teamId === 1
+            ? Effect.succeed([makeMatch(70, daysFromNow(3), "scheduled")])
+            : Effect.succeed([]),
+        );
+
+        const result = await sitemap();
+        for (const slug of ["team-1", "team-2", "team-3"]) {
+          expect(lastModifiedOf(result, `/ploegen/${slug}`)).not.toHaveProperty(
+            "lastModified",
+          );
+        }
+      });
+
+      it("leaves lastmod off a Team whose fetch failed, and dates the others", async () => {
+        stubTeams("1", "2");
+        mockGetMatches.mockImplementation((teamId: number) =>
+          teamId === 1
+            ? Effect.fail(new Error("BFF exploded"))
+            : Effect.succeed([makeMatch(71, daysFromNow(-2))]),
+        );
+
+        const result = await sitemap();
+        expect(lastModifiedOf(result, "/ploegen/team-1")).not.toHaveProperty(
+          "lastModified",
+        );
+        expect(lastModifiedOf(result, "/ploegen/team-2")?.lastModified).toEqual(
+          daysFromNow(-2),
+        );
+      });
+
+      it("lists a Match carried by two Teams once, with the same lastmod", async () => {
+        stubTeams("1", "2");
+        mockGetMatches.mockReturnValue(
+          Effect.succeed([makeMatch(80, hoursFromNow(-3), "scheduled")]),
+        );
+
+        const entries = (await sitemap()).filter((e) =>
+          e.url.endsWith("/wedstrijd/80"),
+        );
+        expect(entries).toHaveLength(1);
+        expect(entries[0].lastModified).toEqual(hoursFromNow(-3));
+      });
     });
 
     it("resolves a team's HttpNotFound to no entries without logging an error", async () => {
