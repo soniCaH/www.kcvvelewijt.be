@@ -73,13 +73,15 @@ export const MobileLongLocation: Story = {
   globals: { viewport: { value: "kcvvMobile" } },
   tags: ["!vr"],
   play: async ({ canvas }) => {
-    const meta = canvas.getByTestId("ticket-stub-meta").getBoundingClientRect();
+    const metaBox = canvas
+      .getByTestId("ticket-stub-meta")
+      .getBoundingClientRect();
     const cue = canvas.getByText("Meer details →").getBoundingClientRect();
     const overlaps =
-      cue.left < meta.right &&
-      meta.left < cue.right &&
-      cue.top < meta.bottom &&
-      meta.top < cue.bottom;
+      cue.left < metaBox.right &&
+      metaBox.left < cue.right &&
+      cue.top < metaBox.bottom &&
+      metaBox.top < cue.bottom;
     await expect(overlaps).toBe(false);
   },
 };
