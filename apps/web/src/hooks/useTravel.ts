@@ -1,5 +1,3 @@
-"use client";
-
 /**
  * useTravel — the source side of a tapped list item growing into its detail
  * page: a fixture row into the match hero (#3397, decided in #2501), a news

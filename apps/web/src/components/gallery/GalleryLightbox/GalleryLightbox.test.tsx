@@ -4,7 +4,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import type { LightboxProps } from "yet-another-react-lightbox";
-import { GalleryLightbox, galleryImageAlt } from "./GalleryLightbox";
+import { GalleryLightbox } from "./GalleryLightbox";
+import { galleryImageAlt } from "./galleryImageAlt";
 import { trackEvent } from "@/lib/analytics/track-event";
 // Warm the lazy chunk during collect, so the click-time import is a cache hit.
 import "./GalleryViewer";

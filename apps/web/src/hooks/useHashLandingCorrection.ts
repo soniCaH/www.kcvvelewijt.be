@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback, useEffect, useRef } from "react";
 import { useWebfontSwap } from "./useWebfontSwap";
 import { safeDecodeURIComponent } from "@/lib/utils/safe-decode";

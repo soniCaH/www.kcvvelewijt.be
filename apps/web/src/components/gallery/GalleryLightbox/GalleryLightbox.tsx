@@ -3,6 +3,7 @@
 import { lazy, Suspense, useState } from "react";
 import { SanityImage } from "@/lib/image/sanity-image";
 import { LightboxLoading } from "../lightbox-chrome";
+import { galleryImageAlt } from "./galleryImageAlt";
 
 // The viewer (library, plugins, CSS) is its own chunk (#3480). `loadViewer` is
 // shared by `lazy()` and the hover/focus preload, so both hit one import.
@@ -43,23 +44,6 @@ export interface GalleryLightboxProps {
 const FIRST_ROW = 4;
 
 const sized = (url: string, w: number) => `${url}?w=${w}&q=80&fm=webp&fit=max`;
-
-/**
- * What one gallery photo says when it cannot be seen (#2559 / #2548 rule 5).
- *
- * A gallery photo is the site's one genuinely alone image: nothing else on the
- * page names it. So it says its **position and extent** — never the collection,
- * which the page's own `<h1>` already names in the same section. The shipped
- * fallback was `Foto 1` … `Foto 55`, which located the reader nowhere.
- *
- * An authored alt always wins; there is no caption fallback, because a caption
- * renders visibly and rule 2 makes a captioned figure silent.
- */
-export const galleryImageAlt = (
-  image: Pick<GalleryLightboxImage, "alt">,
-  index: number,
-  total: number,
-): string => image.alt?.trim() || `Foto ${index + 1} van ${total}`;
 
 /**
  * Thumbnail grid + `yet-another-react-lightbox` viewer (Thumbnails + Zoom +

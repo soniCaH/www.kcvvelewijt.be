@@ -1,12 +1,11 @@
-"use client";
-
 /**
  * Category metadata for the `<HulpFinder>` (design lock 7o6c, decision 1).
  *
- * Client-only: holds Phosphor Fill icon component references (`@phosphor-icons/
- * react` calls `createContext` at module eval, which is absent under the RSC
- * `react-server` condition). Re-exported via the finder barrel, so the boundary
- * keeps the server build from evaluating Phosphor.
+ * Holds Phosphor Fill icon component references through `@/lib/icons.redesign`,
+ * which is the `"use client"` boundary (`@phosphor-icons/react` calls
+ * `createContext` at module eval, absent under the RSC `react-server`
+ * condition). This file carries no directive of its own: it exports constants,
+ * and a `"use client"` file exports components and types only (#3839).
  *
  * Maps the 6 `ResponsibilityPath` categories to a Dutch label, a **Phosphor
  * Fill** icon (redesign canonical, via `@/lib/icons.redesign`), and a restrained
@@ -64,26 +63,3 @@ export const ACCENT_GLYPH_CLASS: Record<CategoryAccent, string> = {
   ink: "text-ink",
   brick: "text-alert",
 };
-
-/**
- * Group a flat list of paths by category, keyed by `CategoryKey` with matching
- * paths in their original input order. Empty categories get an empty array.
- */
-export function groupPathsByCategory(
-  paths: ReadonlyArray<ResponsibilityPath>,
-): Record<CategoryKey, ResponsibilityPath[]> {
-  // Seed a bucket for every category in CATEGORY_META (the Record<CategoryKey>
-  // source of truth) — not CATEGORY_ORDER, which is presentation order only and
-  // could omit a key. Callers order the output via CATEGORY_ORDER.
-  const grouped = {} as Record<CategoryKey, ResponsibilityPath[]>;
-  for (const cat of Object.keys(CATEGORY_META) as CategoryKey[]) {
-    grouped[cat] = [];
-  }
-  for (const path of paths) {
-    // Skip categories not in the known set — guards against CMS data drift
-    // (a category added in Sanity before the front-end map) rather than
-    // throwing on an undefined bucket.
-    grouped[path.category]?.push(path);
-  }
-  return grouped;
-}

@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { useHashLandingCorrection } from "./useHashLandingCorrection";
 

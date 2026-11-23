@@ -5,7 +5,7 @@ import { CookiePreferencesButton } from "./CookiePreferencesButton";
 /**
  * `<CookiePreferencesButton>` is the footer link that re-opens the
  * vanilla-cookieconsent preferences modal. It takes no props: its click
- * handler guards on the module-level `cookieConsentReady` flag exported by
+ * handler guards on the module-level `cookieConsentState.ready` flag exported by
  * `<CookieConsentBanner>`, which only flips to `true` once `CookieConsent.run()`
  * has resolved. Until then the button renders identically but the click is a
  * no-op (it cannot show preferences for a consent system that has not booted).
@@ -24,7 +24,7 @@ const meta = {
       description: {
         component:
           "Footer link that re-opens the cookie preferences modal. No props — " +
-          "the click guards on the `cookieConsentReady` flag from " +
+          "the click guards on the `cookieConsentState.ready` flag from " +
           "`<CookieConsentBanner>`.",
       },
     },
@@ -44,7 +44,7 @@ type Story = StoryObj<typeof meta>;
 
 /**
  * Ready state — `<CookieConsentBanner>` is mounted alongside the button, so
- * once `CookieConsent.run()` resolves, `cookieConsentReady` becomes `true` and
+ * once `CookieConsent.run()` resolves, `cookieConsentState.ready` becomes `true` and
  * clicking the link opens the preferences modal.
  */
 export const Default: Story = {
@@ -53,7 +53,7 @@ export const Default: Story = {
     docs: {
       description: {
         story:
-          "With `<CookieConsentBanner>` mounted, `cookieConsentReady` flips to " +
+          "With `<CookieConsentBanner>` mounted, `cookieConsentState.ready` flips to " +
           "`true` after init and the click opens the preferences modal.",
       },
     },
@@ -68,7 +68,7 @@ export const Default: Story = {
 
 /**
  * Not-ready state — the button renders on its own without the banner, so
- * `cookieConsentReady` stays `false` and clicking is a no-op. The markup is
+ * `cookieConsentState.ready` stays `false` and clicking is a no-op. The markup is
  * identical to the ready state; only the click behaviour differs.
  */
 export const NotReady: Story = {
@@ -77,7 +77,7 @@ export const NotReady: Story = {
     docs: {
       description: {
         story:
-          "Rendered without `<CookieConsentBanner>`: `cookieConsentReady` is " +
+          "Rendered without `<CookieConsentBanner>`: `cookieConsentState.ready` is " +
           "`false`, so the click is a guarded no-op. Visually identical to the " +
           "ready state.",
       },

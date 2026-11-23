@@ -1,5 +1,3 @@
-"use client";
-
 /**
  * useSemanticAugment — the `/zoeken` semantic augment state (8s5 / ZOEK-3).
  *

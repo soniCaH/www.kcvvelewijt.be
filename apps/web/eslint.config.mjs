@@ -4,6 +4,7 @@ import { builtinRules } from "eslint/use-at-your-own-risk";
 import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
 import nextTypescript from "eslint-config-next/typescript";
 import storybook from "eslint-plugin-storybook";
+import { useClientExports } from "./eslint-rules/use-client-exports.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -239,6 +240,8 @@ const kcvvPlugin = {
     "no-off-ramp-leading": builtinRules.get("no-restricted-syntax"),
     "no-off-ramp-tracking": builtinRules.get("no-restricted-syntax"),
     "no-per-component-focus-ring": builtinRules.get("no-restricted-syntax"),
+    // A real rule, not a selector: "component or type" needs the export's name and kind.
+    "use-client-exports": useClientExports,
   },
 };
 
@@ -458,6 +461,14 @@ const eslintConfig = [
         },
       ],
     },
+  },
+  {
+    // 'use client' files export components and types only (#3839). Own rule ID,
+    // own block: `no-restricted-syntax` is replaced per matching block, this rule is not.
+    files: ["**/src/**/*.{ts,tsx}"],
+    ignores: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
+    plugins: { kcvv: kcvvPlugin },
+    rules: { "kcvv/use-client-exports": "error" },
   },
   {
     // /share's story templates and looks are rasterised by html-to-image,

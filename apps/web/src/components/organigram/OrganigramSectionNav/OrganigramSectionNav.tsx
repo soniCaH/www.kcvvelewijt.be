@@ -23,7 +23,7 @@ import {
   SECTION_NAV_BAR_CLASSES,
 } from "@/components/design-system";
 import { HubSearch, type HubSearchProps } from "../HubSearch";
-import { useHubSearchTopInsetPublisher } from "../HubSearch/HubSearchQueryProvider";
+import { useHubSearchTopInsetPublisher } from "../HubSearch/useHubSearchQuery";
 import { useSectionNav } from "@/hooks/useSectionNav";
 import type { OrgChartNode } from "@/types/organigram";
 import type { ResponsibilityPath } from "@/types/responsibility";
