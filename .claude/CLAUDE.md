@@ -14,6 +14,7 @@ Turborepo monorepo (pnpm). TypeScript strict, Effect, Tailwind v4.
 | API contract        | `packages/api-contract/`   | (library)          | Static, Vitest, Build                                                          |
 | BFF (CF Workers)    | `apps/api/`                | Cloudflare Workers | Static, Vitest, Contract (real workerd)                                        |
 | Sanity ops scripts  | `scripts/sanity-ops/`      | (run by hand)      | Static, Vitest                                                                 |
+| Root scripts        | `scripts/*.mjs`            | (run by hand, CI)  | Static, node:test (`pnpm test:doc-paths`)                                      |
 
 App-specific rules → `apps/web/CLAUDE.md` | api-contract conventions → `packages/api-contract/CLAUDE.md`
 

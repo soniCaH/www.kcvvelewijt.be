@@ -10,6 +10,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   auditFiles,
+  listedByNodeTestScript,
   listedByPlaywright,
   listedByVitest,
   splitNul,
@@ -21,6 +22,18 @@ describe("splitNul", () => {
       "src/Café.test.tsx",
       "src/b.test.ts",
     ]);
+  });
+});
+
+describe("listedByNodeTestScript", () => {
+  it("takes the test files the script names", () => {
+    expect(
+      listedByNodeTestScript("node --test scripts/check-doc-paths.test.mjs\n"),
+    ).toEqual(["scripts/check-doc-paths.test.mjs"]);
+  });
+
+  it("lists nothing for a script that names no test file", () => {
+    expect(listedByNodeTestScript("node --test\n")).toEqual([]);
   });
 });
 
