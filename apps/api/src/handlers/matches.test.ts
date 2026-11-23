@@ -10,6 +10,7 @@ import {
   teamMatchesTtl,
   needsInlineRefresh,
   nextMatchesTtl,
+  matchesWindowTtl,
   CACHE_VERSION,
 } from "./matches";
 import { HARD_TTL_DEFAULT, TTL } from "../cache/kv-cache";
@@ -260,6 +261,62 @@ describe("getMatchesWindowHandler", () => {
     expect(result).toHaveLength(1);
     expect(result[0]?.id).toBe(1);
     expect(() => S.decodeUnknownSync(MatchesArray)(result)).not.toThrow();
+  });
+
+  // Wiring: the handler hands `matchesWindowTtl` to the cache, so a seeded
+  // entry's age decides between a fresh read and a fan-out.
+  describe("refresh ladder wiring", () => {
+    const HOUR = 60 * 60 * 1000;
+    const at = (offsetMs: number, id: number): MatchType => ({
+      ...baseMatch,
+      id,
+      status: "scheduled",
+      date: wireDate(Date.now() + offsetMs),
+    });
+
+    const run = (matches: MatchType[], ageMs: number) => {
+      const store = new Map<string, string>([
+        [
+          `matches:window:${CACHE_VERSION}`,
+          JSON.stringify({
+            value: S.encodeSync(MatchesArray)(matches),
+            fetchedAt: Date.now() - ageMs,
+          }),
+        ],
+      ]);
+      const cache: KvCacheInterface = {
+        ...makeCacheMock(),
+        get: (k) => Effect.succeed(store.get(k) ?? null),
+        set: (k, v) => Effect.sync(() => void store.set(k, v)),
+      };
+      const fanout = vi.fn(() => Effect.succeed([baseMatch]));
+      return Effect.runPromise(
+        getMatchesWindowHandler().pipe(
+          Effect.provide(
+            Layer.succeed(
+              PsdService,
+              makeServiceMock({ getMatchesWindow: fanout }),
+            ),
+          ),
+          Effect.provide(Layer.succeed(KvCacheService, cache)),
+          Effect.provide(PsdGateTest),
+          Effect.provide(testEnvLayer),
+        ),
+      ).then((result) => ({ result, fanout }));
+    };
+
+    it("kickoff 30 h away, entry 5 h old: fresh, no fan-out", async () => {
+      const seeded = [at(30 * HOUR, 21)];
+      const { result, fanout } = await run(seeded, 5 * HOUR);
+      expect(result.map((m) => m.id)).toEqual([21]);
+      expect(fanout).not.toHaveBeenCalled();
+    });
+
+    it("kickoff 10 h away, entry 5 h old: stale, triggers the fan-out", async () => {
+      const { result, fanout } = await run([at(10 * HOUR, 22)], 5 * HOUR);
+      expect(result.map((m) => m.id)).toEqual([22]);
+      expect(fanout).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("propagates UpstreamUnavailableError from service", async () => {
@@ -701,6 +758,103 @@ describe("nextMatchesTtl", () => {
     expect(nextMatchesTtl([m], k - 24 * H - 60_000)).toBe(
       TTL.NEXT_MATCHES_QUIET,
     );
+  });
+});
+
+describe("matchesWindowTtl", () => {
+  const now = new Date("2025-06-01T12:00:00.000Z").getTime();
+  const at = (offsetMs: number) => wireDate(now + offsetMs);
+  const H = 60 * 60 * 1000;
+
+  const match = (
+    date: Date,
+    status: MatchType["status"] = "scheduled",
+  ): MatchType => ({ ...baseMatch, date, status });
+
+  it("caps at matchday cadence while a played match is still 'scheduled' (result pending)", () => {
+    const list = [
+      match(at(-3 * H)),
+      match(at(-20 * H), "finished"),
+      match(at(5 * 24 * H)),
+    ];
+    expect(matchesWindowTtl(list, now)).toBe(TTL.MATCH_DETAIL_MATCHDAY);
+  });
+
+  it("starts the pending cap the instant after kickoff and ends it at the 48h edge", () => {
+    expect(matchesWindowTtl([match(at(0))], now)).toBe(TTL.NEXT_MATCHES);
+    expect(matchesWindowTtl([match(at(-1))], now)).toBe(
+      TTL.MATCH_DETAIL_MATCHDAY,
+    );
+    expect(matchesWindowTtl([match(at(-48 * H + 1))], now)).toBe(
+      TTL.MATCH_DETAIL_MATCHDAY,
+    );
+    expect(matchesWindowTtl([match(at(-48 * H))], now)).toBe(TTL.NEXT_MATCHES);
+  });
+
+  it("does not treat a finished past match as pending: the proximity tiers apply", () => {
+    const soon = [match(at(-3 * H), "finished"), match(at(2 * H))];
+    const far = [match(at(-3 * H), "finished"), match(at(30 * H))];
+    expect(matchesWindowTtl(soon, now)).toBe(TTL.NEXT_MATCHES);
+    expect(matchesWindowTtl(far, now)).toBe(TTL.NEXT_MATCHES_QUIET);
+  });
+
+  it("falls to the 4h tier for a list of only finished matches", () => {
+    const list = [
+      match(at(-3 * H), "finished"),
+      match(at(-30 * H), "forfeited"),
+      match(at(-3 * 24 * H), "postponed"),
+    ];
+    expect(matchesWindowTtl(list, now)).toBe(TTL.NEXT_MATCHES);
+  });
+
+  it("returns the 4h tier for an empty list", () => {
+    expect(matchesWindowTtl([], now)).toBe(TTL.NEXT_MATCHES);
+  });
+
+  it("ignores an unparseable kickoff", () => {
+    const list = [match(new Date(Number.NaN)), match(at(2 * H))];
+    expect(matchesWindowTtl(list, now)).toBe(TTL.NEXT_MATCHES);
+  });
+
+  it("ignores past kickoffs when finding the nearest future one", () => {
+    // The nearest kickoff overall is the finished one 1 h ago; the nearest
+    // FUTURE one is 30 h away, so the quiet tier applies.
+    const list = [match(at(-H), "finished"), match(at(30 * H))];
+    expect(matchesWindowTtl(list, now)).toBe(TTL.NEXT_MATCHES_QUIET);
+  });
+
+  it("flips from 4h to 12h at 24h before the nearest future kickoff", () => {
+    const at2359 = [match(at(23 * H + 59 * 60_000))];
+    const at2401 = [match(at(24 * H + 60_000))];
+    expect(matchesWindowTtl(at2359, now)).toBe(TTL.NEXT_MATCHES);
+    expect(matchesWindowTtl(at2401, now)).toBe(TTL.NEXT_MATCHES_QUIET);
+  });
+
+  // Wire dates are Brussels wall-clock-as-UTC: on a DST night the wall-clock
+  // gap differs from the real gap by an hour, for the 24h tier flip AND the
+  // 48h pending edge.
+  it.each([
+    [
+      "spring-forward 29 March 2026",
+      "2026-03-29T15:00:00.000Z",
+      "2026-03-29T13:00:00.000Z",
+    ],
+    [
+      "fall-back 25 October 2026",
+      "2026-10-25T15:00:00.000Z",
+      "2026-10-25T14:00:00.000Z",
+    ],
+  ])("flips at the real instants on %s", (_l, wire, kickoffZ) => {
+    const m = match(new Date(wire));
+    const k = Date.parse(kickoffZ);
+    expect(matchesWindowTtl([m], k - 24 * H + 60_000)).toBe(TTL.NEXT_MATCHES);
+    expect(matchesWindowTtl([m], k - 24 * H - 60_000)).toBe(
+      TTL.NEXT_MATCHES_QUIET,
+    );
+    expect(matchesWindowTtl([m], k + 48 * H - 1)).toBe(
+      TTL.MATCH_DETAIL_MATCHDAY,
+    );
+    expect(matchesWindowTtl([m], k + 48 * H)).toBe(TTL.NEXT_MATCHES);
   });
 });
 
