@@ -647,8 +647,19 @@ describe("nextMatchesTtl", () => {
     expect(nextMatchesTtl(list, now)).toBe(TTL.NEXT_MATCHES);
   });
 
-  it("returns the quiet 12h TTL for an empty list", () => {
-    expect(nextMatchesTtl([], now)).toBe(TTL.NEXT_MATCHES_QUIET);
+  it("returns the 4h TTL for an empty list", () => {
+    expect(nextMatchesTtl([], now)).toBe(TTL.NEXT_MATCHES);
+  });
+
+  it("ignores an unparseable kickoff when finding the nearest", () => {
+    const list = [match(new Date(Number.NaN)), match(at(2 * H))];
+    expect(nextMatchesTtl(list, now)).toBe(TTL.NEXT_MATCHES);
+  });
+
+  it("treats a list of only unparseable kickoffs like an empty list", () => {
+    expect(nextMatchesTtl([match(new Date(Number.NaN))], now)).toBe(
+      TTL.NEXT_MATCHES,
+    );
   });
 
   it("flips from 4h to 12h at 24h before the nearest kickoff", () => {
