@@ -64,6 +64,10 @@ const fillAndSubmit = async (canvasElement: HTMLElement) => {
   await userEvent.click(canvas.getByText("Schrijf onze ploeg in"));
 };
 
+/** Drop focus so the submit button's `:focus-visible` ring never paints: Chromium paints it only when the capture frame holds OS focus, which varies per run. */
+const blurActive = (canvasElement: HTMLElement) =>
+  (canvasElement.ownerDocument.activeElement as HTMLElement | null)?.blur();
+
 export default meta;
 type Story = StoryObj<typeof meta>;
 
@@ -92,6 +96,7 @@ export const Submitting: Story = {
   play: async ({ canvasElement }) => {
     await fillAndSubmit(canvasElement);
     await within(canvasElement).findByRole("button", { name: "Versturen…" });
+    blurActive(canvasElement);
   },
 };
 
@@ -136,5 +141,6 @@ export const ServerError: Story = {
   play: async ({ canvasElement }) => {
     await fillAndSubmit(canvasElement);
     await within(canvasElement).findByRole("alert");
+    blurActive(canvasElement);
   },
 };
