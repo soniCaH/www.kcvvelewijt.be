@@ -4,6 +4,7 @@ import type { Match } from "@kcvv/api-contract";
 import { SITE_CONFIG } from "@/lib/constants";
 import { PAGES_QUERY } from "@/lib/repositories/page.repository";
 import type { PAGES_QUERY_RESULT } from "@/lib/sanity/sanity.types";
+import { kickoffMs } from "@/lib/utils/dates";
 import { isBoardTeamSlug } from "@/lib/utils/team-href";
 import nextConfig from "../../next.config";
 
@@ -123,6 +124,21 @@ async function fetchFromSanity<T>(
 }
 
 type TeamMatch = Pick<Match, "id" | "date" | "status">;
+
+// A Match page can still change (score, report) for 48 h after kickoff.
+const MATCH_SETTLE_MS = 48 * 60 * 60 * 1000;
+
+// A scheduled Match is dated by its kickoff; any other status by the earlier of
+// kickoff + 48 h and now, so the date is never in the future (#3624). Kickoff
+// is the real instant: `Match.date` is Brussels wall-clock in UTC fields (#3491).
+const matchLastModified = (match: TeamMatch, now: Date): Date => {
+  const kickoff = kickoffMs(match);
+  return new Date(
+    match.status === "scheduled"
+      ? kickoff
+      : Math.min(kickoff + MATCH_SETTLE_MS, now.getTime()),
+  );
+};
 
 type TeamMatches = { teamPsdId: string; matches: TeamMatch[] };
 
@@ -291,24 +307,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const teamMatches = await fetchTeamMatches(teamPsdIds);
   const now = new Date();
 
-  // A Team changes when it plays: its lastmod is the kickoff of its latest past
-  // Match. A Team without a past Match (or whose matches could not be fetched)
-  // gets no lastmod rather than an invented one (#3624).
-  const latestPastKickoff = new Map<string, Date>();
+  // A Team page changes when one of its Matches is played, and also when a past
+  // Match is postponed or cancelled: its lastmod is the kickoff of its latest
+  // past Match, whatever the status. A Team without a past Match (or whose
+  // matches could not be fetched) gets no lastmod rather than an invented one
+  // (#3624).
+  const latestPastKickoff = new Map<string, number>();
   for (const { teamPsdId, matches } of teamMatches) {
-    for (const { date } of matches) {
-      const latest = latestPastKickoff.get(teamPsdId);
-      if (date <= now && (!latest || date > latest)) {
-        latestPastKickoff.set(teamPsdId, date);
+    for (const match of matches) {
+      const kickoff = kickoffMs(match);
+      if (kickoff <= now.getTime()) {
+        latestPastKickoff.set(
+          teamPsdId,
+          Math.max(kickoff, latestPastKickoff.get(teamPsdId) ?? kickoff),
+        );
       }
     }
   }
 
   const teamEntries = teams.map((t) => {
-    const lastModified = t.psdId ? latestPastKickoff.get(t.psdId) : undefined;
+    const kickoff = t.psdId ? latestPastKickoff.get(t.psdId) : undefined;
     return {
       url: `${SITE_CONFIG.siteUrl}/ploegen/${t.slug}`,
-      ...(lastModified && { lastModified }),
+      ...(kickoff !== undefined && { lastModified: new Date(kickoff) }),
       changeFrequency: "weekly" as const,
       priority: 0.6,
     };
@@ -321,30 +342,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const recentMatches = new Map<number, TeamMatch>();
   for (const { matches } of teamMatches) {
     for (const match of matches) {
+      const kickoff = kickoffMs(match);
       if (
-        match.date >= sevenDaysAgo &&
-        match.date <= now &&
+        kickoff >= sevenDaysAgo.getTime() &&
+        kickoff <= now.getTime() &&
         !recentMatches.has(match.id)
       ) {
         recentMatches.set(match.id, match);
       }
     }
   }
-  // A scheduled Match is dated by its kickoff. Once played (or postponed,
-  // cancelled, ...) the page can still change for 48 h after kickoff (score,
-  // report), and never in the future.
-  const MATCH_SETTLE_MS = 48 * 60 * 60 * 1000;
-  const matchEntries = [...recentMatches.values()].map(
-    ({ id, date, status }) => ({
-      url: `${SITE_CONFIG.siteUrl}/wedstrijd/${id}`,
-      lastModified:
-        status === "scheduled"
-          ? date
-          : new Date(Math.min(date.getTime() + MATCH_SETTLE_MS, now.getTime())),
-      changeFrequency: "weekly" as const,
-      priority: 0.5,
-    }),
-  );
+  const matchEntries = [...recentMatches.values()].map((match) => ({
+    url: `${SITE_CONFIG.siteUrl}/wedstrijd/${match.id}`,
+    lastModified: matchLastModified(match, now),
+    changeFrequency: "weekly" as const,
+    priority: 0.5,
+  }));
 
   // A page document can share its slug with a hand-listed `/club/*` route
   // (`word-lid`, the board pages): the first entry wins, so the static route's
