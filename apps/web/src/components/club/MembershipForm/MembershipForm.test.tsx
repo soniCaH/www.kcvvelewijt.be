@@ -55,6 +55,10 @@ const submitForm = () =>
 const callsOf = (eventName: string) =>
   vi.mocked(trackEvent).mock.calls.filter(([name]) => name === eventName);
 
+// Gives a pending passive effect (the `report` effect fires the events) a
+// chance to run. It does not prove that none is pending.
+const flushEffects = () => act(async () => {});
+
 describe("MembershipForm", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -212,16 +216,22 @@ describe("MembershipForm", () => {
       fillRequiredFields();
       submitForm();
       await screen.findByText("Controleer de gemarkeerde velden.");
-      expect(callsOf("membership_form_error")).toEqual([
-        [
-          "membership_form_error",
-          {
-            fields: "birthDate,parentEmail",
-            source: "server",
-            role: "vrijwilliger",
-          },
-        ],
-      ]);
+      const expectOneServerError = () =>
+        expect(callsOf("membership_form_error")).toEqual([
+          [
+            "membership_form_error",
+            {
+              fields: "birthDate,parentEmail",
+              source: "server",
+              role: "vrijwilliger",
+            },
+          ],
+        ]);
+      // The event fires from an effect that can run after the notice renders;
+      // flush, then assert again so a second event would fail.
+      await waitFor(expectOneServerError);
+      await flushEffects();
+      expectOneServerError();
       expect(JSON.stringify(callsOf("membership_form_error"))).not.toContain(
         "jan@example.com",
       );
@@ -251,6 +261,7 @@ describe("MembershipForm", () => {
       fillRequiredFields();
       submitForm();
       await screen.findByText(body.error);
+      await flushEffects();
       expect(callsOf("membership_form_error")).toHaveLength(0);
     });
 
@@ -266,6 +277,7 @@ describe("MembershipForm", () => {
       expect(await screen.findByRole("alert")).toHaveTextContent(
         /Verzenden mislukt/,
       );
+      await flushEffects();
       expect(callsOf("membership_form_error")).toHaveLength(0);
     });
   });
@@ -367,17 +379,21 @@ describe("MembershipForm", () => {
       fillRequiredFields();
       submitForm();
       await screen.findByText(/Bedankt voor je interesse/i);
-      expect(callsOf("membership_form_submit")).toEqual([
-        [
-          "membership_form_submit",
-          {
-            role: "vrijwilliger",
-            is_minor: false,
-            has_prior_club: false,
-            has_remark: false,
-          },
-        ],
-      ]);
+      const expectOneSubmit = () =>
+        expect(callsOf("membership_form_submit")).toEqual([
+          [
+            "membership_form_submit",
+            {
+              role: "vrijwilliger",
+              is_minor: false,
+              has_prior_club: false,
+              has_remark: false,
+            },
+          ],
+        ]);
+      await waitFor(expectOneSubmit);
+      await flushEffects();
+      expectOneSubmit();
     });
 
     it("fires nothing for a rejected submit", async () => {
@@ -395,6 +411,7 @@ describe("MembershipForm", () => {
       fillRequiredFields();
       submitForm();
       await screen.findByText("Niet beschikbaar.");
+      await flushEffects();
       expect(callsOf("membership_form_submit")).toHaveLength(0);
     });
   });
