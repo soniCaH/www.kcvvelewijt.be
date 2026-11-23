@@ -27,12 +27,14 @@ env:
   TURBO_TEAM: ${{ vars.TURBO_TEAM }}
 
 jobs:
-  # Docs-only filtering lives HERE, at job level, not on the `on:` triggers.
+  # Docs-only filtering lives HERE, at job and step level, not on the `on:` triggers.
   # GitHub reports a job skipped by `if:` as Success, but a workflow that never
   # triggered at all leaves its checks permanently "Pending" — so a required
-  # check behind `paths-ignore` blocks every docs-only PR forever. Job-level
-  # gating keeps the same "don't burn a runner on docs" behaviour while staying
-  # safe to mark required (#3084).
+  # check behind `paths-ignore` blocks every docs-only PR forever. Gating on
+  # this job's `code` output keeps the same "don't burn a runner on docs"
+  # behaviour while staying safe to mark required (#3084). `quality-checks`
+  # still runs on docs-only changes, but only its markdown and doc-path steps
+  # (#3839); the deploy jobs stay off for them.
   # Same shape and same action as `visual-regression-changes` below.
   changes:
     name: Detect code changes
@@ -102,6 +104,8 @@ jobs:
   # redundant install cycle per run. Steps fail-fast, so a lint/type/test
   # failure still stops before the (later) build steps — same early-exit as the
   # old two-job split. Draft PRs are skipped to avoid CI on work-in-progress.
+  # A docs-only change runs checkout, install and the two doc checks; every
+  # later step is gated on `needs.changes.outputs.code` (#3839).
   quality-checks:
     name: Quality Checks + Build
     runs-on: ubuntu-latest
@@ -112,10 +116,11 @@ jobs:
     # would let a superseded 25-min run finish. (docs: "Workflow cancellation")
     # A plain `if:` gets an implicit `success()`, so a failed `changes` would
     # SKIP this job — and a skipped required check counts as passing (#3473).
+    # Runs for docs-only changes too, so the markdown and doc-path checks (#3839) gate them.
+    # `needs.changes.outputs.code` gates every other step instead, and the deploy jobs below.
     if: |
       !cancelled() &&
-      (github.event_name != 'pull_request' || github.event.pull_request.draft == false) &&
-      (needs.changes.result != 'success' || needs.changes.outputs.code == 'true')
+      (github.event_name != 'pull_request' || github.event.pull_request.draft == false)
     environment: ${{ github.ref == 'refs/heads/main' && 'Production' || 'Preview' }}
 
     steps:
@@ -151,6 +156,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Docs-only changes run only these two checks (#3839): every step after them is gated
+      # on `needs.changes.outputs.code`, so a docs-only PR stays cheap.
+      # MD040: a fenced code block names its language. Only that rule is on;
+      # `.markdownlint-cli2.jsonc` says so.
+      - name: Lint markdown (MD040)
+        run: pnpm run lint:md
+
+      # A backticked path in a CLAUDE.md or docs/ file must exist.
+      - name: Check doc paths
+        run: |
+          pnpm run test:doc-paths
+          pnpm run lint:doc-paths
+
       # The Storybook Vitest addon project (#3146,
       # `apps/web/vitest.storybook.config.ts`, its own config file — see its
       # docblock) runs via the separate "Run Storybook play tests" step
@@ -159,10 +177,12 @@ jobs:
       # `--with-deps` also installs the OS libraries Chromium needs to
       # launch on a bare Ubuntu runner.
       - name: Install Playwright Chromium
+        if: needs.changes.outputs.code == 'true'
         run: npx playwright install --with-deps chromium
         working-directory: apps/web
 
       - name: Lint
+        if: needs.changes.outputs.code == 'true'
         run: npx turbo lint --filter=@kcvv/web
 
       # Pinned to the version `lint:sh` was adopted on, so a runner-image
@@ -170,26 +190,18 @@ jobs:
       # on any error (a one-off TLS fault turned main red in #3377) and lands
       # in a file first, so a retried transfer never feeds tar a torn stream.
       - name: Lint shell scripts
+        if: needs.changes.outputs.code == 'true'
         run: |
           curl -fsSL --retry 3 --retry-all-errors -o "$RUNNER_TEMP/shellcheck.tar.xz" https://github.com/koalaman/shellcheck/releases/download/v0.11.0/shellcheck-v0.11.0.linux.x86_64.tar.xz
           tar -xJf "$RUNNER_TEMP/shellcheck.tar.xz" -C "$RUNNER_TEMP"
           PATH="$RUNNER_TEMP/shellcheck-v0.11.0:$PATH" pnpm run lint:sh
 
-      # MD040: a fenced code block names its language (#3839). Only that rule is
-      # on; `.markdownlint-cli2.jsonc` says so.
-      - name: Lint markdown (MD040)
-        run: pnpm run lint:md
-
-      # A backticked path in a CLAUDE.md or docs/ file must exist (#3839).
-      - name: Check doc paths
-        run: |
-          pnpm run test:doc-paths
-          pnpm run lint:doc-paths
-
       - name: Unused dependencies (knip)
+        if: needs.changes.outputs.code == 'true'
         run: pnpm run knip
 
       - name: Type check
+        if: needs.changes.outputs.code == 'true'
         run: npx turbo type-check --filter=@kcvv/web
 
       # Coverage instrumentation costs ~2.5x the plain run (255s vs 98.6s,
@@ -199,6 +211,7 @@ jobs:
       # upload site instead of two, and the ~2.5 min no longer sits on this
       # job's (or the deploy job's) critical path (#3152 review round 1).
       - name: Run tests
+        if: needs.changes.outputs.code == 'true'
         run: npx turbo test --filter=@kcvv/web
 
       # Separate config, separate invocation, on purpose (#3146, see
@@ -210,6 +223,7 @@ jobs:
       # files. Not run through `turbo` (no other `test:e2e`-style script is
       # either) — no upstream package build dependency to cache against.
       - name: Run Storybook play tests
+        if: needs.changes.outputs.code == 'true'
         run: pnpm --filter @kcvv/web run test:storybook
 
       # A runner exits 0 when SOME files match, so a test file no `include`
@@ -219,27 +233,35 @@ jobs:
       # list, or owned by no layer of the script. Lists, does not run: nothing here costs a test run. Lives in
       # this job so it needs no required check of its own.
       - name: Every test file is picked up by a runner
+        if: needs.changes.outputs.code == 'true'
         run: node apps/web/scripts/test-file-coverage.mjs
 
       - name: Lint API
+        if: needs.changes.outputs.code == 'true'
         run: npx turbo lint --filter=@kcvv/api --filter=@kcvv/api-contract
 
       - name: Type check API
+        if: needs.changes.outputs.code == 'true'
         run: npx turbo type-check --filter=@kcvv/api
 
       - name: Run API tests
+        if: needs.changes.outputs.code == 'true'
         run: npx turbo test --filter=@kcvv/api
 
       - name: Run api-contract tests
+        if: needs.changes.outputs.code == 'true'
         run: npx turbo test --filter=@kcvv/api-contract
 
       - name: Lint + type check Studio
+        if: needs.changes.outputs.code == 'true'
         run: npx turbo lint type-check --filter=@kcvv/studio --filter=@kcvv/studio-staging --filter=@kcvv/sanity-studio --filter=@kcvv/sanity-schemas
 
       - name: Run Studio UI tests
+        if: needs.changes.outputs.code == 'true'
         run: npx turbo test --filter=@kcvv/sanity-studio
 
       - name: Lint + type check + test Sanity ops scripts
+        if: needs.changes.outputs.code == 'true'
         run: npx turbo lint type-check test --filter=@kcvv/sanity-ops
 
       # Both studios share one Turbo invocation (and cache). Staging builds but
@@ -247,6 +269,7 @@ jobs:
       # `@kcvv/sanity-schemas` and its CLI config declares no typegen target
       # (#3287).
       - name: Build Studios
+        if: needs.changes.outputs.code == 'true'
         run: npx turbo build --filter=@kcvv/studio --filter=@kcvv/studio-staging
 
       # `@kcvv/web#build` already depends on `@kcvv/studio#typegen` in
@@ -261,6 +284,7 @@ jobs:
       # local schema code and `sanity typegen generate` reads local GROQ query
       # files — both fully offline.
       - name: Sanity types in sync
+        if: needs.changes.outputs.code == 'true'
         run: |
           npx turbo typegen --filter=@kcvv/studio
           if ! git diff --exit-code -- apps/web/src/lib/sanity/sanity.types.ts; then
@@ -275,10 +299,12 @@ jobs:
       # `security/snyk` PR check), which runs on Snyk's infrastructure with no
       # GitHub Actions minutes.
       - name: Audit dependencies (pnpm)
+        if: needs.changes.outputs.code == 'true'
         run: pnpm audit --audit-level=moderate
         continue-on-error: true
 
       - name: Build Next.js
+        if: needs.changes.outputs.code == 'true'
         run: npx turbo build --filter=@kcvv/web
         env:
           KCVV_API_URL: ${{ vars.KCVV_API_URL }}
@@ -801,8 +827,8 @@ jobs:
     name: Deploy API staging to Cloudflare Workers
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: quality-checks
-    if: github.event_name == 'pull_request' && github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
+    needs: [changes, quality-checks]
+    if: needs.changes.outputs.code == 'true' && github.event_name == 'pull_request' && github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]'
     # Deploys with CLOUDFLARE_API_TOKEN; it never uses GITHUB_TOKEN for more
     # than the checkout itself.
     permissions:
@@ -853,9 +879,10 @@ jobs:
     # behaviour, so the explicit checks below do the gating instead:
     # `storybook-build` may succeed OR skip (RUN_VISUAL_REGRESSION off, or no
     # visual paths touched) but must not have failed.
-    needs: [quality-checks, storybook-build]
+    needs: [changes, quality-checks, storybook-build]
     if: |
       always() &&
+      needs.changes.outputs.code == 'true' &&
       github.event_name == 'push' && github.ref == 'refs/heads/main' &&
       needs.quality-checks.result == 'success' &&
       needs.storybook-build.result != 'failure'
