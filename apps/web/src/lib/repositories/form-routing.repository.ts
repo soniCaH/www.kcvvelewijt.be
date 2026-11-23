@@ -60,9 +60,9 @@ const ROLES: readonly MembershipRole[] = [
 
 // Writer Rule: a vacant box or a holder without a name yields no contact,
 // never an empty name.
-export function toMembershipContacts(
+const toMembershipContacts = (
   data: FORM_ROUTING_CONTACTS_QUERY_RESULT,
-): MembershipContacts {
+): MembershipContacts => {
   const contacts: { -readonly [R in MembershipRole]?: MembershipContact } = {};
   for (const role of ROLES) {
     const box = data?.[role];
@@ -78,7 +78,7 @@ export function toMembershipContacts(
     }
   }
   return contacts;
-}
+};
 
 // ─── Repository ──────────────────────────────────────────────────────────────
 

@@ -4,9 +4,9 @@
  * Static sibling under `club/` that beats the `club/[slug]` CMS catch-all.
  * The structured membership-signup entry point, reached from the "Word lid"
  * CTAs. The CMS "Praktische Informatie" page (`/club/praktische-informatie`) stays as the
- * practical-info hub. The page is static (ISR, hourly); it reads who holds each
- * role's contact box so the confirmation card can name them (#3640). The form
- * POSTs to `/api/membership`.
+ * practical-info hub. The page is ISR (hourly): it reads who holds each role's
+ * contact box so the confirmation card can name them (#3640). The form POSTs
+ * to `/api/membership`.
  */
 
 import { Effect } from "effect";
@@ -57,7 +57,7 @@ export const revalidate = 3600;
  * The outer try/catch covers `AppLayer` construction failing, which happens
  * outside the effect `degradeSection` wraps (same as `/jeugd`).
  */
-async function fetchContacts(): Promise<MembershipContacts> {
+const fetchContacts = async (): Promise<MembershipContacts> => {
   try {
     return await runPromise(
       degradeSection(
@@ -73,7 +73,7 @@ async function fetchContacts(): Promise<MembershipContacts> {
     console.error("[word-lid] contact-box lookup failed:", error);
     return {};
   }
-}
+};
 
 export default async function WordLidPage() {
   const contacts = await fetchContacts();
