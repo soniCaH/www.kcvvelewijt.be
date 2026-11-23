@@ -24,7 +24,7 @@ import {
   SQUARE_SIZE,
   TEMPLATE_SCALE,
 } from "../constants";
-import { ShareBadgeContext, ShareBlocksContext } from "../shared/shareContexts";
+import { ShareBadgeContext, ShareBlocksContext } from "../shared/ShareFrame";
 import { shortSquadLabel, type ResultMood } from "../shared/theme";
 import { EmptyState } from "@/components/design-system/EmptyState";
 import { Input } from "@/components/design-system/Input/Input";

@@ -5,11 +5,15 @@
 // and the failure shows only at runtime. A value that is not a component belongs in a
 // plain module that both sides import.
 //
+// A React context is allowed whatever its name: Next serialises it for the server, and Next's
+// own docs export one from a client file. Why the rule is custom, what was tested and why
+// contexts are exempt: docs/research/use-client-exports-lint-rule.md.
+//
 // shortcut: "component" means a PascalCase name. A camelCase component is flagged; rename
-// it or move it out. A PascalCase value passes unless it is a `createContext(...)` call
-// declared in the same file, so a PascalCase object, class instance or `memo(...)` of a
-// non-component still slips through. A default export always passes: Next pages, layouts
-// and a lone component file default-export. Upgrade to type information if one slips through.
+// it or move it out. A PascalCase value passes, so a PascalCase object, class instance or
+// `memo(...)` of a non-component still slips through. A default export always passes: Next
+// pages, layouts and a lone component file default-export. Upgrade to type information if
+// one slips through.
 // A lowercase letter somewhere keeps SCREAMING_CASE constants (`CATEGORY_META`) out.
 const isComponentName = (name) =>
   /^[A-Z]/.test(name) && (/[a-z]/.test(name) || name.length === 1);
@@ -68,7 +72,7 @@ export const useClientExports = {
           const name = specifier.exported.name ?? specifier.exported.value;
           if (specifier.exportKind === "type" || name === "default") continue;
           const localName = specifier.local.name ?? specifier.local.value;
-          if (!isComponentName(name) || state.contexts.has(localName)) {
+          if (!isComponentName(name) && !state.contexts.has(localName)) {
             report(specifier, name);
           }
         }
@@ -84,8 +88,8 @@ export const useClientExports = {
               if (declarator.id.type !== "Identifier") {
                 report(declarator, "a destructured binding");
               } else if (
-                !isComponentName(declarator.id.name) ||
-                isCreateContextCall(declarator.init)
+                !isComponentName(declarator.id.name) &&
+                !isCreateContextCall(declarator.init)
               ) {
                 report(declarator, declarator.id.name);
               }

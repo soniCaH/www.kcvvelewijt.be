@@ -24,10 +24,6 @@ const VIOLATIONS = [
   `${CLIENT}export * from "./other";`,
   `${CLIENT}export enum Mode { A }`,
   `${CLIENT}export const Card = () => null;\nexport const SIZE = 4;`,
-  // A context is a value however it is named.
-  `${CLIENT}export const ThingContext = createContext(null);`,
-  `${CLIENT}export const ThingContext = React.createContext<string>("a");`,
-  `${CLIENT}const ThingContext = createContext(null);\nexport { ThingContext };`,
 ];
 
 const ALLOWED = [
@@ -35,6 +31,12 @@ const ALLOWED = [
   `${CLIENT}export function Card() { return null; }`,
   `${CLIENT}export class Card {}`,
   `${CLIENT}export const X = () => null;`,
+  // A context is a React object Next serialises for the server, whatever its name (#3839).
+  `${CLIENT}export const ThingContext = createContext(null);`,
+  `${CLIENT}export const thingContext = createContext(null);`,
+  `${CLIENT}export const ThingContext = React.createContext<string>("a");`,
+  `${CLIENT}const ThingContext = createContext(null);\nexport { ThingContext };`,
+  `${CLIENT}const thingContext = createContext(null);\nexport { thingContext };`,
   `${CLIENT}const ThingContext = createContext(null);\nexport const Card = () => null;`,
   `${CLIENT}export type Props = { a: string };`,
   `${CLIENT}export interface Props { a: string }`,

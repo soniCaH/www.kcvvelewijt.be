@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { CAPTURE_HEIGHT, CAPTURE_WIDTH } from "../constants";
 import {
+  ShareBadgeContext,
   ShareFrame,
   ShareTop,
   ShareMid,
   ShareFoot,
   type ShareFrameProps,
 } from "./ShareFrame";
-import { ShareBadgeContext } from "./shareContexts";
 import {
   Headline,
   Kicker,

@@ -9,7 +9,7 @@ import React, {
   useLayoutEffect,
   useRef,
 } from "react";
-import { wedstrijdZ } from "../looks/block-layout";
+import { wedstrijdZ, type BlockLayout } from "../looks/block-layout";
 import {
   BODY_FONT,
   GRAIN_DATA_URL,
@@ -26,7 +26,6 @@ import {
   type ShareSentiment,
 } from "./theme";
 import { SharePaletteContext, useSharePalette } from "./sharePalette";
-import { ShareBadgeContext, ShareBlocksContext } from "./shareContexts";
 
 /**
  * How the image register paints its photo. `"portrait"` — a player photo in
@@ -38,6 +37,23 @@ export type SharePhotoLayout = "portrait" | "backdrop";
 // The layout of the photo the enclosing frame paints, or null without one:
 // ShareMid reads it to place its content.
 const SharePhotoContext = createContext<SharePhotoLayout | null>(null);
+
+/**
+ * Squad badge text (e.g. `"A"`, `"U21"`, `"U13A"`) for the enclosing render.
+ * Defaults to no badge. `SharePage` provides this around the element returned
+ * by its template renderer; `ShareTop` is the single seam that reads it, so
+ * every one of the 11 templates picks up the badge without a threaded prop.
+ * A template rendered standalone (Storybook, a unit test) shows no badge
+ * unless it is wrapped in this provider.
+ */
+export const ShareBadgeContext = createContext<string | undefined>(undefined);
+
+/**
+ * The block layout of the story being composed in `/share` (#3537). With
+ * one, {@link ShareMid} makes each of its direct children a movable block;
+ * without one (Storybook, VR, unit tests) it renders exactly as before.
+ */
+export const ShareBlocksContext = createContext<BlockLayout | null>(null);
 
 export interface ShareFrameProps {
   /** Canvas width in px (1080 for both Story and Square). */

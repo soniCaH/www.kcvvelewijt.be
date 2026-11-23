@@ -1,7 +1,13 @@
 import { describe, it, expect } from "vitest";
 import { act, render, screen } from "@testing-library/react";
-import { ShareFrame, ShareTop, ShareFoot, ShareMid } from "./ShareFrame";
-import { ShareBadgeContext, ShareBlocksContext } from "./shareContexts";
+import {
+  ShareBadgeContext,
+  ShareBlocksContext,
+  ShareFrame,
+  ShareTop,
+  ShareFoot,
+  ShareMid,
+} from "./ShareFrame";
 import { Headline, Kicker, Scoreline, ShareName } from "./ShareElements";
 
 /** Fake element width measurement (happy-dom has no layout); returns a restore. */
