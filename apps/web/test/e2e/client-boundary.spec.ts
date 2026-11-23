@@ -13,6 +13,11 @@ import { waitForHydrated } from "./helpers/hydration";
 test("the footer's Cookie-instellingen button opens the preferences modal", async ({
   page,
 }) => {
+  // vanilla-cookieconsent builds no modal for a webdriver (`hideFromBots`), so
+  // Playwright would see a banner that never mounts.
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, "webdriver", { get: () => false });
+  });
   await gotoBounded(page, "/privacy");
   const button = page.getByRole("button", { name: "Cookie-instellingen" });
   await waitForHydrated(button);
