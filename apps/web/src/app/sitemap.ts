@@ -243,8 +243,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const galleryEntries = galleries.map((gallery) => ({
     url: `${SITE_CONFIG.siteUrl}/galerij/${gallery.slug}`,
-    // The Gallery's publish date; none without one - never "today" (#3623).
-    ...(gallery.publishedAt
+    // The Gallery's publish date; none without one, or while it is still
+    // scheduled in the future - never a date that has not happened (#3623).
+    ...(gallery.publishedAt && new Date(gallery.publishedAt) <= new Date()
       ? { lastModified: new Date(gallery.publishedAt) }
       : {}),
     changeFrequency: "monthly" as const,
@@ -270,7 +271,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
 
   const playerEntries = players.map((p) => ({
-    // No lastmod: the nightly PSD sync touches every Player document, so its
+    // No lastmod: the PSD sync rewrites every Player on each team rotation, so its
     // `_updatedAt` is not an honest change date (#3623).
     url: `${SITE_CONFIG.siteUrl}/spelers/${p.slug}`,
     changeFrequency: "monthly" as const,
@@ -278,16 +279,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const staffEntries = staff.map((s) => ({
-    // No lastmod: same nightly-sync reason as Players (#3623).
+    // No lastmod: same PSD-sync reason as Players (#3623).
     url: `${SITE_CONFIG.siteUrl}/staf/${s.slug}`,
     changeFrequency: "monthly" as const,
     priority: 0.5,
   }));
 
+  // Team and Match keep "today" until their own lastmod is decided (#3624).
+  const teamAndMatchLastModified = new Date();
+
   const teamEntries = teams.map((t) => ({
     url: `${SITE_CONFIG.siteUrl}/ploegen/${t.slug}`,
-    // Unchanged for now; Team and Match lastmod is #3624.
-    lastModified: new Date(),
+    lastModified: teamAndMatchLastModified,
     changeFrequency: "weekly" as const,
     priority: 0.6,
   }));
@@ -316,8 +319,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
   const matchEntries = [...recentMatches.keys()].map((id) => ({
     url: `${SITE_CONFIG.siteUrl}/wedstrijd/${id}`,
-    // Unchanged for now; Team and Match lastmod is #3624.
-    lastModified: new Date(),
+    lastModified: teamAndMatchLastModified,
     changeFrequency: "weekly" as const,
     priority: 0.5,
   }));

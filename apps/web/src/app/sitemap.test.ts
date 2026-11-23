@@ -176,6 +176,11 @@ describe("sitemap.ts", () => {
           return [
             { slug: "dated", publishedAt: "2026-04-01T09:00:00Z", image: null },
             { slug: "undated", publishedAt: null, image: null },
+            {
+              slug: "scheduled",
+              publishedAt: new Date(Date.now() + 86_400_000).toISOString(),
+              image: null,
+            },
           ];
         if (query.includes('_type == "player"')) return [{ slug: "101" }];
         if (query.includes('_type == "staffMember"')) return [{ slug: "202" }];
@@ -209,6 +214,10 @@ describe("sitemap.ts", () => {
         new Date("2026-04-01T09:00:00Z"),
       );
       expect(lastModifiedOf(result, "/galerij/undated")).not.toHaveProperty(
+        "lastModified",
+      );
+      // A scheduled (future) publish date is not a change that has happened.
+      expect(lastModifiedOf(result, "/galerij/scheduled")).not.toHaveProperty(
         "lastModified",
       );
     });
