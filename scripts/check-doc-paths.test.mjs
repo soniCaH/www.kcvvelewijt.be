@@ -5,6 +5,7 @@ import {
   extractCandidates,
   findMissing,
   isChecked,
+  splitNul,
   toCandidate,
   trackedPaths,
 } from "./check-doc-paths.mjs";
@@ -106,4 +107,23 @@ test("isChecked covers CLAUDE.md and docs, minus the archive list", () => {
   assert.equal(isChecked("docs/prd/archive/2026/a.md"), false);
   assert.equal(isChecked("docs/research/a.md"), false);
   assert.equal(isChecked("README.md"), false);
+});
+
+test("a root-anchored path resolves only at the repo root", () => {
+  const nested = trackedPaths(["apps/web/docs/guide.md", "docs/real.md"]);
+  assert.deepEqual(
+    findMissing("apps/web/CLAUDE.md", "`docs/guide.md`", nested),
+    ["docs/guide.md"],
+  );
+  assert.deepEqual(
+    findMissing("apps/web/CLAUDE.md", "`docs/real.md`", nested),
+    [],
+  );
+});
+
+test("splitNul keeps a non-ASCII file name whole", () => {
+  assert.deepEqual(splitNul("docs/Café.md\0docs/b.md\0"), [
+    "docs/Café.md",
+    "docs/b.md",
+  ]);
 });

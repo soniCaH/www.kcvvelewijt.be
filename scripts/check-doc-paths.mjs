@@ -119,6 +119,11 @@ const ancestors = (file) => {
 // tighten if a real stale path slips through.
 export const resolves = (docFile, candidate, tracked) => {
   if (isNotInGit(candidate)) return true;
+  // A root-anchored path (`docs/guide.md`) resolves at the repo root only, never under the
+  // doc's own folder.
+  if (TOP_LEVEL_DIRS.has(candidate.split("/")[0])) {
+    return tracked.set.has(path.posix.normalize(candidate));
+  }
   if (
     ancestors(docFile).some((dir) =>
       tracked.set.has(path.posix.normalize(path.posix.join(dir, candidate))),
@@ -126,7 +131,6 @@ export const resolves = (docFile, candidate, tracked) => {
   ) {
     return true;
   }
-  if (TOP_LEVEL_DIRS.has(candidate.split("/")[0])) return false;
   const tail = `/${candidate.replace(/^\.\.\//, "")}`;
   return tracked.list.some((entry) => entry.endsWith(tail));
 };
@@ -148,6 +152,9 @@ export const trackedPaths = (files) => {
   return { set, list: [...set] };
 };
 
+// `git ls-files -z` output to paths; `-z` because git C-quotes non-ASCII names otherwise.
+export const splitNul = (output) => output.split("\0").filter(Boolean);
+
 export const isChecked = (file) =>
   /(^|\/)CLAUDE\.md$/.test(file) ||
   (file.startsWith("docs/") &&
@@ -155,13 +162,13 @@ export const isChecked = (file) =>
     !EXCLUDED_PREFIXES.some((prefix) => file.startsWith(prefix)));
 
 const main = () => {
-  const tracked = execFileSync("git", ["ls-files"], {
-    cwd: repoRoot,
-    encoding: "utf8",
-    maxBuffer: 64 * 1024 * 1024,
-  })
-    .split("\n")
-    .filter(Boolean);
+  const tracked = splitNul(
+    execFileSync("git", ["ls-files", "-z"], {
+      cwd: repoRoot,
+      encoding: "utf8",
+      maxBuffer: 64 * 1024 * 1024,
+    }),
+  );
   const files = tracked.filter(isChecked);
   const known = trackedPaths(tracked);
   const failures = files.flatMap((file) =>

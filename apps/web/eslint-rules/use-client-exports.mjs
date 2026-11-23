@@ -40,7 +40,11 @@ export const useClientExports = {
     },
   },
   create(context) {
-    const state = { isClientFile: false, contexts: new Set() };
+    const state = {
+      isClientFile: false,
+      contexts: new Set(),
+      enums: new Set(),
+    };
     const report = (node, name) =>
       context.report({ node, messageId: "valueExport", data: { name } });
 
@@ -51,6 +55,10 @@ export const useClientExports = {
         for (const node of program.body) {
           const declaration =
             node.type === "ExportNamedDeclaration" ? node.declaration : node;
+          // An enum is a value however it is named, so `export { Status }` of one fails too.
+          if (declaration?.type === "TSEnumDeclaration") {
+            state.enums.add(declaration.id.name);
+          }
           if (declaration?.type !== "VariableDeclaration") continue;
           for (const declarator of declaration.declarations) {
             if (
@@ -72,7 +80,9 @@ export const useClientExports = {
           const name = specifier.exported.name ?? specifier.exported.value;
           if (specifier.exportKind === "type" || name === "default") continue;
           const localName = specifier.local.name ?? specifier.local.value;
-          if (!isComponentName(name) && !state.contexts.has(localName)) {
+          if (state.enums.has(localName)) {
+            report(specifier, name);
+          } else if (!isComponentName(name) && !state.contexts.has(localName)) {
             report(specifier, name);
           }
         }

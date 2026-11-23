@@ -23,6 +23,8 @@ const VIOLATIONS = [
   `${CLIENT}const helper = 1;\nexport { helper };`,
   `${CLIENT}export * from "./other";`,
   `${CLIENT}export enum Mode { A }`,
+  `${CLIENT}enum Status { Ready }\nexport { Status };`,
+  `${CLIENT}enum Status { Ready }\nexport { Status as Other };`,
   `${CLIENT}export const Card = () => null;\nexport const SIZE = 4;`,
 ];
 
