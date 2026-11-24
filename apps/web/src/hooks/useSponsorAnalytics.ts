@@ -23,7 +23,8 @@ interface SponsorClickInput {
  * Analytics for the `/sponsors` page (PRD redesign-phase-7 §6):
  * `sponsor_view` (page view), `sponsor_click` (any tier/wall tile),
  * `sponsor_featured_click` (the "In de kijker" marquee), `sponsor_impression`
- * (a tile seen for 1 s) and `sponsor_cta_click` (the "Word sponsor +" band
+ * (a tile seen for 1 s), `sponsor_team_line_click` (a name on a team page's
+ * "Gesteund door" line) and `sponsor_cta_click` (the "Word sponsor +" band
  * button).
  *
  * No PII: the internal Sanity sponsor id is hashed via `hashMemberId`, never
@@ -61,6 +62,16 @@ export function useSponsorAnalytics() {
     [send],
   );
 
+  /** A Sponsor's name on a team page's "Gesteund door" line was clicked (#3652). */
+  const trackSponsorTeamLineClick = useCallback(
+    ({ sponsorId, teamSlug }: { sponsorId: string; teamSlug: string }) =>
+      trackEvent("sponsor_team_line_click", {
+        sponsor_id: hashMemberId(sponsorId),
+        team_slug: teamSlug,
+      }),
+    [],
+  );
+
   const trackSponsorCtaClick = useCallback(() => {
     trackEvent("sponsor_cta_click");
   }, []);
@@ -70,6 +81,7 @@ export function useSponsorAnalytics() {
     trackSponsorClick,
     trackSponsorFeaturedClick,
     trackSponsorImpression,
+    trackSponsorTeamLineClick,
     trackSponsorCtaClick,
   };
 }
