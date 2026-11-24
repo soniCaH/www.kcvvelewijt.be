@@ -2,10 +2,10 @@
  * SponsorsPage Stories — Phase 7.
  *
  * Split `<SponsorHero>` → `<StripedSeam>` → `<SponsorTiers>` (Hoofdsponsors grid
- * + unlabelled wall) → `<SponsorCtaBand>`; 0 sponsors collapses to a
+ * + unlabelled wall) → `<PackageExplainer>` → `<SponsorCtaBand>`; 0 sponsors collapses to a
  * `<SponsorEmptyState>` + band. Page-level composition for the /sponsors route —
  * not `vr`-tagged (page coverage is the Playwright e2e suite's job); the hero,
- * marquee card, hoofd tile, tile, tiers, empty state and CTA band each carry
+ * marquee card, hoofd tile, tile, tiers, package explainer, empty state and CTA band each carry
  * their own VR coverage.
  */
 
@@ -25,7 +25,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Phase 7 /sponsors. `<SponsorHero>` (kicker + EditorialHeading + lead + `<FeaturedSponsorCard>` marquee) → `<StripedSeam>` → `<SponsorTiers>` (labelled Hoofdsponsors grid over one unlabelled merged wall) → `<SponsorCtaBand>` (jersey-deep-dark footer invitation). With zero sponsors the body collapses to a `<SponsorEmptyState>` + the band. Replaces the legacy dark header + SectionStack/diagonal composition.",
+          "Phase 7 /sponsors. `<SponsorHero>` (kicker + EditorialHeading + lead + `<FeaturedSponsorCard>` marquee) → `<StripedSeam>` → `<SponsorTiers>` (labelled Hoofdsponsors grid over one unlabelled merged wall) → `<PackageExplainer>` (Wat krijgt een partner?) → `<SponsorCtaBand>` (jersey-deep-dark footer invitation). With zero sponsors the body collapses to a `<SponsorEmptyState>` + the band. Replaces the legacy dark header + SectionStack/diagonal composition.",
       },
     },
   },

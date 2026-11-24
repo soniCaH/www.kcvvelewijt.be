@@ -2665,8 +2665,10 @@ const SEAM_SPACING_SITES: Record<
   "components/club/BestuurPage/BestuurPage.tsx": { below: 1 },
   // sticky nav → hero + finder + directory (top opening) → <CtaBand>.
   "app/(main)/hulp/page.tsx": { below: 1 },
-  // hero + tiers (top opening) → <SponsorCtaBand>.
+  // hero + tiers (top opening) → seam → <PackageExplainer> → <SponsorCtaBand>.
   "components/sponsors/SponsorsPage/SponsorsPage.tsx": { below: 1 },
+  // seam above, <SponsorCtaBand>'s seam below.
+  "components/sponsors/PackageExplainer/PackageExplainer.tsx": { both: 1 },
   // hero → seam → <ArticleBody> → <CtaBand> (membership page only).
   "app/(main)/club/[slug]/page.tsx": { bottom: 1 },
   // hero → nav → seam → klassement | status line | ranking notice (top
@@ -2908,7 +2910,7 @@ describe("rule 16's retired-pair exemptions are pinned to their exact pair (#257
  * convention every other rule in this file carries.
  */
 describe("rule 16 catches what it claims to (#2571)", () => {
-  it("covers 27 files and 42 sites in total (plain and seam, one file counted once)", () => {
+  it("covers 28 files and 43 sites in total (plain and seam, one file counted once)", () => {
     // A section site is a plain `py-12 sm:py-16` or a seam shape (#3335); a
     // `bottom` override sits on top of a component's own plain site, so it
     // adds neither a file nor a site.
@@ -2923,8 +2925,8 @@ describe("rule 16 catches what it claims to (#2571)", () => {
     const sites =
       Object.values(SECTION_SPACING_SITES).reduce((a, b) => a + b, 0) +
       seamSites.reduce((a, [, n]) => a + n, 0);
-    expect(files.size).toBe(27);
-    expect(sites).toBe(42);
+    expect(files.size).toBe(28);
+    expect(sites).toBe(43);
   });
 
   it("counts a contiguous pair on one line", () => {

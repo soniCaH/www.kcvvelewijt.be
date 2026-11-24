@@ -3,6 +3,7 @@
  *
  * Split `<SponsorHero>` (Merci headline + "In de kijker" marquee) → `<StripedSeam>`
  * → `<SponsorTiers>` (labelled Hoofdsponsors grid + one unlabelled merged wall)
+ * → `<StripedSeam>` → `<PackageExplainer>` ("Wat krijgt een partner?", #3654)
  * → `<SponsorCtaBand>` (jersey-deep-dark footer invitation). With zero sponsors
  * the body collapses to a gracious tier-"surface" `<EmptyState>` (#2427 /
  * #2562) between the headline-only hero and the band — inlined here rather
@@ -17,6 +18,7 @@ import { EmptyState, PageContainer } from "@/components/design-system";
 import { SponsorHero } from "../SponsorHero";
 import { SponsorTiers } from "../SponsorTiers";
 import { SponsorCtaBand } from "../SponsorCtaBand";
+import { PackageExplainer } from "../PackageExplainer";
 import { SponsorsAnalytics } from "../SponsorsAnalytics";
 import { SponsorWallTracker } from "../SponsorWallTracker";
 import { selectFeaturedSponsor } from "../selectFeaturedSponsor";
@@ -34,7 +36,7 @@ export function SponsorsPage({ sponsors }: SponsorsPageProps) {
   return (
     <SponsorsAnalytics>
       {/* Plain top (the hero opens the page); the bottom sits above the
-          `<SponsorCtaBand>` seam, so it gives one step back (#3306). */}
+          explainer's seam, so it gives one step back (#3306). */}
       <SponsorWallTracker source="sponsors">
         <PageContainer width="index" className="pt-12 pb-10 sm:pt-16 sm:pb-14">
           <SponsorHero featured={featured} />
@@ -58,6 +60,10 @@ export function SponsorsPage({ sponsors }: SponsorsPageProps) {
           )}
         </PageContainer>
       </SponsorWallTracker>
+
+      {/* Outside the wall tracker: the explainer carries no sponsor tile. */}
+      <StripedSeam colorPair="ink-cream" height="md" />
+      <PackageExplainer />
 
       <SponsorCtaBand />
     </SponsorsAnalytics>
