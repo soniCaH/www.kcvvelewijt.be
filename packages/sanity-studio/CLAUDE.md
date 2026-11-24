@@ -133,6 +133,8 @@ Used verbatim by the Phase 5+ propagation issues (#1503–#1511, #2181). Everyth
 8. [ ] `pnpm turbo run lint type-check test build --filter=...@kcvv/sanity-schemas` passes — the leading `...` checks everything that depends on the schemas: this package, both studios, typegen and the web build.
 9. [ ] Manual smoke against the staging dataset: create the type (via launcher if it has a card), confirm groups/descriptions/errors + the guide sidebar render, publish.
 
+**No `let`** — lint rule `kcvv/no-let` (`eslint.config.mjs`, #3717), tests included. A `let` + `try/catch` becomes a helper that returns; a counter becomes `reduce`/`map`; shared state in a test is a `const` holder object.
+
 ## No Duplication With Root CLAUDE.md
 
 This file covers package-local concerns. For monorepo-wide conventions (TypeScript compiler setup, commit style, PR workflow, Turborepo tasks), see `.claude/CLAUDE.md`.

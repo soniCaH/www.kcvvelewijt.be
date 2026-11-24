@@ -1,4 +1,11 @@
 import studio from "@sanity/eslint-config-studio";
+import { builtinRules } from "eslint/use-at-your-own-risk";
+
+// `no-restricted-syntax` registered under its own rule ID (as apps/web does),
+// so a later config block can never replace this rule's options (#3717).
+const kcvvPlugin = {
+  rules: { "no-let": builtinRules.get("no-restricted-syntax") },
+};
 
 // Twin of the other Sanity package's eslint.config.mjs (sanity-studio ↔ sanity-schemas) — change both.
 export default [
@@ -15,6 +22,7 @@ export default [
   },
   {
     files: ["**/*.ts?(x)"],
+    plugins: { kcvv: kcvvPlugin },
     rules: {
       "typescript/no-unused-vars": [
         "error",
@@ -22,6 +30,14 @@ export default [
           argsIgnorePattern: "^_",
           varsIgnorePattern: "^_",
           caughtErrorsIgnorePattern: "^_",
+        },
+      ],
+      "kcvv/no-let": [
+        "error",
+        {
+          selector: 'VariableDeclaration[kind="let"]',
+          message:
+            "No `let` — use `const` (a `let` + `try/catch` becomes a helper that returns; a counter becomes `reduce`/`map`). Rule: #3717.",
         },
       ],
     },
