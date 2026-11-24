@@ -84,7 +84,16 @@ describe("PackageExplainer", () => {
       screen.getByRole("heading", { name: "Op maat" }),
     ).toBeInTheDocument();
     expect(text(container)).toContain("Samen gebouwd");
-    expect(text(container)).toContain("een themaavond");
+    expect(text(container)).toContain(
+      "Combineer wat je wil. We bouwen het samen.",
+    );
+    // The one-off items live under "Eenmalig", not in this box.
+    const box = screen
+      .getByRole("heading", { name: "Op maat" })
+      .closest("div")!;
+    expect(text(box)).not.toMatch(
+      /VIP-lunch|tombola|Sinterklaas|jeugdkamp|themaavond/i,
+    );
     // The "Word sponsor" band below invites; the box does not say it.
     expect(text(container)).not.toContain("Laten we praten");
   });
@@ -99,7 +108,15 @@ describe("PackageExplainer", () => {
         "Wedstrijduitrusting senior",
       ],
       Online: ["Sponsored posts"],
-      Eenmalig: ["Matchbal", "Onderleggers"],
+      Eenmalig: [
+        "Matchbal",
+        "Onderleggers",
+        "VIP-lunch",
+        "Tombolaprijs",
+        "Jeugdstage",
+        "Sinterklaas",
+        "Thema-avond",
+      ],
     };
     expect(
       screen.getByRole("heading", { name: "Of kies apart" }),
@@ -110,6 +127,34 @@ describe("PackageExplainer", () => {
         .closest("section")!;
       expect(within(group).getAllByRole("term").map(text)).toEqual(names);
     }
+  });
+
+  it("gives each one-off item its own row under Eenmalig", () => {
+    render(<PackageExplainer />);
+    const group = screen
+      .getByRole("heading", { level: 4, name: "Eenmalig" })
+      .closest("section")!;
+    const row = (name: string) =>
+      text(
+        within(group)
+          .getAllByRole("term")
+          .find((dt) => text(dt) === name)!.parentElement!,
+      );
+    expect(row("VIP-lunch")).toContain(
+      "Sponsor een zondagse VIP-lunch voor onze trouwe supporters, voor een wedstrijd van het A-elftal.",
+    );
+    expect(row("Tombolaprijs")).toContain(
+      "Een prijs in jouw naam op het steakrestaurant of het mosselfestijn.",
+    );
+    expect(row("Jeugdstage")).toContain(
+      "Goodies voor de spelers van onze jeugdstages: drinkbussen, sjaals, t-shirts.",
+    );
+    expect(row("Sinterklaas")).toContain(
+      "Een cadeautje van de Sint aan elke jeugdspeler, in jouw naam.",
+    );
+    expect(row("Thema-avond")).toContain(
+      "Je naam op een van onze thema-avonden.",
+    );
   });
 
   it("renders no euro amount at all", () => {

@@ -72,8 +72,7 @@ const BUNDLES: Bundle[] = [
   },
 ];
 
-const OP_MAAT_TEXT =
-  "Een VIP-lunch, een tombolaprijs op een festijn, goodies voor het jeugdkamp, een Sinterklaasgeschenk voor elke jeugdspeler, een themaavond.";
+const OP_MAAT_TEXT = "Combineer wat je wil. We bouwen het samen.";
 
 const BundleCard = ({
   name,
@@ -127,7 +126,8 @@ const BundleCard = ({
   </TapedCard>
 );
 
-/** The made-to-measure box: a dashed ink outline, built together, not fixed. */
+/** The made-to-measure box: a dashed ink outline, built together, not fixed.
+ *  It lists no items: the one-off ones sit under "Eenmalig". */
 const OpMaatBox = () => (
   <div className="border-ink mt-8 flex flex-col gap-4 border-2 border-dashed p-8">
     <span className="text-ink text-label font-mono uppercase">

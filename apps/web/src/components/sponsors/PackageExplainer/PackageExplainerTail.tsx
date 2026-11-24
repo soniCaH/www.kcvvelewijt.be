@@ -3,7 +3,9 @@ interface AlaCarteItem {
   text: string;
 }
 
-// Retyped from the brochure (#3618 slice d): no price, no audience figure.
+// Retyped from the brochure (#3618 slice d), with the one-off items as their own
+// rows under Eenmalig (Kevin, 2026-11-24; the Thema-avond line is not brochure
+// wording). No price, no audience figure.
 const ALA_CARTE_GROUPS: { label: string; items: AlaCarteItem[] }[] = [
   {
     label: "Op het complex",
@@ -54,6 +56,26 @@ const ALA_CARTE_GROUPS: { label: string; items: AlaCarteItem[] }[] = [
       {
         name: "Onderleggers",
         text: "Je logo op de onderleggers in het steakrestaurant, op het mosselfestijn, de VIP-lunches en dergelijke.",
+      },
+      {
+        name: "VIP-lunch",
+        text: "Sponsor een zondagse VIP-lunch voor onze trouwe supporters, voor een wedstrijd van het A-elftal.",
+      },
+      {
+        name: "Tombolaprijs",
+        text: "Een prijs in jouw naam op het steakrestaurant of het mosselfestijn.",
+      },
+      {
+        name: "Jeugdstage",
+        text: "Goodies voor de spelers van onze jeugdstages: drinkbussen, sjaals, t-shirts.",
+      },
+      {
+        name: "Sinterklaas",
+        text: "Een cadeautje van de Sint aan elke jeugdspeler, in jouw naam.",
+      },
+      {
+        name: "Thema-avond",
+        text: "Je naam op een van onze thema-avonden.",
       },
     ],
   },
