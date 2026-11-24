@@ -150,7 +150,7 @@ function formatTijdCell(
 }
 
 /** The `dates` param: UTC date-times when a start time is set, else all-day days. */
-function googleCalendarDates({
+const googleCalendarDates = ({
   startIso,
   endIso,
   start,
@@ -162,7 +162,7 @@ function googleCalendarDates({
   start: string | undefined;
   end: string | undefined;
   zone: string;
-}): string | null {
+}): string | null => {
   if (start) {
     const startDt = DateTime.fromISO(`${startIso}T${start}`, { zone });
     const endDt = end
@@ -177,7 +177,7 @@ function googleCalendarDates({
   const endDay = DateTime.fromISO(endIso, { zone }).plus({ days: 1 });
   if (!startDay.isValid || !endDay.isValid) return null;
   return `${startDay.toFormat("yyyyMMdd")}/${endDay.toFormat("yyyyMMdd")}`;
-}
+};
 
 /**
  * Google Calendar template link for the "Zet in agenda" CTA. Times are

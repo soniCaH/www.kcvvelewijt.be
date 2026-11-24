@@ -280,13 +280,13 @@ export function hasRenderableBody(content: PortableTextBlock[]): boolean {
  * recognisable affordance (CMS-2). Returns null for everything else, so
  * ordinary external links keep the canonical `.prose-link` highlighter marker.
  */
-function hostnameOf(href: string): string | null {
+const hostnameOf = (href: string): string | null => {
   try {
     return new URL(href).hostname.toLowerCase();
   } catch {
     return null;
   }
-}
+};
 
 function socialBrandFor(
   href: string,

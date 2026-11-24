@@ -171,6 +171,22 @@ function formatMinute(minute: number, additionalTime?: number): string {
   return `${minute}'`;
 }
 
+const matchesFilter = (
+  e: MatchEvent,
+  filter: NonNullable<MatchEventsProps["filter"]>,
+): boolean => {
+  if (filter === "goals") return e.type === "goal";
+  if (filter === "cards") {
+    return (
+      e.type === "yellow_card" ||
+      e.type === "second_yellow" ||
+      e.type === "red_card"
+    );
+  }
+  if (filter === "substitutions") return e.type === "substitution";
+  return true;
+};
+
 /**
  * Free-standing event glyph rendered inside the 22px slot of the Option F
  * row grid. Locked at 6.B.d3 round 2:
@@ -184,22 +200,6 @@ function formatMinute(minute: number, additionalTime?: number): string {
  * No background containers — every glyph stands on the paper directly,
  * matching the editorial print register of the surrounding kicker + heading.
  */
-function matchesFilter(
-  e: MatchEvent,
-  filter: NonNullable<MatchEventsProps["filter"]>,
-): boolean {
-  if (filter === "goals") return e.type === "goal";
-  if (filter === "cards") {
-    return (
-      e.type === "yellow_card" ||
-      e.type === "second_yellow" ||
-      e.type === "red_card"
-    );
-  }
-  if (filter === "substitutions") return e.type === "substitution";
-  return true;
-}
-
 function EventGlyph({ type }: { type: MatchEvent["type"] }) {
   switch (type) {
     case "goal":

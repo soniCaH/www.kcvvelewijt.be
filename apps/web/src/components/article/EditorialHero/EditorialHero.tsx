@@ -466,10 +466,10 @@ const eventStartIsoOf = (
   return range.kind === "single" ? range.date.dateIso : range.start.dateIso;
 };
 
-function resolveVariantSlots(
+const resolveVariantSlots = (
   props: EditorialHeroProps,
   kickerDate: string | undefined,
-): VariantSlots {
+): VariantSlots => {
   const { title, lead, author, placement, date } = props;
 
   if (props.variant === "announcement") {
@@ -601,7 +601,7 @@ function resolveVariantSlots(
     belowHero: null,
     coverFirstOnMobile: match != null,
   };
-}
+};
 
 // ─── Component ───────────────────────────────────────────────────────────────
 

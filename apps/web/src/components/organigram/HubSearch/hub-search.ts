@@ -49,15 +49,15 @@ export interface HubResponsibilityResult {
 export type HubSearchResult = HubMemberResult | HubResponsibilityResult;
 
 /** Sum the points of every check that hit, and name the fields that did. */
-function scoredFields(
+const scoredFields = (
   checks: ReadonlyArray<readonly [number, string, boolean | undefined]>,
-): { score: number; matchedFields: string[] } {
+): { score: number; matchedFields: string[] } => {
   const hits = checks.filter(([, , hit]) => hit);
   return {
     score: hits.reduce((sum, [points]) => sum + points, 0),
     matchedFields: hits.map(([, label]) => label),
   };
-}
+};
 
 /**
  * Rank organigram nodes against a query across name (highest), title, roleCode,

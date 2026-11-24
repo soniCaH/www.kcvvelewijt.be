@@ -64,7 +64,7 @@ const stripMonthDot = (s: string) => s.replace(/\.$/, "");
  * The location is appended with a `·` separator. Returns `null` when there is
  * nothing to show (all-day, no location).
  */
-function buildLead(start: DateTime, end: DateTime | null): string | null {
+const buildLead = (start: DateTime, end: DateTime | null): string | null => {
   // Only a genuine multi-day span (end on a later day) shows a range; a missing,
   // same-day, or mistakenly-reversed end falls back to the single-day start time.
   if (isMultiDayEvent(start, end)) {
@@ -81,7 +81,7 @@ function buildLead(start: DateTime, end: DateTime | null): string | null {
     if (time !== "00:00") return time;
   }
   return null;
-}
+};
 
 function buildMeta(
   start: DateTime,

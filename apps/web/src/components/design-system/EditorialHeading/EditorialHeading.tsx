@@ -132,11 +132,11 @@ function renderPortableTextTitle(
   return { body, endsWithPeriod };
 }
 
-function renderBody(
+const renderBody = (
   children: EditorialHeadingProps["children"],
   emphasis: EditorialHeadingProps["emphasis"],
   accentTone: NonNullable<EditorialHeadingProps["accentTone"]>,
-): ReactNode {
+): ReactNode => {
   if (typeof children !== "string") {
     return renderPortableTextTitle(children, accentTone).body;
   }
@@ -173,7 +173,7 @@ function renderBody(
       {split.after}
     </>
   );
-}
+};
 
 export function EditorialHeading({
   level,

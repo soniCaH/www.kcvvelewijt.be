@@ -61,13 +61,13 @@ function parseVimeo(url: URL): ParsedEmbed | null {
   return VIMEO_ID_RE.test(first) ? { provider: "vimeo", videoId: first } : null;
 }
 
-function toUrl(raw: string): URL | null {
+const toUrl = (raw: string): URL | null => {
   try {
     return new URL(raw);
   } catch {
     return null;
   }
-}
+};
 
 export function parseEmbedUrl(raw: string): ParsedEmbed | null {
   if (typeof raw !== "string" || raw.length === 0) return null;
