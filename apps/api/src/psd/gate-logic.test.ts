@@ -26,7 +26,7 @@ function fakeScheduler() {
 }
 
 /** A clock the test moves by hand — `now` is what a GateLogic reads. */
-function fakeClock(start = 0) {
+const fakeClock = (start = 0) => {
   const state = { t: start };
   return {
     now: () => state.t,
@@ -37,7 +37,7 @@ function fakeClock(start = 0) {
       state.t += ms;
     },
   };
-}
+};
 
 /** Clock reading at the moment each of `n` sequential grants completes. */
 async function grantTimes(

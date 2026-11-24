@@ -83,14 +83,15 @@ export const handleSearch = (
       })
       .slice(0, request.limit);
 
-    const context = results
-      .slice(0, 3)
-      .map((r, i) => `${i + 1}. ${r.title}: ${r.excerpt}`)
-      .join("\n");
-
     const answer: string | undefined = asksForAnswer(results)
       ? yield* aiAnswer
-          .generateAnswer(request.query, context)
+          .generateAnswer(
+            request.query,
+            results
+              .slice(0, 3)
+              .map((r, i) => `${i + 1}. ${r.title}: ${r.excerpt}`)
+              .join("\n"),
+          )
           .pipe(Effect.catchAll(() => Effect.succeed(undefined)))
       : undefined;
 

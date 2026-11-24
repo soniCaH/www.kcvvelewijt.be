@@ -306,13 +306,12 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
         ),
       );
 
-    // Built per call, not memoised: createClient is cheap and does no I/O, and
-    // it throws on a missing projectId, which tests with injected fetchers omit.
+    const clientHolder: { client?: ReturnType<typeof createClient> } = {};
     const sanityClient = () =>
-      createClient({
+      (clientHolder.client ??= createClient({
         ...sanityClientConfig(env),
         useCdn: false,
-      });
+      }));
 
     // A failed embedding drops just its own document from the batch.
     const embedDoc = (

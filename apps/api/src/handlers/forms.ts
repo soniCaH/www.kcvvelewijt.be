@@ -52,7 +52,7 @@ const resolveRouting = (role: MembershipRole) =>
       }
       return fetched;
     });
-    const config = fromCache ?? (yield* fetchAndCache);
+    const config = fromCache || (yield* fetchAndCache);
 
     // A blank or malformed Studio value would send the admin mail nowhere.
     const configured = config?.[role]?.trim();
