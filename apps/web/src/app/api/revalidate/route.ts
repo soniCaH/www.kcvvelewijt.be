@@ -96,8 +96,15 @@ function targets(
         paths: psdId ? [`/staf/${psdId}`] : [],
         tags: [SANITY_TAGS.staff],
       };
+    // A Sponsor's `teams` field names it on those team pages ("Gesteund door",
+    // #3652), so a publish busts the teams tag next to `/sponsors`. The detail
+    // read is untagged, so a team page also refreshes through the `sponsors`
+    // tag its club-wide wall carries.
     case "sponsor":
-      return { paths: ["/sponsors"], tags: [SANITY_TAGS.sponsors] };
+      return {
+        paths: ["/sponsors"],
+        tags: [SANITY_TAGS.sponsors, SANITY_TAGS.teams],
+      };
     // The homepage read (HOMEPAGE_QUERY — banners + the off-season placeholder,
     // one fetch since #2858) is tagged 'banners' and lives on '/'; it derefs
     // `banner` docs from the `homePage` document, so either type changing

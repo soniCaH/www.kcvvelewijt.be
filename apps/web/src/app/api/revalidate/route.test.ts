@@ -182,6 +182,14 @@ describe("POST /api/revalidate", () => {
     expect(revalidateTag).toHaveBeenCalledWith("teams", "max");
   });
 
+  it("busts /sponsors, the sponsors tag and the teams tag on a sponsor change (#3652)", async () => {
+    const res = await post({ _type: "sponsor" });
+    expect(res.status).toBe(200);
+    expect(revalidatePath).toHaveBeenCalledWith("/sponsors");
+    expect(revalidateTag).toHaveBeenCalledWith("sponsors", "max");
+    expect(revalidateTag).toHaveBeenCalledWith("teams", "max");
+  });
+
   it("busts /hulp on a help-path change", async () => {
     // The hulp finder read is untagged and the page leans on
     // `revalidate = 3600`, so the path bust is the only lever.
