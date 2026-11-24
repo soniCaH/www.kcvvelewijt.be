@@ -761,36 +761,35 @@ export function transformFootbalistoMatchDetail(
     validEvents.length > 0 ? buildPlayerCardMap(validEvents) : null;
 
   // Resilient lineup decoding — invalid players are filtered, valid ones pass through
-  let lineup:
-    { home: MatchLineupPlayer[]; away: MatchLineupPlayer[] } | undefined;
-  if (response.lineup || response.substitutes) {
-    const rawHome = [
-      ...(response.lineup?.home ?? []),
-      ...(response.substitutes?.home ?? []),
-    ];
-    const rawAway = [
-      ...(response.lineup?.away ?? []),
-      ...(response.substitutes?.away ?? []),
-    ];
+  const lineup:
+    { home: MatchLineupPlayer[]; away: MatchLineupPlayer[] } | undefined =
+    (() => {
+      if (!response.lineup && !response.substitutes) return undefined;
+      const rawHome = [
+        ...(response.lineup?.home ?? []),
+        ...(response.substitutes?.home ?? []),
+      ];
+      const rawAway = [
+        ...(response.lineup?.away ?? []),
+        ...(response.substitutes?.away ?? []),
+      ];
 
-    const homePlayers = decodeItemsSync(FootbalistoLineupPlayer, rawHome);
-    const awayPlayers = decodeItemsSync(FootbalistoLineupPlayer, rawAway);
+      const homePlayers = decodeItemsSync(FootbalistoLineupPlayer, rawHome);
+      const awayPlayers = decodeItemsSync(FootbalistoLineupPlayer, rawAway);
 
-    lineup = {
-      home: homePlayers.map((p) => transformPlayerWithCard(p, cardMap)),
-      away: awayPlayers.map((p) => transformPlayerWithCard(p, cardMap)),
-    };
-  }
+      return {
+        home: homePlayers.map((p) => transformPlayerWithCard(p, cardMap)),
+        away: awayPlayers.map((p) => transformPlayerWithCard(p, cardMap)),
+      };
+    })();
 
-  let events: MatchEvent[] | undefined;
-  if (validEvents.length > 0) {
-    const transformed = validEvents
-      .map((e, i) =>
-        transformMatchEvent(e, i, general.homeClub.id, general.awayClub.id),
-      )
-      .filter((e): e is MatchEvent => e !== null);
-    events = transformed.length > 0 ? transformed : undefined;
-  }
+  const transformedEvents = validEvents
+    .map((e, i) =>
+      transformMatchEvent(e, i, general.homeClub.id, general.awayClub.id),
+    )
+    .filter((e): e is MatchEvent => e !== null);
+  const events: MatchEvent[] | undefined =
+    transformedEvents.length > 0 ? transformedEvents : undefined;
 
   const status = mapGameStatus(
     general.status,
@@ -883,29 +882,25 @@ export function extractId(item: unknown): string | number {
 export function computeOpponentSummary(
   matches: readonly Match[],
 ): OpponentHistory["summary"] {
-  let wins = 0;
-  let draws = 0;
-  let losses = 0;
-  let goalsFor = 0;
-  let goalsAgainst = 0;
+  return matches.reduce<OpponentHistory["summary"]>(
+    (acc, m) => {
+      if (m.status !== "finished") return acc; // only count truly finished matches
+      const homeScore = m.home_team.score;
+      const awayScore = m.away_team.score;
+      if (homeScore == null || awayScore == null) return acc;
+      if (m.is_home == null) return acc; // can't determine result
 
-  for (const m of matches) {
-    if (m.status !== "finished") continue; // only count truly finished matches
-    const homeScore = m.home_team.score;
-    const awayScore = m.away_team.score;
-    if (homeScore == null || awayScore == null) continue;
-    if (m.is_home == null) continue; // can't determine result
+      const kcvvGoals = m.is_home ? homeScore : awayScore;
+      const opponentGoals = m.is_home ? awayScore : homeScore;
 
-    const kcvvGoals = m.is_home ? homeScore : awayScore;
-    const opponentGoals = m.is_home ? awayScore : homeScore;
-
-    goalsFor += kcvvGoals;
-    goalsAgainst += opponentGoals;
-
-    if (kcvvGoals > opponentGoals) wins++;
-    else if (kcvvGoals < opponentGoals) losses++;
-    else draws++;
-  }
-
-  return { wins, draws, losses, goalsFor, goalsAgainst };
+      return {
+        wins: acc.wins + (kcvvGoals > opponentGoals ? 1 : 0),
+        draws: acc.draws + (kcvvGoals === opponentGoals ? 1 : 0),
+        losses: acc.losses + (kcvvGoals < opponentGoals ? 1 : 0),
+        goalsFor: acc.goalsFor + kcvvGoals,
+        goalsAgainst: acc.goalsAgainst + opponentGoals,
+      };
+    },
+    { wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0 },
+  );
 }

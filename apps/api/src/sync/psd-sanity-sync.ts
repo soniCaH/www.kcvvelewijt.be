@@ -1,4 +1,4 @@
-import { Effect, Either } from "effect";
+import { Effect, Either, Ref } from "effect";
 import type {
   PsdClubStaffMember,
   PsdMember,
@@ -620,7 +620,7 @@ export const runSync = Effect.gen(function* () {
   // 0, not Date.now(): the FIRST flush after a member completes must always
   // go through immediately (an "always debounced" clock would let a whole
   // truncation window pass with nothing written at all).
-  let lastCheckpointFlushAt = 0;
+  const lastCheckpointFlushAt = yield* Ref.make(0);
 
   /**
    * Write the current in-memory done-id sets to KV, rate-limited to
@@ -635,11 +635,12 @@ export const runSync = Effect.gen(function* () {
         const now = Date.now();
         if (
           !force &&
-          now - lastCheckpointFlushAt < CHECKPOINT_FLUSH_INTERVAL_MS
+          now - (yield* Ref.get(lastCheckpointFlushAt)) <
+            CHECKPOINT_FLUSH_INTERVAL_MS
         ) {
           return;
         }
-        lastCheckpointFlushAt = now;
+        yield* Ref.set(lastCheckpointFlushAt, now);
         yield* cache.durable
           .setForever(
             CHECKPOINT_KEY,
@@ -925,7 +926,7 @@ export const runSync = Effect.gen(function* () {
       "cycle end reached by a manual run — skipping reconciliation and leaving the accumulators alone",
     );
   }
-  let cleanup: CleanupOutcome = { kind: "not-run" };
+  const cleanup = yield* Ref.make<CleanupOutcome>({ kind: "not-run" });
   if (nextCursor === 0 && !manualRun) {
     yield* Effect.log("cycle complete — running reconciliation");
     const skips: CleanupSkip[] = [];
@@ -1117,7 +1118,10 @@ export const runSync = Effect.gen(function* () {
       ],
       { concurrency: "unbounded" },
     );
-    cleanup = skips.length === 0 ? { kind: "ok" } : { kind: "skipped", skips };
+    yield* Ref.set(
+      cleanup,
+      skips.length === 0 ? { kind: "ok" } : { kind: "skipped", skips },
+    );
   }
 
   // Advance cursor only after reconciliation succeeds (if applicable).
@@ -1182,7 +1186,7 @@ export const runSync = Effect.gen(function* () {
   );
   // The sync itself succeeded whatever `cleanup` says; the caller (index.ts)
   // reports a skipped cleanup under its own job name (#3564).
-  return { cleanup };
+  return { cleanup: yield* Ref.get(cleanup) };
 }).pipe(
   Effect.tapError((e) =>
     Effect.log(

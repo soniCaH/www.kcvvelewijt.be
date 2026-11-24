@@ -42,14 +42,12 @@ describe("getNextMatchesHandler — stale read after a kickoff (workerd)", () =>
       }),
     );
 
-    let fanOuts = 0;
-    let readsDone = false;
-    let fanOutsStartedBeforeReadsDone = 0;
+    const seen = { fanOuts: 0, readsDone: false, startedBeforeReadsDone: 0 };
     const service = {
       getNextMatches: () =>
         Effect.gen(function* () {
-          fanOuts++;
-          if (!readsDone) fanOutsStartedBeforeReadsDone++;
+          seen.fanOuts++;
+          if (!seen.readsDone) seen.startedBeforeReadsDone++;
           yield* Effect.sleep("50 millis");
           return [match(2, HOUR)];
         }),
@@ -89,14 +87,14 @@ describe("getNextMatchesHandler — stale read after a kickoff (workerd)", () =>
       );
 
     const results = await Promise.all(Array.from({ length: 50 }, read));
-    readsDone = true;
+    seen.readsDone = true;
 
     // Every reader is served at once, without the kicked-off match.
     for (const r of results) expect(r.map((m) => m.id)).toEqual([2]);
     // No fan-out started while the readers were still being served.
-    expect(fanOutsStartedBeforeReadsDone).toBe(0);
+    expect(seen.startedBeforeReadsDone).toBe(0);
 
     await Promise.all(detached);
-    expect(fanOuts).toBe(1);
+    expect(seen.fanOuts).toBe(1);
   });
 });

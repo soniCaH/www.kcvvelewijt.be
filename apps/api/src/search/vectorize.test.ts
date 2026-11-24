@@ -82,14 +82,14 @@ function makeFlakyKvNamespaceMock(
   failCount: number,
 ): KVNamespace & { readonly store: Map<string, string> } {
   const store = new Map<string, string>();
-  let attempts = 0;
+  const attempts = { count: 0 };
   const mock = {
     store,
     get: (async (key: string) => store.get(key) ?? null) as KVNamespace["get"],
     put: (async (key: string, value: string) => {
-      attempts++;
-      if (attempts <= failCount) {
-        throw new Error(`KV put failed (simulated attempt ${attempts})`);
+      attempts.count++;
+      if (attempts.count <= failCount) {
+        throw new Error(`KV put failed (simulated attempt ${attempts.count})`);
       }
       store.set(key, value);
     }) as KVNamespace["put"],

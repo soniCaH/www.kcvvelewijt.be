@@ -210,7 +210,8 @@ describe("searchWithCeilings — rate limits (#3468)", () => {
   it("the 11th search from one client IP within the window is a 429 with the fixed body and no AI call", async () => {
     const { search, generateAnswer, ipLimiter } = setup({ ipLimit: 10 });
 
-    for (let i = 0; i < 10; i++) await search({ query: `q${i}` });
+    for (const i of Array.from({ length: 10 }, (_, k) => k))
+      await search({ query: `q${i}` });
     generateAnswer.mockClear();
     const eleventh = await search({ query: "q10" });
 

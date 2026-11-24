@@ -801,13 +801,9 @@ describe("uploadPlayerImage", () => {
   it("skips upload and patch when bytes match the PSD placeholder SHA-1 (#1895)", async () => {
     // Build a 20-byte buffer that hex-encodes to PSD_PLACEHOLDER_IMAGE_SHA1
     // so the SHA-1 digest call returns the known placeholder hash.
-    const placeholderHashBytes = new Uint8Array(20);
-    for (let i = 0; i < 20; i++) {
-      placeholderHashBytes[i] = parseInt(
-        PSD_PLACEHOLDER_IMAGE_SHA1.slice(i * 2, i * 2 + 2),
-        16,
-      );
-    }
+    const placeholderHashBytes = Uint8Array.from({ length: 20 }, (_, i) =>
+      parseInt(PSD_PLACEHOLDER_IMAGE_SHA1.slice(i * 2, i * 2 + 2), 16),
+    );
     const digestSpy = vi
       .spyOn(crypto.subtle, "digest")
       .mockResolvedValueOnce(placeholderHashBytes.buffer);
@@ -1185,13 +1181,9 @@ describe("superseded portrait assets (#3469)", () => {
 
   it("treats the PSD placeholder as no portrait: unsets a stored image", async () => {
     mockGetDocument.mockResolvedValueOnce(storedImage("image-old"));
-    const placeholderHashBytes = new Uint8Array(20);
-    for (let i = 0; i < 20; i++) {
-      placeholderHashBytes[i] = parseInt(
-        PSD_PLACEHOLDER_IMAGE_SHA1.slice(i * 2, i * 2 + 2),
-        16,
-      );
-    }
+    const placeholderHashBytes = Uint8Array.from({ length: 20 }, (_, i) =>
+      parseInt(PSD_PLACEHOLDER_IMAGE_SHA1.slice(i * 2, i * 2 + 2), 16),
+    );
     const digestSpy = vi
       .spyOn(crypto.subtle, "digest")
       .mockResolvedValueOnce(placeholderHashBytes.buffer);
@@ -1279,13 +1271,9 @@ describe("uploadStaffImage", () => {
   });
 
   it("skips upload and patch when bytes match the PSD placeholder SHA-1", async () => {
-    const placeholderHashBytes = new Uint8Array(20);
-    for (let i = 0; i < 20; i++) {
-      placeholderHashBytes[i] = parseInt(
-        PSD_PLACEHOLDER_IMAGE_SHA1.slice(i * 2, i * 2 + 2),
-        16,
-      );
-    }
+    const placeholderHashBytes = Uint8Array.from({ length: 20 }, (_, i) =>
+      parseInt(PSD_PLACEHOLDER_IMAGE_SHA1.slice(i * 2, i * 2 + 2), 16),
+    );
     const digestSpy = vi
       .spyOn(crypto.subtle, "digest")
       .mockResolvedValueOnce(placeholderHashBytes.buffer);

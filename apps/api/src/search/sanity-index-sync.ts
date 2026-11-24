@@ -1,5 +1,5 @@
 import { createClient } from "@sanity/client";
-import { Array as Arr, Effect, Either, Schedule } from "effect";
+import { Array as Arr, Effect, Either, Ref, Schedule } from "effect";
 import { WorkerEnvTag } from "../env";
 import { KvCacheService } from "../cache/kv-cache";
 import { reconcileOrphans } from "../reconciliation";
@@ -271,7 +271,7 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
     // always records the outcome here as a side effect of being called —
     // there is no separate "remember to flag it" step for a future phase to
     // skip (#2831).
-    let reconciliationSafe = true;
+    const reconciliationSafe = yield* Ref.make(true);
 
     // Reported by the caller (index.ts) under its own job name (#2855) —
     // the sweep itself still resolves successfully regardless of this
@@ -279,7 +279,7 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
     // Stays "not-run" unless the reconciliation block below actually
     // reaches the manifest-diff call — see PrunePhaseOutcome's doc comment
     // for why the default must NOT be "healthy".
-    let prunePhase: PrunePhaseOutcome = { kind: "not-run" };
+    const prunePhase = yield* Ref.make<PrunePhaseOutcome>({ kind: "not-run" });
 
     /**
      * Runs one Sanity fetch, degrading a failure to an empty result so
@@ -296,17 +296,19 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
         try: fetch,
         catch: (e) => new Error(`Sanity ${label} fetch failed: ${String(e)}`),
       }).pipe(
-        Effect.catchAll((e) => {
-          reconciliationSafe = false;
-          return Effect.log(
-            `[search-sync] Skipping ${label}: ${String(e)}`,
-          ).pipe(Effect.as([] as T[]));
-        }),
+        Effect.catchAll((e) =>
+          Ref.set(reconciliationSafe, false).pipe(
+            Effect.zipRight(
+              Effect.log(`[search-sync] Skipping ${label}: ${String(e)}`),
+            ),
+            Effect.as([] as T[]),
+          ),
+        ),
       );
 
-    let _sanityClient: ReturnType<typeof createClient> | undefined;
+    const clientHolder: { client?: ReturnType<typeof createClient> } = {};
     const sanityClient = () =>
-      (_sanityClient ??= createClient({
+      (clientHolder.client ??= createClient({
         ...sanityClientConfig(env),
         useCdn: false,
       }));
@@ -524,7 +526,7 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
 
     // ── Reconciliation ───────────────────────────────────────────────────
 
-    if (!reconciliationSafe) {
+    if (!(yield* Ref.get(reconciliationSafe))) {
       yield* Effect.log(
         "[search-sync] Skipping reconciliation — a fetch phase failed this sweep, so its result set can't be trusted to diff against",
       );
@@ -611,12 +613,12 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
           },
         );
         if (manifestReconciliation.action === "skipped") {
-          prunePhase = {
+          yield* Ref.set(prunePhase, {
             kind: "refused",
             orphanCount: manifestReconciliation.orphanCount,
             activeCount: manifestReconciliation.activeCount,
             ratio: manifestReconciliation.ratio,
-          };
+          });
         } else if (
           manifestReconciliation.action === "removed" &&
           manifestReconciliation.requestedIds.length > 0 &&
@@ -626,13 +628,13 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
           // (deleteBatched degrades that to a log-and-skip) — zero vectors
           // actually left the index. Not healthy, even though nothing was
           // "refused".
-          prunePhase = {
+          yield* Ref.set(prunePhase, {
             kind: "zero-confirmed",
             requestedCount: manifestReconciliation.requestedIds.length,
-          };
+          });
         } else {
           // action "none" (no orphans) or "removed" with ≥1 confirmed.
-          prunePhase = { kind: "ok" };
+          yield* Ref.set(prunePhase, { kind: "ok" });
         }
         const manifestConfirmedIds =
           manifestReconciliation.action === "removed"
@@ -651,23 +653,23 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
         const excludedIds = [
           ...new Set([...excludedResponsibilityIds, ...excludedArticleIds]),
         ].filter((id) => !manifestConfirmedIdSet.has(id));
-        let excludedConfirmedIds: readonly string[] = [];
-        if (excludedIds.length > 0) {
-          if (dryRun) {
-            yield* Effect.log(
-              `[search-sync] DRY RUN — would prune ${excludedIds.length} excluded-ids vector(s): ${excludedIds.join(", ")}`,
-            );
-          } else {
-            excludedConfirmedIds = yield* deleteBatched(excludedIds);
-            yield* Effect.log(
-              `[search-sync] Pruned ${excludedConfirmedIds.length} excluded-ids vector(s)`,
-            );
-          }
-        } else {
-          yield* Effect.log(
-            "[search-sync] reconciliation: no orphan excluded ids to prune",
-          );
-        }
+        const pruneExcluded: Effect.Effect<readonly string[]> =
+          excludedIds.length === 0
+            ? Effect.log(
+                "[search-sync] reconciliation: no orphan excluded ids to prune",
+              ).pipe(Effect.as([]))
+            : dryRun
+              ? Effect.log(
+                  `[search-sync] DRY RUN — would prune ${excludedIds.length} excluded-ids vector(s): ${excludedIds.join(", ")}`,
+                ).pipe(Effect.as([]))
+              : deleteBatched(excludedIds).pipe(
+                  Effect.tap((confirmed) =>
+                    Effect.log(
+                      `[search-sync] Pruned ${confirmed.length} excluded-ids vector(s)`,
+                    ),
+                  ),
+                );
+        const excludedConfirmedIds = yield* pruneExcluded;
 
         const confirmedDeleted = new Set([
           ...manifestConfirmedIds,
@@ -727,5 +729,5 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
     // prune-side problem, not an indexing one, so it must not fail this
     // Effect (#2855). The caller (index.ts) reports it under its own
     // job-alert name instead.
-    return { prunePhase };
+    return { prunePhase: yield* Ref.get(prunePhase) };
   });

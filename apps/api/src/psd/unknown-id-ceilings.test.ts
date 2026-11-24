@@ -73,7 +73,8 @@ function makeKv() {
   } as unknown as KVNamespace;
 }
 
-let kv: KVNamespace;
+// A fresh KV per test: beforeEach swaps `current.kv`.
+const current = { kv: makeKv() };
 
 const run = <A, E>(
   effect: Effect.Effect<
@@ -82,7 +83,7 @@ const run = <A, E>(
     PsdService | KvCacheService | WorkerEnvTag | PsdGateService
   >,
 ) => {
-  const env = makeTestEnvLayer({ PSD_CACHE: kv });
+  const env = makeTestEnvLayer({ PSD_CACHE: current.kv });
   const base = Layer.mergeAll(KvCacheLive, PsdGateTest).pipe(
     Layer.provideMerge(env),
   );
@@ -94,7 +95,7 @@ const run = <A, E>(
 };
 
 beforeEach(() => {
-  kv = makeKv();
+  current.kv = makeKv();
   psd.mockClear();
   vi.stubGlobal("fetch", psd);
 });
@@ -123,7 +124,7 @@ describe("an unknown id requested twice costs one PSD call (#3468)", () => {
     await run(getRankingHandler(UNKNOWN));
     expect(callsTo(`/teams/${UNKNOWN}/ranking`)).toBe(1);
     // The marker must not hide the handler's own 24 h "no table" note.
-    expect(await kv.get(`ranking:none:team:${UNKNOWN}`)).not.toBeNull();
+    expect(await current.kv.get(`ranking:none:team:${UNKNOWN}`)).not.toBeNull();
   });
 
   it("/statistics/player/:memberId", async () => {

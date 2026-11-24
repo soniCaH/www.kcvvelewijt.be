@@ -798,16 +798,14 @@ describe("PsdService.getNextMatches", () => {
       return Promise.resolve({ ok: true, json: async () => [rawTeams[0]] });
     });
 
-    let capturedKey: string | undefined;
-    let capturedValue: string | undefined;
-    let capturedTtl: number | undefined;
+    const captured: { key?: string; value?: string; ttl?: number } = {};
     const trackingKv: KvCacheInterface = {
       get: () => Effect.succeed(null), // cache miss
       set: (key, value, ttl) => {
         if (key.includes("visible-team")) {
-          capturedKey = key;
-          capturedValue = value;
-          capturedTtl = ttl;
+          captured.key = key;
+          captured.value = value;
+          captured.ttl = ttl;
         }
         return Effect.succeed(undefined);
       },
@@ -821,9 +819,9 @@ describe("PsdService.getNextMatches", () => {
       kvMock: trackingKv,
     });
 
-    expect(capturedKey).toBeDefined();
-    expect(JSON.parse(capturedValue!)).toEqual(["1"]);
-    expect(capturedTtl).toBe(3600);
+    expect(captured.key).toBeDefined();
+    expect(JSON.parse(captured.value!)).toEqual(["1"]);
+    expect(captured.ttl).toBe(3600);
   });
 
   it("uses KV-cached visible team IDs and skips Sanity on cache hit", async () => {
@@ -853,11 +851,11 @@ describe("PsdService.getNextMatches", () => {
       durable: noopDurableKv,
     };
 
-    let sanityCallCount = 0;
+    const sanityCalled = vi.fn();
     const spySanityMock: SanityProjectionInterface = {
       ...makeSanityMock(["1"]),
       getVisibleTeamPsdIds: () => {
-        sanityCallCount++;
+        sanityCalled();
         return Effect.succeed(["1"]);
       },
     };
@@ -868,7 +866,7 @@ describe("PsdService.getNextMatches", () => {
     });
 
     // Sanity should NOT be called when KV has cached data
-    expect(sanityCallCount).toBe(0);
+    expect(sanityCalled).not.toHaveBeenCalled();
   });
 });
 

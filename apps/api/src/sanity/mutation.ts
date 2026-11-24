@@ -264,11 +264,13 @@ export const SanityMutationLive = Layer.effect(
       Effect.tryPromise({
         try: async () => {
           if (psdIds.length === 0) return;
-          let tx = client.transaction();
-          for (const psdId of psdIds) {
-            tx = tx.patch(docId(type, psdId), (p) => p.set({ archived: true }));
-          }
-          await tx.commit();
+          await psdIds
+            .reduce(
+              (tx, psdId) =>
+                tx.patch(docId(type, psdId), (p) => p.set({ archived: true })),
+              client.transaction(),
+            )
+            .commit();
         },
         catch: (cause) =>
           new SanityMutationError(`Failed to archive ${type} documents`, cause),
@@ -384,14 +386,11 @@ export const SanityMutationLive = Layer.effect(
           params;
         return Effect.gen(function* () {
           // Validate imageUrl before attaching PSD credentials
-          let parsedUrl: URL;
-          try {
-            parsedUrl = new URL(imageUrl);
-          } catch {
-            return yield* Effect.fail(
+          const parsedUrl = yield* Effect.try({
+            try: () => new URL(imageUrl),
+            catch: () =>
               new SanityMutationError(`Invalid image URL: ${imageUrl}`),
-            );
-          }
+          });
           const expectedHost = new URL(env.PSD_IMAGE_BASE_URL).hostname;
           if (
             parsedUrl.protocol !== "https:" ||

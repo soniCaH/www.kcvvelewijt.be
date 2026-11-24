@@ -13,19 +13,20 @@ import { EXPECTED_INDEX_BY_DATASET } from "../search/dataset-index-guard";
 
 function parseSections(source: string): Record<string, string[]> {
   const sections: Record<string, string[]> = {};
-  let current: string | null = null;
-  for (const rawLine of source.split("\n")) {
-    const line = rawLine.trim();
-    const header = /^(\[\[?[^\]]+\]\]?)$/.exec(line)?.[1];
-    if (header) {
-      current = header;
-      sections[current] ??= [];
-      continue;
-    }
-    if (current && line && !line.startsWith("#")) {
-      sections[current]!.push(line);
-    }
-  }
+  source
+    .split("\n")
+    .map((rawLine) => rawLine.trim())
+    .reduce<string | null>((current, line) => {
+      const header = /^(\[\[?[^\]]+\]\]?)$/.exec(line)?.[1];
+      if (header) {
+        sections[header] ??= [];
+        return header;
+      }
+      if (current && line && !line.startsWith("#")) {
+        sections[current]!.push(line);
+      }
+      return current;
+    }, null);
   return sections;
 }
 

@@ -3,11 +3,11 @@ import { IncidentTracker, HEALTH_WINDOW_MS } from "./incident";
 
 /** Mutable clock so we can place reports on a timeline deterministically. */
 function clock(start = 1_000_000) {
-  let t = start;
+  const state = { t: start };
   return {
-    now: () => t,
+    now: () => state.t,
     at: (ms: number) => {
-      t = ms;
+      state.t = ms;
       return ms;
     },
   };

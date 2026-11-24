@@ -83,18 +83,17 @@ export const handleSearch = (
       })
       .slice(0, request.limit);
 
-    let answer: string | undefined;
-
-    if (asksForAnswer(results)) {
-      const context = results
-        .slice(0, 3)
-        .map((r, i) => `${i + 1}. ${r.title}: ${r.excerpt}`)
-        .join("\n");
-
-      answer = yield* aiAnswer
-        .generateAnswer(request.query, context)
-        .pipe(Effect.catchAll(() => Effect.succeed(undefined)));
-    }
+    const answer: string | undefined = asksForAnswer(results)
+      ? yield* aiAnswer
+          .generateAnswer(
+            request.query,
+            results
+              .slice(0, 3)
+              .map((r, i) => `${i + 1}. ${r.title}: ${r.excerpt}`)
+              .join("\n"),
+          )
+          .pipe(Effect.catchAll(() => Effect.succeed(undefined)))
+      : undefined;
 
     return { results, ...(answer ? { answer } : {}) };
   });
