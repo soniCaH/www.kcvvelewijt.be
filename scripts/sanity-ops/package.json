@@ -13,7 +13,8 @@
     "staff-role:fill": "tsx src/staff-role-fill/fill-staff-roles.ts",
     "cashless-terms": "tsx src/cashless-terms-3569/apply-cashless-terms.ts",
     "leerplan-link": "tsx src/leerplan-link-3568/apply-leerplan-link.ts",
-    "short-links": "tsx src/short-links-3573/apply-short-links.ts"
+    "short-links": "tsx src/short-links-3573/apply-short-links.ts",
+    "sponsor-report": "tsx src/sponsor-season-report-3653/run.ts"
   },
   "dependencies": {
     "@sanity/client": "catalog:"
