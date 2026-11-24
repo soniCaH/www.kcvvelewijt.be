@@ -95,3 +95,6 @@ ds-bundle/
 
 # pre-commit wiring-test probes (apps/web/test/hooks/pre-commit.test.ts, #3723)
 apps/web/src/__wiring-probes__/
+
+# sponsor season reports (#3653): a client's numbers, printed by hand
+scripts/sanity-ops/out/
