@@ -2,6 +2,7 @@ import { cache } from "react";
 import { Effect } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
 import { TeamRepository } from "@/lib/repositories/team.repository";
+import { SANITY_TAGS } from "@/lib/sanity/cache-tags";
 
 /**
  * Subject read shared by both children of this segment —
@@ -24,7 +25,10 @@ export const fetchTeamOrNull = cache(async function fetchTeamOrNull(
   return runPromise(
     Effect.gen(function* () {
       const repo = yield* TeamRepository;
-      return yield* repo.findBySlug(slug);
+      // Tagged `sponsors` only (#3652): the read carries the Sponsors that name
+      // this Team, so a Sponsor publish refreshes it. Not `teams`: a team
+      // publish must not rebuild every `/ploegen/<slug>` (#3483).
+      return yield* repo.findBySlug(slug, { tags: [SANITY_TAGS.sponsors] });
     }).pipe(Effect.orDie),
   );
 });

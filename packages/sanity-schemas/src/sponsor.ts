@@ -59,8 +59,17 @@ export const sponsor = defineType({
       type: 'boolean',
       group: 'weergave',
       description:
-        'Zet aan om deze sponsor uit te lichten in de spotlight-sectie op de homepage. Gebruik spaarzaam: meerdere uitgelichte sponsors verdelen de aandacht. Standaard uit.',
+        'Zet aan om deze sponsor uit te lichten in de spotlight ("In de kijker") bovenaan de pagina /sponsors. Gebruik spaarzaam: meerdere uitgelichte sponsors verdelen de aandacht. Standaard uit.',
       initialValue: false,
+    }),
+    defineField({
+      name: 'teams',
+      title: 'Gesteunde ploegen',
+      type: 'array',
+      group: 'weergave',
+      of: [{type: 'reference', to: [{type: 'team'}]}],
+      description:
+        'Vul in als het contract een ploeg noemt. De sponsor staat dan als "Gesteund door" op de pagina van die ploeg (enkel zolang de sponsor actief is). Leeg = clubbreed.',
     }),
     defineField({
       name: 'active',

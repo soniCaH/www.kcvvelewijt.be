@@ -182,6 +182,15 @@ describe("POST /api/revalidate", () => {
     expect(revalidateTag).toHaveBeenCalledWith("teams", "max");
   });
 
+  it("busts /sponsors and the sponsors tag, and nothing else, on a sponsor change (#3652)", async () => {
+    // The team detail read carries the `sponsors` tag; the `teams` tag would
+    // also rebuild /kalender, /inhoud and every /tegenstander page.
+    const res = await post({ _type: "sponsor" });
+    expect(res.status).toBe(200);
+    expect(vi.mocked(revalidatePath).mock.calls).toEqual([["/sponsors"]]);
+    expect(vi.mocked(revalidateTag).mock.calls).toEqual([["sponsors", "max"]]);
+  });
+
   it("busts /hulp on a help-path change", async () => {
     // The hulp finder read is untagged and the page leans on
     // `revalidate = 3600`, so the path bust is the only lever.
