@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { GateLogic } from "./gate-logic";
 
 /**
@@ -12,18 +12,32 @@ import { GateLogic } from "./gate-logic";
  * "granted one cooldown from now".
  */
 function fakeScheduler() {
-  let clock = 0;
+  const state = { clock: 0 };
   return {
-    now: () => clock,
+    now: () => state.clock,
     sleep: async (ms: number) => {
       await Promise.resolve();
-      clock += ms;
+      state.clock += ms;
     },
     get clock() {
-      return clock;
+      return state.clock;
     },
   };
 }
+
+/** A clock the test moves by hand — `now` is what a GateLogic reads. */
+const fakeClock = (start = 0) => {
+  const state = { t: start };
+  return {
+    now: () => state.t,
+    set: (t: number) => {
+      state.t = t;
+    },
+    advance: (ms: number) => {
+      state.t += ms;
+    },
+  };
+};
 
 /** Clock reading at the moment each of `n` sequential grants completes. */
 async function grantTimes(
@@ -31,12 +45,12 @@ async function grantTimes(
   clock: () => number,
   n: number,
 ): Promise<number[]> {
-  const at: number[] = [];
-  for (let i = 0; i < n; i++) {
+  // Sequential: each grant waits for the previous one before it asks.
+  return Array.from({ length: n }).reduce<Promise<number[]>>(async (acc) => {
+    const at = await acc;
     await gate.acquireToken();
-    at.push(clock());
-  }
-  return at;
+    return [...at, clock()];
+  }, Promise.resolve([]));
 }
 
 /** 20 grants paced at 5/s: the full index fan-out, first at 0ms, last at 3800ms. */
@@ -99,28 +113,26 @@ describe("GateLogic — single-flight", () => {
   });
 
   it("an old leader's endFlight cannot release a newer leader's flight (#3467)", async () => {
-    let clock = 0;
-    const gate = new GateLogic({ now: () => clock, leaseMs: 1000 });
+    const clock = fakeClock();
+    const gate = new GateLogic({ now: clock.now, leaseMs: 1000 });
     const oldToken = gate.beginFlight("k")!;
 
-    clock += 1500; // old leader outruns its lease; a new leader reclaims
+    clock.advance(1500); // old leader outruns its lease; a new leader reclaims
     const newToken = gate.beginFlight("k")!;
     expect(newToken).not.toBe(oldToken);
 
-    let released = false;
-    const waiter = gate.awaitFlight("k").then(() => {
-      released = true;
-    });
+    const released = vi.fn();
+    const waiter = gate.awaitFlight("k").then(released);
 
     gate.endFlight("k", oldToken); // stale owner: must be a no-op
     await Promise.resolve();
-    expect(released).toBe(false);
+    expect(released).not.toHaveBeenCalled();
     expect(gate.isInFlight("k")).toBe(true);
     expect(gate.beginFlight("k")).toBeNull(); // new leader still holds it
 
     gate.endFlight("k", newToken);
     await waiter;
-    expect(released).toBe(true);
+    expect(released).toHaveBeenCalledTimes(1);
     expect(gate.isInFlight("k")).toBe(false);
   });
 
@@ -128,17 +140,15 @@ describe("GateLogic — single-flight", () => {
     const gate = new GateLogic();
     const token = gate.beginFlight("k")!;
 
-    let resolved = false;
-    const waiter = gate.awaitFlight("k").then(() => {
-      resolved = true;
-    });
+    const resolved = vi.fn();
+    const waiter = gate.awaitFlight("k").then(resolved);
 
     await Promise.resolve();
-    expect(resolved).toBe(false); // still in flight
+    expect(resolved).not.toHaveBeenCalled(); // still in flight
 
     gate.endFlight("k", token);
     await waiter;
-    expect(resolved).toBe(true);
+    expect(resolved).toHaveBeenCalledTimes(1);
   });
 
   it("awaitFlight for an idle key resolves immediately", async () => {
@@ -154,46 +164,44 @@ describe("GateLogic — single-flight", () => {
   });
 
   it("reclaims leadership after the lease expires (dead-leader guard)", () => {
-    let clock = 0;
-    const gate = new GateLogic({ now: () => clock, leaseMs: 1000 });
+    const clock = fakeClock();
+    const gate = new GateLogic({ now: clock.now, leaseMs: 1000 });
 
     expect(gate.beginFlight("k")).not.toBeNull();
     expect(gate.beginFlight("k")).toBeNull(); // live leader holds it
     expect(gate.isInFlight("k")).toBe(true);
 
-    clock += 1500; // leader died without endFlight; lease lapses
+    clock.advance(1500); // leader died without endFlight; lease lapses
 
     expect(gate.isInFlight("k")).toBe(false);
     expect(gate.beginFlight("k")).not.toBeNull(); // reclaimed by the next caller
   });
 
   it("reclaiming a lapsed flight wakes anyone still awaiting it", async () => {
-    let clock = 0;
-    const gate = new GateLogic({ now: () => clock, leaseMs: 1000 });
+    const clock = fakeClock();
+    const gate = new GateLogic({ now: clock.now, leaseMs: 1000 });
     gate.beginFlight("k");
 
-    let woken = false;
-    const waiter = gate.awaitFlight("k").then(() => {
-      woken = true;
-    });
+    const woken = vi.fn();
+    const waiter = gate.awaitFlight("k").then(woken);
     await Promise.resolve();
-    expect(woken).toBe(false);
+    expect(woken).not.toHaveBeenCalled();
 
-    clock += 1500;
+    clock.advance(1500);
     gate.beginFlight("k"); // reclaim → resolves the abandoned flight's promise
     await waiter;
-    expect(woken).toBe(true);
+    expect(woken).toHaveBeenCalledTimes(1);
   });
 
   it("N concurrent misses coalesce onto ONE fan-out", async () => {
     const gate = new GateLogic();
-    let fanOuts = 0;
+    const fanOut = vi.fn();
 
     // Each caller: if leader → run the (single) fan-out; else await + reuse.
     const caller = async () => {
       const token = gate.beginFlight("matches:next");
       if (token !== null) {
-        fanOuts++;
+        fanOut();
         await Promise.resolve(); // simulate async fan-out
         gate.endFlight("matches:next", token);
       } else {
@@ -202,7 +210,7 @@ describe("GateLogic — single-flight", () => {
     };
 
     await Promise.all(Array.from({ length: 30 }, caller));
-    expect(fanOuts).toBe(1);
+    expect(fanOut).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -231,12 +239,12 @@ describe("GateLogic — daily PSD call count (#3490)", () => {
   });
 
   it("rolls over at the UTC date boundary", async () => {
-    let clock = DAY1;
-    const gate = new GateLogic({ ratePerSecond: 1e9, now: () => clock });
+    const clock = fakeClock(DAY1);
+    const gate = new GateLogic({ ratePerSecond: 1e9, now: clock.now });
     await gate.acquireToken();
     await gate.acquireToken();
     expect(gate.getDailyCount()).toBe(2);
-    clock = DAY2;
+    clock.set(DAY2);
     expect(gate.getDailyCount()).toBe(0);
     await gate.acquireToken();
     expect(gate.getDailyCount()).toBe(1);

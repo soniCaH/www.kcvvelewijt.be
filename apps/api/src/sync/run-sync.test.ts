@@ -419,7 +419,7 @@ describe("runSync", () => {
     const psdMock = makePsdTeamClientMock(THREE_TEAMS, [ONE_PLAYER]);
 
     // Run sync 3 times — each run processes one team, cursor advances
-    for (let i = 0; i < 3; i++) {
+    for (const _i of Array.from({ length: 3 }, (_, k) => k)) {
       const { writerMock, readerMock } = makeSanityMocks();
       await Effect.runPromise(
         runSync.pipe(
@@ -1091,7 +1091,7 @@ describe("runSync", () => {
     const psdMock = makePsdTeamClientMock(FOUR_TEAMS, [ONE_PLAYER]);
 
     // Run all 4 teams to complete the cycle
-    for (let i = 0; i < 4; i++) {
+    for (const i of Array.from({ length: 4 }, (_, k) => k)) {
       const isLastRun = i === 3;
       const current = isLastRun
         ? { writerMock, readerMock }

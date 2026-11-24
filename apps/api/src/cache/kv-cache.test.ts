@@ -253,9 +253,9 @@ describe("TypedKvCache", () => {
 
   it("cache miss: calls fetch, stores wrapper with hardTtl, returns value", async () => {
     const mockKv = makeMockKv();
-    let fetchCalled = false;
+    const fetchCalled = vi.fn();
     const fetchEffect = Effect.sync(() => {
-      fetchCalled = true;
+      fetchCalled();
       return { name: "test", value: 42 };
     });
 
@@ -271,7 +271,7 @@ describe("TypedKvCache", () => {
     );
 
     expect(result).toEqual({ name: "test", value: 42 });
-    expect(fetchCalled).toBe(true);
+    expect(fetchCalled).toHaveBeenCalled();
     // Stored with hardTtl (default 7 days), not softTtl
     expect(mockKv.put).toHaveBeenCalledWith(
       "test-key",
@@ -353,9 +353,9 @@ describe("TypedKvCache", () => {
     const mockKv = makeMockKv();
     mockKv.store.set("test-key", "not-valid-json{{{");
 
-    let fetchCalled = false;
+    const fetchCalled = vi.fn();
     const fetchEffect = Effect.sync(() => {
-      fetchCalled = true;
+      fetchCalled();
       return { name: "fallback", value: 1 };
     });
 
@@ -371,7 +371,7 @@ describe("TypedKvCache", () => {
     );
 
     expect(result).toEqual({ name: "fallback", value: 1 });
-    expect(fetchCalled).toBe(true);
+    expect(fetchCalled).toHaveBeenCalled();
   });
 
   it("cache hit with old format (no wrapper): serves it as stale and rewrites it via refresh", async () => {
@@ -382,9 +382,9 @@ describe("TypedKvCache", () => {
       JSON.stringify({ name: "old-format", value: 5 }),
     );
 
-    let fetchCalled = false;
+    const fetchCalled = vi.fn();
     const fetchEffect = Effect.sync(() => {
-      fetchCalled = true;
+      fetchCalled();
       return { name: "fresh", value: 42 };
     });
 
@@ -400,7 +400,7 @@ describe("TypedKvCache", () => {
     );
 
     expect(result).toEqual({ name: "old-format", value: 5 });
-    expect(fetchCalled).toBe(true);
+    expect(fetchCalled).toHaveBeenCalled();
 
     // Verify old-format entry was rewritten to new wrapper shape
     const stored = JSON.parse(mockKv.store.get("test-key")!);
@@ -706,14 +706,14 @@ describe("TypedKvCache — stale-while-revalidate + storm gate (#2328)", () => {
     mockKv.store.set("neg:test-key", "1");
     const gate = PsdGateTest;
     const { runnerLayer, settle } = withRunner(mockKv, gate);
-    let fetchCalled = false;
+    const fetchCalled = vi.fn();
 
     const result = await Effect.runPromise(
       TypedKvCache(TestSchema)
         .getOrFetch(
           "test-key",
           Effect.sync(() => {
-            fetchCalled = true;
+            fetchCalled();
             return { name: "fresh", value: 2 };
           }),
           60,
@@ -730,7 +730,7 @@ describe("TypedKvCache — stale-while-revalidate + storm gate (#2328)", () => {
     await settle();
 
     expect(result).toEqual({ name: "old", value: 1 });
-    expect(fetchCalled).toBe(false);
+    expect(fetchCalled).not.toHaveBeenCalled();
   });
 
   it("negative marker present → serves stale WITHOUT fetching", async () => {
@@ -740,9 +740,9 @@ describe("TypedKvCache — stale-while-revalidate + storm gate (#2328)", () => {
     const gate = PsdGateTest;
     const { runnerLayer, settle } = withRunner(mockKv, gate);
 
-    let fetchCalled = false;
+    const fetchCalled = vi.fn();
     const fetchEffect = Effect.sync(() => {
-      fetchCalled = true;
+      fetchCalled();
       return { name: "fresh", value: 99 };
     });
 
@@ -759,7 +759,7 @@ describe("TypedKvCache — stale-while-revalidate + storm gate (#2328)", () => {
     await settle();
 
     expect(result).toEqual({ name: "stale", value: 7 });
-    expect(fetchCalled).toBe(false);
+    expect(fetchCalled).not.toHaveBeenCalled();
   });
 
   it("background refresh failure keeps stale and sets the negative marker", async () => {
@@ -796,9 +796,9 @@ describe("TypedKvCache — stale-while-revalidate + storm gate (#2328)", () => {
     mockKv.store.set("test-key", staleWrapper({ name: "old", value: 1 }));
     const gate = makePsdGateLayer(new GateLogic({ ratePerSecond: 1e9 }));
 
-    let fanOuts = 0;
+    const fanOut = vi.fn();
     const fetchEffect = Effect.gen(function* () {
-      fanOuts++;
+      fanOut();
       yield* Effect.sleep("20 millis");
       return { name: "fresh", value: 2 };
     });
@@ -817,7 +817,7 @@ describe("TypedKvCache — stale-while-revalidate + storm gate (#2328)", () => {
     const results = await Promise.all(Array.from({ length: 50 }, run));
 
     for (const r of results) expect(r).toEqual({ name: "old", value: 1 });
-    expect(fanOuts).toBe(1);
+    expect(fanOut).toHaveBeenCalledTimes(1);
     expect(JSON.parse(mockKv.store.get("test-key")!).value).toEqual({
       name: "fresh",
       value: 2,
@@ -829,9 +829,9 @@ describe("TypedKvCache — stale-while-revalidate + storm gate (#2328)", () => {
     // Fresh shared gate so single-flight state is isolated to this test.
     const gate = makePsdGateLayer(new GateLogic({ ratePerSecond: 1e9 }));
 
-    let fanOuts = 0;
+    const fanOut = vi.fn();
     const fetchEffect = Effect.gen(function* () {
-      fanOuts++;
+      fanOut();
       // Yield so all concurrent callers pass the miss check before the leader
       // finishes and writes KV.
       yield* Effect.sleep("5 millis");
@@ -854,7 +854,7 @@ describe("TypedKvCache — stale-while-revalidate + storm gate (#2328)", () => {
 
     // All callers get the value; only the leader fanned out.
     for (const r of results) expect(r).toEqual({ name: "fetched", value: 1 });
-    expect(fanOuts).toBe(1);
+    expect(fanOut).toHaveBeenCalledTimes(1);
   });
 
   it("concurrent misses never run duplicate fan-outs, even when the leader fails", async () => {
@@ -863,13 +863,12 @@ describe("TypedKvCache — stale-while-revalidate + storm gate (#2328)", () => {
     const mockKv = makeMockKv();
     const gate = makePsdGateLayer(new GateLogic({ ratePerSecond: 1e9 }));
 
-    let inFlight = 0;
-    let maxInFlight = 0;
+    const flight = { current: 0, max: 0 };
     const fetchEffect = Effect.gen(function* () {
-      inFlight++;
-      maxInFlight = Math.max(maxInFlight, inFlight);
+      flight.current++;
+      flight.max = Math.max(flight.max, flight.current);
       yield* Effect.sleep("3 millis");
-      inFlight--;
+      flight.current--;
       return yield* Effect.fail(new Error("PSD 429") as never);
     });
 
@@ -889,7 +888,7 @@ describe("TypedKvCache — stale-while-revalidate + storm gate (#2328)", () => {
     // Nothing was ever cached, so every caller surfaces the error (AC7).
     for (const e of exits) expect(e._tag).toBe("Failure");
     // Crucially: fan-outs were serialized, never concurrent.
-    expect(maxInFlight).toBe(1);
+    expect(flight.max).toBe(1);
   });
 
   it("sustained outage decouples PSD calls from request volume", async () => {
@@ -905,14 +904,14 @@ describe("TypedKvCache — stale-while-revalidate + storm gate (#2328)", () => {
     mockKv.store.set("test-key", staleWrapper({ name: "stale", value: 1 }));
     const gate = PsdGateTest;
 
-    let fetches = 0;
+    const fetchSpy = vi.fn();
     const fetchEffect = Effect.gen(function* () {
-      fetches++;
+      fetchSpy();
       return yield* Effect.fail(new Error("PSD 429") as never);
     });
     const typedCache = TypedKvCache(TestSchema);
 
-    for (let i = 0; i < 50; i++) {
+    for (const _i of Array.from({ length: 50 }, (_, k) => k)) {
       const { runnerLayer, settle } = withRunner(mockKv, gate);
       const result = await Effect.runPromise(
         typedCache
@@ -929,7 +928,7 @@ describe("TypedKvCache — stale-while-revalidate + storm gate (#2328)", () => {
     }
 
     // 50 requests, but the marker capped PSD calls at the first attempt.
-    expect(fetches).toBe(1);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 
   it("self-heals: once PSD recovers, the marker clears and fresh data is served", async () => {
@@ -1208,7 +1207,7 @@ describe("Scheduled-job failure signal stays decoupled from PSD incident state (
     // Seven consecutive nightly job failures — the exact regression Option A
     // was rejected to avoid is `gate.reportOutcome` (and therefore
     // IncidentTracker) getting fed by the scheduled path.
-    for (let i = 0; i < 7; i++) {
+    for (const _i of Array.from({ length: 7 }, (_, k) => k)) {
       await Effect.runPromise(
         reportScheduledJobOutcome("psd-sanity-sync", {
           ok: false,
@@ -1458,9 +1457,9 @@ describe("TypedKvCache — silent-drift observability (#2335)", () => {
     seedStaleSince(mockKv, 2 * dayMs);
     mockKv.store.set("neg:test-key", "1");
 
-    let fetchCalled = false;
+    const fetchCalled = vi.fn();
     const fetchEffect = Effect.sync(() => {
-      fetchCalled = true;
+      fetchCalled();
       return { name: "fresh", value: 9 };
     });
 
@@ -1475,7 +1474,7 @@ describe("TypedKvCache — silent-drift observability (#2335)", () => {
     );
 
     expect(result).toEqual({ name: "stale", value: 1 });
-    expect(fetchCalled).toBe(false);
+    expect(fetchCalled).not.toHaveBeenCalled();
     // The marker short-circuits the refresh — the nudge must not depend on it.
     expect(mockKv.store.get("nudge:test-key")).toBe("1");
   });
@@ -2174,18 +2173,18 @@ describe("TypedKvCache — partial fan-out is cached briefly (#3489)", () => {
         partial: true,
       }),
     );
-    let fetched = 0;
+    const fetched = vi.fn();
     const result = await run(
       mockKv,
       Effect.sync(() => {
-        fetched++;
+        fetched();
         return FRESH;
       }),
       () => false,
     );
     // Stale-while-revalidate: the old value is served, a refresh ran.
     expect(result).toEqual({ name: "old", value: 1 });
-    expect(fetched).toBe(1);
+    expect(fetched).toHaveBeenCalledTimes(1);
     expect(JSON.parse(mockKv.store.get("test-key")!).value).toEqual(FRESH);
   });
 
@@ -2195,16 +2194,16 @@ describe("TypedKvCache — partial fan-out is cached briefly (#3489)", () => {
       "test-key",
       makeWrapper({ name: "old", value: 1 }, 10 * 60_000),
     );
-    let fetched = 0;
+    const fetched = vi.fn();
     await run(
       mockKv,
       Effect.sync(() => {
-        fetched++;
+        fetched();
         return FRESH;
       }),
       () => false,
     );
-    expect(fetched).toBe(0);
+    expect(fetched).not.toHaveBeenCalled();
   });
 
   it("a partial entry younger than 5 min is fresh", async () => {
@@ -2217,15 +2216,15 @@ describe("TypedKvCache — partial fan-out is cached briefly (#3489)", () => {
         partial: true,
       }),
     );
-    let fetched = 0;
+    const fetched = vi.fn();
     await run(
       mockKv,
       Effect.sync(() => {
-        fetched++;
+        fetched();
         return FRESH;
       }),
       () => false,
     );
-    expect(fetched).toBe(0);
+    expect(fetched).not.toHaveBeenCalled();
   });
 });

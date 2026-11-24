@@ -48,12 +48,12 @@ describe("getMatchTeamIndex single flight (workerd)", () => {
     await env.PSD_CACHE.put("psd:current-season-id", JSON.stringify(season));
     await env.PSD_CACHE.put("psd:competition-labels", "{}");
 
-    let builds = 0;
+    const builds = vi.fn();
     const json = (body: unknown) => new Response(JSON.stringify(body));
     vi.stubGlobal("fetch", async (input: unknown) => {
       const url = String(input);
       if (url.includes("/games/team/")) {
-        builds++;
+        builds();
         await new Promise((r) => setTimeout(r, 150)); // long enough for followers to pile up
         return json({ content: [] });
       }
@@ -97,6 +97,6 @@ describe("getMatchTeamIndex single flight (workerd)", () => {
 
     expect(results).toHaveLength(5);
     // One team in the index fixture, so one build = one games call.
-    expect(builds).toBe(1);
+    expect(builds).toHaveBeenCalledTimes(1);
   });
 });

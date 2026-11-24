@@ -259,12 +259,12 @@ describe("handleSearch", () => {
   });
 
   it("passes type filter to Vectorize query", async () => {
-    let capturedFilter: Record<string, string> | undefined;
+    const captured: { filter?: Record<string, string> } = {};
     const capturingVectorize: VectorizeServiceInterface = {
       upsert: () => Effect.succeed(undefined),
       query: (_vec, opts) =>
         Effect.sync(() => {
-          capturedFilter = opts.filter;
+          captured.filter = opts.filter;
           return [];
         }),
       getByIds: () => Effect.succeed([]),
@@ -279,7 +279,7 @@ describe("handleSearch", () => {
       ),
     );
 
-    expect(capturedFilter?.["type"]).toBe("responsibility");
+    expect(captured.filter?.["type"]).toBe("responsibility");
   });
 });
 

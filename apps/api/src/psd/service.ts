@@ -819,17 +819,16 @@ export const PsdServiceLive = Layer.effect(
           }
 
           // Pair each result with its team so we can derive the label
-          const matches: Match[] = [];
-          for (let i = 0; i < teamNextMatches.length; i++) {
-            const entry = teamNextMatches[i]!;
-            if (entry._tag === "ok" && entry.match) {
-              const team = visibleTeams[i]!;
-              matches.push({
+          const matches: Match[] = teamNextMatches.flatMap((entry, i) => {
+            if (entry._tag !== "ok" || !entry.match) return [];
+            const team = visibleTeams[i]!;
+            return [
+              {
                 ...entry.match,
                 kcvv_team_label: derivePsdTeamLabel(team.name, team.age),
-              });
-            }
-          }
+              },
+            ];
+          });
           return markPartial(
             matches,
             teamNextMatches.some((r) => r._tag === "failed"),
@@ -929,17 +928,15 @@ export const PsdServiceLive = Layer.effect(
 
           // Flatten all in-window games across teams, tagging each with its
           // KCVV team label, then sort by kickoff ascending.
-          const matches: Match[] = [];
-          for (let i = 0; i < teamWindowMatches.length; i++) {
-            const entry = teamWindowMatches[i]!;
-            if (entry._tag === "ok") {
-              const team = visibleTeams[i]!;
-              const label = derivePsdTeamLabel(team.name, team.age);
-              for (const match of entry.matches) {
-                matches.push({ ...match, kcvv_team_label: label });
-              }
-            }
-          }
+          const matches: Match[] = teamWindowMatches.flatMap((entry, i) => {
+            if (entry._tag !== "ok") return [];
+            const team = visibleTeams[i]!;
+            const label = derivePsdTeamLabel(team.name, team.age);
+            return entry.matches.map((match) => ({
+              ...match,
+              kcvv_team_label: label,
+            }));
+          });
           matches.sort(
             (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
           );

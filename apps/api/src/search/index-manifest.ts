@@ -103,28 +103,28 @@ export const readManifest = (
 ): Effect.Effect<string[], ManifestError> =>
   kv.get(manifestKey(kv.dataset)).pipe(
     Effect.mapError(toManifestError),
-    Effect.flatMap((raw) => {
-      if (raw === null) return Effect.succeed([] as string[]);
-      let parsed: unknown;
-      try {
-        parsed = JSON.parse(raw);
-      } catch (cause) {
-        return Effect.fail(
-          new ManifestError(
-            `manifest value is not valid JSON: ${String(cause)}`,
-            cause,
+    Effect.flatMap((raw) =>
+      raw === null
+        ? Effect.succeed([] as string[])
+        : Effect.try({
+            try: (): unknown => JSON.parse(raw),
+            catch: (cause) =>
+              new ManifestError(
+                `manifest value is not valid JSON: ${String(cause)}`,
+                cause,
+              ),
+          }).pipe(
+            Effect.flatMap((parsed) =>
+              Array.isArray(parsed)
+                ? Effect.succeed(
+                    parsed.filter((id): id is string => typeof id === "string"),
+                  )
+                : Effect.fail(
+                    new ManifestError("manifest value is not a JSON array"),
+                  ),
+            ),
           ),
-        );
-      }
-      if (!Array.isArray(parsed)) {
-        return Effect.fail(
-          new ManifestError("manifest value is not a JSON array"),
-        );
-      }
-      return Effect.succeed(
-        parsed.filter((id): id is string => typeof id === "string"),
-      );
-    }),
+    ),
   );
 
 export const writeManifest = (

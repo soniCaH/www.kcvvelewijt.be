@@ -151,10 +151,7 @@ export class GateLogic {
     if (this.isLive(existing)) return null;
     // No live leader (never claimed, or the previous lease expired) → take it.
     existing?.resolve(); // wake waiters stuck on the abandoned flight
-    let resolve!: () => void;
-    const promise = new Promise<void>((r) => {
-      resolve = r;
-    });
+    const { promise, resolve } = Promise.withResolvers<void>();
     const token = this.nextToken++;
     this.inFlight.set(key, {
       promise,
@@ -186,16 +183,12 @@ export class GateLogic {
   async awaitFlight(key: string): Promise<void> {
     const flight = this.inFlight.get(key);
     if (!flight) return;
-    let timer: ReturnType<typeof setTimeout> | undefined;
+    const { promise: lapsed, resolve: lapse } = Promise.withResolvers<void>();
+    const timer = setTimeout(lapse, this.leaseMs);
     try {
-      await Promise.race([
-        flight.promise,
-        new Promise<void>((resolve) => {
-          timer = setTimeout(resolve, this.leaseMs);
-        }),
-      ]);
+      await Promise.race([flight.promise, lapsed]);
     } finally {
-      if (timer) clearTimeout(timer);
+      clearTimeout(timer);
     }
   }
 

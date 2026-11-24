@@ -119,9 +119,9 @@ describe("getRelatedHandler", () => {
       },
     ];
 
-    let stored: string | null = null;
+    const stored: { value: string | null } = { value: null };
     const set = vi.fn((_key: string, value: string, _ttl: number) => {
-      stored = value;
+      stored.value = value;
       return Effect.succeed(undefined);
     });
 
@@ -162,7 +162,7 @@ describe("getRelatedHandler", () => {
 
     const result2 = await runWithProviders(
       getRelatedHandler({ id: "doc-1", limit: 4 }),
-      makeCacheMock({ get: () => Effect.succeed(stored) }),
+      makeCacheMock({ get: () => Effect.succeed(stored.value) }),
       makeVectorizeMock({ getByIds, query }),
     );
 
