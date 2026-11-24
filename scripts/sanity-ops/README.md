@@ -49,7 +49,12 @@ Prerequisites:
   ```bash
   gcloud auth application-default login \
     --scopes=https://www.googleapis.com/auth/analytics.readonly,https://www.googleapis.com/auth/cloud-platform
+  gcloud auth application-default set-quota-project kcvv-elewijt
   ```
+
+  The quota project (`GOOGLE_CLOUD_QUOTA_PROJECT` overrides it) is sent with
+  every GA4 request; the run stops without one. The Google Analytics Data API
+  (`analyticsdata.googleapis.com`) must be enabled on that GCP project.
 
 Run:
 

@@ -9,7 +9,8 @@
  */
 import { execSync } from "node:child_process";
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { homedir } from "node:os";
+import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { client, dataset } from "../shared/sanity-client";
 import { packageRoot } from "../shared/package-root";
@@ -50,6 +51,39 @@ interface SanitySponsor extends Omit<SponsorInput, "name" | "teams"> {
   teams: (string | null)[] | null;
 }
 
+/**
+ * A raw REST call with a user ADC token does not carry the ADC quota project
+ * (client libraries add it as a header, `fetch` does not): without it Google
+ * bills gcloud's own project and refuses. Reads only that one field.
+ */
+const quotaProject = (): string => {
+  const adcFile =
+    process.env.GOOGLE_APPLICATION_CREDENTIALS ??
+    join(
+      homedir(),
+      ".config",
+      "gcloud",
+      "application_default_credentials.json",
+    );
+  const fromFile = (): string | undefined => {
+    try {
+      const { quota_project_id } = JSON.parse(readFileSync(adcFile, "utf-8"));
+      return typeof quota_project_id === "string"
+        ? quota_project_id
+        : undefined;
+    } catch {
+      return undefined;
+    }
+  };
+  return (
+    process.env.GOOGLE_CLOUD_QUOTA_PROJECT ??
+    fromFile() ??
+    fail(
+      "No quota project for GA4. Run:\n  gcloud auth application-default set-quota-project kcvv-elewijt\n(or set GOOGLE_CLOUD_QUOTA_PROJECT).",
+    )
+  );
+};
+
 const accessToken = () => {
   try {
     return execSync("gcloud auth application-default print-access-token", {
@@ -72,7 +106,11 @@ interface Ga4Response {
   rowCount?: number;
 }
 
-const fetchGa4Rows = async (from: string, to: string): Promise<Ga4Row[]> => {
+const fetchGa4Rows = async (
+  from: string,
+  to: string,
+  project: string,
+): Promise<Ga4Row[]> => {
   const token = accessToken();
   const limit = 100_000;
   const fetchPage = async (offset: number): Promise<Ga4Row[]> => {
@@ -82,6 +120,7 @@ const fetchGa4Rows = async (from: string, to: string): Promise<Ga4Row[]> => {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
+          "x-goog-user-project": project,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -178,6 +217,7 @@ const main = async () => {
     fail((err as Error).message);
   }
   const spotlightWeeks = readSpotlightWeeks(values.spotlight, range);
+  const project = quotaProject();
 
   const sponsors = (await client.fetch<SanitySponsor[]>(SPONSORS_QUERY)).map(
     (sponsor): SponsorInput => ({
@@ -188,7 +228,7 @@ const main = async () => {
       teams: (sponsor.teams ?? []).filter((team): team is string => !!team),
     }),
   );
-  const rows = await fetchGa4Rows(range.from, range.to);
+  const rows = await fetchGa4Rows(range.from, range.to, project);
   const reports = buildReport({ sponsors, rows, spotlightWeeks, range });
 
   console.log(`${range.from} tot ${range.to}: ${rows.length} GA4 rows`);
