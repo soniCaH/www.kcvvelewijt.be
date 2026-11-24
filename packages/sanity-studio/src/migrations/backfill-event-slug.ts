@@ -76,11 +76,11 @@ export function migrateBackfillEventSlug(
   // `spaghetti-avond` and `spaghetti-avond-2` — Sanity's slug input has no
   // server-side uniqueness guarantee, so collisions would otherwise leave
   // one event unreachable from `/events/[slug]`.
-  let candidate = base
-  let suffix = 2
-  while (seenSlugs.has(candidate)) {
-    candidate = `${base}-${suffix++}`
+  const nextFree = (suffix: number): string => {
+    const candidate = `${base}-${suffix}`
+    return seenSlugs.has(candidate) ? nextFree(suffix + 1) : candidate
   }
+  const candidate = seenSlugs.has(base) ? nextFree(2) : base
   seenSlugs.add(candidate)
 
   return [at('slug', set({_type: 'slug', current: candidate}))]

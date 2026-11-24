@@ -27,12 +27,10 @@ export function ageOn(birthDate: string, on: Date): number {
   const year = Number(parts[0]);
   const month = Number(parts[1]);
   const day = Number(parts[2]);
-  let age = on.getUTCFullYear() - year;
   const monthDiff = on.getUTCMonth() + 1 - month;
-  if (monthDiff < 0 || (monthDiff === 0 && on.getUTCDate() < day)) {
-    age -= 1;
-  }
-  return age;
+  const birthdayPending =
+    monthDiff < 0 || (monthDiff === 0 && on.getUTCDate() < day);
+  return on.getUTCFullYear() - year - (birthdayPending ? 1 : 0);
 }
 
 export function isMinorOn(birthDate: string, on: Date): boolean {
