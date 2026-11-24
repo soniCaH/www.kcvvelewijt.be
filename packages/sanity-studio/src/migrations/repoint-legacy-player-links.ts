@@ -123,18 +123,17 @@ export function rewritePlayerLinksInHtml(
   html: string,
   rows: readonly PlayerRow[],
 ): {html: string; changed: boolean} {
-  let changed = false
   const next = html.replace(ANCHOR_RE, (anchorHtml) => {
     const href = extractHref(anchorHtml)
     if (!href) return anchorHtml
     const slug = matchPlayerSlug(href)
     if (!slug) return anchorHtml
-    changed = true
     const psdId = resolvePlayerPsdId(slug, rows)
     const text = extractAnchorText(anchorHtml)
     return psdId ? `<a href="/spelers/${psdId}">${text}</a>` : text
   })
-  return {html: next, changed}
+  // A matching anchor is always rewritten, so any difference means a change.
+  return {html: next, changed: next !== html}
 }
 
 // ─── Portable Text: `link` markDefs ─────────────────────────────────────
@@ -179,20 +178,21 @@ export function rewritePlayerLinksInBlock(
     return {block, changed: false}
   }
 
-  let changed = false
+  const slugOfMarkDef = (markDef: PortableTextMarkDef): string | null =>
+    markDef?._type === 'link' && typeof markDef.href === 'string'
+      ? matchPlayerSlug(markDef.href)
+      : null
+  if (!markDefs.some(slugOfMarkDef)) return {block, changed: false}
+
   const keysToUnwrap = new Set<string>()
   const nextMarkDefs: PortableTextMarkDef[] = []
 
   for (const markDef of markDefs) {
-    const slug =
-      markDef?._type === 'link' && typeof markDef.href === 'string'
-        ? matchPlayerSlug(markDef.href)
-        : null
+    const slug = slugOfMarkDef(markDef)
     if (!slug) {
       nextMarkDefs.push(markDef)
       continue
     }
-    changed = true
     const psdId = resolvePlayerPsdId(slug, rows)
     if (psdId) {
       nextMarkDefs.push({...markDef, href: `/spelers/${psdId}`})
@@ -205,8 +205,6 @@ export function rewritePlayerLinksInBlock(
     // leave a dead /player/ href behind — it just can't be un-marked from
     // a span (shouldn't happen; every markDef Sanity writes carries a key).
   }
-
-  if (!changed) return {block, changed: false}
 
   const children = Array.isArray(block.children)
     ? block.children.map((span) => {
@@ -254,7 +252,6 @@ export function migrateRepointLegacyPlayerLinks(
   const body = doc.body
   if (!Array.isArray(body) || body.length === 0) return undefined
 
-  let changed = false
   const nextBody = body.map((item) => {
     if (isHtmlTableBlock(item) && typeof item.html === 'string') {
       const {html, changed: htmlChanged} = rewritePlayerLinksInHtml(
@@ -262,7 +259,6 @@ export function migrateRepointLegacyPlayerLinks(
         rows,
       )
       if (!htmlChanged) return item
-      changed = true
       return {...item, html}
     }
     if (isPortableTextBlock(item)) {
@@ -271,13 +267,13 @@ export function migrateRepointLegacyPlayerLinks(
         rows,
       )
       if (!blockChanged) return item
-      changed = true
       return block
     }
     return item
   })
 
-  if (!changed) return undefined
+  // Unchanged items come back as the same reference.
+  if (nextBody.every((item, i) => item === body[i])) return undefined
   return [at('body', set(nextBody))]
 }
 
@@ -319,16 +315,16 @@ export function assertPlayerRowsNonEmpty(rows: readonly PlayerRow[]): void {
 // inside this cached chain so it fires exactly once per run, and every
 // document() call awaiting the same cached (rejected) promise fails the
 // same way rather than only the first one.
-let cachedPlayerRows: Promise<PlayerRow[]> | undefined
+const playerRowsCache: {promise?: Promise<PlayerRow[]>} = {}
 
 function fetchPlayerRows(client: MigrationFetchClient): Promise<PlayerRow[]> {
-  cachedPlayerRows ??= client
+  playerRowsCache.promise ??= client
     .fetch<PlayerRow[]>(PLAYER_ROWS_QUERY)
     .then((rows) => {
       assertPlayerRowsNonEmpty(rows)
       return rows
     })
-  return cachedPlayerRows
+  return playerRowsCache.promise
 }
 
 export default defineMigration({

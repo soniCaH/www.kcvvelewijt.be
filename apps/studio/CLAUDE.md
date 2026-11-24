@@ -83,6 +83,8 @@ Production: let CI deploy it, never from a laptop. CI deploys exactly what is on
 
 `apps/studio-staging` is the staging counterpart. `sanity.config.ts` and `structure.ts` in both apps must stay in sync. When editing either file here, apply the equivalent change to `apps/studio-staging` in the same PR or a follow-up before merging.
 
+**No `let`** — lint rule `kcvv/no-let` (`eslint.config.mjs`, #3717), tests included. A `let` + `try/catch` becomes a helper that returns; a counter becomes `reduce`/`map`; shared state in a test is a `const` holder object.
+
 ## No Duplication With Root CLAUDE.md
 
 This file covers app-local concerns. For monorepo-wide conventions (TypeScript compiler setup, commit style, PR workflow, Turborepo tasks), see `.claude/CLAUDE.md`.

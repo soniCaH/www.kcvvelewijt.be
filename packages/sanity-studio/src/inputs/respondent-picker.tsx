@@ -84,17 +84,17 @@ export function RespondentPicker(props: StringInputProps): JSX.Element {
       setResolved([])
       return
     }
-    let cancelled = false
+    const state = {cancelled: false}
     client
       .fetch<ResolvedPerson[]>(`*[_id in $ids]{_id, firstName, lastName}`, {ids: refIds})
       .then((result) => {
-        if (!cancelled) setResolved(Array.isArray(result) ? result : [])
+        if (!state.cancelled) setResolved(Array.isArray(result) ? result : [])
       })
       .catch(() => {
-        if (!cancelled) setResolved([])
+        if (!state.cancelled) setResolved([])
       })
     return () => {
-      cancelled = true
+      state.cancelled = true
     }
   }, [client, refIds])
 
