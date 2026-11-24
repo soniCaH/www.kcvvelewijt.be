@@ -44,26 +44,35 @@ Prerequisites:
   The run stops on any other dataset, because GA4 is the production property
   (`--allow-staging` overrides it, for testing).
 - GA4: a gcloud login with the read scope. The property defaults to
-  `530024143`; override with `GA4_PROPERTY_ID`.
+  `530024143`; override with `GA4_PROPERTY_ID`. Google blocks gcloud's built-in
+  OAuth client for this scope ("This app is blocked"), so log in with the
+  club's own Desktop OAuth client of GCP project `kcvv-elewijt`, kept in
+  1Password as the document "Google OAuth — KCVV Elewijt":
 
   ```bash
-  gcloud auth application-default login \
+  op document get "Google OAuth — KCVV Elewijt" --out-file ~/.config/gcloud/kcvv-ga4-client.json
+  gcloud auth application-default login --client-id-file="$HOME/.config/gcloud/kcvv-ga4-client.json" \
     --scopes=https://www.googleapis.com/auth/analytics.readonly,https://www.googleapis.com/auth/cloud-platform
-  gcloud auth application-default set-quota-project kcvv-elewijt
   ```
 
-  The quota project (`GOOGLE_CLOUD_QUOTA_PROJECT` overrides it) is sent with
-  every GA4 request; the run stops without one. The Google Analytics Data API
-  (`analyticsdata.googleapis.com`) must be enabled on that GCP project.
+  The Google account must be a test user on that project's consent screen.
+
+- GA4 quota project: run with `GOOGLE_CLOUD_QUOTA_PROJECT=kcvv-elewijt`. It is
+  sent with every GA4 request and the run stops without it. (`gcloud auth
+application-default set-quota-project` does not work: it needs the Cloud
+  Resource Manager API, which is off.) The Google Analytics Data API
+  (`analyticsdata.googleapis.com`) is enabled on that project.
 
 Run:
 
 ```bash
 # Dry run: prints impressions / clicks per surface for each Sponsor, writes nothing.
-SANITY_DATASET=production pnpm --filter @kcvv/sanity-ops sponsor-report --dry-run
+GOOGLE_CLOUD_QUOTA_PROJECT=kcvv-elewijt SANITY_DATASET=production \
+  pnpm --filter @kcvv/sanity-ops sponsor-report --dry-run
 
 # The season (default: 1 July to 30 June around today) with spotlight weeks.
-SANITY_DATASET=production pnpm --filter @kcvv/sanity-ops sponsor-report \
+GOOGLE_CLOUD_QUOTA_PROJECT=kcvv-elewijt SANITY_DATASET=production \
+  pnpm --filter @kcvv/sanity-ops sponsor-report \
   --from 2026-07-01 --to 2027-06-30 --spotlight weeks.json
 ```
 

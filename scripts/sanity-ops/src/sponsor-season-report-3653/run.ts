@@ -4,8 +4,8 @@
  * Not unit-tested: `--dry-run` is the manual check.
  *
  * Run (README: "Sponsor season report"):
- *   SANITY_DATASET=production pnpm --filter @kcvv/sanity-ops sponsor-report --dry-run
- *   SANITY_DATASET=production pnpm --filter @kcvv/sanity-ops sponsor-report --from 2026-07-01 --to 2027-06-30 --spotlight weeks.json
+ *   GOOGLE_CLOUD_QUOTA_PROJECT=kcvv-elewijt SANITY_DATASET=production pnpm --filter @kcvv/sanity-ops sponsor-report --dry-run
+ *   GOOGLE_CLOUD_QUOTA_PROJECT=kcvv-elewijt SANITY_DATASET=production pnpm --filter @kcvv/sanity-ops sponsor-report --from 2026-07-01 --to 2027-06-30 --spotlight weeks.json
  */
 import { execSync } from "node:child_process";
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -79,7 +79,7 @@ const quotaProject = (): string => {
     process.env.GOOGLE_CLOUD_QUOTA_PROJECT ??
     fromFile() ??
     fail(
-      "No quota project for GA4. Run:\n  gcloud auth application-default set-quota-project kcvv-elewijt\n(or set GOOGLE_CLOUD_QUOTA_PROJECT).",
+      "No quota project for GA4. Set GOOGLE_CLOUD_QUOTA_PROJECT=kcvv-elewijt on the command.",
     )
   );
 };
@@ -93,7 +93,7 @@ const accessToken = () => {
       .trim();
   } catch {
     return fail(
-      "Could not get a gcloud access token. Run:\n  gcloud auth application-default login --scopes=https://www.googleapis.com/auth/analytics.readonly,https://www.googleapis.com/auth/cloud-platform",
+      'Could not get a gcloud access token. Log in with the club OAuth client (README: Sponsor season report):\n  gcloud auth application-default login --client-id-file="$HOME/.config/gcloud/kcvv-ga4-client.json" --scopes=https://www.googleapis.com/auth/analytics.readonly,https://www.googleapis.com/auth/cloud-platform',
     );
   }
 };
