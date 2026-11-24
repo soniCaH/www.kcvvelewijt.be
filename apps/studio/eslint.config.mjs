@@ -21,7 +21,6 @@ export default [
   },
   {
     files: ["**/*.ts?(x)"],
-    plugins: { kcvv: kcvvPlugin },
     rules: {
       "typescript/no-unused-vars": [
         "error",
@@ -31,6 +30,11 @@ export default [
           caughtErrorsIgnorePattern: "^_",
         },
       ],
+    },
+  },
+  {
+    plugins: { kcvv: kcvvPlugin },
+    rules: {
       "kcvv/no-let": [
         "error",
         {
