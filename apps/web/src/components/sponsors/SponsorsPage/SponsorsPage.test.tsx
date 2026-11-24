@@ -34,7 +34,10 @@ const tileItems = () =>
   screen
     .queryAllByRole("listitem")
     .filter(
-      (li) => !li.closest("section[aria-label='Wat krijgt een partner?']"),
+      (li) =>
+        !li.closest(
+          "section[aria-label='Drie pakketten of een pakket op maat']",
+        ),
     );
 
 const sponsors: Sponsor[] = [
@@ -143,7 +146,7 @@ describe("SponsorsPage", () => {
   it("places the package explainer between the tier grid and the CTA band", () => {
     render(<SponsorsPage sponsors={sponsors} />);
     const explainer = screen.getByRole("region", {
-      name: "Wat krijgt een partner?",
+      name: "Drie pakketten of een pakket op maat",
     });
     const band = screen.getByRole("region", { name: "Word sponsor" });
     const wall = screen.getByText("Hoofdsponsors");

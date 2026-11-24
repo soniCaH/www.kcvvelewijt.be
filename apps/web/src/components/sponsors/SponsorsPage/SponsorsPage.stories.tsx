@@ -25,7 +25,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Phase 7 /sponsors. `<SponsorHero>` (kicker + EditorialHeading + lead + `<FeaturedSponsorCard>` marquee) → `<StripedSeam>` → `<SponsorTiers>` (labelled Hoofdsponsors grid over one unlabelled merged wall) → `<PackageExplainer>` (Wat krijgt een partner?) → `<SponsorCtaBand>` (jersey-deep-dark footer invitation). With zero sponsors the body collapses to a `<SponsorEmptyState>` + the band. Replaces the legacy dark header + SectionStack/diagonal composition.",
+          "Phase 7 /sponsors. `<SponsorHero>` (kicker + EditorialHeading + lead + `<FeaturedSponsorCard>` marquee) → `<StripedSeam>` → `<SponsorTiers>` (labelled Hoofdsponsors grid over one unlabelled merged wall) → `<PackageExplainer>` (the package choice) → `<SponsorCtaBand>` (jersey-deep-dark footer invitation). With zero sponsors the body collapses to a `<SponsorEmptyState>` + the band. Replaces the legacy dark header + SectionStack/diagonal composition.",
       },
     },
   },

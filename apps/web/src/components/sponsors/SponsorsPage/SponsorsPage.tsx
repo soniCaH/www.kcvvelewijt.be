@@ -3,7 +3,7 @@
  *
  * Split `<SponsorHero>` (Merci headline + "In de kijker" marquee) → `<StripedSeam>`
  * → `<SponsorTiers>` (labelled Hoofdsponsors grid + one unlabelled merged wall)
- * → `<StripedSeam>` → `<PackageExplainer>` ("Wat krijgt een partner?", #3654)
+ * → `<StripedSeam>` → `<PackageExplainer>` (the package choice, #3654)
  * → `<SponsorCtaBand>` (jersey-deep-dark footer invitation). With zero sponsors
  * the body collapses to a gracious tier-"surface" `<EmptyState>` (#2427 /
  * #2562) between the headline-only hero and the band — inlined here rather

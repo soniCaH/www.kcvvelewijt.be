@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import { FakeIntersectionObserver } from "@/../tests/helpers/fake-observers.helpers";
 
 vi.mock("@/lib/analytics/track-event", () => ({
@@ -22,21 +22,69 @@ describe("PackageExplainer", () => {
     vi.unstubAllGlobals();
   });
 
-  it("renders the heading", () => {
+  it("frames a choice in its heading and intro", () => {
+    const { container } = render(<PackageExplainer />);
+    const heading = screen.getByRole("heading", { level: 2 });
+    expect(heading).toHaveTextContent("Drie pakketten. Of één op maat.");
+    expect(text(container)).toContain(
+      "Kies een vast pakket, of laat ons samen iets bouwen dat bij je zaak past.",
+    );
+  });
+
+  it("renders the three bundles with their checklists", () => {
     render(<PackageExplainer />);
+    const card = (name: string) =>
+      screen.getByRole("heading", { level: 3, name }).closest("li")!;
+    expect(within(card("Groen")).getAllByRole("listitem").map(text)).toEqual([
+      "TV Tool op de 3 grote schermen",
+      "Uitgaanstraining",
+      "Sponsordoek op het B-veld",
+    ]);
+    expect(within(card("Wit")).getAllByRole("listitem")).toHaveLength(3);
+    expect(text(card("Wit"))).toContain("Sponsordoek op het A-veld");
+    const crossing = within(card("Crossing")).getAllByRole("listitem");
+    expect(crossing.map(text)).toContain("Onderleggers op de festijnen");
+    expect(text(card("Crossing"))).toContain("Meest compleet");
+    expect(crossing.length).toBeGreaterThan(
+      within(card("Groen")).getAllByRole("listitem").length,
+    );
+  });
+
+  it("renders the op maat box", () => {
+    const { container } = render(<PackageExplainer />);
     expect(
-      screen.getByRole("heading", { level: 2, name: /Wat krijgt een partner/ }),
+      screen.getByRole("heading", { name: "Op maat" }),
     ).toBeInTheDocument();
+    expect(text(container)).toContain("Samen gebouwd");
+    expect(text(container)).toContain("een themaavond");
+  });
+
+  it("lists every loose package under its group", () => {
+    render(<PackageExplainer />);
+    const groups: Record<string, string[]> = {
+      "Op het complex": ["TV Tool", "Sponsordoek"],
+      "Op de shirts": [
+        "Uitgaanstraining",
+        "Wedstrijduitrusting jeugd",
+        "Wedstrijduitrusting senior",
+      ],
+      Online: ["Sponsored posts"],
+      Eenmalig: ["Matchbal", "Onderleggers"],
+    };
+    expect(
+      screen.getByRole("heading", { name: "Of kies apart" }),
+    ).toBeVisible();
+    for (const [label, names] of Object.entries(groups)) {
+      const group = screen
+        .getByRole("heading", { level: 4, name: label })
+        .closest("section")!;
+      expect(within(group).getAllByRole("term").map(text)).toEqual(names);
+    }
   });
 
   it("renders no euro amount at all", () => {
     const { container } = render(<PackageExplainer contactName="An Peeters" />);
     expect(text(container)).not.toMatch(/€|\beur\b|\beuro\b|\bbtw\b/i);
-  });
-
-  it("has no matchbal or onderleggers entry", () => {
-    const { container } = render(<PackageExplainer />);
-    expect(text(container)).not.toMatch(/matchbal|onderlegger/i);
   });
 
   it("names no tier", () => {
@@ -45,16 +93,9 @@ describe("PackageExplainer", () => {
     expect(text(container)).not.toMatch(/\btier\b/i);
   });
 
-  it("lists team support and the season overview without a price", () => {
-    render(<PackageExplainer />);
-    const items = screen.getAllByRole("listitem");
-    expect(items).toHaveLength(2);
-    const team = items.find((li) => text(li).includes("Een ploeg steunen"))!;
-    const season = items.find((li) => text(li).includes("Na elk seizoen"))!;
-    expect(text(team)).toContain("Je naam op de pagina van die ploeg.");
-    expect(text(season)).toContain("Een overzicht van wat je logo bereikte.");
-    expect(text(team)).not.toContain("€");
-    expect(text(season)).not.toContain("€");
+  it("drops team support and the season overview", () => {
+    const { container } = render(<PackageExplainer />);
+    expect(text(container)).not.toMatch(/Een ploeg steunen|Na elk seizoen/);
   });
 
   it("shows the contact role and address, no name by default", () => {

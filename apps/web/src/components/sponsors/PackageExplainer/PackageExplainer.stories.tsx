@@ -10,7 +10,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The `/sponsors` "Wat krijgt een partner?" block (#3654): what a partner gets (team support, the season overview) and the contact role with its address. No price. No tier names, no tier-to-placement promise. Fires `sponsor_packages_view` at 40% in view.',
+          'The `/sponsors` package block (#3654): three bundles (Groen, Wit, Crossing) as checklists, a dashed "Op maat" box, the loose packages grouped under "Of kies apart", and the contact role with its address. It reads as a choice. No price, no tier names. Fires `sponsor_packages_view` at 40% in view.',
       },
     },
   },
