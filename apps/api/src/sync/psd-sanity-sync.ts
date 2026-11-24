@@ -17,6 +17,15 @@ import { KvCacheService, KvError } from "../cache/kv-cache";
 import { extractStableImageUrl, needsUpload } from "./image-upload-utils";
 import { reconcileOrphans } from "../reconciliation";
 
+const positionName = (
+  bestPosition: PsdMember["bestPosition"],
+): string | null => {
+  if (bestPosition === null) return null;
+  return typeof bestPosition === "string"
+    ? bestPosition
+    : bestPosition.type.name;
+};
+
 /**
  * Convert a PSD member record into a Sanity-compatible player document and include the PSD image URL when present.
  *
@@ -38,12 +47,7 @@ export function transformMember(
     lastName: psd.lastName,
     birthDate: psd.birthDate ? psd.birthDate.split(" ")[0]! : null, // strip time "HH:MM"
     keeper: psd.keeper,
-    positionPsd:
-      typeof psd.bestPosition === "string"
-        ? psd.bestPosition
-        : psd.bestPosition !== null
-          ? psd.bestPosition.type.name
-          : null,
+    positionPsd: positionName(psd.bestPosition),
     _psdImageUrl: extractStableImageUrl(psd.profilePictureURL, baseUrl),
     // Full URL including ?profileAccessKey — required to actually fetch the image.
     _psdImageFetchUrl: psd.profilePictureURL

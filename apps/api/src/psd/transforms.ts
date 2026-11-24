@@ -485,6 +485,22 @@ export function withoutDetailScores(detail: MatchDetail): MatchDetail {
 
 // ─── PSD Game → Match ─────────────────────────────────────────────────────────
 
+/**
+ * Primary: `homeTeamId` against the queried team (undocumented PSD field, not
+ * always present). Fallback: home club against `ownClubId` when it is known.
+ */
+export const resolveIsHome = (
+  homeTeamId: number | null | undefined,
+  queriedTeamId: number | null | undefined,
+  homeClubId: number,
+  ownClubId: number | null | undefined,
+): boolean | undefined => {
+  if (homeTeamId != null && queriedTeamId != null)
+    return homeTeamId === queriedTeamId;
+  if (ownClubId != null) return homeClubId === ownClubId;
+  return undefined;
+};
+
 export function transformPsdGame(
   game: PsdGame,
   options?: {
@@ -500,14 +516,12 @@ export function transformPsdGame(
     `${datePart} ${timeStr}`,
   );
 
-  // Primary: use homeTeamId (undocumented PSD field, not always present)
-  // Fallback: use club ID comparison when ownClubId is known
-  const isHome =
-    game.homeTeamId != null && game.teamId != null
-      ? game.homeTeamId === game.teamId
-      : options?.ownClubId != null
-        ? game.homeClub.id === options.ownClubId
-        : undefined;
+  const isHome = resolveIsHome(
+    game.homeTeamId,
+    game.teamId,
+    game.homeClub.id,
+    options?.ownClubId,
+  );
 
   const status = mapGameStatus(
     game.status,
@@ -623,6 +637,17 @@ function parseCardType(event: FootbalistoMatchEvent): CardType | undefined {
   }
 }
 
+const cardEventType = (cardType: CardType): MatchEvent["type"] => {
+  switch (cardType) {
+    case "double_yellow":
+      return "second_yellow";
+    case "red":
+      return "red_card";
+    default:
+      return "yellow_card";
+  }
+};
+
 function buildPlayerCardMap(
   events: readonly FootbalistoMatchEvent[],
 ): Map<number, CardType> {
@@ -658,14 +683,8 @@ function transformMatchEvent(
 
   if (minute == null) return null;
 
-  const team: "home" | "away" | null =
-    event.clubId === homeClubId
-      ? "home"
-      : event.clubId === awayClubId
-        ? "away"
-        : null; // clubId unknown — skip event
-
-  if (team === null) return null;
+  if (event.clubId !== homeClubId && event.clubId !== awayClubId) return null; // clubId unknown — skip event
+  const team = event.clubId === homeClubId ? "home" : "away";
 
   const id = event.action.id ?? index;
 
@@ -690,12 +709,7 @@ function transformMatchEvent(
     // Map PSD card subtypes onto the normalised MatchEventType set. A 2nd
     // yellow used to collapse into `red_card` here; #1908 (Phase 6.B) split
     // it out so UI surfaces can ship a distinct stacked-card glyph.
-    const type: MatchEvent["type"] =
-      cardType === "double_yellow"
-        ? "second_yellow"
-        : cardType === "red"
-          ? "red_card"
-          : "yellow_card";
+    const type = cardEventType(cardType);
     return {
       id,
       type,

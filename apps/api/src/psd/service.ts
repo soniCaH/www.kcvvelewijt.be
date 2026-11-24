@@ -34,6 +34,7 @@ import {
   derivePsdTeamLabel,
   deriveOwnClubId,
   transformPsdGame,
+  resolveIsHome,
   hidesScores,
   withoutDetailScores,
   buildCompetitionLabelMap,
@@ -586,12 +587,12 @@ export const PsdServiceLive = Layer.effect(
             // un-normalised `undefined` here silently fell through to the
             // `ownClubId` branch while the list paths never would have.
             const queriedTeamId = game.teamId ?? team.id;
-            const isHome =
-              game.homeTeamId != null
-                ? game.homeTeamId === queriedTeamId
-                : ownClubId != null
-                  ? game.homeClub.id === ownClubId
-                  : undefined;
+            const isHome = resolveIsHome(
+              game.homeTeamId,
+              queriedTeamId,
+              game.homeClub.id,
+              ownClubId,
+            );
             index[key] = {
               teamId: team.id,
               competitionType: resolveCompetitionType(game.competitionType),

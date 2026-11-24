@@ -20,6 +20,7 @@ export default tseslint.config(
           caughtErrorsIgnorePattern: "^_",
         },
       ],
+      "no-nested-ternary": "error",
       "kcvv/no-let": [
         "error",
         {
