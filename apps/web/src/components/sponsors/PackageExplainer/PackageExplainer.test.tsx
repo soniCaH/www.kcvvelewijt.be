@@ -196,8 +196,8 @@ describe("PackageExplainer", () => {
     expect(observer.options?.threshold).toBe(0.4);
     expect(trackEvent).not.toHaveBeenCalled();
     act(() => {
-      observer.trigger([{ isIntersecting: true }]);
-      observer.trigger([{ isIntersecting: true }]);
+      observer.trigger([{ isIntersecting: true, intersectionRatio: 1 }]);
+      observer.trigger([{ isIntersecting: true, intersectionRatio: 1 }]);
     });
     expect(trackEvent).toHaveBeenCalledTimes(1);
     expect(trackEvent).toHaveBeenCalledWith("sponsor_packages_view", undefined);

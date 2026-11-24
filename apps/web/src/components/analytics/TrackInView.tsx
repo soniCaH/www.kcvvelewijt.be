@@ -61,7 +61,13 @@ export function TrackInView({
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting && !firedRef.current) {
+          // `isIntersecting` is true at any ratio above 0, so also gate on
+          // the ratio or a "40 % in view" event fires at one visible pixel.
+          if (
+            entry.isIntersecting &&
+            entry.intersectionRatio >= safeThreshold &&
+            !firedRef.current
+          ) {
             firedRef.current = true;
             trackEvent(eventName, paramsRef.current);
             observer.disconnect();

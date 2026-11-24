@@ -48,7 +48,9 @@ describe("<TrackInView>", () => {
       </TrackInView>,
     );
     act(() => {
-      FakeIntersectionObserver.latest()!.trigger([{ isIntersecting: true }]);
+      FakeIntersectionObserver.latest()!.trigger([
+        { isIntersecting: true, intersectionRatio: 1 },
+      ]);
     });
     expect(trackEvent).toHaveBeenCalledTimes(1);
     expect(trackEvent).toHaveBeenCalledWith("x_in_view", { slug: "foo" });
@@ -62,9 +64,52 @@ describe("<TrackInView>", () => {
     );
     act(() => {
       const observer = FakeIntersectionObserver.latest()!;
-      observer.trigger([{ isIntersecting: true }]);
-      observer.trigger([{ isIntersecting: true }]);
-      observer.trigger([{ isIntersecting: true }]);
+      observer.trigger([{ isIntersecting: true, intersectionRatio: 1 }]);
+      observer.trigger([{ isIntersecting: true, intersectionRatio: 1 }]);
+      observer.trigger([{ isIntersecting: true, intersectionRatio: 1 }]);
+    });
+    expect(trackEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not fire when intersecting below the threshold", () => {
+    render(
+      <TrackInView eventName="x_in_view" threshold={0.4}>
+        <span>child</span>
+      </TrackInView>,
+    );
+    act(() => {
+      FakeIntersectionObserver.latest()!.trigger([
+        { isIntersecting: true, intersectionRatio: 0.01 },
+      ]);
+    });
+    expect(trackEvent).not.toHaveBeenCalled();
+  });
+
+  it("fires exactly once at the threshold after an earlier below-threshold entry", () => {
+    render(
+      <TrackInView eventName="x_in_view" threshold={0.4}>
+        <span>child</span>
+      </TrackInView>,
+    );
+    act(() => {
+      const observer = FakeIntersectionObserver.latest()!;
+      observer.trigger([{ isIntersecting: true, intersectionRatio: 0.2 }]);
+      observer.trigger([{ isIntersecting: true, intersectionRatio: 0.4 }]);
+      observer.trigger([{ isIntersecting: true, intersectionRatio: 0.9 }]);
+    });
+    expect(trackEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it("fires on any intersecting entry when the threshold is 0", () => {
+    render(
+      <TrackInView eventName="x_in_view" threshold={0}>
+        <span>child</span>
+      </TrackInView>,
+    );
+    act(() => {
+      FakeIntersectionObserver.latest()!.trigger([
+        { isIntersecting: true, intersectionRatio: 0 },
+      ]);
     });
     expect(trackEvent).toHaveBeenCalledTimes(1);
   });
@@ -88,7 +133,9 @@ describe("<TrackInView>", () => {
       </TrackInView>,
     );
     act(() => {
-      FakeIntersectionObserver.latest()!.trigger([{ isIntersecting: true }]);
+      FakeIntersectionObserver.latest()!.trigger([
+        { isIntersecting: true, intersectionRatio: 1 },
+      ]);
     });
     expect(
       FakeIntersectionObserver.latest()!.disconnect.mock.calls.length,
