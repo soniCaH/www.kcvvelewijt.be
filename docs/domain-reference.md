@@ -397,6 +397,8 @@ A partner or sponsor of the club.
 
 **Visibility:** Manually toggled via `active` boolean.
 
+**Gesteunde ploegen (`teams`):** optional list of Teams a Sponsor backs; the Sponsor then reads "Gesteund door" on those team pages. Named writer: the sponsor coordinator, by hand in the Studio when a contract names a Team (no sync writes it). Empty = club-wide.
+
 **Sponsor packages** (current, subject to change):
 
 | Code       | Dutch    |
