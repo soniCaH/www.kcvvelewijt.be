@@ -135,6 +135,8 @@ Used verbatim by the Phase 5+ propagation issues (#1503–#1511, #2181). Everyth
 
 **No `let`** — lint rule `kcvv/no-let` (`eslint.config.mjs`, #3717), tests included. A `let` + `try/catch` becomes a helper that returns; a counter becomes `reduce`/`map`; shared state in a test is a `const` holder object.
 
+**No nested ternary** — lint rule `no-nested-ternary` (`eslint.config.mjs`, #3855), tests included. A multi-way choice becomes a small arrow helper whose `switch`/`if` chain returns, or a lookup object when every branch is a plain value; a single ternary inside a branch may stay.
+
 ## No Duplication With Root CLAUDE.md
 
 This file covers package-local concerns. For monorepo-wide conventions (TypeScript compiler setup, commit style, PR workflow, Turborepo tasks), see `.claude/CLAUDE.md`.

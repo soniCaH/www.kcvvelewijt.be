@@ -10,6 +10,7 @@ import {
   deriveOwnClubId,
   isSelfMatch,
   transformPsdGame,
+  resolveIsHome,
   transformFootbalistoMatchDetail,
   transformFootbalistoRankingEntry,
   stripPsdName,
@@ -356,6 +357,22 @@ describe("transformPsdGame — ownClubId fallback for is_home", () => {
     const game = makePsdGame();
     const match = transformPsdGame(game);
     expect(match.is_home).toBeUndefined();
+  });
+});
+
+describe("resolveIsHome", () => {
+  it("compares homeTeamId with the queried team when both are known", () => {
+    expect(resolveIsHome(7, 7, 100, 100)).toBe(true);
+    expect(resolveIsHome(8, 7, 100, 100)).toBe(false);
+  });
+
+  it("falls back to the home club vs ownClubId when queriedTeamId is null", () => {
+    expect(resolveIsHome(7, null, 100, 100)).toBe(true);
+    expect(resolveIsHome(7, null, 200, 100)).toBe(false);
+  });
+
+  it("is undefined when neither team ids nor ownClubId can decide", () => {
+    expect(resolveIsHome(null, null, 100, undefined)).toBeUndefined();
   });
 });
 

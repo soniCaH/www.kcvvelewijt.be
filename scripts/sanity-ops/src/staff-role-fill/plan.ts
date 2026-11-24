@@ -67,11 +67,10 @@ export function classifyEmptyRoles(
       };
       const proposed =
         functionTitle !== null && !isTrainerOrDelegateTitle(functionTitle);
-      const fill = overrides.add?.has(s._key)
-        ? true
-        : overrides.skip?.has(s._key)
-          ? false
-          : proposed;
+      // add wins over skip, which wins over the proposal
+      const fill =
+        overrides.add?.has(s._key) ||
+        (!overrides.skip?.has(s._key) && proposed);
       (fill ? andere : undecided).push(entry);
     }
   }

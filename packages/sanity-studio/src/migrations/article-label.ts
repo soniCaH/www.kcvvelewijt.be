@@ -12,14 +12,15 @@ export function firstBlockText(title: unknown[]): string | undefined {
   return (title as {children?: {text?: string}[]}[])[0]?.children?.map((c) => c.text ?? '').join('')
 }
 
+const titleLabel = (title: unknown): string => {
+  if (typeof title === 'string') return title
+  if (Array.isArray(title)) return firstBlockText(title) ?? '(geen titel)'
+  return '(geen titel)'
+}
+
 export function articleLabel(doc: LabelledArticleDoc): string {
   const {title} = doc
-  const titleText =
-    typeof title === 'string'
-      ? title
-      : Array.isArray(title)
-        ? (firstBlockText(title) ?? '(geen titel)')
-        : '(geen titel)'
+  const titleText = titleLabel(title)
   const slug = doc.slug?.current ?? '(geen slug)'
   return `${slug} — "${titleText}"`
 }
