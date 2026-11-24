@@ -197,15 +197,16 @@ const KEEPER_PSD_IDS_QUERY = defineQuery(
 );
 
 const KEEPER_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
-let keeperCache: { value: ReadonlySet<string>; expiresAt: number } | null =
-  null;
+const keeperCache: {
+  entry: { value: ReadonlySet<string>; expiresAt: number } | null;
+} = { entry: null };
 
 /**
  * Test-only: clear the module-scope keeper cache. Not exported via the
  * repository tag because no production caller needs it.
  */
 export function __resetKeeperCacheForTests() {
-  keeperCache = null;
+  keeperCache.entry = null;
 }
 
 export interface PlayerRepositoryInterface {
@@ -243,15 +244,15 @@ export const PlayerRepositoryLive = Layer.succeed(PlayerRepository, {
   findKeeperPsdIds: () =>
     Effect.gen(function* () {
       const now = Date.now();
-      if (keeperCache && keeperCache.expiresAt > now) {
-        return keeperCache.value;
+      if (keeperCache.entry && keeperCache.entry.expiresAt > now) {
+        return keeperCache.entry.value;
       }
       const rows =
         yield* fetchGroq<readonly (string | null)[]>(KEEPER_PSD_IDS_QUERY);
       const value: ReadonlySet<string> = new Set(
         rows.filter((id): id is string => typeof id === "string" && id !== ""),
       );
-      keeperCache = { value, expiresAt: now + KEEPER_CACHE_TTL_MS };
+      keeperCache.entry = { value, expiresAt: now + KEEPER_CACHE_TTL_MS };
       return value;
     }),
 });

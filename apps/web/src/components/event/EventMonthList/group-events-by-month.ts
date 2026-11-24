@@ -42,19 +42,20 @@ export function groupEventsByMonth<T extends { dateStart: string }>(
 
   for (const { event, dt } of dated) {
     const key = dt.toFormat("yyyy-MM");
-    let group = byKey.get(key);
-    if (!group) {
-      const month = capitalize(dt.toFormat("MMMM"));
-      group = {
-        key,
-        label: spansYears ? `${month} ${dt.year}` : month,
-        month,
-        events: [],
-      };
-      byKey.set(key, group);
-      groups.push(group);
+    const existing = byKey.get(key);
+    if (existing) {
+      existing.events.push(event);
+      continue;
     }
-    group.events.push(event);
+    const month = capitalize(dt.toFormat("MMMM"));
+    const group: EventMonthGroup<T> = {
+      key,
+      label: spansYears ? `${month} ${dt.year}` : month,
+      month,
+      events: [event],
+    };
+    byKey.set(key, group);
+    groups.push(group);
   }
 
   return groups;

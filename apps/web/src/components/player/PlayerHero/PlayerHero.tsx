@@ -122,15 +122,13 @@ function pad2(n: number): string {
 }
 
 function computeAge(birth: Date, now: Date): number {
-  let age = now.getUTCFullYear() - birth.getUTCFullYear();
   const monthDelta = now.getUTCMonth() - birth.getUTCMonth();
-  if (
+  const birthdayPending =
     monthDelta < 0 ||
-    (monthDelta === 0 && now.getUTCDate() < birth.getUTCDate())
-  ) {
-    age -= 1;
-  }
-  return age;
+    (monthDelta === 0 && now.getUTCDate() < birth.getUTCDate());
+  return (
+    now.getUTCFullYear() - birth.getUTCFullYear() - (birthdayPending ? 1 : 0)
+  );
 }
 
 const ISO_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;

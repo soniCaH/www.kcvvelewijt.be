@@ -44,24 +44,27 @@ const encoder = new TextEncoder();
 function foldLine(line: string): string {
   if (encoder.encode(line).length <= 75) return line;
 
-  const physical: string[] = [];
-  let current = "";
-  let currentOctets = 0;
-  for (const ch of line) {
-    const chOctets = encoder.encode(ch).length;
-    // First physical line gets the full 75; continuation lines reserve one
-    // octet for the leading space, so their content budget is 74.
-    const budget = physical.length === 0 ? 75 : 74;
-    if (currentOctets + chOctets > budget) {
-      physical.push(current);
-      current = "";
-      currentOctets = 0;
-    }
-    current += ch;
-    currentOctets += chOctets;
-  }
-  if (current) physical.push(current);
-  return physical.join("\r\n ");
+  const { lines, current } = [...line].reduce<{
+    lines: string[];
+    current: string;
+    octets: number;
+  }>(
+    (acc, ch) => {
+      const chOctets = encoder.encode(ch).length;
+      // First physical line gets the full 75; continuation lines reserve one
+      // octet for the leading space, so their content budget is 74.
+      const budget = acc.lines.length === 0 ? 75 : 74;
+      return acc.octets + chOctets > budget
+        ? { lines: [...acc.lines, acc.current], current: ch, octets: chOctets }
+        : {
+            ...acc,
+            current: acc.current + ch,
+            octets: acc.octets + chOctets,
+          };
+    },
+    { lines: [], current: "", octets: 0 },
+  );
+  return (current ? [...lines, current] : lines).join("\r\n ");
 }
 
 /**

@@ -6,9 +6,8 @@
  * every `trackEvent` call.
  */
 export function hashMemberId(id: string): string {
-  let hash = 5381;
-  for (let i = 0; i < id.length; i++) {
-    hash = ((hash << 5) + hash + id.charCodeAt(i)) | 0;
-  }
+  const hash = Array.from({ length: id.length }, (_, i) =>
+    id.charCodeAt(i),
+  ).reduce((acc, code) => ((acc << 5) + acc + code) | 0, 5381);
   return (hash >>> 0).toString(16);
 }

@@ -64,14 +64,7 @@ const stripMonthDot = (s: string) => s.replace(/\.$/, "");
  * The location is appended with a `·` separator. Returns `null` when there is
  * nothing to show (all-day, no location).
  */
-function buildMeta(
-  start: DateTime,
-  end: DateTime | null,
-  location: string | null | undefined,
-): string | null {
-  const trimmedLocation = location?.trim();
-  let lead: string | null = null;
-
+function buildLead(start: DateTime, end: DateTime | null): string | null {
   // Only a genuine multi-day span (end on a later day) shows a range; a missing,
   // same-day, or mistakenly-reversed end falls back to the single-day start time.
   if (isMultiDayEvent(start, end)) {
@@ -79,13 +72,24 @@ function buildMeta(
     const ed = end.toFormat("d");
     const em = stripMonthDot(end.toFormat("MMM"));
     const sameMonth = start.hasSame(end, "month") && start.hasSame(end, "year");
-    lead = sameMonth
+    return sameMonth
       ? `${sd}–${ed} ${em}`
       : `${sd} ${stripMonthDot(start.toFormat("MMM"))}–${ed} ${em}`;
-  } else if (start.isValid) {
-    const time = start.toFormat("HH:mm");
-    if (time !== "00:00") lead = time;
   }
+  if (start.isValid) {
+    const time = start.toFormat("HH:mm");
+    if (time !== "00:00") return time;
+  }
+  return null;
+}
+
+function buildMeta(
+  start: DateTime,
+  end: DateTime | null,
+  location: string | null | undefined,
+): string | null {
+  const trimmedLocation = location?.trim();
+  const lead = buildLead(start, end);
 
   const parts = [lead, trimmedLocation].filter((part): part is string =>
     Boolean(part),

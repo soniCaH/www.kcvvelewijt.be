@@ -33,11 +33,6 @@ function isBlockquoteStyleBlock(block: PortableTextBlock): boolean {
   );
 }
 
-type OpenSegment =
-  | { kind: "pt"; items: PortableTextBlock[] }
-  | { kind: "transfer-facts"; items: TransferFactValue[] }
-  | { kind: "blockquote-group"; items: PortableTextBlock[] };
-
 type Classified =
   | { kind: "pt"; item: PortableTextBlock }
   | { kind: "transfer-facts"; item: TransferFactValue }
@@ -59,53 +54,45 @@ function classify(block: PortableTextBlock): Classified | null {
 }
 
 /**
- * At most one buffer is ever open at a time, so one `open` slot (rather
- * than one buffer per segment kind) is enough — a segment kind change
- * flushes whatever was open and starts a fresh one of the new kind. Adding
- * a fourth segment kind means adding one `classify` branch, not touching
- * every existing branch to remember to flush the others.
+ * Consecutive blocks of one kind form one segment, so a kind change closes
+ * the current run and starts a fresh one. Adding a fourth segment kind means
+ * adding one `classify` branch, not touching every existing branch.
  */
 export function segmentArticleBody(
   blocks: PortableTextBlock[],
 ): ArticleBodySegment[] {
-  const segments: ArticleBodySegment[] = [];
-  let open: OpenSegment | null = null;
-  let idx = 0;
+  const runs = blocks
+    .map(classify)
+    .filter((item): item is Classified => item !== null)
+    .reduce<Classified[][]>((acc, item) => {
+      const last = acc[acc.length - 1];
+      if (last?.[0]?.kind === item.kind) last.push(item);
+      else acc.push([item]);
+      return acc;
+    }, []);
 
-  const flush = () => {
-    if (!open || open.items.length === 0) return;
-    if (open.kind === "pt") {
-      segments.push({ kind: "pt", key: `pt-${idx++}`, blocks: open.items });
-    } else if (open.kind === "transfer-facts") {
-      segments.push({
+  // Each run holds items of one kind (the reduce above only joins equal
+  // kinds), so the element-type assertions below are safe.
+  return runs.map((run, idx): ArticleBodySegment => {
+    const items = run.map((r) => r.item);
+    if (run[0]!.kind === "pt") {
+      return {
+        kind: "pt",
+        key: `pt-${idx}`,
+        blocks: items as PortableTextBlock[],
+      };
+    }
+    if (run[0]!.kind === "transfer-facts") {
+      return {
         kind: "transfer-facts",
-        key: `tf-${idx++}`,
-        facts: open.items,
-      });
-    } else {
-      segments.push({
-        kind: "blockquote-group",
-        key: `bq-${idx++}`,
-        blocks: open.items,
-      });
+        key: `tf-${idx}`,
+        facts: items as TransferFactValue[],
+      };
     }
-  };
-
-  for (const block of blocks) {
-    const next = classify(block);
-    if (!next) continue;
-    if (open?.kind !== next.kind) {
-      flush();
-      open = { kind: next.kind, items: [] } as OpenSegment;
-    }
-    // Safe: the check above guarantees `open.kind === next.kind` on entry
-    // to this line (either it already matched, or a fresh same-kind buffer
-    // was just opened) — `next.item`'s type therefore always matches
-    // `open.items`'s element type. TS can't correlate that across two
-    // separately-discriminated unions, hence the one assertion.
-    (open.items as (PortableTextBlock | TransferFactValue)[]).push(next.item);
-  }
-  flush();
-
-  return segments;
+    return {
+      kind: "blockquote-group",
+      key: `bq-${idx}`,
+      blocks: items as PortableTextBlock[],
+    };
+  });
 }

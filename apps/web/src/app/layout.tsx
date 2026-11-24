@@ -51,6 +51,23 @@ export const viewport: Viewport = {
   themeColor: BRAND.primaryColor,
 };
 
+const loadTeamNav = async (): Promise<TeamNavVM[]> => {
+  try {
+    return await runPromise(
+      degradeSection(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findAll();
+        }),
+        [],
+        "[RootLayout] failed to load team nav — degrading to empty list",
+      ),
+    );
+  } catch {
+    return [];
+  }
+};
+
 /**
  * Render the application's root HTML layout, including the global header and footer, and conditionally load Adobe Typekit.
  *
@@ -73,21 +90,7 @@ export default async function RootLayout({
   // wraps — an in-effect catch cannot see a failure to provide the effect's
   // own context. Verified empirically: with `KCVV_API_URL` unset, dropping
   // this try/catch 500s every route instead of rendering with an empty nav.
-  let allTeams: TeamNavVM[] = [];
-  try {
-    allTeams = await runPromise(
-      degradeSection(
-        Effect.gen(function* () {
-          const repo = yield* TeamRepository;
-          return yield* repo.findAll();
-        }),
-        [],
-        "[RootLayout] failed to load team nav — degrading to empty list",
-      ),
-    );
-  } catch {
-    allTeams = [];
-  }
+  const allTeams = await loadTeamNav();
 
   // Preview mode ("Voorbeeld", #3619). Next reads the draft-mode cookie only on
   // a request that carries it; the static/ISR build of a route is unchanged.

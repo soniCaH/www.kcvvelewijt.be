@@ -38,7 +38,7 @@ export function CookieConsentBanner() {
   const [closeIconHost, setCloseIconHost] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
-    let isMounted = true;
+    const unmounted = new AbortController();
 
     CookieConsent.run({
       // Retro reskin (#2125): corner-box banner, bottom-left. Skin only — the
@@ -67,7 +67,8 @@ export function CookieConsentBanner() {
       onConsent: syncConsentState,
       onChange: syncConsentState,
       onModalReady: ({ modalName, modal }) => {
-        if (modalName !== "preferencesModal" || !isMounted) return;
+        if (modalName !== "preferencesModal" || unmounted.signal.aborted)
+          return;
         const host = modal.querySelector<HTMLElement>(".pm__close-btn span");
         if (!host) return;
         host.replaceChildren();
@@ -112,7 +113,7 @@ export function CookieConsentBanner() {
       },
     })
       .then(() => {
-        if (isMounted) {
+        if (!unmounted.signal.aborted) {
           cookieConsentState.ready = true;
         }
       })
@@ -121,7 +122,7 @@ export function CookieConsentBanner() {
       });
 
     return () => {
-      isMounted = false;
+      unmounted.abort();
       cookieConsentState.ready = false;
       CookieConsent.reset(false);
     };

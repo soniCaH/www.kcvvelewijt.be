@@ -136,10 +136,9 @@ const SNAP_EPSILON = 0.4;
  * masking ids before they reach analytics, not seeding a PRNG).
  */
 export function djb2Seed(input: string): number {
-  let hash = 5381;
-  for (let i = 0; i < input.length; i++) {
-    hash = (hash * 33) ^ input.charCodeAt(i);
-  }
+  const hash = Array.from({ length: input.length }, (_, i) =>
+    input.charCodeAt(i),
+  ).reduce((acc, code) => (acc * 33) ^ code, 5381);
   return hash >>> 0;
 }
 
@@ -167,14 +166,14 @@ export function playerFigureSeed(player: PlayerFigureIdentity): string {
 
 /** A stable xorshift32 stream — the same seed always yields the same draws in the same order. */
 function createPrngStream(seed: number): () => number {
-  let state = seed || 1;
+  const stream = { state: seed || 1 };
   return () => {
-    state ^= state << 13;
-    state >>>= 0;
-    state ^= state >> 17;
-    state ^= state << 5;
-    state >>>= 0;
-    return state / 4_294_967_296;
+    stream.state ^= stream.state << 13;
+    stream.state >>>= 0;
+    stream.state ^= stream.state >> 17;
+    stream.state ^= stream.state << 5;
+    stream.state >>>= 0;
+    return stream.state / 4_294_967_296;
   };
 }
 
@@ -393,38 +392,51 @@ export function computeFigureBoundingBox(
 export function applyContainmentGuard(
   variant: PlayerFigureVariant,
 ): PlayerFigureVariant {
-  let working = variant;
   const maxWidth = FIGURE_VIEWBOX_WIDTH - 2 * CONTAINMENT_MARGIN;
 
-  for (let pass = 0; pass < MAX_CONTAINMENT_PASSES; pass++) {
+  // One recursion step per pass, capped at MAX_CONTAINMENT_PASSES.
+  const pass = (
+    working: PlayerFigureVariant,
+    n: number,
+  ): PlayerFigureVariant => {
+    if (n >= MAX_CONTAINMENT_PASSES) return working;
     const box = computeFigureBoundingBox(working);
     const width = box.maxX - box.minX;
 
     if (width > maxWidth + 0.5) {
-      working = { ...working, scale: working.scale * (maxWidth / width) };
-      continue;
+      return pass(
+        { ...working, scale: working.scale * (maxWidth / width) },
+        n + 1,
+      );
     }
 
-    let dx = 0;
-    if (box.minX < CONTAINMENT_MARGIN) {
-      dx = CONTAINMENT_MARGIN - box.minX;
-    } else if (box.maxX > FIGURE_VIEWBOX_WIDTH - CONTAINMENT_MARGIN) {
-      dx = FIGURE_VIEWBOX_WIDTH - CONTAINMENT_MARGIN - box.maxX;
-    }
+    const dx = horizontalShift(box);
     const dy =
       box.minY < CONTAINMENT_MARGIN ? CONTAINMENT_MARGIN - box.minY : 0;
 
-    if (Math.abs(dx) < SNAP_EPSILON && dy < SNAP_EPSILON) break;
+    if (Math.abs(dx) < SNAP_EPSILON && dy < SNAP_EPSILON) return working;
 
-    working = {
-      ...working,
-      offsetX: working.offsetX + dx,
-      drop: working.drop + dy,
-    };
-  }
+    return pass(
+      {
+        ...working,
+        offsetX: working.offsetX + dx,
+        drop: working.drop + dy,
+      },
+      n + 1,
+    );
+  };
 
-  return working;
+  return pass(variant, 0);
 }
+
+/** How far to shift right (negative: left) so no shoulder crosses the margin. */
+const horizontalShift = (box: { minX: number; maxX: number }): number => {
+  if (box.minX < CONTAINMENT_MARGIN) return CONTAINMENT_MARGIN - box.minX;
+  if (box.maxX > FIGURE_VIEWBOX_WIDTH - CONTAINMENT_MARGIN) {
+    return FIGURE_VIEWBOX_WIDTH - CONTAINMENT_MARGIN - box.maxX;
+  }
+  return 0;
+};
 
 /**
  * The bottom clamp (#2590's correction): after the guard above settles, if

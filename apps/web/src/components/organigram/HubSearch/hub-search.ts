@@ -48,6 +48,17 @@ export interface HubResponsibilityResult {
 
 export type HubSearchResult = HubMemberResult | HubResponsibilityResult;
 
+/** Sum the points of every check that hit, and name the fields that did. */
+function scoredFields(
+  checks: ReadonlyArray<readonly [number, string, boolean | undefined]>,
+): { score: number; matchedFields: string[] } {
+  const hits = checks.filter(([, , hit]) => hit);
+  return {
+    score: hits.reduce((sum, [points]) => sum + points, 0),
+    matchedFields: hits.map(([, label]) => label),
+  };
+}
+
 /**
  * Rank organigram nodes against a query across name (highest), title, roleCode,
  * email, and department. Returns the top `maxResults` by descending score.
@@ -60,52 +71,30 @@ export function searchMembers(
   if (!query.trim()) return [];
 
   const lowerQuery = query.toLowerCase();
-  const results: HubMemberResult[] = [];
-
-  for (const member of members) {
-    let score = 0;
-    const matchedFields: string[] = [];
-
-    // Name match (highest priority — primary member only)
-    if (member.members[0]?.name?.toLowerCase().includes(lowerQuery)) {
-      score += 50;
-      matchedFields.push("Naam");
-    }
-
-    // Title match
-    if (member.title.toLowerCase().includes(lowerQuery)) {
-      score += 30;
-      matchedFields.push("Functie");
-    }
-
-    // Role code match
-    if (member.roleCode?.toLowerCase().includes(lowerQuery)) {
-      score += 20;
-      matchedFields.push("Positie");
-    }
-
-    // Email match
-    if (member.members[0]?.email?.toLowerCase().includes(lowerQuery)) {
-      score += 15;
-      matchedFields.push("Email");
-    }
-
-    // Department match
-    if (member.department?.toLowerCase().includes(lowerQuery)) {
-      score += 10;
-      matchedFields.push("Afdeling");
-    }
-
-    if (score > 0) {
-      results.push({
+  const results = members.flatMap((member): HubMemberResult[] => {
+    const fields = scoredFields([
+      // Name match (highest priority — primary member only)
+      [50, "Naam", member.members[0]?.name?.toLowerCase().includes(lowerQuery)],
+      [30, "Functie", member.title.toLowerCase().includes(lowerQuery)],
+      [20, "Positie", member.roleCode?.toLowerCase().includes(lowerQuery)],
+      [
+        15,
+        "Email",
+        member.members[0]?.email?.toLowerCase().includes(lowerQuery),
+      ],
+      [10, "Afdeling", member.department?.toLowerCase().includes(lowerQuery)],
+    ]);
+    if (fields.score <= 0) return [];
+    return [
+      {
         type: "member",
         member,
-        score,
-        matchedFields,
+        score: fields.score,
+        matchedFields: fields.matchedFields,
         extraPositions: 0,
-      });
-    }
-  }
+      },
+    ];
+  });
 
   // Consolidate before capping: a person who primarily holds several positions
   // would otherwise return one row per position (e.g. searching a name surfaces
@@ -167,50 +156,41 @@ export function searchResponsibilities(
 
   const lowerQuery = query.toLowerCase();
   const queryWords = lowerQuery.split(/\s+/).filter((w) => w.length > 0);
-  const results: HubResponsibilityResult[] = [];
-
-  for (const path of paths) {
-    let score = 0;
-    const matchedFields: string[] = [];
-
-    // Question match (highest priority)
-    if (path.question.toLowerCase().includes(lowerQuery)) {
-      score += 50;
-      matchedFields.push("Vraag");
-    }
-
-    // Title match — the editor's short name for the path (#3092)
-    if (path.title.toLowerCase().includes(lowerQuery)) {
-      score += 40;
-      matchedFields.push("Titel");
-    }
-
-    // Summary match
-    if (path.summary.toLowerCase().includes(lowerQuery)) {
-      score += 30;
-      matchedFields.push("Samenvatting");
-    }
-
-    // Keyword match
+  const results = paths.flatMap((path): HubResponsibilityResult[] => {
     const matchedKeywords = path.keywords.filter((keyword) =>
       keyword.toLowerCase().includes(lowerQuery),
     );
-    if (matchedKeywords.length > 0) {
-      score += matchedKeywords.length * 20;
-      matchedFields.push("Trefwoorden");
-    }
+    const fields = scoredFields([
+      // Question match (highest priority)
+      [50, "Vraag", path.question.toLowerCase().includes(lowerQuery)],
+      // Title match — the editor's short name for the path (#3092)
+      [40, "Titel", path.title.toLowerCase().includes(lowerQuery)],
+      [30, "Samenvatting", path.summary.toLowerCase().includes(lowerQuery)],
+      [matchedKeywords.length * 20, "Trefwoorden", matchedKeywords.length > 0],
+    ]);
 
     // Word-by-word matching (skip short stop-words)
-    for (const word of queryWords) {
-      if (word.length < 3) continue;
-      if (path.question.toLowerCase().includes(word)) score += 5;
-      if (path.summary.toLowerCase().includes(word)) score += 3;
-    }
+    const wordScore = queryWords
+      .filter((word) => word.length >= 3)
+      .reduce(
+        (sum, word) =>
+          sum +
+          (path.question.toLowerCase().includes(word) ? 5 : 0) +
+          (path.summary.toLowerCase().includes(word) ? 3 : 0),
+        0,
+      );
 
-    if (score > 0) {
-      results.push({ type: "responsibility", path, score, matchedFields });
-    }
-  }
+    const score = fields.score + wordScore;
+    if (score <= 0) return [];
+    return [
+      {
+        type: "responsibility",
+        path,
+        score,
+        matchedFields: fields.matchedFields,
+      },
+    ];
+  });
 
   return results.sort((a, b) => b.score - a.score).slice(0, maxResults);
 }
@@ -332,10 +312,13 @@ export function mergeAnswers(
   const tail = literal.filter((r) => !placed.has(r.path.id));
 
   const lane = [...strong, ...middle, ...tail];
-  for (let i = lane.length - 1; lane.length > maxResults && i >= 0; i--) {
-    if (!literalById.has(lane[i].path.id)) lane.splice(i, 1);
-  }
-  return lane.slice(0, maxResults);
+  // Over the cap, drop plain semantic hits from the tail first.
+  const excess = Math.max(0, lane.length - maxResults);
+  const droppable = lane.flatMap((r, i) =>
+    literalById.has(r.path.id) ? [] : [i],
+  );
+  const dropped = new Set(excess === 0 ? [] : droppable.slice(-excess));
+  return lane.filter((_, i) => !dropped.has(i)).slice(0, maxResults);
 }
 
 /**
@@ -349,19 +332,19 @@ export function mapSemanticResults(
   results: ReadonlyArray<{ id: string; slug: string; score: number }>,
   pathById: Map<string, ResponsibilityPath>,
 ): HubResponsibilityResult[] {
-  const out: HubResponsibilityResult[] = [];
-  for (const result of results) {
+  return results.flatMap((result): HubResponsibilityResult[] => {
     const path = pathById.get(result.slug) ?? pathById.get(result.id);
-    if (path) {
-      out.push({
-        type: "responsibility",
-        path,
-        score: result.score,
-        matchedFields: [],
-      });
-    }
-  }
-  return out;
+    return path
+      ? [
+          {
+            type: "responsibility",
+            path,
+            score: result.score,
+            matchedFields: [],
+          },
+        ]
+      : [];
+  });
 }
 
 /**
@@ -372,18 +355,15 @@ export function interleaveResults(
   memberResults: HubMemberResult[],
   responsibilityResults: HubResponsibilityResult[],
 ): HubSearchResult[] {
-  const combined: HubSearchResult[] = [];
   const maxLength = Math.max(
     memberResults.length,
     responsibilityResults.length,
   );
 
-  for (let i = 0; i < maxLength; i++) {
-    if (i < memberResults.length) combined.push(memberResults[i]);
-    if (i < responsibilityResults.length) {
-      combined.push(responsibilityResults[i]);
-    }
-  }
-
-  return combined;
+  return Array.from({ length: maxLength }, (_, i) => [
+    memberResults[i],
+    responsibilityResults[i],
+  ]).flatMap((pair) =>
+    pair.filter((r): r is HubSearchResult => r !== undefined),
+  );
 }

@@ -44,7 +44,7 @@ function useAutoFit<T extends HTMLElement>(
   useWebfontSwap(() => refitRef.current());
 
   useLayoutEffect(() => {
-    let cancelled = false;
+    const cancelled = new AbortController();
     const fit = () => {
       const el = ref.current;
       const parent = el?.parentElement;
@@ -63,7 +63,7 @@ function useAutoFit<T extends HTMLElement>(
               ),
             )
           : fontSize;
-      if (cancelled) return;
+      if (cancelled.signal.aborted) return;
       // Write the result back imperatively too: `fit()` just probed the DOM AT
       // THE BASE SIZE, and when `next` equals the current state React bails out
       // of the re-render — leaving that probe (= base, overflowing) size on
@@ -73,7 +73,7 @@ function useAutoFit<T extends HTMLElement>(
       setSize(next);
     };
     fit();
-    const refit = () => !cancelled && fit();
+    const refit = () => !cancelled.signal.aborted && fit();
     refitRef.current = refit;
     const fonts = typeof document !== "undefined" ? document.fonts : undefined;
     if (fonts) {
@@ -98,7 +98,7 @@ function useAutoFit<T extends HTMLElement>(
       }
     }
     return () => {
-      cancelled = true;
+      cancelled.abort();
     };
   }, [fontSize, minFontSize, dep]);
 

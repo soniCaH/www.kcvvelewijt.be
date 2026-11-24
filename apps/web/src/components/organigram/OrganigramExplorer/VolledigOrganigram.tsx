@@ -126,10 +126,10 @@ export function VolledigOrganigram({
     const track = rootBranch?.closest<HTMLElement>(".vo-chart");
     if (!rootBranch || !track) return;
 
-    let visitorScrolled = false;
-    let centredAt = Number.NaN;
+    const visitorScrolled = new AbortController();
+    const centred = { at: Number.NaN };
     const centre = () => {
-      if (visitorScrolled) return;
+      if (visitorScrolled.signal.aborted) return;
       const trackBox = track.getBoundingClientRect();
       const rootBox = rootBranch.getBoundingClientRect();
       // `instant`: the site's smooth-scroll default would animate this jump.
@@ -143,14 +143,14 @@ export function VolledigOrganigram({
       });
       // What the browser settled on (it clamps), so our own scroll event is
       // told apart from the visitor's.
-      centredAt = track.scrollLeft;
+      centred.at = track.scrollLeft;
     };
     const stop = () => {
-      visitorScrolled = true;
+      visitorScrolled.abort();
     };
     // The track's arrows scroll it too, without a pointer event on the track.
     const onScroll = () => {
-      if (Math.abs(track.scrollLeft - centredAt) > 2) stop();
+      if (Math.abs(track.scrollLeft - centred.at) > 2) stop();
     };
 
     centre();

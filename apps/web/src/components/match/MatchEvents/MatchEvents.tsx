@@ -184,6 +184,22 @@ function formatMinute(minute: number, additionalTime?: number): string {
  * No background containers — every glyph stands on the paper directly,
  * matching the editorial print register of the surrounding kicker + heading.
  */
+function matchesFilter(
+  e: MatchEvent,
+  filter: NonNullable<MatchEventsProps["filter"]>,
+): boolean {
+  if (filter === "goals") return e.type === "goal";
+  if (filter === "cards") {
+    return (
+      e.type === "yellow_card" ||
+      e.type === "second_yellow" ||
+      e.type === "red_card"
+    );
+  }
+  if (filter === "substitutions") return e.type === "substitution";
+  return true;
+}
+
 function EventGlyph({ type }: { type: MatchEvent["type"] }) {
   switch (type) {
     case "goal":
@@ -250,19 +266,8 @@ export function MatchEvents({
   }
 
   // Filter events
-  let filteredEvents = [...events];
-  if (filter === "goals") {
-    filteredEvents = filteredEvents.filter((e) => e.type === "goal");
-  } else if (filter === "cards") {
-    filteredEvents = filteredEvents.filter(
-      (e) =>
-        e.type === "yellow_card" ||
-        e.type === "second_yellow" ||
-        e.type === "red_card",
-    );
-  } else if (filter === "substitutions") {
-    filteredEvents = filteredEvents.filter((e) => e.type === "substitution");
-  }
+  // (`filter` returns a fresh array, so the in-place sort below is safe.)
+  const filteredEvents = events.filter((e) => matchesFilter(e, filter));
 
   // Sort by minute
   filteredEvents.sort((a, b) => {

@@ -158,6 +158,165 @@ function mapStandardRespondents(
   });
 }
 
+interface RenderedUnit {
+  kind: Unit["kind"];
+  key: string;
+  node: ReactNode;
+}
+
+/** The rapid-fire strip's speaker: the unanimous cluster, or the first respondent's subject. */
+const resolveRapidFireRespondent = (
+  firstKey: string | undefined,
+  subjects: IndexedSubject[] | null,
+): QaGroupRapidFireRespondent | undefined => {
+  const members =
+    firstKey === ALL_RESPONDENTS_KEY ? buildUnanimousAttribution(subjects) : [];
+  if (members.length >= 2) {
+    // Unaniem: the whole rapid-fire run is shared by every subject. The
+    // speaker strip is single-avatar by design, so it carries the joined
+    // names + "Unaniem" role (no cluster).
+    return {
+      firstName: members[0]!.firstName,
+      fullName: joinFirstNames(members.map((m) => m.firstName)),
+      role: UNANIMOUS_ROLE,
+    };
+  }
+  const subject =
+    resolvePairRespondent(firstKey, subjects) ?? subjects?.[0] ?? null;
+  const resolved = resolveSubject(subject);
+  if (!resolved) return undefined;
+  return {
+    firstName: deriveSubjectFirstName(subject, resolved.name),
+    fullName: resolved.name,
+    role: resolved.role || undefined,
+  };
+};
+
+/** One unit → its node, or null when nothing in it resolves. */
+const renderUnit = (
+  unit: Unit,
+  i: number,
+  subjects: IndexedSubject[] | null,
+): RenderedUnit | null => {
+  if (unit.kind === "standard") {
+    const respondents = mapStandardRespondents(unit.pair, subjects);
+    if (respondents.length === 0) return null;
+    return {
+      kind: "standard",
+      key: unit.pair._key ?? `std-${i}`,
+      node: (
+        <QARow question={unit.pair.question ?? ""} respondents={respondents} />
+      ),
+    };
+  }
+
+  if (unit.kind === "key" || unit.kind === "quote") {
+    // Position, not authorship, decides the card's tone (#2515 rule 5).
+    // "key" and "quote" units land as siblings in the same `rendered`
+    // array and render in one flex column alongside the standard QARow
+    // units — no unit here owns its own heading, and none sits beside
+    // running text in an aside. Both are in the flow, so both share the
+    // same (default) placement regardless of which authoring tag
+    // produced them; letting the tag pick "section" for one of them
+    // would be choosing a placement to reproduce a colour, the exact
+    // defect this ticket removes.
+    const key = unit.pair._key ?? `${unit.kind}-${i}`;
+    const source =
+      unit.kind === "key" ? unit.pair.question?.trim() || undefined : undefined;
+    const first = unit.pair.respondents?.[0];
+    const body = flattenAnswerToString(first?.answer);
+    if (body.length === 0) return null;
+    // Unanimous breakout: render the pull-quote with combined attribution
+    // (joined names + "Unaniem") and a monogram cluster so the answer
+    // isn't dropped. Needs 2+ resolvable subjects.
+    const isUnanimous = first?.respondentKey === ALL_RESPONDENTS_KEY;
+    if (isUnanimous) {
+      const members = buildUnanimousAttribution(subjects);
+      if (members.length >= 2) {
+        return {
+          kind: unit.kind,
+          key,
+          node: (
+            <PullQuote
+              key={key}
+              attribution={{
+                name: joinFirstNames(members.map((m) => m.firstName)),
+                role: UNANIMOUS_ROLE,
+                source,
+              }}
+              avatarSlot={
+                <SubjectAvatarCluster members={members} scale="attribution" />
+              }
+            >
+              {body}
+            </PullQuote>
+          ),
+        };
+      }
+    }
+    // Fewer than 2 resolvable subjects (single-subject article, or a
+    // duo with one dangling ref): attribute a `__all__` breakout to the
+    // sole resolvable subject rather than dropping the quote.
+    const subject = isUnanimous
+      ? ((subjects ?? []).find((s) => resolveSubject(s) != null) ?? null)
+      : resolvePairRespondent(first?.respondentKey, subjects);
+    const resolved = resolveSubject(subject);
+    if (!resolved) return null;
+    const firstName = deriveSubjectFirstName(subject, resolved.name);
+    return {
+      kind: unit.kind,
+      key,
+      node: (
+        <PullQuote
+          key={key}
+          attribution={{
+            name: resolved.name,
+            role: resolved.role || undefined,
+            source,
+          }}
+          avatarSlot={
+            <SubjectAvatar
+              firstName={firstName}
+              photoUrl={resolved.photoUrl}
+              scale="attribution"
+            />
+          }
+        >
+          {body}
+        </PullQuote>
+      ),
+    };
+  }
+
+  if (unit.kind === "rapid-fire") {
+    const firstKey = unit.pairs.find((p) => p.respondents?.[0]?.respondentKey)
+      ?.respondents?.[0]?.respondentKey;
+    const key = unit.pairs[0]?._key ?? `rf-${i}`;
+    return {
+      kind: "rapid-fire",
+      key,
+      node: (
+        <QaGroupRapidFire
+          key={key}
+          pairs={unit.pairs}
+          respondent={resolveRapidFireRespondent(firstKey, subjects)}
+        />
+      ),
+    };
+  }
+
+  return assertNever(unit);
+};
+
+const renderUnits = (
+  units: Unit[],
+  subjects: IndexedSubject[] | null,
+): RenderedUnit[] =>
+  units.flatMap((unit, i) => {
+    const rendered = renderUnit(unit, i, subjects);
+    return rendered ? [rendered] : [];
+  });
+
 /**
  * Dispatches each qaPair to its Phase-5 renderer. Separator rules between
  * units:
@@ -170,152 +329,22 @@ export const QaBlock = ({ value, subjects = null }: QaBlockProps) => {
   const pairs = value.pairs ?? [];
   if (pairs.length === 0) return null;
 
-  const units = groupPairs(pairs);
-  const rendered: ReactNode[] = [];
-  let lastRenderedKind: Unit["kind"] | null = null;
-
-  units.forEach((unit, i) => {
-    if (unit.kind === "standard") {
-      const respondents = mapStandardRespondents(unit.pair, subjects);
-      if (respondents.length === 0) return;
-      // Separator rule only between two adjacent rendered standard units —
-      // tracked via `lastRenderedKind` so a skipped standard (no resolvable
-      // respondents) doesn't leave an orphan rule above the next one.
-      const needsRule = lastRenderedKind === "standard";
-      rendered.push(
-        <Fragment key={unit.pair._key ?? `std-${i}`}>
-          {needsRule && (
-            <hr aria-hidden="true" className="border-paper-edge m-0 border-t" />
-          )}
-          <QARow
-            question={unit.pair.question ?? ""}
-            respondents={respondents}
-          />
-        </Fragment>,
-      );
-      lastRenderedKind = "standard";
-      return;
-    }
-
-    if (unit.kind === "key" || unit.kind === "quote") {
-      // Position, not authorship, decides the card's tone (#2515 rule 5).
-      // "key" and "quote" units land as siblings in the same `rendered`
-      // array and render in one flex column alongside the standard QARow
-      // units — no unit here owns its own heading, and none sits beside
-      // running text in an aside. Both are in the flow, so both share the
-      // same (default) placement regardless of which authoring tag
-      // produced them; letting the tag pick "section" for one of them
-      // would be choosing a placement to reproduce a colour, the exact
-      // defect this ticket removes.
-      const first = unit.pair.respondents?.[0];
-      const body = flattenAnswerToString(first?.answer);
-      if (body.length === 0) return;
-      // Unanimous breakout: render the pull-quote with combined attribution
-      // (joined names + "Unaniem") and a monogram cluster so the answer
-      // isn't dropped. Needs 2+ resolvable subjects.
-      const isUnanimous = first?.respondentKey === ALL_RESPONDENTS_KEY;
-      if (isUnanimous) {
-        const members = buildUnanimousAttribution(subjects);
-        if (members.length >= 2) {
-          rendered.push(
-            <PullQuote
-              key={unit.pair._key ?? `${unit.kind}-${i}`}
-              attribution={{
-                name: joinFirstNames(members.map((m) => m.firstName)),
-                role: UNANIMOUS_ROLE,
-                source:
-                  unit.kind === "key"
-                    ? unit.pair.question?.trim() || undefined
-                    : undefined,
-              }}
-              avatarSlot={
-                <SubjectAvatarCluster members={members} scale="attribution" />
-              }
-            >
-              {body}
-            </PullQuote>,
-          );
-          lastRenderedKind = unit.kind;
-          return;
-        }
-      }
-      // Fewer than 2 resolvable subjects (single-subject article, or a
-      // duo with one dangling ref): attribute a `__all__` breakout to the
-      // sole resolvable subject rather than dropping the quote.
-      const subject = isUnanimous
-        ? ((subjects ?? []).find((s) => resolveSubject(s) != null) ?? null)
-        : resolvePairRespondent(first?.respondentKey, subjects);
-      const resolved = resolveSubject(subject);
-      if (!resolved) return;
-      const firstName = deriveSubjectFirstName(subject, resolved.name);
-      rendered.push(
-        <PullQuote
-          key={unit.pair._key ?? `${unit.kind}-${i}`}
-          attribution={{
-            name: resolved.name,
-            role: resolved.role || undefined,
-            source:
-              unit.kind === "key"
-                ? unit.pair.question?.trim() || undefined
-                : undefined,
-          }}
-          avatarSlot={
-            <SubjectAvatar
-              firstName={firstName}
-              photoUrl={resolved.photoUrl}
-              scale="attribution"
-            />
-          }
-        >
-          {body}
-        </PullQuote>,
-      );
-      lastRenderedKind = unit.kind;
-      return;
-    }
-
-    if (unit.kind === "rapid-fire") {
-      const firstKey = unit.pairs.find((p) => p.respondents?.[0]?.respondentKey)
-        ?.respondents?.[0]?.respondentKey;
-      let respondent: QaGroupRapidFireRespondent | undefined;
-      const members =
-        firstKey === ALL_RESPONDENTS_KEY
-          ? buildUnanimousAttribution(subjects)
-          : [];
-      if (members.length >= 2) {
-        // Unaniem: the whole rapid-fire run is shared by every subject. The
-        // speaker strip is single-avatar by design, so it carries the joined
-        // names + "Unaniem" role (no cluster).
-        respondent = {
-          firstName: members[0]!.firstName,
-          fullName: joinFirstNames(members.map((m) => m.firstName)),
-          role: UNANIMOUS_ROLE,
-        };
-      } else {
-        const subject =
-          resolvePairRespondent(firstKey, subjects) ?? subjects?.[0] ?? null;
-        const resolved = resolveSubject(subject);
-        if (resolved) {
-          respondent = {
-            firstName: deriveSubjectFirstName(subject, resolved.name),
-            fullName: resolved.name,
-            role: resolved.role || undefined,
-          };
-        }
-      }
-      rendered.push(
-        <QaGroupRapidFire
-          key={unit.pairs[0]?._key ?? `rf-${i}`}
-          pairs={unit.pairs}
-          respondent={respondent}
-        />,
-      );
-      lastRenderedKind = "rapid-fire";
-      return;
-    }
-
-    assertNever(unit);
-  });
+  const units = renderUnits(groupPairs(pairs), subjects);
+  // Separator rule only between two adjacent rendered standard units —
+  // judged on the units that actually rendered, so a skipped standard (no
+  // resolvable respondents) doesn't leave an orphan rule above the next one.
+  const rendered = units.map(({ kind, key, node }, i) =>
+    kind === "standard" ? (
+      <Fragment key={key}>
+        {units[i - 1]?.kind === "standard" && (
+          <hr aria-hidden="true" className="border-paper-edge m-0 border-t" />
+        )}
+        {node}
+      </Fragment>
+    ) : (
+      node
+    ),
+  );
 
   if (rendered.length === 0) return null;
 

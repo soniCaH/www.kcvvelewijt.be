@@ -149,6 +149,36 @@ function formatTijdCell(
   return formatTimeRange(startTime, endTime) ?? "—";
 }
 
+/** The `dates` param: UTC date-times when a start time is set, else all-day days. */
+function googleCalendarDates({
+  startIso,
+  endIso,
+  start,
+  end,
+  zone,
+}: {
+  startIso: string;
+  endIso: string;
+  start: string | undefined;
+  end: string | undefined;
+  zone: string;
+}): string | null {
+  if (start) {
+    const startDt = DateTime.fromISO(`${startIso}T${start}`, { zone });
+    const endDt = end
+      ? DateTime.fromISO(`${endIso}T${end}`, { zone })
+      : startDt.plus({ hours: 2 });
+    if (!startDt.isValid || !endDt.isValid) return null;
+    return `${startDt.toUTC().toFormat("yyyyMMdd'T'HHmmss'Z'")}/${endDt
+      .toUTC()
+      .toFormat("yyyyMMdd'T'HHmmss'Z'")}`;
+  }
+  const startDay = DateTime.fromISO(startIso, { zone });
+  const endDay = DateTime.fromISO(endIso, { zone }).plus({ days: 1 });
+  if (!startDay.isValid || !endDay.isValid) return null;
+  return `${startDay.toFormat("yyyyMMdd")}/${endDay.toFormat("yyyyMMdd")}`;
+}
+
 /**
  * Google Calendar template link for the "Zet in agenda" CTA. Times are
  * Europe/Brussels → UTC; an event without a start time becomes an
@@ -177,23 +207,14 @@ function buildGoogleCalendarUrl(
   // block when only a start time is set (mirrors the match-feed ical
   // convention).
   const start = range.kind === "sessions" ? undefined : startTime?.trim();
-  let dates: string;
-  if (start) {
-    const startDt = DateTime.fromISO(`${startIso}T${start}`, { zone });
-    const end = endTime?.trim();
-    const endDt = end
-      ? DateTime.fromISO(`${endIso}T${end}`, { zone })
-      : startDt.plus({ hours: 2 });
-    if (!startDt.isValid || !endDt.isValid) return null;
-    dates = `${startDt.toUTC().toFormat("yyyyMMdd'T'HHmmss'Z'")}/${endDt
-      .toUTC()
-      .toFormat("yyyyMMdd'T'HHmmss'Z'")}`;
-  } else {
-    const startDay = DateTime.fromISO(startIso, { zone });
-    const endDay = DateTime.fromISO(endIso, { zone }).plus({ days: 1 });
-    if (!startDay.isValid || !endDay.isValid) return null;
-    dates = `${startDay.toFormat("yyyyMMdd")}/${endDay.toFormat("yyyyMMdd")}`;
-  }
+  const dates = googleCalendarDates({
+    startIso,
+    endIso,
+    start,
+    end: endTime?.trim(),
+    zone,
+  });
+  if (dates === null) return null;
 
   const params = new URLSearchParams({
     action: "TEMPLATE",
