@@ -24,8 +24,9 @@ interface SponsorClickInput {
  * `sponsor_view` (page view), `sponsor_click` (any tier/wall tile),
  * `sponsor_featured_click` (the "In de kijker" marquee), `sponsor_impression`
  * (a tile seen for 1 s), `sponsor_team_line_click` (a name on a team page's
- * "Gesteund door" line) and `sponsor_cta_click` (the "Word sponsor +" band
- * button).
+ * "Gesteund door" line), `sponsor_cta_click` (the "Word sponsor +" band
+ * button) and `sponsor_packages_view` (the package explainer's heading, intro
+ * and bundle cards 40% in view, fired by `<TrackInView>`, not here).
  *
  * No PII: the internal Sanity sponsor id is hashed via `hashMemberId`, never
  * sent raw; sponsor `url`s are never sent.

@@ -28,6 +28,18 @@ vi.mock("next/link", () => ({
   ),
 }));
 
+// The package explainer carries list items of its own; a sponsor tile is any
+// list item outside it.
+const tileItems = () =>
+  screen
+    .queryAllByRole("listitem")
+    .filter(
+      (li) =>
+        !li.closest(
+          "section[aria-label='Drie pakketten of een pakket op maat']",
+        ),
+    );
+
 const sponsors: Sponsor[] = [
   {
     id: "1",
@@ -74,7 +86,7 @@ describe("SponsorsPage", () => {
 
   it("renders one tile per sponsor across the hoofd grid and wall", () => {
     render(<SponsorsPage sponsors={sponsors} />);
-    expect(screen.getAllByRole("listitem")).toHaveLength(sponsors.length);
+    expect(tileItems()).toHaveLength(sponsors.length);
   });
 
   it("labels the Hoofdsponsors group and renders the striped seam", () => {
@@ -131,10 +143,27 @@ describe("SponsorsPage", () => {
     ).toBeInTheDocument();
   });
 
+  it("places the package explainer between the tier grid and the CTA band", () => {
+    render(<SponsorsPage sponsors={sponsors} />);
+    const explainer = screen.getByRole("region", {
+      name: "Drie pakketten of een pakket op maat",
+    });
+    const band = screen.getByRole("region", { name: "Word sponsor" });
+    const wall = screen.getByText("Hoofdsponsors");
+    expect(
+      wall.compareDocumentPosition(explainer) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(
+      explainer.compareDocumentPosition(band) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
   it("collapses to the empty state + CTA band when there are no sponsors", () => {
     render(<SponsorsPage sponsors={[]} />);
     expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
-    expect(screen.queryAllByRole("listitem")).toHaveLength(0);
+    expect(tileItems()).toHaveLength(0);
     expect(screen.queryByText("Hoofdsponsors")).not.toBeInTheDocument();
     // The reskinned empty state + the CTA band both render.
     expect(
