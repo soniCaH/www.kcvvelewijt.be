@@ -637,15 +637,10 @@ function parseCardType(event: FootbalistoMatchEvent): CardType | undefined {
   }
 }
 
-const cardEventType = (cardType: CardType): MatchEvent["type"] => {
-  switch (cardType) {
-    case "double_yellow":
-      return "second_yellow";
-    case "red":
-      return "red_card";
-    default:
-      return "yellow_card";
-  }
+const cardEventType: Record<CardType, MatchEvent["type"]> = {
+  yellow: "yellow_card",
+  red: "red_card",
+  double_yellow: "second_yellow",
 };
 
 function buildPlayerCardMap(
@@ -709,7 +704,7 @@ function transformMatchEvent(
     // Map PSD card subtypes onto the normalised MatchEventType set. A 2nd
     // yellow used to collapse into `red_card` here; #1908 (Phase 6.B) split
     // it out so UI surfaces can ship a distinct stacked-card glyph.
-    const type = cardEventType(cardType);
+    const type = cardEventType[cardType];
     return {
       id,
       type,
