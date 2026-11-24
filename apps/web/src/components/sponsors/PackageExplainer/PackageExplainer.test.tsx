@@ -193,11 +193,25 @@ describe("PackageExplainer", () => {
   it("fires sponsor_packages_view at 40% in view, once", () => {
     render(<PackageExplainer />);
     const observer = FakeIntersectionObserver.latest()!;
-    expect(observer.options?.threshold).toBe(0.4);
+    expect(observer.options?.threshold).toContain(0.4);
     expect(trackEvent).not.toHaveBeenCalled();
     act(() => {
-      observer.trigger([{ isIntersecting: true, intersectionRatio: 1 }]);
-      observer.trigger([{ isIntersecting: true, intersectionRatio: 1 }]);
+      observer.trigger([
+        {
+          isIntersecting: true,
+          intersectionRatio: 1,
+          intersectionRect: { height: 100 } as DOMRectReadOnly,
+          rootBounds: { height: 667 } as DOMRectReadOnly,
+        },
+      ]);
+      observer.trigger([
+        {
+          isIntersecting: true,
+          intersectionRatio: 1,
+          intersectionRect: { height: 100 } as DOMRectReadOnly,
+          rootBounds: { height: 667 } as DOMRectReadOnly,
+        },
+      ]);
     });
     expect(trackEvent).toHaveBeenCalledTimes(1);
     expect(trackEvent).toHaveBeenCalledWith("sponsor_packages_view", undefined);

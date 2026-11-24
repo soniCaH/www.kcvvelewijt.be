@@ -2,8 +2,10 @@
 
 /**
  * <TrackInView> — fires a single `trackEvent(eventName, params)` call the
- * first time the wrapped subtree intersects the viewport at or above the
- * given `threshold`. After firing, the observer disconnects and the
+ * first time the wrapped subtree is in view at or above the given
+ * `threshold`: the threshold of the block, or the threshold of the viewport
+ * for a block taller than the viewport (which can never reach its own
+ * threshold ratio). After firing, the observer disconnects and the
  * component renders only its children — zero further DOM overhead.
  *
  * Server-rendered consumers (page templates) wrap conditionally — i.e.
@@ -31,6 +33,20 @@ export interface TrackInViewProps {
   threshold?: number;
   children: ReactNode;
 }
+
+/**
+ * Steps of 0.05 up to `threshold`, plus `threshold` itself. The observer only
+ * calls back when the ratio crosses one of these values; a block taller than
+ * the viewport never reaches `threshold`, so it needs the lower steps to keep
+ * getting callbacks while it scrolls.
+ */
+const thresholdSteps = (threshold: number): number[] => {
+  const steps = Array.from(
+    { length: Math.floor(threshold / 0.05) + 1 },
+    (_, i) => Math.round(i * 0.05 * 100) / 100,
+  ).filter((step) => step < threshold);
+  return [...steps, threshold];
+};
 
 export function TrackInView({
   eventName,
@@ -61,11 +77,15 @@ export function TrackInView({
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          // `isIntersecting` is true at any ratio above 0, so also gate on
-          // the ratio or a "40 % in view" event fires at one visible pixel.
+          // `isIntersecting` is true at any ratio above 0, so gate on how much
+          // is visible: the threshold of the block, or the threshold of the
+          // viewport for a block taller than the viewport.
+          const viewportHeight = entry.rootBounds?.height ?? window.innerHeight;
           if (
             entry.isIntersecting &&
-            entry.intersectionRatio >= safeThreshold &&
+            (entry.intersectionRatio >= safeThreshold ||
+              entry.intersectionRect.height >=
+                safeThreshold * viewportHeight) &&
             !firedRef.current
           ) {
             firedRef.current = true;
@@ -75,7 +95,7 @@ export function TrackInView({
           }
         }
       },
-      { threshold: safeThreshold },
+      { threshold: thresholdSteps(safeThreshold) },
     );
     observer.observe(el);
     return () => observer.disconnect();
