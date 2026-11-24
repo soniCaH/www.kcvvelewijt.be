@@ -41,7 +41,7 @@ export interface TrackInViewProps {
  * never reaches `threshold`, so it needs the lower steps to keep getting
  * callbacks while it scrolls.
  */
-// shortcut: steps of 0.01, so a block taller than 100 viewports never fires and a tall block fires up to 1 % of its height late; switch to an exact per-element ratio if such a block appears.
+// shortcut: 0.01 steps — a block taller than ~100 × (1 − threshold) viewports (60 at 0.4; never at threshold 1) never fires, and a tall block fires up to 1 % of its height late; switch to an exact per-element ratio if a caller needs that.
 const thresholdSteps = (threshold: number): number[] =>
   Array.from({ length: Math.ceil(threshold * 100) }, (_, i) => i / 100)
     .filter((step) => step < threshold)

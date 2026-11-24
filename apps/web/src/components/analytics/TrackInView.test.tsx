@@ -202,6 +202,23 @@ describe("<TrackInView>", () => {
     expect(trackEvent).toHaveBeenCalledTimes(1);
   });
 
+  it("never fires a block taller than the viewport at threshold 1 (0.01-step limit)", () => {
+    render(
+      <TrackInView eventName="x_in_view" threshold={1}>
+        <span>child</span>
+      </TrackInView>,
+    );
+    const observer = FakeIntersectionObserver.latest()!;
+    const list = observer.options!.threshold as number[];
+    expect(list.filter((t) => t < 1).at(-1)).toBe(0.99);
+    // 1000 px block, 667 px viewport: the ratio tops out at 0.667, between
+    // the 0.66 and 0.67 steps, so no callback carries the full viewport.
+    act(() => {
+      observer.trigger([entry(0.66, 660)]);
+    });
+    expect(trackEvent).not.toHaveBeenCalled();
+  });
+
   it("observes [0] for threshold 0", () => {
     render(
       <TrackInView eventName="x_in_view" threshold={0}>
