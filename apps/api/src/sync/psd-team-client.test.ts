@@ -16,15 +16,14 @@ global.fetch = vi.fn();
  * same totals and would pass a count assertion.
  */
 function expectEveryFetchPaced(trace: string[]) {
-  let tokens = 0;
-  let fetches = 0;
-  for (const [i, event] of trace.entries()) {
-    if (event === "token") tokens += 1;
-    else fetches += 1;
+  for (const [i] of trace.entries()) {
+    const prefix = trace.slice(0, i + 1);
+    const tokens = prefix.filter((event) => event === "token").length;
+    const fetches = prefix.length - tokens;
     // Reported as a trace slice so a failure shows where pacing was lost.
-    expect(
-      fetches <= tokens ? "paced" : `unpaced at [${trace.slice(0, i + 1)}]`,
-    ).toBe("paced");
+    expect(fetches <= tokens ? "paced" : `unpaced at [${prefix}]`).toBe(
+      "paced",
+    );
   }
 }
 

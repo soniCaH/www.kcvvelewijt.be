@@ -137,10 +137,10 @@ describe("getRankingHandler", () => {
   ])(
     "caches %s, so the next read of a team with no table never reaches PSD",
     async (_label, getRanking) => {
-      let psdCalls = 0;
+      const psdCalls = vi.fn();
       const service = makeServiceMock({
         getRanking: () => {
-          psdCalls++;
+          psdCalls();
           return getRanking();
         },
       });
@@ -159,7 +159,7 @@ describe("getRankingHandler", () => {
         }),
       );
 
-      expect(psdCalls).toBe(1);
+      expect(psdCalls).toHaveBeenCalledTimes(1);
       // The wire contract does not move: both reads still answer 404.
       for (const result of [first, second]) {
         expect(result._tag).toBe("Left");
@@ -177,11 +177,13 @@ describe("getRankingHandler", () => {
   it("keeps a cached table when a background refresh answers empty", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     const store = new Map<string, string>();
-    let answer: readonly RankingTable[] = rankingTables;
+    const served: { answer: readonly RankingTable[] } = {
+      answer: rankingTables,
+    };
     const layers = Layer.mergeAll(
       Layer.succeed(
         PsdService,
-        makeServiceMock({ getRanking: () => Effect.succeed(answer) }),
+        makeServiceMock({ getRanking: () => Effect.succeed(served.answer) }),
       ),
       Layer.succeed(KvCacheService, makeMemoryCache(store)),
       PsdGateTest,
@@ -213,7 +215,7 @@ describe("getRankingHandler", () => {
       );
 
     expect((await read())._tag).toBe("Right");
-    answer = [];
+    served.answer = [];
     vi.setSystemTime(Date.now() + 25 * 60 * 60 * 1000); // past TTL.RANKING
     const stale = await read();
     // The refresh really ran (the first stale read also forks its stale-since write).
@@ -236,7 +238,9 @@ describe("getRankingHandler", () => {
   it("never writes the no-table note while a table is cached", async () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     const store = new Map<string, string>();
-    let answer: readonly RankingTable[] = rankingTables;
+    const served: { answer: readonly RankingTable[] } = {
+      answer: rankingTables,
+    };
     const read = () =>
       Effect.runPromise(
         Effect.either(
@@ -244,7 +248,9 @@ describe("getRankingHandler", () => {
             Effect.provide(
               Layer.succeed(
                 PsdService,
-                makeServiceMock({ getRanking: () => Effect.succeed(answer) }),
+                makeServiceMock({
+                  getRanking: () => Effect.succeed(served.answer),
+                }),
               ),
             ),
             Effect.provide(
@@ -257,7 +263,7 @@ describe("getRankingHandler", () => {
       );
 
     expect((await read())._tag).toBe("Right");
-    answer = [];
+    served.answer = [];
     vi.setSystemTime(Date.now() + 25 * 60 * 60 * 1000); // past TTL.RANKING
     await read(); // inline refresh answers empty
 
@@ -292,14 +298,14 @@ describe("getRankingHandler", () => {
       );
 
     it("still answers 404 when PSD is down", async () => {
-      let psdCalls = 0;
+      const psdCalls = vi.fn();
       const result = await readWith(expiredNote(), () => {
-        psdCalls++;
+        psdCalls();
         return Effect.fail(
           new UpstreamUnavailableError({ message: "HTTP 429", status: 429 }),
         );
       });
-      expect(psdCalls).toBe(1); // it did try PSD first
+      expect(psdCalls).toHaveBeenCalledTimes(1); // it did try PSD first
       expect(result._tag).toBe("Left");
       if (result._tag === "Left") {
         expect(result.left._tag).toBe("ResourceNotFound");

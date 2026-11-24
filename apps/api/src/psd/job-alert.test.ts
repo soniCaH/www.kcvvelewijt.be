@@ -160,7 +160,7 @@ describe("reportScheduledJobOutcome", () => {
     vi.stubGlobal("fetch", fetchMock);
     const { cache } = makeCacheDouble();
 
-    for (let i = 0; i < 7; i++) {
+    for (const _i of Array.from({ length: 7 }, (_, k) => k)) {
       await run(
         "psd-sanity-sync",
         { ok: false, error: new Error("PSD 429") },
@@ -226,7 +226,7 @@ describe("reportScheduledJobOutcome", () => {
     vi.stubGlobal("fetch", fetchMock);
     const { cache, store } = makeCacheDouble();
 
-    for (let i = 0; i < 3; i++) {
+    for (const _i of Array.from({ length: 3 }, (_, k) => k)) {
       await run(
         "psd-sanity-sync",
         { ok: false, error: new Error("PSD 429") },

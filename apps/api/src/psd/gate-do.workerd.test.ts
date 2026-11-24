@@ -15,7 +15,7 @@
  * `durable_objects` migration.
  */
 import { abortAllDurableObjects, env } from "cloudflare:test";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { Effect, Schema as S } from "effect";
 import { KvCacheLive, TypedKvCache } from "../cache/kv-cache";
 import { PsdGateLive, PsdGateService } from "./gate";
@@ -51,19 +51,17 @@ describe("PsdGate Durable Object — real single-flight coordination (workerd)",
     const token = await gate.beginFlight("key");
     expect(token).not.toBeNull();
 
-    let resolved = false;
-    const waiter = gate.awaitFlight("key").then(() => {
-      resolved = true;
-    });
+    const resolved = vi.fn();
+    const waiter = gate.awaitFlight("key").then(resolved);
 
     // Give the waiter a moment to actually start waiting — it must NOT have
     // resolved yet, since the leader hasn't ended the flight.
     await new Promise((r) => setTimeout(r, 20));
-    expect(resolved).toBe(false);
+    expect(resolved).not.toHaveBeenCalled();
 
     await gate.endFlight("key", token!);
     await waiter;
-    expect(resolved).toBe(true);
+    expect(resolved).toHaveBeenCalledTimes(1);
   });
 
   it("acquireToken resolves — the RPC + constructor path works end-to-end", async () => {
@@ -124,9 +122,9 @@ describe("TypedKvCache single-flight — real KV + real Durable Object together 
       PSD_GATE: env.PSD_GATE,
     });
 
-    let fanOuts = 0;
+    const fanOut = vi.fn();
     const fetchEffect = Effect.gen(function* () {
-      fanOuts++;
+      fanOut();
       // Give every concurrent caller a chance to pass the miss check before
       // the leader finishes and writes KV — same reasoning as the node
       // suite's mock-backed equivalent.
@@ -149,6 +147,6 @@ describe("TypedKvCache single-flight — real KV + real Durable Object together 
     const results = await Promise.all(Array.from({ length: 10 }, run));
 
     for (const r of results) expect(r).toEqual({ name: "fetched", value: 1 });
-    expect(fanOuts).toBe(1);
+    expect(fanOut).toHaveBeenCalledTimes(1);
   });
 });
