@@ -50,6 +50,42 @@ describe("PackageExplainer", () => {
     );
   });
 
+  it("observes only the heading, intro and bundle cards, not the long tail", () => {
+    // The whole block is taller than a phone screen, so a 40% threshold on it
+    // could never be reached there: the tracked wrapper stays short.
+    const { container } = render(<PackageExplainer />);
+    const tracked = container.querySelector<HTMLElement>(
+      '[data-track-event="sponsor_packages_view"]',
+    )!;
+    expect(
+      within(tracked).getByRole("heading", { level: 2 }),
+    ).toBeInTheDocument();
+    for (const name of ["Groen", "Wit", "Crossing"]) {
+      expect(
+        within(tracked).getByRole("heading", { level: 3, name }),
+      ).toBeInTheDocument();
+    }
+    expect(
+      within(tracked).queryByRole("heading", { name: "Of kies apart" }),
+    ).not.toBeInTheDocument();
+    expect(
+      within(tracked).queryByText("Verantwoordelijke Sponsoring"),
+    ).not.toBeInTheDocument();
+    expect(
+      within(tracked).queryByRole("link", {
+        name: "sponsoring@kcvvelewijt.be",
+      }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("gives every checklist an explicit list role", () => {
+    render(<PackageExplainer />);
+    const card = screen
+      .getByRole("heading", { level: 3, name: "Groen" })
+      .closest("li")!;
+    expect(within(card).getByRole("list")).toBeInTheDocument();
+  });
+
   it("renders the op maat box", () => {
     const { container } = render(<PackageExplainer />);
     expect(
@@ -57,6 +93,8 @@ describe("PackageExplainer", () => {
     ).toBeInTheDocument();
     expect(text(container)).toContain("Samen gebouwd");
     expect(text(container)).toContain("een themaavond");
+    // The closing line already invites; the box does not say it twice.
+    expect(text(container).match(/Laten we praten/g)).toHaveLength(1);
   });
 
   it("lists every loose package under its group", () => {

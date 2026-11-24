@@ -5,8 +5,9 @@
  * → `<SponsorTiers>` (labelled Hoofdsponsors grid + one unlabelled merged wall)
  * → `<StripedSeam>` → `<PackageExplainer>` (the package choice, #3654)
  * → `<SponsorCtaBand>` (jersey-deep-dark footer invitation). With zero sponsors
- * the body collapses to a gracious tier-"surface" `<EmptyState>` (#2427 /
- * #2562) between the headline-only hero and the band — inlined here rather
+ * the wall collapses to a gracious tier-"surface" `<EmptyState>` (#2427 /
+ * #2562) between the headline-only hero and the explainer and band (they
+ * render there too) — inlined here rather
  * than its own file: post-migration it was a 10-line pass-through with a
  * `className` prop nobody passed, and its one caller is this page. The
  * "Word sponsor" action lives in the band below, so this passes no `undo`.

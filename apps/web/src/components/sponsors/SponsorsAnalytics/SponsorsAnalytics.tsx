@@ -16,7 +16,7 @@ export interface SponsorsAnalyticsProps {
  * Markers (set by the components): `data-sponsor-cta` on the band button →
  * `sponsor_cta_click`; `data-sponsor-contact` on the package explainer's
  * mailto link → `sponsor_contact_click`. (`sponsor_packages_view` is the
- * explainer's own `<TrackInView>`.) The tile and marquee clicks belong to
+ * explainer's own `<TrackInView>` around its top part.) The tile and marquee clicks belong to
  * `<SponsorWallTracker>` (#3649), not to this wrapper. A native listener on
  * the container (not a JSX `onClick` on a non-interactive div) catches the
  * bubbled click from mouse and keyboard activation alike.
