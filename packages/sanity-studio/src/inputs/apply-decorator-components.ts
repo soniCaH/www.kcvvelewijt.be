@@ -30,20 +30,17 @@ function patchFields(
   components: DecoratorComponentMap,
 ): readonly unknown[] | undefined {
   if (!Array.isArray(fields)) return fields
-  let changed = false
   const next = fields.map((field) => {
     const of = (field as {of?: unknown}).of
     const patchedOf = patchOf(of, components)
     if (patchedOf === of) return field
-    changed = true
     return {...(field as object), of: patchedOf}
   })
-  return changed ? next : fields
+  return next.some((f, i) => f !== fields[i]) ? next : fields
 }
 
 function patchOf(of: unknown, components: DecoratorComponentMap): unknown {
   if (!Array.isArray(of)) return of
-  let changed = false
   const next = of.map((member) => {
     if (
       !member ||
@@ -53,11 +50,9 @@ function patchOf(of: unknown, components: DecoratorComponentMap): unknown {
       return member
     }
     const patched = patchBlock(member as Record<string, unknown>, components)
-    if (patched === member) return member
-    changed = true
     return patched
   })
-  return changed ? next : of
+  return next.some((m, i) => m !== of[i]) ? next : of
 }
 
 function patchBlock(
@@ -67,15 +62,13 @@ function patchBlock(
   const marks = block.marks as {decorators?: unknown} | undefined
   const decorators = marks?.decorators
   if (!Array.isArray(decorators)) return block
-  let changed = false
   const nextDecorators = decorators.map((decorator) => {
     if (!decorator || typeof decorator !== 'object') return decorator
     const d = decorator as {value?: string; component?: unknown}
     const Component = d.value ? components[d.value] : undefined
     if (!Component || d.component) return decorator
-    changed = true
     return {...d, component: Component}
   })
-  if (!changed) return block
+  if (nextDecorators.every((d, i) => d === decorators[i])) return block
   return {...block, marks: {...marks, decorators: nextDecorators}}
 }

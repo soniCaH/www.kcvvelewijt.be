@@ -56,7 +56,8 @@ export function collectOrganigramExcludedIds(selfId: string, rows: ParentRow[]):
   }
   const excluded = new Set<string>([self])
   const queue = [self]
-  for (let id = queue.shift(); id !== undefined; id = queue.shift()) {
+  // for-of over a growing array visits pushed items, so this is a BFS without shift().
+  for (const id of queue) {
     for (const child of childrenOf.get(id) ?? []) {
       if (!excluded.has(child)) {
         excluded.add(child)
@@ -100,15 +101,12 @@ export async function validateOrganigramParent(
   const parents = new Map(rows.map((row) => [normalizeOrganigramId(row._id), row.parent && normalizeOrganigramId(row.parent)]))
   const self = normalizeOrganigramId(selfId)
 
-  const seen = new Set<string>()
-  let current: string | undefined = normalizeOrganigramId(ref._ref)
-  while (current) {
-    if (current === self) {
-      return 'Dit zou een kringverwijzing maken: een positie kan niet (indirect) aan zichzelf rapporteren.'
-    }
-    if (seen.has(current)) return true
-    seen.add(current)
-    current = parents.get(current) || undefined
+  const reachesSelf = (current: string | undefined, seen: ReadonlySet<string>): boolean => {
+    if (!current || seen.has(current)) return false
+    if (current === self) return true
+    return reachesSelf(parents.get(current) || undefined, new Set(seen).add(current))
   }
-  return true
+  return reachesSelf(normalizeOrganigramId(ref._ref), new Set())
+    ? 'Dit zou een kringverwijzing maken: een positie kan niet (indirect) aan zichzelf rapporteren.'
+    : true
 }

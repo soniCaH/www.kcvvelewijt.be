@@ -1,5 +1,5 @@
 import {at, unset} from 'sanity/migrate'
-import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
+import {afterEach, describe, expect, it, vi} from 'vitest'
 import {
   migrateDropResponsibilityTeamRoleFallback,
   type ResponsibilityWithTeamRoleFallbackDoc,
@@ -86,17 +86,14 @@ describe('migrateDropResponsibilityTeamRoleFallback', () => {
   })
 
   describe('a step contact carrying the field with no _key', () => {
-    let warnSpy: ReturnType<typeof vi.spyOn>
-
-    beforeEach(() => {
-      warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    })
+    const silenceWarn = () => vi.spyOn(console, 'warn').mockImplementation(() => {})
 
     afterEach(() => {
-      warnSpy.mockRestore()
+      vi.restoreAllMocks()
     })
 
     it('skips the patch — no stable path can be built without a _key', () => {
+      silenceWarn()
       const doc: ResponsibilityWithTeamRoleFallbackDoc = {
         _id: 'r-1',
         _type: 'responsibility',
@@ -106,6 +103,7 @@ describe('migrateDropResponsibilityTeamRoleFallback', () => {
     })
 
     it('warns loudly instead of silently leaving the orphan field in place', () => {
+      const warnSpy = silenceWarn()
       const doc: ResponsibilityWithTeamRoleFallbackDoc = {
         _id: 'r-1',
         _type: 'responsibility',

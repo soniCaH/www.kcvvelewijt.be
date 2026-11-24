@@ -67,21 +67,12 @@ export const CANONICAL_TAGS: Readonly<Record<string, string>> = {
  * Returns `null` when nothing changes, so callers can skip the patch entirely.
  */
 export function canonicaliseTags(tags: readonly string[]): string[] | null {
-  const out: string[] = []
-  const seen = new Set<string>()
-  let changed = false
-
-  for (const tag of tags) {
-    const canonical = CANONICAL_TAGS[tag.toLowerCase()] ?? tag
-    if (canonical !== tag) changed = true
-    // A doc carrying both `A-Ploeg` and `A-ploeg` collapses to a single entry.
-    if (seen.has(canonical)) {
-      changed = true
-      continue
-    }
-    seen.add(canonical)
-    out.push(canonical)
-  }
+  const canonical = tags.map((tag) => CANONICAL_TAGS[tag.toLowerCase()] ?? tag)
+  // A doc carrying both `A-Ploeg` and `A-ploeg` collapses to a single entry
+  // (a Set keeps first-seen order).
+  const out = [...new Set(canonical)]
+  const changed =
+    out.length !== canonical.length || canonical.some((c, i) => c !== tags[i])
 
   return changed ? out : null
 }

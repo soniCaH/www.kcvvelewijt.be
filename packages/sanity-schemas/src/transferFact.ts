@@ -128,18 +128,14 @@ export const transferFact = defineType({
     },
     prepare({playerName, direction, otherClubName, until}) {
       const who = playerName ?? 'Transfer fact'
-      let tail = '—'
-      switch (direction) {
-        case 'extension':
-          tail = `verlengd${until ? ` tot ${until}` : ''}`
-          break
-        case 'outgoing':
-          tail = `→ ${otherClubName ?? 'onbekend'}`
-          break
-        case 'incoming':
-          tail = `← ${otherClubName ?? 'onbekend'}`
-          break
-      }
+      const tail =
+        direction === 'extension'
+          ? `verlengd${until ? ` tot ${until}` : ''}`
+          : direction === 'outgoing'
+            ? `→ ${otherClubName ?? 'onbekend'}`
+            : direction === 'incoming'
+              ? `← ${otherClubName ?? 'onbekend'}`
+              : '—'
       return {
         title: who,
         subtitle: `${direction ?? 'no direction'} · ${tail}`,

@@ -84,17 +84,17 @@ export function RespondentPicker(props: StringInputProps): JSX.Element {
       setResolved([])
       return
     }
-    let cancelled = false
+    const controller = new AbortController()
     client
       .fetch<ResolvedPerson[]>(`*[_id in $ids]{_id, firstName, lastName}`, {ids: refIds})
       .then((result) => {
-        if (!cancelled) setResolved(Array.isArray(result) ? result : [])
+        if (!controller.signal.aborted) setResolved(Array.isArray(result) ? result : [])
       })
       .catch(() => {
-        if (!cancelled) setResolved([])
+        if (!controller.signal.aborted) setResolved([])
       })
     return () => {
-      cancelled = true
+      controller.abort()
     }
   }, [client, refIds])
 

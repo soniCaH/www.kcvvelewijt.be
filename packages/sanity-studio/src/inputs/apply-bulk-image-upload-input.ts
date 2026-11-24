@@ -27,10 +27,10 @@ export function applyBulkImageUploadInput(
     if (schemaType.name !== typeName) return schemaType
     const fields = (schemaType as unknown as {fields?: readonly Record<string, unknown>[]}).fields
     if (!Array.isArray(fields)) return schemaType
-    let changed = false
+    const isTarget = (field: unknown) => (field as {name?: string}).name === fieldName
+    if (!fields.some(isTarget)) return schemaType
     const nextFields = fields.map((field) => {
-      if ((field as {name?: string}).name !== fieldName) return field
-      changed = true
+      if (!isTarget(field)) return field
       const existingComponents =
         ((field as {components?: Record<string, unknown>}).components) ?? {}
       return {
@@ -41,7 +41,6 @@ export function applyBulkImageUploadInput(
         },
       }
     })
-    if (!changed) return schemaType
     return {...schemaType, fields: nextFields} as SchemaTypeDefinition
   })
 }
