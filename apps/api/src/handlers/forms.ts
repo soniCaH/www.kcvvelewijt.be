@@ -32,25 +32,27 @@ const resolveRouting = (role: MembershipRole) =>
     const projection = yield* SanityProjection;
 
     const cached = yield* cache.get(ROUTING_CACHE_KEY);
-    let config: FormRoutingConfig | null = cached
+    const fromCache: FormRoutingConfig | null = cached
       ? yield* Effect.try({
           try: () => JSON.parse(cached) as FormRoutingConfig,
           catch: () => new Error("parse"),
         }).pipe(Effect.orElseSucceed(() => null))
       : null;
 
-    if (!config) {
-      config = yield* projection
+    const fetchAndCache = Effect.gen(function* () {
+      const fetched = yield* projection
         .getFormRoutingConfig()
         .pipe(Effect.orElseSucceed(() => null));
-      if (config) {
+      if (fetched) {
         yield* cache.set(
           ROUTING_CACHE_KEY,
-          JSON.stringify(config),
+          JSON.stringify(fetched),
           ROUTING_CACHE_TTL,
         );
       }
-    }
+      return fetched;
+    });
+    const config = fromCache ?? (yield* fetchAndCache);
 
     // A blank or malformed Studio value would send the admin mail nowhere.
     const configured = config?.[role]?.trim();
