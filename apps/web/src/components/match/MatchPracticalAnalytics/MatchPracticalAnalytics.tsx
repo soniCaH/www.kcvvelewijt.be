@@ -1,12 +1,15 @@
 "use client";
 
 import { useRef, type ReactNode } from "react";
+import type { MatchStatus } from "@kcvv/api-contract";
 import { useDelegatedClick } from "@/hooks/useDelegatedClick";
 import { trackEvent } from "@/lib/analytics/track-event";
 
 export interface MatchPracticalAnalyticsProps {
   matchId: number;
-  status: string;
+  status: MatchStatus;
+  /** Applied to the delegating element, so the page owns the spacing. */
+  className?: string;
   children: ReactNode;
 }
 
@@ -22,11 +25,12 @@ export interface MatchPracticalAnalyticsProps {
  * The page only mounts this wrapper when the link renders (a Match with a
  * venue), so an away Match carries no listener.
  */
-export function MatchPracticalAnalytics({
+export const MatchPracticalAnalytics = ({
   matchId,
   status,
+  className,
   children,
-}: MatchPracticalAnalyticsProps) {
+}: MatchPracticalAnalyticsProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useDelegatedClick(ref, {
@@ -42,5 +46,9 @@ export function MatchPracticalAnalytics({
     },
   });
 
-  return <div ref={ref}>{children}</div>;
-}
+  return (
+    <div ref={ref} className={className}>
+      {children}
+    </div>
+  );
+};

@@ -24,6 +24,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { fixtureImage } from "@test-fixtures/images";
 import type { RankingEntry } from "@kcvv/api-contract";
 import { MatchHero } from "@/components/match/MatchHero";
+import { MatchPracticalAnalytics } from "@/components/match/MatchPracticalAnalytics";
 import { MatchLineupSection } from "@/components/match/MatchLineupSection";
 import type { LineupPlayer } from "@/components/match/MatchLineup/MatchLineup";
 import { MatchEventsSection } from "@/components/match/MatchEventsSection";
@@ -31,7 +32,11 @@ import type { MatchEvent } from "@/components/match/MatchEvents/MatchEvents";
 import { MatchStandingsSection } from "@/components/match/MatchStandingsSection";
 import { RelatedRow } from "@/components/related/RelatedRow";
 import type { RelatedRowItem } from "@/components/related/types";
-import { StripedSeam } from "@/components/design-system";
+import {
+  EditorialLink,
+  PageContainer,
+  StripedSeam,
+} from "@/components/design-system";
 import { planMatchBody } from "./utils";
 
 const KCVV_LOGO = fixtureImage("sponsor-logo", 0);
@@ -233,24 +238,40 @@ const spacing = Object.fromEntries(
 function MatchDetailAssembly() {
   return (
     <>
-      <MatchHero
-        match={{
-          kind: "match",
-          homeTeam: {
-            id: KCVV_CLUB_ID,
-            name: HOME_NAME,
-            logo: KCVV_LOGO,
-            score: 3,
-          },
-          awayTeam: { id: 103, name: AWAY_NAME, logo: OPPONENT_LOGO, score: 1 },
-          date: finishedDate,
-          time: "14:30",
-          venue: "Sportpark Elewijt",
-          status: "finished",
-          competition: "3e provinciale A",
-          kcvvTeamLabel: "KCVV-A",
-        }}
-      />
+      <PageContainer className="pb-12 lg:pb-16">
+        <MatchHero
+          match={{
+            kind: "match",
+            homeTeam: {
+              id: KCVV_CLUB_ID,
+              name: HOME_NAME,
+              logo: KCVV_LOGO,
+              score: 3,
+            },
+            awayTeam: {
+              id: 103,
+              name: AWAY_NAME,
+              logo: OPPONENT_LOGO,
+              score: 1,
+            },
+            date: finishedDate,
+            time: "14:30",
+            venue: "Sportpark Elewijt",
+            status: "finished",
+            competition: "3e provinciale A",
+            kcvvTeamLabel: "KCVV-A",
+          }}
+        />
+        <MatchPracticalAnalytics
+          matchId={12345}
+          status="finished"
+          className="mt-6"
+        >
+          <EditorialLink href="/club/contact" data-match-practical>
+            Parking · inkom · kantine
+          </EditorialLink>
+        </MatchPracticalAnalytics>
+      </PageContainer>
 
       <StripedSeam colorPair="ink-cream" height="md" />
 

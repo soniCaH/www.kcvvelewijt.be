@@ -631,17 +631,14 @@ export default async function MatchPage({ params }: MatchPageProps) {
       <PageContainer className="pb-12 lg:pb-16">
         <UpLink href="/kalender" label="Kalender" className="mb-6" />
         <MatchHero match={heroRow} />
-        {/* One onward link to the club's practical information (#3634). The
-            BFF stamps a venue only on a real home Match (not an away Match,
-            a Pitch-Reservation Placeholder or an unconfirmed tournament
-            Match), so its presence is the only home signal read here. */}
+        {/* A venue means a real home Match (#3634): the BFF decides, not the web app. */}
         {match.venue && (
-          <MatchPracticalAnalytics matchId={numericId} status={match.status}>
-            <EditorialLink
-              href="/club/contact"
-              data-match-practical
-              className="mt-6"
-            >
+          <MatchPracticalAnalytics
+            matchId={numericId}
+            status={match.status}
+            className="mt-6"
+          >
+            <EditorialLink href="/club/contact" data-match-practical>
               Parking · inkom · kantine
             </EditorialLink>
           </MatchPracticalAnalytics>

@@ -179,9 +179,10 @@ first. Skip every parameter the taxonomy marks `registered: false`.
 | Target type        | `target_type`        | `related_content_click`, `related_content_shown`                                      |
 | Target ID          | `target_id`          | `related_content_click`                                                               |
 | Source entity type | `source_entity_type` | `related_content_shown`, `related_content_click`                                      |
-| Match ID           | `match_id`           | `homepage_match_widget_clicked`                                                       |
+| Match ID           | `match_id`           | `homepage_match_widget_clicked`, `match_practical_click`, `match_detail_view`         |
 | Match status       | `match_status`       | `homepage_match_widget_clicked`                                                       |
-| Destination        | `destination`        | `homepage_match_widget_clicked`                                                       |
+| Destination        | `destination`        | `homepage_match_widget_clicked`, `match_practical_click`                              |
+| Match status       | `status`             | `match_practical_click`, `match_detail_view`                                          |
 | Event type         | `event_type`         | `event_filter`, `event_view`                                                          |
 | Event slug         | `event_slug`         | `event_view`, `event_detail_cta_click`                                                |
 | CTA                | `cta`                | `event_detail_cta_click` ("reserveer" / "agenda")                                     |
