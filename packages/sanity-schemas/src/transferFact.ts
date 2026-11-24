@@ -22,6 +22,23 @@ import {defineField, defineType} from 'sanity'
  *   - Every subsequent transferFact renders as a compact overview row,
  *     typically beneath an editor-authored `Ander transfernieuws` heading.
  */
+const transferTail = (
+  direction: string | undefined,
+  until: string | undefined,
+  otherClubName: string | undefined,
+): string => {
+  switch (direction) {
+    case 'extension':
+      return `verlengd${until ? ` tot ${until}` : ''}`
+    case 'outgoing':
+      return `→ ${otherClubName ?? 'onbekend'}`
+    case 'incoming':
+      return `← ${otherClubName ?? 'onbekend'}`
+    default:
+      return '—'
+  }
+}
+
 export const transferFact = defineType({
   name: 'transferFact',
   title: 'Transfer fact',
@@ -128,14 +145,7 @@ export const transferFact = defineType({
     },
     prepare({playerName, direction, otherClubName, until}) {
       const who = playerName ?? 'Transfer fact'
-      const tail =
-        direction === 'extension'
-          ? `verlengd${until ? ` tot ${until}` : ''}`
-          : direction === 'outgoing'
-            ? `→ ${otherClubName ?? 'onbekend'}`
-            : direction === 'incoming'
-              ? `← ${otherClubName ?? 'onbekend'}`
-              : '—'
+      const tail = transferTail(direction, until, otherClubName)
       return {
         title: who,
         subtitle: `${direction ?? 'no direction'} · ${tail}`,

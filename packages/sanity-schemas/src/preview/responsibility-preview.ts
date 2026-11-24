@@ -21,17 +21,27 @@ interface ResponsibilityPreviewSelection {
   contactType?: string
 }
 
+const contactLabel = (
+  contactType: string | undefined,
+  contactNodeTitle: string | undefined,
+  contactRole: string | undefined,
+): string | undefined => {
+  switch (contactType) {
+    case 'position':
+      return contactNodeTitle
+    case 'team-role':
+      return 'Teamrol'
+    case 'manual':
+      return contactRole
+    default:
+      return undefined
+  }
+}
+
 export function prepareResponsibilityPreview(selection: ResponsibilityPreviewSelection) {
   const {title, active, category, contactNodeTitle, contactRole, contactType} = selection
 
-  const contact =
-    (contactType === 'position'
-      ? contactNodeTitle
-      : contactType === 'team-role'
-        ? 'Teamrol'
-        : contactType === 'manual'
-          ? contactRole
-          : undefined) || '(geen contact)'
+  const contact = contactLabel(contactType, contactNodeTitle, contactRole) || '(geen contact)'
 
   const parts = [category, contact, active === false ? 'inactief' : undefined].filter(Boolean)
 
