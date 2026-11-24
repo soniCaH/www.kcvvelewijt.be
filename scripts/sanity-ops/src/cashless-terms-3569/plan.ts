@@ -58,16 +58,16 @@ function decode(text: string): string {
  * Drupal's trailing spacer and is dropped.
  */
 export function htmlToBlocks(html: string): Block[] {
-  const blocks: Block[] = [];
   const blockRe = /<(h2|p)>([\s\S]*?)<\/\1>/g;
   const leftover = html.replace(blockRe, "").trim();
   if (leftover) throw new Error(`Unparsed HTML outside h2/p: ${leftover}`);
 
-  let n = 0;
-  for (const [, tag, inner] of html.matchAll(blockRe)) {
-    if (inner!.replace(/&nbsp;|\s/g, "") === "") continue;
+  const sections = [...html.matchAll(blockRe)].filter(
+    ([, , inner]) => inner!.replace(/&nbsp;|\s/g, "") !== "",
+  );
+  return sections.map(([, tag, inner], index) => {
     const block: Block = {
-      _key: `t${++n}`,
+      _key: `t${index + 1}`,
       _type: "block",
       style: tag === "h2" ? "h2" : "normal",
       markDefs: [],
@@ -82,21 +82,22 @@ export function htmlToBlocks(html: string): Block[] {
         text,
       });
     };
-    let at = 0;
-    for (const m of inner!.matchAll(/<a href="([^"]*)">([^<]*)<\/a>/g)) {
-      push(decode(inner!.slice(at, m.index)));
-      const key = `${block._key}l${block.markDefs.length + 1}`;
-      block.markDefs.push({ _key: key, _type: "link", href: decode(m[1]!) });
-      push(decode(m[2]!), [key]);
-      at = m.index + m[0].length;
-    }
-    push(decode(inner!.slice(at)));
+    // split() with two capture groups yields [text, href, label, text, href, label, …].
+    inner!.split(/<a href="([^"]*)">([^<]*)<\/a>/).forEach((piece, i) => {
+      if (i % 3 === 1) {
+        const key = `${block._key}l${block.markDefs.length + 1}`;
+        block.markDefs.push({ _key: key, _type: "link", href: decode(piece) });
+      } else if (i % 3 === 2) {
+        push(decode(piece), [block.markDefs[block.markDefs.length - 1]!._key]);
+      } else {
+        push(decode(piece));
+      }
+    });
     if (/<[^>]+>/.test(block.children.map((c) => c.text).join(""))) {
       throw new Error(`Unhandled tag in ${block._key}: ${inner}`);
     }
-    blocks.push(block);
-  }
-  return blocks;
+    return block;
+  });
 }
 
 export interface TermsPage {
