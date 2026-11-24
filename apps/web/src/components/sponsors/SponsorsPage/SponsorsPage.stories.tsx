@@ -2,11 +2,11 @@
  * SponsorsPage Stories — Phase 7.
  *
  * Split `<SponsorHero>` → `<StripedSeam>` → `<SponsorTiers>` (Hoofdsponsors grid
- * + unlabelled wall) → `<PackageExplainer>` → `<SponsorCtaBand>`; 0 sponsors collapses to a
- * `<SponsorEmptyState>` + band. Page-level composition for the /sponsors route —
- * not `vr`-tagged (page coverage is the Playwright e2e suite's job); the hero,
- * marquee card, hoofd tile, tile, tiers, package explainer, empty state and CTA band each carry
- * their own VR coverage.
+ * + unlabelled wall) → `<PackageExplainer>` → `<SponsorCtaBand>`; 0 sponsors
+ * collapses to a `<SponsorEmptyState>` + band. Page-level composition for the
+ * /sponsors route — not `vr`-tagged (page coverage is the Playwright e2e
+ * suite's job); the hero, marquee card, hoofd tile, tile, tiers, package
+ * explainer, empty state and CTA band each carry their own VR coverage.
  */
 
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";

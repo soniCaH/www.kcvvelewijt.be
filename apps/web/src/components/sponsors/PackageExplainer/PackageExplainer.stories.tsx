@@ -36,7 +36,6 @@ export const WithContactName: Story = {
 
 /** Narrow viewport — the cards stack, nothing overflows at 375 px. */
 export const MobileViewport: Story = {
-  args: { contactName: "An Peeters" },
   globals: { viewport: { value: "kcvvMobile" } },
   parameters: {
     vr: { viewports: ["mobile"] },

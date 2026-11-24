@@ -68,6 +68,13 @@ describe("PackageExplainer", () => {
     expect(screen.queryByText("An Peeters")).not.toBeInTheDocument();
   });
 
+  it("marks the address link for the contact click", () => {
+    render(<PackageExplainer />);
+    expect(
+      screen.getByRole("link", { name: "sponsoring@kcvvelewijt.be" }),
+    ).toHaveAttribute("data-sponsor-contact");
+  });
+
   it("shows the contact person's name when one is passed", () => {
     render(<PackageExplainer contactName="An Peeters" />);
     expect(screen.getByText("An Peeters")).toBeInTheDocument();

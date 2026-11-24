@@ -3,7 +3,7 @@ import { MonoLabel } from "@/components/design-system/MonoLabel";
 import { SectionHeader } from "@/components/design-system/SectionHeader";
 import { TapedCard } from "@/components/design-system/TapedCard";
 import { TapedCardGrid } from "@/components/design-system/TapedCardGrid";
-import { TrackInView } from "@/components/analytics/TrackInView";
+import { TrackInView } from "@/components/analytics";
 
 /** The sponsoring address, shown beside the contact role (#2594). */
 const SPONSORING_EMAIL = "sponsoring@kcvvelewijt.be";
@@ -36,9 +36,12 @@ export interface PackageExplainerProps {
 /**
  * <PackageExplainer> — "Wat krijgt een partner?" on `/sponsors` (#3654): what a
  * partner gets and a contact role. No price, no tier names and no
- * tier-to-placement promise: the brochure names no tiers (#2594). Fires `sponsor_packages_view` once it is 40% in view.
+ * tier-to-placement promise: the brochure names no tiers (#2594). Fires
+ * `sponsor_packages_view` once it is 40% in view; a click on the address is
+ * `sponsor_contact_click`, counted by `<SponsorsAnalytics>` through the
+ * `data-sponsor-contact` marker.
  */
-export function PackageExplainer({ contactName }: PackageExplainerProps) {
+export const PackageExplainer = ({ contactName }: PackageExplainerProps) => {
   return (
     <TrackInView eventName="sponsor_packages_view" threshold={0.4}>
       <PageContainer
@@ -69,7 +72,7 @@ export function PackageExplainer({ contactName }: PackageExplainerProps) {
         </TapedCardGrid>
 
         <div className="mt-10 flex flex-col gap-2 sm:mt-12">
-          <p className="font-display text-ink text-display-sm italic">
+          <p className="font-display text-ink text-xl italic">
             Benieuwd wat er voor jouw zaak kan? Laten we praten.
           </p>
           <MonoLabel>Verantwoordelijke Sponsoring</MonoLabel>
@@ -77,7 +80,11 @@ export function PackageExplainer({ contactName }: PackageExplainerProps) {
             <p className="text-ink text-lg font-bold">{contactName}</p>
           )}
           <p>
-            <a href={`mailto:${SPONSORING_EMAIL}`} className="prose-link">
+            <a
+              href={`mailto:${SPONSORING_EMAIL}`}
+              className="prose-link"
+              data-sponsor-contact="true"
+            >
               {SPONSORING_EMAIL}
             </a>
           </p>
@@ -85,4 +92,4 @@ export function PackageExplainer({ contactName }: PackageExplainerProps) {
       </PageContainer>
     </TrackInView>
   );
-}
+};
