@@ -1,10 +1,15 @@
 // Run with `pnpm test:doc-paths` (node:test, no dependencies).
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { test } from "node:test";
 import {
   extractCandidates,
   findMissing,
   isChecked,
+  listTracked,
   toCandidate,
   trackedPaths,
 } from "./check-doc-paths.mjs";
@@ -106,4 +111,29 @@ test("isChecked covers CLAUDE.md and docs, minus the archive list", () => {
   assert.equal(isChecked("docs/prd/archive/2026/a.md"), false);
   assert.equal(isChecked("docs/research/a.md"), false);
   assert.equal(isChecked("README.md"), false);
+});
+
+test("a root-anchored path resolves only at the repo root", () => {
+  const nested = trackedPaths(["apps/web/docs/guide.md", "docs/real.md"]);
+  assert.deepEqual(
+    findMissing("apps/web/CLAUDE.md", "`docs/guide.md`", nested),
+    ["docs/guide.md"],
+  );
+  assert.deepEqual(
+    findMissing("apps/web/CLAUDE.md", "`docs/real.md`", nested),
+    [],
+  );
+});
+
+test("listTracked returns a non-ASCII file name whole, not C-quoted", () => {
+  const repo = mkdtempSync(path.join(tmpdir(), "doc-paths-"));
+  try {
+    mkdirSync(path.join(repo, "docs"));
+    writeFileSync(path.join(repo, "docs", "Café.md"), "# x\n");
+    execFileSync("git", ["init", "-q"], { cwd: repo });
+    execFileSync("git", ["add", "docs/Café.md"], { cwd: repo });
+    assert.deepEqual(listTracked(repo), ["docs/Café.md"]);
+  } finally {
+    rmSync(repo, { recursive: true, force: true });
+  }
 });
