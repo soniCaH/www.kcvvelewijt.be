@@ -68,14 +68,6 @@ describe("PackageExplainer", () => {
     expect(
       within(tracked).queryByRole("heading", { name: "Of kies apart" }),
     ).not.toBeInTheDocument();
-    expect(
-      within(tracked).queryByText("Verantwoordelijke Sponsoring"),
-    ).not.toBeInTheDocument();
-    expect(
-      within(tracked).queryByRole("link", {
-        name: "sponsoring@kcvvelewijt.be",
-      }),
-    ).not.toBeInTheDocument();
   });
 
   it("gives every checklist an explicit list role", () => {
@@ -93,8 +85,8 @@ describe("PackageExplainer", () => {
     ).toBeInTheDocument();
     expect(text(container)).toContain("Samen gebouwd");
     expect(text(container)).toContain("een themaavond");
-    // The closing line already invites; the box does not say it twice.
-    expect(text(container).match(/Laten we praten/g)).toHaveLength(1);
+    // The "Word sponsor" band below invites; the box does not say it.
+    expect(text(container)).not.toContain("Laten we praten");
   });
 
   it("lists every loose package under its group", () => {
@@ -121,12 +113,12 @@ describe("PackageExplainer", () => {
   });
 
   it("renders no euro amount at all", () => {
-    const { container } = render(<PackageExplainer contactName="An Peeters" />);
+    const { container } = render(<PackageExplainer />);
     expect(text(container)).not.toMatch(/€|\beur\b|\beuro\b|\bbtw\b/i);
   });
 
   it("names no tier", () => {
-    const { container } = render(<PackageExplainer contactName="An Peeters" />);
+    const { container } = render(<PackageExplainer />);
     expect(text(container)).not.toMatch(/hoofdsponsor|sympathisant/i);
     expect(text(container)).not.toMatch(/\btier\b/i);
   });
@@ -136,30 +128,21 @@ describe("PackageExplainer", () => {
     expect(text(container)).not.toMatch(/Een ploeg steunen|Na elk seizoen/);
   });
 
-  it("shows the contact role and address, no name by default", () => {
-    render(<PackageExplainer />);
+  it("has no ending of its own: no contact, no closing line", () => {
+    const { container } = render(<PackageExplainer />);
+    expect(text(container)).not.toMatch(
+      /Verantwoordelijke Sponsoring|Laten we praten|Benieuwd/,
+    );
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
     expect(
-      screen.getByText("Verantwoordelijke Sponsoring"),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("link", { name: "sponsoring@kcvvelewijt.be" }),
-    ).toHaveAttribute("href", "mailto:sponsoring@kcvvelewijt.be");
-    expect(screen.queryByText("An Peeters")).not.toBeInTheDocument();
+      container.querySelector('a[href^="mailto:"]'),
+    ).not.toBeInTheDocument();
   });
 
-  it("marks the address link for the contact click", () => {
-    render(<PackageExplainer />);
-    expect(
-      screen.getByRole("link", { name: "sponsoring@kcvvelewijt.be" }),
-    ).toHaveAttribute("data-sponsor-contact");
-  });
-
-  it("shows the contact person's name when one is passed", () => {
-    render(<PackageExplainer contactName="An Peeters" />);
-    expect(screen.getByText("An Peeters")).toBeInTheDocument();
-    expect(
-      screen.getByText("Verantwoordelijke Sponsoring"),
-    ).toBeInTheDocument();
+  it("ends with the loose packages", () => {
+    const { container } = render(<PackageExplainer />);
+    const last = container.querySelector("section")!.lastElementChild!;
+    expect(text(last as HTMLElement)).toContain("Onderleggers");
   });
 
   it("fires sponsor_packages_view at 40% in view, once", () => {

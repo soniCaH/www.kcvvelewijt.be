@@ -25,9 +25,8 @@ interface SponsorClickInput {
  * `sponsor_featured_click` (the "In de kijker" marquee), `sponsor_impression`
  * (a tile seen for 1 s), `sponsor_team_line_click` (a name on a team page's
  * "Gesteund door" line), `sponsor_cta_click` (the "Word sponsor +" band
- * button), `sponsor_packages_view` (the package explainer's heading, intro and bundle
- * cards 40% in view, fired by `<TrackInView>`, not here) and `sponsor_contact_click` (the explainer's
- * sponsoring address).
+ * button) and `sponsor_packages_view` (the package explainer's heading, intro
+ * and bundle cards 40% in view, fired by `<TrackInView>`, not here).
  *
  * No PII: the internal Sanity sponsor id is hashed via `hashMemberId`, never
  * sent raw; sponsor `url`s are never sent.
@@ -78,10 +77,6 @@ export function useSponsorAnalytics() {
     trackEvent("sponsor_cta_click");
   }, []);
 
-  const trackSponsorContactClick = useCallback(() => {
-    trackEvent("sponsor_contact_click");
-  }, []);
-
   return {
     trackSponsorView,
     trackSponsorClick,
@@ -89,6 +84,5 @@ export function useSponsorAnalytics() {
     trackSponsorImpression,
     trackSponsorTeamLineClick,
     trackSponsorCtaClick,
-    trackSponsorContactClick,
   };
 }

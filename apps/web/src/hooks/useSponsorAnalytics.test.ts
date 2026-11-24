@@ -151,10 +151,4 @@ describe("useSponsorAnalytics", () => {
     act(() => result.current.trackSponsorCtaClick());
     expect(mockTrackEvent).toHaveBeenCalledWith("sponsor_cta_click");
   });
-
-  it("fires sponsor_contact_click with no params", () => {
-    const { result } = renderHook(() => useSponsorAnalytics());
-    act(() => result.current.trackSponsorContactClick());
-    expect(mockTrackEvent).toHaveBeenCalledWith("sponsor_contact_click");
-  });
 });

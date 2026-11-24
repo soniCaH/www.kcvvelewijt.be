@@ -10,7 +10,7 @@ const meta = {
     docs: {
       description: {
         component:
-          'The `/sponsors` package block (#3654): three bundles (Groen, Wit, Crossing) as checklists, a dashed "Op maat" box, the loose packages grouped under "Of kies apart", and the contact role with its address. It reads as a choice. No price, no tier names. `sponsor_packages_view` fires once the heading, intro and bundle cards are 40% in view.',
+          'The `/sponsors` package block (#3654): three bundles (Groen, Wit, Crossing) as checklists, a dashed "Op maat" box, the loose packages grouped under "Of kies apart". It reads as a choice and has no ending of its own: the "Word sponsor" band below carries the invitation. No price, no tier names. `sponsor_packages_view` fires once the heading, intro and bundle cards are 40% in view.',
       },
     },
   },

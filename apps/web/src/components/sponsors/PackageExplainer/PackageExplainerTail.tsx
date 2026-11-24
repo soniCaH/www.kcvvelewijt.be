@@ -1,8 +1,3 @@
-import { MonoLabel } from "@/components/design-system/MonoLabel";
-
-/** The sponsoring address, shown beside the contact role (#2594). */
-const SPONSORING_EMAIL = "sponsoring@kcvvelewijt.be";
-
 interface AlaCarteItem {
   name: string;
   text: string;
@@ -94,32 +89,4 @@ export const ALaCarteList = () => (
       ))}
     </div>
   </>
-);
-
-export interface PackageContactProps {
-  /** Name of the contact person. Shown only when passed; the page passes none
-   *  (a name needs board approval, #3618). */
-  contactName?: string;
-}
-
-/** The closing line, the contact role and the address. A click on the address
- *  is `sponsor_contact_click`, read through the `data-sponsor-contact` marker
- *  by `<SponsorsAnalytics>`. */
-export const PackageContact = ({ contactName }: PackageContactProps) => (
-  <div className="mt-10 flex flex-col gap-2 sm:mt-12">
-    <p className="font-display text-ink text-xl italic">
-      Benieuwd wat er voor jouw zaak kan? Laten we praten.
-    </p>
-    <MonoLabel>Verantwoordelijke Sponsoring</MonoLabel>
-    {contactName && <p className="text-ink text-lg font-bold">{contactName}</p>}
-    <p>
-      <a
-        href={`mailto:${SPONSORING_EMAIL}`}
-        className="prose-link"
-        data-sponsor-contact="true"
-      >
-        {SPONSORING_EMAIL}
-      </a>
-    </p>
-  </div>
 );

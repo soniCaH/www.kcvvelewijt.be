@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { ALaCarteList, PackageContact } from "./PackageExplainerTail";
+import { ALaCarteList } from "./PackageExplainerTail";
 
-// The lower part of `<PackageExplainer>`, rendered alone: the VR harness clips
-// every baseline to the viewport height, so on the whole block these parts sit
-// below the first screen and no baseline would show them.
+// The lower part of `<PackageExplainer>` ("Of kies apart"), rendered alone: the VR harness clips
+// every baseline to the viewport height, so on the whole block it sits
+// below the first screen and no baseline would show it.
 const meta = {
   title: "Features/Sponsors/PackageExplainerTail",
   tags: ["autodocs", "vr"],
@@ -22,11 +22,3 @@ type Story = StoryObj<typeof meta>;
 
 /** "Of kies apart": the four groups of loose packages. */
 export const OfKiesApart: Story = { render: () => <ALaCarteList /> };
-
-/** The closing line, the role and the address: what the page renders. */
-export const Contact: Story = { render: () => <PackageContact /> };
-
-/** With a named contact person. */
-export const ContactWithName: Story = {
-  render: () => <PackageContact contactName="An Peeters" />,
-};

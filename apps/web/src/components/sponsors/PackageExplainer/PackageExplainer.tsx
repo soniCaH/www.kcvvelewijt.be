@@ -6,7 +6,7 @@ import type { TapedCardBg } from "@/components/design-system/TapedCard/TapedCard
 import { TapedCardGrid } from "@/components/design-system/TapedCardGrid";
 import { TrackInView } from "@/components/analytics";
 import { CheckCircle } from "@/lib/icons.redesign";
-import { ALaCarteList, PackageContact } from "./PackageExplainerTail";
+import { ALaCarteList } from "./PackageExplainerTail";
 
 // Club policy, not CMS content (#3618 slice d): every brochure package plus
 // matchbal and onderleggers, retyped from the brochure, with no price, no
@@ -142,12 +142,6 @@ const OpMaatBox = () => (
   </div>
 );
 
-export interface PackageExplainerProps {
-  /** Name of the contact person. Shown only when passed; the page passes none
-   *  (a name needs board approval, #3618). */
-  contactName?: string;
-}
-
 /**
  * <PackageExplainer> — the package block on `/sponsors` (#3654). It reads as a
  * choice: three fixed bundles, an "Op maat" box, or loose packages. No price,
@@ -157,9 +151,11 @@ export interface PackageExplainerProps {
  * `sponsor_packages_view` fires once the heading, intro and the three bundle
  * cards are 40% in view. Only that top part is observed: the whole block is
  * taller than a phone screen, so 40% of it could never be on screen at once.
- * A click on the address is `sponsor_contact_click` (see `<PackageContact>`).
+ *
+ * The block ends with "Of kies apart": no closing line and no contact, since
+ * the `<SponsorCtaBand>` right below it already invites.
  */
-export const PackageExplainer = ({ contactName }: PackageExplainerProps) => (
+export const PackageExplainer = () => (
   <PageContainer
     as="section"
     width="index"
@@ -193,6 +189,5 @@ export const PackageExplainer = ({ contactName }: PackageExplainerProps) => (
 
     <OpMaatBox />
     <ALaCarteList />
-    <PackageContact contactName={contactName} />
   </PageContainer>
 );
