@@ -3,9 +3,10 @@
 /**
  * <TrackInView> — fires a single `trackEvent(eventName, params)` call the
  * first time the wrapped subtree is in view at or above the given
- * `threshold`: the threshold of the block, or the threshold of the viewport
- * for a block taller than the viewport (which can never reach its own
- * threshold ratio). After firing, the observer disconnects and the
+ * `threshold`: the threshold of the block's height, or the threshold of the
+ * viewport height, whichever comes first. The viewport side is what lets a
+ * block taller than viewport ÷ threshold fire, since it can never reach its
+ * own threshold ratio. After firing, the observer disconnects and the
  * component renders only its children — zero further DOM overhead.
  *
  * Server-rendered consumers (page templates) wrap conditionally — i.e.
@@ -29,24 +30,22 @@ import { trackEvent } from "@/lib/analytics/track-event";
 export interface TrackInViewProps {
   eventName: string;
   params?: Record<string, unknown>;
-  /** 0 — 1, fraction of the wrapper's bounding box that must intersect. */
+  /** 0 — 1, threshold of the block's height or threshold of the viewport height, whichever comes first. */
   threshold?: number;
   children: ReactNode;
 }
 
 /**
- * Steps of 0.05 up to `threshold`, plus `threshold` itself. The observer only
- * calls back when the ratio crosses one of these values; a block taller than
- * the viewport never reaches `threshold`, so it needs the lower steps to keep
- * getting callbacks while it scrolls.
+ * Steps of 0.01 up to `threshold`, plus `threshold` itself. The observer only
+ * calls back when the ratio crosses one of these values, and a tall block
+ * never reaches `threshold`, so it needs the lower steps to keep getting
+ * callbacks while it scrolls.
  */
-const thresholdSteps = (threshold: number): number[] => {
-  const steps = Array.from(
-    { length: Math.floor(threshold / 0.05) + 1 },
-    (_, i) => Math.round(i * 0.05 * 100) / 100,
-  ).filter((step) => step < threshold);
-  return [...steps, threshold];
-};
+// shortcut: steps of 0.01, so a block taller than 100 viewports never fires and a tall block fires up to 1 % of its height late; switch to an exact per-element ratio if such a block appears.
+const thresholdSteps = (threshold: number): number[] =>
+  Array.from({ length: Math.ceil(threshold * 100) }, (_, i) => i / 100)
+    .filter((step) => step < threshold)
+    .concat(threshold);
 
 export function TrackInView({
   eventName,
@@ -77,9 +76,7 @@ export function TrackInView({
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          // `isIntersecting` is true at any ratio above 0, so gate on how much
-          // is visible: the threshold of the block, or the threshold of the
-          // viewport for a block taller than the viewport.
+          // `isIntersecting` is true at any ratio above 0: gate on the amount.
           const viewportHeight = entry.rootBounds?.height ?? window.innerHeight;
           if (
             entry.isIntersecting &&

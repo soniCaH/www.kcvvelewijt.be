@@ -182,6 +182,26 @@ describe("<TrackInView>", () => {
     expect(new Set(list).size).toBe(list.length);
   });
 
+  it("fires a 3880 px block at the 0.07 step on a 667 px viewport, not at 0.06", () => {
+    render(
+      <TrackInView eventName="x_in_view" threshold={0.4}>
+        <span>child</span>
+      </TrackInView>,
+    );
+    const observer = FakeIntersectionObserver.latest()!;
+    expect(observer.options!.threshold).toContain(0.07);
+    act(() => {
+      // 0.06 x 3880 = 232.8 px, below 0.4 x 667 = 266.8 px
+      observer.trigger([entry(0.06, 232.8)]);
+    });
+    expect(trackEvent).not.toHaveBeenCalled();
+    act(() => {
+      // 0.07 x 3880 = 271.6 px
+      observer.trigger([entry(0.07, 271.6)]);
+    });
+    expect(trackEvent).toHaveBeenCalledTimes(1);
+  });
+
   it("observes [0] for threshold 0", () => {
     render(
       <TrackInView eventName="x_in_view" threshold={0}>

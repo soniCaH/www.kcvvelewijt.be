@@ -193,7 +193,19 @@ describe("PackageExplainer", () => {
   it("fires sponsor_packages_view at 40% in view, once", () => {
     render(<PackageExplainer />);
     const observer = FakeIntersectionObserver.latest()!;
-    expect(observer.options?.threshold).toContain(0.4);
+    expect((observer.options?.threshold as number[]).at(-1)).toBe(0.4);
+    expect(trackEvent).not.toHaveBeenCalled();
+    act(() => {
+      observer.trigger([
+        {
+          // below 0.4 of the block and of the viewport (0.4 x 667 = 266.8 px)
+          isIntersecting: true,
+          intersectionRatio: 0.3,
+          intersectionRect: { height: 100 } as DOMRectReadOnly,
+          rootBounds: { height: 667 } as DOMRectReadOnly,
+        },
+      ]);
+    });
     expect(trackEvent).not.toHaveBeenCalled();
     act(() => {
       observer.trigger([
