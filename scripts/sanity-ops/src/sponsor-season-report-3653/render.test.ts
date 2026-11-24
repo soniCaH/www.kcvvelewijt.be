@@ -34,6 +34,7 @@ describe("renderReportPage", () => {
     expect(html).toContain("2,5 %");
     expect(html).not.toContain("9,1 %"); // 9 / 99
     expect(html).toContain("pas vanaf 100 vertoningen");
+    expect(html).toContain("sinds de vertoningen gemeten worden");
     expect(html).toContain("1 juli 2026");
     expect(html).toContain("30 juni 2027");
   });
@@ -55,6 +56,14 @@ describe("renderReportPage", () => {
     const plain = render([]);
     expect(plain).toContain("clubbreed");
     expect(plain).not.toContain("In de kijker");
+  });
+
+  it("shows the team-line clicks line only for a Sponsor with Teams", () => {
+    const clicks = [row("sponsor_team_line_click", "(not set)", 4)];
+    expect(render(clicks, ["U15"])).toContain(
+      "Klikken op de naam bij de ploeg: 4",
+    );
+    expect(render(clicks)).not.toContain("Klikken op de naam");
   });
 
   it("carries the minimum-not-estimate footer and no raw id", () => {

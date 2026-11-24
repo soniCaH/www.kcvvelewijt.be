@@ -65,7 +65,12 @@ ${report.surfaces
   .join("\n")}
     </tbody>
   </table>
-  <p class="note">Een vertoning is het logo van de sponsor dat minstens een seconde voor de helft in beeld stond. Klikratio staat er pas vanaf ${MIN_IMPRESSIONS_FOR_RATE} vertoningen: daaronder zegt een percentage niets.</p>`;
+${
+  report.teamLineClicks === undefined
+    ? ""
+    : `  <p>Klikken op de naam bij de ploeg: ${formatNumber(report.teamLineClicks)}</p>`
+}
+  <p class="note">Een vertoning is het logo van de sponsor dat minstens een seconde voor de helft in beeld stond. Klikratio staat er pas vanaf ${MIN_IMPRESSIONS_FOR_RATE} vertoningen: daaronder zegt een percentage niets. Het percentage telt enkel de klikken sinds de vertoningen gemeten worden.</p>`;
 
 export const renderReportPage = (report: SponsorReport): string => {
   const name = escapeHtml(report.name);

@@ -8,9 +8,10 @@
  *   SANITY_DATASET=production pnpm --filter @kcvv/sanity-ops sponsor-report --from 2026-07-01 --to 2027-06-30 --spotlight weeks.json
  */
 import { execSync } from "node:child_process";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { client } from "../shared/sanity-client";
+import { client, dataset } from "../shared/sanity-client";
 import { packageRoot } from "../shared/package-root";
 import {
   buildReport,
@@ -19,28 +20,33 @@ import {
   type SponsorInput,
 } from "./build-report";
 import { renderReportPage } from "./render";
+import { parseSpotlightWeeks, validateRange } from "./validate-input";
 
 const PROPERTY_ID = process.env.GA4_PROPERTY_ID ?? "530024143";
 const EVENTS = [
   "sponsor_impression",
   "sponsor_click",
   "sponsor_featured_click",
+  "sponsor_team_line_click",
 ];
-const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 /** Git-ignored (`.gitignore`): the reports hold a client's numbers. */
-const OUTPUT_DIR = new URL("out/sponsor-season-report-3653/", packageRoot);
+const outputDir = ({ from, to }: { from: string; to: string }) =>
+  new URL(`out/sponsor-season-report-3653/${from}_${to}/`, packageRoot);
 
 const fail = (message: string): never => {
   console.error(message);
   process.exit(1);
 };
 
-const SPONSORS_QUERY = `*[_type == "sponsor" && defined(name)]{
+// Every sponsor doc, named or not, active or not: the web wall tracks each
+// active one, so each must be in the hash collision check.
+const SPONSORS_QUERY = `*[_type == "sponsor"]{
   "id": _id, name, tier, "active": active == true,
   "teams": teams[]->{ "name": coalesce(displayName, name) }.name
 }`;
 
-interface SanitySponsor extends Omit<SponsorInput, "teams"> {
+interface SanitySponsor extends Omit<SponsorInput, "name" | "teams"> {
+  name: string | null;
   teams: (string | null)[] | null;
 }
 
@@ -69,8 +75,7 @@ interface Ga4Response {
 const fetchGa4Rows = async (from: string, to: string): Promise<Ga4Row[]> => {
   const token = accessToken();
   const limit = 100_000;
-  const rows: Ga4Row[] = [];
-  for (let offset = 0; ; offset += limit) {
+  const fetchPage = async (offset: number): Promise<Ga4Row[]> => {
     const response = await fetch(
       `https://analyticsdata.googleapis.com/v1beta/properties/${PROPERTY_ID}:runReport`,
       {
@@ -106,38 +111,41 @@ const fetchGa4Rows = async (from: string, to: string): Promise<Ga4Row[]> => {
       );
     }
     const page = (await response.json()) as Ga4Response;
-    for (const { dimensionValues: d, metricValues: m } of page.rows ?? []) {
-      rows.push({
+    const rows = (page.rows ?? []).map(
+      ({ dimensionValues: d, metricValues: m }): Ga4Row => ({
         sponsorId: d[0].value,
         source: d[1].value,
         eventName: d[2].value,
         date: d[3].value,
         count: Number(m[0].value),
-      });
-    }
-    if (offset + limit >= (page.rowCount ?? 0)) return rows;
-  }
+      }),
+    );
+    return offset + limit >= (page.rowCount ?? 0)
+      ? rows
+      : [...rows, ...(await fetchPage(offset + limit))];
+  };
+  return fetchPage(0);
 };
 
-/** `{ "Garage X": ["2027-03-01", ...] }`: the Monday of each spotlight week. */
-const readSpotlightWeeks = (path: string | undefined) => {
+/** Read and check the spotlight file, relative to where the operator typed the command. */
+const readSpotlightWeeks = (
+  path: string | undefined,
+  range: { from: string; to: string },
+) => {
   if (!path) return {};
-  const weeks = JSON.parse(readFileSync(path, "utf-8")) as Record<
-    string,
-    string[]
-  >;
-  for (const [name, list] of Object.entries(weeks)) {
-    if (!Array.isArray(list) || !list.every((w) => ISO_DATE.test(w))) {
-      fail(`Spotlight weeks for "${name}" must be a list of YYYY-MM-DD dates.`);
-    }
+  // pnpm runs the script from the package folder; INIT_CWD is where it was typed.
+  const file = resolve(process.env.INIT_CWD ?? process.cwd(), path);
+  try {
+    return parseSpotlightWeeks(readFileSync(file, "utf-8"), range);
+  } catch (err) {
+    return fail(`Spotlight file ${file}: ${(err as Error).message}`);
   }
-  return weeks;
 };
 
 const slug = (name: string) =>
   name
     .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
@@ -149,51 +157,68 @@ const main = async () => {
       to: { type: "string" },
       spotlight: { type: "string" },
       "dry-run": { type: "boolean", default: false },
+      "allow-staging": { type: "boolean", default: false },
     },
   });
+  // The shared client reads SANITY_DATASET (default staging); GA4 is always the
+  // production property, so a staging sponsor list would not match its ids.
+  if (dataset !== "production" && !values["allow-staging"]) {
+    fail(
+      `Sanity dataset is "${dataset}" but GA4 is the production property. Run with SANITY_DATASET=production (or --allow-staging to test).`,
+    );
+  }
   const season = defaultSeason(new Date());
   const range = {
     from: values.from ?? season.from,
     to: values.to ?? season.to,
   };
-  for (const date of [range.from, range.to]) {
-    if (!ISO_DATE.test(date)) fail(`Not a YYYY-MM-DD date: ${date}`);
+  try {
+    validateRange(range);
+  } catch (err) {
+    fail((err as Error).message);
   }
+  const spotlightWeeks = readSpotlightWeeks(values.spotlight, range);
 
   const sponsors = (await client.fetch<SanitySponsor[]>(SPONSORS_QUERY)).map(
-    (sponsor) => ({
+    (sponsor): SponsorInput => ({
       ...sponsor,
+      name: sponsor.name?.trim() ?? "",
+      // No name, no page: but the id stays in the collision check.
+      active: sponsor.active && !!sponsor.name?.trim(),
       teams: (sponsor.teams ?? []).filter((team): team is string => !!team),
     }),
   );
   const rows = await fetchGa4Rows(range.from, range.to);
-  const reports = buildReport({
-    sponsors,
-    rows,
-    spotlightWeeks: readSpotlightWeeks(values.spotlight),
-    range,
-  });
+  const reports = buildReport({ sponsors, rows, spotlightWeeks, range });
 
   console.log(`${range.from} tot ${range.to}: ${rows.length} GA4 rows`);
   for (const report of reports) {
-    const own = rows.filter((row) => row.sponsorId === report.hash).length;
+    // What the report keeps: impressions / clicks per surface.
+    const counts = [
+      ...report.surfaces.map(
+        (s) => `${s.surface} ${s.impressions}/${s.clicks}`,
+      ),
+      ...(report.teamLineClicks === undefined
+        ? []
+        : [`team line ${report.teamLineClicks}`]),
+    ].join(", ");
     console.log(
-      `  ${report.name}: ${own} rows${report.hasData ? "" : " (nog geen meetgegevens)"}`,
+      `  ${report.name}: ${report.hasData ? counts : "nog geen meetgegevens"}`,
     );
   }
 
   if (values["dry-run"]) return console.log("\nDry run: nothing written.");
 
-  mkdirSync(OUTPUT_DIR, { recursive: true });
+  // One folder per range, emptied first: no page of an earlier run survives.
+  const dir = outputDir(range);
+  rmSync(dir, { recursive: true, force: true });
+  mkdirSync(dir, { recursive: true });
   for (const report of reports) {
     // The hash keeps two Sponsors with the same name apart.
-    const file = new URL(
-      `${slug(report.name)}-${report.hash}.html`,
-      OUTPUT_DIR,
-    );
+    const file = new URL(`${slug(report.name)}-${report.hash}.html`, dir);
     writeFileSync(file, renderReportPage(report));
   }
-  console.log(`\nWrote ${reports.length} reports to ${OUTPUT_DIR.pathname}`);
+  console.log(`\nWrote ${reports.length} reports to ${dir.pathname}`);
 };
 
 main().catch((err) => {

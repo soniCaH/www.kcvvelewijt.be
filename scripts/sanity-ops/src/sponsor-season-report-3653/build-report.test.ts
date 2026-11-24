@@ -110,6 +110,94 @@ describe("buildReport", () => {
     expect(at(200).clickThroughRate).toBeCloseTo(0.025);
   });
 
+  it("rates clicks only over the period impressions were measured", () => {
+    // Impressions exist from the #3773 deploy; homepage clicks go further back.
+    const [report] = build({
+      rows: [
+        row("garage", "sponsor_click", "homepage", 20, "20261001"),
+        row("garage", "sponsor_impression", "homepage", 100, "20261117"),
+        row("garage", "sponsor_click", "homepage", 5, "20261117"),
+      ],
+    });
+    expect(surface(report, "homepage").clicks).toBe(25);
+    expect(surface(report, "homepage").clickThroughRate).toBeCloseTo(0.05);
+  });
+
+  it("starts the rate period per surface", () => {
+    const [report] = build({
+      rows: [
+        row("garage", "sponsor_impression", "homepage", 100, "20261117"),
+        row("garage", "sponsor_click", "team", 10, "20261117"),
+        row("garage", "sponsor_impression", "team", 100, "20261118"),
+        row("garage", "sponsor_click", "team", 5, "20261118"),
+      ],
+    });
+    expect(surface(report, "team").clickThroughRate).toBeCloseTo(0.05);
+  });
+
+  it("starts the rate period at the first impression of a known Sponsor", () => {
+    const [report] = build({
+      rows: [
+        {
+          ...row(
+            "somebody-else",
+            "sponsor_impression",
+            "homepage",
+            1,
+            "20261001",
+          ),
+        },
+        row("garage", "sponsor_impression", "homepage", 100, "20261117"),
+        row("garage", "sponsor_click", "homepage", 20, "20261101"),
+      ],
+    });
+    expect(surface(report, "homepage").clickThroughRate).toBe(0);
+  });
+
+  describe("team-line clicks (#3652)", () => {
+    const withTeams = (teams: string[]) => [sponsor("garage", { teams })];
+
+    it("counts them as their own figure, whatever the source", () => {
+      // The event has no `source`: GA4 shows "(not set)", and it stays unmapped.
+      const [report] = build({
+        sponsors: withTeams(["U15"]),
+        rows: [
+          row("garage", "sponsor_team_line_click", "(not set)", 3, "20261001"),
+          row("garage", "sponsor_team_line_click", "", 2),
+          row("garage", "sponsor_impression", "team", 100),
+          row("garage", "sponsor_click", "team", 5),
+        ],
+      });
+      expect(report.teamLineClicks).toBe(5);
+      expect(surface(report, "team").clicks).toBe(5);
+      expect(surface(report, "team").clickThroughRate).toBeCloseTo(0.05);
+    });
+
+    it("is absent for a Sponsor without a linked Team", () => {
+      const [report] = build({
+        rows: [row("garage", "sponsor_team_line_click", "(not set)", 3)],
+      });
+      expect(report.teamLineClicks).toBeUndefined();
+    });
+
+    it("is zero for a linked Sponsor without clicks, and counts as data when there are some", () => {
+      expect(build({ sponsors: withTeams(["U15"]) })[0].teamLineClicks).toBe(0);
+      const [report] = build({
+        sponsors: withTeams(["U15"]),
+        rows: [row("garage", "sponsor_team_line_click", "(not set)", 1)],
+      });
+      expect(report.hasData).toBe(true);
+    });
+
+    it("ignores rows of an unknown Sponsor", () => {
+      const [report] = build({
+        sponsors: withTeams(["U15"]),
+        rows: [row("other", "sponsor_team_line_click", "(not set)", 4)],
+      });
+      expect(report.teamLineClicks).toBe(0);
+    });
+  });
+
   it("gives a Sponsor without rows the no-data state", () => {
     const [report] = build();
     expect(report.hasData).toBe(false);
@@ -173,6 +261,18 @@ describe("buildReport", () => {
     expect(() =>
       build({ spotlightWeeks: { "Garaaage X": ["2027-03-01"] } }),
     ).toThrow(/Garaaage X/);
+  });
+
+  it("throws when a spotlight name matches two active Sponsors", () => {
+    expect(() =>
+      build({
+        sponsors: [
+          sponsor("a", { name: "Garage X" }),
+          sponsor("b", { name: "Garage X" }),
+        ],
+        spotlightWeeks: { "Garage X": ["2027-03-01"] },
+      }),
+    ).toThrow(/Garage X.*more than one/);
   });
 
   it("holds no raw Sanity id in the report model", () => {

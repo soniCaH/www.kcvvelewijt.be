@@ -58,7 +58,10 @@ export interface SurfaceReport {
   surface: Surface;
   impressions: number;
   clicks: number;
-  /** clicks / impressions; absent below `MIN_IMPRESSIONS_FOR_RATE` impressions. */
+  /**
+   * Clicks since the first impression was measured / impressions; absent below
+   * `MIN_IMPRESSIONS_FOR_RATE` impressions.
+   */
   clickThroughRate?: number;
 }
 
@@ -70,6 +73,12 @@ export interface SponsorReport {
   teams: string[];
   spotlightWeeks: string[];
   surfaces: SurfaceReport[];
+  /**
+   * Clicks on the Sponsor's name in the "Gesteund door" line on a Team page
+   * (`sponsor_team_line_click`, no `source`). Its own figure: not a wall click,
+   * not in the rate. Present only for a Sponsor with a linked Team.
+   */
+  teamLineClicks?: number;
   /** False when GA4 holds no event for this Sponsor in the range. */
   hasData: boolean;
   range: DateRange;
@@ -93,10 +102,24 @@ const surfaceOf = (row: Ga4Row): Surface | undefined => {
   return SURFACES.find((surface) => surface === source);
 };
 
+interface Totals {
+  impressions: number;
+  clicks: number;
+  /** Clicks from the first impression day of the surface: the rate's numerator. */
+  ratedClicks: number;
+}
+
 const emptyTotals = () =>
-  new Map<Surface, { impressions: number; clicks: number }>(
-    SURFACES.map((surface) => [surface, { impressions: 0, clicks: 0 }]),
+  new Map<Surface, Totals>(
+    SURFACES.map((surface) => [
+      surface,
+      { impressions: 0, clicks: 0, ratedClicks: 0 },
+    ]),
   );
+
+const isCountedClick = (eventName: string, surface: Surface) =>
+  eventName === "sponsor_click" ||
+  (eventName === "sponsor_featured_click" && surface === "sponsors");
 
 export const buildReport = ({
   sponsors,
@@ -104,59 +127,97 @@ export const buildReport = ({
   spotlightWeeks,
   range,
 }: ReportInput): SponsorReport[] => {
-  const hashes = new Map<string, SponsorInput>();
-  for (const sponsor of sponsors) {
-    const hash = hashMemberId(sponsor.id);
-    const other = hashes.get(hash);
+  const entries = sponsors.map((sponsor) => ({
+    sponsor,
+    hash: hashMemberId(sponsor.id),
+  }));
+  const byHash = new Map<string, SponsorInput>();
+  for (const { sponsor, hash } of entries) {
+    const other = byHash.get(hash);
     if (other) {
       // GA4 rows could not be told apart: refuse rather than guess.
       throw new Error(
         `Hash collision: "${other.name}" and "${sponsor.name}" share hash ${hash}.`,
       );
     }
-    hashes.set(hash, sponsor);
+    byHash.set(hash, sponsor);
   }
 
-  const active = sponsors.filter((sponsor) => sponsor.active);
+  const active = entries.filter(({ sponsor }) => sponsor.active);
   for (const name of Object.keys(spotlightWeeks)) {
-    if (!active.some((sponsor) => sponsor.name === name)) {
+    const matches = active.filter(({ sponsor }) => sponsor.name === name);
+    if (matches.length === 0) {
       throw new Error(
         `Spotlight weeks given for "${name}": no active Sponsor has that name.`,
       );
     }
+    if (matches.length > 1) {
+      // Weeks are keyed by name: they cannot be told apart, so none are guessed.
+      throw new Error(
+        `Spotlight weeks given for "${name}": more than one active Sponsor has that name.`,
+      );
+    }
   }
 
-  const totals = new Map<string, ReturnType<typeof emptyTotals>>();
+  const teamLineClicks = new Map<string, number>();
   for (const row of rows) {
-    const sponsor = hashes.get(row.sponsorId);
+    if (row.eventName !== "sponsor_team_line_click") continue;
+    if (!byHash.has(row.sponsorId)) continue;
+    teamLineClicks.set(
+      row.sponsorId,
+      (teamLineClicks.get(row.sponsorId) ?? 0) + row.count,
+    );
+  }
+
+  const counted = rows.flatMap((row) => {
     const surface = surfaceOf(row);
-    if (!sponsor || !surface) continue;
-    const isClick =
-      row.eventName === "sponsor_click" ||
-      (row.eventName === "sponsor_featured_click" && surface === "sponsors");
+    if (!byHash.has(row.sponsorId) || !surface) return [];
+    return [{ row, surface }];
+  });
+
+  // Impressions only exist from the #3773 deploy, clicks go further back:
+  // a rate over both would overstate. Per surface, it starts at the first day
+  // an impression was counted.
+  const firstImpressionDay = new Map<Surface, string>();
+  for (const { row, surface } of counted) {
+    if (row.eventName !== "sponsor_impression") continue;
+    const first = firstImpressionDay.get(surface);
+    if (first === undefined || row.date < first) {
+      firstImpressionDay.set(surface, row.date);
+    }
+  }
+
+  const totals = new Map<string, Map<Surface, Totals>>();
+  for (const { row, surface } of counted) {
+    const isClick = isCountedClick(row.eventName, surface);
     if (row.eventName !== "sponsor_impression" && !isClick) continue;
     const perSurface = totals.get(row.sponsorId) ?? emptyTotals();
     totals.set(row.sponsorId, perSurface);
     const sum = perSurface.get(surface)!;
-    if (isClick) sum.clicks += row.count;
-    else sum.impressions += row.count;
+    if (!isClick) sum.impressions += row.count;
+    else {
+      sum.clicks += row.count;
+      const first = firstImpressionDay.get(surface);
+      if (first !== undefined && row.date >= first)
+        sum.ratedClicks += row.count;
+    }
   }
 
   return active
-    .map((sponsor): SponsorReport => {
-      const hash = hashMemberId(sponsor.id);
+    .map(({ sponsor, hash }): SponsorReport => {
       const perSurface = totals.get(hash) ?? emptyTotals();
       const surfaces = SURFACES.map((surface): SurfaceReport => {
-        const { impressions, clicks } = perSurface.get(surface)!;
+        const { impressions, clicks, ratedClicks } = perSurface.get(surface)!;
         return {
           surface,
           impressions,
           clicks,
           ...(impressions >= MIN_IMPRESSIONS_FOR_RATE && {
-            clickThroughRate: clicks / impressions,
+            clickThroughRate: ratedClicks / impressions,
           }),
         };
       });
+      const lineClicks = teamLineClicks.get(hash) ?? 0;
       return {
         name: sponsor.name,
         tier: sponsor.tier,
@@ -164,7 +225,9 @@ export const buildReport = ({
         teams: sponsor.teams,
         spotlightWeeks: spotlightWeeks[sponsor.name] ?? [],
         surfaces,
-        hasData: surfaces.some((s) => s.impressions + s.clicks > 0),
+        ...(sponsor.teams.length > 0 && { teamLineClicks: lineClicks }),
+        hasData:
+          lineClicks > 0 || surfaces.some((s) => s.impressions + s.clicks > 0),
         range,
       };
     })

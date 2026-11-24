@@ -41,6 +41,8 @@ estimate. The board mails the pages; they never go on the site. The pure core
 Prerequisites:
 
 - Sanity: `SANITY_DATASET=production` plus the token, as above (prod is private).
+  The run stops on any other dataset, because GA4 is the production property
+  (`--allow-staging` overrides it, for testing).
 - GA4: a gcloud login with the read scope. The property defaults to
   `530024143`; override with `GA4_PROPERTY_ID`.
 
@@ -52,7 +54,7 @@ Prerequisites:
 Run:
 
 ```bash
-# Dry run: prints the GA4 row count per Sponsor, writes nothing.
+# Dry run: prints impressions / clicks per surface for each Sponsor, writes nothing.
 SANITY_DATASET=production pnpm --filter @kcvv/sanity-ops sponsor-report --dry-run
 
 # The season (default: 1 July to 30 June around today) with spotlight weeks.
@@ -62,15 +64,23 @@ SANITY_DATASET=production pnpm --filter @kcvv/sanity-ops sponsor-report \
 
 `--spotlight` is a JSON file with the Monday of each spotlight week ("In de
 kijker" on `/sponsors`) per Sponsor name, kept by hand (no field in Sanity has a
-writer for it). A name that matches no active Sponsor stops the run:
+writer for it). The path is read from the folder you typed the command in. Dates
+must be real Mondays inside `--from`..`--to`; a name that matches no active
+Sponsor, or two, stops the run, as does a missing or malformed file:
 
 ```json
 { "Garage Janssens": ["2027-03-01", "2027-03-08"] }
 ```
 
-The pages land in `scripts/sanity-ops/out/sponsor-season-report-3653/`
-(git-ignored). Print one from the browser or save it as PDF.
+The pages land in `scripts/sanity-ops/out/sponsor-season-report-3653/<from>_<to>/`
+(git-ignored). That folder is emptied at the start of each run. Print one page
+from the browser or save it as PDF.
 
-The run stops when two Sponsors share a hashed id. Clicks on `/sponsors` from
-before the #3773 deploy (17 November 2026) have no `source` in GA4 and show as
-`(not set)`; the report counts those as `/sponsors` clicks.
+The run stops when two Sponsors share a hashed id (every sponsor document counts,
+named or not, active or not). Clicks on `/sponsors` from before the #3773 deploy
+(17 November 2026) have no `source` in GA4 and show as `(not set)`; the report
+counts those as `/sponsors` clicks. Impressions only exist from that deploy, so
+the click-through rate counts the clicks from the first day impressions were
+measured on that surface; the raw click counts cover the whole range. Clicks on
+a Sponsor's name in "Gesteund door" (`sponsor_team_line_click`) are a separate
+line, shown only for a Sponsor with a linked Team, and are not in the rate.
