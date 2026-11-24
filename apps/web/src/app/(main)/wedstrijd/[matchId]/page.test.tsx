@@ -4,7 +4,9 @@
  * BFF call (#3486), so `123abc`, `123abd`, … never become fresh ISR entries
  * that each cost a PSD read.
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { Effect, Layer } from "effect";
 import { HttpNotFound } from "@kcvv/api-contract";
 
@@ -26,9 +28,64 @@ vi.mock("next/navigation", async (importOriginal) => ({
   },
 }));
 
-const { mockGetMatchDetail } = vi.hoisted(() => ({
+const { mockGetMatchDetail, mockTrackEvent } = vi.hoisted(() => ({
   mockGetMatchDetail: vi.fn(),
+  mockTrackEvent: vi.fn(),
 }));
+
+vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: mockTrackEvent }));
+
+// The page's four Sanity reads each degrade on failure; stubbing them keeps
+// the whole-page render off the network.
+vi.mock("@/lib/repositories/player.repository", async (importOriginal) => {
+  const mod =
+    await importOriginal<
+      typeof import("@/lib/repositories/player.repository")
+    >();
+  return {
+    ...mod,
+    PlayerRepositoryLive: Layer.succeed(mod.PlayerRepository, {
+      findKeeperPsdIds: () => Effect.succeed(new Set<string>()),
+    } as never),
+  };
+});
+vi.mock("@/lib/repositories/article.repository", async (importOriginal) => {
+  const mod =
+    await importOriginal<
+      typeof import("@/lib/repositories/article.repository")
+    >();
+  return {
+    ...mod,
+    ArticleRepositoryLive: Layer.succeed(mod.ArticleRepository, {
+      findByLinkedMatch: () => Effect.succeed([]),
+    } as never),
+  };
+});
+vi.mock(
+  "@/lib/repositories/photoGallery.repository",
+  async (importOriginal) => {
+    const mod =
+      await importOriginal<
+        typeof import("@/lib/repositories/photoGallery.repository")
+      >();
+    return {
+      ...mod,
+      PhotoGalleryRepositoryLive: Layer.succeed(mod.PhotoGalleryRepository, {
+        findByLinkedMatch: () => Effect.succeed([]),
+      } as never),
+    };
+  },
+);
+vi.mock("@/lib/repositories/team.repository", async (importOriginal) => {
+  const mod =
+    await importOriginal<typeof import("@/lib/repositories/team.repository")>();
+  return {
+    ...mod,
+    TeamRepositoryLive: Layer.succeed(mod.TeamRepository, {
+      findAll: () => Effect.succeed([]),
+    } as never),
+  };
+});
 
 vi.mock("@/lib/effect/services/BffService", async (importOriginal) => {
   const actual =
@@ -103,5 +160,57 @@ describe("/wedstrijd/[matchId] rejects a non-strict id before any read (#3486)",
     expect(metadata.alternates?.canonical).toBe(
       `${SITE_CONFIG.siteUrl}/wedstrijd/3602`,
     );
+  });
+});
+
+describe("/wedstrijd/[matchId] practical link (#3634)", () => {
+  const LABEL = "Parking · inkom · kantine";
+
+  beforeEach(() => {
+    mockGetMatchDetail.mockReset();
+    mockTrackEvent.mockReset();
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const renderPage = async (overrides = {}) => {
+    mockGetMatchDetail.mockReturnValue(
+      Effect.succeed(createMatchDetail({ id: 3602, ...overrides })),
+    );
+    render(await MatchPage({ params: params("3602") }));
+  };
+
+  it("links a Match with a venue to the club's practical information", async () => {
+    await renderPage({ venue: "Sportpark Elewijt" });
+
+    const link = screen.getByRole("link", { name: LABEL });
+    expect(link).toHaveAttribute("href", "/club/contact");
+    // The arrow is decoration: the accessible name is the words alone.
+    expect(link.querySelector("[aria-hidden='true']")).not.toBeNull();
+  });
+
+  it("renders no link on a Match without a venue", async () => {
+    await renderPage();
+
+    expect(screen.queryByRole("link", { name: LABEL })).toBeNull();
+  });
+
+  it("sends exactly match_id, status and destination on a click", async () => {
+    await renderPage({ venue: "Sportpark Elewijt" });
+
+    await userEvent.click(screen.getByRole("link", { name: LABEL }));
+
+    // `match_detail_view` also fires on mount; only the click is asserted.
+    const clicks = mockTrackEvent.mock.calls.filter(
+      ([name]) => name === "match_practical_click",
+    );
+    expect(clicks).toEqual([
+      [
+        "match_practical_click",
+        { match_id: 3602, status: "scheduled", destination: "/club/contact" },
+      ],
+    ]);
   });
 });

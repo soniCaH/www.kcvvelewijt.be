@@ -68,10 +68,16 @@ import {
   buildSportsEventJsonLd,
 } from "@/lib/seo/jsonld";
 import { MatchHero } from "@/components/match/MatchHero";
+import { MatchPracticalAnalytics } from "@/components/match/MatchPracticalAnalytics";
 import { MatchLineupSection } from "@/components/match/MatchLineupSection";
 import { MatchEventsSection } from "@/components/match/MatchEventsSection";
 import { MatchStandingsSection } from "@/components/match/MatchStandingsSection";
-import { PageContainer, StripedSeam, UpLink } from "@/components/design-system";
+import {
+  EditorialLink,
+  PageContainer,
+  StripedSeam,
+  UpLink,
+} from "@/components/design-system";
 import { RelatedRow } from "@/components/related/RelatedRow";
 import { mergeRelatedRow } from "@/components/related/mergeRelatedRow";
 import type { RelatedRowItem } from "@/components/related/types";
@@ -625,6 +631,18 @@ export default async function MatchPage({ params }: MatchPageProps) {
       <PageContainer className="pb-12 lg:pb-16">
         <UpLink href="/kalender" label="Kalender" className="mb-6" />
         <MatchHero match={heroRow} />
+        {/* A venue means a real home Match (#3634): the BFF decides, not the web app. */}
+        {match.venue && (
+          <MatchPracticalAnalytics
+            matchId={numericId}
+            status={match.status}
+            className="mt-6"
+          >
+            <EditorialLink href="/club/contact" data-match-practical>
+              Parking · inkom · kantine
+            </EditorialLink>
+          </MatchPracticalAnalytics>
+        )}
       </PageContainer>
 
       {body.seamUnderHero && <StripedSeam colorPair="ink-cream" height="md" />}
