@@ -49,8 +49,7 @@ function patchOf(of: unknown, components: DecoratorComponentMap): unknown {
     ) {
       return member
     }
-    const patched = patchBlock(member as Record<string, unknown>, components)
-    return patched
+    return patchBlock(member as Record<string, unknown>, components)
   })
   return next.some((m, i) => m !== of[i]) ? next : of
 }

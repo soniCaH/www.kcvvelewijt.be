@@ -102,11 +102,6 @@ function extractHref(anchorHtml: string): string | null {
   return HREF_ATTR_RE.exec(anchorHtml)?.[1] ?? null
 }
 
-function slugOfAnchor(anchorHtml: string): string | null {
-  const href = extractHref(anchorHtml)
-  return href ? matchPlayerSlug(href) : null
-}
-
 function extractAnchorText(anchorHtml: string): string {
   return anchorHtml.replace(/^<a\b[^>]*>/i, '').replace(/<\/a>\s*$/i, '')
 }
@@ -129,14 +124,16 @@ export function rewritePlayerLinksInHtml(
   rows: readonly PlayerRow[],
 ): {html: string; changed: boolean} {
   const next = html.replace(ANCHOR_RE, (anchorHtml) => {
-    const slug = slugOfAnchor(anchorHtml)
+    const href = extractHref(anchorHtml)
+    if (!href) return anchorHtml
+    const slug = matchPlayerSlug(href)
     if (!slug) return anchorHtml
     const psdId = resolvePlayerPsdId(slug, rows)
     const text = extractAnchorText(anchorHtml)
     return psdId ? `<a href="/spelers/${psdId}">${text}</a>` : text
   })
-  const changed = (html.match(ANCHOR_RE) ?? []).some(slugOfAnchor)
-  return {html: next, changed}
+  // A matching anchor is always rewritten, so any difference means a change.
+  return {html: next, changed: next !== html}
 }
 
 // ─── Portable Text: `link` markDefs ─────────────────────────────────────

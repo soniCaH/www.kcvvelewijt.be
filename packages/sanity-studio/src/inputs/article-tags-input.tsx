@@ -39,21 +39,21 @@ export function ArticleTagsInput(props: ArrayOfPrimitivesInputProps<string>): JS
   const [draft, setDraft] = useState('')
 
   useEffect(() => {
-    const controller = new AbortController()
+    const state = {cancelled: false}
     client
       .fetch<unknown[]>(CANONICAL_TAGS_QUERY)
       .then((result) => {
-        if (controller.signal.aborted) return
+        if (state.cancelled) return
         const tags = Array.isArray(result)
           ? result.filter((t): t is string => typeof t === 'string')
           : []
         setCanonicalTags(tags)
       })
       .catch(() => {
-        if (!controller.signal.aborted) setCanonicalTags([])
+        if (!state.cancelled) setCanonicalTags([])
       })
     return () => {
-      controller.abort()
+      state.cancelled = true
     }
   }, [client])
 

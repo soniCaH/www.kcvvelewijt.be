@@ -101,12 +101,14 @@ export async function validateOrganigramParent(
   const parents = new Map(rows.map((row) => [normalizeOrganigramId(row._id), row.parent && normalizeOrganigramId(row.parent)]))
   const self = normalizeOrganigramId(selfId)
 
-  const reachesSelf = (current: string | undefined, seen: ReadonlySet<string>): boolean => {
+  const seen = new Set<string>()
+  const reachesSelf = (current: string | undefined): boolean => {
     if (!current || seen.has(current)) return false
     if (current === self) return true
-    return reachesSelf(parents.get(current) || undefined, new Set(seen).add(current))
+    seen.add(current)
+    return reachesSelf(parents.get(current) || undefined)
   }
-  return reachesSelf(normalizeOrganigramId(ref._ref), new Set())
+  return reachesSelf(normalizeOrganigramId(ref._ref))
     ? 'Dit zou een kringverwijzing maken: een positie kan niet (indirect) aan zichzelf rapporteren.'
     : true
 }
