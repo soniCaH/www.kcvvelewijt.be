@@ -97,14 +97,12 @@ function targets(
         tags: [SANITY_TAGS.staff],
       };
     // A Sponsor's `teams` field names it on those team pages ("Gesteund door",
-    // #3652), so a publish busts the teams tag next to `/sponsors`. The detail
-    // read is untagged, so a team page also refreshes through the `sponsors`
-    // tag its club-wide wall carries.
+    // #3652). The team detail read carries the `sponsors` tag (`team-data.ts`),
+    // so the `sponsors` tag alone refreshes `/sponsors` and those pages. The
+    // `teams` tag is not busted: it would also rebuild /kalender, /inhoud and
+    // every /tegenstander page, none of which show a Sponsor.
     case "sponsor":
-      return {
-        paths: ["/sponsors"],
-        tags: [SANITY_TAGS.sponsors, SANITY_TAGS.teams],
-      };
+      return { paths: ["/sponsors"], tags: [SANITY_TAGS.sponsors] };
     // The homepage read (HOMEPAGE_QUERY — banners + the off-season placeholder,
     // one fetch since #2858) is tagged 'banners' and lives on '/'; it derefs
     // `banner` docs from the `homePage` document, so either type changing

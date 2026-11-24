@@ -284,6 +284,8 @@ describe("TeamRepository", () => {
       const sponsors = TEAM_BY_SLUG_QUERY.match(/"sponsors":[^\n]*/)?.[0];
       expect(sponsors).toContain('_type == "sponsor"');
       expect(sponsors).toContain("active == true");
+      // A nameless Sponsor would leave "Gesteund door , Bakkerij Y".
+      expect(sponsors).toContain('defined(name) && name != ""');
       expect(sponsors).toContain("^._id in teams[]._ref");
       expect(sponsors).toContain("order(name asc)");
     });

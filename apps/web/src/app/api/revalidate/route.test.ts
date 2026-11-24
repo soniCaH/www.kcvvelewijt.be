@@ -182,12 +182,13 @@ describe("POST /api/revalidate", () => {
     expect(revalidateTag).toHaveBeenCalledWith("teams", "max");
   });
 
-  it("busts /sponsors, the sponsors tag and the teams tag on a sponsor change (#3652)", async () => {
+  it("busts /sponsors and the sponsors tag, and nothing else, on a sponsor change (#3652)", async () => {
+    // The team detail read carries the `sponsors` tag; the `teams` tag would
+    // also rebuild /kalender, /inhoud and every /tegenstander page.
     const res = await post({ _type: "sponsor" });
     expect(res.status).toBe(200);
-    expect(revalidatePath).toHaveBeenCalledWith("/sponsors");
-    expect(revalidateTag).toHaveBeenCalledWith("sponsors", "max");
-    expect(revalidateTag).toHaveBeenCalledWith("teams", "max");
+    expect(vi.mocked(revalidatePath).mock.calls).toEqual([["/sponsors"]]);
+    expect(vi.mocked(revalidateTag).mock.calls).toEqual([["sponsors", "max"]]);
   });
 
   it("busts /hulp on a help-path change", async () => {

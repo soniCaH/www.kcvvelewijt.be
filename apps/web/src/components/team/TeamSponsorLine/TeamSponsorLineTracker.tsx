@@ -16,10 +16,10 @@ export interface TeamSponsorLineTrackerProps {
  * stays a server component. It sits outside `<SponsorWallTracker>`, so a name
  * click is counted here and nowhere else.
  */
-export function TeamSponsorLineTracker({
+export const TeamSponsorLineTracker = ({
   teamSlug,
   children,
-}: TeamSponsorLineTrackerProps) {
+}: TeamSponsorLineTrackerProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const { trackSponsorTeamLineClick } = useSponsorAnalytics();
 
@@ -34,4 +34,4 @@ export function TeamSponsorLineTracker({
   });
 
   return <div ref={ref}>{children}</div>;
-}
+};

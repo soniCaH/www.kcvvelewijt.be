@@ -26,11 +26,11 @@ const separator = (index: number, count: number) =>
  * The link's accessible name is its visible name plus `<ExternalMark>`'s
  * "(opent in een nieuw tabblad)", never a replacement label.
  */
-export function TeamSponsorLine({
+export const TeamSponsorLine = ({
   sponsors,
   teamSlug,
   className,
-}: TeamSponsorLineProps) {
+}: TeamSponsorLineProps) => {
   if (sponsors.length === 0) return null;
 
   return (
@@ -65,4 +65,4 @@ export function TeamSponsorLine({
       </p>
     </TeamSponsorLineTracker>
   );
-}
+};

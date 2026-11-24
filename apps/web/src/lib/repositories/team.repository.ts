@@ -28,8 +28,8 @@ export const TEAM_BY_SLUG_QUERY =
   defineQuery(`*[_type == "team" && slug.current == $slug && archived != true][0] {
   _id, psdId, name, displayName, "slug": slug.current, age, gender, footbelId, division, divisionFull,
   "onKalender": showInNavigation != false, tagline, body[]{ ..., "fileUrl": file.asset->url }, contactInfo,
-  // Active Sponsors that name this Team in their own "teams" field (#3652).
-  "sponsors": *[_type == "sponsor" && active == true && ^._id in teams[]._ref] | order(name asc) { "id": _id, "name": coalesce(name, ""), url },
+  // Active, named Sponsors that name this Team in their own "teams" field (#3652).
+  "sponsors": *[_type == "sponsor" && active == true && defined(name) && name != "" && ^._id in teams[]._ref] | order(name asc) { "id": _id, name, url },
   "teamImageUrl": teamImage.asset->url + "?w=1200&h=800&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(teamImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(teamImage.hotspot.y, 0.5)),
   // Uncropped, for the full-screen viewer (#3447): the crop above cuts off
   // the players at the edges of a wide team photo.
