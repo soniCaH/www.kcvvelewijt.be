@@ -83,8 +83,11 @@ export function buildLinkToPsdMutations({oldDoc, psdId, referencingDocs}: LinkTo
   // a rare, manual migration action.
   const draftOldId = `drafts.${oldId}`
   for (const refDoc of referencingDocs) {
-    let updated = deepReplaceRef(refDoc, oldId, newId) as SanityDoc
-    updated = deepReplaceRef(updated, draftOldId, newId) as SanityDoc
+    const updated = deepReplaceRef(
+      deepReplaceRef(refDoc, oldId, newId) as SanityDoc,
+      draftOldId,
+      newId,
+    ) as SanityDoc
     mutations.push({createOrReplace: updated})
   }
 

@@ -36,6 +36,7 @@ src/
 
 - All schemas use Effect Schema (`import { Schema as S } from "effect"`)
 - No `S.Unknown` — every field must be typed
+- **No `let`** — lint rule `kcvv/no-let` (`eslint.config.mjs`, #3717), tests included. A `let` + `try/catch` becomes a helper that returns; a counter becomes `reduce`/`map`; shared state in a test is a `const` holder object.
 - **Numbers are `S.Finite`, never `S.Number`.** JSON has no `NaN` or `Infinity`: both arrive as `null`, and then the decode on the other side fails. Path and query ids are `S.NumberFromString.pipe(S.int())`, so `/match/NaN/detail` gets a 400 and never reaches PSD. `src/wire.test.ts` enforces both rules; red there means the wire is wrong, so fix the schema, not the test.
 - Schemas here are the single source of truth. `apps/web/src/lib/effect/schemas/` holds re-exports only (`match.schema.ts`); never add a schema there.
 - HttpApi groups live in `src/api/`, schemas in `src/schemas/`

@@ -6,8 +6,8 @@ import {
 } from './merge-related-articles-into-related-content'
 
 const stableKey = (() => {
-  let n = 0
-  return () => `key-${++n}`
+  const counter = {n: 0}
+  return () => `key-${++counter.n}`
 })
 
 describe('migrateMergeRelatedArticlesIntoRelatedContent', () => {
@@ -169,10 +169,10 @@ describe('migrateMergeRelatedArticlesIntoRelatedContent', () => {
       _id: 'key-test',
       relatedArticles: [{_type: 'reference', _ref: 'art-1'}],
     }
-    let n = 0
+    const counter = {n: 0}
     const patches = migrateMergeRelatedArticlesIntoRelatedContent(
       doc,
-      () => `injected-${++n}`,
+      () => `injected-${++counter.n}`,
     )
     expect(patches?.[0]).toEqual(
       at(

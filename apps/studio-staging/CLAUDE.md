@@ -48,6 +48,8 @@ Staging has no CI deploy: run it by hand (it goes to https://kcvv-elewijt-stagin
 
 `sanity.cli.ts` here defaults to the **`staging`** dataset (#3210). Always pass `--dataset` to `sanity migration run` anyway — an explicit flag beats relying on either studio's default.
 
+**No `let`** — lint rule `kcvv/no-let` (`eslint.config.mjs`, #3717), tests included. A `let` + `try/catch` becomes a helper that returns; a counter becomes `reduce`/`map`; shared state in a test is a `const` holder object.
+
 ## No Duplication With Root CLAUDE.md
 
 This file covers app-local concerns. For monorepo-wide conventions (TypeScript compiler setup, commit style, PR workflow, Turborepo tasks), see `.claude/CLAUDE.md`.

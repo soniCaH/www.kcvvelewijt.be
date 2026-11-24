@@ -34,11 +34,10 @@ function quoteSnippet(body: unknown): string | undefined {
   for (const block of body as unknown[]) {
     const children = (block as {children?: unknown} | null)?.children
     if (!Array.isArray(children)) continue
-    let blockText = ''
-    for (const child of children as unknown[]) {
-      const text = (child as {text?: unknown} | null)?.text
-      if (typeof text === 'string') blockText += text
-    }
+    const blockText = (children as unknown[])
+      .map((child) => (child as {text?: unknown} | null)?.text)
+      .filter((text): text is string => typeof text === 'string')
+      .join('')
     if (blockText) blocks.push(blockText)
   }
   const joined = blocks.join(' ').trim()
