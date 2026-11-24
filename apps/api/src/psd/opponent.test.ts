@@ -20,20 +20,18 @@ function makeEnvLayer() {
   });
 }
 
-const cacheMock: KvCacheInterface = {
+const kvSeed: Record<string, string> = {
   // Seed an empty competition-label map so getCompetitionLabels() cache-hits and
   // does not insert a /competitions fetch into these order-based fetch mocks.
-  get: (key: string) =>
-    Effect.succeed(
-      key === "psd:competition-labels"
-        ? "{}"
-        : key === "psd:teams-by-id"
-          ? JSON.stringify({
-              "1": { name: "Eerste Elftallen A", age: "A" },
-              "9": { name: "KCVVE U10", age: "U10" },
-            })
-          : null,
-    ),
+  "psd:competition-labels": "{}",
+  "psd:teams-by-id": JSON.stringify({
+    "1": { name: "Eerste Elftallen A", age: "A" },
+    "9": { name: "KCVVE U10", age: "U10" },
+  }),
+};
+
+const cacheMock: KvCacheInterface = {
+  get: (key: string) => Effect.succeed(kvSeed[key] ?? null),
   set: () => Effect.succeed(undefined),
   delete: () => Effect.succeed(undefined),
   durable: noopDurableKv,

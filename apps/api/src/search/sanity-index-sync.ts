@@ -653,23 +653,24 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
         const excludedIds = [
           ...new Set([...excludedResponsibilityIds, ...excludedArticleIds]),
         ].filter((id) => !manifestConfirmedIdSet.has(id));
-        const pruneExcluded: Effect.Effect<readonly string[]> =
-          excludedIds.length === 0
-            ? Effect.log(
-                "[search-sync] reconciliation: no orphan excluded ids to prune",
-              ).pipe(Effect.as([]))
-            : dryRun
-              ? Effect.log(
-                  `[search-sync] DRY RUN — would prune ${excludedIds.length} excluded-ids vector(s): ${excludedIds.join(", ")}`,
-                ).pipe(Effect.as([]))
-              : deleteBatched(excludedIds).pipe(
-                  Effect.tap((confirmed) =>
-                    Effect.log(
-                      `[search-sync] Pruned ${confirmed.length} excluded-ids vector(s)`,
-                    ),
-                  ),
-                );
-        const excludedConfirmedIds = yield* pruneExcluded;
+        const pruneExcluded = (): Effect.Effect<readonly string[]> => {
+          if (excludedIds.length === 0)
+            return Effect.log(
+              "[search-sync] reconciliation: no orphan excluded ids to prune",
+            ).pipe(Effect.as([]));
+          if (dryRun)
+            return Effect.log(
+              `[search-sync] DRY RUN — would prune ${excludedIds.length} excluded-ids vector(s): ${excludedIds.join(", ")}`,
+            ).pipe(Effect.as([]));
+          return deleteBatched(excludedIds).pipe(
+            Effect.tap((confirmed) =>
+              Effect.log(
+                `[search-sync] Pruned ${confirmed.length} excluded-ids vector(s)`,
+              ),
+            ),
+          );
+        };
+        const excludedConfirmedIds = yield* pruneExcluded();
 
         const confirmedDeleted = new Set([
           ...manifestConfirmedIds,

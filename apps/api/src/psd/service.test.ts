@@ -26,6 +26,12 @@ import { CLUB_VENUE } from "./venue";
 
 global.fetch = vi.fn();
 
+/** KV `get` over a fixed seed: a key that is not in it is a cache miss (`null`). */
+const kvGetFrom =
+  (seed: Record<string, string>): KvCacheInterface["get"] =>
+  (key) =>
+    Effect.succeed(seed[key] ?? null);
+
 function makeEnvLayer() {
   return makeTestEnvLayer({
     SANITY_PROJECT_ID: "test-project",
@@ -1672,16 +1678,11 @@ describe("PsdService.getMatchDetail — status/score backfill from season list",
 
   // KV mock seeding a populated match-team index (12h cache-hit → no fan-out).
   const indexKvMock = (entry: Record<string, unknown>): KvCacheInterface => ({
-    get: (key: string) =>
-      Effect.succeed(
-        key === "psd:teams-by-id"
-          ? "{}"
-          : key === "psd:match-team-index:v5"
-            ? JSON.stringify({ "99": entry })
-            : key === "psd:competition-labels"
-              ? "{}"
-              : null,
-      ),
+    get: kvGetFrom({
+      "psd:teams-by-id": "{}",
+      "psd:match-team-index:v5": JSON.stringify({ "99": entry }),
+      "psd:competition-labels": "{}",
+    }),
     set: () => Effect.succeed(undefined),
     delete: () => Effect.succeed(undefined),
     durable: noopDurableKv,
@@ -2375,14 +2376,12 @@ describe("PsdService.getMatchDetail - competition/team enrichment", () => {
       "123": { teamId: 1, competitionType: "league" },
     };
     const kvMock: KvCacheInterface = {
-      get: (key: string) =>
-        Effect.succeed(
-          key === "psd:teams-by-id"
-            ? JSON.stringify({ "1": { name: "Eerste Elftallen A", age: "A" } })
-            : key === "psd:match-team-index:v5"
-              ? JSON.stringify(idx)
-              : null,
-        ),
+      get: kvGetFrom({
+        "psd:teams-by-id": JSON.stringify({
+          "1": { name: "Eerste Elftallen A", age: "A" },
+        }),
+        "psd:match-team-index:v5": JSON.stringify(idx),
+      }),
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
       durable: noopDurableKv,
@@ -2475,16 +2474,12 @@ describe("PsdService.getMatchDetail - competition/team enrichment", () => {
       competitionType: { id: 1, name: null, type: "OFFICIAL" },
     };
     const kvMock: KvCacheInterface = {
-      get: (key: string) =>
-        Effect.succeed(
-          key === "psd:teams-by-id"
-            ? "{}"
-            : key === "psd:current-season-id"
-              ? JSON.stringify(seasons[0])
-              : key === "psd:competition-labels"
-                ? "{}"
-                : null, // psd:match-team-index → null → force a build
-        ),
+      // psd:match-team-index is absent → null → force a build
+      get: kvGetFrom({
+        "psd:teams-by-id": "{}",
+        "psd:current-season-id": JSON.stringify(seasons[0]),
+        "psd:competition-labels": "{}",
+      }),
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
       durable: noopDurableKv,
@@ -2529,14 +2524,10 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
     "123": { teamId: 1, competitionType: "league", isHome },
   });
   const kvMockFor = (isHome: boolean | undefined): KvCacheInterface => ({
-    get: (key: string) =>
-      Effect.succeed(
-        key === "psd:teams-by-id"
-          ? "{}"
-          : key === "psd:match-team-index:v5"
-            ? JSON.stringify(indexEntry(isHome))
-            : null,
-      ),
+    get: kvGetFrom({
+      "psd:teams-by-id": "{}",
+      "psd:match-team-index:v5": JSON.stringify(indexEntry(isHome)),
+    }),
     set: () => Effect.succeed(undefined),
     delete: () => Effect.succeed(undefined),
     durable: noopDurableKv,
@@ -2675,16 +2666,12 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
       competitionType: { id: 1, name: null, type: "OFFICIAL" },
     };
     const kvMock: KvCacheInterface = {
-      get: (key: string) =>
-        Effect.succeed(
-          key === "psd:teams-by-id"
-            ? "{}"
-            : key === "psd:current-season-id"
-              ? JSON.stringify(seasons[0])
-              : key === "psd:competition-labels"
-                ? "{}"
-                : null, // psd:match-team-index → null → force a build
-        ),
+      // psd:match-team-index is absent → null → force a build
+      get: kvGetFrom({
+        "psd:teams-by-id": "{}",
+        "psd:current-season-id": JSON.stringify(seasons[0]),
+        "psd:competition-labels": "{}",
+      }),
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
       durable: noopDurableKv,
@@ -2742,16 +2729,12 @@ describe("PsdService.getMatchDetail — venue (#2491)", () => {
       competitionType: { id: 1, name: null, type: "OFFICIAL" },
     };
     const kvMock: KvCacheInterface = {
-      get: (key: string) =>
-        Effect.succeed(
-          key === "psd:teams-by-id"
-            ? "{}"
-            : key === "psd:current-season-id"
-              ? JSON.stringify(seasons[0])
-              : key === "psd:competition-labels"
-                ? "{}"
-                : null, // psd:match-team-index → null → force a build
-        ),
+      // psd:match-team-index is absent → null → force a build
+      get: kvGetFrom({
+        "psd:teams-by-id": "{}",
+        "psd:current-season-id": JSON.stringify(seasons[0]),
+        "psd:competition-labels": "{}",
+      }),
       set: () => Effect.succeed(undefined),
       delete: () => Effect.succeed(undefined),
       durable: noopDurableKv,
@@ -2793,22 +2776,18 @@ describe("PsdService — youth score gate (#3428)", () => {
     ages: Record<string, string>,
     extra: Record<string, string> = {},
   ): KvCacheInterface => ({
-    get: (key: string) =>
-      Effect.succeed(
-        key === "psd:teams-by-id"
-          ? JSON.stringify(
-              Object.fromEntries(
-                Object.entries(ages).map(([id, age]) => [
-                  id,
-                  { name: `KCVV ${age}`, age },
-                ]),
-              ),
-            )
-          : key === "psd:competition-labels" ||
-              key === "psd:match-team-index:v5"
-            ? (extra[key] ?? "{}")
-            : null,
+    get: kvGetFrom({
+      "psd:teams-by-id": JSON.stringify(
+        Object.fromEntries(
+          Object.entries(ages).map(([id, age]) => [
+            id,
+            { name: `KCVV ${age}`, age },
+          ]),
+        ),
       ),
+      "psd:competition-labels": extra["psd:competition-labels"] ?? "{}",
+      "psd:match-team-index:v5": extra["psd:match-team-index:v5"] ?? "{}",
+    }),
     set: () => Effect.succeed(undefined),
     delete: () => Effect.succeed(undefined),
     durable: noopDurableKv,
@@ -2853,12 +2832,10 @@ describe("PsdService — youth score gate (#3428)", () => {
       (url: string) =>
         Promise.resolve({
           ok: true,
-          json: async () =>
-            url.includes("/games/team/")
-              ? playedToday
-              : url.includes("/seasons")
-                ? seasons
-                : teams,
+          json: async () => {
+            if (url.includes("/games/team/")) return playedToday;
+            return url.includes("/seasons") ? seasons : teams;
+          },
         }),
     );
 
@@ -2949,12 +2926,10 @@ describe("PsdService — youth score gate (#3428)", () => {
             ? { ok: false, status: 503, json: async () => ({}) }
             : {
                 ok: true,
-                json: async () =>
-                  url.includes("/seasons")
-                    ? seasons
-                    : url.includes("/teams")
-                      ? rawTeams
-                      : rawDetailWithGoal,
+                json: async () => {
+                  if (url.includes("/seasons")) return seasons;
+                  return url.includes("/teams") ? rawTeams : rawDetailWithGoal;
+                },
                 text: async () => JSON.stringify(rawDetailWithGoal),
               },
         ),

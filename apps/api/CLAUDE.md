@@ -252,6 +252,7 @@ pnpm --filter @kcvv/api cache:clear:staging:key "ranking:team:23"
 
 - No `S.Unknown` in PSD schemas — only declare fields actively used in transforms. Exception: wrapper schemas for resilient per-item decoding (e.g., `PsdMatchListSchema`) use `S.Array(S.Unknown)` so items can be decoded individually via `Effect.partition`
 - **No `let`** — lint rule `kcvv/no-let` (`eslint.config.mjs`, #3717), tests included. A `let` + `try/catch` becomes a helper that returns (`Effect.try`); a counter becomes `reduce`/`map`; state shared across Effects is a `Ref`; in a test, a flag is a `vi.fn()` and shared state is a `const` holder object
+- **No nested ternary** — lint rule `no-nested-ternary` (`eslint.config.mjs`, #3855), tests included. A multi-way choice becomes a small arrow helper whose `switch`/`if` chain returns, or a lookup object when every branch is a plain value; a single ternary inside a branch may stay.
 - Secrets via `wrangler secret put`, never in `wrangler.toml`
 - `Effect.orDie` in HttpApiGroup handlers — errors become 500s; keep errors typed at handler level
 - After changing `@kcvv/api-contract`, run `pnpm turbo build --filter=@kcvv/api-contract` first

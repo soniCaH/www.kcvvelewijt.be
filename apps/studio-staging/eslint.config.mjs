@@ -35,6 +35,7 @@ export default [
   {
     plugins: { kcvv: kcvvPlugin },
     rules: {
+      "no-nested-ternary": "error",
       "kcvv/no-let": [
         "error",
         {

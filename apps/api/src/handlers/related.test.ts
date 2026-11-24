@@ -182,14 +182,14 @@ describe("getRelatedHandler", () => {
       excerpt: "Ex",
     };
 
-    const getByIds = (ids: string[]) =>
-      Effect.succeed(
-        ids.includes("doc-1")
-          ? [{ id: "doc-1", values: FAKE_VECTOR, metadata: {} }]
-          : ids.includes("doc-2")
-            ? [{ id: "doc-2", values: FAKE_VECTOR, metadata }]
-            : [],
-      );
+    const vectorsFor = (ids: string[]) => {
+      if (ids.includes("doc-1"))
+        return [{ id: "doc-1", values: FAKE_VECTOR, metadata: {} }];
+      if (ids.includes("doc-2"))
+        return [{ id: "doc-2", values: FAKE_VECTOR, metadata }];
+      return [];
+    };
+    const getByIds = (ids: string[]) => Effect.succeed(vectorsFor(ids));
 
     const result = await runWithProviders(
       getRelatedHandler({ id: "doc-1", limit: 4 }),
