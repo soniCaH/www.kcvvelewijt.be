@@ -149,3 +149,7 @@ revise them. The AWS and Drupal documents are cut down; the full versions are ke
 | [`calendar-feed-redirects.md`](./old-stack/calendar-feed-redirects.md) | Calendar apps follow a redirect but never rewrite the stored URL        |
 | [`drupal-kcvv-data-api.md`](./old-stack/drupal-kcvv-data-api.md)       | What Drupal ran, who depended on it, and the data that lived only there |
 | [`netlify-old-site.md`](./old-stack/netlify-old-site.md)               | What the old Netlify project ran besides `www`, and what had to move    |
+
+## Code audits
+
+Standalone audits of this codebase, dated and frozen: cite them, do not revise them. [`parse-dont-validate.md`](./parse-dont-validate.md) (2026-11-25): where untrusted input enters, whether it is decoded at the edge with Effect Schema, and ten ranked gaps.
