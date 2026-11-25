@@ -1,4 +1,4 @@
-import { Effect } from "effect";
+import { Effect, Option, Schema as S } from "effect";
 import { WorkerEnvTag } from "../env";
 
 const SITEVERIFY_URL =
@@ -47,8 +47,13 @@ export const verifyTurnstile = (
         if (!response.ok) {
           throw new Error(`siteverify responded ${response.status}`);
         }
-        const data = (await response.json()) as { success?: boolean };
-        return data.success === true;
+        const data = S.decodeUnknownOption(S.Struct({ success: S.Boolean }))(
+          await response.json(),
+        );
+        if (Option.isNone(data)) {
+          throw new Error("siteverify body has no boolean success");
+        }
+        return data.value.success;
       },
       catch: (cause) => cause,
     }).pipe(

@@ -81,6 +81,20 @@ describe("verifyTurnstile (#3464)", () => {
     expect(await run(withSecret).result).toBe(false);
   });
 
+  it.each([
+    ["no success field", {}],
+    ["a success that is not a boolean", { success: "true" }],
+  ])("fails closed on a siteverify body with %s (#3876)", async (_l, body) => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Response.json(body)),
+    );
+    const { result, logged } = run(withSecret);
+
+    expect(await result).toBe(false);
+    expect(logged("Error")).toHaveLength(1);
+  });
+
   it("fails closed and logs an error on a non-2xx response", async () => {
     vi.stubGlobal(
       "fetch",

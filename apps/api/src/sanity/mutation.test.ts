@@ -894,6 +894,45 @@ describe("uploadPlayerImage", () => {
     fetchSpy.mockRestore();
   });
 
+  it("takes the upload-failure path and writes no reference when the response has no document._id (#3876)", async () => {
+    const digestSpy = vi
+      .spyOn(crypto.subtle, "digest")
+      .mockResolvedValueOnce(new Uint8Array(20).buffer);
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    fetchSpy.mockResolvedValueOnce(
+      new Response(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]), {
+        status: 200,
+        headers: { "content-type": "image/jpeg" },
+      }),
+    );
+    fetchSpy.mockResolvedValueOnce(
+      new Response(JSON.stringify({ document: {} }), { status: 200 }),
+    );
+
+    const result = await Effect.runPromise(
+      Effect.either(
+        Effect.gen(function* () {
+          const mutation = yield* SanityMutation;
+          yield* mutation.uploadPlayerImage(
+            "99",
+            "https://kcvv.prosoccerdata.com/img/real.jpg?profileAccessKey=xyz",
+            "https://kcvv.prosoccerdata.com/img/real.jpg?v=1",
+          );
+        }).pipe(Effect.provide(makeTestLayer())),
+      ),
+    );
+
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left).toBeInstanceOf(SanityMutationError);
+      expect(result.left.message).toContain("Failed to upload image");
+    }
+    expect(mockClientPatch).not.toHaveBeenCalled();
+
+    digestSpy.mockRestore();
+    fetchSpy.mockRestore();
+  });
+
   it("rejects invalid URLs", async () => {
     const result = await Effect.runPromise(
       Effect.either(
