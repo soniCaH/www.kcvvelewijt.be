@@ -89,8 +89,7 @@ describe("QuestionCard", () => {
     // exactly what was there (restoreAllMocks does not undo an assignment).
     const original = Element.prototype.scrollIntoView;
     const scrollIntoView = vi.fn();
-    let top = 0;
-    let reduced = false;
+    const env = { top: 0, reduced: false };
 
     beforeEach(() => {
       scrollIntoView.mockClear();
@@ -98,12 +97,12 @@ describe("QuestionCard", () => {
       // The sticky nav publishes its height as `scroll-padding-top` on <html>.
       document.documentElement.style.scrollPaddingTop = "80px";
       vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(
-        () => ({ top }) as DOMRect,
+        () => ({ top: env.top }) as DOMRect,
       );
       vi.stubGlobal(
         "matchMedia",
         (query: string) =>
-          ({ matches: reduced, media: query }) as MediaQueryList,
+          ({ matches: env.reduced, media: query }) as MediaQueryList,
       );
     });
     afterEach(() => {
@@ -111,7 +110,7 @@ describe("QuestionCard", () => {
       document.documentElement.style.scrollPaddingTop = "";
       vi.restoreAllMocks();
       vi.unstubAllGlobals();
-      reduced = false;
+      env.reduced = false;
     });
 
     const closed = <QuestionCard path={path} open={false} onToggle={noop} />;
@@ -136,7 +135,7 @@ describe("QuestionCard", () => {
       transitionEnd(el, "grid-template-rows");
 
     it("shows the header at the top when a tapped open ended up under the sticky nav", () => {
-      top = 20;
+      env.top = 20;
       heightEnded(tapOpen());
       expect(scrollIntoView).toHaveBeenCalledWith({
         block: "start",
@@ -145,13 +144,13 @@ describe("QuestionCard", () => {
     });
 
     it("does nothing when the header is already visible", () => {
-      top = 200;
+      env.top = 200;
       heightEnded(tapOpen());
       expect(scrollIntoView).not.toHaveBeenCalled();
     });
 
     it("ignores other properties and a child's transition", () => {
-      top = 20;
+      env.top = 20;
       const grow = tapOpen();
       transitionEnd(grow, "opacity");
       heightEnded(screen.getByText("Mail de jeugdsecretaris."));
@@ -159,14 +158,14 @@ describe("QuestionCard", () => {
     });
 
     it("does not run when a card finishes closing", () => {
-      top = 20;
+      env.top = 20;
       render(closed);
       heightEnded(growOf(panelOf(/inschrijven kan het hele seizoen/i)));
       expect(scrollIntoView).not.toHaveBeenCalled();
     });
 
     it("does not run for a programmatic open (reveal): that one scrolls to the centre", () => {
-      top = 20;
+      env.top = 20;
       const view = render(closed);
       view.rerender(opened);
       heightEnded(growOf(panelOf(/inschrijven kan het hele seizoen/i)));
@@ -183,7 +182,7 @@ describe("QuestionCard", () => {
     ])(
       "stands down when the visitor scrolls (%s) while it grows",
       (_, scroll) => {
-        top = 20;
+        env.top = 20;
         const grow = tapOpen();
         scroll();
         heightEnded(grow);
@@ -192,7 +191,7 @@ describe("QuestionCard", () => {
     );
 
     it("stands down when the visitor leaves for the structuur while it grows", () => {
-      top = 20;
+      env.top = 20;
       const onShowInStructure = vi.fn();
       const withNode = {
         ...path,
@@ -232,7 +231,7 @@ describe("QuestionCard", () => {
     });
 
     it("a key that does not scroll leaves the guard armed", () => {
-      top = 20;
+      env.top = 20;
       const grow = tapOpen();
       window.dispatchEvent(new KeyboardEvent("keydown", { key: "a" }));
       heightEnded(grow);
@@ -240,8 +239,8 @@ describe("QuestionCard", () => {
     });
 
     it("under reduced motion a tapped open runs at once, instantly", () => {
-      top = 20;
-      reduced = true;
+      env.top = 20;
+      env.reduced = true;
       tapOpen();
       expect(scrollIntoView).toHaveBeenCalledWith({
         block: "start",
@@ -250,8 +249,8 @@ describe("QuestionCard", () => {
     });
 
     it("does not run for a card that mounts already open", () => {
-      top = 20;
-      reduced = true;
+      env.top = 20;
+      env.reduced = true;
       render(opened);
       expect(scrollIntoView).not.toHaveBeenCalled();
     });

@@ -48,8 +48,10 @@ vi.mock("@/hooks/useResponsibilityAnalytics", () => ({
 // happy-dom doesn't implement scrollIntoView — stub it so the finder's
 // scroll-into-view effects don't throw, and so we can assert them.
 const scrollIntoView = vi.fn();
-let pushState: MockInstance<History["pushState"]>;
-let replaceState: MockInstance<History["replaceState"]>;
+const spies = {} as {
+  pushState: MockInstance<History["pushState"]>;
+  replaceState: MockInstance<History["replaceState"]>;
+};
 beforeEach(() => {
   Element.prototype.scrollIntoView = scrollIntoView;
   scrollIntoView.mockClear();
@@ -59,13 +61,13 @@ beforeEach(() => {
   trackOrganigramLink.mockClear();
   trackStepLinkClicked.mockClear();
   setUrl("/hulp");
-  pushState = vi.spyOn(window.history, "pushState");
-  replaceState = vi.spyOn(window.history, "replaceState");
+  spies.pushState = vi.spyOn(window.history, "pushState");
+  spies.replaceState = vi.spyOn(window.history, "replaceState");
 });
 
 afterEach(() => {
-  pushState.mockRestore();
-  replaceState.mockRestore();
+  spies.pushState.mockRestore();
+  spies.replaceState.mockRestore();
 });
 
 const q = (re: RegExp) => screen.getByRole("button", { name: re });
@@ -301,8 +303,8 @@ describe("HulpFinder", () => {
     );
 
     // `audience` is gone from the pushed URL; `categorie=medisch` survives.
-    expect(lastUrl(pushState)).not.toContain("audience=");
-    expect(lastUrl(pushState)).toContain("categorie=medisch");
+    expect(lastUrl(spies.pushState)).not.toContain("audience=");
+    expect(lastUrl(spies.pushState)).toContain("categorie=medisch");
     // The category selection survives the undo click.
     expect(screen.getByRole("button", { name: "Medisch" })).toHaveAttribute(
       "aria-pressed",
@@ -320,13 +322,13 @@ describe("HulpFinder", () => {
   it("an audience chip writes the ?audience param", () => {
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
     fireEvent.click(screen.getByRole("button", { name: "Ouder" }));
-    expect(lastUrl(pushState)).toBe("/hulp?audience=ouder#hulp");
+    expect(lastUrl(spies.pushState)).toBe("/hulp?audience=ouder#hulp");
   });
 
   it("a category chip writes the ?categorie param", () => {
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
     fireEvent.click(screen.getByRole("button", { name: "Medisch" }));
-    expect(lastUrl(pushState)).toBe("/hulp?categorie=medisch#hulp");
+    expect(lastUrl(spies.pushState)).toBe("/hulp?categorie=medisch#hulp");
   });
 
   it("seeds the active category from ?categorie= (e.g. after browser back)", () => {
@@ -349,11 +351,11 @@ describe("HulpFinder", () => {
     // toggle-off-by-reclicking idiom is retired in favour of "Alles" as the
     // one reset, matching every other absorbed row.
     fireEvent.click(screen.getByRole("button", { name: "Ouder" }));
-    expect(pushState).not.toHaveBeenCalled();
+    expect(spies.pushState).not.toHaveBeenCalled();
 
     const allesButtons = screen.getAllByRole("button", { name: "Alles" });
     fireEvent.click(allesButtons[0]!);
-    expect(lastUrl(pushState)).toBe("/hulp#hulp");
+    expect(lastUrl(spies.pushState)).toBe("/hulp#hulp");
   });
 
   it("keeps the #<slug> deep-linked category after an unrelated audience chip click (#2564 review finding 2)", () => {
@@ -456,7 +458,7 @@ describe("HulpFinder", () => {
   it("a #<slug> deep-link rewrites the URL in place — both params, the slug hash, no new history entry", () => {
     setUrl("/hulp?audience=supporter#blessure");
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
-    expect(pushState).not.toHaveBeenCalled();
+    expect(spies.pushState).not.toHaveBeenCalled();
     expect(window.location.pathname + window.location.search).toBe(
       "/hulp?categorie=medisch",
     );
@@ -473,7 +475,7 @@ describe("HulpFinder", () => {
     setUrl("/hulp?member=node-gc");
     render(<HulpFinder responsibilityPaths={FINDER_FIXTURE_PATHS} />);
     fireEvent.click(screen.getByRole("button", { name: "Medisch" }));
-    expect(lastUrl(pushState)).toBe(
+    expect(lastUrl(spies.pushState)).toBe(
       "/hulp?member=node-gc&categorie=medisch#hulp",
     );
   });

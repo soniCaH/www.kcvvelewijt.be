@@ -489,20 +489,22 @@ describe("FilterTabs", () => {
   });
 
   describe("Scroll Arrows", () => {
-    let originalScrollWidth: PropertyDescriptor | undefined;
-    let originalClientWidth: PropertyDescriptor | undefined;
-    let originalScrollTo: PropertyDescriptor | undefined;
+    const original: {
+      scrollWidth?: PropertyDescriptor;
+      clientWidth?: PropertyDescriptor;
+      scrollTo?: PropertyDescriptor;
+    } = {};
 
     beforeEach(() => {
-      originalScrollWidth = Object.getOwnPropertyDescriptor(
+      original.scrollWidth = Object.getOwnPropertyDescriptor(
         HTMLElement.prototype,
         "scrollWidth",
       );
-      originalClientWidth = Object.getOwnPropertyDescriptor(
+      original.clientWidth = Object.getOwnPropertyDescriptor(
         HTMLElement.prototype,
         "clientWidth",
       );
-      originalScrollTo = Object.getOwnPropertyDescriptor(
+      original.scrollTo = Object.getOwnPropertyDescriptor(
         HTMLElement.prototype,
         "scrollTo",
       );
@@ -530,9 +532,9 @@ describe("FilterTabs", () => {
           delete (HTMLElement.prototype as any)[prop];
         }
       };
-      restore("scrollWidth", originalScrollWidth);
-      restore("clientWidth", originalClientWidth);
-      restore("scrollTo", originalScrollTo);
+      restore("scrollWidth", original.scrollWidth);
+      restore("clientWidth", original.clientWidth);
+      restore("scrollTo", original.scrollTo);
       vi.restoreAllMocks();
     });
 

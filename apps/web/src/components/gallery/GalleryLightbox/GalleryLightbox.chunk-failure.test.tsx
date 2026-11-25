@@ -9,10 +9,7 @@ import { describe, expect, it, vi } from "vitest";
 import { GalleryLightbox } from "./GalleryLightbox";
 
 const chunk = vi.hoisted(() => {
-  let reject!: (error: Error) => void;
-  const promise = new Promise<never>((_, r) => {
-    reject = r;
-  });
+  const { promise, reject } = Promise.withResolvers<never>();
   promise.catch(() => {});
   return { promise, reject };
 });

@@ -163,8 +163,10 @@ describe("ScrollOverlay", () => {
       </ScrollOverlay>,
     );
 
-    let fade = container.querySelector('[aria-hidden="true"]') as HTMLElement;
-    expect(fade.style.width).toBe("24px");
+    const fadeAtStart = container.querySelector(
+      '[aria-hidden="true"]',
+    ) as HTMLElement;
+    expect(fadeAtStart.style.width).toBe("24px");
 
     const track = container.querySelector('[tabindex="0"]') as HTMLElement;
     const { flush } = stubAnimationFrame();
@@ -177,26 +179,29 @@ describe("ScrollOverlay", () => {
       flush();
     });
 
-    fade = container.querySelector('[aria-hidden="true"]') as HTMLElement;
-    expect(fade.style.width).toBe("15px");
+    const fadeNearEnd = container.querySelector(
+      '[aria-hidden="true"]',
+    ) as HTMLElement;
+    expect(fadeNearEnd.style.width).toBe("15px");
   });
 
   describe("bottom fade — the vertical cue (#3340)", () => {
-    let restoreLayout: (() => void) | undefined;
+    const restores: Array<() => void> = [];
     function mockVerticalDimensions(
       scrollHeight: number,
       clientHeight: number,
       offsetHeight = clientHeight,
     ) {
-      restoreLayout = mockLayoutProps({
-        scrollHeight,
-        clientHeight,
-        offsetHeight,
-      });
+      restores.push(
+        mockLayoutProps({ scrollHeight, clientHeight, offsetHeight }),
+      );
     }
 
     afterEach(() => {
-      restoreLayout?.();
+      restores
+        .splice(0)
+        .reverse()
+        .forEach((restore) => restore());
     });
 
     it("sits above the track's horizontal scrollbar instead of painting over it", () => {
@@ -396,10 +401,10 @@ describe("ScrollOverlay", () => {
   });
 
   it("re-checks overflow when a remeasureOn dependency changes", () => {
-    let currentScrollWidth = 400;
+    const layout = { scrollWidth: 400 };
     Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
       configurable: true,
-      get: () => currentScrollWidth,
+      get: () => layout.scrollWidth,
     });
     Object.defineProperty(HTMLElement.prototype, "clientWidth", {
       configurable: true,
@@ -417,7 +422,7 @@ describe("ScrollOverlay", () => {
     const { rerender } = render(<ZoomHost scaleStep={0} />);
     expect(screen.queryByLabelText("Scroll right")).not.toBeInTheDocument();
 
-    currentScrollWidth = 900;
+    layout.scrollWidth = 900;
     act(() => {
       rerender(<ZoomHost scaleStep={1} />);
     });

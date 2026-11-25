@@ -73,9 +73,9 @@ describe("QaGroupRapidFire (Phase 5 rewrite)", () => {
         `"${positions[i]}" must appear in the rendered flow`,
       ).toBeGreaterThanOrEqual(0);
     });
-    for (let i = 1; i < positions.length; i++) {
-      expect(positions[i]).toBeGreaterThan(positions[i - 1]);
-    }
+    positions.slice(1).forEach((pos, i) => {
+      expect(pos).toBeGreaterThan(positions[i]);
+    });
   });
 
   it("renders exactly N-1 dotted dividers between N pairs", () => {

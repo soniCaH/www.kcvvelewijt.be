@@ -105,14 +105,14 @@ describe("ShareName auto-fit", () => {
     // re-fit here can ONLY have come through the shared `useWebfontSwap`
     // backstop, not the targeted `fonts.load()` path or the old `fonts.ready`
     // fallback this replaces.
-    let loadingDoneHandler: (() => void) | undefined;
-    let restoreWidths = fakeMeasuredWidths(920, 2000);
+    const loadingDone: { handler?: () => void } = {};
+    const widths = { restore: fakeMeasuredWidths(920, 2000) };
     const origFonts = Object.getOwnPropertyDescriptor(document, "fonts");
     Object.defineProperty(document, "fonts", {
       configurable: true,
       value: {
         addEventListener: (event: string, handler: () => void) => {
-          if (event === "loadingdone") loadingDoneHandler = handler;
+          if (event === "loadingdone") loadingDone.handler = handler;
         },
         removeEventListener: () => {},
       },
@@ -129,9 +129,9 @@ describe("ShareName auto-fit", () => {
       });
 
       // The name widens once the real Freight swap lands.
-      restoreWidths();
-      restoreWidths = fakeMeasuredWidths(920, 4000);
-      act(() => loadingDoneHandler?.());
+      widths.restore();
+      widths.restore = fakeMeasuredWidths(920, 4000);
+      act(() => loadingDone.handler?.());
 
       // floor(185 * 920 / 4000) = 42, floored again to minFontSize (56).
       expect(screen.getByText("Amirgan Bouakhouf")).toHaveStyle({
@@ -140,7 +140,7 @@ describe("ShareName auto-fit", () => {
     } finally {
       if (origFonts) Object.defineProperty(document, "fonts", origFonts);
       else delete (document as unknown as Record<string, unknown>).fonts;
-      restoreWidths();
+      widths.restore();
     }
   });
 

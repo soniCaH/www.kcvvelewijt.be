@@ -200,11 +200,11 @@ describe("NavTakeover", () => {
     // `change` listener so a transition can actually be simulated via
     // `trigger()`, which the peer's static mock has no need for.
     function mockMatchMedia(initialMatches: boolean) {
-      let currentMatches = initialMatches;
+      const state = { matches: initialMatches };
       const listeners = new Set<(event: { matches: boolean }) => void>();
       const mql = {
         get matches() {
-          return currentMatches;
+          return state.matches;
         },
         addEventListener: vi.fn(
           (type: string, cb: (event: { matches: boolean }) => void) => {
@@ -220,7 +220,7 @@ describe("NavTakeover", () => {
       return {
         matchMedia: vi.fn().mockReturnValue(mql),
         trigger: (matches: boolean) => {
-          currentMatches = matches;
+          state.matches = matches;
           listeners.forEach((cb) => cb({ matches }));
         },
       };
@@ -233,14 +233,14 @@ describe("NavTakeover", () => {
     // "(min-width: 900px)", so `toHaveBeenCalledWith` below would fail.
     const TEST_BREAKPOINT_LG_PX = 900;
 
-    let originalMatchMedia: typeof window.matchMedia;
+    const saved = {} as { matchMedia: typeof window.matchMedia };
 
     beforeEach(() => {
-      originalMatchMedia = window.matchMedia;
+      saved.matchMedia = window.matchMedia;
     });
 
     afterEach(() => {
-      window.matchMedia = originalMatchMedia;
+      window.matchMedia = saved.matchMedia;
       document.documentElement.style.removeProperty("--breakpoint-lg");
     });
 

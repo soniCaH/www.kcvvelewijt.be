@@ -25,25 +25,27 @@ function TestHost({ onHook }: { onHook: (h: UseScrollHintReturn) => void }) {
 }
 
 describe("useScrollHint", () => {
-  let savedScrollTo: PropertyDescriptor | undefined;
-  let savedScrollWidth: PropertyDescriptor | undefined;
-  let savedClientWidth: PropertyDescriptor | undefined;
-  let savedScrollLeft: PropertyDescriptor | undefined;
+  const saved: {
+    scrollTo?: PropertyDescriptor;
+    scrollWidth?: PropertyDescriptor;
+    clientWidth?: PropertyDescriptor;
+    scrollLeft?: PropertyDescriptor;
+  } = {};
 
   beforeEach(() => {
-    savedScrollTo = Object.getOwnPropertyDescriptor(
+    saved.scrollTo = Object.getOwnPropertyDescriptor(
       HTMLElement.prototype,
       "scrollTo",
     );
-    savedScrollWidth = Object.getOwnPropertyDescriptor(
+    saved.scrollWidth = Object.getOwnPropertyDescriptor(
       HTMLElement.prototype,
       "scrollWidth",
     );
-    savedClientWidth = Object.getOwnPropertyDescriptor(
+    saved.clientWidth = Object.getOwnPropertyDescriptor(
       HTMLElement.prototype,
       "clientWidth",
     );
-    savedScrollLeft = Object.getOwnPropertyDescriptor(
+    saved.scrollLeft = Object.getOwnPropertyDescriptor(
       HTMLElement.prototype,
       "scrollLeft",
     );
@@ -66,10 +68,10 @@ describe("useScrollHint", () => {
         delete (HTMLElement.prototype as any)[prop];
       }
     };
-    restore("scrollTo", savedScrollTo);
-    restore("scrollWidth", savedScrollWidth);
-    restore("clientWidth", savedClientWidth);
-    restore("scrollLeft", savedScrollLeft);
+    restore("scrollTo", saved.scrollTo);
+    restore("scrollWidth", saved.scrollWidth);
+    restore("clientWidth", saved.clientWidth);
+    restore("scrollLeft", saved.scrollLeft);
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
@@ -79,7 +81,7 @@ describe("useScrollHint", () => {
     clientWidth: number;
     scrollLeft: number;
   }) {
-    let hookResult: UseScrollHintReturn | undefined;
+    const hookRef: { current?: UseScrollHintReturn } = {};
 
     // Mock scrollWidth/clientWidth/scrollLeft on HTMLElement.prototype
     // so the element gets these values once the hook reads them
@@ -105,12 +107,12 @@ describe("useScrollHint", () => {
     const utils = render(
       createElement(TestHost, {
         onHook: (h: UseScrollHintReturn) => {
-          hookResult = h;
+          hookRef.current = h;
         },
       }),
     );
 
-    return { hookResult: hookResult!, ...utils };
+    return { hookResult: hookRef.current!, ...utils };
   }
 
   it("returns canScrollLeft=false and canScrollRight=false when no overflow", () => {
@@ -222,17 +224,17 @@ describe("useScrollHint", () => {
       return createElement("div", { ref: hook.scrollRef });
     }
 
-    let customResult: UseScrollHintReturn | undefined;
+    const custom: { current?: UseScrollHintReturn } = {};
     render(
       createElement(CustomAmountHost, {
         onHook: (h: UseScrollHintReturn) => {
-          customResult = h;
+          custom.current = h;
         },
       }),
     );
 
     act(() => {
-      customResult!.scrollLeft();
+      custom.current!.scrollLeft();
     });
 
     expect(scrollToMock).toHaveBeenCalledWith({
@@ -274,17 +276,17 @@ describe("useScrollHint", () => {
       return createElement("div", { ref: hook.scrollRef });
     }
 
-    let result: UseScrollHintReturn | undefined;
+    const latest: { current?: UseScrollHintReturn } = {};
     render(
       createElement(ProportionalHost, {
         onHook: (h: UseScrollHintReturn) => {
-          result = h;
+          latest.current = h;
         },
       }),
     );
 
     act(() => {
-      result!.scrollRight();
+      latest.current!.scrollRight();
     });
 
     expect(scrollToMock).toHaveBeenCalledWith({
@@ -384,9 +386,12 @@ describe("useScrollHint", () => {
   });
 
   describe("canScrollDown / remainingBottom — the vertical axis (#3340)", () => {
-    let restoreLayout: (() => void) | undefined;
+    const restores: Array<() => void> = [];
     afterEach(() => {
-      restoreLayout?.();
+      restores
+        .splice(0)
+        .reverse()
+        .forEach((restore) => restore());
     });
 
     function renderVertical(
@@ -398,17 +403,17 @@ describe("useScrollHint", () => {
       },
       maxRemainingPx?: number,
     ) {
-      restoreLayout = mockLayoutProps(dims);
-      let hookResult: UseScrollHintReturn | undefined;
+      restores.push(mockLayoutProps(dims));
+      const hookRef: { current?: UseScrollHintReturn } = {};
       function Host() {
         const hook = useScrollHint({ maxRemainingPx });
         useEffect(() => {
-          hookResult = hook;
+          hookRef.current = hook;
         });
         return createElement("div", { ref: hook.scrollRef });
       }
       render(createElement(Host));
-      return hookResult!;
+      return hookRef.current!;
     }
 
     it("is false and 0 when the track fits vertically", () => {
@@ -487,10 +492,10 @@ describe("useScrollHint", () => {
       // scrollWidth — exactly the scenario a web-font swap or a
       // Sanity-driven chip count produces without the track's own box
       // changing size.
-      let currentScrollWidth = 500;
+      const dims = { scrollWidth: 500 };
       Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
         configurable: true,
-        get: () => currentScrollWidth,
+        get: () => dims.scrollWidth,
       });
       Object.defineProperty(HTMLElement.prototype, "clientWidth", {
         configurable: true,
@@ -501,7 +506,7 @@ describe("useScrollHint", () => {
         value: 0,
       });
 
-      let hookResult: UseScrollHintReturn | undefined;
+      const hookRef: { current?: UseScrollHintReturn } = {};
       function HostWithChild({
         onHook,
       }: {
@@ -521,12 +526,12 @@ describe("useScrollHint", () => {
       render(
         createElement(HostWithChild, {
           onHook: (h: UseScrollHintReturn) => {
-            hookResult = h;
+            hookRef.current = h;
           },
         }),
       );
 
-      expect(hookResult!.overflows).toBe(false);
+      expect(hookRef.current!.overflows).toBe(false);
       // track + child
       expect(
         FakeResizeObserver.latest()!.observed.length,
@@ -534,12 +539,12 @@ describe("useScrollHint", () => {
 
       // Content grows (e.g. the web font swaps in) without the track's own
       // box changing — a child ResizeObserver entry fires instead.
-      currentScrollWidth = 900;
+      dims.scrollWidth = 900;
       act(() => {
         FakeResizeObserver.latest()!.trigger();
       });
 
-      expect(hookResult!.overflows).toBe(true);
+      expect(hookRef.current!.overflows).toBe(true);
     });
   });
 
@@ -548,22 +553,22 @@ describe("useScrollHint", () => {
       // Stub `document.fonts` with ONLY a `loadingdone` subscription (no
       // `ready` at all) — proves the hook's re-check comes through the
       // real-swap event, not a `fonts.ready` fallback.
-      let loadingDoneHandler: (() => void) | undefined;
+      const loadingDone: { handler?: () => void } = {};
       Object.defineProperty(document, "fonts", {
         configurable: true,
         value: {
           addEventListener: (event: string, handler: () => void) => {
-            if (event === "loadingdone") loadingDoneHandler = handler;
+            if (event === "loadingdone") loadingDone.handler = handler;
           },
           removeEventListener: vi.fn(),
         },
       });
 
       try {
-        let currentScrollWidth = 500;
+        const dims = { scrollWidth: 500 };
         Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
           configurable: true,
-          get: () => currentScrollWidth,
+          get: () => dims.scrollWidth,
         });
         Object.defineProperty(HTMLElement.prototype, "clientWidth", {
           configurable: true,
@@ -574,22 +579,22 @@ describe("useScrollHint", () => {
           value: 0,
         });
 
-        let hookResult: UseScrollHintReturn | undefined;
+        const hookRef: { current?: UseScrollHintReturn } = {};
         render(
           createElement(TestHost, {
             onHook: (h: UseScrollHintReturn) => {
-              hookResult = h;
+              hookRef.current = h;
             },
           }),
         );
 
-        expect(hookResult!.overflows).toBe(false);
+        expect(hookRef.current!.overflows).toBe(false);
 
         // The real Freight swap lands and widens the track's content.
-        currentScrollWidth = 900;
-        act(() => loadingDoneHandler?.());
+        dims.scrollWidth = 900;
+        act(() => loadingDone.handler?.());
 
-        expect(hookResult!.overflows).toBe(true);
+        expect(hookRef.current!.overflows).toBe(true);
       } finally {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         delete (document as any).fonts;
@@ -604,10 +609,10 @@ describe("useScrollHint", () => {
       // a new crumb <span> the mount-time el.children snapshot never saw.
       // A one-shot ResizeObserver.observe() loop over el.children at mount
       // alone would leave that new span unwatched forever.
-      let currentScrollWidth = 500;
+      const dims = { scrollWidth: 500 };
       Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
         configurable: true,
-        get: () => currentScrollWidth,
+        get: () => dims.scrollWidth,
       });
       Object.defineProperty(HTMLElement.prototype, "clientWidth", {
         configurable: true,
@@ -618,7 +623,7 @@ describe("useScrollHint", () => {
         value: 0,
       });
 
-      let hookResult: UseScrollHintReturn | undefined;
+      const hookRef: { current?: UseScrollHintReturn } = {};
       function GrowingHost({
         onHook,
         childCount,
@@ -643,25 +648,25 @@ describe("useScrollHint", () => {
         createElement(GrowingHost, {
           childCount: 1,
           onHook: (h: UseScrollHintReturn) => {
-            hookResult = h;
+            hookRef.current = h;
           },
         }),
       );
 
-      expect(hookResult!.overflows).toBe(false);
+      expect(hookRef.current!.overflows).toBe(false);
 
       // A crumb is appended (navigate() deeper into the tree) AND the
       // trail's real content width grows past the viewport — jsdom does
       // not run layout, so the growth is simulated via scrollWidth, but the
       // DOM mutation itself (the new <span>) is real and must be what
       // triggers the re-check, not a container resize (there is none).
-      currentScrollWidth = 900;
+      dims.scrollWidth = 900;
       await act(async () => {
         rerender(
           createElement(GrowingHost, {
             childCount: 2,
             onHook: (h: UseScrollHintReturn) => {
-              hookResult = h;
+              hookRef.current = h;
             },
           }),
         );
@@ -671,7 +676,7 @@ describe("useScrollHint", () => {
         await Promise.resolve();
       });
 
-      expect(hookResult!.overflows).toBe(true);
+      expect(hookRef.current!.overflows).toBe(true);
     });
   });
 
@@ -697,7 +702,7 @@ describe("useScrollHint", () => {
         value: 0,
       });
 
-      let hookResult: UseScrollHintReturn | undefined;
+      const hookRef: { current?: UseScrollHintReturn } = {};
       function PaddedHost({
         onHook,
       }: {
@@ -717,12 +722,12 @@ describe("useScrollHint", () => {
       render(
         createElement(PaddedHost, {
           onHook: (h: UseScrollHintReturn) => {
-            hookResult = h;
+            hookRef.current = h;
           },
         }),
       );
 
-      expect(hookResult!.overflows).toBe(false);
+      expect(hookRef.current!.overflows).toBe(false);
     });
 
     it("is true when the excess is real content, not padding", () => {
@@ -739,7 +744,7 @@ describe("useScrollHint", () => {
         value: 0,
       });
 
-      let hookResult: UseScrollHintReturn | undefined;
+      const hookRef: { current?: UseScrollHintReturn } = {};
       function PaddedHost({
         onHook,
       }: {
@@ -759,14 +764,14 @@ describe("useScrollHint", () => {
       render(
         createElement(PaddedHost, {
           onHook: (h: UseScrollHintReturn) => {
-            hookResult = h;
+            hookRef.current = h;
           },
         }),
       );
 
       // 900 scrollWidth - 80 padding - 640 clientWidth = 180, well past
       // the dead zone — genuinely overflowing, padding aside.
-      expect(hookResult!.overflows).toBe(true);
+      expect(hookRef.current!.overflows).toBe(true);
     });
 
     /**
@@ -815,7 +820,7 @@ describe("useScrollHint", () => {
             configurable: true,
             value: content + railPx,
           });
-          let hookResult: UseScrollHintReturn | undefined;
+          const hookRef: { current?: UseScrollHintReturn } = {};
           function Host({
             onHook,
           }: {
@@ -836,11 +841,11 @@ describe("useScrollHint", () => {
           const { unmount } = render(
             createElement(Host, {
               onHook: (h: UseScrollHintReturn) => {
-                hookResult = h;
+                hookRef.current = h;
               },
             }),
           );
-          const verdict = hookResult!.overflows;
+          const verdict = hookRef.current!.overflows;
           unmount();
           return verdict;
         };
@@ -857,17 +862,17 @@ describe("useScrollHint", () => {
         value: 0,
       });
 
-      let currentScrollWidth = 500;
+      const dims = { scrollWidth: 500 };
       Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
         configurable: true,
-        get: () => currentScrollWidth,
+        get: () => dims.scrollWidth,
       });
       Object.defineProperty(HTMLElement.prototype, "clientWidth", {
         configurable: true,
         value: 500,
       });
 
-      let hookResult: UseScrollHintReturn | undefined;
+      const hookRef: { current?: UseScrollHintReturn } = {};
       function ZoomHost({
         onHook,
         scaleStep,
@@ -889,38 +894,38 @@ describe("useScrollHint", () => {
         createElement(ZoomHost, {
           scaleStep: 0,
           onHook: (h: UseScrollHintReturn) => {
-            hookResult = h;
+            hookRef.current = h;
           },
         }),
       );
 
-      expect(hookResult!.overflows).toBe(false);
+      expect(hookRef.current!.overflows).toBe(false);
 
       // A CSS `transform: scale()` zoom never changes the track's own
       // border box, so no ResizeObserver entry fires for it — only the
       // declared `remeasureOn` dependency changing forces the re-check.
-      currentScrollWidth = 900;
+      dims.scrollWidth = 900;
       act(() => {
         rerender(
           createElement(ZoomHost, {
             scaleStep: 1,
             onHook: (h: UseScrollHintReturn) => {
-              hookResult = h;
+              hookRef.current = h;
             },
           }),
         );
       });
 
-      expect(hookResult!.overflows).toBe(true);
+      expect(hookRef.current!.overflows).toBe(true);
     });
   });
 
   describe("transitionend — a bubbled CSS transition re-checks the final state", () => {
     it("re-checks scroll when a transitionend event bubbles up to the track", () => {
-      let currentScrollWidth = 500;
+      const dims = { scrollWidth: 500 };
       Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
         configurable: true,
-        get: () => currentScrollWidth,
+        get: () => dims.scrollWidth,
       });
       Object.defineProperty(HTMLElement.prototype, "clientWidth", {
         configurable: true,
@@ -931,33 +936,33 @@ describe("useScrollHint", () => {
         value: 0,
       });
 
-      let hookResult: UseScrollHintReturn | undefined;
+      const hookRef: { current?: UseScrollHintReturn } = {};
       render(
         createElement(TestHost, {
           onHook: (h: UseScrollHintReturn) => {
-            hookResult = h;
+            hookRef.current = h;
           },
         }),
       );
 
-      expect(hookResult!.overflows).toBe(false);
+      expect(hookRef.current!.overflows).toBe(false);
 
       // A `transform: scale()` zoom animates over its transition duration —
       // by the time `transitionend` fires, the descendant has settled at
       // its final (larger) size, unlike the instant-but-possibly-mid-
       // animation read `remeasureOn` gets.
-      currentScrollWidth = 900;
+      dims.scrollWidth = 900;
       const container = screen.getByTestId("scroll-container");
       act(() => {
         container.dispatchEvent(new Event("transitionend", { bubbles: true }));
       });
 
-      expect(hookResult!.overflows).toBe(true);
+      expect(hookRef.current!.overflows).toBe(true);
     });
   });
 
   it("updates when scroll event fires on the container", () => {
-    let scrollLeftValue = 0;
+    const scrolled = { left: 0 };
 
     Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
       configurable: true,
@@ -974,25 +979,25 @@ describe("useScrollHint", () => {
     Object.defineProperty(HTMLElement.prototype, "scrollLeft", {
       configurable: true,
       get() {
-        return scrollLeftValue;
+        return scrolled.left;
       },
     });
 
     const { flush } = stubAnimationFrame();
 
-    let hookResult: UseScrollHintReturn | undefined;
+    const hookRef: { current?: UseScrollHintReturn } = {};
     render(
       createElement(TestHost, {
         onHook: (h: UseScrollHintReturn) => {
-          hookResult = h;
+          hookRef.current = h;
         },
       }),
     );
 
-    expect(hookResult!.canScrollLeft).toBe(false);
+    expect(hookRef.current!.canScrollLeft).toBe(false);
 
     // Change the scrollLeft value and fire scroll event
-    scrollLeftValue = 200;
+    scrolled.left = 200;
     const container = screen.getByTestId("scroll-container");
     act(() => {
       container.dispatchEvent(new Event("scroll"));
@@ -1004,8 +1009,8 @@ describe("useScrollHint", () => {
       flush();
     });
 
-    expect(hookResult!.canScrollLeft).toBe(true);
-    expect(hookResult!.canScrollRight).toBe(true);
+    expect(hookRef.current!.canScrollLeft).toBe(true);
+    expect(hookRef.current!.canScrollRight).toBe(true);
   });
 
   describe("#2860 — cached padding and rAF-coalesced scroll", () => {
@@ -1013,7 +1018,7 @@ describe("useScrollHint", () => {
       const getComputedStyleSpy = vi.spyOn(window, "getComputedStyle");
       const { flush } = stubAnimationFrame();
 
-      let scrollLeftValue = 0;
+      const scrolled = { left: 0 };
       Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
         configurable: true,
         value: 1000,
@@ -1024,7 +1029,7 @@ describe("useScrollHint", () => {
       });
       Object.defineProperty(HTMLElement.prototype, "scrollLeft", {
         configurable: true,
-        get: () => scrollLeftValue,
+        get: () => scrolled.left,
       });
 
       render(
@@ -1039,7 +1044,7 @@ describe("useScrollHint", () => {
       expect(callsAfterMount).toBeGreaterThan(0);
 
       const container = screen.getByTestId("scroll-container");
-      scrollLeftValue = 200;
+      scrolled.left = 200;
       act(() => {
         container.dispatchEvent(new Event("scroll"));
       });
@@ -1053,12 +1058,12 @@ describe("useScrollHint", () => {
     });
 
     it("refreshes the cached padding via the resize listener, not the scroll path", () => {
-      let currentPaddingPx = 40;
+      const padding = { px: 40 };
       vi.spyOn(window, "getComputedStyle").mockImplementation(
         () =>
           ({
-            paddingLeft: `${currentPaddingPx}px`,
-            paddingRight: `${currentPaddingPx}px`,
+            paddingLeft: `${padding.px}px`,
+            paddingRight: `${padding.px}px`,
           }) as CSSStyleDeclaration,
       );
 
@@ -1078,33 +1083,33 @@ describe("useScrollHint", () => {
       // Declared directly (rather than via the `renderScrollHint` helper,
       // which snapshots the hook result once at mount) so it keeps
       // reflecting the latest render after the resize event below.
-      let hookResult: UseScrollHintReturn | undefined;
+      const hookRef: { current?: UseScrollHintReturn } = {};
       render(
         createElement(TestHost, {
           onHook: (h: UseScrollHintReturn) => {
-            hookResult = h;
+            hookRef.current = h;
           },
         }),
       );
 
       // 680 scrollWidth - 80 padding - 640 clientWidth = -40, well under the
       // dead zone — no overflow once the (cached) padding is subtracted.
-      expect(hookResult!.overflows).toBe(false);
+      expect(hookRef.current!.overflows).toBe(false);
 
       // Padding shrinks to 0 (e.g. a breakpoint change). Only a non-scroll
       // trigger picks this up — here, the window resize listener.
-      currentPaddingPx = 0;
+      padding.px = 0;
       act(() => {
         window.dispatchEvent(new Event("resize"));
       });
 
       // 680 - 0 - 640 = 40, past the dead zone: overflows flips true only
       // if the resize listener actually refreshed the cached padding.
-      expect(hookResult!.overflows).toBe(true);
+      expect(hookRef.current!.overflows).toBe(true);
     });
 
     it("coalesces multiple scroll events into a single measurement per animation frame", () => {
-      let scrollLeftValue = 0;
+      const scrolled = { left: 0 };
       Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
         configurable: true,
         value: 1000,
@@ -1115,16 +1120,16 @@ describe("useScrollHint", () => {
       });
       Object.defineProperty(HTMLElement.prototype, "scrollLeft", {
         configurable: true,
-        get: () => scrollLeftValue,
+        get: () => scrolled.left,
       });
 
       const { raf, flush } = stubAnimationFrame();
 
-      let hookResult: UseScrollHintReturn | undefined;
+      const hookRef: { current?: UseScrollHintReturn } = {};
       render(
         createElement(TestHost, {
           onHook: (h: UseScrollHintReturn) => {
-            hookResult = h;
+            hookRef.current = h;
           },
         }),
       );
@@ -1132,15 +1137,15 @@ describe("useScrollHint", () => {
       const rafCallsAfterMount = raf.mock.calls.length;
       const container = screen.getByTestId("scroll-container");
 
-      scrollLeftValue = 50;
+      scrolled.left = 50;
       act(() => {
         container.dispatchEvent(new Event("scroll"));
       });
-      scrollLeftValue = 120;
+      scrolled.left = 120;
       act(() => {
         container.dispatchEvent(new Event("scroll"));
       });
-      scrollLeftValue = 300;
+      scrolled.left = 300;
       act(() => {
         container.dispatchEvent(new Event("scroll"));
       });
@@ -1155,8 +1160,8 @@ describe("useScrollHint", () => {
 
       // The single coalesced measurement reflects the latest scroll
       // position (300), not a stale intermediate one.
-      expect(hookResult!.canScrollLeft).toBe(true);
-      expect(hookResult!.remainingLeft).toBe(300);
+      expect(hookRef.current!.canScrollLeft).toBe(true);
+      expect(hookRef.current!.remainingLeft).toBe(300);
     });
 
     it("cancels a pending animation frame in the cleanup function on unmount", () => {
@@ -1231,22 +1236,22 @@ describe("useScrollHint", () => {
         });
       }
 
-      let hookResult: UseScrollHintReturn | undefined;
+      const hookRef: { current?: UseScrollHintReturn } = {};
       render(
         createElement(CappedHost, {
           onHook: (h: UseScrollHintReturn) => {
-            hookResult = h;
+            hookRef.current = h;
           },
         }),
       );
 
       // Real remaining is 300 / 1200 — both well past the 24px cap.
-      expect(hookResult!.remainingLeft).toBe(24);
-      expect(hookResult!.remainingRight).toBe(24);
+      expect(hookRef.current!.remainingLeft).toBe(24);
+      expect(hookRef.current!.remainingRight).toBe(24);
     });
 
     it("keeps a capped value unchanged across a scroll tick that stays past the cap", () => {
-      let scrollLeftValue = 0;
+      const scrolled = { left: 0 };
       Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
         configurable: true,
         value: 2000,
@@ -1257,7 +1262,7 @@ describe("useScrollHint", () => {
       });
       Object.defineProperty(HTMLElement.prototype, "scrollLeft", {
         configurable: true,
-        get: () => scrollLeftValue,
+        get: () => scrolled.left,
       });
 
       const { flush } = stubAnimationFrame();
@@ -1277,20 +1282,20 @@ describe("useScrollHint", () => {
         });
       }
 
-      let hookResult: UseScrollHintReturn | undefined;
+      const hookRef: { current?: UseScrollHintReturn } = {};
       render(
         createElement(CappedHost, {
           onHook: (h: UseScrollHintReturn) => {
-            hookResult = h;
+            hookRef.current = h;
           },
         }),
       );
 
       // 2000 - 500 - 0 = 1500, capped to 24.
-      expect(hookResult!.remainingRight).toBe(24);
+      expect(hookRef.current!.remainingRight).toBe(24);
 
       const container = screen.getByTestId("scroll-container");
-      scrollLeftValue = 100;
+      scrolled.left = 100;
       act(() => {
         container.dispatchEvent(new Event("scroll"));
       });
@@ -1300,7 +1305,7 @@ describe("useScrollHint", () => {
 
       // Real remaining dropped to 1400 — still far past the cap, so the
       // capped output — and a consumer keyed off it — is unchanged.
-      expect(hookResult!.remainingRight).toBe(24);
+      expect(hookRef.current!.remainingRight).toBe(24);
     });
   });
 });
