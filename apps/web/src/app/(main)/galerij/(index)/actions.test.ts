@@ -22,7 +22,10 @@ vi.mock(
           findPaginated(...args);
           return Effect.succeed([]);
         },
-      } as never),
+        findBySlug: () => Effect.die("not used by this suite"),
+        findByLinkedMatch: () => Effect.die("not used by this suite"),
+        findByLinkedEvent: () => Effect.die("not used by this suite"),
+      }),
     };
   },
 );

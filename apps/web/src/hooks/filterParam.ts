@@ -1,6 +1,7 @@
 /**
  * Shared, non-hook primitives behind `useHistoryFilterParam` (#2779, #2783
- * review finding 2).
+ * review finding 2), plus `firstParam`, which narrows Next's server-side
+ * `searchParams` and is imported by Server Components (#3875).
  *
  * `useHistoryFilterParam` is the only filter-param hook: a router-backed twin
  * (`useRouterFilterParam`) existed until #3382 moved its last caller,

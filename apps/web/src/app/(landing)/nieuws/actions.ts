@@ -15,7 +15,8 @@ import {
 const ArticlesParams = S.Struct({
   offset: S.Number,
   limit: S.Number,
-  category: S.optional(S.String),
+  // Tags carry no length limit in the Studio schema; 100 is a generous bound.
+  category: S.optional(S.String.pipe(S.maxLength(100))),
 });
 const decodeArticlesParams = S.decodeUnknownSync(ArticlesParams);
 

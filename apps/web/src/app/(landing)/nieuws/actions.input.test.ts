@@ -53,6 +53,13 @@ describe("fetchArticlesAction decodes its public input (#3875)", () => {
     expect(findPaginated).not.toHaveBeenCalled();
   });
 
+  it("rejects a category longer than 100 characters, and never reads", async () => {
+    await expect(
+      fetchArticlesAction({ offset: 0, limit: 12, category: "a".repeat(101) }),
+    ).rejects.toThrow();
+    expect(findPaginated).not.toHaveBeenCalled();
+  });
+
   it("passes a string category through to the read", async () => {
     await fetchArticlesAction({ offset: 0, limit: 12, category: "a" });
     expect(findPaginated).toHaveBeenCalledWith({
