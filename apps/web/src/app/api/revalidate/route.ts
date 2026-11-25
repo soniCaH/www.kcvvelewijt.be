@@ -145,10 +145,15 @@ function targets(
   }
 }
 
-/** `undefined` when the body is not valid JSON. */
+/** `undefined` when the body is not valid JSON or not a JSON object (#3861). */
 const parseWebhookBody = (rawBody: string): WebhookBody | undefined => {
   try {
-    return JSON.parse(rawBody) as WebhookBody;
+    const parsed: unknown = JSON.parse(rawBody);
+    return typeof parsed === "object" &&
+      parsed !== null &&
+      !Array.isArray(parsed)
+      ? (parsed as WebhookBody)
+      : undefined;
   } catch {
     return undefined;
   }
