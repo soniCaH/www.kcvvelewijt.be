@@ -38,7 +38,7 @@ const contactLabel = (
   }
 }
 
-export function prepareResponsibilityPreview(selection: ResponsibilityPreviewSelection) {
+export const prepareResponsibilityPreview = (selection: ResponsibilityPreviewSelection) => {
   const {title, active, category, contactNodeTitle, contactRole, contactType} = selection
 
   const contact = contactLabel(contactType, contactNodeTitle, contactRole) || '(geen contact)'
@@ -49,4 +49,4 @@ export function prepareResponsibilityPreview(selection: ResponsibilityPreviewSel
     title: title ?? '(untitled)',
     subtitle: parts.join(' — '),
   }
-}
+};

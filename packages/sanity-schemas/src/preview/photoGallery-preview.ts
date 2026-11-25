@@ -14,12 +14,11 @@ export const galleryImagePreviewSelect = {
   media: 'asset',
 }
 
-export function prepareGalleryImagePreview(
-  selection: Record<keyof typeof galleryImagePreviewSelect, any>,
-) {
+export const prepareGalleryImagePreview = (
+  selection: Record<keyof typeof galleryImagePreviewSelect, any>,) => {
   const {title, subtitle, media} = selection
   return {title: title || 'Foto', subtitle, media}
-}
+};
 
 export const photoGalleryPreviewSelect = {
   title: 'title',
@@ -28,13 +27,12 @@ export const photoGalleryPreviewSelect = {
   images: 'images',
 }
 
-export function preparePhotoGalleryPreview(
-  selection: Record<keyof typeof photoGalleryPreviewSelect, any>,
-) {
+export const preparePhotoGalleryPreview = (
+  selection: Record<keyof typeof photoGalleryPreviewSelect, any>,) => {
   const {title, media, publishedAt, images} = selection
   const count = Array.isArray(images) ? images.length : 0
   const parsed = typeof publishedAt === 'string' ? new Date(publishedAt) : null
   const date = parsed && !Number.isNaN(parsed.getTime()) ? parsed.toLocaleDateString('nl-BE') : ''
   const subtitle = [count ? `${count} foto's` : '', date].filter(Boolean).join(' · ')
   return {title, subtitle, media}
-}
+};

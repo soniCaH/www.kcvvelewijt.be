@@ -19,10 +19,9 @@ const hasContent = (value: unknown): boolean =>
  * and `solutionStep.contact` so it can be unit-tested against synthetic
  * objects without the Sanity Studio runtime.
  */
-export function validateContactFields(
+export const validateContactFields = (
   contact: Record<string, unknown> | undefined,
-  required: boolean,
-): true | string {
+  required: boolean,): true | string => {
   if (!contact?.contactType) return required ? 'Kies een type contact' : true
   switch (contact.contactType) {
     case 'position':
@@ -39,4 +38,4 @@ export function validateContactFields(
     default:
       return 'Ongeldig type contact'
   }
-}
+};

@@ -20,7 +20,7 @@ interface OrganigramNodePreviewSelection {
   members?: unknown[]
 }
 
-export function prepareOrganigramNodePreview(selection: OrganigramNodePreviewSelection) {
+export const prepareOrganigramNodePreview = (selection: OrganigramNodePreviewSelection) => {
   const {title, roleCode, members} = selection
 
   const count = Array.isArray(members) ? members.length : 0
@@ -30,4 +30,4 @@ export function prepareOrganigramNodePreview(selection: OrganigramNodePreviewSel
     title: [badge, title].filter(Boolean).join(' '),
     subtitle: count > 0 ? `${count} ${count === 1 ? 'lid' : 'leden'}` : 'Vacant',
   }
-}
+};

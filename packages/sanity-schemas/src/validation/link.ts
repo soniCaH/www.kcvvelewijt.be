@@ -22,9 +22,9 @@ const hasUnsafeChar = (value: string): boolean =>
 
 const LINK_PATTERN = /^(\/(?![/\\])|#|https?:\/\/|mailto:|tel:)/i
 
-export function validateLink(value: unknown): true | string {
+export const validateLink = (value: unknown): true | string => {
   if (typeof value !== 'string' || value.length === 0) return true
   return LINK_PATTERN.test(value) && !hasUnsafeChar(value)
     ? true
     : 'Dit is geen geldige link. Gebruik een volledige link (https://…) of een pad dat met "/" begint (bijv. /jeugd/visie), zonder spaties.'
-}
+};

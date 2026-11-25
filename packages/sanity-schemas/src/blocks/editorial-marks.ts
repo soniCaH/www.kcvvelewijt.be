@@ -38,7 +38,7 @@ export const PULLQUOTE_BIO_HELP =
  * text (STUDIO-7 / PLAYER-5). The default `link` annotation is kept by
  * leaving `marks.annotations` unspecified.
  */
-export function editorialBioOf() {
+export const editorialBioOf = () => {
   return [
     defineArrayMember({
       type: 'block',
@@ -56,7 +56,7 @@ export function editorialBioOf() {
       },
     }),
   ]
-}
+};
 
 /**
  * `of:[block]` shared by the constrained accent title fields
@@ -64,7 +64,7 @@ export function editorialBioOf() {
  * lists, no annotations, ONE `accent` decorator. The editor selects a word +
  * clicks Accent; the renderer paints accent spans jersey-deep + italic.
  */
-export function accentTitleOf() {
+export const accentTitleOf = () => {
   return [
     defineArrayMember({
       type: 'block',
@@ -76,4 +76,4 @@ export function accentTitleOf() {
       },
     }),
   ]
-}
+};

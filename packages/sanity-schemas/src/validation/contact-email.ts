@@ -8,11 +8,10 @@
 const EMAIL_PATTERN =
   /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
-export function validateContactEmail(
+export const validateContactEmail = (
   value: unknown,
-  parent: {contactType?: string} | undefined,
-): true | string {
+  parent: {contactType?: string} | undefined,): true | string => {
   if (parent?.contactType !== 'manual') return true
   if (typeof value !== 'string' || value.length === 0) return true
   return EMAIL_PATTERN.test(value) ? true : 'Dit is geen geldig e-mailadres.'
-}
+};

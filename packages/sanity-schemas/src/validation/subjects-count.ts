@@ -8,14 +8,13 @@ export interface SubjectsCountContext {
   document?: {articleType?: string}
 }
 
-export function validateSubjectsCount(
+export const validateSubjectsCount = (
   subjects: unknown,
-  context: SubjectsCountContext,
-): true | string {
+  context: SubjectsCountContext,): true | string => {
   if (context.document?.articleType !== 'interview') return true
   const count = Array.isArray(subjects) ? subjects.length : 0
   if (count < 1) return 'Interview articles need at least one subject.'
   if (count > 4)
     return 'Maximum 4 subjects per interview. Lift the cap via a dedicated design pass — not inline.'
   return true
-}
+};

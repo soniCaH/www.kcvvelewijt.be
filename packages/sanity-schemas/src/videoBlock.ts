@@ -19,16 +19,16 @@ const ALLOWED_EMBED_HOSTS = new Set([
 // ES2017 lib without pulling in the DOM types.
 const HTTPS_URL_RE = /^https:\/\/([^/?#]+)(?:[/?#]|$)/i
 
-function isAllowedEmbedUrl(raw: string): boolean {
+const isAllowedEmbedUrl = (raw: string): boolean => {
   const match = HTTPS_URL_RE.exec(raw)
   if (!match) return false
   return ALLOWED_EMBED_HOSTS.has(match[1].toLowerCase())
-}
+};
 
-function extractHost(raw: string): string | null {
+const extractHost = (raw: string): string | null => {
   const match = HTTPS_URL_RE.exec(raw)
   return match ? match[1].toLowerCase() : null
-}
+};
 
 /**
  * Soft-warning threshold for uploaded video files. Above this size the
