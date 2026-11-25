@@ -95,6 +95,25 @@ describe("POST /api/revalidate", () => {
   });
 
   it.each([
+    ["an array", ["article"]],
+    ["an object", { x: 1 }],
+    ["a boolean", true],
+    ["a number", 7],
+    ["an empty string", ""],
+  ])(
+    "returns 400 Missing _type when _type is %s (#3863)",
+    async (_label, type) => {
+      const res = await POST(makeRequest({ _type: type }));
+      expect(res.status).toBe(400);
+      await expect(res.json()).resolves.toEqual({
+        ok: false,
+        error: "Missing _type",
+      });
+      expect(after).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
     ["null", null],
     ["a number", 42],
     ["a string", "x"],
@@ -178,6 +197,73 @@ describe("POST /api/revalidate", () => {
     expect(res.status).toBe(200);
     expect(revalidatePath).toHaveBeenCalledWith("/spelers/42");
     expect(revalidateTag).toHaveBeenCalledWith("players", "max");
+  });
+
+  it("returns 400 Missing _type when _type is absent entirely (#3863)", async () => {
+    const res = await POST(makeRequest({ slug: "x", psdId: 1 }));
+    expect(res.status).toBe(400);
+    await expect(res.json()).resolves.toEqual({
+      ok: false,
+      error: "Missing _type",
+    });
+  });
+
+  it("reports Missing _type when both _type and psdId are bad (#3863)", async () => {
+    const res = await POST(makeRequest({ _type: 7, psdId: {} }));
+    expect(res.status).toBe(400);
+    await expect(res.json()).resolves.toEqual({
+      ok: false,
+      error: "Missing _type",
+    });
+  });
+
+  it.each([
+    ["player", "an object", {}],
+    ["staffMember", "an object", {}],
+    ["player", "a boolean", true],
+    ["staffMember", "an array", []],
+  ])(
+    "returns 400 Invalid psdId for a %s whose psdId is %s (#3863)",
+    async (type, _label, psdId) => {
+      const res = await POST(makeRequest({ _type: type, psdId }));
+      expect(res.status).toBe(400);
+      await expect(res.json()).resolves.toEqual({
+        ok: false,
+        error: "Invalid psdId",
+      });
+      expect(after).not.toHaveBeenCalled();
+      expect(revalidatePath).not.toHaveBeenCalled();
+      expect(revalidateTag).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
+    ["slug", { _type: "article", slug: 5 }],
+    ["previousSlug", { _type: "article", slug: "x", previousSlug: {} }],
+  ])(
+    "returns 400 Invalid %s when it is not a string (#3863)",
+    async (field, body) => {
+      const res = await POST(makeRequest(body));
+      expect(res.status).toBe(400);
+      await expect(res.json()).resolves.toEqual({
+        ok: false,
+        error: `Invalid ${field}`,
+      });
+      expect(after).not.toHaveBeenCalled();
+      expect(revalidatePath).not.toHaveBeenCalled();
+    },
+  );
+
+  it("accepts null for the optional projected fields", async () => {
+    // GROQ yields null for a missing field, e.g. previousSlug on a non-rename.
+    const res = await post({
+      _type: "player",
+      slug: null,
+      previousSlug: null,
+      psdId: 42,
+    });
+    expect(res.status).toBe(200);
+    expect(revalidatePath).toHaveBeenCalledWith("/spelers/42");
   });
 
   it("routes staff by psdId, not slug", async () => {
