@@ -107,7 +107,7 @@ function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
 // here so `afterEach` can remove them by reference, without a bespoke marker
 // attribute (every one of them already sets a real `id`, which is all these
 // tests query by).
-let appendedSectionTargets: Element[] = [];
+const appendedSectionTargets: Element[] = [];
 
 describe("TeamSectionNav", () => {
   beforeEach(() => {
@@ -119,8 +119,7 @@ describe("TeamSectionNav", () => {
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
     document.documentElement.style.scrollPaddingTop = "";
-    appendedSectionTargets.forEach((el) => el.remove());
-    appendedSectionTargets = [];
+    appendedSectionTargets.splice(0).forEach((el) => el.remove());
   });
 
   it("renders nothing with zero sections", () => {

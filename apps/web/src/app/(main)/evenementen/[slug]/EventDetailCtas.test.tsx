@@ -26,23 +26,24 @@ const baseProps = {
 const suppressNavigation = (event: Event) => event.preventDefault();
 
 describe("EventDetailCtas", () => {
-  let clickSpy: ReturnType<typeof vi.spyOn>;
+  const ctx = {} as {
+    clickSpy: ReturnType<typeof vi.spyOn>;
+    lastIcsBlob?: Blob;
+  };
   // The Blob passed to createObjectURL by the most recent agenda click — set
   // by the stub below so a test can inspect the actual .ics content without
   // re-stubbing the global itself (which vi.restoreAllMocks() couldn't undo).
-  let lastIcsBlob: Blob | undefined;
-
   beforeEach(() => {
     trackEventMock.mockReset();
-    lastIcsBlob = undefined;
+    ctx.lastIcsBlob = undefined;
     document.addEventListener("click", suppressNavigation, true);
     // Stub blob-URL APIs (absent / navigation-triggering in the test DOM).
     globalThis.URL.createObjectURL = vi.fn((blob: Blob) => {
-      lastIcsBlob = blob;
+      ctx.lastIcsBlob = blob;
       return "blob:mock";
     });
     globalThis.URL.revokeObjectURL = vi.fn();
-    clickSpy = vi
+    ctx.clickSpy = vi
       .spyOn(HTMLAnchorElement.prototype, "click")
       .mockImplementation(() => {});
   });
@@ -120,7 +121,7 @@ describe("EventDetailCtas", () => {
     await user.click(screen.getByRole("button", { name: /Zet in agenda/i }));
 
     expect(globalThis.URL.createObjectURL).toHaveBeenCalledTimes(1);
-    expect(clickSpy).toHaveBeenCalledTimes(1);
+    expect(ctx.clickSpy).toHaveBeenCalledTimes(1);
     expect(globalThis.URL.revokeObjectURL).toHaveBeenCalledWith("blob:mock");
     expect(trackEventMock).toHaveBeenCalledWith("event_detail_cta_click", {
       event_slug: "mosselfeest",
@@ -150,7 +151,7 @@ describe("EventDetailCtas", () => {
     render(<EventDetailCtas {...baseProps} />);
     await user.click(screen.getByRole("button", { name: /Zet in agenda/i }));
 
-    const ics = await lastIcsBlob!.text();
+    const ics = await ctx.lastIcsBlob!.text();
     expect(ics).toContain(`UID:${buildEventUid(baseProps.eventId)}`);
     // The slug never appears bare — the pre-#2716 defect minted
     // `${eventSlug}@kcvvelewijt.be` with no namespace prefix at all.

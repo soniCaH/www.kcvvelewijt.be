@@ -270,27 +270,30 @@ function optionsArg(method: string, args: string[]): string | undefined {
  */
 function topLevelArgs(source: string, open: number): string[] | null {
   const args: string[] = [];
-  let depth = 0;
-  let start = open + 1;
-  let quote: string | null = null;
+  const scan = {
+    depth: 0,
+    start: open + 1,
+    quote: null as string | null,
+    i: open,
+  };
 
-  for (let i = open; i < source.length; i++) {
-    const ch = source[i]!;
-    if (quote) {
-      if (ch === "\\") i++;
-      else if (ch === quote) quote = null;
+  for (; scan.i < source.length; scan.i++) {
+    const ch = source[scan.i]!;
+    if (scan.quote) {
+      if (ch === "\\") scan.i++;
+      else if (ch === scan.quote) scan.quote = null;
       continue;
     }
-    if (ch === '"' || ch === "'" || ch === "`") quote = ch;
-    else if (ch === "(" || ch === "[" || ch === "{") depth++;
+    if (ch === '"' || ch === "'" || ch === "`") scan.quote = ch;
+    else if (ch === "(" || ch === "[" || ch === "{") scan.depth++;
     else if (ch === ")" || ch === "]" || ch === "}") {
-      if (--depth > 0) continue;
-      args.push(source.slice(start, i));
+      if (--scan.depth > 0) continue;
+      args.push(source.slice(scan.start, scan.i));
       // A zero-argument call reads as one empty argument; report none.
       return args.length === 1 && args[0]!.trim() === "" ? [] : args;
-    } else if (ch === "," && depth === 1) {
-      args.push(source.slice(start, i));
-      start = i + 1;
+    } else if (ch === "," && scan.depth === 1) {
+      args.push(source.slice(scan.start, scan.i));
+      scan.start = scan.i + 1;
     }
   }
   return null;
@@ -328,19 +331,18 @@ function findRuntimeZoneParses(source: string): string[] {
 
 /** Offset from a call's `(` to just past its matching `)`. */
 function rest(source: string, open: number): number {
-  let depth = 0;
-  let quote: string | null = null;
-  for (let i = open; i < source.length; i++) {
-    const ch = source[i]!;
-    if (quote) {
-      if (ch === "\\") i++;
-      else if (ch === quote) quote = null;
+  const scan = { depth: 0, quote: null as string | null, i: open };
+  for (; scan.i < source.length; scan.i++) {
+    const ch = source[scan.i]!;
+    if (scan.quote) {
+      if (ch === "\\") scan.i++;
+      else if (ch === scan.quote) scan.quote = null;
       continue;
     }
-    if (ch === '"' || ch === "'" || ch === "`") quote = ch;
-    else if (ch === "(" || ch === "[" || ch === "{") depth++;
+    if (ch === '"' || ch === "'" || ch === "`") scan.quote = ch;
+    else if (ch === "(" || ch === "[" || ch === "{") scan.depth++;
     else if (ch === ")" || ch === "]" || ch === "}") {
-      if (--depth === 0) return i - open + 1;
+      if (--scan.depth === 0) return scan.i - open + 1;
     }
   }
   return source.length - open;
@@ -969,13 +971,13 @@ function resolveImport(
   fromPath: string,
   specifier: string,
 ): string | undefined {
-  let target: string | undefined;
-  if (specifier.startsWith("@/")) {
-    target = specifier.slice(2);
-  } else if (specifier.startsWith(".")) {
-    const dir = fromPath.split("/").slice(0, -1).join("/");
-    target = new URL(specifier, `file:///${dir}/`).pathname.slice(1);
-  }
+  const dir = fromPath.split("/").slice(0, -1).join("/");
+  const toTarget = (): string | undefined => {
+    if (specifier.startsWith("@/")) return specifier.slice(2);
+    if (!specifier.startsWith(".")) return undefined;
+    return new URL(specifier, `file:///${dir}/`).pathname.slice(1);
+  };
+  const target = toTarget();
   if (target === undefined) return undefined;
   for (const ext of [".tsx", ".ts"]) {
     if (code.has(`${target}${ext}`)) return `${target}${ext}`;
@@ -1833,19 +1835,18 @@ function interfaceBody(source: string, name: string): string {
     );
   }
   const bodyStart = markerIndex + marker.length;
-  let depth = 1;
-  let i = bodyStart;
-  while (depth > 0) {
-    if (i >= source.length) {
+  const scan = { depth: 1, i: bodyStart };
+  while (scan.depth > 0) {
+    if (scan.i >= source.length) {
       throw new Error(
         `${name}: unterminated interface — its opening "{" never finds a matching "}" before the file ends.`,
       );
     }
-    if (source[i] === "{") depth++;
-    else if (source[i] === "}") depth--;
-    i++;
+    if (source[scan.i] === "{") scan.depth++;
+    else if (source[scan.i] === "}") scan.depth--;
+    scan.i++;
   }
-  return source.slice(bodyStart, i - 1);
+  return source.slice(bodyStart, scan.i - 1);
 }
 
 /** Every field name declared directly inside an interface `body` — a
@@ -3120,19 +3121,18 @@ function expressionAt(source: string, open: number): string {
     const literal = STRING_LITERAL_G.exec(source);
     return literal?.index === open ? literal[0] : "";
   }
-  let depth = 0;
-  let i = open;
-  while (i < source.length) {
-    STRING_LITERAL_G.lastIndex = i;
+  const scan = { depth: 0, i: open };
+  while (scan.i < source.length) {
+    STRING_LITERAL_G.lastIndex = scan.i;
     const literal = STRING_LITERAL_G.exec(source);
     const next = literal?.index ?? source.length;
-    for (; i < next; i++) {
-      if (/[{(]/.test(source[i]!)) depth++;
-      else if (/[})]/.test(source[i]!) && --depth === 0) {
-        return source.slice(open, i + 1);
+    for (; scan.i < next; scan.i++) {
+      if (/[{(]/.test(source[scan.i]!)) scan.depth++;
+      else if (/[})]/.test(source[scan.i]!) && --scan.depth === 0) {
+        return source.slice(open, scan.i + 1);
       }
     }
-    i = next + (literal?.[0].length ?? 0);
+    scan.i = next + (literal?.[0].length ?? 0);
   }
   return source.slice(open);
 }

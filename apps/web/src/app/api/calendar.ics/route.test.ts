@@ -291,12 +291,10 @@ describe("GET /api/calendar.ics", () => {
     // happened — `rejects.toBeDefined()` alone would also pass on a rejection
     // caused by a typo in this test's own setup, proving nothing about the
     // Sanity defect actually propagating (#2711 round 2 finding B).
-    let caught: unknown;
-    try {
-      await eventsCacheCallAtImport!.fn();
-    } catch (error) {
-      caught = error;
-    }
+    const caught = await eventsCacheCallAtImport!.fn().then(
+      () => undefined,
+      (error: unknown) => error,
+    );
     expect(caught).toBeDefined();
     expect(String(caught)).toContain("Sanity is down");
   });

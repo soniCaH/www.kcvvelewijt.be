@@ -45,11 +45,11 @@ function makePostRequest(body: unknown): NextRequest {
 
 describe("POST /api/search", () => {
   const TEST_BFF_URL = "http://localhost:8787";
-  let savedApiUrl: string | undefined;
+  const saved: { value?: string } = {};
 
   beforeEach(() => {
     vi.stubGlobal("fetch", vi.fn());
-    savedApiUrl = process.env.KCVV_API_URL;
+    saved.value = process.env.KCVV_API_URL;
     process.env.KCVV_API_URL = TEST_BFF_URL;
     vi.stubEnv("BFF_SHARED_SECRET", "test-bff-secret");
   });
@@ -57,8 +57,8 @@ describe("POST /api/search", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.unstubAllEnvs();
-    if (savedApiUrl !== undefined) {
-      process.env.KCVV_API_URL = savedApiUrl;
+    if (saved.value !== undefined) {
+      process.env.KCVV_API_URL = saved.value;
     } else {
       delete process.env.KCVV_API_URL;
     }

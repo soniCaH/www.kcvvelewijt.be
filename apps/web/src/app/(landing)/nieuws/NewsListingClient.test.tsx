@@ -555,12 +555,8 @@ describe("NewsListingClient", () => {
 
   it("shows loading indicator while fetching", async () => {
     // Make fetchArticles hang
-    let resolvePromise: (value: unknown) => void;
-    mockFetchArticles.mockReturnValue(
-      new Promise((resolve) => {
-        resolvePromise = resolve;
-      }),
-    );
+    const hung = Promise.withResolvers<unknown>();
+    mockFetchArticles.mockReturnValue(hung.promise);
 
     render(
       <NewsListingClient
@@ -579,7 +575,7 @@ describe("NewsListingClient", () => {
     });
 
     // Resolve to prevent act warnings
-    resolvePromise!({ items: [], hasMore: false });
+    hung.resolve({ items: [], hasMore: false });
   });
 
   describe("a pending category switch (#3388)", () => {
@@ -614,14 +610,8 @@ describe("NewsListingClient", () => {
       );
 
     const hangFetch = () => {
-      let resolve!: (value: unknown) => void;
-      let reject!: (reason: unknown) => void;
-      mockFetchArticles.mockReturnValue(
-        new Promise((res, rej) => {
-          resolve = res;
-          reject = rej;
-        }),
-      );
+      const { promise, resolve, reject } = Promise.withResolvers<unknown>();
+      mockFetchArticles.mockReturnValue(promise);
       return { resolve, reject };
     };
 
@@ -765,12 +755,8 @@ describe("NewsListingClient", () => {
 
     it("lets 'Meer nieuws laden' work right after a switch cut off an in-flight load-more", async () => {
       vi.spyOn(window, "scrollTo").mockImplementation(() => {});
-      let resolveStale!: (value: unknown) => void;
-      mockFetchArticles.mockReturnValueOnce(
-        new Promise((res) => {
-          resolveStale = res;
-        }),
-      );
+      const stale = Promise.withResolvers<unknown>();
+      mockFetchArticles.mockReturnValueOnce(stale.promise);
       renderListing();
       clickLoadMore();
 
@@ -787,7 +773,7 @@ describe("NewsListingClient", () => {
       clickLoadMore();
       expect(mockFetchArticles).toHaveBeenCalledTimes(3);
 
-      resolveStale({ items: [], hasMore: false });
+      stale.resolve({ items: [], hasMore: false });
       await advance(0);
     });
 
