@@ -205,6 +205,23 @@ describe("handleDartsPaidWebhook", () => {
     expect(dispatch).not.toHaveBeenCalled();
   });
 
+  it("sends no mail for a document with an invalid captainEmail, and logs its id (#3876)", async () => {
+    mockFetch.mockResolvedValue({ ...paidDoc, captainEmail: "not-an-email" });
+
+    const res = await call();
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({
+      ok: true,
+      action: "skipped_invalid_doc",
+    });
+    expect(dispatch).not.toHaveBeenCalled();
+    expect(mockCommit).not.toHaveBeenCalled();
+    expect(console.error).toHaveBeenCalledWith(
+      expect.stringContaining("abc123"),
+    );
+  });
+
   it("skips another document type and a delete without reading Sanity", async () => {
     await call({ _id: "x", _type: "article" });
     await call(undefined, { operation: "delete" });
