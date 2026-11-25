@@ -82,8 +82,8 @@ createServer((req, res) => {
 });
 `;
 
-let dir = "";
-let stubPath = "";
+const dir = mkdtempSync(join(tmpdir(), "psd-sync-fixture-"));
+const stubPath = join(dir, "stub.mjs");
 
 /**
  * Each run gets its own port, hits file and log. Sharing them across cases let
@@ -91,7 +91,7 @@ let stubPath = "";
  * exactly-once assertion pass or fail on test ordering rather than on the
  * script's behaviour — and a reused port raced the previous stub's shutdown.
  */
-let seq = 0;
+const runs = { count: 0 };
 
 /**
  * Ask the OS for a free port, then release it. A base port plus a counter
@@ -116,17 +116,15 @@ function freePort(): Promise<number> {
 }
 
 beforeAll(() => {
-  dir = mkdtempSync(join(tmpdir(), "psd-sync-fixture-"));
-  stubPath = join(dir, "stub.mjs");
   writeFileSync(stubPath, STUB_SERVER, "utf8");
 });
 
 afterAll(() => {
-  if (dir) rmSync(dir, { recursive: true, force: true });
+  rmSync(dir, { recursive: true, force: true });
 });
 
 async function run(args: string[], extraEnv: Record<string, string> = {}) {
-  const n = seq++;
+  const n = runs.count++;
   const port = await freePort();
   const hitsFile = join(dir, `hits-${n}.txt`);
   const logPath = join(dir, `sync-${n}.log`);

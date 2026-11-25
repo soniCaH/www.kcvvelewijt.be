@@ -80,8 +80,7 @@ interface TagsArrayMatch {
 function findTagsArrays(code: string): TagsArrayMatch[] {
   const arrays: TagsArrayMatch[] = [];
   const re = /\btags\s*:\s*\[([^\]]*)\]/g;
-  let match: RegExpExecArray | null;
-  while ((match = re.exec(code))) {
+  for (const match of code.matchAll(re)) {
     const tags = Array.from(
       match[1]!.matchAll(/["']([^"']+)["']/g),
       (m) => m[1]!,
@@ -126,14 +125,12 @@ function effectiveTagsAt(code: string, tagIndex: number): Set<string> {
     storiesRegion.matchAll(/^export const /gm),
     (m) => m.index!,
   );
-  let blockStart = 0;
-  let blockEnd = storiesRegion.length;
-  for (let i = 0; i < boundaries.length; i++) {
-    if (boundaries[i]! <= relativeIndex) {
-      blockStart = boundaries[i]!;
-      blockEnd = boundaries[i + 1] ?? storiesRegion.length;
-    }
-  }
+  const owner = boundaries.findLastIndex((b) => b <= relativeIndex);
+  const blockStart = owner === -1 ? 0 : boundaries[owner]!;
+  const blockEnd =
+    owner === -1
+      ? storiesRegion.length
+      : (boundaries[owner + 1] ?? storiesRegion.length);
   const ownTags = findTagsArrays(
     storiesRegion.slice(blockStart, blockEnd),
   ).flatMap((a) => a.tags);
@@ -145,41 +142,38 @@ describe("structural VR assertion tags stay wired to a story the VR run actually
   it.each(STRUCTURAL_ASSERTIONS)(
     'tag "$tag" is applied, via a real `tags:` array, to a story whose combined tags include "vr" and exclude "vr-skip"',
     ({ tag, description }) => {
-      let matchCount = 0;
-
-      for (const relPath of storyFiles) {
+      const occurrences = storyFiles.flatMap((relPath) => {
         const code = stripComments(
           readFileSync(resolve(srcDir, relPath), "utf8"),
         );
-        const owningArrays = findTagsArrays(code).filter((a) =>
-          a.tags.includes(tag),
-        );
+        return findTagsArrays(code)
+          .filter((a) => a.tags.includes(tag))
+          .map(({ index }) => ({ relPath, code, index }));
+      });
 
-        for (const { index } of owningArrays) {
-          matchCount++;
-          const effectiveTags = effectiveTagsAt(code, index);
+      for (const { relPath, code, index } of occurrences) {
+        const effectiveTags = effectiveTagsAt(code, index);
 
-          expect(
-            effectiveTags.has("vr"),
-            `${relPath} applies structural-assertion tag "${tag}" to a ` +
-              `story whose combined tags (meta ∪ story) do not include ` +
-              `"vr". The VR run is \`test-storybook --includeTags vr\` ` +
-              `(apps/web/package.json) — it never visits this story, so ` +
-              `the assertion never runs. (${description})`,
-          ).toBe(true);
-          expect(
-            effectiveTags.has("vr-skip"),
-            `${relPath} applies structural-assertion tag "${tag}" to a ` +
-              `story whose combined tags (meta ∪ story) also include ` +
-              `"vr-skip". The VR run excludes it ` +
-              `(\`--excludeTags vr-skip\`), so the assertion never runs. ` +
-              `(${description})`,
-          ).toBe(false);
-        }
+        expect(
+          effectiveTags.has("vr"),
+          `${relPath} applies structural-assertion tag "${tag}" to a ` +
+            `story whose combined tags (meta ∪ story) do not include ` +
+            `"vr". The VR run is \`test-storybook --includeTags vr\` ` +
+            `(apps/web/package.json) — it never visits this story, so ` +
+            `the assertion never runs. (${description})`,
+        ).toBe(true);
+        expect(
+          effectiveTags.has("vr-skip"),
+          `${relPath} applies structural-assertion tag "${tag}" to a ` +
+            `story whose combined tags (meta ∪ story) also include ` +
+            `"vr-skip". The VR run excludes it ` +
+            `(\`--excludeTags vr-skip\`), so the assertion never runs. ` +
+            `(${description})`,
+        ).toBe(false);
       }
 
       expect(
-        matchCount,
+        occurrences.length,
         `No *.stories.{js,jsx,mjs,ts,tsx} file applies the structural-` +
           `assertion tag "${tag}" inside a real \`tags:\` array ` +
           `(${description}). If it was renamed, removed, or only survives ` +

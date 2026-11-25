@@ -71,10 +71,10 @@ const DEV_VARS = [
   "",
 ].join("\n");
 
-let dir = "";
-let stubPath = "";
-let devVarsDir = "";
-let seq = 0;
+const dir = mkdtempSync(join(tmpdir(), "staging-search-fixture-"));
+const stubPath = join(dir, "stub.mjs");
+const devVarsDir = join(dir, "api");
+const runs = { count: 0 };
 
 /** OS-assigned, released before use — see `trigger-psd-sync.test.ts` (#3109). */
 function freePort(): Promise<number> {
@@ -89,16 +89,13 @@ function freePort(): Promise<number> {
 }
 
 beforeAll(() => {
-  dir = mkdtempSync(join(tmpdir(), "staging-search-fixture-"));
-  stubPath = join(dir, "stub.mjs");
   writeFileSync(stubPath, STUB_SERVER, "utf8");
-  devVarsDir = join(dir, "api");
   mkdirSync(devVarsDir);
   writeFileSync(join(devVarsDir, ".dev.vars"), DEV_VARS, "utf8");
 });
 
 afterAll(() => {
-  if (dir) rmSync(dir, { recursive: true, force: true });
+  rmSync(dir, { recursive: true, force: true });
 });
 
 type Run = SpawnSyncReturns<string> & { hits: string[]; log: string };
@@ -107,7 +104,7 @@ async function run(
   outcome: "ok" | "failed",
   extraEnv: Record<string, string> = {},
 ): Promise<Run> {
-  const n = seq++;
+  const n = runs.count++;
   const port = await freePort();
   const hitsFile = join(dir, `hits-${n}.txt`);
   const logPath = join(dir, `backfill-${n}.log`);
@@ -136,28 +133,28 @@ async function run(
 
 describe("backfill-staging-search.sh", () => {
   /** One happy-path run, shared by every test that only reads its output. */
-  let ok: Run;
+  const shared = {} as { ok: Run };
   beforeAll(async () => {
-    ok = await run("ok");
+    shared.ok = await run("ok");
   });
 
   it("fires the search-index cron exactly once, and never the PSD sync", () => {
-    expect(ok.status, ok.log).toBe(0);
-    expect(ok.hits).toHaveLength(1);
-    const url = new URL(ok.hits[0]!, "http://localhost");
+    expect(shared.ok.status, shared.ok.log).toBe(0);
+    expect(shared.ok.hits).toHaveLength(1);
+    const url = new URL(shared.ok.hits[0]!, "http://localhost");
     expect(url.pathname).toBe("/__scheduled");
     expect(url.searchParams.get("cron")).toBe("30 2 * * *");
   });
 
   it("names the target index and dataset before it writes, and reports what landed", () => {
-    expect(ok.stdout).toContain("Vectorize index : kcvv-search-staging");
-    expect(ok.stdout).toContain("Sanity dataset  : staging");
-    expect(ok.stdout).toContain("[search-sync] Indexed 12/12 articles");
+    expect(shared.ok.stdout).toContain("Vectorize index : kcvv-search-staging");
+    expect(shared.ok.stdout).toContain("Sanity dataset  : staging");
+    expect(shared.ok.stdout).toContain("[search-sync] Indexed 12/12 articles");
   });
 
   it("hands wrangler the secrets without any spelling of the two guarded keys", () => {
-    const envFile = /ENV_FILE>>([\s\S]*)<<ENV_FILE/.exec(ok.log)?.[1];
-    expect(envFile, ok.log).toBeDefined();
+    const envFile = /ENV_FILE>>([\s\S]*)<<ENV_FILE/.exec(shared.ok.log)?.[1];
+    expect(envFile, shared.ok.log).toBeDefined();
     expect(envFile).toContain("SANITY_API_TOKEN=secret-token");
     expect(envFile).not.toMatch(/SANITY_DATASET|SEARCH_INDEX_NAME/);
   });

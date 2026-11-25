@@ -67,12 +67,12 @@ const ALLOWED = [
   'const ok9 = "has-[:focus-visible]:translate-y-1";',
 ];
 
-let messages: Map<string, string[]>;
+const lint = {} as { messages: Map<string, string[]> };
 
 // Loading the Next ESLint config takes seconds; pay it here, once, outside
 // every test's timeout.
 beforeAll(async () => {
-  messages = await lintFixtures(
+  lint.messages = await lintFixtures(
     eslint,
     [...PER_COMPONENT_RINGS, ...ALLOWED],
     join(webDir, "src", "fixture.tsx"),
@@ -83,13 +83,13 @@ describe("focus ring — src-file restricted-syntax rule", () => {
   it.each(PER_COMPONENT_RINGS)(
     "forbids a per-component ring or hidden outline: %s",
     (source) => {
-      expect(messages.get(source)).toEqual([
+      expect(lint.messages.get(source)).toEqual([
         expect.stringContaining("global focus ring"),
       ]);
     },
   );
 
   it.each(ALLOWED)("allows %s", (source) => {
-    expect(messages.get(source)).toEqual([]);
+    expect(lint.messages.get(source)).toEqual([]);
   });
 });

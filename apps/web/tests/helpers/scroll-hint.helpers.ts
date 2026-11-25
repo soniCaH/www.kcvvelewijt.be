@@ -27,12 +27,12 @@ import { vi } from "vitest";
  */
 export function stubAnimationFrame() {
   const queue = new Map<number, FrameRequestCallback>();
-  let nextId = 1;
+  const ids = { next: 1 };
 
   const raf = vi
     .spyOn(window, "requestAnimationFrame")
     .mockImplementation((cb: FrameRequestCallback) => {
-      const id = nextId++;
+      const id = ids.next++;
       queue.set(id, cb);
       return id;
     });

@@ -68,10 +68,10 @@ const HELP_BLOCK = "COMMIT MESSAGE FORMAT";
 /** How husky itself invokes a hook — see the `sh -e "$s"` line in `.husky/_/h`. */
 const AS_HUSKY_DOES = ["sh", "-e"];
 
-let fixture: string;
-let stubBin: string;
-let fakeNvmDir: string;
-let messageFile: string;
+const fixture = mkdtempSync(join(tmpdir(), "kcvv-husky-"));
+const stubBin = join(fixture, "stub-bin");
+const fakeNvmDir = join(fixture, "nvm");
+const messageFile = join(fixture, "COMMIT_EDITMSG");
 
 /**
  * Run a hook against stub `npx` / `pnpm` / `branch-guard.sh` binaries whose exit
@@ -107,11 +107,6 @@ const writeStub = (path: string, exitVar: string) => {
 };
 
 beforeAll(() => {
-  fixture = mkdtempSync(join(tmpdir(), "kcvv-husky-"));
-  stubBin = join(fixture, "stub-bin");
-  fakeNvmDir = join(fixture, "nvm");
-  messageFile = join(fixture, "COMMIT_EDITMSG");
-
   mkdirSync(stubBin);
   mkdirSync(join(fixture, ".husky"));
   mkdirSync(join(fakeNvmDir, "versions", "node"), { recursive: true });

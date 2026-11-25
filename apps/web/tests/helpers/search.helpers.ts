@@ -98,18 +98,16 @@ export function createMockSearchResponse(
  * Per-type counters for generating deterministic IDs in tests
  * Ensures test failures are reproducible and snapshots are stable
  */
-let articleIdCounter = 0;
-let playerIdCounter = 0;
-let teamIdCounter = 0;
+const idCounters = { article: 0, player: 0, team: 0 };
 
 /**
  * Reset all ID counters to 0
  * Call this in beforeEach if tests assert on specific ID values
  */
 export function resetIdCounter() {
-  articleIdCounter = 0;
-  playerIdCounter = 0;
-  teamIdCounter = 0;
+  idCounters.article = 0;
+  idCounters.player = 0;
+  idCounters.team = 0;
 }
 
 /**
@@ -120,7 +118,7 @@ export function createMockArticle(
 ): SearchResult {
   return {
     type: "article",
-    id: `article-${++articleIdCounter}`,
+    id: `article-${++idCounters.article}`,
     title: "Test Article",
     description: "Test article description",
     url: "/news/test-article",
@@ -139,7 +137,7 @@ export function createMockPlayer(
 ): SearchResult {
   return {
     type: "player",
-    id: `player-${++playerIdCounter}`,
+    id: `player-${++idCounters.player}`,
     title: "Test Player",
     description: "Middenvelder - Test Team",
     url: "/players/test-player",
@@ -156,7 +154,7 @@ export function createMockTeam(
 ): SearchResult {
   return {
     type: "team",
-    id: `team-${++teamIdCounter}`,
+    id: `team-${++idCounters.team}`,
     title: "Test Team",
     description: "Test team description",
     url: "/teams/test-team",
