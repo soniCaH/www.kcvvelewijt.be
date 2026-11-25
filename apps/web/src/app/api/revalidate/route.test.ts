@@ -200,19 +200,53 @@ describe("POST /api/revalidate", () => {
   });
 
   it.each([
-    ["player", "/spelers/", "players"],
-    ["staffMember", "/staf/", "staff"],
+    ["player", "an object", {}],
+    ["staffMember", "an object", {}],
+    ["player", "a boolean", true],
+    ["staffMember", "an array", []],
   ])(
-    "treats a non-string, non-number psdId on a %s as no psdId (#3863)",
-    async (type, prefix, tag) => {
-      const res = await post({ _type: type, psdId: {} });
-      expect(res.status).toBe(200);
-      expect(revalidatePath).not.toHaveBeenCalledWith(
-        expect.stringContaining(prefix),
-      );
-      expect(revalidateTag).toHaveBeenCalledWith(tag, "max");
+    "returns 400 Invalid psdId for a %s whose psdId is %s (#3863)",
+    async (type, _label, psdId) => {
+      const res = await POST(makeRequest({ _type: type, psdId }));
+      expect(res.status).toBe(400);
+      await expect(res.json()).resolves.toEqual({
+        ok: false,
+        error: "Invalid psdId",
+      });
+      expect(after).not.toHaveBeenCalled();
+      expect(revalidatePath).not.toHaveBeenCalled();
+      expect(revalidateTag).not.toHaveBeenCalled();
     },
   );
+
+  it.each([
+    ["slug", { _type: "article", slug: 5 }],
+    ["previousSlug", { _type: "article", slug: "x", previousSlug: {} }],
+  ])(
+    "returns 400 Invalid %s when it is not a string (#3863)",
+    async (field, body) => {
+      const res = await POST(makeRequest(body));
+      expect(res.status).toBe(400);
+      await expect(res.json()).resolves.toEqual({
+        ok: false,
+        error: `Invalid ${field}`,
+      });
+      expect(after).not.toHaveBeenCalled();
+      expect(revalidatePath).not.toHaveBeenCalled();
+    },
+  );
+
+  it("accepts null for the optional projected fields", async () => {
+    // GROQ yields null for a missing field, e.g. previousSlug on a non-rename.
+    const res = await post({
+      _type: "player",
+      slug: null,
+      previousSlug: null,
+      psdId: 42,
+    });
+    expect(res.status).toBe(200);
+    expect(revalidatePath).toHaveBeenCalledWith("/spelers/42");
+  });
 
   it("routes staff by psdId, not slug", async () => {
     const res = await post({ _type: "staffMember", psdId: 900 });

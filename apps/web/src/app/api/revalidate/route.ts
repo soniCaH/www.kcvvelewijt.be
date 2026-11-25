@@ -1,6 +1,7 @@
 import { after, NextResponse } from "next/server";
 import { isValidSignature, SIGNATURE_HEADER_NAME } from "@sanity/webhook";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { Either, ParseResult, Schema as S } from "effect";
 import { SANITY_TAGS } from "@/lib/sanity/cache-tags";
 
 /**
@@ -32,16 +33,21 @@ export const maxDuration = 120;
  * issue's "Scope E manual step" for the exact URL / projection / secret.
  */
 
-/** Fields are `unknown`: the signed body is parsed, never validated upstream. */
-interface WebhookBody {
-  _type?: unknown;
+/**
+ * The webhook body, decoded once at the edge (#3863). The projection is set by
+ * hand in the Sanity console and GROQ yields `null` for a missing field (e.g.
+ * `before().slug.current` on every non-rename), so the optional fields accept
+ * `null` as well as absence; anything else is a 400.
+ */
+const WebhookBody = S.Struct({
+  _type: S.NonEmptyString,
   /** Current `slug.current` from the webhook projection. */
-  slug?: unknown;
+  slug: S.optional(S.NullOr(S.String)),
   /** Previous slug on a rename (`before().slug.current`), if projected. */
-  previousSlug?: unknown;
-  /** Player/staff detail pages route by PSD id, not a Sanity slug. Expect a string or number. */
-  psdId?: unknown;
-}
+  previousSlug: S.optional(S.NullOr(S.String)),
+  /** Player/staff detail pages route by PSD id, not a Sanity slug. */
+  psdId: S.optional(S.NullOr(S.Union(S.String, S.Number))),
+});
 
 /**
  * The contents page (#2622) lists ploegen, nieuws, evenementen and the
@@ -147,17 +153,23 @@ function targets(
 }
 
 /** `undefined` when the body is not valid JSON or not a JSON object (#3861). */
-const parseWebhookBody = (rawBody: string): WebhookBody | undefined => {
+const parseJsonObject = (rawBody: string): unknown => {
   try {
     const parsed: unknown = JSON.parse(rawBody);
     return typeof parsed === "object" &&
       parsed !== null &&
       !Array.isArray(parsed)
-      ? (parsed as WebhookBody)
+      ? parsed
       : undefined;
   } catch {
     return undefined;
   }
+};
+
+/** The message for the first field that failed to decode. */
+const decodeError = (error: ParseResult.ParseError): string => {
+  const field = ParseResult.ArrayFormatter.formatErrorSync(error)[0]?.path[0];
+  return field === "_type" ? "Missing _type" : `Invalid ${String(field)}`;
 };
 
 export async function POST(request: Request) {
@@ -178,36 +190,36 @@ export async function POST(request: Request) {
     );
   }
 
-  const payload = parseWebhookBody(rawBody);
-  if (payload === undefined) {
+  const parsed = parseJsonObject(rawBody);
+  if (parsed === undefined) {
     return NextResponse.json(
       { ok: false, error: "Invalid JSON" },
       { status: 400 },
     );
   }
 
-  const type = payload._type;
-  if (typeof type !== "string" || type.length === 0) {
+  const decoded = S.decodeUnknownEither(WebhookBody)(parsed);
+  if (Either.isLeft(decoded)) {
     return NextResponse.json(
-      { ok: false, error: "Missing _type" },
+      { ok: false, error: decodeError(decoded.left) },
       { status: 400 },
     );
   }
+  const { _type: type, slug, previousSlug, psdId } = decoded.right;
 
   const slugs = [
     ...new Set(
-      [payload.slug, payload.previousSlug].filter(
+      [slug, previousSlug].filter(
         (s): s is string => typeof s === "string" && s.length > 0,
       ),
     ),
   ];
-  // Anything but a string or number is treated as no psdId, never stringified.
-  const psdId =
-    typeof payload.psdId === "string" || typeof payload.psdId === "number"
-      ? String(payload.psdId)
-      : undefined;
 
-  const target = targets(type, slugs, psdId);
+  const target = targets(
+    type,
+    slugs,
+    psdId == null ? undefined : String(psdId),
+  );
   if (!target) {
     // Unknown type — ack with 200 so Sanity doesn't retry, but revalidate
     // nothing.
