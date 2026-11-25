@@ -507,3 +507,46 @@ describe("findDartsSignup", () => {
     });
   });
 });
+
+// ─── getFormRoutingConfig (#3876) ────────────────────────────────────────────
+
+describe("getFormRoutingConfig", () => {
+  const get = () =>
+    Effect.runPromise(
+      Effect.either(
+        Effect.provide(
+          Effect.gen(function* () {
+            const projection = yield* SanityProjection;
+            return yield* projection.getFormRoutingConfig();
+          }),
+          makeTestLayer(),
+        ),
+      ),
+    );
+
+  const roles = {
+    speler: null,
+    jeugdspeler: null,
+    vrijwilliger: "vrijwilligers@example.com",
+    trainer: null,
+    scheidsrechter: null,
+  };
+
+  it("returns the decoded config, null for a missing singleton", async () => {
+    mockFetch.mockResolvedValueOnce(roles).mockResolvedValueOnce(null);
+
+    expect(await get()).toMatchObject({ _tag: "Right", right: roles });
+    expect(await get()).toMatchObject({ _tag: "Right", right: null });
+  });
+
+  it("fails with SanityQueryError, never a TypeError, on a non-string role value", async () => {
+    mockFetch.mockResolvedValueOnce({ ...roles, vrijwilliger: 5 });
+
+    const result = await get();
+
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left).toBeInstanceOf(SanityQueryError);
+    }
+  });
+});

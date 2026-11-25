@@ -1,4 +1,4 @@
-import { Effect } from "effect";
+import { Effect, Option, Schema as S } from "effect";
 import { HttpApiBuilder } from "@effect/platform";
 import {
   EMAIL_PATTERN,
@@ -10,7 +10,7 @@ import {
   type MembershipRole,
 } from "@kcvv/api-contract";
 import { SanityMutation } from "../sanity/mutation";
-import { SanityProjection, type FormRoutingConfig } from "../sanity/projection";
+import { FormRoutingConfig, SanityProjection } from "../sanity/projection";
 import { KvCacheService } from "../cache/kv-cache";
 import { EmailTransport } from "../email/resend";
 import { verifyTurnstile } from "../forms/turnstile";
@@ -32,11 +32,11 @@ const resolveRouting = (role: MembershipRole) =>
     const projection = yield* SanityProjection;
 
     const cached = yield* cache.get(ROUTING_CACHE_KEY);
-    const fromCache: FormRoutingConfig | null = cached
-      ? yield* Effect.try({
-          try: () => JSON.parse(cached) as FormRoutingConfig,
-          catch: () => new Error("parse"),
-        }).pipe(Effect.orElseSucceed(() => null))
+    // A cached value that fails the decode is a miss: refetch.
+    const fromCache = cached
+      ? Option.getOrNull(
+          S.decodeUnknownOption(S.parseJson(FormRoutingConfig))(cached),
+        )
       : null;
 
     const fetchAndCache = Effect.gen(function* () {

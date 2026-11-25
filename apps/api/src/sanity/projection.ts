@@ -1,5 +1,5 @@
 import { createClient } from "@sanity/client";
-import { Context, Effect, Layer } from "effect";
+import { Context, Effect, Layer, Schema as S } from "effect";
 import {
   TVJO_ROLE_CODE,
   YOUTH_COORDINATOR_ROLE_CODES,
@@ -23,26 +23,43 @@ export class SanityQueryError extends Error {
 }
 
 /** A role's contact box; `holder` is null for a vacant or inactive box. */
-export interface FormRoutingContactBox {
-  functionTitle: string | null;
-  holder: { firstName: string | null; lastName: string | null } | null;
-}
+export const FormRoutingContactBox = S.Struct({
+  functionTitle: S.NullOr(S.String),
+  holder: S.NullOr(
+    S.Struct({
+      firstName: S.NullOr(S.String),
+      lastName: S.NullOr(S.String),
+    }),
+  ),
+});
+export type FormRoutingContactBox = typeof FormRoutingContactBox.Type;
 
-/** Per-role admin-notification recipients and contact boxes from the formRoutingConfig singleton. */
-export interface FormRoutingConfig {
-  speler: string | null;
-  jeugdspeler: string | null;
-  vrijwilliger: string | null;
-  trainer: string | null;
-  scheidsrechter: string | null;
-  /** Absent in a config cached before the contact boxes existed. */
-  contacts?: Partial<
-    Record<
-      keyof Omit<FormRoutingConfig, "contacts">,
-      FormRoutingContactBox | null
-    >
-  >;
-}
+const roleBoxes = S.NullOr(FormRoutingContactBox);
+
+/**
+ * Per-role admin-notification recipients and contact boxes from the
+ * formRoutingConfig singleton. A blank Studio field reads as `null`;
+ * `contacts` is absent in a config cached before the contact boxes existed.
+ */
+export const FormRoutingConfig = S.Struct({
+  speler: S.NullOr(S.String),
+  jeugdspeler: S.NullOr(S.String),
+  vrijwilliger: S.NullOr(S.String),
+  trainer: S.NullOr(S.String),
+  scheidsrechter: S.NullOr(S.String),
+  contacts: S.optional(
+    S.partial(
+      S.Struct({
+        speler: roleBoxes,
+        jeugdspeler: roleBoxes,
+        vrijwilliger: roleBoxes,
+        trainer: roleBoxes,
+        scheidsrechter: roleBoxes,
+      }),
+    ),
+  ),
+});
+export type FormRoutingConfig = typeof FormRoutingConfig.Type;
 
 /** The weekly staff-gaps nudge's read (#3561) — see `sync/staff-gaps-check.ts`. */
 export interface StaffGaps {
@@ -435,10 +452,17 @@ export const SanityProjectionLive = Layer.effect(
 
       getFormRoutingConfig: () =>
         Effect.tryPromise({
-          try: () => client.fetch<FormRoutingConfig | null>(FORM_ROUTING_QUERY),
+          try: () => client.fetch<unknown>(FORM_ROUTING_QUERY),
           catch: (cause) =>
             new SanityQueryError("Failed to fetch form routing config", cause),
-        }),
+        }).pipe(
+          Effect.flatMap(S.decodeUnknown(S.NullOr(FormRoutingConfig))),
+          Effect.mapError((cause) =>
+            cause instanceof SanityQueryError
+              ? cause
+              : new SanityQueryError("Invalid form routing config", cause),
+          ),
+        ),
 
       getDartsCounts: () =>
         Effect.tryPromise({
