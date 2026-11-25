@@ -214,12 +214,8 @@ describe("useSemanticSearch", () => {
     await waitFor(() => expect(result.current.answer).toBe("Eerste."));
 
     // A re-search in flight: the old answer (and results) are still held.
-    let resolveSecond!: (value: Response) => void;
-    vi.mocked(fetch).mockReturnValueOnce(
-      new Promise<Response>((resolve) => {
-        resolveSecond = resolve;
-      }),
-    );
+    const second = Promise.withResolvers<Response>();
+    vi.mocked(fetch).mockReturnValueOnce(second.promise);
     act(() => result.current.search("kantine open"));
     await waitFor(() => expect(result.current.loading).toBe(true));
     expect(result.current.answer).toBe("Eerste.");
@@ -227,7 +223,7 @@ describe("useSemanticSearch", () => {
     expect(result.current.executedQuery).toBe("kantine");
 
     await act(async () => {
-      resolveSecond({
+      second.resolve({
         ok: true,
         json: async () => ({ results: [hit], answer: "Tweede." }),
       } as Response);
@@ -247,12 +243,8 @@ describe("useSemanticSearch", () => {
     };
     // A is superseded but, as on WebKit, does NOT reject with an AbortError
     // when its signal fires: it settles later with a plain network error.
-    let failA!: (reason: unknown) => void;
-    vi.mocked(fetch).mockReturnValueOnce(
-      new Promise<Response>((_, reject) => {
-        failA = reject;
-      }),
-    );
+    const requestA = Promise.withResolvers<Response>();
+    vi.mocked(fetch).mockReturnValueOnce(requestA.promise);
     // B honours its signal like a spec-compliant fetch: an abort rejects with
     // an AbortError. Here it is never aborted, so it just resolves.
     vi.mocked(fetch).mockImplementationOnce(
@@ -279,7 +271,7 @@ describe("useSemanticSearch", () => {
     expect(result.current.executedQuery).toBe("kantine open");
 
     await act(async () => {
-      failA(new TypeError("Load failed"));
+      requestA.reject(new TypeError("Load failed"));
     });
 
     expect(result.current.results).toHaveLength(1);

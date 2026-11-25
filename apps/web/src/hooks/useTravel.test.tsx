@@ -116,22 +116,22 @@ describe("useTravel", () => {
   ] as const)("is inert for %s: no name, no tap recorded", (_l, kind, href) => {
     mockReducedMotion(false);
     const { result } = renderHook(() => useTravel(kind, href));
-    let recorded = true;
+    const recorded: boolean[] = [];
     act(() => {
-      recorded = result.current.onClick();
+      recorded.push(result.current.onClick());
     });
-    expect(recorded).toBe(false);
+    expect(recorded).toEqual([false]);
     expect(result.current.transition).toEqual({ default: "none" });
   });
 
   it("says whether a tap was recorded", () => {
     mockReducedMotion(false);
     const { result } = renderHook(() => useTravel("article", "/nieuws/winst"));
-    let recorded = false;
+    const recorded: boolean[] = [];
     act(() => {
-      recorded = result.current.onClick();
+      recorded.push(result.current.onClick());
     });
-    expect(recorded).toBe(true);
+    expect(recorded).toEqual([true]);
   });
 
   it("sets no name under prefers-reduced-motion", () => {

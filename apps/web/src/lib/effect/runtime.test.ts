@@ -109,12 +109,13 @@ describe("runPromise", () => {
   });
 
   it("reclassifies a genuine error that WRAPS a notFound() sentinel as its own .cause — unstable_rethrow's documented cause-walk, not narrowed here (#3034 review findings 1/2)", async () => {
-    let sentinel: unknown;
-    try {
-      notFound();
-    } catch (error) {
-      sentinel = error;
-    }
+    const sentinel: unknown = (() => {
+      try {
+        return notFound();
+      } catch (error) {
+        return error;
+      }
+    })();
 
     // Shaped like `SanityReadError` (`lib/sanity/fetch-groq.ts`): a genuine
     // failure whose `.cause` happens to be one of Next's own sentinels.

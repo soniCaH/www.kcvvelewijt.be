@@ -1,18 +1,20 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
 // Fresh import per test to avoid module caching issues
-let updateConsentState: typeof import("./gtm-consent").updateConsentState;
+const consent = {} as {
+  updateConsentState: typeof import("./gtm-consent").updateConsentState;
+};
 
 beforeEach(async () => {
   window.dataLayer = [];
   vi.resetModules();
   const mod = await import("./gtm-consent");
-  updateConsentState = mod.updateConsentState;
+  consent.updateConsentState = mod.updateConsentState;
 });
 
 describe("updateConsentState", () => {
   it("pushes consent update with analytics_storage granted when true", () => {
-    updateConsentState(true);
+    consent.updateConsentState(true);
 
     const pushed = window.dataLayer![0] as unknown as IArguments;
     expect(pushed[0]).toBe("consent");
@@ -23,7 +25,7 @@ describe("updateConsentState", () => {
   });
 
   it("pushes consent update with analytics_storage denied when false", () => {
-    updateConsentState(false);
+    consent.updateConsentState(false);
 
     const pushed = window.dataLayer![0] as unknown as IArguments;
     expect(pushed[0]).toBe("consent");
@@ -36,7 +38,7 @@ describe("updateConsentState", () => {
   it("initializes dataLayer if it does not exist", () => {
     delete window.dataLayer;
 
-    updateConsentState(true);
+    consent.updateConsentState(true);
 
     expect(window.dataLayer).toBeDefined();
     expect(window.dataLayer).toHaveLength(1);

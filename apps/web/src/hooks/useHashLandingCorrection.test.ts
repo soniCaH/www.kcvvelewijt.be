@@ -31,18 +31,18 @@ function TestHost({
 }
 
 function renderHook(ids: readonly string[]) {
-  let result: UseHashLandingCorrectionResult | undefined;
+  const latest: { result?: UseHashLandingCorrectionResult } = {};
   const utils = render(
     createElement(TestHost, {
       ids,
       onHook: (h) => {
-        result = h;
+        latest.result = h;
       },
     }),
   );
   return {
     get result() {
-      return result!;
+      return latest.result!;
     },
     ...utils,
   };
@@ -52,7 +52,7 @@ function renderHook(ids: readonly string[]) {
 // `afterEach` can remove them by reference, without a bespoke marker
 // attribute (every one of them already sets a real `id`, which is all these
 // tests query by).
-let appendedTargets: Element[] = [];
+const appendedTargets: Element[] = [];
 
 function appendTarget(id: string): HTMLDivElement {
   const el = document.createElement("div");
@@ -66,8 +66,7 @@ describe("useHashLandingCorrection", () => {
   afterEach(() => {
     vi.useRealTimers();
     window.location.hash = "";
-    appendedTargets.forEach((el) => el.remove());
-    appendedTargets = [];
+    appendedTargets.splice(0).forEach((el) => el.remove());
   });
 
   it("corrects a hash already in the URL at mount (a cold load)", () => {
@@ -96,12 +95,12 @@ describe("useHashLandingCorrection", () => {
     // used for this trigger — it can resolve for an already-cached fallback
     // face well before the real webfont's own network fetch even starts
     // (measured on `/jeugd#visie` — see the hook's own docblock).
-    let loadingDoneHandler: (() => void) | undefined;
+    const loadingDone: { handler?: () => void } = {};
     Object.defineProperty(document, "fonts", {
       configurable: true,
       value: {
         addEventListener: (event: string, handler: () => void) => {
-          if (event === "loadingdone") loadingDoneHandler = handler;
+          if (event === "loadingdone") loadingDone.handler = handler;
         },
         removeEventListener: vi.fn(),
       },
@@ -119,7 +118,7 @@ describe("useHashLandingCorrection", () => {
     // loadingdone trigger, not a false positive from that first call.
     scrollIntoView.mockClear();
 
-    act(() => loadingDoneHandler?.());
+    act(() => loadingDone.handler?.());
 
     expect(scrollIntoView).toHaveBeenCalledWith({ block: "start" });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
