@@ -30,10 +30,10 @@ export interface TeamWithSeasonDoc {
 
 type Patch = ReturnType<typeof at>
 
-export function migrateDropTeamSeason(doc: TeamWithSeasonDoc): Patch[] | undefined {
+export const migrateDropTeamSeason = (doc: TeamWithSeasonDoc): Patch[] | undefined => {
   if (doc.season === undefined) return undefined
   return [at('season', unset())]
-}
+};
 
 export default defineMigration({
   title: 'Drop unused team field: season (#2567)',

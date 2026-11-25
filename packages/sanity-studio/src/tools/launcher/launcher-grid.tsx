@@ -10,7 +10,7 @@ export interface LauncherGridProps {
   onSelect: (template: LauncherTemplate) => void
 }
 
-export function LauncherGrid({templates, onSelect}: LauncherGridProps): JSX.Element {
+export const LauncherGrid = ({templates, onSelect}: LauncherGridProps): JSX.Element => {
   const [query, setQuery] = useState('')
   const grouped = useMemo(() => groupByUiGroup(searchTemplates(templates, query)), [templates, query])
 
@@ -54,4 +54,4 @@ export function LauncherGrid({templates, onSelect}: LauncherGridProps): JSX.Elem
       </Stack>
     </Container>
   )
-}
+};

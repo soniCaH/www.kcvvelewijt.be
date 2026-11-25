@@ -8,9 +8,9 @@ export interface LabelledArticleDoc {
 }
 
 /** Joined span text of a Portable Text title's first block, if it has children. */
-export function firstBlockText(title: unknown[]): string | undefined {
+export const firstBlockText = (title: unknown[]): string | undefined => {
   return (title as {children?: {text?: string}[]}[])[0]?.children?.map((c) => c.text ?? '').join('')
-}
+};
 
 const titleLabel = (title: unknown): string => {
   if (typeof title === 'string') return title
@@ -18,9 +18,9 @@ const titleLabel = (title: unknown): string => {
   return '(geen titel)'
 }
 
-export function articleLabel(doc: LabelledArticleDoc): string {
+export const articleLabel = (doc: LabelledArticleDoc): string => {
   const {title} = doc
   const titleText = titleLabel(title)
   const slug = doc.slug?.current ?? '(geen slug)'
   return `${slug} — "${titleText}"`
-}
+};

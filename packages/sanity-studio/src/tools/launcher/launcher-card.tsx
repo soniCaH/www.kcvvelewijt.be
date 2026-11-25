@@ -21,7 +21,7 @@ export interface LauncherCardProps {
  * card renders title/description/badge today; an icon slot will be
  * added when the icon-name registry lands.
  */
-export function LauncherCard({template, onSelect}: LauncherCardProps): JSX.Element {
+export const LauncherCard = ({template, onSelect}: LauncherCardProps): JSX.Element => {
   return (
     <Card
       padding={4}
@@ -59,4 +59,4 @@ export function LauncherCard({template, onSelect}: LauncherCardProps): JSX.Eleme
       </Stack>
     </Card>
   )
-}
+};

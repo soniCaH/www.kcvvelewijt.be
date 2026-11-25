@@ -13,7 +13,7 @@ const NEWEST_FIRST = [{field: 'submittedAt', direction: 'desc'}] as const
  * Interesse desk structure: all applications plus one filter view per
  * status. Mirrors the feedback section's filter-chip pattern. Labels in Dutch.
  */
-export function membershipApplicationStructure(S: StructureBuilder) {
+export const membershipApplicationStructure = (S: StructureBuilder) => {
   return S.listItem()
     .title('📨 Interesse')
     .child(
@@ -42,4 +42,4 @@ export function membershipApplicationStructure(S: StructureBuilder) {
           ),
         ]),
     )
-}
+};

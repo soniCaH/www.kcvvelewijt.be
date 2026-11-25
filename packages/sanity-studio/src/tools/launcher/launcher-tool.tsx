@@ -18,7 +18,7 @@ import {useTemplates} from './use-templates'
  * Tool and lands the editor in a new draft. (Sanity's own structure
  * tool follows the same pattern.)
  */
-function LauncherTool(): JSX.Element {
+const LauncherTool = (): JSX.Element => {
   const templates = useTemplates()
   const router = useRouter()
 
@@ -30,7 +30,7 @@ function LauncherTool(): JSX.Element {
   }
 
   return <LauncherGrid templates={templates} onSelect={handleSelect} />
-}
+};
 
 /**
  * Tool definition consumed by `apps/studio/sanity.config.ts` and
@@ -40,11 +40,11 @@ function LauncherTool(): JSX.Element {
  * future "options" argument (e.g. recents persistence, group ordering)
  * lands additively without breaking call sites.
  */
-export function launcherTool(): Tool {
+export const launcherTool = (): Tool => {
   return {
     name: 'launcher',
     title: 'Create',
     icon: ComposeSparklesIcon,
     component: LauncherTool,
   }
-}
+};

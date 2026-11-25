@@ -14,11 +14,10 @@ import {isLauncherTemplate, type LauncherTemplate} from '../../templates/types'
  * vitest suite can import it without dragging Sanity's runtime CSS
  * bundle into the module graph.
  */
-export function filterLauncherTemplates(
+export const filterLauncherTemplates = (
   templates: ReadonlyArray<Template>,
   isKnownType: (schemaType: string) => boolean,
-  onUnknownType?: (schemaType: string) => void,
-): LauncherTemplate[] {
+  onUnknownType?: (schemaType: string) => void,): LauncherTemplate[] => {
   const result: LauncherTemplate[] = []
   const seenUnknown = new Set<string>()
   for (const template of templates) {
@@ -33,4 +32,4 @@ export function filterLauncherTemplates(
     result.push(template)
   }
   return result
-}
+};

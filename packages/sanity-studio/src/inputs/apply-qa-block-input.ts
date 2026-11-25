@@ -22,10 +22,9 @@ export interface QaBlockInlineComponents {
  * Ordering is irrelevant: the picker grafts a field's `components.input`,
  * this grafts a type's `components.item` — disjoint targets.
  */
-export function applyQaBlockInput(
+export const applyQaBlockInput = (
   schemaTypes: readonly SchemaTypeDefinition[],
-  {QaPairItem, QaPairRespondentItem}: QaBlockInlineComponents,
-): SchemaTypeDefinition[] {
+  {QaPairItem, QaPairRespondentItem}: QaBlockInlineComponents,): SchemaTypeDefinition[] => {
   const itemFor: Record<string, ItemComponent> = {
     qaPair: QaPairItem,
     qaPairRespondent: QaPairRespondentItem,
@@ -40,4 +39,4 @@ export function applyQaBlockInput(
       components: {...existingComponents, item},
     } as SchemaTypeDefinition
   })
-}
+};

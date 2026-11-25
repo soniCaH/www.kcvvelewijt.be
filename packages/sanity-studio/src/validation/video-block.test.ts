@@ -10,16 +10,16 @@ import {videoBlock} from '@kcvv/sanity-schemas'
  * disabling Publish for an oversized-but-otherwise-valid upload, even
  * though the validator itself only ever intended a hint.
  */
-function getUploadedFileValidation() {
+const getUploadedFileValidation = () => {
   const field = videoBlock.fields.find((f) => f.name === 'uploadedFile')
   if (!field) throw new Error('videoBlock.uploadedFile field not found')
   const validation = field.validation as (
     rule: InstanceType<typeof ConcreteRuleClass>,
   ) => InstanceType<typeof ConcreteRuleClass>
   return validation
-}
+};
 
-function makeContext(asset: {size?: number} | null) {
+const makeContext = (asset: {size?: number} | null) => {
   return {
     getClient: () => ({fetch: vi.fn().mockResolvedValue(asset)}),
     i18n: {t: (key: string) => key},
@@ -29,7 +29,7 @@ function makeContext(asset: {size?: number} | null) {
     environment: 'test',
     path: [],
   }
-}
+};
 
 describe('videoBlock.uploadedFile validation (rule level)', () => {
   it('emits exactly one warning marker (no error) for an oversized upload', async () => {

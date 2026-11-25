@@ -10,20 +10,20 @@ import {
 type Row = {_id: string; parent?: string}
 
 /** A client whose `fetch` answers every query with the given rows. */
-function clientWith(rows: Row[]) {
+const clientWith = (rows: Row[]) => {
   return {fetch: vi.fn().mockResolvedValue(rows)}
-}
+};
 
-function field() {
+const field = () => {
   const f = organigramNode.fields.find((x) => x.name === 'parentNode')
   if (!f) throw new Error('organigramNode.parentNode field not found')
   return f as unknown as {
     validation: (rule: InstanceType<typeof ConcreteRuleClass>) => InstanceType<typeof ConcreteRuleClass>
     options: {filter: (ctx: unknown) => Promise<{filter: string; params: {excluded: string[]}}>}
   }
-}
+};
 
-async function validateParent(selfId: string, parentRef: string | undefined, rows: Row[]) {
+const validateParent = async (selfId: string, parentRef: string | undefined, rows: Row[]) => {
   const rule = field().validation(new ConcreteRuleClass())
   const context = {
     document: {_id: selfId, _type: 'organigramNode'},
@@ -36,7 +36,7 @@ async function validateParent(selfId: string, parentRef: string | undefined, row
   }
   const value = parentRef ? {_type: 'reference', _ref: parentRef} : undefined
   return rule.validate(value, context as never)
-}
+};
 
 describe('normalizeOrganigramId', () => {
   it('strips drafts. and versions.<release>. prefixes', () => {

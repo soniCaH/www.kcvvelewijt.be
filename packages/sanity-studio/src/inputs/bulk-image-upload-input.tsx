@@ -16,7 +16,7 @@ import {fanOutSelectedFiles} from './fan-out-selected-files'
  * an upload-capable asset source is missing, renders only the default input —
  * no dead button.
  */
-export function BulkImageUploadInput(props: ArrayOfObjectsInputProps): JSX.Element {
+export const BulkImageUploadInput = (props: ArrayOfObjectsInputProps): JSX.Element => {
   const {onSelectFile, readOnly, schemaType} = props
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const {image} = useFormBuilder().__internal
@@ -58,6 +58,6 @@ export function BulkImageUploadInput(props: ArrayOfObjectsInputProps): JSX.Eleme
       />
     </Stack>
   )
-}
+};
 
 BulkImageUploadInput.displayName = 'BulkImageUploadInput'

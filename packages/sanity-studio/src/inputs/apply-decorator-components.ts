@@ -13,22 +13,20 @@ type DecoratorComponentMap = Record<string, ComponentType<BlockDecoratorProps>>
  * Non-mutating — the input array and every nested definition stay untouched.
  * A decorator that already has a `component` is left as-is (idempotent).
  */
-export function applyDecoratorComponents(
+export const applyDecoratorComponents = (
   schemaTypes: readonly SchemaTypeDefinition[],
-  components: DecoratorComponentMap,
-): SchemaTypeDefinition[] {
+  components: DecoratorComponentMap,): SchemaTypeDefinition[] => {
   return schemaTypes.map((schemaType) => {
     const fields = (schemaType as unknown as {fields?: readonly unknown[]}).fields
     const nextFields = patchFields(fields, components)
     if (nextFields === fields) return schemaType
     return {...schemaType, fields: nextFields} as SchemaTypeDefinition
   })
-}
+};
 
-function patchFields(
+const patchFields = (
   fields: readonly unknown[] | undefined,
-  components: DecoratorComponentMap,
-): readonly unknown[] | undefined {
+  components: DecoratorComponentMap,): readonly unknown[] | undefined => {
   if (!Array.isArray(fields)) return fields
   const next = fields.map((field) => {
     const of = (field as {of?: unknown}).of
@@ -37,9 +35,9 @@ function patchFields(
     return {...(field as object), of: patchedOf}
   })
   return next.some((f, i) => f !== fields[i]) ? next : fields
-}
+};
 
-function patchOf(of: unknown, components: DecoratorComponentMap): unknown {
+const patchOf = (of: unknown, components: DecoratorComponentMap): unknown => {
   if (!Array.isArray(of)) return of
   const next = of.map((member) => {
     if (
@@ -52,12 +50,11 @@ function patchOf(of: unknown, components: DecoratorComponentMap): unknown {
     return patchBlock(member as Record<string, unknown>, components)
   })
   return next.some((m, i) => m !== of[i]) ? next : of
-}
+};
 
-function patchBlock(
+const patchBlock = (
   block: Record<string, unknown>,
-  components: DecoratorComponentMap,
-): Record<string, unknown> {
+  components: DecoratorComponentMap,): Record<string, unknown> => {
   const marks = block.marks as {decorators?: unknown} | undefined
   const decorators = marks?.decorators
   if (!Array.isArray(decorators)) return block
@@ -70,4 +67,4 @@ function patchBlock(
   })
   if (nextDecorators.every((d, i) => d === decorators[i])) return block
   return {...block, marks: {...marks, decorators: nextDecorators}}
-}
+};

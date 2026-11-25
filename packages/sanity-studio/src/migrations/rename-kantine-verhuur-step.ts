@@ -31,7 +31,7 @@ const QUESTION_TITLE = 'Terrein of kantine huren'
 const OLD_NAME = 'Kantine & Evenementen'
 const NEW_NAME = 'Kantineverhuur'
 
-export function migrateRenameKantineVerhuurStep(doc: KantineVerhuurResponsibilityDoc): Patch[] | undefined {
+export const migrateRenameKantineVerhuurStep = (doc: KantineVerhuurResponsibilityDoc): Patch[] | undefined => {
   if (doc.title !== QUESTION_TITLE) return undefined
 
   const patches = (doc.steps ?? []).flatMap((step) =>
@@ -40,7 +40,7 @@ export function migrateRenameKantineVerhuurStep(doc: KantineVerhuurResponsibilit
       : [],
   )
   return patches.length > 0 ? patches : undefined
-}
+};
 
 export default defineMigration({
   title: 'Rename "Kantine & Evenementen" to "Kantineverhuur" in the huren question (#3525)',

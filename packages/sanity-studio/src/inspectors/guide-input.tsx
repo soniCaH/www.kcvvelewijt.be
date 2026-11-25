@@ -17,7 +17,7 @@ import {guideContent} from './guide-content'
  *  - a `guideContent` entry exists for the document type → types without a guide
  *    get no panel and no empty card.
  */
-export function GuideFormInput(props: InputProps): JSX.Element {
+export const GuideFormInput = (props: InputProps): JSX.Element => {
   const entry = props.path.length === 0 ? guideContent[props.schemaType.name] : undefined
   if (!entry) return props.renderDefault(props)
 
@@ -29,4 +29,4 @@ export function GuideFormInput(props: InputProps): JSX.Element {
       {props.renderDefault(props)}
     </Stack>
   )
-}
+};

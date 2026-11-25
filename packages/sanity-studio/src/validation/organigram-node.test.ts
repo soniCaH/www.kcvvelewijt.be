@@ -10,7 +10,7 @@ import {organigramNode} from '@kcvv/sanity-schemas'
  * emits every marker at `error`, no matter what `{level: 'warning'}` object
  * the helper itself returns.
  */
-function getMembersItemValidation() {
+const getMembersItemValidation = () => {
   const field = organigramNode.fields.find((f) => f.name === 'members')
   if (!field) throw new Error('organigramNode.members field not found')
   const itemDef = (field as {of: {validation?: unknown}[]}).of[0]
@@ -18,9 +18,9 @@ function getMembersItemValidation() {
     rule: InstanceType<typeof ConcreteRuleClass>,
   ) => InstanceType<typeof ConcreteRuleClass>
   return validation
-}
+};
 
-function makeContext(doc: Record<string, unknown> | null) {
+const makeContext = (doc: Record<string, unknown> | null) => {
   return {
     getClient: () => ({fetch: vi.fn().mockResolvedValue(doc)}),
     i18n: {t: (key: string) => key},
@@ -30,7 +30,7 @@ function makeContext(doc: Record<string, unknown> | null) {
     environment: 'test',
     path: [],
   }
-}
+};
 
 describe('organigramNode.members[] validation (rule level)', () => {
   it('emits exactly one warning marker (no error) for an archived member', async () => {

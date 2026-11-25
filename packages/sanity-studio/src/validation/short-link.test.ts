@@ -8,10 +8,10 @@ import {
 } from '@kcvv/sanity-schemas'
 
 /** A client whose `fetch` answers the duplicate count with `taken`. */
-function contextWith(taken: number, id = 'shortLink-new') {
+const contextWith = (taken: number, id = 'shortLink-new') => {
   const fetch = vi.fn().mockResolvedValue(taken)
   return {fetch, context: {document: {_id: id}, getClient: () => ({fetch})}}
-}
+};
 
 describe('validateShortLinkName', () => {
   it.each(['stage', 'tornooi', 'kampioenen-2027', 'a1'])('accepts %s', async (name) => {

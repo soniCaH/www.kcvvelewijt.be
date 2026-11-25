@@ -47,18 +47,17 @@ type Patch = ReturnType<typeof at>
 
 const TARGET_TYPES = new Set(['articleImage', 'videoBlock'])
 
-function asTargetBlock(value: unknown): BlockWithWidthLike | null {
+const asTargetBlock = (value: unknown): BlockWithWidthLike | null => {
   if (typeof value !== 'object' || value === null) return null
   const block = value as BlockWithWidthLike
   if (typeof block._type !== 'string' || !TARGET_TYPES.has(block._type)) {
     return null
   }
   return block
-}
+};
 
-export function migrateArticleImageVideoBlockWidth(
-  doc: ArticleWithWidthBlocksDoc,
-): Patch[] | undefined {
+export const migrateArticleImageVideoBlockWidth = (
+  doc: ArticleWithWidthBlocksDoc,): Patch[] | undefined => {
   const body = Array.isArray(doc.body) ? doc.body : null
   if (!body) return undefined
 
@@ -89,7 +88,7 @@ export function migrateArticleImageVideoBlockWidth(
   }
 
   return patches.length > 0 ? patches : undefined
-}
+};
 
 export default defineMigration({
   title:

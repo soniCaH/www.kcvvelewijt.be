@@ -19,11 +19,11 @@ export interface CoverImageArticleDoc extends LabelledArticleDoc {
   coverImage?: unknown
 }
 
-export function auditCoverImageRequired(doc: CoverImageArticleDoc): string | undefined {
+export const auditCoverImageRequired = (doc: CoverImageArticleDoc): string | undefined => {
   const ci = doc.coverImage
   const hasAsset = ci !== undefined && ci !== null && typeof ci === 'object' && 'asset' in ci
   return hasAsset ? undefined : `[coverImage missing] ${articleLabel(doc)}`
-}
+};
 
 export default defineMigration({
   title: 'Audit articles missing coverImage (pre Ask-8 backfill gate)',

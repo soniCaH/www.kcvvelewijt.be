@@ -47,30 +47,29 @@ type Patch = ReturnType<typeof at>
 const DEFAULT_KEY_LENGTH = 12
 const KEY_ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789'
 
-export function defaultGenKey(): string {
+export const defaultGenKey = (): string => {
   return Array.from(
     {length: DEFAULT_KEY_LENGTH},
     () => KEY_ALPHABET[Math.floor(Math.random() * KEY_ALPHABET.length)],
   ).join('')
-}
+};
 
-function isQaBlock(value: unknown): value is QaBlockLike {
+const isQaBlock = (value: unknown): value is QaBlockLike => {
   return (
     typeof value === 'object' &&
     value !== null &&
     (value as {_type?: string})._type === 'qaBlock'
   )
-}
+};
 
-function asQaPair(value: unknown): QaPairLike | null {
+const asQaPair = (value: unknown): QaPairLike | null => {
   if (typeof value !== 'object' || value === null) return null
   return value as QaPairLike
-}
+};
 
-export function migrateQaPairRespondents(
+export const migrateQaPairRespondents = (
   doc: ArticleWithQaDoc,
-  genKey: () => string = defaultGenKey,
-): Patch[] | undefined {
+  genKey: () => string = defaultGenKey,): Patch[] | undefined => {
   const body = Array.isArray(doc.body) ? doc.body : null
   if (!body) return undefined
 
@@ -132,7 +131,7 @@ export function migrateQaPairRespondents(
   }
 
   return patches.length > 0 ? patches : undefined
-}
+};
 
 export default defineMigration({
   title:

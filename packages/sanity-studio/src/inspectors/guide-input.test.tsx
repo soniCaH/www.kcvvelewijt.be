@@ -22,14 +22,14 @@ import {GuideFormInput} from './guide-input'
 
 const DEFAULT_MARKER = 'default-form-render'
 
-function makeProps(overrides: Record<string, unknown>): InputProps {
+const makeProps = (overrides: Record<string, unknown>): InputProps => {
   return {
     path: [],
     schemaType: {name: 'player'},
     renderDefault: () => <div>{DEFAULT_MARKER}</div>,
     ...overrides,
   } as unknown as InputProps
-}
+};
 
 describe('GuideFormInput', () => {
   it('renders the guide above the default form at the document root for a guided type', () => {

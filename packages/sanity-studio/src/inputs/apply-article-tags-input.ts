@@ -9,10 +9,9 @@ type ArticleTagsInputComponent = ComponentType<ArrayOfPrimitivesInputProps<strin
  * and every nested definition stay untouched. Safe no-op when the `article`
  * type or its `tags` field is absent.
  */
-export function applyArticleTagsInput(
+export const applyArticleTagsInput = (
   schemaTypes: readonly SchemaTypeDefinition[],
-  InputComponent: ArticleTagsInputComponent,
-): SchemaTypeDefinition[] {
+  InputComponent: ArticleTagsInputComponent,): SchemaTypeDefinition[] => {
   return schemaTypes.map((schemaType) => {
     if (schemaType.name !== 'article') return schemaType
     const fields = (schemaType as unknown as {fields?: readonly Record<string, unknown>[]}).fields
@@ -33,4 +32,4 @@ export function applyArticleTagsInput(
     })
     return {...schemaType, fields: nextFields} as SchemaTypeDefinition
   })
-}
+};

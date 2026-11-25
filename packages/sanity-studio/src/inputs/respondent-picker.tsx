@@ -61,7 +61,7 @@ const EMPTY_SUBJECTS: SubjectItem[] = []
  *   the schema validator surfaces the "no longer one of the article
  *   subjects" error so editors know to re-pick.
  */
-export function RespondentPicker(props: StringInputProps): JSX.Element {
+export const RespondentPicker = (props: StringInputProps): JSX.Element => {
   const {value, onChange, readOnly, elementProps} = props
   const subjects =
     (useFormValue(['subjects']) as SubjectItem[] | undefined) ?? EMPTY_SUBJECTS
@@ -186,6 +186,6 @@ export function RespondentPicker(props: StringInputProps): JSX.Element {
       )}
     </Stack>
   )
-}
+};
 
 RespondentPicker.displayName = 'RespondentPicker'

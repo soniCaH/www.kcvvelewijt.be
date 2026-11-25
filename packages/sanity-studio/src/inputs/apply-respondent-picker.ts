@@ -15,10 +15,9 @@ type RespondentPickerComponent = ComponentType<StringInputProps>
  * Mirrors the shape of `applyArticleTagsInput` — the two helpers compose:
  * `applyRespondentPicker(applyArticleTagsInput(baseSchemaTypes, ...), ...)`.
  */
-export function applyRespondentPicker(
+export const applyRespondentPicker = (
   schemaTypes: readonly SchemaTypeDefinition[],
-  InputComponent: RespondentPickerComponent,
-): SchemaTypeDefinition[] {
+  InputComponent: RespondentPickerComponent,): SchemaTypeDefinition[] => {
   return schemaTypes.map((schemaType) => {
     if (schemaType.name !== 'qaPairRespondent') return schemaType
     const fields = (schemaType as unknown as {fields?: readonly Record<string, unknown>[]}).fields
@@ -39,4 +38,4 @@ export function applyRespondentPicker(
     })
     return {...schemaType, fields: nextFields} as SchemaTypeDefinition
   })
-}
+};

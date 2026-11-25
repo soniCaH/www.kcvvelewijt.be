@@ -8,9 +8,8 @@ import type {LauncherTemplate} from '../../templates/types'
  * module graph. Mirrors the convention established by
  * `filter-launcher-templates.ts`.
  */
-export function groupByUiGroup(
-  templates: ReadonlyArray<LauncherTemplate>,
-): {group: string; templates: LauncherTemplate[]}[] {
+export const groupByUiGroup = (
+  templates: ReadonlyArray<LauncherTemplate>,): {group: string; templates: LauncherTemplate[]}[] => {
   const order: string[] = []
   const map = new Map<string, LauncherTemplate[]>()
   for (const template of templates) {
@@ -22,17 +21,16 @@ export function groupByUiGroup(
     map.get(key)!.push(template)
   }
   return order.map((group) => ({group, templates: map.get(group)!}))
-}
+};
 
 /**
  * Case-insensitive substring search across the title, description,
  * group label, and schemaType. Empty / whitespace queries return the
  * full input list (a fresh copy, never the input array).
  */
-export function searchTemplates(
+export const searchTemplates = (
   templates: ReadonlyArray<LauncherTemplate>,
-  query: string,
-): LauncherTemplate[] {
+  query: string,): LauncherTemplate[] => {
   const trimmed = query.trim().toLowerCase()
   if (!trimmed) return [...templates]
   return templates.filter((template) => {
@@ -40,4 +38,4 @@ export function searchTemplates(
       `${template.title} ${template.ui.description} ${template.ui.group} ${template.schemaType}`.toLowerCase()
     return haystack.includes(trimmed)
   })
-}
+};

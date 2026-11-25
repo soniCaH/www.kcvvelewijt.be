@@ -52,9 +52,8 @@ export interface ResponsibilityWithTeamRoleFallbackDoc {
 
 type Patch = ReturnType<typeof at>
 
-export function migrateDropResponsibilityTeamRoleFallback(
-  doc: ResponsibilityWithTeamRoleFallbackDoc,
-): Patch[] | undefined {
+export const migrateDropResponsibilityTeamRoleFallback = (
+  doc: ResponsibilityWithTeamRoleFallbackDoc,): Patch[] | undefined => {
   const patches: Patch[] = []
 
   if (doc.primaryContact?.teamRoleFallback !== undefined) {
@@ -78,7 +77,7 @@ export function migrateDropResponsibilityTeamRoleFallback(
   })
 
   return patches.length > 0 ? patches : undefined
-}
+};
 
 export default defineMigration({
   title: 'Drop unreachable responsibility field: teamRoleFallback (#2952)',

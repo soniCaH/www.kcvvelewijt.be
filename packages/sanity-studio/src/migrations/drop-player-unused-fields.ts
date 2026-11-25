@@ -27,9 +27,8 @@ type Patch = ReturnType<typeof at>
 
 const FIELDS = ['nationality', 'height', 'weight'] as const
 
-export function migrateDropPlayerUnusedFields(
-  doc: PlayerWithUnusedFieldsDoc,
-): Patch[] | undefined {
+export const migrateDropPlayerUnusedFields = (
+  doc: PlayerWithUnusedFieldsDoc,): Patch[] | undefined => {
   const patches: Patch[] = []
   for (const field of FIELDS) {
     if (doc[field] !== undefined) {
@@ -37,7 +36,7 @@ export function migrateDropPlayerUnusedFields(
     }
   }
   return patches.length > 0 ? patches : undefined
-}
+};
 
 export default defineMigration({
   title: 'Drop unused player fields: nationality, height, weight (#1881)',

@@ -16,13 +16,12 @@ interface FanOutContext {
  * Sanity's runtime bundle into the module graph — same split as
  * `filterLauncherTemplates` and `match-tag-candidates`.
  */
-export function fanOutSelectedFiles(
+export const fanOutSelectedFiles = (
   files: readonly File[],
-  {imageMember, assetSource, onSelectFile}: FanOutContext,
-): void {
+  {imageMember, assetSource, onSelectFile}: FanOutContext,): void => {
   if (!onSelectFile) return
   for (const file of files) {
     if (!file.type.startsWith('image/')) continue
     onSelectFile({file, schemaType: imageMember, assetSource})
   }
-}
+};

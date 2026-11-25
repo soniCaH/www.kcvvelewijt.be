@@ -85,7 +85,7 @@ export const KEY_BOX_WHY_LINES: Readonly<Record<string, string>> = {
   API: 'Vertrouwenspersoon integriteit',
 }
 
-export function migrateBackfillOrganigramPillar(doc: OrganigramNodeDoc): Patch[] | undefined {
+export const migrateBackfillOrganigramPillar = (doc: OrganigramNodeDoc): Patch[] | undefined => {
   const code = doc.roleCode
   if (!code) return undefined
 
@@ -98,7 +98,7 @@ export function migrateBackfillOrganigramPillar(doc: OrganigramNodeDoc): Patch[]
   if (why && !doc.description?.trim()) patches.push(at('description', set(why)))
 
   return patches.length > 0 ? patches : undefined
-}
+};
 
 export default defineMigration({
   title: 'Backfill organigramNode.pillar and key-box why-lines (#3525)',

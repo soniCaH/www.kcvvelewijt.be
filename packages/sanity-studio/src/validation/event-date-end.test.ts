@@ -9,7 +9,7 @@ import {event} from '@kcvv/sanity-schemas'
  */
 const MESSAGE = 'De einddatum moet op of na de startdatum vallen.'
 
-async function validateDateEnd(dateEnd: unknown, dateStart: unknown) {
+const validateDateEnd = async (dateEnd: unknown, dateStart: unknown) => {
   const field = event.fields.find((f) => f.name === 'dateEnd')
   if (!field) throw new Error('event.dateEnd field not found')
   const validation = (field as {validation?: unknown}).validation as (
@@ -26,7 +26,7 @@ async function validateDateEnd(dateEnd: unknown, dateStart: unknown) {
     path: ['dateEnd'],
   }
   return rule.validate(dateEnd, context as never)
-}
+};
 
 describe('event.dateEnd validation (rule level)', () => {
   it('rejects an end before the start with the eventFact message', async () => {
