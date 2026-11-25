@@ -477,9 +477,9 @@ const eslintConfig = [
     // e2e, test infrastructure and `.storybook/` are the next issue.
     files: ["**/*.{ts,tsx,js,jsx,mjs,cjs,mts,cts}"],
     ignores: [
-      "**/*.test.{ts,tsx}",
-      "**/*.spec.{ts,tsx}",
-      "**/*.stories.{ts,tsx}",
+      "**/*.test.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
+      "**/*.spec.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
+      "**/*.stories.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
       "**/__tests__/**",
       "**/test/**",
       "**/tests/**",
