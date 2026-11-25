@@ -41,13 +41,13 @@ function SemanticStub({
 }) {
   useEffect(() => {
     const original = window.fetch;
-    let calls = 0;
+    const calls = { count: 0 };
     window.fetch = async (input, init) => {
       const url = typeof input === "string" ? input : input.toString();
       if (url.includes("/api/search")) {
-        calls += 1;
+        calls.count += 1;
         if (mode === "error") return new Response("nope", { status: 503 });
-        if (mode === "hang" || (mode === "once" && calls > 1)) {
+        if (mode === "hang" || (mode === "once" && calls.count > 1)) {
           // Honour the hook's abort, so a superseded request still ends.
           return new Promise<Response>((_, reject) =>
             init?.signal?.addEventListener("abort", () =>

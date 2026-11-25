@@ -223,7 +223,7 @@ function mockFetchPending() {
 // in flight, so the dimmed list and its floating scarf hold still.
 function mockFetchFirstThenPending(lexical: SearchResponse) {
   const original = globalThis.fetch;
-  let lexicalCalls = 0;
+  const lexicalCalls = { count: 0 };
   globalThis.fetch = async (_url: RequestInfo | URL, init?: RequestInit) => {
     if (init?.method === "POST") {
       return new Response(JSON.stringify(noSemantic), {
@@ -231,8 +231,8 @@ function mockFetchFirstThenPending(lexical: SearchResponse) {
         headers: { "Content-Type": "application/json" },
       });
     }
-    lexicalCalls += 1;
-    if (lexicalCalls > 1) return new Promise<Response>(() => {});
+    lexicalCalls.count += 1;
+    if (lexicalCalls.count > 1) return new Promise<Response>(() => {});
     return new Response(JSON.stringify(lexical), {
       status: 200,
       headers: { "Content-Type": "application/json" },

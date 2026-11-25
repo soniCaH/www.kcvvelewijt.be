@@ -126,14 +126,11 @@ function measureHitArea(
     return !!at && (at === el || el.contains(at));
   };
 
-  let covered = 0;
-  let total = 0;
-  for (let x = cx - 20.5; x < cx + 22; x += 3) {
-    for (let y = cy - 20.5; y < cy + 22; y += 3) {
-      total++;
-      if (hits(x, y)) covered++;
-    }
-  }
+  // 15 × 15 probes, 3px apart, from 20.5px before the centre.
+  const grid = Array.from({ length: 15 }, (_, i) => -20.5 + i * 3);
+  const probes = grid.flatMap((dx) => grid.map((dy) => hits(cx + dx, cy + dy)));
+  const covered = probes.filter(Boolean).length;
+  const total = probes.length;
 
   const left = cx - 22;
   const right = cx + 22;
@@ -312,18 +309,17 @@ async function sampleArrowCountOverTime(
 ) {
   return new Promise<{ counts: number[]; flips: number }>((resolve) => {
     const counts: number[] = [];
-    let flips = 0;
-    let previous: number | null = null;
     const start = performance.now();
     const tick = () => {
       track.dispatchEvent(new Event("transitionend", { bubbles: true }));
       const count = canvas.queryAllByRole("button").length;
       counts.push(count);
-      if (previous !== null && count !== previous) flips += 1;
-      previous = count;
       if (performance.now() - start < durationMs) {
         requestAnimationFrame(tick);
       } else {
+        const flips = counts.filter(
+          (count, i) => i > 0 && count !== counts[i - 1],
+        ).length;
         resolve({ counts, flips });
       }
     };
