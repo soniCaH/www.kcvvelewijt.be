@@ -37,11 +37,13 @@ async function measureHitArea(control: Locator): Promise<HitMeasurement> {
     // pseudo-element hit-area overhanging the viewport uncounted (the
     // ContactCard defect this rule closes too).
     const isStickyOrFixed = (node: Element | null): boolean => {
-      for (let n = node; n; n = n.parentElement) {
-        const position = getComputedStyle(n).position;
-        if (position === "sticky" || position === "fixed") return true;
-      }
-      return false;
+      if (!node) return false;
+      const position = getComputedStyle(node).position;
+      return (
+        position === "sticky" ||
+        position === "fixed" ||
+        isStickyOrFixed(node.parentElement)
+      );
     };
     if (!isStickyOrFixed(el)) {
       const pre = el.getBoundingClientRect();
@@ -84,9 +86,10 @@ async function measureHitArea(control: Locator): Promise<HitMeasurement> {
     const px = Math.round(cx);
     const py = Math.round(cy);
     const reach = (dx: number, dy: number) => {
-      let n = 0;
-      while (n < 60 && hits(px + dx * (n + 1), py + dy * (n + 1))) n++;
-      return n;
+      const firstMiss = Array.from({ length: 60 }, (_, i) => i + 1).findIndex(
+        (k) => !hits(px + dx * k, py + dy * k),
+      );
+      return firstMiss === -1 ? 60 : firstMiss;
     };
     const [l, rt, t, b] = [
       reach(-1, 0),
@@ -101,14 +104,13 @@ async function measureHitArea(control: Locator): Promise<HitMeasurement> {
     const top = py - t;
     const bottom = py + b + 1;
 
-    let covered = 0;
-    let total = 0;
-    for (let x = cx - 20.5; x < cx + 22; x += 3) {
-      for (let y = cy - 20.5; y < cy + 22; y += 3) {
-        total++;
-        if (hits(x, y)) covered++;
-      }
-    }
+    // 15 × 15 probes, 3px apart, from 20.5px before the centre.
+    const grid = Array.from({ length: 15 }, (_, i) => -20.5 + i * 3);
+    const probes = grid.flatMap((dx) =>
+      grid.map((dy) => hits(cx + dx, cy + dy)),
+    );
+    const covered = probes.filter(Boolean).length;
+    const total = probes.length;
 
     // A pseudo-element hit area hides what sits under it from
     // `elementFromPoint`, so look geometrically, then confirm the neighbour
@@ -168,12 +170,12 @@ const VIEWPORTS = [
  */
 async function waitForHeightSettled(region: Locator): Promise<void> {
   const clip = region.locator("xpath=..");
-  let previous: number | null = null;
+  const last: { height: number | null } = { height: null };
   await expect
     .poll(async () => {
       const height = (await clip.boundingBox())?.height ?? 0;
-      const settled = height > 0 && height === previous;
-      previous = height;
+      const settled = height > 0 && height === last.height;
+      last.height = height;
       return settled;
     })
     .toBe(true);
@@ -195,9 +197,8 @@ async function openAnswerWithContact(page: Page): Promise<Locator | null> {
   // question's contact ends up at the viewport edge (flake ledger row 29 /
   // class N).
   await waitForHydrated(toggles.first());
-  const n = Math.min(await toggles.count(), 20);
-  for (let i = 0; i < n; i++) {
-    await toggles.nth(i).click();
+  for (const toggle of (await toggles.all()).slice(0, 20)) {
+    await toggle.click();
     if ((await actions.count()) > 0) {
       await waitForHeightSettled(openRegion);
       // …and the scroll-back guard that may follow it (smooth under the page's
@@ -205,7 +206,7 @@ async function openAnswerWithContact(page: Page): Promise<Locator | null> {
       await waitForScrollSettled(page);
       return actions;
     }
-    await toggles.nth(i).click();
+    await toggle.click();
   }
   return null;
 }
@@ -224,12 +225,12 @@ async function openAnswerWithContact(page: Page): Promise<Locator | null> {
  * own default timeout — no timeout raised, no fixed sleep.
  */
 async function waitForScrollSettled(page: Page): Promise<void> {
-  let previous: number | null = null;
+  const last: { scrollY: number | null } = { scrollY: null };
   await expect
     .poll(async () => {
       const current = await page.evaluate(() => window.scrollY);
-      const settled = previous !== null && current === previous;
-      previous = current;
+      const settled = last.scrollY !== null && current === last.scrollY;
+      last.scrollY = current;
       return settled;
     })
     .toBe(true);

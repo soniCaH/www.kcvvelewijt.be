@@ -21,7 +21,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   acquireLock,
@@ -277,8 +277,10 @@ describe("checkImageStatus", () => {
   });
 
   it("is absent when the daemon is up but the image inspect fails", () => {
-    let call = 0;
-    const spawn = () => (call++ === 0 ? okDaemon() : { status: 1 });
+    const spawn = vi
+      .fn()
+      .mockReturnValueOnce(okDaemon())
+      .mockReturnValue({ status: 1 });
 
     expect(
       checkImageStatus("kcvv-vr-runner:latest", { spawn, expectedHash: "abc" }),
@@ -286,9 +288,10 @@ describe("checkImageStatus", () => {
   });
 
   it("is stale when the image's label does not match the expected hash", () => {
-    let call = 0;
-    const spawn = () =>
-      call++ === 0 ? okDaemon() : { status: 0, stdout: "old-hash\n" };
+    const spawn = vi
+      .fn()
+      .mockReturnValueOnce(okDaemon())
+      .mockReturnValue({ status: 0, stdout: "old-hash\n" });
 
     expect(
       checkImageStatus("kcvv-vr-runner:latest", {
@@ -303,9 +306,10 @@ describe("checkImageStatus", () => {
   });
 
   it("is ok when the image's label matches the expected hash", () => {
-    let call = 0;
-    const spawn = () =>
-      call++ === 0 ? okDaemon() : { status: 0, stdout: "same-hash\n" };
+    const spawn = vi
+      .fn()
+      .mockReturnValueOnce(okDaemon())
+      .mockReturnValue({ status: 0, stdout: "same-hash\n" });
 
     expect(
       checkImageStatus("kcvv-vr-runner:latest", {
@@ -316,20 +320,17 @@ describe("checkImageStatus", () => {
   });
 
   it("asks docker for the content-hash label", () => {
-    let call = 0;
-    let inspectArgs: string[] = [];
-    const spawn = (_cmd: string, args: string[]) => {
-      if (call++ === 0) return okDaemon();
-      inspectArgs = args;
-      return { status: 0, stdout: "same-hash\n" };
-    };
+    const spawn = vi
+      .fn()
+      .mockReturnValueOnce(okDaemon())
+      .mockReturnValue({ status: 0, stdout: "same-hash\n" });
 
     checkImageStatus("kcvv-vr-runner:latest", {
       spawn,
       expectedHash: "same-hash",
     });
 
-    expect(inspectArgs.join(" ")).toContain(VR_IMAGE_HASH_LABEL);
+    expect(spawn.mock.calls[1]![1].join(" ")).toContain(VR_IMAGE_HASH_LABEL);
   });
 });
 
@@ -387,15 +388,17 @@ describe("isVrContainerRunning", () => {
     // container still running the OLD image underneath it. The service
     // label Compose stamps on its own containers doesn't move when the tag
     // does.
-    let seenArgs: string[] = [];
+    const seen = { args: [] as string[] };
     isVrContainerRunning({
       spawn: (_cmd: string, args: string[]) => {
-        seenArgs = args;
+        seen.args = args;
         return { status: 0, stdout: "" };
       },
     });
-    expect(seenArgs.join(" ")).toContain("label=com.docker.compose.service=vr");
-    expect(seenArgs.join(" ")).not.toContain("ancestor=");
+    expect(seen.args.join(" ")).toContain(
+      "label=com.docker.compose.service=vr",
+    );
+    expect(seen.args.join(" ")).not.toContain("ancestor=");
   });
 });
 
@@ -419,17 +422,20 @@ describe("buildDockerArgs", () => {
 });
 
 describe("the exclusive lock", () => {
-  let tmpParent: string;
-  let lockDir: string;
+  const tmpParents: string[] = [];
 
   const freshLockDir = () => {
-    tmpParent = mkdtempSync(join(tmpdir(), "kcvv-vr-lock-test-"));
-    lockDir = join(tmpParent, "lock");
-    return lockDir;
+    const tmpParent = mkdtempSync(join(tmpdir(), "kcvv-vr-lock-test-"));
+    tmpParents.push(tmpParent);
+    return join(tmpParent, "lock");
   };
 
   afterEach(() => {
-    rmSync(tmpParent, { recursive: true, force: true });
+    tmpParents
+      .splice(0)
+      .forEach((tmpParent) =>
+        rmSync(tmpParent, { recursive: true, force: true }),
+      );
   });
 
   it("acquires a fresh lock and writes its own pid", () => {
@@ -506,20 +512,19 @@ describe("the exclusive lock", () => {
   it("does not delete a fresh lock that appeared between the staleness check and the reclaim (#3141 finding 1b)", () => {
     const dir = freshLockDir();
     acquireLock(dir, { pid: 4242, isAlive: () => true });
-    let calls = 0;
     // On the first isAlive() check (for the original holder, 4242) simulate
     // another lane fully reclaiming AND reacquiring the lock in the gap
     // before our own reclaim runs.
-    const isAlive = (candidatePid: number) => {
-      calls += 1;
-      if (calls === 1) {
+    const isAlive = vi
+      .fn<(candidatePid: number) => boolean>()
+      .mockImplementationOnce(() => {
         rmSync(dir, { recursive: true, force: true });
         mkdirSync(dir);
         writeFileSync(join(dir, "pid"), "5555");
         return false; // our check of the ORIGINAL holder (4242) still says dead
-      }
-      return candidatePid === 5555; // the second read is of the new, live holder
-    };
+      })
+      // the second read is of the new, live holder
+      .mockImplementation((candidatePid) => candidatePid === 5555);
 
     const result = acquireLock(dir, {
       isAlive,
@@ -534,15 +539,13 @@ describe("the exclusive lock", () => {
   it("claims the lock outright when a stale holder's lock is fully released before reclaim", () => {
     const dir = freshLockDir();
     acquireLock(dir, { pid: 4242, isAlive: () => true });
-    let calls = 0;
-    const isAlive = () => {
-      calls += 1;
-      if (calls === 1) {
+    const isAlive = vi
+      .fn<() => boolean>()
+      .mockImplementationOnce(() => {
         rmSync(dir, { recursive: true, force: true }); // released, not re-claimed
         return false;
-      }
-      return true;
-    };
+      })
+      .mockReturnValue(true);
 
     const result = acquireLock(dir, {
       isAlive,
@@ -583,15 +586,15 @@ describe("the exclusive lock", () => {
     // or it is already fully gone.
     const dir = freshLockDir();
     acquireLock(dir);
-    let dirGoneBeforeContentsRemoved = false;
+    const dirGoneBeforeContentsRemoved: boolean[] = [];
     const rm: typeof rmSync = (path, opts) => {
-      dirGoneBeforeContentsRemoved = !existsSync(dir);
+      dirGoneBeforeContentsRemoved.push(!existsSync(dir));
       rmSync(path, opts);
     };
 
     releaseLock(dir, { rm });
 
-    expect(dirGoneBeforeContentsRemoved).toBe(true);
+    expect(dirGoneBeforeContentsRemoved.at(-1)).toBe(true);
     expect(existsSync(dir)).toBe(false);
   });
 
@@ -613,17 +616,16 @@ describe("the exclusive lock", () => {
     // alone entirely.
     const dir = freshLockDir();
     acquireLock(dir, { pid: 4242, isAlive: () => true });
-    let calls = 0;
-    const isAlive = (candidatePid: number) => {
-      calls += 1;
-      if (calls === 1) {
+    const isAlive = vi
+      .fn<(candidatePid: number) => boolean>()
+      .mockImplementationOnce(() => {
         rmSync(dir, { recursive: true, force: true });
         mkdirSync(dir);
         writeFileSync(join(dir, "pid"), "5555");
         return false; // the ORIGINAL holder (4242) really is dead
-      }
-      return candidatePid === 5555; // every later check finds the new holder alive
-    };
+      })
+      // every later check finds the new holder alive
+      .mockImplementation((candidatePid) => candidatePid === 5555);
 
     const result = acquireLock(dir, {
       isAlive,

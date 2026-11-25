@@ -110,29 +110,29 @@ const productionSources = sourceFiles.filter(
  */
 function classTokens(source: string): Set<string> {
   const tokens = new Set<string>();
-  let buf = "";
+  const buf: string[] = [];
 
   const flush = () => {
-    if (!buf) return;
-    for (const token of buf.split(/\s+/)) {
+    if (buf.length === 0) return;
+    for (const token of buf.splice(0).join("").split(/\s+/)) {
       if (token) tokens.add(token);
     }
-    buf = "";
   };
 
   // Stack of active contexts, innermost last: a quote char (content is
   // being buffered), "${" (template interpolation — ordinary code rules,
   // buffering suspended), or "{" (a nested code brace inside "${", e.g. an
   // object literal — depth-tracked so it doesn't close the interpolation).
+  const cur = { i: 0 };
   const stack: Array<'"' | "'" | "`" | "${" | "{"> = [];
 
-  for (let i = 0; i < source.length; i++) {
-    const ch = source[i]!;
+  for (; cur.i < source.length; cur.i++) {
+    const ch = source[cur.i]!;
     const top = stack[stack.length - 1];
 
     if (top === '"' || top === "'") {
       if (ch === "\\") {
-        i++;
+        cur.i++;
         continue; // escape sequence — not a token boundary either way
       }
       if (ch === top) {
@@ -140,13 +140,13 @@ function classTokens(source: string): Set<string> {
         stack.pop();
         continue;
       }
-      buf += ch;
+      buf.push(ch);
       continue;
     }
 
     if (top === "`") {
       if (ch === "\\") {
-        i++;
+        cur.i++;
         continue;
       }
       if (ch === "`") {
@@ -154,13 +154,13 @@ function classTokens(source: string): Set<string> {
         stack.pop();
         continue;
       }
-      if (ch === "$" && source[i + 1] === "{") {
+      if (ch === "$" && source[cur.i + 1] === "{") {
         flush(); // static text collected so far in this template
         stack.push("${");
-        i++;
+        cur.i++;
         continue;
       }
-      buf += ch;
+      buf.push(ch);
       continue;
     }
 
@@ -169,14 +169,14 @@ function classTokens(source: string): Set<string> {
       // directly; nested strings/backticks recurse through the same
       // machine above. `{` nests (object literal, block); `}` closes
       // whichever of "{" / "${" is innermost.
-      if (ch === "/" && source[i + 1] === "/") {
-        const nl = source.indexOf("\n", i);
-        i = nl === -1 ? source.length : nl;
+      if (ch === "/" && source[cur.i + 1] === "/") {
+        const nl = source.indexOf("\n", cur.i);
+        cur.i = nl === -1 ? source.length : nl;
         continue;
       }
-      if (ch === "/" && source[i + 1] === "*") {
-        const end = source.indexOf("*/", i + 2);
-        i = end === -1 ? source.length : end + 1;
+      if (ch === "/" && source[cur.i + 1] === "*") {
+        const end = source.indexOf("*/", cur.i + 2);
+        cur.i = end === -1 ? source.length : end + 1;
         continue;
       }
       if (ch === '"' || ch === "'" || ch === "`") {
@@ -195,14 +195,14 @@ function classTokens(source: string): Set<string> {
     }
 
     // Top level — no active string/template/interpolation.
-    if (ch === "/" && source[i + 1] === "/") {
-      const nl = source.indexOf("\n", i);
-      i = nl === -1 ? source.length : nl;
+    if (ch === "/" && source[cur.i + 1] === "/") {
+      const nl = source.indexOf("\n", cur.i);
+      cur.i = nl === -1 ? source.length : nl;
       continue;
     }
-    if (ch === "/" && source[i + 1] === "*") {
-      const end = source.indexOf("*/", i + 2);
-      i = end === -1 ? source.length : end + 1;
+    if (ch === "/" && source[cur.i + 1] === "*") {
+      const end = source.indexOf("*/", cur.i + 2);
+      cur.i = end === -1 ? source.length : end + 1;
       continue;
     }
     if (ch === '"' || ch === "'" || ch === "`") {
@@ -238,26 +238,27 @@ function extractBalanced(
   open: string,
   close: string,
 ): string | null {
-  let depth = 0;
+  const state = { depth: 0 };
+  const cur = { i: openIndex };
   const stack: string[] = [];
 
-  for (let i = openIndex; i < source.length; i++) {
-    const ch = source[i]!;
+  for (; cur.i < source.length; cur.i++) {
+    const ch = source[cur.i]!;
 
     if (stack.length > 0) {
       const top = stack[stack.length - 1];
       if (top === "`") {
         if (ch === "\\") {
-          i++;
+          cur.i++;
           continue;
         }
         if (ch === "`") {
           stack.pop();
           continue;
         }
-        if (ch === "$" && source[i + 1] === "{") {
+        if (ch === "$" && source[cur.i + 1] === "{") {
           stack.push("${");
-          i++;
+          cur.i++;
           continue;
         }
         continue;
@@ -292,14 +293,14 @@ function extractBalanced(
           continue;
         }
         if (ch === "\\") {
-          i++;
+          cur.i++;
           continue;
         }
         continue;
       }
       // top is a plain quote character (" or ')
       if (ch === "\\") {
-        i++;
+        cur.i++;
         continue;
       }
       if (ch === top) {
@@ -310,14 +311,14 @@ function extractBalanced(
     }
 
     // Not inside any string/template — normal code scanning.
-    if (ch === "/" && source[i + 1] === "/") {
-      const nl = source.indexOf("\n", i);
-      i = nl === -1 ? source.length : nl;
+    if (ch === "/" && source[cur.i + 1] === "/") {
+      const nl = source.indexOf("\n", cur.i);
+      cur.i = nl === -1 ? source.length : nl;
       continue;
     }
-    if (ch === "/" && source[i + 1] === "*") {
-      const end = source.indexOf("*/", i + 2);
-      i = end === -1 ? source.length : end + 1;
+    if (ch === "/" && source[cur.i + 1] === "*") {
+      const end = source.indexOf("*/", cur.i + 2);
+      cur.i = end === -1 ? source.length : end + 1;
       continue;
     }
     if (ch === '"' || ch === "'" || ch === "`") {
@@ -325,12 +326,12 @@ function extractBalanced(
       continue;
     }
     if (ch === open) {
-      depth++;
+      state.depth++;
       continue;
     }
     if (ch === close) {
-      depth--;
-      if (depth === 0) return source.slice(openIndex, i + 1);
+      state.depth--;
+      if (state.depth === 0) return source.slice(openIndex, cur.i + 1);
       continue;
     }
   }
@@ -379,9 +380,12 @@ function findBagSpans(source: string): string[] {
     // peeking a fixed number of characters: an 8-char window leaves room for
     // `.join(` plus only two spaces, so a formatted array whose `.join(" ")`
     // sits on the next line at any normal indent was silently not a bag
-    // (CodeRabbit round 3). Walking the run is exact and stays linear.
-    let after = m.index + span.length;
-    while (after < source.length && /\s/.test(source[after]!)) after++;
+    // (CodeRabbit round 3). A sticky `\s*` at the span's end consumes exactly
+    // that run, so this stays linear (no slice of the rest of the file).
+    const whitespace = /\s*/y;
+    whitespace.lastIndex = m.index + span.length;
+    whitespace.exec(source);
+    const after = whitespace.lastIndex;
     if (source.startsWith(".join(", after)) spans.push(span);
   }
 

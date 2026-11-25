@@ -454,13 +454,8 @@ describe("SharePage", () => {
 
     it("the panel, look strip and preview are inert while the PNG is made", async () => {
       const { toPng } = await import("html-to-image");
-      let resolveToPng!: (value: string) => void;
-      vi.mocked(toPng).mockImplementationOnce(
-        () =>
-          new Promise<string>((resolve) => {
-            resolveToPng = resolve;
-          }),
-      );
+      const png = Promise.withResolvers<string>();
+      vi.mocked(toPng).mockImplementationOnce(() => png.promise);
       const user = userEvent.setup();
       render(<SharePage matches={MATCHES} players={PLAYERS} />);
       await openTab(user, "Tekst");
@@ -470,7 +465,7 @@ describe("SharePage", () => {
       expect(lookStrip()).toHaveAttribute("inert");
       expect(preview()).toHaveAttribute("inert");
 
-      resolveToPng("data:image/png;base64,ABC");
+      png.resolve("data:image/png;base64,ABC");
       expect(await screen.findByText("Bewaar PNG")).toBeInTheDocument();
       expect(panel()).not.toHaveAttribute("inert");
     });
@@ -501,13 +496,8 @@ describe("SharePage", () => {
 
     it("ignores a second tap while the first is still busy", async () => {
       const { toPng } = await import("html-to-image");
-      let resolveToPng!: (value: string) => void;
-      vi.mocked(toPng).mockImplementationOnce(
-        () =>
-          new Promise<string>((resolve) => {
-            resolveToPng = resolve;
-          }),
-      );
+      const png = Promise.withResolvers<string>();
+      vi.mocked(toPng).mockImplementationOnce(() => png.promise);
 
       const user = userEvent.setup();
       render(<SharePage matches={MATCHES} players={PLAYERS} />);
@@ -517,7 +507,7 @@ describe("SharePage", () => {
       await user.click(btn);
 
       expect(toPng).toHaveBeenCalledTimes(1);
-      resolveToPng("data:image/png;base64,ABC");
+      png.resolve("data:image/png;base64,ABC");
     });
 
     describe("generate failure (#2818)", () => {

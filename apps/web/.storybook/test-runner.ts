@@ -53,20 +53,21 @@ const KNOWN_ABORT_HOSTS =
 
 // Off-machine URLs the deny-by-default route in `prepare` has aborted since
 // the last check. Module-scoped so `postVisit` can see what `prepare`'s
-// route handler recorded — reset to empty every time it's read (see
+// route handler recorded — spliced empty every time it's read (see
 // throwIfDenied below), so a denial is attributed to the one story whose
 // mount/capture window it fell in, not every story for the rest of the file.
-let deniedUrls: string[] = [];
+const deniedUrls: string[] = [];
 
 // The page's own viewport, read once in `prepare`. `preVisit` restores it for
 // every story that names no fixed viewport, so `play()` never runs at whatever
 // size the previous story (or its capture loop) left behind.
-let defaultViewport: { width: number; height: number } | null = null;
+const viewportState: {
+  defaultViewport: { width: number; height: number } | null;
+} = { defaultViewport: null };
 
 function throwIfDenied(storyId: string): void {
   if (deniedUrls.length === 0) return;
-  const offending = deniedUrls;
-  deniedUrls = [];
+  const offending = deniedUrls.splice(0);
   throw new Error(
     `[VR] Story "${storyId}" triggered ${offending.length} denied ` +
       `off-machine request(s), which must not happen: ${offending.join(", ")}`,
@@ -90,8 +91,7 @@ function reportDeniedAfterCapture(
   storyId: string,
   captureError: unknown,
 ): void {
-  const offending = deniedUrls;
-  deniedUrls = [];
+  const offending = deniedUrls.splice(0);
   if (offending.length === 0) {
     if (captureError) throw captureError;
     return;
@@ -205,16 +205,15 @@ function determinismInitScript({
   (globalThis as { Date: DateConstructor }).Date =
     StubDate as unknown as DateConstructor;
 
-  let s = prngSeed >>> 0;
+  const prng = { s: prngSeed >>> 0 };
   Math.random = () => {
-    s = (s + 0x6d2b79f5) >>> 0;
-    let t = s;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    prng.s = (prng.s + 0x6d2b79f5) >>> 0;
+    const t1 = Math.imul(prng.s ^ (prng.s >>> 15), prng.s | 1);
+    const t2 = t1 ^ (t1 + Math.imul(t1 ^ (t1 >>> 7), t1 | 61));
+    return ((t2 ^ (t2 >>> 14)) >>> 0) / 4294967296;
   };
   (globalThis as { __VR_RESET_PRNG__?: () => void }).__VR_RESET_PRNG__ = () => {
-    s = prngSeed >>> 0;
+    prng.s = prngSeed >>> 0;
   };
 }
 
@@ -430,12 +429,12 @@ function waitTwoFrames(frameTimeoutMs: number) {
 async function waitForImagesSettled(budgetMs: number) {
   // Resolves true when `work` finished, false when the cap won.
   const finishedInTime = async (work: Promise<unknown>) => {
-    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timer: { id?: ReturnType<typeof setTimeout> } = {};
     const timedOut = new Promise<false>((resolve) => {
-      timer = setTimeout(() => resolve(false), budgetMs);
+      timer.id = setTimeout(() => resolve(false), budgetMs);
     });
     const done = await Promise.race([work.then(() => true as const), timedOut]);
-    clearTimeout(timer);
+    clearTimeout(timer.id);
     return done;
   };
 
@@ -514,17 +513,17 @@ function collectImageSamples(decodeProbeMs: number): Promise<ImageSample[]> {
     Array.from(document.images).map(async (img) => {
       const rect = img.getBoundingClientRect();
       const style = getComputedStyle(img);
-      let timer: ReturnType<typeof setTimeout> | undefined;
+      const timer: { id?: ReturnType<typeof setTimeout> } = {};
       const outcome = await Promise.race([
         img.decode().then(
           () => true as const,
           () => false as const,
         ),
         new Promise<"timeout">((resolve) => {
-          timer = setTimeout(() => resolve("timeout"), decodeProbeMs);
+          timer.id = setTimeout(() => resolve("timeout"), decodeProbeMs);
         }),
       ]);
-      clearTimeout(timer);
+      clearTimeout(timer.id);
       if (outcome === "timeout") {
         console.warn(
           `[VR] image decode probe gave up after ${decodeProbeMs} ms: ` +
@@ -748,7 +747,7 @@ const config: TestRunnerConfig = {
         }
       ).__STORYBOOK_PREVIEW__.ready(),
     );
-    defaultViewport = page.viewportSize();
+    viewportState.defaultViewport = page.viewportSize();
   },
   // Re-seed the PRNG before each story so consumption order is independent of
   // which other story rendered first in the same `.stories.tsx` file. Without
@@ -808,7 +807,8 @@ const config: TestRunnerConfig = {
     // which carry no `styles`) → back to the page default, never the size
     // the previous story left. postVisit's capture loop still sets each
     // capture size for a `vr` story.
-    const size = width && height ? { width, height } : defaultViewport;
+    const size =
+      width && height ? { width, height } : viewportState.defaultViewport;
     if (size) {
       await page.setViewportSize(size);
     }
@@ -927,7 +927,7 @@ const config: TestRunnerConfig = {
     // Wrapped so a failing capture (a snapshot mismatch, a structural
     // assertion, any thrown error below) still runs the denial check/clear
     // in reportDeniedAfterCapture — see that function's docblock.
-    let captureError: unknown;
+    const capture: { error: unknown } = { error: undefined };
     try {
       await page.addStyleTag({ content: DETERMINISM_STYLESHEET });
       // Park the mouse off-canvas before any screenshot so a stray cursor
@@ -999,18 +999,19 @@ const config: TestRunnerConfig = {
         // visible image still unpainted; still unpainted after that fails the
         // story — a half-loaded page is never screenshotted, and never retried
         // (a capture retry could hide a real slowdown).
-        let unpainted = unpaintedImages(
+        const firstPass = unpaintedImages(
           await page.evaluate(collectImageSamples, IMAGE_DECODE_PROBE_MS),
         );
-        if (unpainted.length > 0) {
+        const retryPass = async () => {
           await page.evaluate(
             waitForImagesSettled,
             IMAGE_PAINT_RETRY_TIMEOUT_MS,
           );
-          unpainted = unpaintedImages(
+          return unpaintedImages(
             await page.evaluate(collectImageSamples, IMAGE_DECODE_PROBE_MS),
           );
-        }
+        };
+        const unpainted = firstPass.length > 0 ? await retryPass() : firstPass;
         if (unpainted.length > 0) {
           throw new Error(
             `[VR] Story "${context.id}": ${unpainted.length} image(s) not ` +
@@ -1117,12 +1118,12 @@ const config: TestRunnerConfig = {
         });
       }
     } catch (err) {
-      captureError = err;
+      capture.error = err;
     }
     // Covers the capture phase — image/font loads triggered while the
     // viewport loop above ran, and the mouse/page-ready/font-settle calls
     // before it. See reportDeniedAfterCapture above.
-    reportDeniedAfterCapture(context.id, captureError);
+    reportDeniedAfterCapture(context.id, capture.error);
   },
 };
 

@@ -39,12 +39,12 @@ const ALLOWED = [
   'const page = import("./page");',
 ];
 
-let messages: Map<string, string[]>;
+const lint = {} as { messages: Map<string, string[]> };
 
 // Loading the Next ESLint config takes seconds; pay it here, once, outside
 // every test's timeout.
 beforeAll(async () => {
-  messages = await lintFixtures(
+  lint.messages = await lintFixtures(
     eslint,
     [...WINDOW_SIZE_WRITES, ...FIXED_PORTS, ...IN_BODY_IMPORTS, ...ALLOWED],
     join(webDir, "src", "fixture.test.ts"),
@@ -53,22 +53,24 @@ beforeAll(async () => {
 
 describe("test-file restricted-syntax rules", () => {
   it.each(WINDOW_SIZE_WRITES)("forbids a window-size write: %s", (source) => {
-    expect(messages.get(source)).toEqual([
+    expect(lint.messages.get(source)).toEqual([
       expect.stringContaining("setViewport"),
     ]);
   });
 
   it.each(FIXED_PORTS)("forbids a fixed TCP port: %s", (source) => {
-    expect(messages.get(source)).toEqual([
+    expect(lint.messages.get(source)).toEqual([
       expect.stringContaining("fixed TCP port"),
     ]);
   });
 
   it.each(IN_BODY_IMPORTS)("forbids an in-body route import: %s", (source) => {
-    expect(messages.get(source)).toEqual([expect.stringContaining("Hoist")]);
+    expect(lint.messages.get(source)).toEqual([
+      expect.stringContaining("Hoist"),
+    ]);
   });
 
   it.each(ALLOWED)("allows %s", (source) => {
-    expect(messages.get(source)).toEqual([]);
+    expect(lint.messages.get(source)).toEqual([]);
   });
 });

@@ -472,20 +472,10 @@ const eslintConfig = [
     rules: { "kcvv/use-client-exports": "error" },
   },
   {
-    // No `let` (#3717, #3842) — own rule ID, own block, so no other
-    // `no-restricted-syntax` block can replace it. Source only: tests, stories,
-    // e2e, test infrastructure and `.storybook/` are the next issue.
+    // No `let` (#3717, #3842, #3843) — own rule ID, own block, so no other
+    // `no-restricted-syntax` block can replace it. Covers every linted file:
+    // source, tests, stories, e2e, test infrastructure and `.storybook/`.
     files: ["**/*.{ts,tsx,js,jsx,mjs,cjs,mts,cts}"],
-    ignores: [
-      "**/*.test.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
-      "**/*.spec.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
-      "**/*.stories.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
-      "**/__tests__/**",
-      "**/test/**",
-      "**/tests/**",
-      "**/e2e/**",
-      "**/.storybook/**",
-    ],
     plugins: { kcvv: kcvvPlugin },
     rules: {
       "kcvv/no-let": [

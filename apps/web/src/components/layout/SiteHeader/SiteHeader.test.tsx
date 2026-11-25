@@ -3,9 +3,9 @@ import { render, screen, act, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SiteHeader } from "./SiteHeader";
 
-let mockPathname = "/";
+const route = vi.hoisted(() => ({ pathname: "/" }));
 vi.mock("next/navigation", () => ({
-  usePathname: () => mockPathname,
+  usePathname: () => route.pathname,
 }));
 
 import type { TeamNavVM } from "@/lib/repositories/team.repository";
@@ -32,7 +32,7 @@ const seniorTeams: TeamNavVM[] = [
 
 describe("SiteHeader", () => {
   beforeEach(() => {
-    mockPathname = "/";
+    route.pathname = "/";
   });
 
   it("renders sticky header with top: 0", () => {
@@ -199,24 +199,24 @@ describe("SiteHeader", () => {
   // mock in `CalendarWidget.test.tsx` — this stubs a controllable one
   // instead of trying to drive a real resize.
   describe("drawer retires itself when the viewport crosses into `lg`", () => {
-    let originalMatchMedia: typeof window.matchMedia;
+    const saved = {} as { matchMedia: typeof window.matchMedia };
 
     beforeEach(() => {
-      originalMatchMedia = window.matchMedia;
+      saved.matchMedia = window.matchMedia;
     });
 
     afterEach(() => {
-      window.matchMedia = originalMatchMedia;
+      window.matchMedia = saved.matchMedia;
       document.documentElement.style.removeProperty("--breakpoint-lg");
     });
 
     it("closes the takeover and moves focus to the desktop nav's first link, not the now-hidden hamburger", async () => {
       document.documentElement.style.setProperty("--breakpoint-lg", "900px");
-      let matches = false;
+      const state = { matches: false };
       const listeners = new Set<(event: { matches: boolean }) => void>();
       window.matchMedia = vi.fn().mockReturnValue({
         get matches() {
-          return matches;
+          return state.matches;
         },
         addEventListener: vi.fn(
           (type: string, cb: (event: { matches: boolean }) => void) => {
@@ -237,7 +237,7 @@ describe("SiteHeader", () => {
       expect(screen.getByRole("dialog")).toBeInTheDocument();
 
       act(() => {
-        matches = true;
+        state.matches = true;
         listeners.forEach((cb) => cb({ matches: true }));
       });
 
@@ -269,14 +269,14 @@ describe("SiteHeader", () => {
       await user.click(screen.getByRole("button", { name: /open menu/i }));
       await user.click(drawer().getByRole("link", { name: "Nieuws" }));
 
-      mockPathname = "/nieuws";
+      route.pathname = "/nieuws";
       rerender(<SiteHeader seniorTeams={seniorTeams} />);
 
       expect(screen.queryByRole("dialog")).toBeNull();
     });
 
     it("closes at once when the row for the current page is tapped", async () => {
-      mockPathname = "/nieuws";
+      route.pathname = "/nieuws";
       const user = userEvent.setup();
       render(<SiteHeader seniorTeams={seniorTeams} />);
       await user.click(screen.getByRole("button", { name: /open menu/i }));
@@ -294,7 +294,7 @@ describe("SiteHeader", () => {
       expect(screen.getByRole("dialog")).toBeInTheDocument();
       unmount();
 
-      mockPathname = "/club/word-lid";
+      route.pathname = "/club/word-lid";
       render(<SiteHeader seniorTeams={seniorTeams} />);
       await user.click(screen.getByRole("button", { name: /open menu/i }));
       await user.click(drawer().getByRole("link", { name: "Word lid" }));

@@ -30,8 +30,7 @@ function findImageUrlProjections(
 
   // Match named image URL projections: "fieldName": something.asset->url...
   const namedPattern = /"(\w+)":\s*\w[\w.]*\.asset->url(?:\s*\+\s*"[^"]*")?/g;
-  let match;
-  while ((match = namedPattern.exec(query)) !== null) {
+  for (const match of query.matchAll(namedPattern)) {
     const field = match[1];
     // Skip file attachment fields
     if (field === "fileUrl") continue;
@@ -41,7 +40,7 @@ function findImageUrlProjections(
   // Match inline body image projections: asset->{ url } or asset->{ "url": url + "..." }
   const inlinePattern =
     /asset->\{\s*(?:"url":\s*)?url(?:\s*\+\s*"[^"]*")?\s*\}/g;
-  while ((match = inlinePattern.exec(query)) !== null) {
+  for (const match of query.matchAll(inlinePattern)) {
     results.push({ field: "url (inline body image)", projection: match[0] });
   }
 

@@ -25,12 +25,12 @@ const mockTrackEvent = vi.mocked(trackEvent);
 // effect that `router.push` retriggers in real Next.js never actually fired
 // here.
 const searchParamsStore = vi.hoisted(() => {
-  let current = new URLSearchParams();
+  const state = { current: new URLSearchParams() };
   const listeners = new Set<() => void>();
   return {
-    get: () => current,
+    get: () => state.current,
     set: (next: URLSearchParams) => {
-      current = next;
+      state.current = next;
       listeners.forEach((listener) => listener());
     },
     subscribe: (listener: () => void) => {
@@ -96,7 +96,7 @@ const setupUser = () =>
   userEvent.setup({ advanceTimers: vi.advanceTimersByTimeAsync });
 
 describe("SearchInterface", () => {
-  let fetchMock: ReturnType<typeof vi.fn>;
+  const fetchMock = vi.fn();
 
   beforeEach(() => {
     // Fake timers, so SearchForm's 350ms typeahead debounce is simulated
@@ -111,7 +111,7 @@ describe("SearchInterface", () => {
     searchParamsStore.set(new URLSearchParams());
 
     // Setup fetch mock using vi.stubGlobal for proper cleanup
-    fetchMock = vi.fn();
+    fetchMock.mockReset();
     vi.stubGlobal("fetch", fetchMock);
 
     // `vi.clearAllMocks()` below (afterEach) clears calls but not a
@@ -311,12 +311,9 @@ describe("SearchInterface", () => {
   describe("Fetch Behavior", () => {
     it("should display loading state during fetch", async () => {
       const user = setupUser();
-      let resolvePromise: (value: unknown) => void;
-      const promise = new Promise((resolve) => {
-        resolvePromise = resolve;
-      });
+      const pending = Promise.withResolvers<unknown>();
 
-      fetchMock.mockReturnValueOnce(promise);
+      fetchMock.mockReturnValueOnce(pending.promise);
 
       render(<SearchInterface />);
 
@@ -332,7 +329,7 @@ describe("SearchInterface", () => {
       });
 
       // Resolve promise
-      resolvePromise!({
+      pending.resolve({
         ok: true,
         json: async () => createMockSearchResponse("test"),
       });
@@ -485,7 +482,7 @@ describe("SearchInterface", () => {
 
     it("should abort previous request when new search is submitted", async () => {
       const user = setupUser();
-      let firstRequestAborted = false;
+      const onFirstAbort = vi.fn();
 
       // First request that never resolves (manually controlled)
       const firstRequestPromise = new Promise(() => {
@@ -494,7 +491,7 @@ describe("SearchInterface", () => {
 
       fetchMock.mockImplementationOnce((_url, options) => {
         options?.signal?.addEventListener("abort", () => {
-          firstRequestAborted = true;
+          onFirstAbort();
         });
         return firstRequestPromise;
       });
@@ -531,7 +528,7 @@ describe("SearchInterface", () => {
 
       // First request should be aborted when second request starts
       await waitFor(() => {
-        expect(firstRequestAborted).toBe(true);
+        expect(onFirstAbort).toHaveBeenCalled();
       });
     });
 
@@ -563,11 +560,11 @@ describe("SearchInterface", () => {
 
     it("should abort in-flight request on unmount", async () => {
       const user = setupUser();
-      let capturedSignal: AbortSignal | undefined;
+      const captured: { signal?: AbortSignal } = {};
 
       fetchMock.mockImplementationOnce(
         (_url: string, options?: RequestInit) => {
-          capturedSignal = options?.signal as AbortSignal;
+          captured.signal = options?.signal as AbortSignal;
           return new Promise(() => {}); // never resolves
         },
       );
@@ -580,12 +577,12 @@ describe("SearchInterface", () => {
       await user.click(submitButton);
 
       await waitFor(() => {
-        expect(capturedSignal).toBeDefined();
+        expect(captured.signal).toBeDefined();
       });
 
       unmount();
 
-      expect(capturedSignal!.aborted).toBe(true);
+      expect(captured.signal!.aborted).toBe(true);
     });
   });
 
@@ -773,12 +770,9 @@ describe("SearchInterface", () => {
   describe("Loading States", () => {
     it("disables the submit button during loading; the input stays enabled (ZOEK-2)", async () => {
       const user = setupUser();
-      let resolvePromise: (value: unknown) => void;
-      const promise = new Promise((resolve) => {
-        resolvePromise = resolve;
-      });
+      const pending = Promise.withResolvers<unknown>();
 
-      fetchMock.mockReturnValueOnce(promise);
+      fetchMock.mockReturnValueOnce(pending.promise);
 
       render(<SearchInterface />);
 
@@ -795,7 +789,7 @@ describe("SearchInterface", () => {
       });
       expect(input).not.toBeDisabled();
 
-      resolvePromise!({
+      pending.resolve({
         ok: true,
         json: async () => createMockSearchResponse("test"),
       });
@@ -1963,19 +1957,15 @@ describe("SearchInterface", () => {
       });
       beforeReSearch?.();
 
-      let resolveSecond!: (value: unknown) => void;
-      fetchMock.mockReturnValueOnce(
-        new Promise((resolve) => {
-          resolveSecond = resolve;
-        }),
-      );
+      const second = Promise.withResolvers<unknown>();
+      fetchMock.mockReturnValueOnce(second.promise);
       act(() => {
         setMockSearchParams({ q: "second" });
       });
       await waitFor(() => {
         expect(fetchMock).toHaveBeenCalledTimes(2);
       });
-      return { resolveSecond, ...view };
+      return { resolveSecond: second.resolve, ...view };
     }
 
     it("shows the centred scarf at once on a first search: there is nothing to keep", async () => {

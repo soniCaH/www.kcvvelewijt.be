@@ -79,15 +79,15 @@ describe("useHistoryFilterParam", () => {
     // unconditional setState back to the SAME string would still be a
     // no-op via React's own Object.is bail-out, so it wouldn't show up as a
     // *value* difference — only as this extra render.
-    let renderCount = 0;
+    const renders = vi.fn();
     const { result } = renderHook(() => {
-      renderCount++;
+      renders();
       return useHistoryFilterParam("type", VALUES, {
         fallback: "a",
         route: "/evenementen",
       });
     });
-    expect(renderCount).toBe(1);
+    expect(renders).toHaveBeenCalledTimes(1);
     expect(result.current[0]).toBe("a");
   });
 

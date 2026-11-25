@@ -54,12 +54,12 @@ describe("useTeamGuess", () => {
   });
 
   it("aborts the request in flight when the query changes", async () => {
-    let firstSignal: AbortSignal | undefined;
+    const first: { signal?: AbortSignal } = {};
     vi.mocked(fetch).mockImplementationOnce(
       (_url, init) =>
         new Promise((_resolve, reject) => {
-          firstSignal = init?.signal ?? undefined;
-          firstSignal?.addEventListener("abort", () =>
+          first.signal = init?.signal ?? undefined;
+          first.signal?.addEventListener("abort", () =>
             reject(new DOMException("aborted", "AbortError")),
           );
         }),
@@ -73,7 +73,7 @@ describe("useTeamGuess", () => {
     rerender({ query: "mijn dochter" });
     await settle();
 
-    expect(firstSignal?.aborted).toBe(true);
+    expect(first.signal?.aborted).toBe(true);
     expect(warn).not.toHaveBeenCalled();
     expect(result.current).toEqual({ query: "mijn dochter", age: "U9" });
   });

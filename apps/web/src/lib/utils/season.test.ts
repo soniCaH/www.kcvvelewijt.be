@@ -71,12 +71,12 @@ describe("season derivation (via groupBySeason)", () => {
    * the season that has not started yet.
    */
   describe("across runtime zones", () => {
-    let savedTz: string | undefined;
+    const saved: { value?: string } = {};
     beforeEach(() => {
-      savedTz = process.env.TZ;
+      saved.value = process.env.TZ;
     });
     afterEach(() => {
-      if (savedTz !== undefined) process.env.TZ = savedTz;
+      if (saved.value !== undefined) process.env.TZ = saved.value;
       else delete process.env.TZ;
     });
 

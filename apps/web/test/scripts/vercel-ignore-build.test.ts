@@ -24,18 +24,21 @@ const SCRIPT = join(__dirname, "..", "..", "scripts", "vercel-ignore-build.sh");
 const stubs = mkdtempSync(join(tmpdir(), "vercel-ignore-stubs-"));
 const curlLog = join(stubs, "curl.log");
 
-let repo: string;
-let base: string;
-let docsOnly: string;
-let apiOnly: string;
-let webChange: string;
+// The fixture repo and its commit SHAs, filled in by `beforeAll`.
+const fixture = {} as { repo: string };
+const sha = {} as {
+  base: string;
+  docsOnly: string;
+  apiOnly: string;
+  webChange: string;
+};
 
 const git = (...args: string[]) =>
-  spawnSync("git", args, { cwd: repo, encoding: "utf8" }).stdout.trim();
+  spawnSync("git", args, { cwd: fixture.repo, encoding: "utf8" }).stdout.trim();
 
 const commit = (path: string, body: string) => {
-  mkdirSync(join(repo, path, ".."), { recursive: true });
-  writeFileSync(join(repo, path), body);
+  mkdirSync(join(fixture.repo, path, ".."), { recursive: true });
+  writeFileSync(join(fixture.repo, path), body);
   git("add", "-A");
   git("commit", "-q", "-m", path);
   return git("rev-parse", "HEAD");
@@ -48,7 +51,7 @@ const curlCalls = () =>
 const run = (env: Record<string, string>, at: string) => {
   git("checkout", "-q", at);
   return spawnSync("bash", [SCRIPT], {
-    cwd: join(repo, "apps", "web"),
+    cwd: join(fixture.repo, "apps", "web"),
     // Blank the Vercel vars first, so only each case's own values count.
     env: {
       ...process.env,
@@ -75,7 +78,7 @@ const firstPush = (at: string, env: Record<string, string> = {}) =>
 const botPush = (
   ref: string,
   env: Record<string, string> = {},
-  at = webChange,
+  at = sha.webChange,
 ) =>
   run(
     {
@@ -92,30 +95,30 @@ const pulls = (...names: string[]) =>
   JSON.stringify([{ number: 42, labels: names.map((name) => ({ name })) }]);
 
 beforeAll(() => {
-  repo = mkdtempSync(join(tmpdir(), "vercel-ignore-"));
+  fixture.repo = mkdtempSync(join(tmpdir(), "vercel-ignore-"));
   writeFileSync(
     join(stubs, "curl"),
     `#!/bin/sh\necho "$@" >> "${curlLog}"\nprintf '%s' "$STUB_CURL_BODY"\nexit "$STUB_CURL_EXIT"\n`,
   );
   chmodSync(join(stubs, "curl"), 0o755);
-  mkdirSync(join(repo, "apps", "web"), { recursive: true });
+  mkdirSync(join(fixture.repo, "apps", "web"), { recursive: true });
   git("init", "-q", "-b", "main");
   git("config", "user.email", "test@example.com");
   git("config", "user.name", "test");
-  git("remote", "add", "origin", repo);
-  base = commit("apps/web/page.ts", "1");
-  docsOnly = commit("docs/notes.md", "1");
-  apiOnly = commit("apps/api/index.ts", "1");
-  webChange = commit("apps/web/page.ts", "2");
-  // origin/main stays at `base`; the branches under test sit on top of it.
+  git("remote", "add", "origin", fixture.repo);
+  sha.base = commit("apps/web/page.ts", "1");
+  sha.docsOnly = commit("docs/notes.md", "1");
+  sha.apiOnly = commit("apps/api/index.ts", "1");
+  sha.webChange = commit("apps/web/page.ts", "2");
+  // origin/main stays at `sha.base`; the branches under test sit on top of it.
   git("checkout", "-q", "--detach");
-  git("branch", "-f", "main", base);
+  git("branch", "-f", "main", sha.base);
 });
 
 beforeEach(() => rmSync(curlLog, { force: true }));
 
 afterAll(() => {
-  rmSync(repo, { recursive: true, force: true });
+  if (fixture.repo) rmSync(fixture.repo, { recursive: true, force: true });
   rmSync(stubs, { recursive: true, force: true });
 });
 
@@ -123,8 +126,11 @@ describe("vercel-ignore-build.sh", () => {
   it("skips (0) when nothing the web app builds from changed", () => {
     expect(
       run(
-        { VERCEL_GIT_PREVIOUS_SHA: base, VERCEL_GIT_COMMIT_SHA: apiOnly },
-        apiOnly,
+        {
+          VERCEL_GIT_PREVIOUS_SHA: sha.base,
+          VERCEL_GIT_COMMIT_SHA: sha.apiOnly,
+        },
+        sha.apiOnly,
       ),
     ).toBe(0);
   });
@@ -132,8 +138,11 @@ describe("vercel-ignore-build.sh", () => {
   it("builds (1) when the web app changed", () => {
     expect(
       run(
-        { VERCEL_GIT_PREVIOUS_SHA: apiOnly, VERCEL_GIT_COMMIT_SHA: webChange },
-        webChange,
+        {
+          VERCEL_GIT_PREVIOUS_SHA: sha.apiOnly,
+          VERCEL_GIT_COMMIT_SHA: sha.webChange,
+        },
+        sha.webChange,
       ),
     ).toBe(1);
   });
@@ -142,8 +151,8 @@ describe("vercel-ignore-build.sh", () => {
     const gone = "6940eb9100dd80394caac932088acf6352fced1c";
     expect(
       run(
-        { VERCEL_GIT_PREVIOUS_SHA: gone, VERCEL_GIT_COMMIT_SHA: webChange },
-        webChange,
+        { VERCEL_GIT_PREVIOUS_SHA: gone, VERCEL_GIT_COMMIT_SHA: sha.webChange },
+        sha.webChange,
       ),
     ).toBe(1);
   });
@@ -152,26 +161,26 @@ describe("vercel-ignore-build.sh", () => {
     expect(
       run(
         {
-          VERCEL_GIT_PREVIOUS_SHA: webChange,
-          VERCEL_GIT_COMMIT_SHA: webChange,
+          VERCEL_GIT_PREVIOUS_SHA: sha.webChange,
+          VERCEL_GIT_COMMIT_SHA: sha.webChange,
         },
-        webChange,
+        sha.webChange,
       ),
     ).toBe(1);
   });
 
   describe("first push of a branch (compared against main)", () => {
     it.each([
-      [0, "only docs/ changed", () => docsOnly, {}],
-      [0, "only docs/ and apps/api/ changed", () => apiOnly, {}],
-      [1, "the web app changed", () => webChange, {}],
+      [0, "only docs/ changed", () => sha.docsOnly, {}],
+      [0, "only docs/ and apps/api/ changed", () => sha.apiOnly, {}],
+      [1, "the web app changed", () => sha.webChange, {}],
       [
         0,
         "a Redeploy of a skipped first push (still no previous SHA)",
-        () => docsOnly,
+        () => sha.docsOnly,
         { VERCEL_GIT_COMMIT_REF: "feat/docs-only" },
       ],
-      [1, "main itself", () => base, { VERCEL_GIT_COMMIT_REF: "main" }],
+      [1, "main itself", () => sha.base, { VERCEL_GIT_COMMIT_REF: "main" }],
     ])("exits %i for %s", (expected, _name, at, env) => {
       expect(firstPush(at(), env)).toBe(expected);
     });
@@ -179,7 +188,7 @@ describe("vercel-ignore-build.sh", () => {
     it("builds (1) when main cannot be fetched", () => {
       git("remote", "rename", "origin", "gone");
       try {
-        expect(firstPush(apiOnly)).toBe(1);
+        expect(firstPush(sha.apiOnly)).toBe(1);
       } finally {
         git("remote", "rename", "gone", "origin");
       }
@@ -254,11 +263,11 @@ describe("vercel-ignore-build.sh", () => {
         run(
           {
             VERCEL_GIT_COMMIT_REF: "renovate/x",
-            VERCEL_GIT_PREVIOUS_SHA: base,
-            VERCEL_GIT_COMMIT_SHA: webChange,
+            VERCEL_GIT_PREVIOUS_SHA: sha.base,
+            VERCEL_GIT_COMMIT_SHA: sha.webChange,
             VERCEL_GIT_COMMIT_MESSAGE: "⬆️ chore(deps): update x",
           },
-          webChange,
+          sha.webChange,
         ),
       ).toBe(0);
     });

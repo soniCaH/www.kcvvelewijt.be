@@ -91,12 +91,12 @@ describe("PosterPrintScale", () => {
     // Stub `document.fonts` with ONLY a `loadingdone` subscription (no
     // `ready`) — proves the re-measure comes through the shared
     // `useWebfontSwap` trigger, not the removed `fonts.ready` check.
-    let loadingDoneHandler: (() => void) | undefined;
+    const loadingDone: { handler?: () => void } = {};
     Object.defineProperty(document, "fonts", {
       configurable: true,
       value: {
         addEventListener: (event: string, handler: () => void) => {
-          if (event === "loadingdone") loadingDoneHandler = handler;
+          if (event === "loadingdone") loadingDone.handler = handler;
         },
         removeEventListener: vi.fn(),
       },
@@ -113,7 +113,7 @@ describe("PosterPrintScale", () => {
         configurable: true,
         value: 1800,
       });
-      loadingDoneHandler?.();
+      loadingDone.handler?.();
 
       expect(readScale()).toBeCloseTo(BLOCK_HEIGHT_PX / 1800, 4);
     } finally {

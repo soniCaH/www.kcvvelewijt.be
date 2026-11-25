@@ -295,11 +295,8 @@ describe("CalendarSubscribePanel", () => {
       const copyButton = screen.getByRole("button", { name: /Kopieer link/ });
 
       // Attempt A: all three teams selected, held pending — resolves later.
-      let resolveA!: () => void;
-      const pendingA = new Promise<void>((resolve) => {
-        resolveA = resolve;
-      });
-      mockWriteText.mockReturnValueOnce(pendingA);
+      const pendingA = Promise.withResolvers<void>();
+      mockWriteText.mockReturnValueOnce(pendingA.promise);
       await user.click(copyButton);
 
       // Change the selection while A is still in flight — webcalUrl now
@@ -316,7 +313,7 @@ describe("CalendarSubscribePanel", () => {
       // A now resolves successfully, for a URL that is no longer current —
       // it must not clear B's still-accurate failure notice (#2580: this
       // used to be an unconditional `setFailedUrl(null)` on any success).
-      resolveA();
+      pendingA.resolve();
       await waitFor(() => expect(mockWriteText).toHaveBeenCalledTimes(2));
       expect(screen.getByRole("alert")).toBeInTheDocument();
 

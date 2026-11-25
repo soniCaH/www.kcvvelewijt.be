@@ -34,12 +34,12 @@ const ALLOWED = [
   'const ok4 = "leading-glyph";',
 ];
 
-let messages: Map<string, string[]>;
+const lint = {} as { messages: Map<string, string[]> };
 
 // Loading the Next ESLint config takes seconds; pay it here, once, outside
 // every test's timeout.
 beforeAll(async () => {
-  messages = await lintFixtures(
+  lint.messages = await lintFixtures(
     eslint,
     [...OFF_RAMP_LEADING, ...ALLOWED],
     join(webDir, "src", "fixture.tsx"),
@@ -50,13 +50,13 @@ describe("leading freeze — src-file restricted-syntax rule", () => {
   it.each(OFF_RAMP_LEADING)(
     "forbids an off-ramp leading utility: %s",
     (source) => {
-      expect(messages.get(source)).toEqual([
+      expect(lint.messages.get(source)).toEqual([
         expect.stringContaining("Off-ramp leading"),
       ]);
     },
   );
 
   it.each(ALLOWED)("allows %s", (source) => {
-    expect(messages.get(source)).toEqual([]);
+    expect(lint.messages.get(source)).toEqual([]);
   });
 });

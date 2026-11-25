@@ -170,14 +170,14 @@ describe("HorizontalSlider", () => {
   });
 
   describe("Scroll Arrows — paper register", () => {
-    let restoreScrollDimensions: () => void;
+    const restores: Array<() => void> = [];
 
     beforeEach(() => {
-      restoreScrollDimensions = mockScrollDimensions();
+      restores.push(mockScrollDimensions());
     });
 
     afterEach(() => {
-      restoreScrollDimensions();
+      restores.splice(0).forEach((restore) => restore());
     });
 
     it("should show right arrow when content overflows", () => {

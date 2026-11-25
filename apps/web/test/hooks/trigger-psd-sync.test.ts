@@ -21,6 +21,7 @@
  * and nothing real is synced.
  */
 import { spawnSync } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import {
   existsSync,
   mkdtempSync,
@@ -82,16 +83,8 @@ createServer((req, res) => {
 });
 `;
 
-let dir = "";
-let stubPath = "";
-
-/**
- * Each run gets its own port, hits file and log. Sharing them across cases let
- * a later run append to an earlier run's hits, which would make the
- * exactly-once assertion pass or fail on test ordering rather than on the
- * script's behaviour — and a reused port raced the previous stub's shutdown.
- */
-let seq = 0;
+// Filled by `beforeAll`, so a run that selects no test here creates no directory.
+const fixture = {} as { dir: string; stubPath: string };
 
 /**
  * Ask the OS for a free port, then release it. A base port plus a counter
@@ -116,20 +109,24 @@ function freePort(): Promise<number> {
 }
 
 beforeAll(() => {
-  dir = mkdtempSync(join(tmpdir(), "psd-sync-fixture-"));
-  stubPath = join(dir, "stub.mjs");
-  writeFileSync(stubPath, STUB_SERVER, "utf8");
+  fixture.dir = mkdtempSync(join(tmpdir(), "psd-sync-fixture-"));
+  fixture.stubPath = join(fixture.dir, "stub.mjs");
+  writeFileSync(fixture.stubPath, STUB_SERVER, "utf8");
 });
 
 afterAll(() => {
-  if (dir) rmSync(dir, { recursive: true, force: true });
+  if (fixture.dir) rmSync(fixture.dir, { recursive: true, force: true });
 });
 
 async function run(args: string[], extraEnv: Record<string, string> = {}) {
-  const n = seq++;
+  // Each run gets its own port, hits file and log. Sharing them across cases let
+  // a later run append to an earlier run's hits, which would make the
+  // exactly-once assertion pass or fail on test ordering rather than on the
+  // script's behaviour — and a reused port raced the previous stub's shutdown.
+  const n = randomUUID();
   const port = await freePort();
-  const hitsFile = join(dir, `hits-${n}.txt`);
-  const logPath = join(dir, `sync-${n}.log`);
+  const hitsFile = join(fixture.dir, `hits-${n}.txt`);
+  const logPath = join(fixture.dir, `sync-${n}.log`);
   writeFileSync(hitsFile, "", "utf8");
 
   const result = spawnSync("bash", [SCRIPT, ...args], {
@@ -137,7 +134,7 @@ async function run(args: string[], extraEnv: Record<string, string> = {}) {
     encoding: "utf8",
     env: {
       ...process.env,
-      TRIGGER_PSD_SYNC_SERVER_CMD: `node ${stubPath} ${port} ${hitsFile}`,
+      TRIGGER_PSD_SYNC_SERVER_CMD: `node ${fixture.stubPath} ${port} ${hitsFile}`,
       TRIGGER_PSD_SYNC_PORT: String(port),
       TRIGGER_PSD_SYNC_LOG: logPath,
       ...extraEnv,

@@ -20,10 +20,10 @@ function popTo(pathname: string) {
 }
 
 describe("ScrollToTop", () => {
-  let scrollSpy: ReturnType<typeof vi.spyOn>;
+  const ctx = {} as { scrollSpy: ReturnType<typeof vi.spyOn> };
 
   beforeEach(() => {
-    scrollSpy = vi
+    ctx.scrollSpy = vi
       .spyOn(window, "scrollTo")
       .mockImplementation(() => undefined);
     window.history.pushState({}, "", "/club");
@@ -38,28 +38,28 @@ describe("ScrollToTop", () => {
 
   it("scrolls to the top on a forward navigation to a new route", () => {
     const { rerender } = render(<ScrollToTop />);
-    scrollSpy.mockClear();
+    ctx.scrollSpy.mockClear();
     mockPathname.mockReturnValue("/jeugd");
     rerender(<ScrollToTop />);
-    expect(scrollSpy).toHaveBeenCalledWith(TO_TOP);
+    expect(ctx.scrollSpy).toHaveBeenCalledWith(TO_TOP);
   });
 
   it("does not scroll on the initial render", () => {
     // The browser has already placed a fresh load. Scrolling here throws a
     // visitor who started reading during hydration back to the top (#2986).
     render(<ScrollToTop />);
-    expect(scrollSpy).not.toHaveBeenCalled();
+    expect(ctx.scrollSpy).not.toHaveBeenCalled();
   });
 
   it("does not scroll when the route change came from a back/forward pop", () => {
     // The browser restores the offset the visitor left; overwriting it is
     // what made Back land at the top of every page (#2986).
     const { rerender } = render(<ScrollToTop />);
-    scrollSpy.mockClear();
+    ctx.scrollSpy.mockClear();
     popTo("/jeugd");
     mockPathname.mockReturnValue("/jeugd");
     rerender(<ScrollToTop />);
-    expect(scrollSpy).not.toHaveBeenCalled();
+    expect(ctx.scrollSpy).not.toHaveBeenCalled();
   });
 
   it("still scrolls on the forward navigation after a pop", () => {
@@ -67,11 +67,11 @@ describe("ScrollToTop", () => {
     popTo("/jeugd");
     mockPathname.mockReturnValue("/jeugd");
     rerender(<ScrollToTop />);
-    scrollSpy.mockClear();
+    ctx.scrollSpy.mockClear();
 
     mockPathname.mockReturnValue("/sponsors");
     rerender(<ScrollToTop />);
-    expect(scrollSpy).toHaveBeenCalledWith(TO_TOP);
+    expect(ctx.scrollSpy).toHaveBeenCalledWith(TO_TOP);
   });
 
   it("survives Strict Mode's double-invoked mount effect", () => {
@@ -83,7 +83,7 @@ describe("ScrollToTop", () => {
         <ScrollToTop />
       </StrictMode>,
     );
-    expect(scrollSpy).not.toHaveBeenCalled();
+    expect(ctx.scrollSpy).not.toHaveBeenCalled();
   });
 
   it("keeps the restored offset through a multi-step Back", () => {
@@ -91,7 +91,7 @@ describe("ScrollToTop", () => {
     // has to hold more than the most recent one.
     mockPathname.mockReturnValue("/sponsors");
     const { rerender } = render(<ScrollToTop />);
-    scrollSpy.mockClear();
+    ctx.scrollSpy.mockClear();
 
     popTo("/jeugd");
     popTo("/club");
@@ -99,7 +99,7 @@ describe("ScrollToTop", () => {
     rerender(<ScrollToTop />);
     mockPathname.mockReturnValue("/club");
     rerender(<ScrollToTop />);
-    expect(scrollSpy).not.toHaveBeenCalled();
+    expect(ctx.scrollSpy).not.toHaveBeenCalled();
   });
 
   it("does not let a pop that kept the same pathname swallow the next navigation", () => {
@@ -108,11 +108,11 @@ describe("ScrollToTop", () => {
     // would stay armed and skip the next real forward navigation.
     const { rerender } = render(<ScrollToTop />);
     popTo("/club");
-    scrollSpy.mockClear();
+    ctx.scrollSpy.mockClear();
 
     mockPathname.mockReturnValue("/sponsors");
     rerender(<ScrollToTop />);
-    expect(scrollSpy).toHaveBeenCalledWith(TO_TOP);
+    expect(ctx.scrollSpy).toHaveBeenCalledWith(TO_TOP);
   });
 
   it("does not scroll when the URL targets an in-page anchor", () => {
@@ -120,6 +120,6 @@ describe("ScrollToTop", () => {
     window.location.hash = "#visie";
     mockPathname.mockReturnValue("/jeugd");
     rerender(<ScrollToTop />);
-    expect(scrollSpy).not.toHaveBeenCalled();
+    expect(ctx.scrollSpy).not.toHaveBeenCalled();
   });
 });

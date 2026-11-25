@@ -16,12 +16,12 @@ import { useWebfontSwap } from "./useWebfontSwap";
  *  an optional `ready` promise, mirroring `useHashLandingCorrection.test.ts`
  *  — happy-dom has no `document.fonts` at all, unlike a real browser. */
 function stubFonts(ready?: Promise<unknown>) {
-  let loadingDoneHandler: (() => void) | undefined;
+  const loadingDone: { handler?: () => void } = {};
   const removeEventListener = vi.fn((event: string) => {
-    if (event === "loadingdone") loadingDoneHandler = undefined;
+    if (event === "loadingdone") loadingDone.handler = undefined;
   });
   const addEventListener = vi.fn((event: string, handler: () => void) => {
-    if (event === "loadingdone") loadingDoneHandler = handler;
+    if (event === "loadingdone") loadingDone.handler = handler;
   });
   Object.defineProperty(document, "fonts", {
     configurable: true,
@@ -30,7 +30,7 @@ function stubFonts(ready?: Promise<unknown>) {
   return {
     addEventListener,
     removeEventListener,
-    fireLoadingDone: () => loadingDoneHandler?.(),
+    fireLoadingDone: () => loadingDone.handler?.(),
   };
 }
 
@@ -169,10 +169,8 @@ describe("useWebfontSwap", () => {
       // `ready` can't be "cancelled" — this documents (not just asserts)
       // that a post-unmount resolution is safe because every real consumer
       // is idempotent against it (see useWebfontSwap's own docblock).
-      let resolveReady!: () => void;
-      const ready = new Promise<void>((resolve) => {
-        resolveReady = resolve;
-      });
+      const { promise: ready, resolve: resolveReady } =
+        Promise.withResolvers<void>();
       stubFonts(ready);
       const onSwap = vi.fn();
 

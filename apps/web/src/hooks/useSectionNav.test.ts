@@ -27,7 +27,7 @@ import {
 // no host element to render them for real) — tracked here so `afterEach` can
 // remove them by reference, without a bespoke marker attribute (every one of
 // them already sets a real `id`, which is all these tests query by).
-let appendedSectionTargets: Element[] = [];
+const appendedSectionTargets: Element[] = [];
 
 function appendSectionTarget(id: string): HTMLDivElement {
   const el = document.createElement("div");
@@ -90,18 +90,18 @@ function TestHost({
 }
 
 function renderHook(ids: readonly string[]) {
-  let result: UseSectionNavResult | undefined;
+  const latest: { result?: UseSectionNavResult } = {};
   const utils = render(
     createElement(TestHost, {
       ids,
       onHook: (h) => {
-        result = h;
+        latest.result = h;
       },
     }),
   );
   return {
     get result() {
-      return result!;
+      return latest.result!;
     },
     ...utils,
   };
@@ -120,8 +120,7 @@ describe("useSectionNav", () => {
     vi.useRealTimers();
     document.documentElement.style.scrollPaddingTop = "";
     window.location.hash = "";
-    appendedSectionTargets.forEach((el) => el.remove());
-    appendedSectionTargets = [];
+    appendedSectionTargets.splice(0).forEach((el) => el.remove());
   });
 
   it("returns null active id and zero barHeight when no section matches", () => {

@@ -211,10 +211,13 @@ describe("OrganigramExplorer — FLIP settle re-measures the stage (#3340)", () 
     Element.prototype,
     "animate",
   );
-  let restoreLayout: (() => void) | undefined;
+  const restores: Array<() => void> = [];
 
   afterEach(() => {
-    restoreLayout?.();
+    restores
+      .splice(0)
+      .reverse()
+      .forEach((restore) => restore());
     if (savedAnimate) {
       Object.defineProperty(Element.prototype, "animate", savedAnimate);
     } else {
@@ -224,28 +227,32 @@ describe("OrganigramExplorer — FLIP settle re-measures the stage (#3340)", () 
   });
 
   async function startFlip() {
-    let fits = false;
-    restoreLayout = mockLayoutProps({
-      scrollHeight: () => (fits ? 400 : 900),
-      clientHeight: 400,
-      scrollTop: 0,
-    });
+    const stage = { fits: false };
+    restores.push(
+      mockLayoutProps({
+        scrollHeight: () => (stage.fits ? 400 : 900),
+        clientHeight: 400,
+        scrollTop: 0,
+      }),
+    );
     // First read (the activated child, at navigate time) sits 300px below the
     // second (the new centre) — a FLIP far past the 2px skip threshold.
-    let reads = 0;
+    const rects = { reads: 0 };
     vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(
       () => {
-        const top = reads++ === 0 ? 300 : 0;
+        const top = rects.reads++ === 0 ? 300 : 0;
         return new DOMRect(0, top, 100, 50);
       },
     );
-    let settle!: (outcome: "finish" | "cancel") => void;
-    const finished = new Promise<Animation>((resolve, reject) => {
-      settle = (outcome) =>
-        outcome === "finish"
-          ? resolve({} as Animation)
-          : reject(new DOMException("cancelled", "AbortError"));
-    });
+    const {
+      promise: finished,
+      resolve,
+      reject,
+    } = Promise.withResolvers<Animation>();
+    const settle = (outcome: "finish" | "cancel") =>
+      outcome === "finish"
+        ? resolve({} as Animation)
+        : reject(new DOMException("cancelled", "AbortError"));
     const animate = vi.fn(() => ({ finished }) as unknown as Animation);
     Object.defineProperty(Element.prototype, "animate", {
       configurable: true,
@@ -262,7 +269,7 @@ describe("OrganigramExplorer — FLIP settle re-measures the stage (#3340)", () 
     expect(animate).toHaveBeenCalledTimes(1);
 
     // The stage now fits, but nothing has told the hook yet.
-    fits = true;
+    stage.fits = true;
     await act(async () => {});
     expect(
       document.querySelector('[data-scroll-fade="bottom"]'),
@@ -404,7 +411,7 @@ describe("OrganigramExplorer — parent cycles (#3478)", () => {
     const user = userEvent.setup();
     open({ nodes: cyclic, initialFocusId: "club" });
     const visited = new Set<string>();
-    for (let i = 0; i < cyclic.length; i++) {
+    for (const _node of cyclic) {
       const down = screen.queryAllByRole("button", { name: /^Naar / });
       if (down.length === 0) break;
       await user.click(down[0]);

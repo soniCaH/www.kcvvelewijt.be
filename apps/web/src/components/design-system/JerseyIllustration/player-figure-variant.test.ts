@@ -231,36 +231,34 @@ describe("containment guard — the top edge (#2542 addendum)", () => {
 
 describe("bottom clamp — the ground line (#2590 correction)", () => {
   it("never lets the figure stop short of the viewBox bottom", () => {
-    const bad: string[] = [];
-    for (let i = 0; i < 3000; i += 1) {
-      const seed = i * 65_537;
-      const box = computeFigureBoundingBox(
-        computePlayerFigureVariant(String(seed)),
-      );
-      if (!(box.maxY >= FIGURE_VIEWBOX_HEIGHT - BOX_EPSILON)) {
-        bad.push(`seed ${seed}: maxY ${box.maxY}`);
-      }
-    }
+    const bad = Array.from({ length: 3000 }, (_, i) => i * 65_537).flatMap(
+      (seed) => {
+        const box = computeFigureBoundingBox(
+          computePlayerFigureVariant(String(seed)),
+        );
+        return box.maxY >= FIGURE_VIEWBOX_HEIGHT - BOX_EPSILON
+          ? []
+          : [`seed ${seed}: maxY ${box.maxY}`];
+      },
+    );
     expect(bad.slice(0, FIRST)).toEqual([]);
   });
 
   it("leaves a figure that already bleeds past the bottom untouched", () => {
     // Find a seed whose pre-clamp box already runs past the viewBox bottom
     // and assert the clamp is a no-op for it (bleed stays free).
-    let found = false;
-    for (let seed = 0; seed < 5000 && !found; seed += 1) {
-      const guarded = applyContainmentGuard(
-        generateRawPlayerFigureVariant(seed),
-      );
-      const beforeClamp = computeFigureBoundingBox(guarded);
-      if (beforeClamp.maxY > FIGURE_VIEWBOX_HEIGHT + 1) {
-        found = true;
-        const clamped = applyBottomClamp(guarded);
-        // Same drop → clamp added nothing, because the bleed already clears.
-        expect(clamped.drop).toBeCloseTo(guarded.drop, 5);
-      }
-    }
-    expect(found).toBe(true);
+    const guardedAt = (seed: number) =>
+      applyContainmentGuard(generateRawPlayerFigureVariant(seed));
+    const found = Array.from({ length: 5000 }, (_, seed) => seed).find(
+      (seed) =>
+        computeFigureBoundingBox(guardedAt(seed)).maxY >
+        FIGURE_VIEWBOX_HEIGHT + 1,
+    );
+    expect(found).toBeDefined();
+    const guarded = guardedAt(found!);
+    const clamped = applyBottomClamp(guarded);
+    // Same drop → clamp added nothing, because the bleed already clears.
+    expect(clamped.drop).toBeCloseTo(guarded.drop, 5);
   });
 });
 

@@ -38,11 +38,11 @@ async function post(body: unknown): Promise<Response> {
 }
 
 describe("POST /api/revalidate", () => {
-  let savedSecret: string | undefined;
+  const saved: { value?: string } = {};
 
   beforeEach(() => {
     vi.useFakeTimers();
-    savedSecret = process.env.SANITY_REVALIDATE_SECRET;
+    saved.value = process.env.SANITY_REVALIDATE_SECRET;
     process.env.SANITY_REVALIDATE_SECRET = "test-secret";
     revalidatePath.mockReset();
     revalidateTag.mockReset();
@@ -55,8 +55,8 @@ describe("POST /api/revalidate", () => {
 
   afterEach(() => {
     vi.useRealTimers();
-    if (savedSecret !== undefined) {
-      process.env.SANITY_REVALIDATE_SECRET = savedSecret;
+    if (saved.value !== undefined) {
+      process.env.SANITY_REVALIDATE_SECRET = saved.value;
     } else {
       delete process.env.SANITY_REVALIDATE_SECRET;
     }

@@ -294,8 +294,10 @@ describe("StandingsTable", () => {
       mockScrollDimensions(900, 500);
       const { container } = render(<StandingsTable entries={DIVISION} />);
 
-      let fade = container.querySelector(".bg-gradient-to-l") as HTMLElement;
-      expect(fade.style.width).toBe("24px");
+      const fadeAtStart = container.querySelector(
+        ".bg-gradient-to-l",
+      ) as HTMLElement;
+      expect(fadeAtStart.style.width).toBe("24px");
 
       const region = screen.getByRole("region");
       const { flush } = stubAnimationFrame();
@@ -308,8 +310,10 @@ describe("StandingsTable", () => {
         flush();
       });
 
-      fade = container.querySelector(".bg-gradient-to-l") as HTMLElement;
-      expect(fade.style.width).toBe("15px");
+      const fadeNearEnd = container.querySelector(
+        ".bg-gradient-to-l",
+      ) as HTMLElement;
+      expect(fadeNearEnd.style.width).toBe("15px");
     });
   });
 

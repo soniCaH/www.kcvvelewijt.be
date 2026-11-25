@@ -89,15 +89,15 @@ describe("VolledigOrganigram — keeping the root centred", () => {
   // happy-dom has no layout: stand in for it. The track is 300px wide, the root
   // branch starts 1000px in and is 200px wide, so centring means scrollLeft 950.
   // Every observer the chart mounts (the scroll arrows watch the track too).
-  let observers: Array<() => void> = [];
+  const observers: Array<() => void> = [];
   const resize = () => observers.forEach((callback) => callback());
-  let rootLeft = 1000;
+  const layout = { rootLeft: 1000 };
 
   afterEach(() => {
     vi.restoreAllMocks();
     vi.unstubAllGlobals();
-    observers = [];
-    rootLeft = 1000;
+    observers.length = 0;
+    layout.rootLeft = 1000;
   });
 
   function mountWithLayout() {
@@ -119,7 +119,7 @@ describe("VolledigOrganigram — keeping the root centred", () => {
           : -this.closest<HTMLElement>(".vo-chart")!.scrollLeft;
         return isTrack
           ? ({ left: 0, width: 300 } as DOMRect)
-          : ({ left: rootLeft + scrolled, width: 200 } as DOMRect);
+          : ({ left: layout.rootLeft + scrolled, width: 200 } as DOMRect);
       },
     );
     const scrollTo = vi
@@ -137,7 +137,7 @@ describe("VolledigOrganigram — keeping the root centred", () => {
     const { scrollTo, track } = mountWithLayout();
     expect(track.scrollLeft).toBe(950);
 
-    rootLeft = 1400; // e.g. a late font swap widened the chart
+    layout.rootLeft = 1400; // e.g. a late font swap widened the chart
     resize();
 
     expect(scrollTo).toHaveBeenCalledTimes(2);

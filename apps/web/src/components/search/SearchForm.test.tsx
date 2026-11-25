@@ -65,13 +65,11 @@ describe("SearchForm", () => {
         <SearchForm onSearch={vi.fn()} initialValue="first" />,
       );
 
-      let input = screen.getByRole("textbox");
-      expect(input).toHaveValue("first");
+      expect(screen.getByRole("textbox")).toHaveValue("first");
 
       rerender(<SearchForm onSearch={vi.fn()} initialValue="second" />);
 
-      input = screen.getByRole("textbox");
-      expect(input).toHaveValue("second");
+      expect(screen.getByRole("textbox")).toHaveValue("second");
     });
 
     it("stays enabled when isLoading is true (typeahead — ZOEK-2)", () => {
@@ -271,18 +269,16 @@ describe("SearchForm", () => {
       const form = container.querySelector("form");
 
       // Capture the submit event to verify preventDefault was called
-      let submitEvent: Event | null = null;
-      form?.addEventListener("submit", (e) => {
-        submitEvent = e;
-      });
+      const onSubmit = vi.fn<(e: Event) => void>();
+      form?.addEventListener("submit", onSubmit);
 
       const input = screen.getByRole("textbox");
       await user.type(input, "test");
       await user.keyboard("{Enter}");
 
       // Verify the form's onSubmit handler prevented default browser behavior
-      expect(submitEvent).not.toBeNull();
-      expect(submitEvent!.defaultPrevented).toBe(true);
+      expect(onSubmit).toHaveBeenCalledTimes(1);
+      expect(onSubmit.mock.calls[0][0].defaultPrevented).toBe(true);
       expect(handleSearch).toHaveBeenCalledWith("test");
     });
   });

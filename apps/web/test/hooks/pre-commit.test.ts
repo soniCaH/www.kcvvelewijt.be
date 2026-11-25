@@ -68,10 +68,13 @@ const HELP_BLOCK = "COMMIT MESSAGE FORMAT";
 /** How husky itself invokes a hook — see the `sh -e "$s"` line in `.husky/_/h`. */
 const AS_HUSKY_DOES = ["sh", "-e"];
 
-let fixture: string;
-let stubBin: string;
-let fakeNvmDir: string;
-let messageFile: string;
+// Filled by `beforeAll`, so a run that selects no test here creates no directory.
+const fixture = {} as {
+  dir: string;
+  stubBin: string;
+  fakeNvmDir: string;
+  messageFile: string;
+};
 
 /**
  * Run a hook against stub `npx` / `pnpm` / `branch-guard.sh` binaries whose exit
@@ -83,18 +86,18 @@ const runHook = (
   exits: { branchGuard?: number; npx?: number; pnpm?: number },
   launcher: string[] = AS_HUSKY_DOES,
 ) =>
-  spawnSync(launcher[0], [...launcher.slice(1), hook, messageFile], {
-    cwd: fixture,
+  spawnSync(launcher[0], [...launcher.slice(1), hook, fixture.messageFile], {
+    cwd: fixture.dir,
     encoding: "utf8",
     env: {
       ...process.env,
-      PATH: `${stubBin}:${process.env.PATH ?? ""}`,
+      PATH: `${fixture.stubBin}:${process.env.PATH ?? ""}`,
       // A `versions/node` directory exists, so the hook enters its nvm block;
       // the version named by the fixture `.nvmrc` does not, so that block's
       // trailing `[ -d "$NODE_PATH" ] && export PATH=…` returns non-zero. Under
       // errexit that must not abort the hook — bash and sh both keep going on a
       // failing non-final command of an AND-list, and this pins it.
-      NVM_DIR: fakeNvmDir,
+      NVM_DIR: fixture.fakeNvmDir,
       STUB_BRANCH_GUARD_EXIT: String(exits.branchGuard ?? 0),
       STUB_NPX_EXIT: String(exits.npx ?? 0),
       STUB_PNPM_EXIT: String(exits.pnpm ?? 0),
@@ -107,27 +110,27 @@ const writeStub = (path: string, exitVar: string) => {
 };
 
 beforeAll(() => {
-  fixture = mkdtempSync(join(tmpdir(), "kcvv-husky-"));
-  stubBin = join(fixture, "stub-bin");
-  fakeNvmDir = join(fixture, "nvm");
-  messageFile = join(fixture, "COMMIT_EDITMSG");
+  fixture.dir = mkdtempSync(join(tmpdir(), "kcvv-husky-"));
+  fixture.stubBin = join(fixture.dir, "stub-bin");
+  fixture.fakeNvmDir = join(fixture.dir, "nvm");
+  fixture.messageFile = join(fixture.dir, "COMMIT_EDITMSG");
 
-  mkdirSync(stubBin);
-  mkdirSync(join(fixture, ".husky"));
-  mkdirSync(join(fakeNvmDir, "versions", "node"), { recursive: true });
-  writeFileSync(join(fixture, ".nvmrc"), "99.99.99\n");
-  writeFileSync(messageFile, "fix(config): a subject\n");
+  mkdirSync(fixture.stubBin);
+  mkdirSync(join(fixture.dir, ".husky"));
+  mkdirSync(join(fixture.fakeNvmDir, "versions", "node"), { recursive: true });
+  writeFileSync(join(fixture.dir, ".nvmrc"), "99.99.99\n");
+  writeFileSync(fixture.messageFile, "fix(config): a subject\n");
 
   writeStub(
-    join(fixture, ".husky", "branch-guard.sh"),
+    join(fixture.dir, ".husky", "branch-guard.sh"),
     "STUB_BRANCH_GUARD_EXIT",
   );
-  writeStub(join(stubBin, "npx"), "STUB_NPX_EXIT");
-  writeStub(join(stubBin, "pnpm"), "STUB_PNPM_EXIT");
+  writeStub(join(fixture.stubBin, "npx"), "STUB_NPX_EXIT");
+  writeStub(join(fixture.stubBin, "pnpm"), "STUB_PNPM_EXIT");
 });
 
 afterAll(() => {
-  rmSync(fixture, { recursive: true, force: true });
+  if (fixture.dir) rmSync(fixture.dir, { recursive: true, force: true });
 });
 
 describe(".husky/pre-commit", () => {

@@ -138,10 +138,9 @@ describe("MembershipForm", () => {
       const container = document.createElement("div");
       document.body.appendChild(container);
       container.innerHTML = renderToString(<MembershipForm />);
-      let root!: ReturnType<typeof hydrateRoot>;
-      await act(async () => {
-        root = hydrateRoot(container, <MembershipForm />);
-      });
+      const root = await act(async () =>
+        hydrateRoot(container, <MembershipForm />),
+      );
       // The remount alone is no field change.
       expect(callsOf("membership_form_start")).toHaveLength(0);
 
@@ -1046,10 +1045,9 @@ describe("MembershipForm", () => {
       container.innerHTML = renderToString(<MembershipForm />);
       expect(container.querySelector("input[name=email]")).toHaveValue("");
 
-      let root!: ReturnType<typeof hydrateRoot>;
-      await act(async () => {
-        root = hydrateRoot(container, <MembershipForm />);
-      });
+      const root = await act(async () =>
+        hydrateRoot(container, <MembershipForm />),
+      );
 
       expect(container.querySelector("input[name=email]")).toHaveValue(
         "jan@example.com",
@@ -1066,10 +1064,9 @@ describe("MembershipForm", () => {
       container.innerHTML = renderToString(<MembershipForm />);
       const before = container.querySelector("input[name=email]");
 
-      let root!: ReturnType<typeof hydrateRoot>;
-      await act(async () => {
-        root = hydrateRoot(container, <MembershipForm />);
-      });
+      const root = await act(async () =>
+        hydrateRoot(container, <MembershipForm />),
+      );
 
       expect(container.querySelector("input[name=email]")).toBe(before);
       await act(async () => root.unmount());

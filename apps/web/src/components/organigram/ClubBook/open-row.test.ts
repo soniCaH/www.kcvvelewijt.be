@@ -9,7 +9,9 @@ import {
 } from "vitest";
 import { openStructureRow } from "./open-row";
 
-let scrollIntoView: MockInstance<Element["scrollIntoView"]>;
+const spies = {} as {
+  scrollIntoView: MockInstance<Element["scrollIntoView"]>;
+};
 
 function mountRows() {
   document.body.innerHTML = `
@@ -21,14 +23,14 @@ function mountRows() {
 }
 
 beforeEach(() => {
-  scrollIntoView = vi
+  spies.scrollIntoView = vi
     .spyOn(Element.prototype, "scrollIntoView")
     .mockImplementation(() => {});
   mountRows();
 });
 
 afterEach(() => {
-  scrollIntoView.mockRestore();
+  spies.scrollIntoView.mockRestore();
   document.body.innerHTML = "";
 });
 
@@ -39,8 +41,8 @@ describe("openStructureRow", () => {
     const row = document.querySelector("details");
     expect(row?.open).toBe(true);
     expect(document.activeElement).toBe(document.getElementById("s1"));
-    expect(scrollIntoView).toHaveBeenCalledOnce();
-    expect(scrollIntoView.mock.instances[0]).toBe(row);
+    expect(spies.scrollIntoView).toHaveBeenCalledOnce();
+    expect(spies.scrollIntoView.mock.instances[0]).toBe(row);
   });
 
   it("finds a row through any of the boxes merged into it", () => {
@@ -59,13 +61,13 @@ describe("openStructureRow", () => {
 
     const card = document.getElementById("card");
     expect(document.activeElement).toBe(card);
-    expect(scrollIntoView.mock.instances[0]).toBe(card);
+    expect(spies.scrollIntoView.mock.instances[0]).toBe(card);
     expect(document.querySelector("details")?.open).toBe(false);
   });
 
   it("returns false and touches nothing when no row carries the id", () => {
     expect(openStructureRow("missing")).toBe(false);
-    expect(scrollIntoView).not.toHaveBeenCalled();
+    expect(spies.scrollIntoView).not.toHaveBeenCalled();
     expect(document.querySelector("details")?.open).toBe(false);
   });
 
@@ -74,6 +76,6 @@ describe("openStructureRow", () => {
 
     expect(openStructureRow("tvjo")).toBe(true);
     expect(document.querySelector("details")?.open).toBe(true);
-    expect(scrollIntoView).toHaveBeenCalledOnce();
+    expect(spies.scrollIntoView).toHaveBeenCalledOnce();
   });
 });

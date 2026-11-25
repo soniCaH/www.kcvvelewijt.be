@@ -8,15 +8,15 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import robots from "./robots";
 
 describe("robots.ts", () => {
-  let savedVercelEnv: string | undefined;
+  const saved: { value?: string } = {};
 
   beforeEach(() => {
-    savedVercelEnv = process.env.VERCEL_ENV;
+    saved.value = process.env.VERCEL_ENV;
   });
 
   afterEach(() => {
-    if (savedVercelEnv !== undefined) {
-      process.env.VERCEL_ENV = savedVercelEnv;
+    if (saved.value !== undefined) {
+      process.env.VERCEL_ENV = saved.value;
     } else {
       delete process.env.VERCEL_ENV;
     }

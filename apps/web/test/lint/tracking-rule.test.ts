@@ -31,12 +31,12 @@ const ALLOWED = [
   'const ok = "tracking-id";',
 ];
 
-let messages: Map<string, string[]>;
+const lint = {} as { messages: Map<string, string[]> };
 
 // Loading the Next ESLint config takes seconds; pay it here, once, outside
 // every test's timeout.
 beforeAll(async () => {
-  messages = await lintFixtures(
+  lint.messages = await lintFixtures(
     eslint,
     [...OFF_RAMP_TRACKING, ...ALLOWED],
     join(webDir, "src", "fixture.tsx"),
@@ -47,13 +47,13 @@ describe("tracking freeze — src-file restricted-syntax rule", () => {
   it.each(OFF_RAMP_TRACKING)(
     "forbids an off-ramp tracking utility: %s",
     (source) => {
-      expect(messages.get(source)).toEqual([
+      expect(lint.messages.get(source)).toEqual([
         expect.stringContaining("Off-ramp tracking"),
       ]);
     },
   );
 
   it.each(ALLOWED)("allows %s", (source) => {
-    expect(messages.get(source)).toEqual([]);
+    expect(lint.messages.get(source)).toEqual([]);
   });
 });

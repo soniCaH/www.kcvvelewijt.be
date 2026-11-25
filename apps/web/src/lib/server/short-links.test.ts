@@ -14,8 +14,8 @@ vi.mock("next/cache", () => ({
     options: unknown,
   ) => {
     cacheOptions.seen.push({ keyParts, options });
-    let filled: Promise<T> | undefined;
-    return () => (filled ??= fn());
+    const slot: { filled?: Promise<T> } = {};
+    return () => (slot.filled ??= fn());
   },
 }));
 
