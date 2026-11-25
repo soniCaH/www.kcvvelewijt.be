@@ -29,15 +29,22 @@ const DOT_GRID = {
   radius: 2.4,
 } as const;
 
+/** `start, start + step, …` while below `end`. */
+const stepRange = (start: number, end: number, step: number): number[] =>
+  Array.from(
+    { length: Math.max(0, Math.ceil((end - start) / step)) },
+    (_, i) => start + i * step,
+  );
+
 function buildDotPositions(): { cx: number; cy: number }[] {
-  const dots: { cx: number; cy: number }[] = [];
-  for (let y = DOT_GRID.startY; y < DOT_GRID.endY; y += DOT_GRID.stepY) {
-    const rowOffset = ((y / DOT_GRID.stepY) % 2) * (DOT_GRID.stepX / 2);
-    for (let x = DOT_GRID.startX; x < DOT_GRID.endX; x += DOT_GRID.stepX) {
-      dots.push({ cx: x + rowOffset, cy: y });
-    }
-  }
-  return dots;
+  return stepRange(DOT_GRID.startY, DOT_GRID.endY, DOT_GRID.stepY).flatMap(
+    (y) => {
+      const rowOffset = ((y / DOT_GRID.stepY) % 2) * (DOT_GRID.stepX / 2);
+      return stepRange(DOT_GRID.startX, DOT_GRID.endX, DOT_GRID.stepX).map(
+        (x) => ({ cx: x + rowOffset, cy: y }),
+      );
+    },
+  );
 }
 
 // `DOT_GRID` is frozen and `buildDotPositions` takes no arguments, so the

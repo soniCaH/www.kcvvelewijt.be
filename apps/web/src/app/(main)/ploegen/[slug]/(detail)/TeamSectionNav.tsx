@@ -138,12 +138,10 @@ function TeamSectionNavBar({ items, width }: TeamSectionNavProps) {
     const visibleLeft = trackRect.left + gutterLeft;
     const visibleRight = trackRect.right - gutterRight;
 
-    let delta = 0;
-    if (chipRect.left < visibleLeft) {
-      delta = chipRect.left - visibleLeft;
-    } else if (chipRect.right > visibleRight) {
-      delta = chipRect.right - visibleRight;
-    }
+    const delta =
+      chipRect.left < visibleLeft
+        ? chipRect.left - visibleLeft
+        : Math.max(0, chipRect.right - visibleRight);
     if (delta !== 0) {
       track.scrollTo({ left: track.scrollLeft + delta, behavior: "smooth" });
     }

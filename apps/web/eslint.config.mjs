@@ -240,6 +240,7 @@ const kcvvPlugin = {
     "no-off-ramp-leading": builtinRules.get("no-restricted-syntax"),
     "no-off-ramp-tracking": builtinRules.get("no-restricted-syntax"),
     "no-per-component-focus-ring": builtinRules.get("no-restricted-syntax"),
+    "no-let": builtinRules.get("no-restricted-syntax"),
     // A real rule, not a selector: "component or type" needs the export's name and kind.
     "use-client-exports": useClientExports,
   },
@@ -469,6 +470,33 @@ const eslintConfig = [
     ignores: ["**/*.test.{ts,tsx}", "**/*.spec.{ts,tsx}"],
     plugins: { kcvv: kcvvPlugin },
     rules: { "kcvv/use-client-exports": "error" },
+  },
+  {
+    // No `let` (#3717, #3842) — own rule ID, own block, so no other
+    // `no-restricted-syntax` block can replace it. Source only: tests, stories,
+    // e2e, test infrastructure and `.storybook/` are the next issue.
+    files: ["**/*.{ts,tsx,js,jsx,mjs,cjs,mts,cts}"],
+    ignores: [
+      "**/*.test.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
+      "**/*.spec.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
+      "**/*.stories.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
+      "**/__tests__/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/e2e/**",
+      "**/.storybook/**",
+    ],
+    plugins: { kcvv: kcvvPlugin },
+    rules: {
+      "kcvv/no-let": [
+        "error",
+        {
+          selector: 'VariableDeclaration[kind="let"]',
+          message:
+            "No `let` — use `const` (a `let` + `try/catch` becomes a helper that returns; a counter becomes `reduce`/`map`). Rule: #3717.",
+        },
+      ],
+    },
   },
   {
     // /share's story templates and looks are rasterised by html-to-image,

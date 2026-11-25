@@ -68,14 +68,12 @@ function isAdult(birthDate: string | undefined, now: Date): boolean {
   if (birthDate === undefined || birthDate === "") return false;
   const parsed = new Date(birthDate);
   if (Number.isNaN(parsed.getTime())) return false;
-  let ageYears = now.getUTCFullYear() - parsed.getUTCFullYear();
   const monthDelta = now.getUTCMonth() - parsed.getUTCMonth();
-  if (
+  const birthdayPending =
     monthDelta < 0 ||
-    (monthDelta === 0 && now.getUTCDate() < parsed.getUTCDate())
-  ) {
-    ageYears -= 1;
-  }
+    (monthDelta === 0 && now.getUTCDate() < parsed.getUTCDate());
+  const ageYears =
+    now.getUTCFullYear() - parsed.getUTCFullYear() - (birthdayPending ? 1 : 0);
   return ageYears >= ADULT_AGE_THRESHOLD;
 }
 

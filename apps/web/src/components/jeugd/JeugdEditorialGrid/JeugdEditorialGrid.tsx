@@ -196,21 +196,19 @@ function buildItemsFromConfig(
   config: EditorialCardConfig[],
   articles: ArticleVM[],
 ): React.ReactNode[] {
-  const items: React.ReactNode[] = [];
-  let articleIdx = 0;
-
-  for (let i = 0; i < config.length; i++) {
-    const entry = config[i];
-
+  return config.flatMap((entry, i): React.ReactNode[] => {
     if (entry.cardType === "article") {
       // Article slots bubble: fill with the latest Jeugd articles in order.
-      const article = articles[articleIdx++];
-      if (!article) continue;
-      items.push(renderArticleCard(article));
-    } else if (entry.cardType === "nav") {
+      const slot = config
+        .slice(0, i)
+        .filter((e) => e.cardType === "article").length;
+      const article = articles[slot];
+      return article ? [renderArticleCard(article)] : [];
+    }
+    if (entry.cardType === "nav") {
       // Nav card — skip if required fields are missing.
-      if (!entry.title || !entry.href) continue;
-      items.push(
+      if (!entry.title || !entry.href) return [];
+      return [
         <EditorialHubCard
           key={`nav-sanity-${i}`}
           variant="nav"
@@ -225,15 +223,12 @@ function buildItemsFromConfig(
           // contract as the hardcoded NAV_CARDS.
           imageUrl={entry.imageUrl ?? undefined}
         />,
-      );
-    } else {
-      // Exhaustiveness guard — fails loudly if `cardType` gains a value the
-      // render doesn't handle (schema drift).
-      assertNever(entry.cardType);
+      ];
     }
-  }
-
-  return items;
+    // Exhaustiveness guard — fails loudly if `cardType` gains a value the
+    // render doesn't handle (schema drift).
+    return assertNever(entry.cardType);
+  });
 }
 
 function buildItemsFromHardcoded(articles: ArticleVM[]): React.ReactNode[] {
@@ -254,9 +249,7 @@ function buildItemsFromHardcoded(articles: ArticleVM[]): React.ReactNode[] {
   if (article2) items.push(renderArticleCard(article2));
   items.push(renderNavCard(NAV_CARDS[2]));
 
-  for (let i = 3; i < NAV_CARDS.length; i++) {
-    items.push(renderNavCard(NAV_CARDS[i]));
-  }
+  items.push(...NAV_CARDS.slice(3).map(renderNavCard));
 
   return items;
 }

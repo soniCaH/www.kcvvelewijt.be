@@ -171,6 +171,22 @@ function formatMinute(minute: number, additionalTime?: number): string {
   return `${minute}'`;
 }
 
+const matchesFilter = (
+  e: MatchEvent,
+  filter: NonNullable<MatchEventsProps["filter"]>,
+): boolean => {
+  if (filter === "goals") return e.type === "goal";
+  if (filter === "cards") {
+    return (
+      e.type === "yellow_card" ||
+      e.type === "second_yellow" ||
+      e.type === "red_card"
+    );
+  }
+  if (filter === "substitutions") return e.type === "substitution";
+  return true;
+};
+
 /**
  * Free-standing event glyph rendered inside the 22px slot of the Option F
  * row grid. Locked at 6.B.d3 round 2:
@@ -250,19 +266,8 @@ export function MatchEvents({
   }
 
   // Filter events
-  let filteredEvents = [...events];
-  if (filter === "goals") {
-    filteredEvents = filteredEvents.filter((e) => e.type === "goal");
-  } else if (filter === "cards") {
-    filteredEvents = filteredEvents.filter(
-      (e) =>
-        e.type === "yellow_card" ||
-        e.type === "second_yellow" ||
-        e.type === "red_card",
-    );
-  } else if (filter === "substitutions") {
-    filteredEvents = filteredEvents.filter((e) => e.type === "substitution");
-  }
+  // (`filter` returns a fresh array, so the in-place sort below is safe.)
+  const filteredEvents = events.filter((e) => matchesFilter(e, filter));
 
   // Sort by minute
   filteredEvents.sort((a, b) => {

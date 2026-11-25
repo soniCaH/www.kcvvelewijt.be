@@ -61,14 +61,17 @@ function parseVimeo(url: URL): ParsedEmbed | null {
   return VIMEO_ID_RE.test(first) ? { provider: "vimeo", videoId: first } : null;
 }
 
-export function parseEmbedUrl(raw: string): ParsedEmbed | null {
-  if (typeof raw !== "string" || raw.length === 0) return null;
-  let url: URL;
+const toUrl = (raw: string): URL | null => {
   try {
-    url = new URL(raw);
+    return new URL(raw);
   } catch {
     return null;
   }
-  if (url.protocol !== "https:") return null;
+};
+
+export function parseEmbedUrl(raw: string): ParsedEmbed | null {
+  if (typeof raw !== "string" || raw.length === 0) return null;
+  const url = toUrl(raw);
+  if (url === null || url.protocol !== "https:") return null;
   return parseYoutube(url) ?? parseVimeo(url);
 }

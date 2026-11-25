@@ -25,6 +25,19 @@ declare global {
   }
 }
 
+const getTurnstileScript = (): HTMLScriptElement => {
+  const existing = document.querySelector<HTMLScriptElement>(
+    `script[src="${SCRIPT_SRC}"]`,
+  );
+  if (existing) return existing;
+  const scriptEl = document.createElement("script");
+  scriptEl.src = SCRIPT_SRC;
+  scriptEl.async = true;
+  scriptEl.defer = true;
+  document.head.appendChild(scriptEl);
+  return scriptEl;
+};
+
 /**
  * Cloudflare Turnstile widget. With no site key configured (local/dev) it
  * renders nothing and reports an empty token — the BFF only accepts that when
@@ -58,13 +71,13 @@ export function TurnstileWidget({
       return;
     }
 
-    let cancelled = false;
-    let widgetId: string | null = null;
-    let scriptEl: HTMLScriptElement | null = null;
+    const controller = new AbortController();
 
     const render = () => {
-      if (cancelled || !ref.current || !window.turnstile) return;
-      widgetId = widgetIdRef.current = window.turnstile.render(ref.current, {
+      if (controller.signal.aborted || !ref.current || !window.turnstile) {
+        return;
+      }
+      widgetIdRef.current = window.turnstile.render(ref.current, {
         sitekey: SITE_KEY,
         callback: (token) => onToken(token),
         "expired-callback": () => onToken(""),
@@ -72,24 +85,13 @@ export function TurnstileWidget({
       });
     };
 
-    if (window.turnstile) {
-      render();
-    } else {
-      const existing = document.querySelector<HTMLScriptElement>(
-        `script[src="${SCRIPT_SRC}"]`,
-      );
-      scriptEl = existing ?? document.createElement("script");
-      if (!existing) {
-        scriptEl.src = SCRIPT_SRC;
-        scriptEl.async = true;
-        scriptEl.defer = true;
-        document.head.appendChild(scriptEl);
-      }
-      scriptEl.addEventListener("load", render);
-    }
+    const scriptEl = window.turnstile ? null : getTurnstileScript();
+    if (scriptEl) scriptEl.addEventListener("load", render);
+    else render();
 
     return () => {
-      cancelled = true;
+      controller.abort();
+      const widgetId = widgetIdRef.current;
       widgetIdRef.current = null;
       if (scriptEl) scriptEl.removeEventListener("load", render);
       if (widgetId && window.turnstile) window.turnstile.remove(widgetId);

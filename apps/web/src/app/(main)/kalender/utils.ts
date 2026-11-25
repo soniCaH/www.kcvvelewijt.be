@@ -378,11 +378,10 @@ export interface DayFeed {
 }
 
 function ensureDayFeed(map: Map<string, DayFeed>, day: string): DayFeed {
-  let entry = map.get(day);
-  if (!entry) {
-    entry = { matches: [], events: [] };
-    map.set(day, entry);
-  }
+  const existing = map.get(day);
+  if (existing) return existing;
+  const entry: DayFeed = { matches: [], events: [] };
+  map.set(day, entry);
   return entry;
 }
 
@@ -419,11 +418,18 @@ export function groupFeedByDay(
     if (event.dateEnd) {
       const end = toDisplayZone(event.dateEnd);
       if (end.isValid) {
-        let cursor = start.startOf("day").plus({ days: 1 });
-        const last = end.startOf("day");
-        while (cursor <= last) {
-          ensureDayFeed(map, cursor.toISODate()!).events.push(event);
-          cursor = cursor.plus({ days: 1 });
+        const first = start.startOf("day");
+        const laterDays = Math.round(
+          end.startOf("day").diff(first, "days").days,
+        );
+        for (const offset of Array.from(
+          { length: laterDays },
+          (_, i) => i + 1,
+        )) {
+          ensureDayFeed(
+            map,
+            first.plus({ days: offset }).toISODate()!,
+          ).events.push(event);
         }
       }
     }
@@ -452,22 +458,18 @@ export function getDaysInMonth(year: number, month: number): string[] {
   const daysInMonth = firstOfMonth.daysInMonth!;
   const totalCells = startOffset + daysInMonth > 35 ? 42 : 35;
 
-  const days: string[] = [];
-  for (let i = 0; i < totalCells; i++) {
-    days.push(gridStart.plus({ days: i }).toISODate()!);
-  }
-  return days;
+  return Array.from({ length: totalCells }, (_, i) =>
+    gridStart.plus({ days: i }).toISODate()!,
+  );
 }
 
 /** Returns 7 YYYY-MM-DD strings (Mon-Sun) for the week containing `dateStr` */
 export function getDaysInWeek(dateStr: string): string[] {
   const dt = toDisplayZone(dateStr);
   const monday = dt.startOf("week"); // Luxon weeks start on Monday by default
-  const days: string[] = [];
-  for (let i = 0; i < 7; i++) {
-    days.push(monday.plus({ days: i }).toISODate()!);
-  }
-  return days;
+  return Array.from({ length: 7 }, (_, i) =>
+    monday.plus({ days: i }).toISODate()!,
+  );
 }
 
 /**
@@ -712,14 +714,12 @@ export function buildMonthAgenda(
   const first = clubMonthStart(year, month);
   const daysInMonth = first.daysInMonth!;
 
-  const groups: AgendaDayGroup[] = [];
-  for (let i = 0; i < daysInMonth; i++) {
+  return Array.from({ length: daysInMonth }, (_, i) => {
     const day = first.plus({ days: i }).toISODate()!;
-    const entry = byDay.get(day);
-    if (!entry || (entry.matches.length === 0 && entry.events.length === 0)) {
-      continue;
-    }
-    groups.push({ date: day, matches: entry.matches, events: entry.events });
-  }
-  return groups;
+    return { day, entry: byDay.get(day) };
+  }).flatMap(({ day, entry }) =>
+    !entry || (entry.matches.length === 0 && entry.events.length === 0)
+      ? []
+      : [{ date: day, matches: entry.matches, events: entry.events }],
+  );
 }

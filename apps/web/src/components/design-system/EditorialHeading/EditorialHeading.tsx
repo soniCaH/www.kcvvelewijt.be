@@ -132,6 +132,49 @@ function renderPortableTextTitle(
   return { body, endsWithPeriod };
 }
 
+const renderBody = (
+  children: EditorialHeadingProps["children"],
+  emphasis: EditorialHeadingProps["emphasis"],
+  accentTone: NonNullable<EditorialHeadingProps["accentTone"]>,
+): ReactNode => {
+  if (typeof children !== "string") {
+    return renderPortableTextTitle(children, accentTone).body;
+  }
+  const display = ensureTrailingPeriod(children);
+  if (!emphasis) return display;
+  const split = splitOnAccent(display, emphasis.text);
+  if (!split) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn(
+        `[EditorialHeading] emphasis.text "${emphasis.text}" not found in heading children "${display}"`,
+      );
+    }
+    return display;
+  }
+  const isHighlight = !!emphasis.highlight;
+  const emphasisTone = emphasis.tone ?? "jersey-deep";
+  // The highlight (marker) variant owns its own colour — no tone
+  // class here, unlike the plain `<AccentEm>` register below — so it
+  // stays a bare inline `<em>` rather than going through `<AccentEm>`.
+  const emEl = isHighlight ? (
+    <em className="font-display italic">{split.match}</em>
+  ) : (
+    <AccentEm tone={emphasisTone}>{split.match}</AccentEm>
+  );
+  const wrapped = isHighlight ? (
+    <HighlighterStroke>{emEl}</HighlighterStroke>
+  ) : (
+    emEl
+  );
+  return (
+    <>
+      {split.before}
+      {wrapped}
+      {split.after}
+    </>
+  );
+};
+
 export function EditorialHeading({
   level,
   children,
@@ -142,47 +185,7 @@ export function EditorialHeading({
   className,
   id,
 }: EditorialHeadingProps) {
-  let body: ReactNode;
-
-  if (typeof children !== "string") {
-    body = renderPortableTextTitle(children, accentTone).body;
-  } else {
-    const display = ensureTrailingPeriod(children);
-    body = display;
-    if (emphasis) {
-      const split = splitOnAccent(display, emphasis.text);
-      if (!split) {
-        if (process.env.NODE_ENV === "development") {
-          console.warn(
-            `[EditorialHeading] emphasis.text "${emphasis.text}" not found in heading children "${display}"`,
-          );
-        }
-      } else {
-        const isHighlight = !!emphasis.highlight;
-        const emphasisTone = emphasis.tone ?? "jersey-deep";
-        // The highlight (marker) variant owns its own colour — no tone
-        // class here, unlike the plain `<AccentEm>` register below — so it
-        // stays a bare inline `<em>` rather than going through `<AccentEm>`.
-        const emEl = isHighlight ? (
-          <em className="font-display italic">{split.match}</em>
-        ) : (
-          <AccentEm tone={emphasisTone}>{split.match}</AccentEm>
-        );
-        const wrapped = isHighlight ? (
-          <HighlighterStroke>{emEl}</HighlighterStroke>
-        ) : (
-          emEl
-        );
-        body = (
-          <>
-            {split.before}
-            {wrapped}
-            {split.after}
-          </>
-        );
-      }
-    }
-  }
+  const body = renderBody(children, emphasis, accentTone);
 
   return createElement(
     `h${level}`,

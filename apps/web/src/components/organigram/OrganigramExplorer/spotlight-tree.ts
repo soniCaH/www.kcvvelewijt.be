@@ -116,6 +116,17 @@ export function buildSpotlightTree(
   return { rootId, byId, childrenOf, parentOf };
 }
 
+/** Climb parent links until the root, a settled node or a revisit; `end` is where it stopped. */
+const walkUp = (
+  id: string | null,
+  parentOf: Map<string, string | null>,
+  settled: Set<string>,
+  path: string[],
+): { path: string[]; end: string | null } =>
+  id === null || settled.has(id) || path.includes(id)
+    ? { path, end: id }
+    : walkUp(parentOf.get(id) ?? null, parentOf, settled, [...path, id]);
+
 /**
  * Re-attach one member of every parent cycle to the root (mutates `parentOf`).
  * Walks up from each node; a walk that revisits a node of its own path has
@@ -130,16 +141,9 @@ function breakParentCycles(
   const settled = new Set<string>();
 
   for (const start of nodes) {
-    const path: string[] = [];
-    const onPath = new Set<string>();
-    let current: string | null = start.id;
-    while (current !== null && !settled.has(current) && !onPath.has(current)) {
-      path.push(current);
-      onPath.add(current);
-      current = parentOf.get(current) ?? null;
-    }
-    if (current !== null && onPath.has(current)) {
-      const cycle = path.slice(path.indexOf(current));
+    const { path, end } = walkUp(start.id, parentOf, settled, []);
+    if (end !== null && path.includes(end)) {
+      const cycle = path.slice(path.indexOf(end));
       const cut = cycle.reduce((a, b) =>
         (order.get(b) ?? 0) < (order.get(a) ?? 0) ? b : a,
       );
@@ -162,15 +166,13 @@ export function childrenOf(tree: SpotlightTree, id: string): OrgChartNode[] {
  * top nodes. The root stays reachable via the breadcrumb.
  */
 export function primaryFocusId(tree: SpotlightTree): string {
-  let best: OrgChartNode | undefined;
-  for (const node of childrenOf(tree, tree.rootId)) {
-    if (
-      !best ||
-      childrenOf(tree, node.id).length > childrenOf(tree, best.id).length
-    ) {
-      best = node;
-    }
-  }
+  const best = childrenOf(tree, tree.rootId).reduce<OrgChartNode | undefined>(
+    (top, node) =>
+      !top || childrenOf(tree, node.id).length > childrenOf(tree, top.id).length
+        ? node
+        : top,
+    undefined,
+  );
   return best?.id ?? tree.rootId;
 }
 
@@ -179,21 +181,26 @@ function parentIdOf(tree: SpotlightTree, id: string): string | null {
   return tree.parentOf.get(id) ?? null;
 }
 
+/** Nodes from `current` up to the root, stopping on an unknown or revisited node. */
+const collectTrail = (
+  tree: SpotlightTree,
+  current: string | null,
+  seen: string[],
+): OrgChartNode[] => {
+  const node = current === null ? undefined : tree.byId.get(current);
+  if (current === null || !node || seen.includes(current)) return [];
+  return [
+    node,
+    ...collectTrail(tree, parentIdOf(tree, current), [...seen, current]),
+  ];
+};
+
 /**
  * The reporting line from the root down to `id`, inclusive. Guards against
  * cycles by stopping if a node is revisited.
  */
 export function trailTo(tree: SpotlightTree, id: string): OrgChartNode[] {
-  const trail: OrgChartNode[] = [];
-  const seen = new Set<string>();
-  let current: string | null = id;
-  while (current !== null && tree.byId.has(current) && !seen.has(current)) {
-    seen.add(current);
-    const node = tree.byId.get(current);
-    if (node) trail.push(node);
-    current = parentIdOf(tree, current);
-  }
-  return trail.reverse();
+  return collectTrail(tree, id, []).reverse();
 }
 
 /**

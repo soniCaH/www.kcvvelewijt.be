@@ -449,48 +449,59 @@ function renderMatchEditorial(
   );
 }
 
-// ─── Component ───────────────────────────────────────────────────────────────
+interface VariantSlots {
+  editorial: React.ReactNode;
+  coverOverlay: React.ReactNode;
+  belowHero: React.ReactNode;
+  /** Match hero stacks the cover above the editorial on mobile so the score
+   *  bar is read first (5.d-mat lock). Other variants keep editorial-first. */
+  coverFirstOnMobile: boolean;
+}
 
-export function EditorialHero(props: EditorialHeroProps) {
-  const { title, lead, author, coverImage, placement, slug, date, priority } =
-    props;
-  // The publish date reaches the kicker on the homepage only (#2531): the
-  // detail page's metadata bar owns it there, and `date` stays untouched for
-  // the homepage event strip below.
-  const kickerDate = placement === "homepage" ? date : undefined;
+/** The day an event starts on, or `undefined` when it has no structured date. */
+const eventStartIsoOf = (
+  range: ReturnType<typeof resolveEventRange>,
+): string | undefined => {
+  if (range.kind === "none") return undefined;
+  return range.kind === "single" ? range.date.dateIso : range.start.dateIso;
+};
 
-  // Variant-specific editorial slot, cover aspect, cover overlay, and
-  // below-hero strip. All branches share the placement + link wrapper
-  // logic below.
-  let editorial: React.ReactNode;
-  // Every variant renders the cover at 16:9 — the aspect the `coverImage`
-  // schema mandates editors upload. (Interview/transfer previously forced
-  // 3:2, which center-cropped 16:9 sources.)
-  const coverAspect = "landscape-16-9";
-  let coverOverlay: React.ReactNode = null;
-  let belowHero: React.ReactNode = null;
-  // Match hero stacks the cover above the editorial on mobile so the score
-  // bar is read first (5.d-mat lock). Other variants keep editorial-first.
-  let coverFirstOnMobile = false;
+const resolveVariantSlots = (
+  props: EditorialHeroProps,
+  kickerDate: string | undefined,
+): VariantSlots => {
+  const { title, lead, author, placement, date } = props;
 
   if (props.variant === "announcement") {
-    editorial = renderAnnouncementEditorial(
-      title,
-      lead,
-      author,
-      props.category,
-      kickerDate,
-    );
-  } else if (props.variant === "interview") {
-    editorial = renderInterviewEditorial(
-      title,
-      lead,
-      author,
-      props.subjects,
-      kickerDate,
-    );
-  } else if (props.variant === "event") {
-    editorial = renderEventEditorial(
+    return {
+      editorial: renderAnnouncementEditorial(
+        title,
+        lead,
+        author,
+        props.category,
+        kickerDate,
+      ),
+      coverOverlay: null,
+      belowHero: null,
+      coverFirstOnMobile: false,
+    };
+  }
+  if (props.variant === "interview") {
+    return {
+      editorial: renderInterviewEditorial(
+        title,
+        lead,
+        author,
+        props.subjects,
+        kickerDate,
+      ),
+      coverOverlay: null,
+      belowHero: null,
+      coverFirstOnMobile: false,
+    };
+  }
+  if (props.variant === "event") {
+    const editorial = renderEventEditorial(
       title,
       lead,
       author,
@@ -498,17 +509,12 @@ export function EditorialHero(props: EditorialHeroProps) {
       kickerDate,
     );
     // Day-block overlay — derived from feature.date when present.
-    if (props.feature?.date) {
-      const dayBlock = deriveEventDayBlock(props.feature.date);
-      if (dayBlock) {
-        coverOverlay = (
-          <HeroDayBlockOverlay
-            weekday={dayBlock.weekday}
-            date={dayBlock.date}
-          />
-        );
-      }
-    }
+    const dayBlock = props.feature?.date
+      ? deriveEventDayBlock(props.feature.date)
+      : null;
+    const coverOverlay = dayBlock ? (
+      <HeroDayBlockOverlay weekday={dayBlock.weekday} date={dayBlock.date} />
+    ) : null;
     // Compressed strip only on the homepage teaser card. On the detail
     // page the contained <EventDetailBlock> panel (ART-3 Variant B, #2237)
     // renders between the hero and the body instead, so the strip would be
@@ -517,72 +523,103 @@ export function EditorialHero(props: EditorialHeroProps) {
     // shows its first session date, not the article's publishedAt. Fall
     // back to the article-level `date` only when no structured event date
     // exists (rare partial-content case).
-    if (placement === "homepage") {
-      const eventRange = resolveEventRange(
-        props.feature?.date,
-        props.feature?.endDate,
-        props.feature?.sessions,
-      );
-      const eventStartIso =
-        eventRange.kind === "none"
-          ? undefined
-          : eventRange.kind === "single"
-            ? eventRange.date.dateIso
-            : eventRange.start.dateIso;
-      const eventStripDate = eventStartIso
-        ? formatArticleDate(eventStartIso)
-        : (date ?? null);
-      // Session-based events keep their hours per-session (top-level
-      // start/end are empty), so the strip time comes from the earliest
-      // dated session — same start day as `eventStripDate` — and falls back
-      // to the top-level times for plain single/range events.
-      const startSession = (props.feature?.sessions ?? [])
-        .filter((s) => s.date?.trim())
-        .sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""))[0];
-      const stripStartTime =
-        startSession?.startTime?.trim() || props.feature?.startTime || null;
-      const stripEndTime =
-        startSession?.endTime?.trim() || props.feature?.endTime || null;
-      belowHero = (
+    if (placement !== "homepage") {
+      return {
+        editorial,
+        coverOverlay,
+        belowHero: null,
+        coverFirstOnMobile: false,
+      };
+    }
+    const eventRange = resolveEventRange(
+      props.feature?.date,
+      props.feature?.endDate,
+      props.feature?.sessions,
+    );
+    const eventStartIso = eventStartIsoOf(eventRange);
+    const eventStripDate = eventStartIso
+      ? formatArticleDate(eventStartIso)
+      : (date ?? null);
+    // Session-based events keep their hours per-session (top-level
+    // start/end are empty), so the strip time comes from the earliest
+    // dated session — same start day as `eventStripDate` — and falls back
+    // to the top-level times for plain single/range events.
+    const startSession = (props.feature?.sessions ?? [])
+      .filter((s) => s.date?.trim())
+      .sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""))[0];
+    const stripStartTime =
+      startSession?.startTime?.trim() || props.feature?.startTime || null;
+    const stripEndTime =
+      startSession?.endTime?.trim() || props.feature?.endTime || null;
+    return {
+      editorial,
+      coverOverlay,
+      belowHero: (
         <HeroCompressedEventStrip
           location={props.feature?.location ?? null}
           date={eventStripDate}
           startTime={stripStartTime}
           endTime={stripEndTime}
         />
-      );
-    }
-  } else if (props.variant === "transfer") {
-    editorial = renderTransferEditorial(
-      title,
-      lead,
-      author,
-      props.feature,
-      kickerDate,
-    );
-  } else {
-    // matchPreview | matchRecap — score-forward hero. The two-tier score bar
-    // sits in the cover's lower third (5.d-mat-refine D@P3) and carries the
-    // competition + match date, so the kicker stays a clean type label; the
-    // article date never reaches it on the detail page, even when the bar is
-    // absent (404) — the metadata bar carries it (#2531).
-    const match = props.match;
-    editorial = renderMatchEditorial(
+      ),
+      coverFirstOnMobile: false,
+    };
+  }
+  if (props.variant === "transfer") {
+    return {
+      editorial: renderTransferEditorial(
+        title,
+        lead,
+        author,
+        props.feature,
+        kickerDate,
+      ),
+      coverOverlay: null,
+      belowHero: null,
+      coverFirstOnMobile: false,
+    };
+  }
+  // matchPreview | matchRecap — score-forward hero. The two-tier score bar
+  // sits in the cover's lower third (5.d-mat-refine D@P3) and carries the
+  // competition + match date, so the kicker stays a clean type label; the
+  // article date never reaches it on the detail page, even when the bar is
+  // absent (404) — the metadata bar carries it (#2531).
+  const match = props.match;
+  return {
+    editorial: renderMatchEditorial(
       title,
       lead,
       author,
       props.variant,
       match ? undefined : kickerDate,
-    );
-    if (match) {
-      coverFirstOnMobile = true;
-      coverOverlay = (
-        <div className="absolute inset-x-0 bottom-3 z-10 flex justify-center px-3">
-          <HeroMatchScoreBar variant={props.variant} {...match} />
-        </div>
-      );
-    }
-  }
+    ),
+    coverOverlay: match ? (
+      <div className="absolute inset-x-0 bottom-3 z-10 flex justify-center px-3">
+        <HeroMatchScoreBar variant={props.variant} {...match} />
+      </div>
+    ) : null,
+    belowHero: null,
+    coverFirstOnMobile: match != null,
+  };
+};
+
+// ─── Component ───────────────────────────────────────────────────────────────
+
+export function EditorialHero(props: EditorialHeroProps) {
+  const { title, coverImage, placement, slug, date, priority } = props;
+  // The publish date reaches the kicker on the homepage only (#2531): the
+  // detail page's metadata bar owns it there, and `date` stays untouched for
+  // the homepage event strip below.
+  const kickerDate = placement === "homepage" ? date : undefined;
+
+  // Variant-specific editorial slot, cover overlay, and below-hero strip.
+  // All branches share the placement + link wrapper logic below.
+  // Every variant renders the cover at 16:9 — the aspect the `coverImage`
+  // schema mandates editors upload. (Interview/transfer previously forced
+  // 3:2, which center-cropped 16:9 sources.)
+  const coverAspect = "landscape-16-9";
+  const { editorial, coverOverlay, belowHero, coverFirstOnMobile } =
+    resolveVariantSlots(props, kickerDate);
 
   // Homepage hero is one tappable card: the whole link presses into its
   // shadow on hover (canonical press-down), so the cover figure collapses

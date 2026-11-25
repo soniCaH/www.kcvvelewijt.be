@@ -76,7 +76,7 @@ function readPublicAsset(relativePath: string): Promise<Buffer> {
  * Read once per lambda instance. The card is regenerated rarely (OG images are
  * cached at the edge), but re-reading three files per request is pure waste.
  */
-let assetsPromise: Promise<OgAssets> | undefined;
+const assetsCache: { promise?: Promise<OgAssets> } = {};
 
 interface OgAssets {
   fonts: { name: string; data: Buffer; weight: 400 | 700; style: "normal" }[];
@@ -84,7 +84,7 @@ interface OgAssets {
 }
 
 function loadAssets(): Promise<OgAssets> {
-  assetsPromise ??= Promise.all([
+  assetsCache.promise ??= Promise.all([
     readPublicAsset("fonts/ibm-plex-mono-400.woff"),
     readPublicAsset("fonts/ibm-plex-mono-700.woff"),
     readPublicAsset("images/logos/kcvv-logo.png"),
@@ -105,7 +105,7 @@ function loadAssets(): Promise<OgAssets> {
     ],
     crest: `data:image/png;base64,${crest.toString("base64")}`,
   }));
-  return assetsPromise;
+  return assetsCache.promise;
 }
 
 export interface ShareCardProps {

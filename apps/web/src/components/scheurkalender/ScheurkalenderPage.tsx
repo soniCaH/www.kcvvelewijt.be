@@ -188,13 +188,13 @@ function groupByWeekend(matches: ScheurkalenderMatch[]): Weekend[] {
     // Keeping the pair adjacent is worth less than printing it readable — this
     // poster hangs a full season.
     const key = `${dt.weekYear}-W${String(dt.weekNumber).padStart(2, "0")}-${dt.toFormat("yyyy-MM")}`;
-    let bucket = buckets.get(key);
-    if (!bucket) {
-      bucket = [];
-      buckets.set(key, bucket);
+    const bucket = buckets.get(key);
+    if (bucket) {
+      bucket.push(match);
+    } else {
+      buckets.set(key, [match]);
       order.push(key);
     }
-    bucket.push(match);
   }
   return order.map((key) => {
     const bucket = buckets.get(key)!;

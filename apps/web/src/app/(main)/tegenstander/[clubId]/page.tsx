@@ -159,17 +159,13 @@ function getMatchOutcome(match: Match): "win" | "draw" | "loss" | null {
 
 /** Per-season tally caption, e.g. `"2W · 1G"` or `"1 gepland"`. */
 function seasonTally(matches: readonly Match[]): string {
-  let wins = 0;
-  let draws = 0;
-  let losses = 0;
-  let scheduled = 0;
-  for (const match of matches) {
-    const outcome = getMatchOutcome(match);
-    if (outcome === "win") wins += 1;
-    else if (outcome === "draw") draws += 1;
-    else if (outcome === "loss") losses += 1;
-    else if (match.status === "scheduled") scheduled += 1;
-  }
+  const outcomes = matches.map(getMatchOutcome);
+  const wins = outcomes.filter((o) => o === "win").length;
+  const draws = outcomes.filter((o) => o === "draw").length;
+  const losses = outcomes.filter((o) => o === "loss").length;
+  const scheduled = matches.filter(
+    (m, i) => outcomes[i] === null && m.status === "scheduled",
+  ).length;
   const parts: string[] = [];
   if (wins) parts.push(`${wins}W`);
   if (draws) parts.push(`${draws}G`);

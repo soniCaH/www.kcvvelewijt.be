@@ -2,6 +2,14 @@ import { NextResponse, type NextRequest } from "next/server";
 import { CLIENT_IP_HEADER } from "@kcvv/api-contract";
 import { bffKeyHeader } from "./bff-key";
 
+const parseBody = (text: string): unknown => {
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    return { error: text || "Unknown error from search service" };
+  }
+};
+
 /**
  * Forwards a visitor's POST body to `KCVV_API_URL{path}` and hands the BFF's
  * status and JSON back. A server-side proxy avoids CORS and keeps the BFF URL
@@ -38,13 +46,7 @@ export async function proxyPostToBff(request: NextRequest, path: string) {
     // Read the body once: `res.json()` consumes it, so a `res.text()` fallback
     // after a failed parse would throw "Body is unusable".
     const text = await res.text();
-    let data: unknown;
-    try {
-      data = JSON.parse(text) as unknown;
-    } catch {
-      data = { error: text || "Unknown error from search service" };
-    }
-    return NextResponse.json(data, { status: res.status });
+    return NextResponse.json(parseBody(text), { status: res.status });
   } catch (error) {
     console.error(`[Search API] BFF proxy error on ${path}:`, error);
     return NextResponse.json(

@@ -145,6 +145,15 @@ function targets(
   }
 }
 
+/** `undefined` when the body is not valid JSON. */
+const parseWebhookBody = (rawBody: string): WebhookBody | undefined => {
+  try {
+    return JSON.parse(rawBody) as WebhookBody;
+  } catch {
+    return undefined;
+  }
+};
+
 export async function POST(request: Request) {
   const secret = process.env.SANITY_REVALIDATE_SECRET;
   if (!secret) {
@@ -163,10 +172,8 @@ export async function POST(request: Request) {
     );
   }
 
-  let payload: WebhookBody;
-  try {
-    payload = JSON.parse(rawBody) as WebhookBody;
-  } catch {
+  const payload = parseWebhookBody(rawBody);
+  if (payload === undefined) {
     return NextResponse.json(
       { ok: false, error: "Invalid JSON" },
       { status: 400 },

@@ -39,10 +39,9 @@ const TAPE_ROTATION_POOL = ["a", "b", "c", "d", "e", "f"] as const;
 // stable across renders (no hydration mismatch, stable VR baselines).
 // Exported so a card deriving its own lean from its identity reuses it.
 export function seededIndex(seed: string, modulo: number): number {
-  let h = 5381;
-  for (let i = 0; i < seed.length; i++) {
-    h = ((h << 5) + h + seed.charCodeAt(i)) >>> 0;
-  }
+  const h = Array.from({ length: seed.length }, (_, i) =>
+    seed.charCodeAt(i),
+  ).reduce((acc, code) => ((acc << 5) + acc + code) >>> 0, 5381);
   return h % modulo;
 }
 

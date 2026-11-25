@@ -54,6 +54,26 @@ export function hasRenderableBioContent(blocks: PortableTextBlock[]): boolean {
   return blocks.some((b) => extractBlockText(b).length > 0);
 }
 
+/** The trimmed, non-empty runs of adjacent `pullquote`-marked spans in one block. */
+const pullquoteRunsOf = (children: PortableTextSpanLike[]): string[] => {
+  const { runs, current } = children.reduce<{
+    runs: string[];
+    current: string | null;
+  }>(
+    (acc, span) =>
+      span.marks?.includes("pullquote")
+        ? { ...acc, current: (acc.current ?? "") + (span.text ?? "") }
+        : {
+            runs: acc.current === null ? acc.runs : [...acc.runs, acc.current],
+            current: null,
+          },
+    { runs: [], current: null },
+  );
+  return (current === null ? runs : [...runs, current])
+    .map((text) => text.trim())
+    .filter((text) => text.length > 0);
+};
+
 /**
  * Return the text of the Nth (0-indexed) contiguous `pullquote`-marked
  * run across all blocks, or `null` when fewer than `n + 1` runs exist.
@@ -65,30 +85,9 @@ export function findNthPullquoteText(
   n: number,
 ): string | null {
   if (n < 0) return null;
-  const runs: string[] = [];
-  for (const block of blocks) {
+  const runs = blocks.flatMap((block) => {
     const children = (block as PortableTextBlockLike).children;
-    if (!Array.isArray(children)) continue;
-    let collecting = false;
-    let text = "";
-    for (const span of children) {
-      const isPullquote = span.marks?.includes("pullquote") ?? false;
-      if (isPullquote) {
-        collecting = true;
-        text += span.text ?? "";
-      } else if (collecting) {
-        const trimmed = text.trim();
-        if (trimmed.length > 0) runs.push(trimmed);
-        text = "";
-        collecting = false;
-        if (runs.length > n) return runs[n] ?? null;
-      }
-    }
-    if (collecting) {
-      const trimmed = text.trim();
-      if (trimmed.length > 0) runs.push(trimmed);
-      if (runs.length > n) return runs[n] ?? null;
-    }
-  }
+    return Array.isArray(children) ? pullquoteRunsOf(children) : [];
+  });
   return runs[n] ?? null;
 }

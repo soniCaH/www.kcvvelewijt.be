@@ -280,15 +280,19 @@ export function hasRenderableBody(content: PortableTextBlock[]): boolean {
  * recognisable affordance (CMS-2). Returns null for everything else, so
  * ordinary external links keep the canonical `.prose-link` highlighter marker.
  */
+const hostnameOf = (href: string): string | null => {
+  try {
+    return new URL(href).hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+};
+
 function socialBrandFor(
   href: string,
 ): { Icon: typeof FacebookLogo; label: string } | null {
-  let host: string;
-  try {
-    host = new URL(href).hostname.toLowerCase();
-  } catch {
-    return null; // relative / malformed href → not a social affordance
-  }
+  const host = hostnameOf(href);
+  if (host === null) return null; // relative / malformed href → not a social affordance
   // Match a registrable domain OR any of its subdomains (www., m., web.,
   // business., l. …) — the `.` prefix on the suffix check rejects look-alikes
   // like notfacebook.com.
@@ -495,47 +499,49 @@ function renderPullQuote(
 
   const resolvedSpeaker = resolvePullQuoteSpeaker(value.speaker);
 
-  let inner: ReactNode;
-
   if (resolvedSpeaker) {
-    inner = (
-      <PullQuote
-        attribution={{
-          name: resolvedSpeaker.name,
-          role: resolvedSpeaker.role || undefined,
-        }}
-        avatarSlot={
-          <SubjectAvatar
-            firstName={resolvedSpeaker.firstName}
-            photoUrl={resolvedSpeaker.photoUrl}
-            scale="attribution"
-          />
-        }
-      >
-        {quoteBody}
-      </PullQuote>
-    );
-  } else {
-    const externalName = value.externalName?.trim();
-    inner = externalName ? (
-      <PullQuote
-        attribution={{
-          name: externalName,
-          role: value.externalRole?.trim() || undefined,
-          source: value.externalSource?.trim() || undefined,
-        }}
-      >
-        {quoteBody}
-      </PullQuote>
-    ) : (
-      // No resolvable speaker and no external name — a nameless quote.
-      // `attribution` is omitted entirely; <PullQuote> skips the row
-      // rather than rendering an empty one (#2515 rule 1).
-      <PullQuote attribution={undefined}>{quoteBody}</PullQuote>
+    return (
+      <QuoteSpacer>
+        <PullQuote
+          attribution={{
+            name: resolvedSpeaker.name,
+            role: resolvedSpeaker.role || undefined,
+          }}
+          avatarSlot={
+            <SubjectAvatar
+              firstName={resolvedSpeaker.firstName}
+              photoUrl={resolvedSpeaker.photoUrl}
+              scale="attribution"
+            />
+          }
+        >
+          {quoteBody}
+        </PullQuote>
+      </QuoteSpacer>
     );
   }
 
-  return <QuoteSpacer>{inner}</QuoteSpacer>;
+  const externalName = value.externalName?.trim();
+  return (
+    <QuoteSpacer>
+      {externalName ? (
+        <PullQuote
+          attribution={{
+            name: externalName,
+            role: value.externalRole?.trim() || undefined,
+            source: value.externalSource?.trim() || undefined,
+          }}
+        >
+          {quoteBody}
+        </PullQuote>
+      ) : (
+        // No resolvable speaker and no external name — a nameless quote.
+        // `attribution` is omitted entirely; <PullQuote> skips the row
+        // rather than rendering an empty one (#2515 rule 1).
+        <PullQuote attribution={undefined}>{quoteBody}</PullQuote>
+      )}
+    </QuoteSpacer>
+  );
 }
 
 /**
@@ -644,18 +650,14 @@ function renderArticleImage(value: ArticleImageValue): ReactNode {
 function buildVideoBlockPositions(
   content: PortableTextBlock[],
 ): Map<string, number> {
-  const map = new Map<string, number>();
-  let i = 0;
-  for (const block of content) {
-    if (
-      block._type === "videoBlock" &&
-      typeof block._key === "string" &&
-      block._key.length > 0
-    ) {
-      map.set(block._key, ++i);
-    }
-  }
-  return map;
+  const keys = content.flatMap((block) =>
+    block._type === "videoBlock" &&
+    typeof block._key === "string" &&
+    block._key.length > 0
+      ? [block._key]
+      : [],
+  );
+  return new Map(keys.map((key, i) => [key, i + 1]));
 }
 
 interface ComponentsBuildArgs {

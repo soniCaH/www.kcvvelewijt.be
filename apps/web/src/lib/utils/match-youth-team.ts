@@ -151,9 +151,11 @@ export function matchYouthTeams<T extends YouthTeamSource>(
     extra: Pick<Draft, "age" | "oldName"> = { age: null, oldName: null },
   ): Draft | null => {
     if (category < MIN_CATEGORY || category > MAX_CATEGORY) return null;
-    let found = category;
-    while (found <= MAX_CATEGORY && teamsIn(found).length === 0) found++;
-    if (found > MAX_CATEGORY) return null;
+    const found = Array.from(
+      { length: MAX_CATEGORY - category + 1 },
+      (_, i) => category + i,
+    ).find((c) => teamsIn(c).length > 0);
+    if (found === undefined) return null;
     const lower =
       kind === "birth-year" && category <= LATE_BORN_MAX_CATEGORY
         ? teamsIn(category - 1).filter((p) => p.regional)

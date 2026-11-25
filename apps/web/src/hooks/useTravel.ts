@@ -49,12 +49,13 @@ import {
   type TravelKind,
 } from "@/lib/utils/travel";
 
-let tappedKey: string | null = null;
+// A module-level external store shared by every travelling source.
+const tappedStore: { key: string | null } = { key: null };
 const listeners = new Set<() => void>();
 
 function setTapped(next: string | null) {
-  if (next === tappedKey) return;
-  tappedKey = next;
+  if (next === tappedStore.key) return;
+  tappedStore.key = next;
   listeners.forEach((listener) => listener());
 }
 
@@ -88,7 +89,7 @@ export function useTravel(
   const pathname = usePathname();
   const tapped = useSyncExternalStore(
     subscribe,
-    () => tappedKey === key,
+    () => tappedStore.key === key,
     () => false,
   );
 
@@ -108,7 +109,7 @@ export function useTravel(
   // the old snapshot with the name the tap set, so the pair still forms.
   useEffect(
     () => () => {
-      if (tappedKey === key) setTapped(null);
+      if (tappedStore.key === key) setTapped(null);
     },
     [key],
   );

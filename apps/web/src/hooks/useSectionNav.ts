@@ -132,27 +132,27 @@ export function useSectionNav(ids: readonly string[]): UseSectionNavResult {
             el: entry.target,
           });
         }
-        let topId: string | null = null;
-        let topValue = Infinity;
-        for (const [id, s] of state) {
-          if (!s.intersecting) continue;
-          // Read LIVE, not `entry.boundingClientRect` at delivery time.
-          // With `threshold: [0]` a section shorter than the band gets
-          // exactly one delivery for its whole visit — the instant it
-          // crosses the band's bottom edge — so a snapshotted `top` goes
-          // stale for the rest of that visit. Two short sections in the
-          // band at once would then tie (or mis-order) on their frozen
-          // entry-time values instead of their current position. Reading
-          // the element's own rect here instead makes "topmost" correct
-          // at decision time regardless of how long ago either delivery
-          // fired.
-          const top = s.el.getBoundingClientRect().top;
-          if (top < topValue) {
-            topId = id;
-            topValue = top;
-          }
-        }
-        if (topId !== null) setActiveId(topId);
+        const topId = [...state]
+          .filter(([, s]) => s.intersecting)
+          .map(([id, s]) => ({
+            id,
+            // Read LIVE, not `entry.boundingClientRect` at delivery time.
+            // With `threshold: [0]` a section shorter than the band gets
+            // exactly one delivery for its whole visit — the instant it
+            // crosses the band's bottom edge — so a snapshotted `top` goes
+            // stale for the rest of that visit. Two short sections in the
+            // band at once would then tie (or mis-order) on their frozen
+            // entry-time values instead of their current position. Reading
+            // the element's own rect here instead makes "topmost" correct
+            // at decision time regardless of how long ago either delivery
+            // fired.
+            top: s.el.getBoundingClientRect().top,
+          }))
+          .reduce<{ id: string; top: number } | null>(
+            (best, c) => (best === null || c.top < best.top ? c : best),
+            null,
+          )?.id;
+        if (topId !== undefined) setActiveId(topId);
       },
       // Top inset clears the header + this bar; the bottom inset flips
       // "active" near the top third of the viewport, not the very bottom.
