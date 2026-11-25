@@ -23,6 +23,7 @@ import { PageViewTracker } from "@/components/analytics";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildItemListJsonLd } from "@/lib/seo/jsonld";
 import { buildPageMetadata } from "@/lib/seo/page-metadata";
+import { firstParam } from "@/hooks/filterParam";
 import { SITE_CONFIG } from "@/lib/constants";
 import { CalendarWidget } from "@/components/calendar/CalendarWidget";
 import { KALENDER_ABONNEER_PARAM } from "@/components/calendar/CalendarWidget/abonneer";
@@ -231,9 +232,9 @@ export default async function CalendarPage({
         <CalendarWidget
           feed={data.feed}
           teams={data.teams}
-          initialType={typeof type === "string" ? type : undefined}
-          initialView={typeof view === "string" ? view : undefined}
-          initialAbonneer={typeof abonneer === "string" ? abonneer : undefined}
+          initialType={firstParam(type)}
+          initialView={firstParam(view)}
+          initialAbonneer={firstParam(abonneer)}
           initialIsPhone={initialIsPhone}
         />
       </PageContainer>
