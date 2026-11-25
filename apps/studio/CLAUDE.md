@@ -87,6 +87,8 @@ Production: let CI deploy it, never from a laptop. CI deploys exactly what is on
 
 **No nested ternary** — lint rule `no-nested-ternary` (`eslint.config.mjs`, #3855), tests included. A multi-way choice becomes a small arrow helper whose `switch`/`if` chain returns, or a lookup object when every branch is a plain value; a single ternary inside a branch may stay.
 
+**Arrow functions only** — ESLint core `func-style: ["error", "expression"]` (`eslint.config.mjs`, #3867), tests included. A helper is `const name = () => …`, and it goes above its first use at module load (a `const` has no hoisting). A generator is `const name = function* () { … }`; `Effect.gen(function* () { … })` is an expression and passes. Class and object methods are not declarations.
+
 ## No Duplication With Root CLAUDE.md
 
 This file covers app-local concerns. For monorepo-wide conventions (TypeScript compiler setup, commit style, PR workflow, Turborepo tasks), see `.claude/CLAUDE.md`.
