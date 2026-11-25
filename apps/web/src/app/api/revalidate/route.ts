@@ -32,14 +32,15 @@ export const maxDuration = 120;
  * issue's "Scope E manual step" for the exact URL / projection / secret.
  */
 
+/** Fields are `unknown`: the signed body is parsed, never validated upstream. */
 interface WebhookBody {
-  _type?: string;
+  _type?: unknown;
   /** Current `slug.current` from the webhook projection. */
-  slug?: string;
+  slug?: unknown;
   /** Previous slug on a rename (`before().slug.current`), if projected. */
-  previousSlug?: string;
-  /** Player/staff detail pages route by PSD id, not a Sanity slug. */
-  psdId?: string | number;
+  previousSlug?: unknown;
+  /** Player/staff detail pages route by PSD id, not a Sanity slug. Expect a string or number. */
+  psdId?: unknown;
 }
 
 /**
@@ -186,7 +187,6 @@ export async function POST(request: Request) {
   }
 
   const type = payload._type;
-  // The body is a signed but unchecked cast (#3863): `_type` may be any JSON.
   if (typeof type !== "string" || type.length === 0) {
     return NextResponse.json(
       { ok: false, error: "Missing _type" },
@@ -202,10 +202,9 @@ export async function POST(request: Request) {
     ),
   ];
   // Anything but a string or number is treated as no psdId, never stringified.
-  const rawPsdId: unknown = payload.psdId;
   const psdId =
-    typeof rawPsdId === "string" || typeof rawPsdId === "number"
-      ? String(rawPsdId)
+    typeof payload.psdId === "string" || typeof payload.psdId === "number"
+      ? String(payload.psdId)
       : undefined;
 
   const target = targets(type, slugs, psdId);

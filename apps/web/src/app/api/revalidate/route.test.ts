@@ -200,16 +200,17 @@ describe("POST /api/revalidate", () => {
   });
 
   it.each([
-    ["player", "/spelers/"],
-    ["staffMember", "/staf/"],
+    ["player", "/spelers/", "players"],
+    ["staffMember", "/staf/", "staff"],
   ])(
     "treats a non-string, non-number psdId on a %s as no psdId (#3863)",
-    async (type, prefix) => {
+    async (type, prefix, tag) => {
       const res = await post({ _type: type, psdId: {} });
       expect(res.status).toBe(200);
       expect(revalidatePath).not.toHaveBeenCalledWith(
         expect.stringContaining(prefix),
       );
+      expect(revalidateTag).toHaveBeenCalledWith(tag, "max");
     },
   );
 
