@@ -42,7 +42,7 @@ const describeRow = ({ action, doc, before }: PlanRow) =>
     : `  ${action.padEnd(9)} ${doc._id}  /${doc.name} → ${doc.target}`;
 
 /** Returns the process exit code. Never throws on a refusal. */
-export async function runSeed(options: SeedOptions): Promise<number> {
+export const runSeed = async (options: SeedOptions): Promise<number> => {
   const { client, execute, requestedDataset, log, error } = options;
 
   // The guard reads the dataset the client really uses — `getCliClient({dataset})`
@@ -100,4 +100,4 @@ export async function runSeed(options: SeedOptions): Promise<number> {
   const result = await tx.commit();
   log(`\nDone. Transaction ${result.transactionId} on ${dataset}.`);
   return 0;
-}
+};

@@ -43,13 +43,13 @@ const ENTITIES: Record<string, string> = {
 };
 
 /** Decodes the few entities the Drupal export uses; any other one is a stop. */
-function decode(text: string): string {
+const decode = (text: string): string => {
   return text.replace(/&[#\w]+;/g, (e) => {
     const decoded = ENTITIES[e];
     if (decoded === undefined) throw new Error(`Unhandled HTML entity ${e}`);
     return decoded;
   });
-}
+};
 
 /**
  * Converts the Drupal body (`<h2>`, `<p>`, `<a href>` and nothing else) to
@@ -57,7 +57,7 @@ function decode(text: string): string {
  * across verbatim, never half-converted. A paragraph holding only `&nbsp;` is
  * Drupal's trailing spacer and is dropped.
  */
-export function htmlToBlocks(html: string): Block[] {
+export const htmlToBlocks = (html: string): Block[] => {
   const blockRe = /<(h2|p)>([\s\S]*?)<\/\1>/g;
   const leftover = html.replace(blockRe, "").trim();
   if (leftover) throw new Error(`Unparsed HTML outside h2/p: ${leftover}`);
@@ -98,7 +98,7 @@ export function htmlToBlocks(html: string): Block[] {
     }
     return block;
   });
-}
+};
 
 export interface TermsPage {
   _id: string;
@@ -108,7 +108,7 @@ export interface TermsPage {
   body: Block[];
 }
 
-export function buildTermsPage(): TermsPage {
+export const buildTermsPage = (): TermsPage => {
   return {
     _id: TERMS_ID,
     _type: "page",
@@ -116,7 +116,7 @@ export function buildTermsPage(): TermsPage {
     slug: { _type: "slug", current: TERMS_SLUG },
     body: htmlToBlocks(TERMS_HTML),
   };
-}
+};
 
 export interface CashlessDoc {
   _id: string;
@@ -152,7 +152,7 @@ export interface CashlessPatch {
  * clause becomes a paper-copy clause. The mail link and the rest stay.
  * Returns `null` when that paragraph already carries the link (a re-run).
  */
-export function buildCashlessPatch(doc: CashlessDoc): CashlessPatch | null {
+export const buildCashlessPatch = (doc: CashlessDoc): CashlessPatch | null => {
   const blocks = (doc.body ?? []).filter(
     (b): b is Block => b._type === "block",
   );
@@ -207,7 +207,7 @@ export function buildCashlessPatch(doc: CashlessDoc): CashlessPatch | null {
     after: textOf(next),
     block: next,
   };
-}
+};
 
 /** What the read found, so `preflight` can refuse before anything is planned. */
 export interface Snapshot {
@@ -218,7 +218,7 @@ export interface Snapshot {
   drafts: string[];
 }
 
-export function preflight(snap: Snapshot): string[] {
+export const preflight = (snap: Snapshot): string[] => {
   const errors: string[] = [];
   if (!snap.cashless) {
     errors.push(
@@ -236,4 +236,4 @@ export function preflight(snap: Snapshot): string[] {
     );
   }
   return errors;
-}
+};

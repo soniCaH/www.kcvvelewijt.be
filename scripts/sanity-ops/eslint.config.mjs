@@ -32,6 +32,10 @@ export default tseslint.config(
     },
   },
   {
+    // Arrow functions only: a `function` declaration becomes `const name = () => …` (#3867, rule: #3865).
+    rules: { "func-style": ["error", "expression"] },
+  },
+  {
     ignores: ["node_modules/**"],
   },
 );

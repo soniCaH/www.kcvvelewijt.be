@@ -32,7 +32,7 @@ export interface LinkPatch {
  * is left and the new href is there (a re-run); throws when neither is found,
  * since the article was edited and the script no longer knows what to change.
  */
-export function buildLinkPatch(doc: ArticleDoc): LinkPatch | null {
+export const buildLinkPatch = (doc: ArticleDoc): LinkPatch | null => {
   const defs = (doc.body ?? []).flatMap((b) =>
     (b.markDefs ?? []).map((d) => ({ block: b._key, def: d })),
   );
@@ -47,7 +47,7 @@ export function buildLinkPatch(doc: ArticleDoc): LinkPatch | null {
   throw new Error(
     `${doc._id}: no link points at ${OLD_HREF} or ${NEW_HREF} — the article was edited; update the script.`,
   );
-}
+};
 
 /** What the read found, so `preflight` can refuse before anything is planned. */
 export interface Snapshot {
@@ -56,7 +56,7 @@ export interface Snapshot {
   drafts: string[];
 }
 
-export function preflight(snap: Snapshot): string[] {
+export const preflight = (snap: Snapshot): string[] => {
   const errors: string[] = [];
   if (!snap.article) {
     errors.push(
@@ -69,4 +69,4 @@ export function preflight(snap: Snapshot): string[] {
     );
   }
   return errors;
-}
+};

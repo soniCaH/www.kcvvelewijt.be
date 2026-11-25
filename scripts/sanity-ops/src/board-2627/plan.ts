@@ -301,16 +301,16 @@ export const TOUCHED_IDS = [
 ];
 
 /** True when every field of the topic already holds its new value. */
-export function topicDone(t: TopicUpdate, snap: Snapshot): boolean {
+export const topicDone = (t: TopicUpdate, snap: Snapshot): boolean => {
   return t.changes.every((c) => snap.topics[t.id]?.values[c.path] === c.to);
-}
+};
 
 /**
  * Reasons not to write, or an empty list. Accepts both the before and the
  * after state, so a re-run after a successful run passes; anything else — a
  * reused id, an edited text — stops the run instead of being overwritten.
  */
-export function preflight(snap: Snapshot): string[] {
+export const preflight = (snap: Snapshot): string[] => {
   const errors: string[] = [];
   const created = new Set(STAFF_CREATES.map((s) => s._id));
 
@@ -355,4 +355,4 @@ export function preflight(snap: Snapshot): string[] {
   }
 
   return errors;
-}
+};

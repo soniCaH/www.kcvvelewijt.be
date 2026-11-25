@@ -24,7 +24,7 @@ const BATCH = 100;
 
 // Draft-aware on purpose, for both reads: a staff draft still holds the birth
 // date, and a draft that references an asset must keep that asset alive.
-async function readSnapshot() {
+const readSnapshot = async () => {
   const [staff, assets] = await Promise.all([
     draftAwareClient.fetch<StaffRow[]>(
       `*[_type == "staffMember" && defined(birthDate)]{ _id, _rev, birthDate }`,
@@ -37,14 +37,14 @@ async function readSnapshot() {
     staff: selectStaffToUnset(staff),
     assets: selectUnreferencedPortraitAssets(assets),
   };
-}
+};
 
 const chunks = <T>(list: T[]): T[][] =>
   Array.from({ length: Math.ceil(list.length / BATCH) }, (_, i) =>
     list.slice(i * BATCH, (i + 1) * BATCH),
   );
 
-async function main() {
+const main = async () => {
   const { staff, assets } = await readSnapshot();
 
   console.log(`\nDataset ${dataset}:`);
@@ -88,7 +88,7 @@ async function main() {
   console.log(
     `\nDone. Unset birthDate on ${staff.length} staff, deleted ${assets.length} assets on ${dataset}.`,
   );
-}
+};
 
 main().catch((err) => {
   console.error("Fatal error:", err);

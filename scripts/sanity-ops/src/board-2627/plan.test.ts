@@ -10,7 +10,7 @@ import {
 } from "./plan";
 
 /** A snapshot of the dataset exactly as it was before the update ran. */
-function beforeSnapshot(): Snapshot {
+const beforeSnapshot = (): Snapshot => {
   const staff: Snapshot["staff"] = {};
   for (const [id, name] of Object.entries(STAFF))
     staff[id] = { name, archived: false };
@@ -28,10 +28,10 @@ function beforeSnapshot(): Snapshot {
     };
   }
   return { staff, nodes, topics, pending: [] };
-}
+};
 
 /** The same dataset after a successful run: every topic field holds its new value. */
-function afterSnapshot(): Snapshot {
+const afterSnapshot = (): Snapshot => {
   const snap = beforeSnapshot();
   for (const t of TOPIC_UPDATES) {
     snap.topics[t.id] = {
@@ -43,7 +43,7 @@ function afterSnapshot(): Snapshot {
     snap.staff[s._id] = { name: `${s.firstName} ${s.lastName}` };
   for (const n of NODE_CREATES) snap.nodes[n._id] = { rev: "r1" };
   return snap;
-}
+};
 
 describe("preflight", () => {
   it("passes on the dataset as it was before the update", () => {

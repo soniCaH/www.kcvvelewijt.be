@@ -35,7 +35,7 @@ const EXECUTE = process.argv.includes("--execute");
 // silently ignores that option and hits production, so an env var is no proof.
 const { dataset } = client.config();
 
-async function readSnapshot(): Promise<Snapshot> {
+const readSnapshot = async (): Promise<Snapshot> => {
   // `perspective: "raw"` on purpose (`draftAwareClient`): the revision pinned
   // below must be the published document's, and a draft or a content-release
   // version of either page would be published over this write.
@@ -59,9 +59,9 @@ async function readSnapshot(): Promise<Snapshot> {
     ),
   ]);
   return { cashless, existingTerms, drafts };
-}
+};
 
-async function main() {
+const main = async () => {
   if (dataset !== "staging" && dataset !== "production") {
     console.error(`Refusing to run on dataset "${dataset}".`);
     process.exit(1);
@@ -125,7 +125,7 @@ async function main() {
   }
   const result = await tx.commit();
   console.log(`\nDone. Transaction ${result.transactionId} on ${dataset}.`);
-}
+};
 
 main().catch((err) => {
   console.error("Fatal error:", err);
