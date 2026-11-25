@@ -478,6 +478,7 @@ const eslintConfig = [
     files: ["**/*.{ts,tsx,js,jsx,mjs,cjs,mts,cts}"],
     plugins: { kcvv: kcvvPlugin },
     rules: {
+      "no-nested-ternary": "error",
       "kcvv/no-let": [
         "error",
         {
