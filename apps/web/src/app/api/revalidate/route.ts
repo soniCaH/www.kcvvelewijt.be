@@ -186,7 +186,8 @@ export async function POST(request: Request) {
   }
 
   const type = payload._type;
-  if (!type) {
+  // The body is a signed but unchecked cast (#3863): `_type` may be any JSON.
+  if (typeof type !== "string" || type.length === 0) {
     return NextResponse.json(
       { ok: false, error: "Missing _type" },
       { status: 400 },
@@ -200,7 +201,12 @@ export async function POST(request: Request) {
       ),
     ),
   ];
-  const psdId = payload.psdId != null ? String(payload.psdId) : undefined;
+  // Anything but a string or number is treated as no psdId, never stringified.
+  const rawPsdId: unknown = payload.psdId;
+  const psdId =
+    typeof rawPsdId === "string" || typeof rawPsdId === "number"
+      ? String(rawPsdId)
+      : undefined;
 
   const target = targets(type, slugs, psdId);
   if (!target) {

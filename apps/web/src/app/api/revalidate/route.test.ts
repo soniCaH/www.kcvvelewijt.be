@@ -95,6 +95,25 @@ describe("POST /api/revalidate", () => {
   });
 
   it.each([
+    ["an array", ["article"]],
+    ["an object", { x: 1 }],
+    ["a boolean", true],
+    ["a number", 7],
+    ["an empty string", ""],
+  ])(
+    "returns 400 Missing _type when _type is %s (#3863)",
+    async (_label, type) => {
+      const res = await POST(makeRequest({ _type: type }));
+      expect(res.status).toBe(400);
+      await expect(res.json()).resolves.toEqual({
+        ok: false,
+        error: "Missing _type",
+      });
+      expect(after).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([
     ["null", null],
     ["a number", 42],
     ["a string", "x"],
@@ -179,6 +198,20 @@ describe("POST /api/revalidate", () => {
     expect(revalidatePath).toHaveBeenCalledWith("/spelers/42");
     expect(revalidateTag).toHaveBeenCalledWith("players", "max");
   });
+
+  it.each([
+    ["player", "/spelers/"],
+    ["staffMember", "/staf/"],
+  ])(
+    "treats a non-string, non-number psdId on a %s as no psdId (#3863)",
+    async (type, prefix) => {
+      const res = await post({ _type: type, psdId: {} });
+      expect(res.status).toBe(200);
+      expect(revalidatePath).not.toHaveBeenCalledWith(
+        expect.stringContaining(prefix),
+      );
+    },
+  );
 
   it("routes staff by psdId, not slug", async () => {
     const res = await post({ _type: "staffMember", psdId: 900 });
