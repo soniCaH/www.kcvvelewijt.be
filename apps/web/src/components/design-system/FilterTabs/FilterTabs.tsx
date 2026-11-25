@@ -226,11 +226,9 @@ export function FilterTabs({
     const chipClasses = cn(
       ...CHIP_BASE_CLASSES,
       isActive ? "bg-ink text-cream" : "bg-cream-soft text-ink",
-      isActive
+      isActive || surface === "inverse"
         ? "shadow-paper-sm-soft"
-        : surface === "inverse"
-          ? "shadow-paper-sm-soft"
-          : "shadow-paper-sm",
+        : "shadow-paper-sm",
       // A caller's `fill` may be white-on-jersey-deep (e.g. event-type-style.ts's
       // EVENT_TYPE_FILL.Clubevent) rather than cream — kept deliberately: this is
       // the selected tab's own colour identity, a primitive white-on-green case

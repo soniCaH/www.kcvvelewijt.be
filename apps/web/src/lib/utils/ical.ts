@@ -275,12 +275,10 @@ function matchesToEntries(
     return true;
   });
 
-  const filtered =
-    side === "home"
-      ? unique.filter(isHomeSide)
-      : side === "away"
-        ? unique.filter((m) => !isHomeSide(m))
-        : unique;
+  const filtered = (() => {
+    if (side === "home") return unique.filter(isHomeSide);
+    return side === "away" ? unique.filter((m) => !isHomeSide(m)) : unique;
+  })();
 
   const sorted = [...filtered].sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),

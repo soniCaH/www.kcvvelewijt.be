@@ -173,9 +173,8 @@ export function EventFactInline({
           className="flex flex-col gap-3"
         >
           <header className="flex items-center gap-3">
-            {isPast ? (
-              <MonoLabel variant="pill-cream">{PAST_LABEL}</MonoLabel>
-            ) : tag ? (
+            {isPast && <MonoLabel variant="pill-cream">{PAST_LABEL}</MonoLabel>}
+            {!isPast && tag ? (
               <MonoLabel variant="pill-jersey-deep">{tag}</MonoLabel>
             ) : null}
             {value.ageGroup?.trim() ? (

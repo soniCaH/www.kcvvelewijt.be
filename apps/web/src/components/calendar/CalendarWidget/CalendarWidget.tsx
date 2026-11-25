@@ -161,8 +161,8 @@ export function CalendarWidget({
     { fallback: "default", route: "/kalender", initial: initialView },
   );
   const isPhone = useIsPhoneViewport(initialIsPhone);
-  const requestedView: ViewMode =
-    rawView !== "default" ? rawView : isPhone ? "agenda" : "month";
+  const defaultView: ViewMode = isPhone ? "agenda" : "month";
+  const requestedView: ViewMode = rawView !== "default" ? rawView : defaultView;
   // The week grid is forced 7-col (~41px cells) and `?view=week` pins it on any
   // viewport — coerce it to the agenda list on phones (MOB-6). The month tab is
   // hidden on phones too, but an explicit `?view=month` still wins (it can only
@@ -289,6 +289,78 @@ export function CalendarWidget({
     return { filteredFeed: filtered, matches: matchList, events: eventList };
   }, [feed, activeTypeFilter]);
 
+  const renderEmptyState = () => {
+    // "all" + nothing = genuinely empty ("Nog geen" — a match or
+    // event can still be scheduled); a specific facet + nothing =
+    // the selection emptied the calendar (names the facet, carries
+    // the mandatory undo via `reason="filtered"`, never "Nog geen"
+    // — #2427 rule 5). Computed only here, not on every render
+    // (round 3 review, D6). `surface="bare"`: already inside this
+    // panel's own bordered/shadowed shell — a second frame here
+    // nested two ink borders with a shadow between them.
+    if (activeTypeFilter === "all")
+      return (
+        <EmptyState
+          tier="surface"
+          heading="Nog geen wedstrijden of evenementen gepland"
+          live
+          surface="bare"
+        >
+          {pendingEmptyBody(
+            "er een wedstrijd of evenement gepland wordt",
+            "het",
+          )}
+        </EmptyState>
+      );
+    return (
+      <EmptyState
+        tier="surface"
+        heading={
+          activeTypeFilter === "Wedstrijden"
+            ? "Geen wedstrijden gepland"
+            : `Geen evenementen in de categorie ${activeTypeFilter}`
+        }
+        live
+        surface="bare"
+        reason="filtered"
+        undo={{
+          label: "Toon alles",
+          onClick: () => setType("all"),
+          analyticsSource: "kalender",
+          analyticsFacet: activeTypeFilter,
+        }}
+      >
+        {filteredEmptyBody("de volledige kalender")}
+      </EmptyState>
+    );
+  };
+
+  const renderView = () => {
+    if (view === "month")
+      return (
+        <CalendarMonth
+          matches={matches}
+          events={events}
+          selectedDate={selectedDate}
+          onSelectDate={setSelectedDate}
+          currentMonth={currentMonth}
+          currentYear={currentYear}
+        />
+      );
+    if (view === "week")
+      return (
+        <CalendarWeek matches={matches} events={events} weekStart={weekStart} />
+      );
+    return (
+      <CalendarAgenda
+        matches={matches}
+        events={events}
+        currentMonth={currentMonth}
+        currentYear={currentYear}
+      />
+    );
+  };
+
   return (
     <div className="space-y-4">
       {/* By-type filter chips (the row doubles as the colour legend) */}
@@ -377,71 +449,7 @@ export function CalendarWidget({
 
         {/* View content */}
         <div className="p-4">
-          {filteredFeed.length === 0 ? (
-            // "all" + nothing = genuinely empty ("Nog geen" — a match or
-            // event can still be scheduled); a specific facet + nothing =
-            // the selection emptied the calendar (names the facet, carries
-            // the mandatory undo via `reason="filtered"`, never "Nog geen"
-            // — #2427 rule 5). Computed only here, not on every render
-            // (round 3 review, D6). `surface="bare"`: already inside this
-            // panel's own bordered/shadowed shell — a second frame here
-            // nested two ink borders with a shadow between them.
-            activeTypeFilter === "all" ? (
-              <EmptyState
-                tier="surface"
-                heading="Nog geen wedstrijden of evenementen gepland"
-                live
-                surface="bare"
-              >
-                {pendingEmptyBody(
-                  "er een wedstrijd of evenement gepland wordt",
-                  "het",
-                )}
-              </EmptyState>
-            ) : (
-              <EmptyState
-                tier="surface"
-                heading={
-                  activeTypeFilter === "Wedstrijden"
-                    ? "Geen wedstrijden gepland"
-                    : `Geen evenementen in de categorie ${activeTypeFilter}`
-                }
-                live
-                surface="bare"
-                reason="filtered"
-                undo={{
-                  label: "Toon alles",
-                  onClick: () => setType("all"),
-                  analyticsSource: "kalender",
-                  analyticsFacet: activeTypeFilter,
-                }}
-              >
-                {filteredEmptyBody("de volledige kalender")}
-              </EmptyState>
-            )
-          ) : view === "month" ? (
-            <CalendarMonth
-              matches={matches}
-              events={events}
-              selectedDate={selectedDate}
-              onSelectDate={setSelectedDate}
-              currentMonth={currentMonth}
-              currentYear={currentYear}
-            />
-          ) : view === "week" ? (
-            <CalendarWeek
-              matches={matches}
-              events={events}
-              weekStart={weekStart}
-            />
-          ) : (
-            <CalendarAgenda
-              matches={matches}
-              events={events}
-              currentMonth={currentMonth}
-              currentYear={currentYear}
-            />
-          )}
+          {filteredFeed.length === 0 ? renderEmptyState() : renderView()}
         </div>
       </div>
     </div>

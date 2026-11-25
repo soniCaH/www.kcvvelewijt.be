@@ -90,7 +90,7 @@ export function resolveYouthSlug(
       (team) => team.age?.toUpperCase() === age || segment.test(team.slug),
     )
     // Deterministic code-unit order (localeCompare may ignore hyphens by locale).
-    .sort((a, b) => (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0));
+    .sort((a, b) => Number(a.slug > b.slug) - Number(a.slug < b.slug));
   if (ofAge.length === 0) return null;
 
   const colour = lower.match(/wit|groen/)?.[0];

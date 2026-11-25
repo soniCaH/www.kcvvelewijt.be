@@ -42,14 +42,9 @@ export function MatchStripSlider({
   // was wrong when the switch had been moved to the fixture and a later render
   // dropped it: the fallback rendered the result while still labelled
   // "Volgende" and with `vs.` in place of the score.
-  const slide =
-    showResult && result
-      ? { parts: result, isResult: true }
-      : fixture
-        ? { parts: fixture, isResult: false }
-        : result
-          ? { parts: result, isResult: true }
-          : null;
+  const resultSlide = result ? { parts: result, isResult: true } : null;
+  const fixtureSlide = fixture ? { parts: fixture, isResult: false } : null;
+  const slide = (showResult && resultSlide) || fixtureSlide || resultSlide;
   if (!slide) return null;
 
   const { parts, isResult: isResultSlide } = slide;

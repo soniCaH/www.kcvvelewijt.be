@@ -361,11 +361,11 @@ const MatchRow = ({ match, kcvvTeamId, surface }: MatchRowProps) => {
   // Home wins a tie. KCVV-vs-KCVV is real data — pitch-reservation placeholders
   // come through the feed — and reads as a home fixture; both names still bold,
   // because each flag is an independent truth about its own team.
-  const kcvvSide: KcvvSide | undefined = homeIsKcvv
-    ? "home"
-    : awayIsKcvv
-      ? "away"
-      : undefined;
+  const kcvvSide = ((): KcvvSide | undefined => {
+    if (homeIsKcvv) return "home";
+    if (awayIsKcvv) return "away";
+    return undefined;
+  })();
   const dateLabel = formatMatchWidgetDate(match.date);
   const when = [dateLabel, match.time].filter(Boolean).join(" · ");
   // Venue last, and only when present. The BFF stamps it for a home fixture

@@ -655,19 +655,31 @@ export function HubSearch({
   }, [teamNotFound, debouncedTrimmed]);
 
   // Announce result state to screen readers when the listbox is open (S1).
-  const statusMessage = !showResults
-    ? ""
-    : showShimmer
-      ? // Distinct from the visible "Slim zoeken…" hint so SR users hear a
-        // spoken sentence, not a clipped UI label (and the two never collide).
-        "Bezig met zoeken…"
-      : items.length > 0
-        ? `${items.length} ${items.length === 1 ? "resultaat" : "resultaten"}`
-        : teamCardMatches.length > 0
-          ? `Ploeg gevonden: ${shownCardAges.replaceAll(",", ", ")}`
-          : askGuess
-            ? "Bedoel je deze ploeg?"
-            : "Geen resultaten";
+  const statusMessage = (() => {
+    if (!showResults) return "";
+    // Distinct from the visible "Slim zoeken…" hint so SR users hear a
+    // spoken sentence, not a clipped UI label (and the two never collide).
+    if (showShimmer) return "Bezig met zoeken…";
+    if (items.length > 0)
+      return `${items.length} ${items.length === 1 ? "resultaat" : "resultaten"}`;
+    if (teamCardMatches.length > 0)
+      return `Ploeg gevonden: ${shownCardAges.replaceAll(",", ", ")}`;
+    if (askGuess) return "Bedoel je deze ploeg?";
+    return "Geen resultaten";
+  })();
+
+  // Literal hits can render before the semantic lane settles (#3092) — say it
+  // is still searching until it has.
+  const smartHintText = (() => {
+    if (!answersSettled) return "Slim zoeken…";
+    return answerForward ? "Beste match" : "Slim gezocht";
+  })();
+  // The card (or its question) above is the answer — no dead end under it.
+  const showNoResults =
+    !showShimmer &&
+    items.length === 0 &&
+    teamCardMatches.length === 0 &&
+    !askGuess;
 
   // #2478 rule 5 addendum: the `nav` instance sits in a section nav's chip
   // row (<OrganigramSectionNav>) and takes the light chip's exact paper
@@ -902,18 +914,10 @@ export function HubSearch({
                 <Spinner size="md" variant="primary" />
               </div>
             </>
-          ) : items.length > 0 ? (
+          ) : null}
+          {!showShimmer && items.length > 0 ? (
             <>
-              {!usingFallback &&
-                smartHint(
-                  // Literal hits can render before the semantic lane settles
-                  // (#3092) — say it is still searching until it has.
-                  !answersSettled
-                    ? "Slim zoeken…"
-                    : answerForward
-                      ? "Beste match"
-                      : "Slim gezocht",
-                )}
+              {!usingFallback && smartHint(smartHintText)}
               <div className="relative">
                 <div
                   id={listboxId}
@@ -972,8 +976,8 @@ export function HubSearch({
                 )}
               </div>
             </>
-          ) : teamCardMatches.length > 0 || askGuess ? null : (
-            // The card (or its question) above is the answer — no dead end under it.
+          ) : null}
+          {showNoResults ? (
             <>
               <div className="px-4 py-6 text-center">
                 <p className="text-ink text-sm">
@@ -1000,7 +1004,7 @@ export function HubSearch({
                 </Link>
               </div>
             </>
-          )}
+          ) : null}
         </div>
       )}
     </div>

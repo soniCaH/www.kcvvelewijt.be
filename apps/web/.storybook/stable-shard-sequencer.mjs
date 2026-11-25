@@ -23,13 +23,17 @@ export default class StableShardSequencer extends Sequencer {
   shard(tests, { shardIndex, shardCount }) {
     // Jest's own boundaries, so the split stays as even as Jest's (#3275).
     const bound = (index) =>
-      this._shardPosition({ shardCount, shardIndex: index, suiteLength: tests.length });
+      this._shardPosition({
+        shardCount,
+        shardIndex: index,
+        suiteLength: tests.length,
+      });
     return tests
       .map((test) => ({
         hash: createHash("sha1").update(path.basename(test.path)).digest("hex"),
         test,
       }))
-      .sort((a, b) => (a.hash < b.hash ? -1 : a.hash > b.hash ? 1 : 0))
+      .sort((a, b) => Number(a.hash > b.hash) - Number(a.hash < b.hash))
       .slice(bound(shardIndex - 1), bound(shardIndex))
       .map(({ test }) => test);
   }

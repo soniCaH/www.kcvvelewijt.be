@@ -55,12 +55,11 @@ export function toHeroMatchData(match: MatchDetail): HeroMatchData | null {
   if (matchRowKind(match) !== "match") {
     return null;
   }
-  const kcvvSide =
-    match.home_team.id === KCVV_CLUB_ID
-      ? "home"
-      : match.away_team.id === KCVV_CLUB_ID
-        ? "away"
-        : undefined;
+  const kcvvSide = ((): "home" | "away" | undefined => {
+    if (match.home_team.id === KCVV_CLUB_ID) return "home";
+    if (match.away_team.id === KCVV_CLUB_ID) return "away";
+    return undefined;
+  })();
   return {
     homeTeam: { name: match.home_team.name, logo: match.home_team.logo },
     awayTeam: { name: match.away_team.name, logo: match.away_team.logo },

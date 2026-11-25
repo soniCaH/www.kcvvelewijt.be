@@ -75,12 +75,11 @@ export function deriveIsPast(
   const today = toDisplayZone(now).toISODate();
   if (!today) return false;
   const range = resolveEventRange(value.date, value.endDate, value.sessions);
-  const reference =
-    range.kind === "none"
-      ? undefined
-      : range.kind === "single"
-        ? range.date.dateIso
-        : range.end.dateIso;
+  const reference = (() => {
+    if (range.kind === "none") return undefined;
+    if (range.kind === "single") return range.date.dateIso;
+    return range.end.dateIso;
+  })();
   if (!reference) return false;
   return reference < today;
 }

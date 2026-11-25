@@ -195,7 +195,8 @@ export function PullQuote({
             avatarSlot={avatarSlot}
             palette={palette}
           />
-        ) : labels && labels.length > 0 ? (
+        ) : null}
+        {!speaker && labels && labels.length > 0 ? (
           <MonoLabelRow items={labels} tone={palette.labelTone} />
         ) : null}
       </div>

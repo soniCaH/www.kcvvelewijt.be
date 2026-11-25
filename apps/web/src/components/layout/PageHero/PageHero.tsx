@@ -446,11 +446,10 @@ export function PageHero(props: PageHeroProps) {
   const showImage = Boolean(image) && !isCompact;
   const showLead = Boolean(lead);
 
-  const headingSize: EditorialHeadingSize = isCompact
-    ? "display-md"
-    : showImage
-      ? "display-lg"
-      : "display-xl";
+  const headingSize = ((): EditorialHeadingSize => {
+    if (isCompact) return "display-md";
+    return showImage ? "display-lg" : "display-xl";
+  })();
 
   const headingBlock = (
     <div>

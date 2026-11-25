@@ -906,30 +906,30 @@ function ShareTool({
     ? items.filter((i) => i.title.toLowerCase().includes(query))
     : items;
   // Built for W too: the look strip draws A–E beside it.
-  const storyContent =
-    mode === "match"
-      ? buildMatchContent({
-          template: selectedTemplateId,
-          matchName: matchName || FALLBACK_MATCH_NAME,
-          score: score || FALLBACK_SCORE,
-          minute: minute || FALLBACK_MINUTE,
-          mood,
-          competition: competition.trim() || undefined,
-          dateTime: dateTime.trim() || undefined,
-          homeLogo: selectedMatch?.homeLogo,
-          awayLogo: selectedMatch?.awayLogo,
-          squad: shortSquadLabel(squad),
-          playerName: selectedPlayer
-            ? `${selectedPlayer.firstName} ${selectedPlayer.lastName}`
-            : undefined,
-          photo: resolvedImageUrl,
-        })
-      : item && fields
-        ? (item.kind === "article" ? buildArticleContent : buildEventContent)(
-            item,
-            fields,
-          )
-        : null;
+  const storyContent = (() => {
+    if (mode === "match")
+      return buildMatchContent({
+        template: selectedTemplateId,
+        matchName: matchName || FALLBACK_MATCH_NAME,
+        score: score || FALLBACK_SCORE,
+        minute: minute || FALLBACK_MINUTE,
+        mood,
+        competition: competition.trim() || undefined,
+        dateTime: dateTime.trim() || undefined,
+        homeLogo: selectedMatch?.homeLogo,
+        awayLogo: selectedMatch?.awayLogo,
+        squad: shortSquadLabel(squad),
+        playerName: selectedPlayer
+          ? `${selectedPlayer.firstName} ${selectedPlayer.lastName}`
+          : undefined,
+        photo: resolvedImageUrl,
+      });
+    if (item && fields)
+      return (
+        item.kind === "article" ? buildArticleContent : buildEventContent
+      )(item, fields);
+    return null;
+  })();
   // Omslag only chooses how a cover is shown: an item without one already
   // fills its slot with the fallback picture, and an own photo replaces it.
   const showOmslag = !!item?.cover && !uploadedImageUrl;
@@ -1688,6 +1688,11 @@ function ShareTool({
     </>
   );
 
+  const saveLabel = (() => {
+    if (isGenerating) return "Bezig…";
+    return generatedBlob ? "Deel PNG" : "Bewaar PNG";
+  })();
+
   return (
     // A full-screen layer over the site chrome (#3538): at the pitch the tool
     // is the whole screen. globals.css hides the site header and footer
@@ -1857,11 +1862,7 @@ function ShareTool({
             disabled={isGenerating || !hasStory}
             className="bg-jersey-deep border-jersey-deep text-cream flex min-h-12 min-w-0 flex-[1.6] items-center justify-center rounded-none border-2 px-2 font-mono text-sm font-bold uppercase disabled:opacity-40"
           >
-            {isGenerating
-              ? "Bezig…"
-              : generatedBlob
-                ? "Deel PNG"
-                : "Bewaar PNG"}
+            {saveLabel}
           </button>
         </div>
       </div>

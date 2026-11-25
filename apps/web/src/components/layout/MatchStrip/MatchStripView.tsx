@@ -516,20 +516,21 @@ function LedgerLinkRow({
   // Stated KCVV-first and side-by-side with each name, since "3-1" alone does
   // not say whose goals are whose when KCVV played away.
   const { homeScore, awayScore } = match;
-  const scored =
-    homeScore !== undefined && awayScore !== undefined
-      ? home
-        ? `${homeScore} - ${opponent.name} ${awayScore}`
-        : `${awayScore} - ${opponent.name} ${homeScore}`
-      : null;
+  const scored = (() => {
+    if (homeScore === undefined || awayScore === undefined) return null;
+    return home
+      ? `${homeScore} - ${opponent.name} ${awayScore}`
+      : `${awayScore} - ${opponent.name} ${homeScore}`;
+  })();
   // `leadWordA11y` — see its declaration above for why this reads the full
   // register rather than `leadWordVisual`.
-  const label =
-    kind === "result"
-      ? scored
-        ? `${leadWordA11y} ${dateLabel}: KCVV Elewijt ${scored}`
-        : `${leadWordA11y} ${dateLabel}: KCVV Elewijt tegen ${opponent.name}`
-      : `${leadWordA11y} wedstrijd ${dateLabel}${match.time ? ` om ${match.time}` : ""}: KCVV Elewijt tegen ${opponent.name}`;
+  const label = (() => {
+    if (kind !== "result")
+      return `${leadWordA11y} wedstrijd ${dateLabel}${match.time ? ` om ${match.time}` : ""}: KCVV Elewijt tegen ${opponent.name}`;
+    return scored
+      ? `${leadWordA11y} ${dateLabel}: KCVV Elewijt ${scored}`
+      : `${leadWordA11y} ${dateLabel}: KCVV Elewijt tegen ${opponent.name}`;
+  })();
 
   return (
     <MatchTravelLink
@@ -571,7 +572,8 @@ function LedgerLinkRow({
             dark={matchDay}
             awaitingResult={awaitingResult}
           />
-        ) : match.time ? (
+        ) : null}
+        {kind !== "result" && match.time ? (
           <span
             className={cn(
               "text-mono-sm font-mono font-semibold whitespace-nowrap",

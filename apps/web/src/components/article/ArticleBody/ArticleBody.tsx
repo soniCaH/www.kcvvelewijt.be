@@ -573,12 +573,11 @@ function renderArticleImage(value: ArticleImageValue): ReactNode {
   const credit = value.asset?.creditLine?.trim() || undefined;
   const alt = value.alt?.trim() || value.asset?.title?.trim() || "";
 
-  const sizes =
-    width === "bleed"
-      ? "100vw"
-      : width === "wide"
-        ? "(max-width: 640px) 100vw, 1040px"
-        : "(max-width: 640px) 100vw, 680px";
+  const sizes = (() => {
+    if (width === "bleed") return "100vw";
+    if (width === "wide") return "(max-width: 640px) 100vw, 1040px";
+    return "(max-width: 640px) 100vw, 680px";
+  })();
 
   const showTape = width !== "bleed";
 
@@ -588,12 +587,13 @@ function renderArticleImage(value: ArticleImageValue): ReactNode {
   // it collapses to prose. `bleed` pins to viewport edges via
   // `mx-[calc(50%-50vw)] max-w-[100vw]` (the canonical Phase 5
   // full-bleed escape).
-  const wrapperClass =
-    width === "wide"
-      ? "my-8 mx-auto w-full md:w-auto md:max-w-[var(--container-wide,1040px)] md:mx-[calc(50%-min(50vw,calc(var(--container-wide,1040px)/2)))]"
-      : width === "bleed"
-        ? "my-8 mx-[calc(50%-50vw)] w-screen max-w-[100vw]"
-        : "my-8 mx-auto w-full";
+  const wrapperClass = (() => {
+    if (width === "wide")
+      return "my-8 mx-auto w-full md:w-auto md:max-w-[var(--container-wide,1040px)] md:mx-[calc(50%-min(50vw,calc(var(--container-wide,1040px)/2)))]";
+    if (width === "bleed")
+      return "my-8 mx-[calc(50%-50vw)] w-screen max-w-[100vw]";
+    return "my-8 mx-auto w-full";
+  })();
 
   return (
     <div

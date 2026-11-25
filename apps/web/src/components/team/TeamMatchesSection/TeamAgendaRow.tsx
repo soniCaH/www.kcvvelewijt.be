@@ -366,22 +366,20 @@ export function TeamAgendaRow({
   // A scoreline, else the waiting glyph for a result still owed (#2587), else
   // the kickoff or its label. The waiting row used to fall through to the
   // kickoff time — a meaningless number in the slot a score would occupy.
-  const scoreOrTime =
-    match.kind === "match" && hasScoreline
-      ? `${match.homeScore} – ${match.awayScore}`
-      : awaitingResult
-        ? RESULT_PENDING_GLYPH
-        : timeOrLabel;
+  const scoreOrTime = (() => {
+    if (match.kind === "match" && hasScoreline)
+      return `${match.homeScore} – ${match.awayScore}`;
+    return awaitingResult ? RESULT_PENDING_GLYPH : timeOrLabel;
+  })();
 
   // Scorelines and kickoff times use the big display face; the "Gepland" label
   // and the waiting glyph drop to the mono caption register (cf. the mockup
   // `.score.sched`).
   const demoteScoreSlot = showUpcomingLabel || awaitingResult;
-  const scoreToneClass = demoteScoreSlot
-    ? monoClass
-    : featured
-      ? "text-cream"
-      : "text-ink";
+  const scoreToneClass = (() => {
+    if (demoteScoreSlot) return monoClass;
+    return featured ? "text-cream" : "text-ink";
+  })();
 
   // TeamAgendaRow predates the light/dark ground split OUTCOME_UNDERLINE now
   // carries (#2616) and has never reconsidered this tint for its own
@@ -416,13 +414,11 @@ export function TeamAgendaRow({
   // that never needed it.
   const outcomeWord = outcome ? OUTCOME_WORD[outcome] : null;
   const outcomeWordA11y = outcome ? OUTCOME_WORD_FULL[outcome] : null;
-  const slotWord = statusWording
-    ? null
-    : awaitingResult
-      ? RESULT_PENDING_WORD
-      : kind
-        ? MATCH_KIND_WORD[kind]
-        : null;
+  const slotWord = (() => {
+    if (statusWording) return null;
+    if (awaitingResult) return RESULT_PENDING_WORD;
+    return kind ? MATCH_KIND_WORD[kind] : null;
+  })();
 
   // The two layouts do not need the same amount of help, so they do not get
   // the same caption.

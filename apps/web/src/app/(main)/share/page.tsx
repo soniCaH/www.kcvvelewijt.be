@@ -235,22 +235,22 @@ export default async function ShareRoute({
     fetchSharePageData(),
     fetchShareItems(articleSlug, eventSlug),
   ]);
-  const initial = articleSlug
-    ? { kind: "article" as const, item: share.pickedArticle }
-    : eventSlug
-      ? { kind: "event" as const, item: share.pickedEvent }
-      : undefined;
+  const initial = (() => {
+    if (articleSlug)
+      return { kind: "article" as const, item: share.pickedArticle };
+    if (eventSlug) return { kind: "event" as const, item: share.pickedEvent };
+    return undefined;
+  })();
+  const sharePageKey = (() => {
+    if (articleSlug) return `a:${articleSlug}`;
+    if (eventSlug) return `e:${eventSlug}`;
+    return "share";
+  })();
   return (
     // A new key per deep link: client navigation between two links starts
     // the tool afresh instead of keeping the first link's state.
     <SharePage
-      key={
-        articleSlug
-          ? `a:${articleSlug}`
-          : eventSlug
-            ? `e:${eventSlug}`
-            : "share"
-      }
+      key={sharePageKey}
       matches={matches}
       players={players}
       articles={share.articles}

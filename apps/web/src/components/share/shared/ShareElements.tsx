@@ -131,6 +131,8 @@ export function Kicker({
   );
 }
 
+const PUNCTUATION_MARK = { bang: "!", dot: ".", none: "" } as const;
+
 /**
  * Freight Display headline: an italic accent word plus sentiment punctuation —
  * a warm `!` for positive shouts, a sober `.` elsewhere.
@@ -150,7 +152,7 @@ export function Headline({
   style?: React.CSSProperties;
 }) {
   const palette = useSharePalette();
-  const mark = punctuation === "bang" ? "!" : punctuation === "dot" ? "." : "";
+  const mark = PUNCTUATION_MARK[punctuation];
   const { ref, size } = useAutoFit<HTMLHeadingElement>(
     fontSize,
     minFontSize,

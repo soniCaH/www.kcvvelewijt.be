@@ -430,12 +430,11 @@ function FullHeroCard({
     kcvvTeamLabel,
   } = match;
   // The label names one KCVV team, so a KCVV-vs-KCVV match gets no chip.
-  const kcvvSide =
-    (homeTeam.id === KCVV_CLUB_ID) === (awayTeam.id === KCVV_CLUB_ID)
-      ? undefined
-      : homeTeam.id === KCVV_CLUB_ID
-        ? "home"
-        : "away";
+  const kcvvSide = (() => {
+    if ((homeTeam.id === KCVV_CLUB_ID) === (awayTeam.id === KCVV_CLUB_ID))
+      return undefined;
+    return homeTeam.id === KCVV_CLUB_ID ? "home" : "away";
+  })();
   const stubDate = formatStubDate(date);
   const kicker = getKicker(status);
   const metaParts = buildCompetitionMeta(competition, date);
