@@ -119,6 +119,37 @@ export function EventsBrowser({ events }: EventsBrowserProps) {
       )
     : events;
 
+  const renderEmptyState = () => {
+    if (isFilterActive)
+      return (
+        <EmptyState
+          tier="surface"
+          surface="inverse"
+          heading={`Geen evenementen in de categorie ${selected}`}
+          live
+          reason="filtered"
+          undo={{
+            label: "Toon alles",
+            onClick: () => handleSelect("all"),
+            analyticsSource: "evenementen",
+            analyticsFacet: selected,
+          }}
+        >
+          {filteredEmptyBody("alle evenementen")}
+        </EmptyState>
+      );
+    return (
+      <EmptyState
+        tier="surface"
+        surface="inverse"
+        heading="Nog geen evenementen gepland"
+        live
+      >
+        Kom snel terug voor het volgende evenement.
+      </EmptyState>
+    );
+  };
+
   return (
     <div className="flex flex-col gap-8">
       {!isGenuinelyEmpty && (
@@ -133,32 +164,7 @@ export function EventsBrowser({ events }: EventsBrowserProps) {
       )}
 
       {filtered.length === 0 ? (
-        isFilterActive ? (
-          <EmptyState
-            tier="surface"
-            surface="inverse"
-            heading={`Geen evenementen in de categorie ${selected}`}
-            live
-            reason="filtered"
-            undo={{
-              label: "Toon alles",
-              onClick: () => handleSelect("all"),
-              analyticsSource: "evenementen",
-              analyticsFacet: selected,
-            }}
-          >
-            {filteredEmptyBody("alle evenementen")}
-          </EmptyState>
-        ) : (
-          <EmptyState
-            tier="surface"
-            surface="inverse"
-            heading="Nog geen evenementen gepland"
-            live
-          >
-            Kom snel terug voor het volgende evenement.
-          </EmptyState>
-        )
+        renderEmptyState()
       ) : (
         <EventMonthList events={filtered} />
       )}

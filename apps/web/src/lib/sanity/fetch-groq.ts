@@ -69,14 +69,14 @@ export const fetchGroq = <T>(
       // tags-only call (`revalidate: undefined`, #3483) sets no lifetime of its
       // own, so the route segment's `revalidate` still applies, exactly as for a
       // call with no options.
-      try: () =>
-        preview
-          ? sanityPreviewClient.fetch<T>(query, params ?? {})
-          : options
-            ? sanityClient.fetch<T>(query, params ?? {}, {
-                next: { revalidate: options.revalidate, tags: options.tags },
-              })
-            : sanityClient.fetch<T>(query, params ?? {}),
+      try: () => {
+        if (preview) return sanityPreviewClient.fetch<T>(query, params ?? {});
+        if (options)
+          return sanityClient.fetch<T>(query, params ?? {}, {
+            next: { revalidate: options.revalidate, tags: options.tags },
+          });
+        return sanityClient.fetch<T>(query, params ?? {});
+      },
       catch: (cause) => new SanityReadError({ cause }),
     }),
   );

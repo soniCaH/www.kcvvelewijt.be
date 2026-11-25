@@ -285,6 +285,11 @@ function FixtureRow({ match }: { match: ScheurkalenderMatch }) {
   );
 }
 
+const columnClassName = (index: number, columnCount: number) => {
+  if (columnCount <= 1) return "";
+  return index === 0 ? "border-ink/15 border-r pr-[17px]" : "pl-[17px]";
+};
+
 function FixtureColumn({ weekends }: { weekends: Weekend[] }) {
   return (
     <>
@@ -369,13 +374,7 @@ export function ScheurkalenderPage({
                 {columns.map((weekends, index) => (
                   <div
                     key={weekends[0]?.key ?? index}
-                    className={
-                      index === 0 && columns.length > 1
-                        ? "border-ink/15 border-r pr-[17px]"
-                        : columns.length > 1
-                          ? "pl-[17px]"
-                          : ""
-                    }
+                    className={columnClassName(index, columns.length)}
                   >
                     <FixtureColumn weekends={weekends} />
                   </div>

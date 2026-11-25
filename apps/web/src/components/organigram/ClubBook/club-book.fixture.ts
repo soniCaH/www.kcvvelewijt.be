@@ -42,17 +42,16 @@ export const clubBookNodes: OrgChartNode[] = explorerFixture.map(
     const description = node.roleCode ? WHY[node.roleCode] : undefined;
     // A person holding two boxes in the same list: TVJO's holder also runs the
     // Onderbouw — they merge into one row ("TVJO · Jeugdcoördinator Onderbouw").
-    const members =
-      node.id === "bestuursorgaan"
-        ? RAAD
-        : node.id === "jc-onderbouw"
-          ? firstHolder("tvjo")
-          : node.members.map((member) =>
-              // Give the first key holders an email so both contact lines render.
-              index < 4 && member === node.members[0]
-                ? { ...member, email: `${member.id}@kcvv.example` }
-                : member,
-            );
+    const members = (() => {
+      if (node.id === "bestuursorgaan") return RAAD;
+      if (node.id === "jc-onderbouw") return firstHolder("tvjo");
+      return node.members.map((member) =>
+        // Give the first key holders an email so both contact lines render.
+        index < 4 && member === node.members[0]
+          ? { ...member, email: `${member.id}@kcvv.example` }
+          : member,
+      );
+    })();
     return { ...node, members, ...(description ? { description } : {}) };
   },
 );

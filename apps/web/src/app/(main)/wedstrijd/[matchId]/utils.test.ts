@@ -587,15 +587,13 @@ describe("planMatchBody", () => {
         const seamBelow = i < sections.length - 1 || input.hasRelated;
         // The first keeps its top (the hero's opening seam), the last keeps
         // its bottom when nothing follows it; every seam side gives one step.
-        expect(spacing).toBe(
-          seamAbove && seamBelow
-            ? SEAM_ABOVE_AND_BELOW
-            : seamAbove
-              ? SEAM_ABOVE_ONLY
-              : seamBelow
-                ? SEAM_BELOW_ONLY
-                : undefined,
-        );
+        const expected = (() => {
+          if (seamAbove && seamBelow) return SEAM_ABOVE_AND_BELOW;
+          if (seamAbove) return SEAM_ABOVE_ONLY;
+          if (seamBelow) return SEAM_BELOW_ONLY;
+          return undefined;
+        })();
+        expect(spacing).toBe(expected);
       });
     },
   );

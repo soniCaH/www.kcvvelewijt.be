@@ -450,19 +450,28 @@ export function buildMatchContent(m: MatchMomentInput): ShareContent {
   const ours = m.template.endsWith("-kcvv");
   const theirs = m.template.endsWith("-opponent");
   const { home, away } = splitMatchName(m.matchName);
-  const title: TitleRun[] = ours
-    ? [{ text: m.playerName || "KCVV Elewijt", accent: false }]
-    : theirs
-      ? [{ text: opponentName(m.matchName), accent: false }]
-      : [
-          { text: home, accent: isKcvv(home) },
-          ...(away
-            ? [
-                { text: " — ", accent: false },
-                { text: away, accent: isKcvv(away) },
-              ]
-            : []),
-        ];
+  const title = ((): TitleRun[] => {
+    if (ours) return [{ text: m.playerName || "KCVV Elewijt", accent: false }];
+    if (theirs) return [{ text: opponentName(m.matchName), accent: false }];
+    return [
+      { text: home, accent: isKcvv(home) },
+      ...(away
+        ? [
+            { text: " — ", accent: false },
+            { text: away, accent: isKcvv(away) },
+          ]
+        : []),
+    ];
+  })();
+  const hero = ((): MatchHero | undefined => {
+    if (kickoff)
+      return {
+        kind: "crests",
+        crests: resolveCrests(m.matchName, m.homeLogo, m.awayLogo),
+      };
+    if (moment === "yellow" || moment === "red") return undefined;
+    return { kind: "score", score: formatScore(m.score) };
+  })();
 
   return {
     kind: "match",
@@ -483,14 +492,7 @@ export function buildMatchContent(m: MatchMomentInput): ShareContent {
         }
       : { day: "", month: "" },
     squad: m.squad,
-    hero: kickoff
-      ? {
-          kind: "crests",
-          crests: resolveCrests(m.matchName, m.homeLogo, m.awayLogo),
-        }
-      : moment === "yellow" || moment === "red"
-        ? undefined
-        : { kind: "score", score: formatScore(m.score) },
+    hero,
     minute: m.minute,
     card: moment === "yellow" || moment === "red" ? moment : undefined,
     photo: m.photo

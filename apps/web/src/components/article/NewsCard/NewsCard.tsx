@@ -293,18 +293,18 @@ export const NewsCard = ({
               blurDataURL={imageLqip ?? undefined}
             />
           </TravelTarget>
-        ) : artefact ? (
-          artefact
         ) : (
-          <div
-            data-testid="newscard-image-fallback"
-            aria-hidden="true"
-            className="absolute inset-0 opacity-30"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(135deg, transparent 0, transparent 12px, var(--color-jersey-deep) 12px, var(--color-jersey-deep) 13px)",
-            }}
-          />
+          artefact || (
+            <div
+              data-testid="newscard-image-fallback"
+              aria-hidden="true"
+              className="absolute inset-0 opacity-30"
+              style={{
+                backgroundImage:
+                  "repeating-linear-gradient(135deg, transparent 0, transparent 12px, var(--color-jersey-deep) 12px, var(--color-jersey-deep) 13px)",
+              }}
+            />
+          )
         )}
       </div>
 

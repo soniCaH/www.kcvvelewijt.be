@@ -83,13 +83,15 @@ export function RoundAvatar({
   const step = STEP[size];
   const src = glyph === undefined ? (photoUrl?.trim() ?? "") : "";
   const hasPhoto = src !== "";
+  const avatarKind = (() => {
+    if (hasPhoto) return "photo";
+    return glyph === undefined ? "monogram" : "glyph";
+  })();
 
   return (
     <span
       aria-hidden="true"
-      data-round-avatar={
-        hasPhoto ? "photo" : glyph === undefined ? "monogram" : "glyph"
-      }
+      data-round-avatar={avatarKind}
       data-size={size}
       className={cn(
         "border-ink bg-cream-soft inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full",

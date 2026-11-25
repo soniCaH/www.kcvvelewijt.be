@@ -93,7 +93,7 @@ export function TapedCard({
   // Normalise `interactive: true` to the historical "tilt" idiom so the
   // boolean form keeps its existing meaning for current consumers.
   const interactiveMode: false | "tilt" | "press" =
-    interactive === true ? "tilt" : interactive === false ? false : interactive;
+    interactive === true ? "tilt" : interactive;
   const isInteractive = interactiveMode !== false;
   const style: StyleWithVars = isInteractive
     ? {
@@ -108,7 +108,10 @@ export function TapedCard({
       }
     : { transform: `rotate(${restRotation})` };
 
-  const tapes = tape ? (Array.isArray(tape) ? tape : [tape]) : [];
+  const tapes = (() => {
+    if (!tape) return [];
+    return Array.isArray(tape) ? tape : [tape];
+  })();
 
   return (
     <Tag

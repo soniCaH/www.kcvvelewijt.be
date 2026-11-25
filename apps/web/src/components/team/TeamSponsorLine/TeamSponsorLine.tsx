@@ -13,8 +13,10 @@ export interface TeamSponsorLineProps {
 }
 
 /** ", " between names, " en " before the last: "A, B en C". */
-const separator = (index: number, count: number) =>
-  index === count - 1 ? "" : index === count - 2 ? " en " : ", ";
+const separator = (index: number, count: number) => {
+  if (index === count - 1) return "";
+  return index === count - 2 ? " en " : ", ";
+};
 
 /**
  * "Gesteund door A, B en C" — the quiet line on a team page (#3652, slice (b) of

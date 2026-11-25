@@ -292,17 +292,17 @@ export const DartsSignupForm = () => {
   }
 
   const full = spotsLeft === 0;
+  const intro = (() => {
+    if (full)
+      return `Alle ${DARTS_TEAM_LIMIT} plaatsen zijn ingenomen. Schrijf je toch in: dan staan jullie op de wachtlijst.`;
+    if (spotsLeft === undefined) return "Schrijf je ploeg in.";
+    return `Schrijf je ploeg in. Nog ${spotsLeft} van de ${DARTS_TEAM_LIMIT} plaatsen vrij.`;
+  })();
 
   return (
     <ClippedCard className="mt-6">
       <form onSubmit={handleSubmit} noValidate>
-        <p className="text-ink text-body-md mb-6">
-          {full
-            ? `Alle ${DARTS_TEAM_LIMIT} plaatsen zijn ingenomen. Schrijf je toch in: dan staan jullie op de wachtlijst.`
-            : spotsLeft === undefined
-              ? "Schrijf je ploeg in."
-              : `Schrijf je ploeg in. Nog ${spotsLeft} van de ${DARTS_TEAM_LIMIT} plaatsen vrij.`}
-        </p>
+        <p className="text-ink text-body-md mb-6">{intro}</p>
 
         {/* Honeypot — visually hidden, off-screen; bots fill it, humans don't. */}
         <div

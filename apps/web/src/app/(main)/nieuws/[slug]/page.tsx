@@ -287,11 +287,10 @@ export async function generateMetadata({ params }: ArticlePageProps) {
   const description =
     article.metaDescription?.trim() ||
     `${article.title} — Nieuws van KCVV Elewijt`;
-  const ogImage = article.ogImageUrl
-    ? { url: article.ogImageUrl, alt: article.title }
-    : article.coverImageUrl
-      ? { url: article.coverImageUrl, alt: article.title }
-      : DEFAULT_OG_IMAGE;
+  const ogImageUrl = article.ogImageUrl || article.coverImageUrl;
+  const ogImage = ogImageUrl
+    ? { url: ogImageUrl, alt: article.title }
+    : DEFAULT_OG_IMAGE;
 
   return {
     title: article.title,

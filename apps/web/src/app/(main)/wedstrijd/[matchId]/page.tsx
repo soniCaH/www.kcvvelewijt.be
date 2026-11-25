@@ -530,15 +530,16 @@ export default async function MatchPage({ params }: MatchPageProps) {
   // link straight into a hard 404 on a noindex, off-nav page, and a Reserven
   // one (Sanity `age` "A" too) into a 404 or a page showing only A/B (#3289).
   const hasOpponentLink = hasOpponentPage(match.competitionType, kcvvTeam);
+  const kcvvOpponent = (): typeof match.home_team | null => {
+    if (match.home_team.id === KCVV_CLUB_ID) return match.away_team;
+    if (match.away_team.id === KCVV_CLUB_ID) return match.home_team;
+    return null;
+  };
   const opponentClub =
     hasOpponentLink &&
     !match.is_placeholder &&
     match.home_team.id !== match.away_team.id
-      ? match.home_team.id === KCVV_CLUB_ID
-        ? match.away_team
-        : match.away_team.id === KCVV_CLUB_ID
-          ? match.home_team
-          : null
+      ? kcvvOpponent()
       : null;
   const opponentItems: RelatedRowItem[] = opponentClub
     ? [

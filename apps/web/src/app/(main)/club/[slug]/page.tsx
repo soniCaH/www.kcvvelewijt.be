@@ -66,11 +66,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const description =
     page.metaDescription?.trim() || `${page.title} — KCVV Elewijt`;
-  const ogImage = page.ogImageUrl
-    ? { url: page.ogImageUrl, alt: page.title }
-    : page.heroImageUrl
-      ? { url: page.heroImageUrl, alt: page.title }
-      : undefined;
+  const ogImageUrl = page.ogImageUrl || page.heroImageUrl;
+  const ogImage = ogImageUrl ? { url: ogImageUrl, alt: page.title } : undefined;
 
   return buildPageMetadata({
     title: page.title,

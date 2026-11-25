@@ -90,26 +90,26 @@ export function MonoLabelRow({
             {item.label}
           </MonoLabel>
         );
-        const dividerEl =
-          index < items.length - 1 ? (
-            divider === "·" ? (
-              <span
-                data-divider="true"
-                data-divider-glyph={divider}
-                aria-hidden="true"
-                className={DOT_CLASS[shade]}
-              />
-            ) : (
-              <span
-                data-divider="true"
-                data-divider-glyph={divider}
-                aria-hidden="true"
-                className={GLYPH_CLASS[shade]}
-              >
-                {divider}
-              </span>
-            )
-          ) : null;
+        const isLast = index === items.length - 1;
+        const dotDivider = !isLast && divider === "·" && (
+          <span
+            data-divider="true"
+            data-divider-glyph={divider}
+            aria-hidden="true"
+            className={DOT_CLASS[shade]}
+          />
+        );
+        const glyphDivider = !isLast && divider !== "·" && (
+          <span
+            data-divider="true"
+            data-divider-glyph={divider}
+            aria-hidden="true"
+            className={GLYPH_CLASS[shade]}
+          >
+            {divider}
+          </span>
+        );
+        const dividerEl = dotDivider || glyphDivider || null;
         return isList ? (
           // <ol>/<ul> requires <li> direct children. Pack the label AND its
           // following divider inside the same <li> so list semantics stay

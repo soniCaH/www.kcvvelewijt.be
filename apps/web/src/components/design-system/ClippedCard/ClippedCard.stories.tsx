@@ -136,6 +136,11 @@ function PreviewField({
   error,
   span2,
 }: PreviewFieldProps) {
+  const fieldTone = (() => {
+    if (error) return "border-alert text-alert";
+    if (value) return "border-ink/60 text-ink";
+    return "border-ink/30 text-ink-muted";
+  })();
   return (
     <label className={span2 ? "block md:col-span-2" : "block"}>
       <span className="mb-1 flex items-center gap-2 font-mono text-[11px] tracking-[0.08em] uppercase">
@@ -149,11 +154,7 @@ function PreviewField({
       <span
         className={
           "block w-full border bg-white px-3 py-2 font-mono text-[13px] " +
-          (error
-            ? "border-alert text-alert"
-            : value
-              ? "border-ink/60 text-ink"
-              : "border-ink/30 text-ink-muted")
+          fieldTone
         }
       >
         {value ?? placeholder ?? " "}

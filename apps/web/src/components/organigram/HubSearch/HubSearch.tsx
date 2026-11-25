@@ -655,19 +655,25 @@ export function HubSearch({
   }, [teamNotFound, debouncedTrimmed]);
 
   // Announce result state to screen readers when the listbox is open (S1).
-  const statusMessage = !showResults
-    ? ""
-    : showShimmer
-      ? // Distinct from the visible "Slim zoeken…" hint so SR users hear a
-        // spoken sentence, not a clipped UI label (and the two never collide).
-        "Bezig met zoeken…"
-      : items.length > 0
-        ? `${items.length} ${items.length === 1 ? "resultaat" : "resultaten"}`
-        : teamCardMatches.length > 0
-          ? `Ploeg gevonden: ${shownCardAges.replaceAll(",", ", ")}`
-          : askGuess
-            ? "Bedoel je deze ploeg?"
-            : "Geen resultaten";
+  const statusMessage = (() => {
+    if (!showResults) return "";
+    // Distinct from the visible "Slim zoeken…" hint so SR users hear a
+    // spoken sentence, not a clipped UI label (and the two never collide).
+    if (showShimmer) return "Bezig met zoeken…";
+    if (items.length > 0)
+      return `${items.length} ${items.length === 1 ? "resultaat" : "resultaten"}`;
+    if (teamCardMatches.length > 0)
+      return `Ploeg gevonden: ${shownCardAges.replaceAll(",", ", ")}`;
+    if (askGuess) return "Bedoel je deze ploeg?";
+    return "Geen resultaten";
+  })();
+
+  // Literal hits can render before the semantic lane settles (#3092) — say it
+  // is still searching until it has.
+  const smartHintText = (() => {
+    if (!answersSettled) return "Slim zoeken…";
+    return answerForward ? "Beste match" : "Slim gezocht";
+  })();
 
   // #2478 rule 5 addendum: the `nav` instance sits in a section nav's chip
   // row (<OrganigramSectionNav>) and takes the light chip's exact paper
@@ -755,6 +761,134 @@ export function HubSearch({
       <span className="text-jersey-deep">{label}</span>
     </div>
   );
+
+  const renderResults = () => {
+    if (showShimmer)
+      return (
+        <>
+          {smartHint("Slim zoeken…")}
+          <div
+            id={listboxId}
+            role="listbox"
+            aria-label="Zoekresultaten"
+            // Open but still empty while the answer lane loads.
+            aria-busy={memberResults.length === 0 || undefined}
+          >
+            {memberResults.map((result, index) => (
+              <MemberRow
+                key={`member-${result.member.id}`}
+                result={result}
+                optionId={`${listboxId}-opt-${index}`}
+                selected={index === selectedIndex}
+                onSelect={select}
+                onHover={() => setSelectedIndex(index)}
+              />
+            ))}
+          </div>
+          {/* A search is a request the visitor made, so it waits with the
+              scarf (Waiting-Device Rule, #3399) in the slot the answer
+              will land. `h-15` is the old skeleton row's height (40px
+              avatar + 2 × 10px), so the swap adds none. `aria-hidden`:
+              the `role="status"` below already announces the wait. */}
+          <div aria-hidden className="flex h-15 items-center justify-center">
+            <Spinner size="md" variant="primary" />
+          </div>
+        </>
+      );
+    if (items.length > 0)
+      return (
+        <>
+          {!usingFallback && smartHint(smartHintText)}
+          <div className="relative">
+            <div
+              id={listboxId}
+              role="listbox"
+              aria-label="Zoekresultaten"
+              // Re-search (#3399): the listbox is the region being replaced,
+              // so it carries `aria-busy` (members and answers alike are in
+              // flux); only the stale answers dim, so fresh rows read fresh.
+              // Arrival is an instant swap back.
+              aria-busy={reSearching ? true : undefined}
+            >
+              {forwardCard && (
+                // It opens its own room above rows already on screen, at
+                // the Arrival speed. `bleed` off: the popup scrolls, and the
+                // flush card paints inside its own box.
+                <HeightGrow enter={growForward} bleed={false}>
+                  {forwardCard}
+                </HeightGrow>
+              )}
+              {rows.map((result, i) => {
+                const index = answerForward ? i + 1 : i;
+                const optionId = `${listboxId}-opt-${index}`;
+                const selected = index === selectedIndex;
+                const onHover = () => setSelectedIndex(index);
+                return result.type === "member" ? (
+                  <MemberRow
+                    key={`member-${result.member.id}`}
+                    result={result}
+                    optionId={optionId}
+                    selected={selected}
+                    onSelect={select}
+                    onHover={onHover}
+                  />
+                ) : (
+                  <AnswerRow
+                    key={`answer-${result.path.id}`}
+                    result={result}
+                    optionId={optionId}
+                    selected={selected}
+                    onSelect={select}
+                    onHover={onHover}
+                    stale={isStale(result)}
+                  />
+                );
+              })}
+            </div>
+            {showFloatingScarf && (
+              // A sibling of the busy listbox, absolutely positioned: it
+              // adds no height. `aria-hidden`: the status region speaks.
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-0 flex items-center justify-center"
+              >
+                <Spinner size="md" variant="primary" />
+              </div>
+            )}
+          </div>
+        </>
+      );
+    // The card (or its question) above is the answer — no dead end under it.
+    if (teamCardMatches.length > 0 || askGuess) return null;
+    return (
+      <>
+        <div className="px-4 py-6 text-center">
+          <p className="text-ink text-sm">
+            Geen resultaten voor &ldquo;{value}&rdquo;
+          </p>
+          <p className="text-ink-muted mt-1 text-xs">
+            Probeer een andere zoekterm — of contacteer ons rechtstreeks.
+          </p>
+          {/* Dead-end escape (#2058): a failed search always offers a
+              human door. The click is its own conversion signal,
+              separate from `organigram_search_used`. */}
+          <Link
+            href="/club/contact"
+            onClick={() =>
+              trackEvent("organigram_search_contact_escape", {
+                query_length: value.length,
+              })
+            }
+            className={`${CHIP_LINK_CLASSES} border-ink bg-warm text-ink mt-3`}
+          >
+            Contacteer de club
+            <ArrowRight size={12} aria-hidden />
+            <LinkPendingDots spaced={false} />
+          </Link>
+        </div>
+      </>
+    );
+  };
 
   return (
     // `min-w-0` on the nav root, not left to the call site: the bar row it
@@ -869,138 +1003,7 @@ export function HubSearch({
               shell above — that shell keeps every class it had, and a plain
               wrapping `<div>` around a block-stacking subset of the same
               children changes no pixel. */}
-          {showShimmer ? (
-            <>
-              {smartHint("Slim zoeken…")}
-              <div
-                id={listboxId}
-                role="listbox"
-                aria-label="Zoekresultaten"
-                // Open but still empty while the answer lane loads.
-                aria-busy={memberResults.length === 0 || undefined}
-              >
-                {memberResults.map((result, index) => (
-                  <MemberRow
-                    key={`member-${result.member.id}`}
-                    result={result}
-                    optionId={`${listboxId}-opt-${index}`}
-                    selected={index === selectedIndex}
-                    onSelect={select}
-                    onHover={() => setSelectedIndex(index)}
-                  />
-                ))}
-              </div>
-              {/* A search is a request the visitor made, so it waits with the
-                  scarf (Waiting-Device Rule, #3399) in the slot the answer
-                  will land. `h-15` is the old skeleton row's height (40px
-                  avatar + 2 × 10px), so the swap adds none. `aria-hidden`:
-                  the `role="status"` below already announces the wait. */}
-              <div
-                aria-hidden
-                className="flex h-15 items-center justify-center"
-              >
-                <Spinner size="md" variant="primary" />
-              </div>
-            </>
-          ) : items.length > 0 ? (
-            <>
-              {!usingFallback &&
-                smartHint(
-                  // Literal hits can render before the semantic lane settles
-                  // (#3092) — say it is still searching until it has.
-                  !answersSettled
-                    ? "Slim zoeken…"
-                    : answerForward
-                      ? "Beste match"
-                      : "Slim gezocht",
-                )}
-              <div className="relative">
-                <div
-                  id={listboxId}
-                  role="listbox"
-                  aria-label="Zoekresultaten"
-                  // Re-search (#3399): the listbox is the region being replaced,
-                  // so it carries `aria-busy` (members and answers alike are in
-                  // flux); only the stale answers dim, so fresh rows read fresh.
-                  // Arrival is an instant swap back.
-                  aria-busy={reSearching ? true : undefined}
-                >
-                  {forwardCard && (
-                    // It opens its own room above rows already on screen, at
-                    // the Arrival speed. `bleed` off: the popup scrolls, and the
-                    // flush card paints inside its own box.
-                    <HeightGrow enter={growForward} bleed={false}>
-                      {forwardCard}
-                    </HeightGrow>
-                  )}
-                  {rows.map((result, i) => {
-                    const index = answerForward ? i + 1 : i;
-                    const optionId = `${listboxId}-opt-${index}`;
-                    const selected = index === selectedIndex;
-                    const onHover = () => setSelectedIndex(index);
-                    return result.type === "member" ? (
-                      <MemberRow
-                        key={`member-${result.member.id}`}
-                        result={result}
-                        optionId={optionId}
-                        selected={selected}
-                        onSelect={select}
-                        onHover={onHover}
-                      />
-                    ) : (
-                      <AnswerRow
-                        key={`answer-${result.path.id}`}
-                        result={result}
-                        optionId={optionId}
-                        selected={selected}
-                        onSelect={select}
-                        onHover={onHover}
-                        stale={isStale(result)}
-                      />
-                    );
-                  })}
-                </div>
-                {showFloatingScarf && (
-                  // A sibling of the busy listbox, absolutely positioned: it
-                  // adds no height. `aria-hidden`: the status region speaks.
-                  <div
-                    aria-hidden
-                    className="pointer-events-none absolute inset-0 flex items-center justify-center"
-                  >
-                    <Spinner size="md" variant="primary" />
-                  </div>
-                )}
-              </div>
-            </>
-          ) : teamCardMatches.length > 0 || askGuess ? null : (
-            // The card (or its question) above is the answer — no dead end under it.
-            <>
-              <div className="px-4 py-6 text-center">
-                <p className="text-ink text-sm">
-                  Geen resultaten voor &ldquo;{value}&rdquo;
-                </p>
-                <p className="text-ink-muted mt-1 text-xs">
-                  Probeer een andere zoekterm — of contacteer ons rechtstreeks.
-                </p>
-                {/* Dead-end escape (#2058): a failed search always offers a
-                    human door. The click is its own conversion signal,
-                    separate from `organigram_search_used`. */}
-                <Link
-                  href="/club/contact"
-                  onClick={() =>
-                    trackEvent("organigram_search_contact_escape", {
-                      query_length: value.length,
-                    })
-                  }
-                  className={`${CHIP_LINK_CLASSES} border-ink bg-warm text-ink mt-3`}
-                >
-                  Contacteer de club
-                  <ArrowRight size={12} aria-hidden />
-                  <LinkPendingDots spaced={false} />
-                </Link>
-              </div>
-            </>
-          )}
+          {renderResults()}
         </div>
       )}
     </div>

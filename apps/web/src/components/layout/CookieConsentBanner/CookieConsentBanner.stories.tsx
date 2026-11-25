@@ -138,6 +138,12 @@ function MockBanner() {
   );
 }
 
+const MOCK_TOGGLE_BACKGROUND = {
+  on: "var(--color-jersey-deep)",
+  locked: "var(--color-ink-muted)",
+  off: "var(--color-cream)",
+} as const;
+
 function MockToggle({ state }: { state: "on" | "off" | "locked" }) {
   const filled = state === "on" || state === "locked";
   return (
@@ -149,12 +155,7 @@ function MockToggle({ state }: { state: "on" | "off" | "locked" }) {
         border: "2px solid var(--color-ink)",
         position: "relative",
         flex: "none",
-        background:
-          state === "on"
-            ? "var(--color-jersey-deep)"
-            : state === "locked"
-              ? "var(--color-ink-muted)"
-              : "var(--color-cream)",
+        background: MOCK_TOGGLE_BACKGROUND[state],
       }}
     >
       <span
