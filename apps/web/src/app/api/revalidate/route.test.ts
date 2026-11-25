@@ -94,6 +94,24 @@ describe("POST /api/revalidate", () => {
     expect(after).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ["null", null],
+    ["a number", 42],
+    ["a string", "x"],
+    ["an array", []],
+  ])(
+    "returns 400 Invalid JSON on a signed body that is %s, not an object (#3861)",
+    async (_label, body) => {
+      const res = await POST(makeRequest(body));
+      expect(res.status).toBe(400);
+      await expect(res.json()).resolves.toEqual({
+        ok: false,
+        error: "Invalid JSON",
+      });
+      expect(after).not.toHaveBeenCalled();
+    },
+  );
+
   it("answers Sanity at once but revalidates only after the API CDN window (#2959)", async () => {
     // Sanity's API CDN can serve the pre-publish answer for ~75 s
     // (max-age=60 + stale-while-revalidate=15). A regeneration inside that
