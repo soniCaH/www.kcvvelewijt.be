@@ -199,6 +199,24 @@ describe("POST /api/revalidate", () => {
     expect(revalidateTag).toHaveBeenCalledWith("players", "max");
   });
 
+  it("returns 400 Missing _type when _type is absent entirely (#3863)", async () => {
+    const res = await POST(makeRequest({ slug: "x", psdId: 1 }));
+    expect(res.status).toBe(400);
+    await expect(res.json()).resolves.toEqual({
+      ok: false,
+      error: "Missing _type",
+    });
+  });
+
+  it("reports Missing _type when both _type and psdId are bad (#3863)", async () => {
+    const res = await POST(makeRequest({ _type: 7, psdId: {} }));
+    expect(res.status).toBe(400);
+    await expect(res.json()).resolves.toEqual({
+      ok: false,
+      error: "Missing _type",
+    });
+  });
+
   it.each([
     ["player", "an object", {}],
     ["staffMember", "an object", {}],

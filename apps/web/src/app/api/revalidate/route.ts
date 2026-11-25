@@ -34,10 +34,11 @@ export const maxDuration = 120;
  */
 
 /**
- * The webhook body, decoded once at the edge (#3863). The projection is set by
- * hand in the Sanity console and GROQ yields `null` for a missing field (e.g.
- * `before().slug.current` on every non-rename), so the optional fields accept
- * `null` as well as absence; anything else is a 400.
+ * The webhook body, decoded once at the edge (#3863). The live hook projects
+ * `{ _type, "slug": slug.current, "previousSlug": before().slug.current, "psdId": psdId }`,
+ * so each optional field is its type or `null` (a missing field; `previousSlug`
+ * on every non-rename). Any other type is a broken projection: the 400 shows in
+ * Sanity's attempt log instead of leaving a page stale.
  */
 const WebhookBody = S.Struct({
   _type: S.NonEmptyString,
@@ -169,8 +170,11 @@ const parseJsonObject = (rawBody: string): unknown => {
 /** The message for the first field that failed to decode. */
 const decodeError = (error: ParseResult.ParseError): string => {
   const field = ParseResult.ArrayFormatter.formatErrorSync(error)[0]?.path[0];
+  if (field === undefined) return "Invalid body";
   return field === "_type" ? "Missing _type" : `Invalid ${String(field)}`;
 };
+
+const decodeWebhookBody = S.decodeUnknownEither(WebhookBody);
 
 export async function POST(request: Request) {
   const secret = process.env.SANITY_REVALIDATE_SECRET;
@@ -198,7 +202,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const decoded = S.decodeUnknownEither(WebhookBody)(parsed);
+  const decoded = decodeWebhookBody(parsed);
   if (Either.isLeft(decoded)) {
     return NextResponse.json(
       { ok: false, error: decodeError(decoded.left) },
@@ -210,7 +214,7 @@ export async function POST(request: Request) {
   const slugs = [
     ...new Set(
       [slug, previousSlug].filter(
-        (s): s is string => typeof s === "string" && s.length > 0,
+        (s): s is string => s != null && s.length > 0,
       ),
     ),
   ];
