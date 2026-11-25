@@ -18,6 +18,7 @@ import { degradeSection } from "@/lib/effect/degrade";
 import type { Match } from "@/lib/effect/schemas/match.schema";
 import { toDisplayZone, toMatchDisplayZone } from "@/lib/utils/dates";
 import { capitalize } from "@/lib/utils/capitalize";
+import { firstParam } from "@/hooks/filterParam";
 import { formatEventDays, isMultiDayEvent } from "@/lib/utils/event-datetime";
 import { SharePage } from "@/components/share/SharePage/SharePage";
 import type {
@@ -119,9 +120,6 @@ function toEventItem(row: ShareEventRow): ShareItem {
     cover: shareCover(row),
   };
 }
-
-const firstParam = (v: string | string[] | undefined) =>
-  Array.isArray(v) ? v[0] : v;
 
 /**
  * Section reads (#3540): the news and event pickers degrade to empty on a

@@ -30,6 +30,11 @@ export function narrowParam<T extends string>(
     : fallback;
 }
 
+/** A Next `searchParams` value is `string | string[]` (`?a=1&a=2` arrives as
+ *  an array) whatever the page types it as: take the first one (#3875). */
+export const firstParam = (v: string | string[] | undefined) =>
+  Array.isArray(v) ? v[0] : v;
+
 /** Reads one `?<name>=` value from the LIVE `window.location.search` —
  *  history mode's own canonical read source. There is no `useSearchParams()`
  *  subscription to prefer instead here (that's the whole reason history
