@@ -108,7 +108,10 @@ export function TapedCard({
       }
     : { transform: `rotate(${restRotation})` };
 
-  const tapes = tape ? [tape].flat() : [];
+  const tapes = (() => {
+    if (!tape) return [];
+    return Array.isArray(tape) ? tape : [tape];
+  })();
 
   return (
     <Tag

@@ -57,6 +57,12 @@ export interface YouthTeamRow {
   age: string | null;
 }
 
+const compareSlugs = (a: { slug: string }, b: { slug: string }) => {
+  if (a.slug < b.slug) return -1;
+  if (a.slug > b.slug) return 1;
+  return 0;
+};
+
 /**
  * Resolve a legacy youth token (e.g. `"u9"`, `"u8-wit"`) to a current team
  * slug. Youth slugs drifted to `"kcvve-u9-groen"` form after migration, so the
@@ -90,7 +96,7 @@ export function resolveYouthSlug(
       (team) => team.age?.toUpperCase() === age || segment.test(team.slug),
     )
     // Deterministic code-unit order (localeCompare may ignore hyphens by locale).
-    .sort((a, b) => Number(a.slug > b.slug) - Number(a.slug < b.slug));
+    .sort(compareSlugs);
   if (ofAge.length === 0) return null;
 
   const colour = lower.match(/wit|groen/)?.[0];

@@ -19,21 +19,23 @@ const jest = requireFrom(import.meta.resolve("@storybook/test-runner"), "jest");
 const core = requireFrom(jest, "@jest/core");
 const Sequencer = createRequire(core)("@jest/test-sequencer").default;
 
+const compareHash = (a, b) => {
+  if (a.hash < b.hash) return -1;
+  if (a.hash > b.hash) return 1;
+  return 0;
+};
+
 export default class StableShardSequencer extends Sequencer {
   shard(tests, { shardIndex, shardCount }) {
     // Jest's own boundaries, so the split stays as even as Jest's (#3275).
     const bound = (index) =>
-      this._shardPosition({
-        shardCount,
-        shardIndex: index,
-        suiteLength: tests.length,
-      });
+      this._shardPosition({ shardCount, shardIndex: index, suiteLength: tests.length });
     return tests
       .map((test) => ({
         hash: createHash("sha1").update(path.basename(test.path)).digest("hex"),
         test,
       }))
-      .sort((a, b) => Number(a.hash > b.hash) - Number(a.hash < b.hash))
+      .sort(compareHash)
       .slice(bound(shardIndex - 1), bound(shardIndex))
       .map(({ test }) => test);
   }
