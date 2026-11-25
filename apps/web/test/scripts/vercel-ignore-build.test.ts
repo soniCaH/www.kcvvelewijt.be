@@ -24,8 +24,8 @@ const SCRIPT = join(__dirname, "..", "..", "scripts", "vercel-ignore-build.sh");
 const stubs = mkdtempSync(join(tmpdir(), "vercel-ignore-stubs-"));
 const curlLog = join(stubs, "curl.log");
 
-const repo = mkdtempSync(join(tmpdir(), "vercel-ignore-"));
-// Commit SHAs of the fixture repo, filled in by `beforeAll`.
+// The fixture repo and its commit SHAs, filled in by `beforeAll`.
+const fixture = {} as { repo: string };
 const sha = {} as {
   base: string;
   docsOnly: string;
@@ -34,11 +34,11 @@ const sha = {} as {
 };
 
 const git = (...args: string[]) =>
-  spawnSync("git", args, { cwd: repo, encoding: "utf8" }).stdout.trim();
+  spawnSync("git", args, { cwd: fixture.repo, encoding: "utf8" }).stdout.trim();
 
 const commit = (path: string, body: string) => {
-  mkdirSync(join(repo, path, ".."), { recursive: true });
-  writeFileSync(join(repo, path), body);
+  mkdirSync(join(fixture.repo, path, ".."), { recursive: true });
+  writeFileSync(join(fixture.repo, path), body);
   git("add", "-A");
   git("commit", "-q", "-m", path);
   return git("rev-parse", "HEAD");
@@ -51,7 +51,7 @@ const curlCalls = () =>
 const run = (env: Record<string, string>, at: string) => {
   git("checkout", "-q", at);
   return spawnSync("bash", [SCRIPT], {
-    cwd: join(repo, "apps", "web"),
+    cwd: join(fixture.repo, "apps", "web"),
     // Blank the Vercel vars first, so only each case's own values count.
     env: {
       ...process.env,
@@ -95,16 +95,17 @@ const pulls = (...names: string[]) =>
   JSON.stringify([{ number: 42, labels: names.map((name) => ({ name })) }]);
 
 beforeAll(() => {
+  fixture.repo = mkdtempSync(join(tmpdir(), "vercel-ignore-"));
   writeFileSync(
     join(stubs, "curl"),
     `#!/bin/sh\necho "$@" >> "${curlLog}"\nprintf '%s' "$STUB_CURL_BODY"\nexit "$STUB_CURL_EXIT"\n`,
   );
   chmodSync(join(stubs, "curl"), 0o755);
-  mkdirSync(join(repo, "apps", "web"), { recursive: true });
+  mkdirSync(join(fixture.repo, "apps", "web"), { recursive: true });
   git("init", "-q", "-b", "main");
   git("config", "user.email", "test@example.com");
   git("config", "user.name", "test");
-  git("remote", "add", "origin", repo);
+  git("remote", "add", "origin", fixture.repo);
   sha.base = commit("apps/web/page.ts", "1");
   sha.docsOnly = commit("docs/notes.md", "1");
   sha.apiOnly = commit("apps/api/index.ts", "1");
@@ -117,7 +118,7 @@ beforeAll(() => {
 beforeEach(() => rmSync(curlLog, { force: true }));
 
 afterAll(() => {
-  rmSync(repo, { recursive: true, force: true });
+  if (fixture.repo) rmSync(fixture.repo, { recursive: true, force: true });
   rmSync(stubs, { recursive: true, force: true });
 });
 

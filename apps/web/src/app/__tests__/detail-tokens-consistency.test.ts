@@ -380,10 +380,12 @@ function findBagSpans(source: string): string[] {
     // peeking a fixed number of characters: an 8-char window leaves room for
     // `.join(` plus only two spaces, so a formatted array whose `.join(" ")`
     // sits on the next line at any normal indent was silently not a bag
-    // (CodeRabbit round 3). Walking the run is exact and stays linear.
-    const spanEnd = m.index + span.length;
-    const tail = source.slice(spanEnd);
-    const after = spanEnd + tail.length - tail.trimStart().length;
+    // (CodeRabbit round 3). A sticky `\s*` at the span's end consumes exactly
+    // that run, so this stays linear (no slice of the rest of the file).
+    const whitespace = /\s*/y;
+    whitespace.lastIndex = m.index + span.length;
+    whitespace.exec(source);
+    const after = whitespace.lastIndex;
     if (source.startsWith(".join(", after)) spans.push(span);
   }
 

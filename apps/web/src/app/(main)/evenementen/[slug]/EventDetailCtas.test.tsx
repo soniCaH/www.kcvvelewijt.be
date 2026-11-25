@@ -28,11 +28,12 @@ const suppressNavigation = (event: Event) => event.preventDefault();
 describe("EventDetailCtas", () => {
   const ctx = {} as {
     clickSpy: ReturnType<typeof vi.spyOn>;
+    // The Blob passed to createObjectURL by the most recent agenda click — set
+    // by the stub below so a test can inspect the actual .ics content without
+    // re-stubbing the global itself (which vi.restoreAllMocks() couldn't undo).
     lastIcsBlob?: Blob;
   };
-  // The Blob passed to createObjectURL by the most recent agenda click — set
-  // by the stub below so a test can inspect the actual .ics content without
-  // re-stubbing the global itself (which vi.restoreAllMocks() couldn't undo).
+
   beforeEach(() => {
     trackEventMock.mockReset();
     ctx.lastIcsBlob = undefined;
