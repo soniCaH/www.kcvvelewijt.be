@@ -4,6 +4,10 @@ import { WorkerEnvTag } from "../env";
 const SITEVERIFY_URL =
   "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
+const decodeSiteverify = S.decodeUnknownOption(
+  S.Struct({ success: S.Boolean }),
+);
+
 /**
  * Verify a Cloudflare Turnstile token server-side. Fails closed (#3464).
  *
@@ -47,9 +51,7 @@ export const verifyTurnstile = (
         if (!response.ok) {
           throw new Error(`siteverify responded ${response.status}`);
         }
-        const data = S.decodeUnknownOption(S.Struct({ success: S.Boolean }))(
-          await response.json(),
-        );
+        const data = decodeSiteverify(await response.json());
         if (Option.isNone(data)) {
           throw new Error("siteverify body has no boolean success");
         }

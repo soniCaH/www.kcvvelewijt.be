@@ -5,6 +5,7 @@ import type { WorkerEnv } from "../env";
 import { WorkerEnvTag } from "../env";
 import { EmailTransport, EmailTransportLive } from "../email/resend";
 import { buildDartsPaidEmail } from "../forms/darts-emails";
+import { parseErrorPaths } from "../parse-error-paths";
 import { sanityClientConfig } from "../sanity/config";
 import {
   WebhookAuthError,
@@ -102,7 +103,7 @@ const webhookEffect = (request: Request, env: WorkerEnv) =>
     if (Either.isLeft(decoded)) {
       // A retry cannot fix a bad document: answer 200 so Sanity stops.
       console.error(
-        `[webhook:darts-paid] invalid_doc: ${_id}: ${errorMessage(decoded.left)}`,
+        `[webhook:darts-paid] invalid_doc: ${_id}: ${parseErrorPaths(decoded.left)}`,
       );
       return Response.json({ ok: true, action: "skipped_invalid_doc" });
     }

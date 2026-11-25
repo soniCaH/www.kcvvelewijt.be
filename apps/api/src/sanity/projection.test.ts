@@ -540,13 +540,18 @@ describe("getFormRoutingConfig", () => {
   });
 
   it("fails with SanityQueryError, never a TypeError, on a non-string role value", async () => {
-    mockFetch.mockResolvedValueOnce({ ...roles, vrijwilliger: 5 });
+    mockFetch.mockResolvedValueOnce({
+      ...roles,
+      vrijwilliger: { leak: "secret@example.com" },
+    });
 
     const result = await get();
 
     expect(result._tag).toBe("Left");
     if (result._tag === "Left") {
       expect(result.left).toBeInstanceOf(SanityQueryError);
+      expect(result.left.message).toContain("vrijwilliger");
+      expect(result.left.message).not.toContain("secret@example.com");
     }
   });
 });

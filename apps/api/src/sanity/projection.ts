@@ -7,6 +7,7 @@ import {
 import { WorkerEnvTag } from "../env";
 import { derivePsdTeamLabel } from "../psd/transforms";
 import type { PlayerImageState, StaffImageState } from "./types";
+import { parseErrorPaths } from "../parse-error-paths";
 import { sanityClientConfig } from "./config";
 
 // ─── Error ────────────────────────────────────────────────────────────────────
@@ -457,10 +458,12 @@ export const SanityProjectionLive = Layer.effect(
             new SanityQueryError("Failed to fetch form routing config", cause),
         }).pipe(
           Effect.flatMap(S.decodeUnknown(S.NullOr(FormRoutingConfig))),
-          Effect.mapError((cause) =>
-            cause instanceof SanityQueryError
-              ? cause
-              : new SanityQueryError("Invalid form routing config", cause),
+          Effect.mapError((error) =>
+            error instanceof SanityQueryError
+              ? error
+              : new SanityQueryError(
+                  `Invalid form routing config at: ${parseErrorPaths(error)}`,
+                ),
           ),
         ),
 

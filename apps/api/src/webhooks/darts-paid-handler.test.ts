@@ -217,9 +217,11 @@ describe("handleDartsPaidWebhook", () => {
     });
     expect(dispatch).not.toHaveBeenCalled();
     expect(mockCommit).not.toHaveBeenCalled();
-    expect(console.error).toHaveBeenCalledWith(
-      expect.stringContaining("abc123"),
-    );
+    const logged = vi.mocked(console.error).mock.calls.join(" ");
+    expect(logged).toContain("abc123");
+    expect(logged).toContain("captainEmail");
+    expect(logged).not.toContain("not-an-email");
+    expect(logged).not.toContain(paidDoc.captainName);
   });
 
   it("skips another document type and a delete without reading Sanity", async () => {

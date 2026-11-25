@@ -269,7 +269,16 @@ describe("handleMembership", () => {
     };
 
     it.each([
-      ["a role that is not a string", '{"vrijwilliger":5}'],
+      [
+        "a role that is not a string",
+        JSON.stringify({
+          speler: null,
+          jeugdspeler: null,
+          vrijwilliger: 5,
+          trainer: null,
+          scheidsrechter: null,
+        }),
+      ],
       ["a value that is not JSON", "not json"],
       ["a value that is not an object", "42"],
     ])("refetches when the cached value has %s", async (_label, cached) => {

@@ -1,7 +1,8 @@
 import { createClient } from "@sanity/client";
-import { Context, Effect, Layer, Schema as S } from "effect";
+import { Context, Effect, Either, Layer, Schema as S } from "effect";
 import { WorkerEnvTag } from "../env";
 import { PsdGateService } from "../psd/gate";
+import { parseErrorPaths } from "../parse-error-paths";
 import { sanityClientConfig } from "./config";
 
 /**
@@ -57,16 +58,16 @@ function mergePreservingOrder(
   return [...kept, ...psdIds.filter((id) => !keptSet.has(id))];
 }
 
-/**
- * Deep equality as Sanity stores data: a field written as `null` comes back
- * with no key at all, so `null` and `undefined` are the same value. Arrays
- * compare in order; object keys in any order.
- */
 /** Sanity's answer to an asset upload: only the new asset's id is read. */
 const UploadResponse = S.Struct({
   document: S.Struct({ _id: S.NonEmptyString }),
 });
 
+/**
+ * Deep equality as Sanity stores data: a field written as `null` comes back
+ * with no key at all, so `null` and `undefined` are the same value. Arrays
+ * compare in order; object keys in any order.
+ */
 const sameValue = (a: unknown, b: unknown): boolean => {
   if ((a ?? null) === (b ?? null)) return true;
   if (Array.isArray(a) || Array.isArray(b)) {
@@ -524,10 +525,15 @@ export const SanityMutationLive = Layer.effect(
                   `Sanity upload failed: ${uploadRes.status} ${text}`,
                 );
               }
-              const { document } = S.decodeUnknownSync(UploadResponse)(
+              const decoded = S.decodeUnknownEither(UploadResponse)(
                 await uploadRes.json(),
               );
-              return document;
+              if (Either.isLeft(decoded)) {
+                throw new Error(
+                  `Sanity upload response invalid at: ${parseErrorPaths(decoded.left)}`,
+                );
+              }
+              return decoded.right.document;
             },
             catch: (cause) =>
               new SanityMutationError(

@@ -40,9 +40,14 @@ const resolveRouting = (role: MembershipRole) =>
       : null;
 
     const fetchAndCache = Effect.gen(function* () {
-      const fetched = yield* projection
-        .getFormRoutingConfig()
-        .pipe(Effect.orElseSucceed(() => null));
+      const fetched = yield* projection.getFormRoutingConfig().pipe(
+        Effect.tapError((error) =>
+          Effect.logWarning(
+            `[membership] routing config unreadable, falling back to the default recipient: ${error.message}`,
+          ),
+        ),
+        Effect.orElseSucceed(() => null),
+      );
       if (fetched) {
         yield* cache.set(
           ROUTING_CACHE_KEY,
