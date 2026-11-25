@@ -16,9 +16,10 @@ import {launcherTemplates} from '../../templates'
  */
 export const curateDefaultTemplateItems = (
   prev: ReadonlyArray<TemplateItem>,
-  curatedSchemaTypes: ReadonlySet<string>,): TemplateItem[] => {
+  curatedSchemaTypes: ReadonlySet<string>,
+): TemplateItem[] => {
   return prev.filter((item) => !curatedSchemaTypes.has(item.templateId))
-};
+}
 
 const CURATED_SCHEMA_TYPES: ReadonlySet<string> = new Set(launcherTemplates.map((t) => t.schemaType))
 
@@ -41,6 +42,7 @@ const CURATED_SCHEMA_TYPES: ReadonlySet<string> = new Set(launcherTemplates.map(
  */
 export const curatedNewDocumentOptions = (
   prev: TemplateItem[],
-  _context: NewDocumentOptionsContext,): TemplateItem[] => {
+  _context: NewDocumentOptionsContext,
+): TemplateItem[] => {
   return curateDefaultTemplateItems(prev, CURATED_SCHEMA_TYPES)
-};
+}

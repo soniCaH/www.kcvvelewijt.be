@@ -40,4 +40,4 @@ export const GuideBody = ({entry}: {entry: GuideEntry}): JSX.Element => {
       ) : null}
     </Stack>
   )
-};
+}

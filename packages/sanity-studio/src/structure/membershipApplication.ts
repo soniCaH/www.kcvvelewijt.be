@@ -42,4 +42,4 @@ export const membershipApplicationStructure = (S: StructureBuilder) => {
           ),
         ]),
     )
-};
+}

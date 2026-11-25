@@ -114,7 +114,7 @@ describe('rewritePlayerLinksInHtml', () => {
 
 const playerMarkDef = (key: string, href: string) => {
   return {_type: 'link', _key: key, href}
-};
+}
 
 describe('rewritePlayerLinksInBlock', () => {
   it('rewrites a resolvable link markDef href to a relative /spelers/<psdId>, keeping the mark', () => {
@@ -208,7 +208,7 @@ const htmlTableDoc = (html: string): ArticleOrPageDoc => {
     _type: 'article',
     body: [{_type: 'htmlTable', _key: 'tbl1', html}],
   }
-};
+}
 
 describe('migrateRepointLegacyPlayerLinks', () => {
   it('patches body when an htmlTable block has a resolvable /player/ link', () => {

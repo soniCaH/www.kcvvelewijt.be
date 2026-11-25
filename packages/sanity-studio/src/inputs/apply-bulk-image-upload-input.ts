@@ -21,7 +21,8 @@ interface BulkImageUploadTarget {
 export const applyBulkImageUploadInput = (
   schemaTypes: readonly SchemaTypeDefinition[],
   InputComponent: BulkImageUploadComponent,
-  {typeName, fieldName}: BulkImageUploadTarget,): SchemaTypeDefinition[] => {
+  {typeName, fieldName}: BulkImageUploadTarget,
+): SchemaTypeDefinition[] => {
   return schemaTypes.map((schemaType) => {
     if (schemaType.name !== typeName) return schemaType
     const fields = (schemaType as unknown as {fields?: readonly Record<string, unknown>[]}).fields
@@ -42,4 +43,4 @@ export const applyBulkImageUploadInput = (
     })
     return {...schemaType, fields: nextFields} as SchemaTypeDefinition
   })
-};
+}

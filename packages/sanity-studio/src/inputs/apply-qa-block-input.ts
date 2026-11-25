@@ -24,7 +24,8 @@ export interface QaBlockInlineComponents {
  */
 export const applyQaBlockInput = (
   schemaTypes: readonly SchemaTypeDefinition[],
-  {QaPairItem, QaPairRespondentItem}: QaBlockInlineComponents,): SchemaTypeDefinition[] => {
+  {QaPairItem, QaPairRespondentItem}: QaBlockInlineComponents,
+): SchemaTypeDefinition[] => {
   const itemFor: Record<string, ItemComponent> = {
     qaPair: QaPairItem,
     qaPairRespondent: QaPairRespondentItem,
@@ -39,4 +40,4 @@ export const applyQaBlockInput = (
       components: {...existingComponents, item},
     } as SchemaTypeDefinition
   })
-};
+}

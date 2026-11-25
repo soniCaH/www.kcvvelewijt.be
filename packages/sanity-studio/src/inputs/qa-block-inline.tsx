@@ -66,7 +66,7 @@ const InlineMembers = ({
       })}
     </Stack>
   )
-};
+}
 
 /**
  * One respondent (RespondentPicker + Portable Text answer) rendered inline in
@@ -107,7 +107,7 @@ export const QaPairRespondentItem = (props: ObjectItemProps): JSX.Element => {
       </Stack>
     </Card>
   )
-};
+}
 
 /**
  * One Q&A pair (question + respondents + tag) rendered inline, collapsible so
@@ -163,7 +163,7 @@ export const QaPairItem = (props: ObjectItemProps): JSX.Element => {
       </Stack>
     </Card>
   )
-};
+}
 
 QaPairRespondentItem.displayName = 'QaPairRespondentItem'
 QaPairItem.displayName = 'QaPairItem'

@@ -23,4 +23,4 @@ export const withPublishedAtDefault = (Publish: DocumentActionComponent): Docume
   }
   PublishWithPublishedAt.action = Publish.action
   return PublishWithPublishedAt
-};
+}

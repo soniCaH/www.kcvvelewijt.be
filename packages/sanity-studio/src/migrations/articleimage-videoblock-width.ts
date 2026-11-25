@@ -54,10 +54,11 @@ const asTargetBlock = (value: unknown): BlockWithWidthLike | null => {
     return null
   }
   return block
-};
+}
 
 export const migrateArticleImageVideoBlockWidth = (
-  doc: ArticleWithWidthBlocksDoc,): Patch[] | undefined => {
+  doc: ArticleWithWidthBlocksDoc,
+): Patch[] | undefined => {
   const body = Array.isArray(doc.body) ? doc.body : null
   if (!body) return undefined
 
@@ -88,7 +89,7 @@ export const migrateArticleImageVideoBlockWidth = (
   }
 
   return patches.length > 0 ? patches : undefined
-};
+}
 
 export default defineMigration({
   title:

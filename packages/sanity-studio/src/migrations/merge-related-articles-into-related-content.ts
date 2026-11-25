@@ -35,7 +35,7 @@ const defaultGenKey = (): string => {
     {length: DEFAULT_KEY_LENGTH},
     () => KEY_ALPHABET[Math.floor(Math.random() * KEY_ALPHABET.length)],
   ).join('')
-};
+}
 
 const isRelatedRef = (value: unknown): value is RelatedRef => {
   return (
@@ -45,16 +45,17 @@ const isRelatedRef = (value: unknown): value is RelatedRef => {
     typeof (value as RelatedRef)._ref === 'string' &&
     (value as RelatedRef)._ref!.length > 0
   )
-};
+}
 
 const takeRelatedRefs = (value: unknown): RelatedRef[] => {
   if (!Array.isArray(value)) return []
   return value.filter(isRelatedRef)
-};
+}
 
 export const migrateMergeRelatedArticlesIntoRelatedContent = (
   doc: ArticleDoc,
-  genKey: () => string = defaultGenKey,): Patch[] | undefined => {
+  genKey: () => string = defaultGenKey,
+): Patch[] | undefined => {
   const legacy = takeRelatedRefs(doc.relatedArticles)
 
   // No legacy data — nothing to migrate. The legacy field may exist as an
@@ -84,7 +85,7 @@ export const migrateMergeRelatedArticlesIntoRelatedContent = (
   const merged = [...existing, ...additions]
 
   return [at('relatedContent', set(merged)), at('relatedArticles', unset())]
-};
+}
 
 export default defineMigration({
   title:

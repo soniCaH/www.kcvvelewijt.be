@@ -22,12 +22,13 @@ export interface PortableTextTitleArticleDoc {
 type Patch = ReturnType<typeof at>
 
 export const migrateTitlePortableTextToString = (
-  doc: PortableTextTitleArticleDoc,): Patch[] | undefined => {
+  doc: PortableTextTitleArticleDoc,
+): Patch[] | undefined => {
   if (!Array.isArray(doc.title)) return undefined
   const text = firstBlockText(doc.title) ?? ''
   if (text.trim().length === 0) return undefined
   return [at('title', set(text))]
-};
+}
 
 export const assertTitleRollbackAllowed = (env: Record<string, string | undefined> = process.env): void => {
   if (env.ALLOW_TITLE_ROLLBACK !== 'yes') {
@@ -35,7 +36,7 @@ export const assertTitleRollbackAllowed = (env: Record<string, string | undefine
       'title-portable-text-to-string is rollback-only: it flattens every article title. Set ALLOW_TITLE_ROLLBACK=yes to run it.',
     )
   }
-};
+}
 
 export default defineMigration({
   title: 'Reverse: convert article.title (PT) → string (rollback only)',

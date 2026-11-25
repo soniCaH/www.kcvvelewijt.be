@@ -52,4 +52,4 @@ export const responsibilityStructure = (S: StructureBuilder) => {
             ),
         ]),
     )
-};
+}

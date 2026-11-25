@@ -40,7 +40,7 @@ export const migrateRenameKantineVerhuurStep = (doc: KantineVerhuurResponsibilit
       : [],
   )
   return patches.length > 0 ? patches : undefined
-};
+}
 
 export default defineMigration({
   title: 'Rename "Kantine & Evenementen" to "Kantineverhuur" in the huren question (#3525)',

@@ -55,7 +55,7 @@ type Node = {
 
 const children = (node: Node): Node[] => {
   return [...(node.fields ?? []), ...(node.of ?? []), ...(node.marks?.annotations ?? [])]
-};
+}
 
 /** Resolve a named path; unnamed array members / blocks are transparent. */
 const resolve = (node: Node, path: string[]): Node => {
@@ -68,7 +68,7 @@ const resolve = (node: Node, path: string[]): Node => {
     if (!child.name) queue.push(...children(child))
   }
   throw new Error(`path segment "${head}" not found`)
-};
+}
 
 const markersFor = async (root: unknown, path: string[], value: unknown) => {
   const field = resolve(root as Node, path)
@@ -87,7 +87,7 @@ const markersFor = async (root: unknown, path: string[], value: unknown) => {
     path,
   }
   return rule.validate(value, context as never)
-};
+}
 
 const LINK_FIELDS: Array<{label: string; root: unknown; path: string[]; type: string}> = [
   {label: 'jeugdLandingPage card href', root: jeugdLandingPage, path: ['editorialCards', 'href'], type: 'url'},

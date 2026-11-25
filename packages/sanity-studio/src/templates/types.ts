@@ -37,4 +37,4 @@ export const isLauncherTemplate = (template: Template): template is LauncherTemp
     typeof ui.description === 'string' &&
     typeof ui.group === 'string'
   )
-};
+}

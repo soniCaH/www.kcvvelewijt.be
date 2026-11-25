@@ -31,7 +31,7 @@ export const migrateTitleToPortableText = (doc: StringTitleArticleDoc): Patch[] 
     children: [{_type: 'span', _key: `span_${keySuffix}`, text: title, marks: []}],
   }
   return [at('title', set([block]))]
-};
+}
 
 export default defineMigration({
   title: 'Convert article.title (string) → constrained Portable Text',

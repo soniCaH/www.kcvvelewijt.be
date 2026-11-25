@@ -23,7 +23,7 @@ const find = (node: Node, path: string[]): Node => {
     if (!child.name) queue.push(...(child.fields ?? []), ...(child.of ?? []))
   }
   throw new Error(`path segment "${head}" not found`)
-};
+}
 
 const markersFor = async (root: unknown, path: string[], value: unknown, parent: Record<string, unknown> = {}) => {
   const field = find(root as Node, path)
@@ -34,7 +34,7 @@ const markersFor = async (root: unknown, path: string[], value: unknown, parent:
   const rule = validation(new ConcreteRuleClass().type('String'))
   const context = {parent, document: {}, i18n: {t: (key: string) => key}, schema: {}, type: {}, environment: 'test', path}
   return rule.validate(value, context as never)
-};
+}
 
 describe('staffMember.email (rule level)', () => {
   it('rejects not-an-email', async () => {

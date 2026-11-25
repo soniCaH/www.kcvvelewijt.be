@@ -26,7 +26,7 @@ const validateDateEnd = async (dateEnd: unknown, dateStart: unknown) => {
     path: ['dateEnd'],
   }
   return rule.validate(dateEnd, context as never)
-};
+}
 
 describe('event.dateEnd validation (rule level)', () => {
   it('rejects an end before the start with the eventFact message', async () => {

@@ -21,7 +21,8 @@ const hasContent = (value: unknown): boolean =>
  */
 export const validateContactFields = (
   contact: Record<string, unknown> | undefined,
-  required: boolean,): true | string => {
+  required: boolean,
+): true | string => {
   if (!contact?.contactType) return required ? 'Kies een type contact' : true
   switch (contact.contactType) {
     case 'position':
@@ -38,4 +39,4 @@ export const validateContactFields = (
     default:
       return 'Ongeldig type contact'
   }
-};
+}

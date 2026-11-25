@@ -24,7 +24,7 @@ type Patch = ReturnType<typeof at>
 export const migrateBackfillArticleType = (doc: ArticleTypeDoc): Patch[] | undefined => {
   if (typeof doc.articleType === 'string' && doc.articleType.length > 0) return undefined
   return [at('articleType', set('announcement'))]
-};
+}
 
 export default defineMigration({
   title: 'Backfill articleType="announcement" on legacy articles',

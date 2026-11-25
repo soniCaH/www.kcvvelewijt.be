@@ -52,7 +52,7 @@ const nameToSlug = (firstName: string, lastName: string): string => {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
-};
+}
 
 export interface PlayerRow {
   psdId: string | null
@@ -68,7 +68,8 @@ export interface PlayerRow {
  */
 export const resolvePlayerPsdId = (
   slug: string,
-  rows: readonly PlayerRow[],): string | null => {
+  rows: readonly PlayerRow[],
+): string | null => {
   const target = slug.toLowerCase()
   for (const row of rows) {
     if (!row.psdId) continue
@@ -77,7 +78,7 @@ export const resolvePlayerPsdId = (
     }
   }
   return rows.some((row) => row.psdId === slug) ? slug : null
-};
+}
 
 // ─── Legacy href matching ────────────────────────────────────────────────
 //
@@ -90,7 +91,7 @@ const PLAYER_HREF_RE =
 
 const matchPlayerSlug = (href: string): string | null => {
   return PLAYER_HREF_RE.exec(href)?.[1] ?? null
-};
+}
 
 // ─── htmlTable block: raw HTML string ───────────────────────────────────
 
@@ -99,11 +100,11 @@ const HREF_ATTR_RE = /\shref\s*=\s*"([^"]*)"/i
 
 const extractHref = (anchorHtml: string): string | null => {
   return HREF_ATTR_RE.exec(anchorHtml)?.[1] ?? null
-};
+}
 
 const extractAnchorText = (anchorHtml: string): string => {
   return anchorHtml.replace(/^<a\b[^>]*>/i, '').replace(/<\/a>\s*$/i, '')
-};
+}
 
 /**
  * Rewrites every `<a href="https://www.kcvvelewijt.be/player/<slug>[/]">`
@@ -120,7 +121,8 @@ const extractAnchorText = (anchorHtml: string): string => {
  */
 export const rewritePlayerLinksInHtml = (
   html: string,
-  rows: readonly PlayerRow[],): {html: string; changed: boolean} => {
+  rows: readonly PlayerRow[],
+): {html: string; changed: boolean} => {
   const next = html.replace(ANCHOR_RE, (anchorHtml) => {
     const href = extractHref(anchorHtml)
     if (!href) return anchorHtml
@@ -132,7 +134,7 @@ export const rewritePlayerLinksInHtml = (
   })
   // A matching anchor is always rewritten, so any difference means a change.
   return {html: next, changed: next !== html}
-};
+}
 
 // ─── Portable Text: `link` markDefs ─────────────────────────────────────
 
@@ -169,7 +171,8 @@ export interface PortableTextBlockLike {
  */
 export const rewritePlayerLinksInBlock = (
   block: PortableTextBlockLike,
-  rows: readonly PlayerRow[],): {block: PortableTextBlockLike; changed: boolean} => {
+  rows: readonly PlayerRow[],
+): {block: PortableTextBlockLike; changed: boolean} => {
   const markDefs = block.markDefs
   if (!Array.isArray(markDefs) || markDefs.length === 0) {
     return {block, changed: false}
@@ -212,7 +215,7 @@ export const rewritePlayerLinksInBlock = (
     : block.children
 
   return {block: {...block, markDefs: nextMarkDefs, children}, changed: true}
-};
+}
 
 // ─── Per-document transform ──────────────────────────────────────────────
 
@@ -225,13 +228,14 @@ export interface ArticleOrPageDoc {
 type Patch = ReturnType<typeof at>
 
 const isHtmlTableBlock = (
-  value: unknown,): value is {_type: 'htmlTable'; html?: unknown; [k: string]: unknown} => {
+  value: unknown,
+): value is {_type: 'htmlTable'; html?: unknown; [k: string]: unknown} => {
   return (
     value !== null &&
     typeof value === 'object' &&
     (value as {_type?: unknown})._type === 'htmlTable'
   )
-};
+}
 
 const isPortableTextBlock = (value: unknown): value is PortableTextBlockLike => {
   return (
@@ -239,11 +243,12 @@ const isPortableTextBlock = (value: unknown): value is PortableTextBlockLike => 
     typeof value === 'object' &&
     (value as {_type?: unknown})._type === 'block'
   )
-};
+}
 
 export const migrateRepointLegacyPlayerLinks = (
   doc: ArticleOrPageDoc,
-  rows: readonly PlayerRow[],): Patch[] | undefined => {
+  rows: readonly PlayerRow[],
+): Patch[] | undefined => {
   const body = doc.body
   if (!Array.isArray(body) || body.length === 0) return undefined
 
@@ -270,7 +275,7 @@ export const migrateRepointLegacyPlayerLinks = (
   // Unchanged items come back as the same reference.
   if (nextBody.every((item, i) => item === body[i])) return undefined
   return [at('body', set(nextBody))]
-};
+}
 
 // ─── CLI wiring ──────────────────────────────────────────────────────────
 
@@ -302,7 +307,7 @@ export const assertPlayerRowsNonEmpty = (rows: readonly PlayerRow[]): void => {
       'sync has actually populated `player` documents with a `psdId` in ' +
       'this dataset; and the Sanity API call above did not fail silently.',
   )
-};
+}
 
 // Fetched once per migration run (the CLI runs this module fresh in its own
 // process) and reused across every document() invocation — mirrors the
@@ -320,7 +325,7 @@ const fetchPlayerRows = (client: MigrationFetchClient): Promise<PlayerRow[]> => 
       return rows
     })
   return playerRowsCache.promise
-};
+}
 
 export default defineMigration({
   title:

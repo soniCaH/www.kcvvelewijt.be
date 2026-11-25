@@ -27,7 +27,7 @@ const PUBLISHED_NODES_QUERY = `*[_type == "organigramNode" && !(_id in path("dra
 /** `drafts.x` / `versions.<release>.x` → `x`. */
 export const normalizeOrganigramId = (id: string): string => {
   return id.replace(/^drafts\./, '').replace(/^versions\.[^.]+\./, '')
-};
+}
 
 /** Normalised child → parent map. Later rows win, so a draft (sorted last) overrides its published twin. */
 const parentMap = (rows: ParentRow[]): Map<string, string | undefined> => {
@@ -37,7 +37,7 @@ const parentMap = (rows: ParentRow[]): Map<string, string | undefined> => {
     map.set(normalizeOrganigramId(row._id), row.parent ? normalizeOrganigramId(row.parent) : undefined)
   }
   return map
-};
+}
 
 /**
  * Every `_id` the parent picker must hide for `selfId`: the node itself, its
@@ -67,7 +67,7 @@ export const collectOrganigramExcludedIds = (selfId: string, rows: ParentRow[]):
   }
   const ids = [...excluded]
   return [...ids, ...ids.map((id) => `drafts.${id}`)]
-};
+}
 
 /** `options.filter` for `organigramNode.parentNode`. */
 export const organigramParentFilter = async ({
@@ -81,7 +81,7 @@ export const organigramParentFilter = async ({
   if (!selfId) return {filter: 'true', params: {excluded: []}}
   const rows = await getClient({apiVersion: API_VERSION}).fetch<ParentRow[]>(ALL_NODES_QUERY)
   return {filter: '!(_id in $excluded)', params: {excluded: collectOrganigramExcludedIds(selfId, rows)}}
-};
+}
 
 /**
  * Walks the PUBLISHED parent chain upward from the picked parent. Fails when
@@ -92,7 +92,8 @@ export const organigramParentFilter = async ({
  */
 export const validateOrganigramParent = async (
   ref: {_ref?: string} | undefined,
-  context: ValidationContext,): Promise<true | string> => {
+  context: ValidationContext,
+): Promise<true | string> => {
   const selfId = (context.document as {_id?: string} | undefined)?._id
   if (!ref?._ref || !selfId) return true
 
@@ -110,4 +111,4 @@ export const validateOrganigramParent = async (
   return reachesSelf(normalizeOrganigramId(ref._ref))
     ? 'Dit zou een kringverwijzing maken: een positie kan niet (indirect) aan zichzelf rapporteren.'
     : true
-};
+}

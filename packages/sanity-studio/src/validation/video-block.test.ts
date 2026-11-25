@@ -17,7 +17,7 @@ const getUploadedFileValidation = () => {
     rule: InstanceType<typeof ConcreteRuleClass>,
   ) => InstanceType<typeof ConcreteRuleClass>
   return validation
-};
+}
 
 const makeContext = (asset: {size?: number} | null) => {
   return {
@@ -29,7 +29,7 @@ const makeContext = (asset: {size?: number} | null) => {
     environment: 'test',
     path: [],
   }
-};
+}
 
 describe('videoBlock.uploadedFile validation (rule level)', () => {
   it('emits exactly one warning marker (no error) for an oversized upload', async () => {

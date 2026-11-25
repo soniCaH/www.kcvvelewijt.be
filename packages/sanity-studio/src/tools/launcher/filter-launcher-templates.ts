@@ -17,7 +17,8 @@ import {isLauncherTemplate, type LauncherTemplate} from '../../templates/types'
 export const filterLauncherTemplates = (
   templates: ReadonlyArray<Template>,
   isKnownType: (schemaType: string) => boolean,
-  onUnknownType?: (schemaType: string) => void,): LauncherTemplate[] => {
+  onUnknownType?: (schemaType: string) => void,
+): LauncherTemplate[] => {
   const result: LauncherTemplate[] = []
   const seenUnknown = new Set<string>()
   for (const template of templates) {
@@ -32,4 +33,4 @@ export const filterLauncherTemplates = (
     result.push(template)
   }
   return result
-};
+}

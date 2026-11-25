@@ -18,7 +18,7 @@ const getMembersItemValidation = () => {
     rule: InstanceType<typeof ConcreteRuleClass>,
   ) => InstanceType<typeof ConcreteRuleClass>
   return validation
-};
+}
 
 const makeContext = (doc: Record<string, unknown> | null) => {
   return {
@@ -30,7 +30,7 @@ const makeContext = (doc: Record<string, unknown> | null) => {
     environment: 'test',
     path: [],
   }
-};
+}
 
 describe('organigramNode.members[] validation (rule level)', () => {
   it('emits exactly one warning marker (no error) for an archived member', async () => {

@@ -58,6 +58,6 @@ export const BulkImageUploadInput = (props: ArrayOfObjectsInputProps): JSX.Eleme
       />
     </Stack>
   )
-};
+}
 
 BulkImageUploadInput.displayName = 'BulkImageUploadInput'

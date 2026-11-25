@@ -49,4 +49,4 @@ export const prepareResponsibilityPreview = (selection: ResponsibilityPreviewSel
     title: title ?? '(untitled)',
     subtitle: parts.join(' — '),
   }
-};
+}

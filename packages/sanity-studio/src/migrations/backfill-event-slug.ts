@@ -47,7 +47,7 @@ export const slugifyTitle = (title: string, maxLength = SLUG_MAX_LENGTH): string
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '')
   return normalized.slice(0, maxLength).replace(/-+$/, '')
-};
+}
 
 /**
  * Pure variant for unit tests — `seenSlugs` lets the test pre-populate
@@ -56,7 +56,8 @@ export const slugifyTitle = (title: string, maxLength = SLUG_MAX_LENGTH): string
  */
 export const migrateBackfillEventSlug = (
   doc: EventDoc,
-  seenSlugs: Set<string> = new Set(),): Patch[] | undefined => {
+  seenSlugs: Set<string> = new Set(),
+): Patch[] | undefined => {
   const existing = doc.slug?.current
   if (typeof existing === 'string' && existing.length > 0) {
     seenSlugs.add(existing)
@@ -83,7 +84,7 @@ export const migrateBackfillEventSlug = (
   seenSlugs.add(candidate)
 
   return [at('slug', set({_type: 'slug', current: candidate}))]
-};
+}
 
 const runScopedSeenSlugs = new Set<string>()
 

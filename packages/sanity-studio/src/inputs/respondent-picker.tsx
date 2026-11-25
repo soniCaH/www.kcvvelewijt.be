@@ -186,6 +186,6 @@ export const RespondentPicker = (props: StringInputProps): JSX.Element => {
       )}
     </Stack>
   )
-};
+}
 
 RespondentPicker.displayName = 'RespondentPicker'

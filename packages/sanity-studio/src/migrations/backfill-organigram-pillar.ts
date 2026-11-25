@@ -98,7 +98,7 @@ export const migrateBackfillOrganigramPillar = (doc: OrganigramNodeDoc): Patch[]
   if (why && !doc.description?.trim()) patches.push(at('description', set(why)))
 
   return patches.length > 0 ? patches : undefined
-};
+}
 
 export default defineMigration({
   title: 'Backfill organigramNode.pillar and key-box why-lines (#3525)',

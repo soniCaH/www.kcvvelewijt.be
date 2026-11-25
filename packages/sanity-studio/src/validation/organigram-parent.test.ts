@@ -12,7 +12,7 @@ type Row = {_id: string; parent?: string}
 /** A client whose `fetch` answers every query with the given rows. */
 const clientWith = (rows: Row[]) => {
   return {fetch: vi.fn().mockResolvedValue(rows)}
-};
+}
 
 const field = () => {
   const f = organigramNode.fields.find((x) => x.name === 'parentNode')
@@ -21,7 +21,7 @@ const field = () => {
     validation: (rule: InstanceType<typeof ConcreteRuleClass>) => InstanceType<typeof ConcreteRuleClass>
     options: {filter: (ctx: unknown) => Promise<{filter: string; params: {excluded: string[]}}>}
   }
-};
+}
 
 const validateParent = async (selfId: string, parentRef: string | undefined, rows: Row[]) => {
   const rule = field().validation(new ConcreteRuleClass())
@@ -36,7 +36,7 @@ const validateParent = async (selfId: string, parentRef: string | undefined, row
   }
   const value = parentRef ? {_type: 'reference', _ref: parentRef} : undefined
   return rule.validate(value, context as never)
-};
+}
 
 describe('normalizeOrganigramId', () => {
   it('strips drafts. and versions.<release>. prefixes', () => {

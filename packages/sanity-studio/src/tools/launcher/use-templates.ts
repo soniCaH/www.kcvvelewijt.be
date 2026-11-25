@@ -31,4 +31,4 @@ export const useTemplates = (): LauncherTemplate[] => {
       ),
     [allTemplates, schema],
   )
-};
+}

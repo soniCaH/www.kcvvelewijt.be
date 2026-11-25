@@ -11,7 +11,8 @@ type ArticleTagsInputComponent = ComponentType<ArrayOfPrimitivesInputProps<strin
  */
 export const applyArticleTagsInput = (
   schemaTypes: readonly SchemaTypeDefinition[],
-  InputComponent: ArticleTagsInputComponent,): SchemaTypeDefinition[] => {
+  InputComponent: ArticleTagsInputComponent,
+): SchemaTypeDefinition[] => {
   return schemaTypes.map((schemaType) => {
     if (schemaType.name !== 'article') return schemaType
     const fields = (schemaType as unknown as {fields?: readonly Record<string, unknown>[]}).fields
@@ -32,4 +33,4 @@ export const applyArticleTagsInput = (
     })
     return {...schemaType, fields: nextFields} as SchemaTypeDefinition
   })
-};
+}

@@ -17,7 +17,8 @@ type RespondentPickerComponent = ComponentType<StringInputProps>
  */
 export const applyRespondentPicker = (
   schemaTypes: readonly SchemaTypeDefinition[],
-  InputComponent: RespondentPickerComponent,): SchemaTypeDefinition[] => {
+  InputComponent: RespondentPickerComponent,
+): SchemaTypeDefinition[] => {
   return schemaTypes.map((schemaType) => {
     if (schemaType.name !== 'qaPairRespondent') return schemaType
     const fields = (schemaType as unknown as {fields?: readonly Record<string, unknown>[]}).fields
@@ -38,4 +39,4 @@ export const applyRespondentPicker = (
     })
     return {...schemaType, fields: nextFields} as SchemaTypeDefinition
   })
-};
+}

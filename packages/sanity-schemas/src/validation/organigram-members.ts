@@ -12,7 +12,8 @@ interface Reference {
  */
 export const validateOrganigramMember = async (
   ref: Reference | undefined,
-  context: ValidationContext,): Promise<true | {message: string}> => {
+  context: ValidationContext,
+): Promise<true | {message: string}> => {
   if (!ref?._ref) return true
 
   const client = context.getClient({apiVersion: '2024-01-01'})
@@ -28,4 +29,4 @@ export const validateOrganigramMember = async (
   }
 
   return true
-};
+}

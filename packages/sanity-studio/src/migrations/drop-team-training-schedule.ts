@@ -32,10 +32,11 @@ export interface TeamWithTrainingScheduleDoc {
 type Patch = ReturnType<typeof at>
 
 export const migrateDropTeamTrainingSchedule = (
-  doc: TeamWithTrainingScheduleDoc,): Patch[] | undefined => {
+  doc: TeamWithTrainingScheduleDoc,
+): Patch[] | undefined => {
   if (doc.trainingSchedule === undefined) return undefined
   return [at('trainingSchedule', unset())]
-};
+}
 
 export default defineMigration({
   title: 'Drop deleted team field: trainingSchedule (#2582)',

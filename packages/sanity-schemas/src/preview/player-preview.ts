@@ -22,4 +22,4 @@ export const preparePlayerPreview = (selection: Record<keyof typeof playerPrevie
     subtitle: jerseyNumber ? `#${jerseyNumber}` : 'Geen rugnummer',
     media,
   }
-};
+}

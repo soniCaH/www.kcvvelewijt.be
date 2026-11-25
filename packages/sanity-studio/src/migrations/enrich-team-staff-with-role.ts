@@ -39,7 +39,7 @@ export const migrateEnrichTeamStaffWithRole = (doc: TeamWithStaffDoc): Patch[] |
         },
   )
   return [at('staff', set(migrated))]
-};
+}
 
 export default defineMigration({
   title: 'Convert team.staff from plain refs to objects with member + role',

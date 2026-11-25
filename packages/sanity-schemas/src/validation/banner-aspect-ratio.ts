@@ -61,7 +61,8 @@ const ASSET_REF_DIMENSIONS_RE = /-(\d+)x(\d+)-\w+$/
  * for a check that exists to catch a mistake.
  */
 export const validateBannerAspectRatio = (
-  value: ImageValue | undefined,): true | {message: string} => {
+  value: ImageValue | undefined,
+): true | {message: string} => {
   const ref = value?.asset?._ref
   if (!ref) return true
 
@@ -93,4 +94,4 @@ export const validateBannerAspectRatio = (
   }
 
   return true
-};
+}

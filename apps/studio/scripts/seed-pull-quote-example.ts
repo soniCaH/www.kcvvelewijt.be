@@ -156,7 +156,7 @@ const main = async () => {
     `Seeded ${doc._id} — bekijk op staging via /nieuws/${doc.slug.current} (transaction ${transactionId}).`,
   )
   if (existingDraft) console.log(`Deleted a lingering draft: ${existingDraft}`)
-};
+}
 
 main().catch((err) => {
   console.error(err)

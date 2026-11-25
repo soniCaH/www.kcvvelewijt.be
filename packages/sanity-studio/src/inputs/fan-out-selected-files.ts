@@ -18,10 +18,11 @@ interface FanOutContext {
  */
 export const fanOutSelectedFiles = (
   files: readonly File[],
-  {imageMember, assetSource, onSelectFile}: FanOutContext,): void => {
+  {imageMember, assetSource, onSelectFile}: FanOutContext,
+): void => {
   if (!onSelectFile) return
   for (const file of files) {
     if (!file.type.startsWith('image/')) continue
     onSelectFile({file, schemaType: imageMember, assetSource})
   }
-};
+}

@@ -54,4 +54,4 @@ export const LauncherGrid = ({templates, onSelect}: LauncherGridProps): JSX.Elem
       </Stack>
     </Container>
   )
-};
+}

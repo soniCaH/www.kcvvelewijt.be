@@ -30,4 +30,4 @@ export const prepareOrganigramNodePreview = (selection: OrganigramNodePreviewSel
     title: [badge, title].filter(Boolean).join(' '),
     subtitle: count > 0 ? `${count} ${count === 1 ? 'lid' : 'leden'}` : 'Vacant',
   }
-};
+}

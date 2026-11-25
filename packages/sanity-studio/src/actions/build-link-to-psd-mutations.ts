@@ -53,7 +53,7 @@ const deepReplaceRef = (value: unknown, oldId: string, newId: string): unknown =
     }
   }
   return result
-};
+}
 
 export const buildLinkToPsdMutations = ({oldDoc, psdId, referencingDocs}: LinkToPsdInput): Mutation[] => {
   const oldId = oldDoc._id
@@ -97,4 +97,4 @@ export const buildLinkToPsdMutations = ({oldDoc, psdId, referencingDocs}: LinkTo
   mutations.push({delete: {id: `drafts.${oldId}`}})
 
   return mutations
-};
+}

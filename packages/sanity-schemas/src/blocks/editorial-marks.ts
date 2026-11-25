@@ -56,7 +56,7 @@ export const editorialBioOf = () => {
       },
     }),
   ]
-};
+}
 
 /**
  * `of:[block]` shared by the constrained accent title fields
@@ -76,4 +76,4 @@ export const accentTitleOf = () => {
       },
     }),
   ]
-};
+}

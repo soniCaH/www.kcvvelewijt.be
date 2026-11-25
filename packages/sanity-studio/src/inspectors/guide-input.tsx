@@ -29,4 +29,4 @@ export const GuideFormInput = (props: InputProps): JSX.Element => {
       {props.renderDefault(props)}
     </Stack>
   )
-};
+}

@@ -40,14 +40,15 @@ const answerSnippet = (answer: unknown): string | undefined => {
   }
   const joined = blocks.join(' ').trim()
   return joined.length > 0 ? joined : undefined
-};
+}
 
 export const prepareQaPairRespondentPreview = (
-  selection: QaPairRespondentPreviewSelection,) => {
+  selection: QaPairRespondentPreviewSelection,
+) => {
   const {respondentKey, answer} = selection
   return {
     title:
       respondentKey === ALL_RESPONDENTS_KEY ? 'Allen (unaniem)' : 'Respondent',
     subtitle: answerSnippet(answer),
   }
-};
+}

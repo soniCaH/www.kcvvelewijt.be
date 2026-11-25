@@ -25,7 +25,8 @@ const DUPLICATE_QUERY = `count(*[_type == "shortLink" && name == $name && !(_id 
  */
 export const validateShortLinkName = async (
   value: unknown,
-  context: ShortLinkNameContext,): Promise<true | string> => {
+  context: ShortLinkNameContext,
+): Promise<true | string> => {
   if (typeof value !== 'string' || value.length === 0) return true
 
   if (!SHORT_LINK_NAME_PATTERN.test(value)) {
@@ -43,7 +44,7 @@ export const validateShortLinkName = async (
     if (taken > 0) return `Er bestaat al een korte link "${value}". Elke naam kan maar één keer gebruikt worden.`
   }
   return true
-};
+}
 
 /**
  * Validation for `shortLink.target` (#3573): a full `https://` URL or an
@@ -76,7 +77,7 @@ export const validateShortLinkTarget = (value: unknown): true | string => {
     }
   }
   return true
-};
+}
 
 /** The club's own host, any case, optional port; the lookahead stops `kcvvelewijt.be.evil.com` and `kcvvelewijt.be@evil.com`. */
 const OWN_SITE_URL = /^https:\/\/(?:www\.)?kcvvelewijt\.be\.?(?::\d*)?(?=[/?#]|$)([^?#]*)/i
@@ -85,4 +86,4 @@ const OWN_SITE_URL = /^https:\/\/(?:www\.)?kcvvelewijt\.be\.?(?::\d*)?(?=[/?#]|$
 const ownSitePath = (value: string): string | null => {
   const match = OWN_SITE_URL.exec(value)
   return match ? match[1] || '/' : null
-};
+}

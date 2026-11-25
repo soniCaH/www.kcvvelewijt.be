@@ -153,6 +153,6 @@ export const ArticleTagsInput = (props: ArrayOfPrimitivesInputProps<string>): JS
       />
     </Stack>
   )
-};
+}
 
 ArticleTagsInput.displayName = 'ArticleTagsInput'

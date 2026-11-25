@@ -38,18 +38,19 @@ export interface PullQuoteSpeakerReferenceContext {
 
 export const validatePullQuoteSpeakerReference = (
   value: unknown,
-  context: PullQuoteSpeakerReferenceContext,): true | string => {
+  context: PullQuoteSpeakerReferenceContext,
+): true | string => {
   const hasReference = value !== undefined && value !== null
   const externalName = context.parent?.externalName?.trim()
   if (hasReference && externalName) {
     return 'Kies één spreker: een verwijzing naar een spelers- of stafprofiel óf een externe naam — niet beide.'
   }
   return true
-};
+}
 
 const hasSpeakerReference = (speaker: unknown): boolean => {
   return speaker !== undefined && speaker !== null
-};
+}
 
 export interface PullQuoteExternalRoleSourceContext {
   parent?: {speaker?: unknown}
@@ -58,13 +59,14 @@ export interface PullQuoteExternalRoleSourceContext {
 /** Shared by `externalRole` and `externalSource` — rule 2 above. */
 export const validatePullQuoteExternalRoleOrSource = (
   value: unknown,
-  context: PullQuoteExternalRoleSourceContext,): true | string => {
+  context: PullQuoteExternalRoleSourceContext,
+): true | string => {
   const filled = typeof value === 'string' && value.trim().length > 0
   if (filled && hasSpeakerReference(context.parent?.speaker)) {
     return 'Rol en bron horen alleen bij een externe spreker — maak ze leeg.'
   }
   return true
-};
+}
 
 export interface PullQuoteExternalNameContext {
   parent?: {externalRole?: string; externalSource?: string; speaker?: unknown}
@@ -72,7 +74,8 @@ export interface PullQuoteExternalNameContext {
 
 export const validatePullQuoteExternalName = (
   value: unknown,
-  context: PullQuoteExternalNameContext,): true | string => {
+  context: PullQuoteExternalNameContext,
+): true | string => {
   // A reference speaker already covers this quote — a role/source filled in
   // alongside it is flagged on those fields instead (rule 2, above), so this
   // validator stays silent rather than also demanding a name (rule 3's job
@@ -86,4 +89,4 @@ export const validatePullQuoteExternalName = (
     return 'Vul een naam in voor de externe spreker — een rol of bron alleen is niet genoeg.'
   }
   return true
-};
+}

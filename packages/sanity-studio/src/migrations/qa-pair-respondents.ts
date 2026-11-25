@@ -52,7 +52,7 @@ export const defaultGenKey = (): string => {
     {length: DEFAULT_KEY_LENGTH},
     () => KEY_ALPHABET[Math.floor(Math.random() * KEY_ALPHABET.length)],
   ).join('')
-};
+}
 
 const isQaBlock = (value: unknown): value is QaBlockLike => {
   return (
@@ -60,16 +60,17 @@ const isQaBlock = (value: unknown): value is QaBlockLike => {
     value !== null &&
     (value as {_type?: string})._type === 'qaBlock'
   )
-};
+}
 
 const asQaPair = (value: unknown): QaPairLike | null => {
   if (typeof value !== 'object' || value === null) return null
   return value as QaPairLike
-};
+}
 
 export const migrateQaPairRespondents = (
   doc: ArticleWithQaDoc,
-  genKey: () => string = defaultGenKey,): Patch[] | undefined => {
+  genKey: () => string = defaultGenKey,
+): Patch[] | undefined => {
   const body = Array.isArray(doc.body) ? doc.body : null
   if (!body) return undefined
 
@@ -131,7 +132,7 @@ export const migrateQaPairRespondents = (
   }
 
   return patches.length > 0 ? patches : undefined
-};
+}
 
 export default defineMigration({
   title:

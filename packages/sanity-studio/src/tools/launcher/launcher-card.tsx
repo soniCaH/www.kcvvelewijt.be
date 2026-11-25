@@ -59,4 +59,4 @@ export const LauncherCard = ({template, onSelect}: LauncherCardProps): JSX.Eleme
       </Stack>
     </Card>
   )
-};
+}

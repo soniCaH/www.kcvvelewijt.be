@@ -30,7 +30,7 @@ const LauncherTool = (): JSX.Element => {
   }
 
   return <LauncherGrid templates={templates} onSelect={handleSelect} />
-};
+}
 
 /**
  * Tool definition consumed by `apps/studio/sanity.config.ts` and
@@ -47,4 +47,4 @@ export const launcherTool = (): Tool => {
     icon: ComposeSparklesIcon,
     component: LauncherTool,
   }
-};
+}

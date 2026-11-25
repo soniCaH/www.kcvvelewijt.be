@@ -42,7 +42,7 @@ const quoteSnippet = (body: unknown): string | undefined => {
   }
   const joined = blocks.join(' ').trim()
   return joined.length > 0 ? joined : undefined
-};
+}
 
 export const preparePullQuotePreview = (selection: PullQuotePreviewSelection) => {
   const {body, speakerFirstName, speakerLastName, externalName} = selection
@@ -57,4 +57,4 @@ export const preparePullQuotePreview = (selection: PullQuotePreviewSelection) =>
   const external = typeof externalName === 'string' ? externalName.trim() : ''
   const subtitle = referenceName || external || 'Geen spreker'
   return {title, subtitle}
-};
+}

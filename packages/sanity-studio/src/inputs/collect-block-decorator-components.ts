@@ -16,7 +16,8 @@ import type {SchemaTypeDefinition} from 'sanity'
  */
 export const collectBlockDecoratorComponents = (
   types: readonly SchemaTypeDefinition[],
-  value: string,): unknown[] => {
+  value: string,
+): unknown[] => {
   const out: unknown[] = []
   for (const type of types) {
     const fields = (type as {fields?: unknown[]}).fields
@@ -48,4 +49,4 @@ export const collectBlockDecoratorComponents = (
     }
   }
   return out
-};
+}

@@ -26,7 +26,7 @@ const flattenTitle = (value: unknown): string => {
     return block?.children?.map((c) => c.text ?? '').join('') ?? ''
   }
   return ''
-};
+}
 
 export const prepareArticlePreview = (selection: Record<keyof typeof articlePreviewSelect, any>) => {
   const {title, media, publishedAt} = selection
@@ -34,4 +34,4 @@ export const prepareArticlePreview = (selection: Record<keyof typeof articlePrev
   const subtitle =
     parsed && !Number.isNaN(parsed.getTime()) ? parsed.toLocaleDateString('nl-BE') : 'Geen datum'
   return {title: flattenTitle(title), subtitle, media}
-};
+}

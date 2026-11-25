@@ -27,4 +27,4 @@ export const validateLink = (value: unknown): true | string => {
   return LINK_PATTERN.test(value) && !hasUnsafeChar(value)
     ? true
     : 'Dit is geen geldige link. Gebruik een volledige link (https://…) of een pad dat met "/" begint (bijv. /jeugd/visie), zonder spaties.'
-};
+}

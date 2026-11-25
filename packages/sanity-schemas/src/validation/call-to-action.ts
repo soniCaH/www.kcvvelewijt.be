@@ -22,7 +22,8 @@ export interface CallToActionValue {
  * below, never this gate on its own.
  */
 const isCallToActionStarted = (
-  cta: CallToActionValue | undefined | null,): boolean => {
+  cta: CallToActionValue | undefined | null,
+): boolean => {
   if (!cta) return false
   return (
     hasText(cta.question) ||
@@ -32,7 +33,7 @@ const isCallToActionStarted = (
     hasText(cta.href) ||
     Boolean(cta.reference?._ref)
   )
-};
+}
 
 /**
  * `question` / `lead` / `buttonLabel` share one rule: optional while the
@@ -41,10 +42,11 @@ const isCallToActionStarted = (
 export const validateCallToActionRequiredField = (
   cta: CallToActionValue | undefined,
   value: unknown,
-  message: string,): true | string => {
+  message: string,
+): true | string => {
   if (!isCallToActionStarted(cta)) return true
   return hasText(value) ? true : message
-};
+}
 
 /**
  * `emphasis` must be a literal substring of `question` when set. Both sides
@@ -55,14 +57,15 @@ export const validateCallToActionRequiredField = (
  */
 export const validateCallToActionEmphasis = (
   cta: CallToActionValue | undefined,
-  emphasis: unknown,): true | string => {
+  emphasis: unknown,
+): true | string => {
   if (!hasText(emphasis)) return true
   const question = (cta?.question ?? '').trim()
   const trimmedEmphasis = typeof emphasis === 'string' ? emphasis.trim() : ''
   return question.includes(trimmedEmphasis)
     ? true
     : 'Het accentwoord moet letterlijk voorkomen in de vraag.'
-};
+}
 
 /**
  * Exactly one of `reference` / `href` once the object is started — checked
@@ -70,7 +73,8 @@ export const validateCallToActionEmphasis = (
  */
 export const validateCallToActionLink = (
   cta: CallToActionValue | undefined,
-  field: 'reference' | 'href',): true | string => {
+  field: 'reference' | 'href',
+): true | string => {
   if (!isCallToActionStarted(cta)) return true
   const hasReference = Boolean(cta?.reference?._ref)
   const hasHref = hasText(cta?.href)
@@ -83,4 +87,4 @@ export const validateCallToActionLink = (
       : 'Verplicht zodra je een oproep invult: vul een URL in, of kies hierboven een interne verwijzing.'
   }
   return true
-};
+}

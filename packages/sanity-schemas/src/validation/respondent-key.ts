@@ -36,7 +36,8 @@ export interface RespondentKeyContext {
 
 export const validateRespondentKey = (
   value: unknown,
-  context: RespondentKeyContext,): true | string => {
+  context: RespondentKeyContext,
+): true | string => {
   const tag = context.parent?.tag ?? 'standard'
   if (!['key', 'quote'].includes(tag)) return true
 
@@ -52,4 +53,4 @@ export const validateRespondentKey = (
   if (!subjects.some((s) => s?._key === value))
     return 'Deze respondent staat niet meer in de lijst van subjects'
   return true
-};
+}

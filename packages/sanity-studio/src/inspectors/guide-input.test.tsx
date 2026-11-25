@@ -29,7 +29,7 @@ const makeProps = (overrides: Record<string, unknown>): InputProps => {
     renderDefault: () => <div>{DEFAULT_MARKER}</div>,
     ...overrides,
   } as unknown as InputProps
-};
+}
 
 describe('GuideFormInput', () => {
   it('renders the guide above the default form at the document root for a guided type', () => {

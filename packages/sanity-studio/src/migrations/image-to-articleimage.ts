@@ -78,10 +78,11 @@ const asLegacyImageBlock = (value: unknown): LegacyImageBlock | null => {
   const block = value as LegacyImageBlock
   if (block._type !== 'image') return null
   return block
-};
+}
 
 export const migrateImageToArticleImage = (
-  doc: ArticleWithImageBlocksDoc,): Patch[] | undefined => {
+  doc: ArticleWithImageBlocksDoc,
+): Patch[] | undefined => {
   const body = Array.isArray(doc.body) ? doc.body : null
   if (!body) return undefined
 
@@ -139,7 +140,7 @@ export const migrateImageToArticleImage = (
   }
 
   return patches.length > 0 ? patches : undefined
-};
+}
 
 export default defineMigration({
   title: 'Migrate legacy `image` body blocks → `articleImage` (#1850)',

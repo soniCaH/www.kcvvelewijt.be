@@ -95,4 +95,4 @@ export const staffStructure = (S: StructureBuilder) => {
             ),
         ]),
     )
-};
+}

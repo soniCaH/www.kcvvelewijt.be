@@ -28,7 +28,7 @@ export const PullquoteDecorator = (props: BlockDecoratorProps) => {
       {props.children}
     </span>
   )
-};
+}
 
 export const AccentDecorator = (props: BlockDecoratorProps) => {
   return (
@@ -36,4 +36,4 @@ export const AccentDecorator = (props: BlockDecoratorProps) => {
       {props.children}
     </span>
   )
-};
+}

@@ -22,7 +22,7 @@ export const auditFactBlocks = (doc: FactBlockArticleDoc): string | undefined =>
   const requiredType = articleType === 'event' ? 'eventFact' : 'transferFact'
   if ((doc.body ?? []).some((b) => b._type === requiredType)) return undefined
   return `[${articleType} missing ${requiredType}] ${articleLabel(doc)}`
-};
+}
 
 export default defineMigration({
   title: 'Audit event/transfer articles missing required fact blocks',

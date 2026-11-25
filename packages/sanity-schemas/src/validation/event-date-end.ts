@@ -10,11 +10,12 @@ export interface EventDateEndContext {
 
 export const validateEventDateEnd = (
   dateEnd: string | undefined,
-  context: EventDateEndContext,): true | string => {
+  context: EventDateEndContext,
+): true | string => {
   const dateStart = context.parent?.dateStart
   if (!dateEnd || !dateStart) return true
   const end = new Date(dateEnd).getTime()
   const start = new Date(dateStart).getTime()
   if (Number.isNaN(end) || Number.isNaN(start)) return true
   return end >= start ? true : 'De einddatum moet op of na de startdatum vallen.'
-};
+}

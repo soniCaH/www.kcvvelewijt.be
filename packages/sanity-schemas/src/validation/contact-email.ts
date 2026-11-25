@@ -10,8 +10,9 @@ const EMAIL_PATTERN =
 
 export const validateContactEmail = (
   value: unknown,
-  parent: {contactType?: string} | undefined,): true | string => {
+  parent: {contactType?: string} | undefined,
+): true | string => {
   if (parent?.contactType !== 'manual') return true
   if (typeof value !== 'string' || value.length === 0) return true
   return EMAIL_PATTERN.test(value) ? true : 'Dit is geen geldig e-mailadres.'
-};
+}

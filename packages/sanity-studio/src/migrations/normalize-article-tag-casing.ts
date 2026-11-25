@@ -75,10 +75,11 @@ export const canonicaliseTags = (tags: readonly string[]): string[] | null => {
     out.length !== canonical.length || canonical.some((c, i) => c !== tags[i])
 
   return changed ? out : null
-};
+}
 
 export const migrateNormalizeArticleTagCasing = (
-  doc: TaggedArticleDoc,): Patch[] | undefined => {
+  doc: TaggedArticleDoc,
+): Patch[] | undefined => {
   if (!Array.isArray(doc.tags)) return undefined
   if (doc.tags.length === 0) return undefined
 
@@ -92,7 +93,7 @@ export const migrateNormalizeArticleTagCasing = (
   if (next === null) return undefined
 
   return [at('tags', set(next))]
-};
+}
 
 export default defineMigration({
   title: 'Collapse case-variant article tags onto one canonical spelling',

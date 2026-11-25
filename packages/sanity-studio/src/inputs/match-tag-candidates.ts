@@ -13,7 +13,7 @@ const normalizeCanonicalTags = (canonicalTags: readonly string[]): string[] => {
     result.push(tag)
   }
   return result
-};
+}
 
 /**
  * Returns canonical tags whose lowercase value starts with the lowercase input,
@@ -22,14 +22,15 @@ const normalizeCanonicalTags = (canonicalTags: readonly string[]): string[] => {
  */
 export const matchTagCandidates = (
   input: string,
-  canonicalTags: readonly string[],): string[] => {
+  canonicalTags: readonly string[],
+): string[] => {
   const trimmed = input.trim().toLowerCase()
   const unique = normalizeCanonicalTags(canonicalTags)
   const matches = trimmed === ''
     ? unique
     : unique.filter((tag) => tag.toLowerCase().startsWith(trimmed))
   return [...matches].sort((a, b) => a.localeCompare(b, 'nl-BE'))
-};
+}
 
 /**
  * Maps a user-entered value to its canonical casing when an existing tag
@@ -38,7 +39,8 @@ export const matchTagCandidates = (
  */
 export const canonicalizeTagInput = (
   input: string,
-  canonicalTags: readonly string[],): string => {
+  canonicalTags: readonly string[],
+): string => {
   const trimmed = input.trim()
   const needle = trimmed.toLowerCase()
   for (const tag of canonicalTags) {
@@ -46,4 +48,4 @@ export const canonicalizeTagInput = (
     if (tag.toLowerCase() === needle) return tag
   }
   return trimmed
-};
+}
