@@ -261,7 +261,7 @@ const SessionsGrid = ({ sessions }: { sessions: ResolvedSession[] }) => {
   return (
     <dl
       data-event-detail-sessions="true"
-      className="grid grid-cols-[80px_auto_1fr] gap-x-[14px] gap-y-[6px]"
+      className="grid grid-cols-[auto_auto_1fr] items-baseline gap-x-[14px] gap-y-[6px]"
     >
       {sessions.map((session, i) => {
         const time = formatTimeRange(session.startTime, session.endTime);
@@ -269,10 +269,11 @@ const SessionsGrid = ({ sessions }: { sessions: ResolvedSession[] }) => {
         return (
           <div key={key} className="contents">
             <dt className="text-ink-muted font-mono text-[10px] leading-tight tracking-[0.18em] uppercase">
-              {weekdayAbbrev(session.date)} · {session.date.day}
+              {weekdayAbbrev(session.date)}
             </dt>
+            {/* Day + month, so a schedule over several months reads unambiguously (#3891). */}
             <dd className="text-ink font-display m-0 text-[14px] leading-tight font-bold italic">
-              {session.date.weekday.replace(/^./, (c) => c.toUpperCase())}
+              {session.date.day} {session.date.monthLong}
             </dd>
             <dd className="text-ink-muted m-0 font-mono text-[11px] leading-tight tracking-[0.06em]">
               {time ?? "—"}

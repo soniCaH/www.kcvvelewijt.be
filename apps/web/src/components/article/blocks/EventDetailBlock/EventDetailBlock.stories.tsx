@@ -174,3 +174,33 @@ export const Mobile: Story = {
     },
   },
 };
+
+// Schedule over several months (#3891): 1 Feb / 1 Mar and 22 Feb / 22 Mar
+// share weekday and day number, so each row must carry its month.
+const mondays = [
+  "2027-01-25",
+  "2027-02-01",
+  "2027-02-22",
+  "2027-03-01",
+  "2027-03-22",
+  "2027-05-10",
+];
+
+export const MultiMonthSessions: Story = {
+  args: {
+    isPast: false,
+    value: {
+      _key: "evt-multi-month",
+      _type: "eventFact",
+      title: "Opleiding Initiator / UEFA C",
+      sessions: mondays.map((date) => ({
+        _key: date,
+        date,
+        startTime: "18:30",
+        endTime: "22:30",
+      })),
+      location: "Sportpark Elewijt",
+      competitionTag: "Opleiding",
+    },
+  },
+};
