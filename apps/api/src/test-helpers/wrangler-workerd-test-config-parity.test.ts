@@ -20,14 +20,16 @@ import { describe, expect, it } from "vitest";
 
 /** `key = ["a", "b"]` → `["a", "b"]`. `undefined` if the bracketed group
  * itself is `undefined` (regex didn't match) rather than merely empty. */
-function parseStringArray(bracketed: string | undefined): string[] | undefined {
+const parseStringArray = (
+  bracketed: string | undefined,
+): string[] | undefined => {
   return bracketed
     ?.split(",")
     .map((s) => s.trim().replace(/^"|"$/g, ""))
     .filter(Boolean);
-}
+};
 
-function readWranglerTomlTopLevel(source: string) {
+const readWranglerTomlTopLevel = (source: string) => {
   // Everything before the first `[section]`/`[[section]]` header — the root
   // config, before any `[env.*]` override block.
   const topLevel = source.split(/\n\[/)[0]!;
@@ -39,9 +41,9 @@ function readWranglerTomlTopLevel(source: string) {
     /new_sqlite_classes\s*=\s*\[([^\]]*)\]/.exec(source)?.[1],
   );
   return { date, flags, migrationClasses };
-}
+};
 
-function readWorkerdTestConfig(source: string) {
+const readWorkerdTestConfig = (source: string) => {
   // Strip `//` line comments — wrangler.workerd-test.jsonc is JSONC, and
   // JSON.parse doesn't tolerate them.
   const stripped = source.replace(/^\s*\/\/.*$/gm, "");
@@ -57,7 +59,7 @@ function readWorkerdTestConfig(source: string) {
       (m) => m.new_sqlite_classes ?? [],
     ),
   };
-}
+};
 
 describe("wrangler.workerd-test.jsonc stays in lock-step with wrangler.toml", () => {
   const real = readWranglerTomlTopLevel(

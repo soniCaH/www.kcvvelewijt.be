@@ -15,7 +15,7 @@ global.fetch = vi.fn();
  * (PSD hit first, paced afterwards: the exact defect #2867 fixes) yields the
  * same totals and would pass a count assertion.
  */
-function expectEveryFetchPaced(trace: string[]) {
+const expectEveryFetchPaced = (trace: string[]) => {
   for (const [i] of trace.entries()) {
     const prefix = trace.slice(0, i + 1);
     const tokens = prefix.filter((event) => event === "token").length;
@@ -25,13 +25,13 @@ function expectEveryFetchPaced(trace: string[]) {
       "paced",
     );
   }
-}
+};
 
 /**
  * Gate that records every token grant into a shared trace, so a test can assert
  * both HOW MANY tokens a call path takes and that each one precedes its fetch.
  */
-function makeCountingGate(trace: string[], spentToday = 0) {
+const makeCountingGate = (trace: string[], spentToday = 0) => {
   return Layer.succeed(PsdGateService, {
     acquireToken: Effect.sync(() => {
       trace.push("token");
@@ -42,7 +42,7 @@ function makeCountingGate(trace: string[], spentToday = 0) {
     awaitFlight: () => Effect.succeed(undefined),
     reportOutcome: () => Effect.succeed({ incidentOpen: false }),
   });
-}
+};
 
 const TEAM = {
   id: 1,
@@ -74,7 +74,7 @@ const membersPage = (totalPages: number) => ({
 });
 
 /** Every fetch appends to the trace, so token/fetch interleaving is observable. */
-function stubFetch(trace: string[], bodies: unknown[]) {
+const stubFetch = (trace: string[], bodies: unknown[]) => {
   const mock = global.fetch as ReturnType<typeof vi.fn>;
   for (const body of bodies) {
     mock.mockImplementationOnce(() => {
@@ -82,12 +82,12 @@ function stubFetch(trace: string[], bodies: unknown[]) {
       return Promise.resolve({ ok: true, json: async () => body } as Response);
     });
   }
-}
+};
 
-function run<A, E>(
+const run = <A, E>(
   program: Effect.Effect<A, E, PsdTeamClient>,
   trace: string[],
-) {
+) => {
   return Effect.runPromise(
     program.pipe(
       Effect.provide(PsdTeamClientLive),
@@ -95,7 +95,7 @@ function run<A, E>(
       Effect.provide(makeTestEnvLayer()),
     ),
   );
-}
+};
 
 beforeEach(() => {
   vi.resetAllMocks();

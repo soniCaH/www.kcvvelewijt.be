@@ -16,25 +16,25 @@ const GENDER_LABELS: Record<string, string> = {
 };
 
 /** Minimal escaping for the user-supplied strings we interpolate into HTML. */
-export function esc(value: string): string {
+export const esc = (value: string): string => {
   return value
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
-}
+};
 
 const FOOTER_TEXT =
   "KCVV Elewijt · Driesstraat 32, 1982 Elewijt · https://www.kcvvelewijt.be";
 
-export function shell(title: string, body: string): string {
+export const shell = (title: string, body: string): string => {
   return `<div style="font-family:Arial,Helvetica,sans-serif;color:#1a1a1a;max-width:560px;margin:0 auto;line-height:1.5">
   <h1 style="font-size:18px;color:#005c2e">${title}</h1>
   ${body}
   <hr style="border:none;border-top:1px solid #ddd;margin:24px 0" />
   <p style="font-size:12px;color:#888">KCVV Elewijt · Driesstraat 32, 1982 Elewijt · <a href="https://www.kcvvelewijt.be">kcvvelewijt.be</a></p>
 </div>`;
-}
+};
 
 /** The box holder the applicant and parent mails name; absent/vacant → today's wording. */
 export interface MembershipContact {
@@ -55,10 +55,10 @@ const followUp = (
     ? `${escape(contactLabel(contact))} neemt contact${you} op.`
     : `Iemand van de club neemt binnenkort contact${you} op.`;
 
-function applicantText(
+const applicantText = (
   payload: MembershipRequest,
   contact?: MembershipContact | null,
-): string {
+): string => {
   return [
     `Beste ${payload.firstName},`,
     "",
@@ -68,12 +68,12 @@ function applicantText(
     "",
     FOOTER_TEXT,
   ].join("\n");
-}
+};
 
-function parentText(
+const parentText = (
   payload: MembershipRequest,
   contact?: MembershipContact | null,
-): string {
+): string => {
   return [
     "Beste ouder/voogd,",
     "",
@@ -81,15 +81,15 @@ function parentText(
     "",
     FOOTER_TEXT,
   ].join("\n");
-}
+};
 
 const REMARK_LABEL = "Opmerking";
 
 /** Raw (unescaped) label/value rows shared by the admin html and text parts. */
-function adminRows(
+const adminRows = (
   payload: MembershipRequest,
   isMinor: boolean,
-): ReadonlyArray<readonly [label: string, value: string]> {
+): ReadonlyArray<readonly [label: string, value: string]> => {
   return [
     ["Rol", ROLE_LABELS[payload.role]],
     ["Naam", `${payload.firstName} ${payload.lastName}`],
@@ -107,9 +107,9 @@ function adminRows(
       : []),
     ...(payload.remark ? [[REMARK_LABEL, payload.remark] as const] : []),
   ];
-}
+};
 
-function adminText(payload: MembershipRequest, isMinor: boolean): string {
+const adminText = (payload: MembershipRequest, isMinor: boolean): string => {
   return [
     "Nieuwe interesse via de website",
     "",
@@ -122,12 +122,12 @@ function adminText(payload: MembershipRequest, isMinor: boolean): string {
     "",
     FOOTER_TEXT,
   ].join("\n");
-}
+};
 
-function applicantHtml(
+const applicantHtml = (
   payload: MembershipRequest,
   contact?: MembershipContact | null,
-): string {
+): string => {
   return shell(
     "Bedankt voor je interesse!",
     `<p>Beste ${esc(payload.firstName)},</p>
@@ -135,12 +135,12 @@ function applicantHtml(
         ${followUp(contact, " met je", esc)}</p>
      <p>Er is maar 1 plezante compagnie. Tot snel!</p>`,
   );
-}
+};
 
-function parentHtml(
+const parentHtml = (
   payload: MembershipRequest,
   contact?: MembershipContact | null,
-): string {
+): string => {
   return shell(
     "Interesse ontvangen",
     `<p>Beste ouder/voogd,</p>
@@ -148,9 +148,9 @@ function parentHtml(
         als <strong>${ROLE_LABELS[payload.role]}</strong> bij KCVV Elewijt ontvangen, met jouw toestemming.
         ${followUp(contact, "", esc)}</p>`,
   );
-}
+};
 
-function adminHtml(payload: MembershipRequest, isMinor: boolean): string {
+const adminHtml = (payload: MembershipRequest, isMinor: boolean): string => {
   const row = ([label, value]: readonly [string, string]) =>
     label === REMARK_LABEL
       ? `<tr><td style="padding:4px 12px 4px 0;color:#666;vertical-align:top">${label}</td><td style="padding:4px 0;word-break:break-word">${esc(value).replace(/\n/g, "<br>")}</td></tr>`
@@ -162,20 +162,20 @@ function adminHtml(payload: MembershipRequest, isMinor: boolean): string {
      </table>
      <p style="font-size:13px;color:#888">Beheer dit in Sanity Studio (Interesse).</p>`,
   );
-}
+};
 
 /**
  * Membership-specific email templates. Produces the messages the BFF hands to
  * the form-agnostic {@link EmailMessage} transport: applicant acknowledgment,
  * parent acknowledgment (minors), and the admin notification.
  */
-export function buildMembershipEmails(input: {
+export const buildMembershipEmails = (input: {
   payload: MembershipRequest;
   isMinor: boolean;
   adminRecipient: string;
   /** Holder of the role's contact box; omit when the box is missing or vacant. */
   contact?: MembershipContact | null;
-}): EmailMessage[] {
+}): EmailMessage[] => {
   const { payload, isMinor, adminRecipient, contact } = input;
   const fullName = `${payload.firstName} ${payload.lastName}`;
 
@@ -206,4 +206,4 @@ export function buildMembershipEmails(input: {
   });
 
   return messages;
-}
+};

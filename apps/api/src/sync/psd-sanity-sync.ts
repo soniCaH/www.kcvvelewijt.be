@@ -34,13 +34,13 @@ const positionName = (
  * @returns A Sanity player document populated from the PSD member with an additional `_psdImageUrl` set to the absolute image URL or `null`
  */
 
-export function transformMember(
+export const transformMember = (
   psd: PsdMember,
   baseUrl: string,
 ): SanityPlayerDoc & {
   _psdImageUrl: string | null;
   _psdImageFetchUrl: string | null;
-} {
+} => {
   return {
     psdId: String(psd.id),
     firstName: psd.firstName,
@@ -54,7 +54,7 @@ export function transformMember(
       ? `${baseUrl}${psd.profilePictureURL}`
       : null,
   };
-}
+};
 
 /**
  * Convert a PSD team object into a Sanity-compatible team document.
@@ -64,11 +64,11 @@ export function transformMember(
  * @param staffPsdIds - Array of PSD staff member IDs to associate with the team
  * @returns A SanityTeamDoc containing mapped fields (psdId, name, slug, age, gender, footbelId) and the provided player/staff IDs
  */
-export function transformTeam(
+export const transformTeam = (
   psd: PsdTeam,
   playerPsdIds: string[],
   staffPsdIds: string[],
-): SanityTeamDoc {
+): SanityTeamDoc => {
   const slug = psd.name
     .toLowerCase()
     .normalize("NFD")
@@ -86,7 +86,7 @@ export function transformTeam(
     playerPsdIds,
     staffPsdIds,
   };
-}
+};
 
 /**
  * Convert a PSD staff member record into a Sanity staffMember document and
@@ -103,7 +103,7 @@ export function transformTeam(
  * @param psd - PSD member object (uses fields: id, firstName, lastName, birthDate, functionTitle, profilePictureURL — staff birth dates are stored again for the birthday post, #3570)
  * @param baseUrl - Base URL to prepend to `profilePictureURL` to form an absolute `_psdImageUrl`
  */
-export function transformStaff(
+export const transformStaff = (
   psd: Pick<
     PsdMember,
     "id" | "firstName" | "lastName" | "birthDate" | "functionTitle"
@@ -114,7 +114,7 @@ export function transformStaff(
 ): SanityStaffDoc & {
   _psdImageUrl: string | null;
   _psdImageFetchUrl: string | null;
-} {
+} => {
   const profilePictureURL = psd.profilePictureURL ?? null;
   return {
     psdId: String(psd.id),
@@ -128,7 +128,7 @@ export function transformStaff(
       ? `${baseUrl}${profilePictureURL}`
       : null,
   };
-}
+};
 
 // ─── Member partitioning ──────────────────────────────────────────────────────
 
@@ -140,11 +140,13 @@ export function transformStaff(
  * Note: `active` is intentionally ignored — in PSD it means "has logged in to
  * the platform", not club membership status.
  */
-export function partitionMembers(members: readonly PsdMember[]): {
+export const partitionMembers = (
+  members: readonly PsdMember[],
+): {
   players: readonly PsdMember[];
   staff: readonly PsdMember[];
   unknown: readonly PsdMember[];
-} {
+} => {
   const players: PsdMember[] = [];
   const staff: PsdMember[] = [];
   const unknown: PsdMember[] = [];
@@ -154,7 +156,7 @@ export function partitionMembers(members: readonly PsdMember[]): {
     else unknown.push(m);
   }
   return { players, staff, unknown };
-}
+};
 
 // ─── Reconciliation helper ───────────────────────────────────────────────────
 
@@ -283,7 +285,7 @@ export const reconcileEntity = <E>(
  * pre-#2900 behaviour of retrying every night. The same holds for a failed
  * removal of a portrait PSD no longer has (#3469).
  */
-export function syncMemberImage(
+export const syncMemberImage = (
   kind: "player" | "staff",
   psdId: string,
   stableImageUrl: string | null,
@@ -295,7 +297,7 @@ export function syncMemberImage(
     stableUrl: string,
   ) => Effect.Effect<void, SanityMutationError>,
   unset: (psdId: string) => Effect.Effect<void, SanityMutationError>,
-): Effect.Effect<boolean> {
+): Effect.Effect<boolean> => {
   return Effect.gen(function* () {
     if (!stableImageUrl || !fetchImageUrl) {
       // PSD has no portrait. A stored one is removed (#3469) — the only way a
@@ -343,7 +345,7 @@ export function syncMemberImage(
       ),
     );
   });
-}
+};
 
 // ─── Sync effect ──────────────────────────────────────────────────────────────
 
@@ -461,9 +463,9 @@ const ORPHAN_CAP_OVERRIDE_SCOPES: readonly OrphanCapOverrideScope[] = [
  * (bypasses nothing) rather than failing the sync — a typo'd override
  * should never take down the sync, only fail to release anything.
  */
-function parseOrphanCapOverride(
+const parseOrphanCapOverride = (
   raw: string | null,
-): ReadonlySet<OrphanCapOverrideScope> {
+): ReadonlySet<OrphanCapOverrideScope> => {
   if (raw === null) return new Set();
   const trimmed = raw.trim().toLowerCase();
   if (trimmed === "") return new Set();
@@ -474,7 +476,7 @@ function parseOrphanCapOverride(
   return new Set(
     ORPHAN_CAP_OVERRIDE_SCOPES.filter((scope) => requested.has(scope)),
   );
-}
+};
 
 /**
  * Runtime shape guard for a parsed checkpoint. JSON.parse only proves the
@@ -482,7 +484,7 @@ function parseOrphanCapOverride(
  * value written by some future/other version of this key would parse fine
  * and then blow up `new Set(...)` on a non-array field (#2900 review).
  */
-function isTeamCheckpoint(value: unknown): value is TeamCheckpoint {
+const isTeamCheckpoint = (value: unknown): value is TeamCheckpoint => {
   if (typeof value !== "object" || value === null) return false;
   const v = value as Record<string, unknown>;
   const isStringArray = (a: unknown): a is string[] =>
@@ -492,14 +494,14 @@ function isTeamCheckpoint(value: unknown): value is TeamCheckpoint {
     isStringArray(v.donePlayerIds) &&
     isStringArray(v.doneStaffIds)
   );
-}
+};
 
 /**
  * Parse a stored checkpoint, treating anything unparseable OR shape-invalid
  * as "none" — a corrupt or unrecognised value is a resumption hint gone
  * stale, not an error worth failing the sync over.
  */
-function parseCheckpoint(raw: string | null): TeamCheckpoint | null {
+const parseCheckpoint = (raw: string | null): TeamCheckpoint | null => {
   if (!raw) return null;
   try {
     const parsed: unknown = JSON.parse(raw);
@@ -507,7 +509,7 @@ function parseCheckpoint(raw: string | null): TeamCheckpoint | null {
   } catch {
     return null;
   }
-}
+};
 
 /**
  * KV enforces at most one write per second per key. A member whose image is

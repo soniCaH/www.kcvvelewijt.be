@@ -117,7 +117,7 @@ describe("isUnknownGameStatus", () => {
 
 const club = { id: 1, name: "FC Test" };
 
-function makePsdGame(overrides: Partial<PsdGame> = {}): PsdGame {
+const makePsdGame = (overrides: Partial<PsdGame> = {}): PsdGame => {
   return {
     id: 100,
     status: 0,
@@ -129,7 +129,7 @@ function makePsdGame(overrides: Partial<PsdGame> = {}): PsdGame {
     awayClub: { id: 2, name: "FC Other" },
     ...overrides,
   } as PsdGame;
-}
+};
 
 // ─── Date validation via public APIs ─────────────────────────────────────────
 

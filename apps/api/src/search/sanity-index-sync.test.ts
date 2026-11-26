@@ -65,7 +65,7 @@ const mockGallery = {
   imageUrl: null as string | null,
 };
 
-function makeEnvLayer(overrides: Partial<TestEnv> = {}) {
+const makeEnvLayer = (overrides: Partial<TestEnv> = {}) => {
   const envLayer = makeTestEnvLayer({
     PSD_API_BASE_URL: "",
     PSD_IMAGE_BASE_URL: "",
@@ -84,11 +84,11 @@ function makeEnvLayer(overrides: Partial<TestEnv> = {}) {
   // durable operations now (#2873) — merged in (not just provided) so it
   // also satisfies KvCacheLive's own WorkerEnvTag requirement below.
   return Layer.mergeAll(KvCacheLive, envLayer).pipe(Layer.provide(envLayer));
-}
+};
 
-function makeEmbeddingMock(): EmbeddingServiceInterface {
+const makeEmbeddingMock = (): EmbeddingServiceInterface => {
   return { embed: () => Effect.succeed(FAKE_VECTOR) };
-}
+};
 
 /**
  * Records every upsert batch and every deleteByIds call. Each upsert call
@@ -96,7 +96,9 @@ function makeEmbeddingMock(): EmbeddingServiceInterface {
  * `probe.maxInFlight` stays 1 only if the batches really are upserted one at
  * a time.
  */
-function makeVectorizeCapture(overrides?: Partial<VectorizeServiceInterface>) {
+const makeVectorizeCapture = (
+  overrides?: Partial<VectorizeServiceInterface>,
+) => {
   const upsertCalls: VectorRecord[][] = [];
   const deleteCalls: string[][] = [];
   const probe = { inFlight: 0, maxInFlight: 0 };
@@ -118,7 +120,7 @@ function makeVectorizeCapture(overrides?: Partial<VectorizeServiceInterface>) {
     ...overrides,
   };
   return { upsertCalls, deleteCalls, probe, mock };
-}
+};
 
 /**
  * Stateful, in-memory KVNamespace so a test can run sweeps back to back and
@@ -130,9 +132,9 @@ function makeVectorizeCapture(overrides?: Partial<VectorizeServiceInterface>) {
  * (index-manifest.ts) — single page, `list_complete: true`, which is all a
  * test-scale marker count ever needs.
  */
-function makeKvNamespaceMock(): KVNamespace & {
+const makeKvNamespaceMock = (): KVNamespace & {
   readonly store: Map<string, string>;
-} {
+} => {
   const store = new Map<string, string>();
   const mock = {
     store,
@@ -159,11 +161,11 @@ function makeKvNamespaceMock(): KVNamespace & {
   return mock as unknown as KVNamespace & {
     readonly store: Map<string, string>;
   };
-}
+};
 
-function noopFetch<T>(data: T[]) {
+const noopFetch = <T>(data: T[]) => {
   return async () => data;
-}
+};
 
 /**
  * Runs one sweep with sensible defaults for every fetcher (all empty), so a
@@ -171,11 +173,11 @@ function noopFetch<T>(data: T[]) {
  * "what's different about this sweep" instead of re-listing all five
  * fetchers plus three provides every time.
  */
-function sweep(
+const sweep = (
   options: Parameters<typeof runSanityIndexSync>[0],
   vectorize: VectorizeServiceInterface,
   envOverrides: Partial<TestEnv> = {},
-) {
+) => {
   return runSanityIndexSync({
     fetchResponsibility: noopFetch([]),
     fetchArticles: noopFetch([]),
@@ -189,7 +191,7 @@ function sweep(
     Effect.provide(Layer.succeed(EmbeddingService, makeEmbeddingMock())),
     Effect.provide(Layer.succeed(VectorizeService, vectorize)),
   );
-}
+};
 
 describe("runSanityIndexSync", () => {
   it("embeds and upserts each responsibility path with correct metadata", async () => {

@@ -20,29 +20,29 @@ import {
 
 const FAKE_VECTOR = Array(1024).fill(0.1);
 
-function makeEmbeddingMock(): EmbeddingServiceInterface {
+const makeEmbeddingMock = (): EmbeddingServiceInterface => {
   return { embed: () => Effect.succeed(FAKE_VECTOR) };
-}
+};
 
-function makeVectorizeMock(
+const makeVectorizeMock = (
   matches: VectorizeMatch[],
-): VectorizeServiceInterface {
+): VectorizeServiceInterface => {
   return {
     upsert: () => Effect.succeed(undefined),
     query: () => Effect.succeed(matches),
     getByIds: () => Effect.succeed([]),
     deleteByIds: () => Effect.succeed(undefined as void),
   };
-}
+};
 
-function makeAiAnswerMock(answer?: string): AiAnswerServiceInterface {
+const makeAiAnswerMock = (answer?: string): AiAnswerServiceInterface => {
   return {
     generateAnswer: () => Effect.succeed(answer),
     guessTeam: () => Effect.succeed(null),
   };
-}
+};
 
-function provideAllServices<A, E>(
+const provideAllServices = <A, E>(
   effect: Effect.Effect<
     A,
     E,
@@ -53,7 +53,7 @@ function provideAllServices<A, E>(
     aiAnswer?: string;
     aiService?: AiAnswerServiceInterface;
   } = {},
-) {
+) => {
   return effect.pipe(
     Effect.provide(Layer.succeed(EmbeddingService, makeEmbeddingMock())),
     Effect.provide(
@@ -66,7 +66,7 @@ function provideAllServices<A, E>(
       ),
     ),
   );
-}
+};
 
 const makeHit = (id: string, score: number): VectorizeMatch => ({
   id,

@@ -46,7 +46,7 @@ const PLAYED_OR_STOPPED_STATUSES = new Set<MatchStatus>([
  * unconfirmed reservation or tournament entry is actually played at the
  * club's own pitch, so neither claims the venue.
  */
-function isRealFixture(fixture: VenueFixtureContext): boolean {
+const isRealFixture = (fixture: VenueFixtureContext): boolean => {
   if (fixture.isPlaceholder) return false;
   if (fixture.competitionType !== "tournament") return true;
   return (
@@ -54,7 +54,7 @@ function isRealFixture(fixture: VenueFixtureContext): boolean {
     typeof fixture.homeScore === "number" &&
     typeof fixture.awayScore === "number"
   );
-}
+};
 
 /**
  * The single place a fixture's `venue` is decided in the BFF (#2491). The
@@ -69,9 +69,9 @@ function isRealFixture(fixture: VenueFixtureContext): boolean {
  * Every BFF read path calls this rather than hardcoding `venue: undefined`
  * or re-deriving home/away from a team name.
  */
-export function resolveVenue(
+export const resolveVenue = (
   isHome: boolean | undefined,
   fixture: VenueFixtureContext,
-): string | undefined {
+): string | undefined => {
   return isHome === true && isRealFixture(fixture) ? CLUB_VENUE : undefined;
-}
+};

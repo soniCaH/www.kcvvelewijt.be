@@ -57,9 +57,9 @@ const baseDetail: MatchDetailType = {
   hasReport: true,
 };
 
-function makeServiceMock(
+const makeServiceMock = (
   overrides: Partial<PsdServiceInterface> = {},
-): PsdServiceInterface {
+): PsdServiceInterface => {
   return {
     getTeamMatches: (_teamId) => Effect.succeed([baseMatch]),
     getNextMatches: () => Effect.succeed([baseMatch]),
@@ -88,32 +88,32 @@ function makeServiceMock(
       }),
     ...overrides,
   };
-}
+};
 
-function makeCacheMock(): KvCacheInterface {
+const makeCacheMock = (): KvCacheInterface => {
   return {
     get: () => Effect.succeed(null),
     set: () => Effect.succeed(undefined),
     delete: () => Effect.succeed(undefined),
     durable: noopDurableKv,
   };
-}
+};
 
-function provide<A>(
+const provide = <A>(
   effect: Effect.Effect<
     A,
     BffError,
     PsdService | KvCacheService | WorkerEnvTag | PsdGateService
   >,
   overrides: Partial<PsdServiceInterface> = {},
-) {
+) => {
   return effect.pipe(
     Effect.provide(Layer.succeed(PsdService, makeServiceMock(overrides))),
     Effect.provide(Layer.succeed(KvCacheService, makeCacheMock())),
     Effect.provide(PsdGateTest),
     Effect.provide(testEnvLayer),
   );
-}
+};
 
 describe("getMatchesByTeamHandler", () => {
   it("returns matches from PsdService", async () => {
@@ -156,10 +156,10 @@ describe("getNextMatchesHandler", () => {
   const future = () => at(HOUR, 11);
 
   /** KV mock backed by a map, so a test can seed `matches:next` fresh or stale. */
-  function provideSeeded(
+  const provideSeeded = (
     seed: { matches: MatchType[]; ageMs: number } | null,
     fetched: MatchType[],
-  ) {
+  ) => {
     const store = new Map<string, string>();
     if (seed) {
       store.set(
@@ -186,7 +186,7 @@ describe("getNextMatchesHandler", () => {
       Effect.provide(PsdGateTest),
       Effect.provide(testEnvLayer),
     );
-  }
+  };
 
   it("returns next matches from PsdService (team 23 filter is internal to service)", async () => {
     const result = await Effect.runPromise(

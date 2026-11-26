@@ -15,7 +15,7 @@ vi.mock("@sanity/client", () => ({
   createClient: () => ({ fetch: mockFetch }),
 }));
 
-function makeTestLayer() {
+const makeTestLayer = () => {
   return SanityProjectionLive.pipe(
     Layer.provide(
       makeTestEnvLayer({
@@ -24,11 +24,13 @@ function makeTestLayer() {
       }),
     ),
   );
-}
+};
 
-function run<A>(effect: Effect.Effect<A, SanityQueryError, SanityProjection>) {
+const run = <A>(
+  effect: Effect.Effect<A, SanityQueryError, SanityProjection>,
+) => {
   return Effect.runPromise(Effect.provide(effect, makeTestLayer()));
-}
+};
 
 beforeEach(() => {
   vi.clearAllMocks();

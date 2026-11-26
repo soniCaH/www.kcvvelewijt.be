@@ -3,13 +3,13 @@ import { Effect, Layer } from "effect";
 import { EmbeddingService, EmbeddingServiceLive } from "./embedding";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
 
-function makeAiMock(runFn?: () => Promise<unknown>): Ai {
+const makeAiMock = (runFn?: () => Promise<unknown>): Ai => {
   return {
     run: runFn ?? (async () => ({ data: [Array(1024).fill(0.1)] })),
   } as unknown as Ai;
-}
+};
 
-function makeEnvLayer(ai: Ai) {
+const makeEnvLayer = (ai: Ai) => {
   return makeTestEnvLayer({
     AI: ai,
     PSD_API_BASE_URL: "",
@@ -23,7 +23,7 @@ function makeEnvLayer(ai: Ai) {
     SANITY_API_TOKEN: "",
     SANITY_WEBHOOK_SECRET: "",
   });
-}
+};
 
 describe("EmbeddingService", () => {
   it("returns a 1024-dimensional float array", async () => {

@@ -97,13 +97,13 @@ export const ARTICLE_INDEX_PROJECTION = `_id,
  * matched — named, decimal and hex — because an unmatched `&#x26;` would glue
  * the cells on either side of it into one nonsense token.
  */
-export function stripTableHtml(html: string): string {
+export const stripTableHtml = (html: string): string => {
   return html
     .replace(/&[a-z]+;|&#\d+;|&#x[0-9a-f]+;/gi, " ")
     .replace(/<[^>]*>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-}
+};
 
 /**
  * Whether a responsibility is currently visible on `/hulp`
@@ -149,37 +149,37 @@ export const RESPONSIBILITY_INDEX_PROJECTION = `_id,
   "keywords": coalesce(keywords, []),
   "summary": coalesce(summary, "")`;
 
-export function buildResponsibilityIndexText(doc: {
+export const buildResponsibilityIndexText = (doc: {
   title: string;
   question: string;
   keywords: readonly string[];
   summary: string;
-}): string {
+}): string => {
   return [doc.title, doc.question, doc.keywords.join(" "), doc.summary]
     .filter(Boolean)
     .join(". ");
-}
+};
 
 /**
  * The vector metadata for a responsibility, built once for both index paths.
  * Mirrors `buildArticleMetadata` — the two paths hand-assembled this record
  * before #2832.
  */
-export function buildResponsibilityMetadata(doc: {
+export const buildResponsibilityMetadata = (doc: {
   slug: string;
   title: string;
   summary: string;
-}): Record<string, string> {
+}): Record<string, string> => {
   return {
     slug: doc.slug,
     type: "responsibility",
     title: doc.title,
     excerpt: doc.summary.slice(0, 200),
   };
-}
+};
 
 /** The text an article is embedded from. */
-export function buildArticleIndexText(doc: {
+export const buildArticleIndexText = (doc: {
   title: string;
   tags: readonly string[];
   lead: string;
@@ -188,7 +188,7 @@ export function buildArticleIndexText(doc: {
   qaAnswers: string;
   tableHtml: readonly string[];
   pullQuoteText: string;
-}): string {
+}): string => {
   return (
     [
       doc.title,
@@ -204,7 +204,7 @@ export function buildArticleIndexText(doc: {
       .filter(Boolean)
       .join(". ")
   );
-}
+};
 
 /**
  * The article's search-card summary — display only. It is the grey line under
@@ -216,12 +216,12 @@ export function buildArticleIndexText(doc: {
  * empty should show its opening paragraph, not "Hoe ging het? Uitstekend", and
  * a transfer overview should not show a run of table cells.
  */
-export function buildArticleExcerpt(doc: {
+export const buildArticleExcerpt = (doc: {
   lead: string;
   prose: string;
-}): string {
+}): string => {
   return (doc.lead || doc.prose).slice(0, 200);
-}
+};
 
 /**
  * The vector metadata for an article, built once for both index paths.
@@ -231,14 +231,14 @@ export function buildArticleExcerpt(doc: {
  * `tags` and the webhook did not, so an article's tag metadata depended on
  * which path last touched it.
  */
-export function buildArticleMetadata(doc: {
+export const buildArticleMetadata = (doc: {
   slug: string;
   title: string;
   lead: string;
   prose: string;
   tags: readonly string[];
   imageUrl?: string | null;
-}): Record<string, string> {
+}): Record<string, string> => {
   return {
     slug: doc.slug,
     type: "article",
@@ -247,7 +247,7 @@ export function buildArticleMetadata(doc: {
     tags: doc.tags.join(","),
     ...(doc.imageUrl ? { imageUrl: doc.imageUrl } : {}),
   };
-}
+};
 
 /**
  * The one page projection, shared by the nightly reindex
@@ -283,15 +283,15 @@ export const PAGE_INDEX_PROJECTION = `_id,
   "bodyText": pt::text(body),
   "fileAttachmentLabels": array::compact(coalesce(body[_type == "fileAttachment"].label, []))`;
 
-export function buildPageIndexText(doc: {
+export const buildPageIndexText = (doc: {
   title: string;
   bodyText: string | null;
   fileAttachmentLabels: readonly string[];
-}): string {
+}): string => {
   return [doc.title, doc.bodyText ?? "", doc.fileAttachmentLabels.join(" ")]
     .filter(Boolean)
     .join(". ");
-}
+};
 
 /**
  * The vector metadata for a page, built once for both index paths. Mirrors
@@ -307,12 +307,12 @@ export function buildPageIndexText(doc: {
  * the existing contract: fileAttachment labels are a fallback, not
  * preferred summary text.
  */
-export function buildPageMetadata(doc: {
+export const buildPageMetadata = (doc: {
   slug: string;
   title: string;
   bodyText: string | null;
   fileAttachmentLabels: readonly string[];
-}): Record<string, string> {
+}): Record<string, string> => {
   return {
     slug: doc.slug,
     type: "page",
@@ -322,7 +322,7 @@ export function buildPageMetadata(doc: {
       200,
     ),
   };
-}
+};
 
 /**
  * Which galleries are indexable. A gallery with no slug has no `/galerij/…`
@@ -358,24 +358,24 @@ export const GALLERY_INDEX_PROJECTION = `_id,
   "descriptionText": coalesce(pt::text(description), ""),
   ${GALLERY_COVER_IMAGE_PROJECTION}`;
 
-export function buildGalleryIndexText(doc: {
+export const buildGalleryIndexText = (doc: {
   title: string;
   descriptionText: string;
-}): string {
+}): string => {
   return [doc.title, doc.descriptionText].filter(Boolean).join(". ");
-}
+};
 
 /**
  * The vector metadata for a photo gallery, built once for both index paths.
  * Mirrors `buildPageMetadata`; `type` is `"gallery"` — what the related
  * handler maps to the contract's gallery literal.
  */
-export function buildGalleryMetadata(doc: {
+export const buildGalleryMetadata = (doc: {
   slug: string;
   title: string;
   descriptionText: string;
   imageUrl?: string | null;
-}): Record<string, string> {
+}): Record<string, string> => {
   return {
     slug: doc.slug,
     type: "gallery",
@@ -383,4 +383,4 @@ export function buildGalleryMetadata(doc: {
     excerpt: doc.descriptionText.slice(0, 200),
     ...(doc.imageUrl ? { imageUrl: doc.imageUrl } : {}),
   };
-}
+};

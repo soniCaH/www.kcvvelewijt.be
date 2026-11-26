@@ -11,7 +11,7 @@ import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import { noopDurableKv } from "../test-helpers/kv-cache-mock";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
 
-function makeCacheDouble() {
+const makeCacheDouble = () => {
   const store = new Map<string, string>();
   const cache: KvCacheInterface = {
     get: (key) => Effect.sync(() => store.get(key) ?? null),
@@ -26,30 +26,30 @@ function makeCacheDouble() {
     durable: noopDurableKv,
   };
   return { cache, store };
-}
+};
 
 /** Read back the persisted state the way `reportScheduledJobOutcome` writes it. */
-function readState(
+const readState = (
   store: Map<string, string>,
   job: string,
-): JobAlertState | undefined {
+): JobAlertState | undefined => {
   const raw = store.get(jobAlertKey(job));
   return raw === undefined ? undefined : (JSON.parse(raw) as JobAlertState);
-}
+};
 
-function run(
+const run = (
   job: string,
   outcome: Parameters<typeof reportScheduledJobOutcome>[1],
   cache: KvCacheInterface,
   webhookUrl?: string,
-) {
+) => {
   return Effect.runPromise(
     reportScheduledJobOutcome(job, outcome).pipe(
       Effect.provide(Layer.succeed(KvCacheService, cache)),
       Effect.provide(makeTestEnvLayer({ SLACK_ALERT_WEBHOOK_URL: webhookUrl })),
     ),
   );
-}
+};
 
 describe("decideJobAlert", () => {
   it("healthy + success: no alert, state unchanged", () => {

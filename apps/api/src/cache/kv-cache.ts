@@ -209,7 +209,7 @@ export interface DurableKvScoped extends Omit<DurableKv, "forDataset"> {
  * `KVNamespace` and want to exercise `search/index-manifest.ts`'s functions
  * directly rather than through the full Layer/Effect wiring.
  */
-export function makeDurableKv(kv: KVNamespace): DurableKv {
+export const makeDurableKv = (kv: KVNamespace): DurableKv => {
   const ops = {
     get: (key: string) =>
       Effect.tryPromise({
@@ -256,7 +256,7 @@ export function makeDurableKv(kv: KVNamespace): DurableKv {
     ...ops,
     forDataset: (dataset: string) => ({ ...ops, dataset }),
   };
-}
+};
 
 export class KvCacheService extends Context.Tag("KvCacheService")<
   KvCacheService,

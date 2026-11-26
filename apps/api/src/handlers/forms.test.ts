@@ -26,9 +26,9 @@ const decode = decodeMembership;
 
 const validPayload = decode(validRaw);
 
-function makeMutationMock(
+const makeMutationMock = (
   writeImpl?: SanityMutationInterface["writeMembershipApplication"],
-): SanityMutationInterface {
+): SanityMutationInterface => {
   return {
     upsertPlayer: () => Effect.succeed(undefined),
     upsertTeam: () => Effect.succeed(undefined),
@@ -43,7 +43,7 @@ function makeMutationMock(
     writeMembershipApplication: writeImpl ?? (() => Effect.succeed(undefined)),
     writeDartsSignup: () => Effect.succeed(undefined),
   };
-}
+};
 
 const projectionMock = makeSanityProjectionStub();
 
@@ -54,7 +54,7 @@ const cacheMock: KvCacheInterface = {
   durable: noopDurableKv,
 };
 
-function run(
+const run = (
   payload: MembershipRequest,
   opts: {
     write?: SanityMutationInterface["writeMembershipApplication"];
@@ -65,7 +65,7 @@ function run(
     env?: Partial<TestEnv>;
     errors?: string[];
   } = {},
-) {
+) => {
   const emailMock: EmailTransportInterface = {
     dispatchEmail: opts.dispatch ?? (() => Effect.succeed(undefined)),
   };
@@ -95,7 +95,7 @@ function run(
       Effect.provide(logger),
     ),
   );
-}
+};
 
 describe("handleMembership", () => {
   it("persists and returns ok for a valid adult submission", async () => {

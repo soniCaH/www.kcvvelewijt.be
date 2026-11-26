@@ -13,12 +13,12 @@ import { CLUB_VENUE } from "./venue";
 
 global.fetch = vi.fn();
 
-function makeEnvLayer() {
+const makeEnvLayer = () => {
   return makeTestEnvLayer({
     SANITY_PROJECT_ID: "test-project",
     SANITY_WEBHOOK_SECRET: "",
   });
-}
+};
 
 const kvSeed: Record<string, string> = {
   // Seed an empty competition-label map so getCompetitionLabels() cache-hits and
@@ -39,9 +39,9 @@ const cacheMock: KvCacheInterface = {
 
 const sanityProjectionMock = makeSanityProjectionStub();
 
-function runService<A>(
+const runService = <A>(
   fn: (svc: (typeof PsdService)["Service"]) => Effect.Effect<A, BffError>,
-) {
+) => {
   const program = Effect.gen(function* () {
     const service = yield* PsdService;
     return yield* fn(service);
@@ -57,7 +57,7 @@ function runService<A>(
       ),
     ),
   );
-}
+};
 
 const allSeasons = [
   {

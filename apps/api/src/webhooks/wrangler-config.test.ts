@@ -11,7 +11,7 @@ import { EXPECTED_INDEX_BY_DATASET } from "../search/dataset-index-guard";
 // `[[section]]` headers. That is enough to answer the one question this
 // test exists to ask.
 
-function parseSections(source: string): Record<string, string[]> {
+const parseSections = (source: string): Record<string, string[]> => {
   const sections: Record<string, string[]> = {};
   source
     .split("\n")
@@ -28,15 +28,15 @@ function parseSections(source: string): Record<string, string[]> {
       return current;
     }, null);
   return sections;
-}
+};
 
-function readStringVar(lines: string[], key: string): string | undefined {
+const readStringVar = (lines: string[], key: string): string | undefined => {
   for (const line of lines) {
     const match = new RegExp(`^${key}\\s*=\\s*"([^"]*)"`).exec(line);
     if (match) return match[1];
   }
   return undefined;
-}
+};
 
 // ─── The invariant the runtime guard cannot check itself ───────────────────
 //

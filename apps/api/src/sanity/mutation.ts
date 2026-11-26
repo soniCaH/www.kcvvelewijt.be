@@ -27,9 +27,9 @@ export const PSD_PLACEHOLDER_IMAGE_SHA1 =
  * identify a member (#2892 review). Returns "" for anything that is not a
  * psd-shaped reference, which `mergePreservingOrder` then ignores.
  */
-function refSuffix(ref: string | undefined): string {
+const refSuffix = (ref: string | undefined): string => {
   return ref?.split("-psd-")[1] ?? "";
-}
+};
 
 /**
  * Order a team's `staff[]` / `players[]` so that the editor's arrangement
@@ -47,15 +47,15 @@ function refSuffix(ref: string | undefined): string {
  *
  * ponytail: O(n) with two sets; a squad is ~25 entries.
  */
-function mergePreservingOrder(
+const mergePreservingOrder = (
   existingKeys: readonly string[],
   psdIds: readonly string[],
-): string[] {
+): string[] => {
   const wanted = new Set(psdIds);
   const kept = existingKeys.filter((k) => k !== "" && wanted.has(k));
   const keptSet = new Set(kept);
   return [...kept, ...psdIds.filter((id) => !keptSet.has(id))];
-}
+};
 
 /** Sanity's answer to an asset upload: only the new asset's id is read. */
 const UploadResponse = S.Struct({

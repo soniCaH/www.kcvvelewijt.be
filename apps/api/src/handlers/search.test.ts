@@ -19,7 +19,7 @@ import { VectorizeService } from "../search/vectorize";
 import { AiAnswerService } from "../search/ai-answer";
 
 /** Stub of the Workers Rate Limiting binding: `limit` calls per key. */
-function stubLimiter(limit: number) {
+const stubLimiter = (limit: number) => {
   const seen = new Map<string, number>();
   return {
     limit: vi.fn(async ({ key }: { key: string }) => {
@@ -28,9 +28,9 @@ function stubLimiter(limit: number) {
       return { success: n <= limit };
     }),
   };
-}
+};
 
-function makeKv() {
+const makeKv = () => {
   const store = new Map<string, string>();
   return {
     get: async (key: string) => store.get(key) ?? null,
@@ -44,9 +44,9 @@ function makeKv() {
       store.delete(key);
     },
   } as unknown as KVNamespace;
-}
+};
 
-function setup(
+const setup = (
   opts: {
     ipLimit?: number;
     globalLimit?: number;
@@ -58,7 +58,7 @@ function setup(
     /** What guessTeam yields — undefined is "not asked" (cap or AI error). */
     guess?: string | null | undefined;
   } = {},
-) {
+) => {
   const ipLimiter = stubLimiter(opts.ipLimit ?? 10);
   const globalLimiter = stubLimiter(opts.globalLimit ?? 120);
   const embed = vi.fn(() =>
@@ -138,7 +138,7 @@ function setup(
     ipLimiter,
     globalLimiter,
   };
-}
+};
 
 describe("searchCacheKey", () => {
   const key = (request: typeof SearchRequest.Type) =>

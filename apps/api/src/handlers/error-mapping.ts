@@ -8,7 +8,7 @@ import type { BffError } from "../psd/errors";
 
 type HttpApiError = HttpServiceUnavailable | HttpBadGateway | HttpNotFound;
 
-export function mapBffErrorToHttpError(error: BffError): HttpApiError {
+export const mapBffErrorToHttpError = (error: BffError): HttpApiError => {
   switch (error._tag) {
     case "UpstreamUnavailable":
       return new HttpServiceUnavailable({
@@ -21,7 +21,7 @@ export function mapBffErrorToHttpError(error: BffError): HttpApiError {
     case "ResourceNotFound":
       return new HttpNotFound({ error: "Not found" });
   }
-}
+};
 
 export const withErrorMapping = <A, R>(
   effect: Effect.Effect<A, BffError, R>,

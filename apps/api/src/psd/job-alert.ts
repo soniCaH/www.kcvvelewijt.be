@@ -50,10 +50,10 @@ const HEALTHY: JobAlertState = { consecutiveFailures: 0, announced: false };
  * ≥1 failures). A job failing every night for a week — once its first alert
  * actually lands — produces one failure alert, not seven.
  */
-export function decideJobAlert(
+export const decideJobAlert = (
   state: JobAlertState,
   ok: boolean,
-): { readonly next: JobAlertState; readonly alert: JobAlert | null } {
+): { readonly next: JobAlertState; readonly alert: JobAlert | null } => {
   if (ok) {
     if (state.consecutiveFailures === 0) return { next: state, alert: null };
     return { next: HEALTHY, alert: { kind: "job-recovery" } };
@@ -63,7 +63,7 @@ export function decideJobAlert(
     announced: state.announced,
   };
   return { next, alert: state.announced ? null : { kind: "job-failure" } };
-}
+};
 
 export const jobAlertKey = (job: string): string => `job-alert:${job}`;
 
@@ -75,7 +75,7 @@ export const JOB_ALERT_STATE_TTL = 60 * 60 * 24 * 3; // 3 days
 /** Parse the persisted state, guarding against a malformed value the same
  * way the daily counters in `cache/daily-ceiling.ts` do — a bad value must never wedge the job
  * into "permanently failing" or "permanently healthy". */
-function parseState(raw: string | null): JobAlertState {
+const parseState = (raw: string | null): JobAlertState => {
   if (raw == null) return HEALTHY;
   try {
     const parsed: unknown = JSON.parse(raw);
@@ -86,21 +86,21 @@ function parseState(raw: string | null): JobAlertState {
   } catch {
     return HEALTHY;
   }
-}
+};
 
 /** Persist `next`, deleting the key once healthy (skipping a no-op delete
  * when it was already healthy) rather than writing a `0` entry every night. */
-function persistState(
+const persistState = (
   cache: KvCacheInterface,
   key: string,
   previous: JobAlertState,
   next: JobAlertState,
-): Effect.Effect<void> {
+): Effect.Effect<void> => {
   if (next.consecutiveFailures === 0) {
     return previous.consecutiveFailures === 0 ? Effect.void : cache.delete(key);
   }
   return cache.set(key, JSON.stringify(next), JOB_ALERT_STATE_TTL);
-}
+};
 
 /**
  * Report one scheduled-job outcome for debounced Slack alerting. Best-effort

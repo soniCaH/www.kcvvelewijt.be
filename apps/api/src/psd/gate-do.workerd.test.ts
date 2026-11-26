@@ -26,10 +26,10 @@ import { makeTestEnvLayer } from "../test-helpers/env-layer";
  * No cast needed: `env.PSD_GATE` is already typed as
  * `DurableObjectNamespace<PsdGate>` (workerd-test-env.d.ts), so the stub's
  * RPC methods are typed structurally off `PsdGate` itself. */
-function freshGateStub(name: string) {
+const freshGateStub = (name: string) => {
   const id = env.PSD_GATE.idFromName(name);
   return env.PSD_GATE.get(id);
-}
+};
 
 describe("PsdGate Durable Object — real single-flight coordination (workerd)", () => {
   it("exactly one of N concurrent callers becomes the leader", async () => {

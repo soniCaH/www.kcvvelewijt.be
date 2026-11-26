@@ -10,10 +10,10 @@ import {
 
 const FAKE_VECTOR = Array(1024).fill(0.1);
 
-function makeVectorizeMock(opts: {
+const makeVectorizeMock = (opts: {
   stored?: VectorRecord[];
   matches?: VectorizeMatch[];
-}): VectorizeServiceInterface {
+}): VectorizeServiceInterface => {
   // `stored` carries the self-vector (keyed by handler's request id) plus any
   // vectors that handleRelated will look up via getByIds after ranking.
   const records = opts.stored ?? [];
@@ -24,17 +24,17 @@ function makeVectorizeMock(opts: {
       Effect.succeed(records.filter((r) => ids.includes(r.id))),
     deleteByIds: () => Effect.succeed(undefined as void),
   };
-}
+};
 
 // Build a VectorRecord from a VectorizeMatch so mock `stored` stays in sync
 // with `matches` metadata without rewriting every test fixture.
-function storeFromMatch(m: VectorizeMatch): VectorRecord {
+const storeFromMatch = (m: VectorizeMatch): VectorRecord => {
   return {
     id: m.id,
     values: FAKE_VECTOR,
     metadata: (m.metadata ?? {}) as Record<string, string>,
   };
-}
+};
 
 describe("handleRelated", () => {
   it("returns empty results when id not found in Vectorize", async () => {

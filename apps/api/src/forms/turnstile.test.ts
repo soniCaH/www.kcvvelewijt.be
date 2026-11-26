@@ -5,7 +5,7 @@ import { verifyTurnstile } from "./turnstile";
 
 type Level = "Error" | "Warning";
 
-function run(env: Partial<TestEnv>) {
+const run = (env: Partial<TestEnv>) => {
   const logs: { level: string; message: string }[] = [];
   const logger = Logger.replace(
     Logger.defaultLogger,
@@ -21,7 +21,7 @@ function run(env: Partial<TestEnv>) {
   );
   const logged = (level: Level) => logs.filter((l) => l.level === level);
   return { result, logged };
-}
+};
 
 const withSecret = { TURNSTILE_SECRET: "s3cret" };
 
