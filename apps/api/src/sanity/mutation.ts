@@ -413,7 +413,7 @@ export const SanityMutationLive = Layer.effect(
           // directly, so they take the gate token themselves, as in every PSD
           // client (#3469) — the grant is what counts the call (#3490).
           yield* gate.acquireToken;
-          const response = yield* Effect.tryPromise({
+          const { response, imageBody } = yield* Effect.tryPromise({
             try: async () => {
               const psdAbort = new AbortController();
               const psdTimeout = setTimeout(() => psdAbort.abort(), 10_000);
@@ -424,10 +424,17 @@ export const SanityMutationLive = Layer.effect(
                 // Sending the regular PSD API headers (x-api-key / Authorization)
                 // alongside it causes a 404 — the image endpoint uses key-based auth
                 // only, not the REST API credentials.
-                return await fetch(imageUrl, {
+                const res = await fetch(imageUrl, {
                   signal: psdAbort.signal,
                   redirect: "follow",
                 });
+                // fetch() settles on the headers: the timer must also cover the
+                // body read, or a stalled body hangs the sync (#3884). Only an
+                // OK body is read; a 404 or an error status never was.
+                return {
+                  response: res,
+                  imageBody: res.ok ? await res.arrayBuffer() : undefined,
+                };
               } finally {
                 clearTimeout(psdTimeout);
               }
@@ -455,14 +462,8 @@ export const SanityMutationLive = Layer.effect(
 
           const contentType =
             response.headers.get("content-type") ?? "image/jpeg";
-          const arrayBuffer = yield* Effect.tryPromise({
-            try: () => response.arrayBuffer(),
-            catch: (cause) =>
-              new SanityMutationError(
-                `Failed to read image body for ${entityLabel} ${psdId}`,
-                cause,
-              ),
-          });
+          // `response.ok` held above, so the body was read inside the timer.
+          const arrayBuffer = imageBody ?? new ArrayBuffer(0);
 
           yield* Effect.log(
             `[${logName}] ${entityLabel}=${psdId} body_bytes=${arrayBuffer.byteLength} content-type=${contentType}`,
@@ -510,30 +511,36 @@ export const SanityMutationLive = Layer.effect(
                 () => sanityAbort.abort(),
                 10_000,
               );
-              const uploadRes = await fetch(uploadUrl, {
-                signal: sanityAbort.signal,
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${env.SANITY_API_TOKEN}`,
-                  "Content-Type": contentType,
-                },
-                body: arrayBuffer,
-              }).finally(() => clearTimeout(sanityTimeout));
-              if (!uploadRes.ok) {
-                const text = await uploadRes.text();
-                throw new Error(
-                  `Sanity upload failed: ${uploadRes.status} ${text}`,
+              // The timer runs until the body is read, not just the headers:
+              // a stalled body fails after 10 s instead of hanging (#3884).
+              try {
+                const uploadRes = await fetch(uploadUrl, {
+                  signal: sanityAbort.signal,
+                  method: "POST",
+                  headers: {
+                    Authorization: `Bearer ${env.SANITY_API_TOKEN}`,
+                    "Content-Type": contentType,
+                  },
+                  body: arrayBuffer,
+                });
+                if (!uploadRes.ok) {
+                  const text = await uploadRes.text();
+                  throw new Error(
+                    `Sanity upload failed: ${uploadRes.status} ${text}`,
+                  );
+                }
+                const decoded = S.decodeUnknownEither(UploadResponse)(
+                  await uploadRes.json(),
                 );
+                if (Either.isLeft(decoded)) {
+                  throw new Error(
+                    `Sanity upload response invalid at: ${parseErrorPaths(decoded.left)}`,
+                  );
+                }
+                return decoded.right.document;
+              } finally {
+                clearTimeout(sanityTimeout);
               }
-              const decoded = S.decodeUnknownEither(UploadResponse)(
-                await uploadRes.json(),
-              );
-              if (Either.isLeft(decoded)) {
-                throw new Error(
-                  `Sanity upload response invalid at: ${parseErrorPaths(decoded.left)}`,
-                );
-              }
-              return decoded.right.document;
             },
             catch: (cause) =>
               new SanityMutationError(
