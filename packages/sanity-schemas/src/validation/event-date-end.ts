@@ -8,10 +8,10 @@ export interface EventDateEndContext {
   parent?: {dateStart?: string}
 }
 
-export function validateEventDateEnd(
+export const validateEventDateEnd = (
   dateEnd: string | undefined,
   context: EventDateEndContext,
-): true | string {
+): true | string => {
   const dateStart = context.parent?.dateStart
   if (!dateEnd || !dateStart) return true
   const end = new Date(dateEnd).getTime()

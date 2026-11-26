@@ -8,7 +8,7 @@ import type {GuideEntry} from './guide-model'
  * once: at the top of every guide-enabled document form (see `GuideFormInput`).
  * The surrounding panel chrome (Card/tone) lives in the caller.
  */
-export function GuideBody({entry}: {entry: GuideEntry}): JSX.Element {
+export const GuideBody = ({entry}: {entry: GuideEntry}): JSX.Element => {
   const {intro, placement, tips} = entry
 
   return (

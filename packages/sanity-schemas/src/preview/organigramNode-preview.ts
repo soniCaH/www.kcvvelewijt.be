@@ -20,7 +20,7 @@ interface OrganigramNodePreviewSelection {
   members?: unknown[]
 }
 
-export function prepareOrganigramNodePreview(selection: OrganigramNodePreviewSelection) {
+export const prepareOrganigramNodePreview = (selection: OrganigramNodePreviewSelection) => {
   const {title, roleCode, members} = selection
 
   const count = Array.isArray(members) ? members.length : 0

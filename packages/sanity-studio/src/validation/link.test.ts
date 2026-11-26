@@ -53,12 +53,12 @@ type Node = {
   type?: string
 }
 
-function children(node: Node): Node[] {
+const children = (node: Node): Node[] => {
   return [...(node.fields ?? []), ...(node.of ?? []), ...(node.marks?.annotations ?? [])]
 }
 
 /** Resolve a named path; unnamed array members / blocks are transparent. */
-function resolve(node: Node, path: string[]): Node {
+const resolve = (node: Node, path: string[]): Node => {
   if (path.length === 0) return node
   const [head, ...rest] = path
   const queue = children(node)
@@ -70,7 +70,7 @@ function resolve(node: Node, path: string[]): Node {
   throw new Error(`path segment "${head}" not found`)
 }
 
-async function markersFor(root: unknown, path: string[], value: unknown) {
+const markersFor = async (root: unknown, path: string[], value: unknown) => {
   const field = resolve(root as Node, path)
   const validation = field.validation as (rule: InstanceType<typeof ConcreteRuleClass>) => InstanceType<typeof ConcreteRuleClass>
   if (typeof validation !== 'function') throw new Error(`${path.join('.')} has no validation`)

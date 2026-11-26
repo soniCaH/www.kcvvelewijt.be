@@ -38,7 +38,7 @@ const SLUG_MAX_LENGTH = 96
  * Studio after the migration runs — this helper is best-effort, not 1:1
  * with Studio's input.
  */
-export function slugifyTitle(title: string, maxLength = SLUG_MAX_LENGTH): string {
+export const slugifyTitle = (title: string, maxLength = SLUG_MAX_LENGTH): string => {
   const normalized = title
     .normalize('NFKD')
     .replace(/\p{M}+/gu, '')
@@ -54,10 +54,10 @@ export function slugifyTitle(title: string, maxLength = SLUG_MAX_LENGTH): string
  * collisions deterministically. The real CLI entry uses a fresh `Set` on
  * every migration run (see `defineMigration` below).
  */
-export function migrateBackfillEventSlug(
+export const migrateBackfillEventSlug = (
   doc: EventDoc,
   seenSlugs: Set<string> = new Set(),
-): Patch[] | undefined {
+): Patch[] | undefined => {
   const existing = doc.slug?.current
   if (typeof existing === 'string' && existing.length > 0) {
     seenSlugs.add(existing)

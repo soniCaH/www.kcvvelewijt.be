@@ -6,7 +6,7 @@ import {type DocumentActionComponent, useDocumentOperation} from 'sanity'
  * `publishedAt <= now()`, so an empty field meant a published-but-invisible
  * article until an editor filled the date by hand.
  */
-export function withPublishedAtDefault(Publish: DocumentActionComponent): DocumentActionComponent {
+export const withPublishedAtDefault = (Publish: DocumentActionComponent): DocumentActionComponent => {
   const PublishWithPublishedAt: DocumentActionComponent = (props) => {
     const {patch} = useDocumentOperation(props.id, props.type)
     const original = Publish(props)

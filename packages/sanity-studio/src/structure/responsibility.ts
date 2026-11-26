@@ -14,7 +14,7 @@ const CATEGORIES = [
  * plus a "without contact person" filter view.
  * All labels in Dutch.
  */
-export function responsibilityStructure(S: StructureBuilder) {
+export const responsibilityStructure = (S: StructureBuilder) => {
   return S.listItem()
     .title('Hulp & Contact')
     .child(

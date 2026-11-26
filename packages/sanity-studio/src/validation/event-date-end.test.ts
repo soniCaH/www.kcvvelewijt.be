@@ -9,7 +9,7 @@ import {event} from '@kcvv/sanity-schemas'
  */
 const MESSAGE = 'De einddatum moet op of na de startdatum vallen.'
 
-async function validateDateEnd(dateEnd: unknown, dateStart: unknown) {
+const validateDateEnd = async (dateEnd: unknown, dateStart: unknown) => {
   const field = event.fields.find((f) => f.name === 'dateEnd')
   if (!field) throw new Error('event.dateEnd field not found')
   const validation = (field as {validation?: unknown}).validation as (

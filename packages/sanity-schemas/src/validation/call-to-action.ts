@@ -21,9 +21,9 @@ export interface CallToActionValue {
  * exported — every consumer needs one of the three field-level validators
  * below, never this gate on its own.
  */
-function isCallToActionStarted(
+const isCallToActionStarted = (
   cta: CallToActionValue | undefined | null,
-): boolean {
+): boolean => {
   if (!cta) return false
   return (
     hasText(cta.question) ||
@@ -39,11 +39,11 @@ function isCallToActionStarted(
  * `question` / `lead` / `buttonLabel` share one rule: optional while the
  * object is untouched, required the moment any sibling field is filled in.
  */
-export function validateCallToActionRequiredField(
+export const validateCallToActionRequiredField = (
   cta: CallToActionValue | undefined,
   value: unknown,
   message: string,
-): true | string {
+): true | string => {
   if (!isCallToActionStarted(cta)) return true
   return hasText(value) ? true : message
 }
@@ -55,10 +55,10 @@ export function validateCallToActionRequiredField(
  * match, so validating against the untrimmed values here could pass a pair
  * that then fails to highlight on the page.
  */
-export function validateCallToActionEmphasis(
+export const validateCallToActionEmphasis = (
   cta: CallToActionValue | undefined,
   emphasis: unknown,
-): true | string {
+): true | string => {
   if (!hasText(emphasis)) return true
   const question = (cta?.question ?? '').trim()
   const trimmedEmphasis = typeof emphasis === 'string' ? emphasis.trim() : ''
@@ -71,10 +71,10 @@ export function validateCallToActionEmphasis(
  * Exactly one of `reference` / `href` once the object is started — checked
  * from both fields so Sanity marks whichever one(s) are wrong, not just one.
  */
-export function validateCallToActionLink(
+export const validateCallToActionLink = (
   cta: CallToActionValue | undefined,
   field: 'reference' | 'href',
-): true | string {
+): true | string => {
   if (!isCallToActionStarted(cta)) return true
   const hasReference = Boolean(cta?.reference?._ref)
   const hasHref = hasText(cta?.href)

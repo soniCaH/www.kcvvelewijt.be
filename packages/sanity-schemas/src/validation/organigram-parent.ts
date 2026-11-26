@@ -25,12 +25,12 @@ const ALL_NODES_QUERY = `*[_type == "organigramNode"]{_id, "parent": parentNode.
 const PUBLISHED_NODES_QUERY = `*[_type == "organigramNode" && !(_id in path("drafts.**")) && !(_id in path("versions.**"))]{_id, "parent": parentNode._ref}`
 
 /** `drafts.x` / `versions.<release>.x` → `x`. */
-export function normalizeOrganigramId(id: string): string {
+export const normalizeOrganigramId = (id: string): string => {
   return id.replace(/^drafts\./, '').replace(/^versions\.[^.]+\./, '')
 }
 
 /** Normalised child → parent map. Later rows win, so a draft (sorted last) overrides its published twin. */
-function parentMap(rows: ParentRow[]): Map<string, string | undefined> {
+const parentMap = (rows: ParentRow[]): Map<string, string | undefined> => {
   const isDraft = (row: ParentRow) => row._id.startsWith('drafts.') || row._id.startsWith('versions.')
   const map = new Map<string, string | undefined>()
   for (const row of [...rows].sort((a, b) => Number(isDraft(a)) - Number(isDraft(b)))) {
@@ -44,7 +44,7 @@ function parentMap(rows: ParentRow[]): Map<string, string | undefined> {
  * draft twin and all descendants, each in published and `drafts.` form (a
  * reference search returns whichever form exists). Terminates on stored cycles.
  */
-export function collectOrganigramExcludedIds(selfId: string, rows: ParentRow[]): string[] {
+export const collectOrganigramExcludedIds = (selfId: string, rows: ParentRow[]): string[] => {
   const parents = parentMap(rows)
   const self = normalizeOrganigramId(selfId)
   const childrenOf = new Map<string, string[]>()
@@ -70,13 +70,13 @@ export function collectOrganigramExcludedIds(selfId: string, rows: ParentRow[]):
 }
 
 /** `options.filter` for `organigramNode.parentNode`. */
-export async function organigramParentFilter({
+export const organigramParentFilter = async ({
   document,
   getClient,
 }: {
   document?: {_id?: string}
   getClient: GetClient
-}): Promise<{filter: string; params: {excluded: string[]}}> {
+}): Promise<{filter: string; params: {excluded: string[]}}> => {
   const selfId = document?._id
   if (!selfId) return {filter: 'true', params: {excluded: []}}
   const rows = await getClient({apiVersion: API_VERSION}).fetch<ParentRow[]>(ALL_NODES_QUERY)
@@ -90,10 +90,10 @@ export async function organigramParentFilter({
  * stops there and passes. Ids are compared with `drafts.` / `versions.`
  * stripped.
  */
-export async function validateOrganigramParent(
+export const validateOrganigramParent = async (
   ref: {_ref?: string} | undefined,
   context: ValidationContext,
-): Promise<true | string> {
+): Promise<true | string> => {
   const selfId = (context.document as {_id?: string} | undefined)?._id
   if (!ref?._ref || !selfId) return true
 

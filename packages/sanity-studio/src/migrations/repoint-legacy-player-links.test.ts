@@ -112,7 +112,7 @@ describe('rewritePlayerLinksInHtml', () => {
   })
 })
 
-function playerMarkDef(key: string, href: string) {
+const playerMarkDef = (key: string, href: string) => {
   return {_type: 'link', _key: key, href}
 }
 
@@ -203,7 +203,7 @@ describe('rewritePlayerLinksInBlock', () => {
   })
 })
 
-function htmlTableDoc(html: string): ArticleOrPageDoc {
+const htmlTableDoc = (html: string): ArticleOrPageDoc => {
   return {
     _type: 'article',
     body: [{_type: 'htmlTable', _key: 'tbl1', html}],

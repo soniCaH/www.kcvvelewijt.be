@@ -8,9 +8,9 @@ import type {LauncherTemplate} from '../../templates/types'
  * module graph. Mirrors the convention established by
  * `filter-launcher-templates.ts`.
  */
-export function groupByUiGroup(
+export const groupByUiGroup = (
   templates: ReadonlyArray<LauncherTemplate>,
-): {group: string; templates: LauncherTemplate[]}[] {
+): {group: string; templates: LauncherTemplate[]}[] => {
   const order: string[] = []
   const map = new Map<string, LauncherTemplate[]>()
   for (const template of templates) {
@@ -29,10 +29,10 @@ export function groupByUiGroup(
  * group label, and schemaType. Empty / whitespace queries return the
  * full input list (a fresh copy, never the input array).
  */
-export function searchTemplates(
+export const searchTemplates = (
   templates: ReadonlyArray<LauncherTemplate>,
   query: string,
-): LauncherTemplate[] {
+): LauncherTemplate[] => {
   const trimmed = query.trim().toLowerCase()
   if (!trimmed) return [...templates]
   return templates.filter((template) => {

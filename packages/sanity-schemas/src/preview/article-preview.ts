@@ -16,7 +16,7 @@ interface PortableTextBlock {
   children?: PortableTextSpan[]
 }
 
-function flattenTitle(value: unknown): string {
+const flattenTitle = (value: unknown): string => {
   // Title is now constrained Portable Text (single block, `accent`
   // decorator). Fall back to the legacy string form for any draft
   // surviving the migration window.
@@ -28,7 +28,7 @@ function flattenTitle(value: unknown): string {
   return ''
 }
 
-export function prepareArticlePreview(selection: Record<keyof typeof articlePreviewSelect, any>) {
+export const prepareArticlePreview = (selection: Record<keyof typeof articlePreviewSelect, any>) => {
   const {title, media, publishedAt} = selection
   const parsed = typeof publishedAt === 'string' ? new Date(publishedAt) : null
   const subtitle =

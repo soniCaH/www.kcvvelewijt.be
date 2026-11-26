@@ -32,7 +32,7 @@ export interface PlanRow {
   before?: string;
 }
 
-export function planSeed(existing: ExistingDoc[]): PlanRow[] {
+export const planSeed = (existing: ExistingDoc[]): PlanRow[] => {
   return SHORT_LINK_SEED.map(({ name, target }) => {
     const doc: ShortLinkDoc = {
       _id: shortLinkId(name),
@@ -47,10 +47,10 @@ export function planSeed(existing: ExistingDoc[]): PlanRow[] {
     }
     return { action: "update", doc, before: current.target ?? undefined };
   });
-}
+};
 
 /** Reasons to refuse before anything is planned; empty means go. */
-export function preflight(existing: ExistingDoc[]): string[] {
+export const preflight = (existing: ExistingDoc[]): string[] => {
   const errors: string[] = [];
   for (const { name } of SHORT_LINK_SEED) {
     const id = shortLinkId(name);
@@ -71,4 +71,4 @@ export function preflight(existing: ExistingDoc[]): string[] {
     }
   }
   return errors;
-}
+};

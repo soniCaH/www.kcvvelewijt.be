@@ -14,7 +14,7 @@ type Node = {
   validation?: unknown
 }
 
-function find(node: Node, path: string[]): Node {
+const find = (node: Node, path: string[]): Node => {
   const [head, ...rest] = path
   const queue = [...(node.fields ?? []), ...(node.of ?? [])]
   while (queue.length) {
@@ -25,7 +25,7 @@ function find(node: Node, path: string[]): Node {
   throw new Error(`path segment "${head}" not found`)
 }
 
-async function markersFor(root: unknown, path: string[], value: unknown, parent: Record<string, unknown> = {}) {
+const markersFor = async (root: unknown, path: string[], value: unknown, parent: Record<string, unknown> = {}) => {
   const field = find(root as Node, path)
   const validation = field.validation as (
     rule: InstanceType<typeof ConcreteRuleClass>,

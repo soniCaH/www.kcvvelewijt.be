@@ -73,16 +73,16 @@ export interface ArticleWithImageBlocksDoc {
 
 type Patch = ReturnType<typeof at>
 
-function asLegacyImageBlock(value: unknown): LegacyImageBlock | null {
+const asLegacyImageBlock = (value: unknown): LegacyImageBlock | null => {
   if (typeof value !== 'object' || value === null) return null
   const block = value as LegacyImageBlock
   if (block._type !== 'image') return null
   return block
 }
 
-export function migrateImageToArticleImage(
+export const migrateImageToArticleImage = (
   doc: ArticleWithImageBlocksDoc,
-): Patch[] | undefined {
+): Patch[] | undefined => {
   const body = Array.isArray(doc.body) ? doc.body : null
   if (!body) return undefined
 

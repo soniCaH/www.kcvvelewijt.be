@@ -26,7 +26,7 @@ interface QaPairRespondentPreviewSelection {
  * `flattenAnswerToString`: `@kcvv/sanity-schemas` is app-free by policy and
  * cannot import from `apps/web`, and this variant only needs a subtitle.
  */
-function answerSnippet(answer: unknown): string | undefined {
+const answerSnippet = (answer: unknown): string | undefined => {
   if (!Array.isArray(answer)) return undefined
   const blocks: string[] = []
   for (const block of answer as unknown[]) {
@@ -42,9 +42,9 @@ function answerSnippet(answer: unknown): string | undefined {
   return joined.length > 0 ? joined : undefined
 }
 
-export function prepareQaPairRespondentPreview(
+export const prepareQaPairRespondentPreview = (
   selection: QaPairRespondentPreviewSelection,
-) {
+) => {
   const {respondentKey, answer} = selection
   return {
     title:

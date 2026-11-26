@@ -15,7 +15,7 @@ export interface FactBlockArticleDoc extends LabelledArticleDoc {
   body?: {_type?: string}[]
 }
 
-export function auditFactBlocks(doc: FactBlockArticleDoc): string | undefined {
+export const auditFactBlocks = (doc: FactBlockArticleDoc): string | undefined => {
   const {articleType} = doc
   if (articleType !== 'event' && articleType !== 'transfer') return undefined
 

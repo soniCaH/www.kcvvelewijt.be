@@ -66,7 +66,7 @@ export const CANONICAL_TAGS: Readonly<Record<string, string>> = {
  *
  * Returns `null` when nothing changes, so callers can skip the patch entirely.
  */
-export function canonicaliseTags(tags: readonly string[]): string[] | null {
+export const canonicaliseTags = (tags: readonly string[]): string[] | null => {
   const canonical = tags.map((tag) => CANONICAL_TAGS[tag.toLowerCase()] ?? tag)
   // A doc carrying both `A-Ploeg` and `A-ploeg` collapses to a single entry
   // (a Set keeps first-seen order).
@@ -77,9 +77,9 @@ export function canonicaliseTags(tags: readonly string[]): string[] | null {
   return changed ? out : null
 }
 
-export function migrateNormalizeArticleTagCasing(
+export const migrateNormalizeArticleTagCasing = (
   doc: TaggedArticleDoc,
-): Patch[] | undefined {
+): Patch[] | undefined => {
   if (!Array.isArray(doc.tags)) return undefined
   if (doc.tags.length === 0) return undefined
 

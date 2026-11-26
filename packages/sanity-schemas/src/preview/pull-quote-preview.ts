@@ -28,7 +28,7 @@ interface PullQuotePreviewSelection {
  * policy and cannot import from `apps/web` (mirrors `answerSnippet` in
  * `qa-pair-respondent-preview.ts`).
  */
-function quoteSnippet(body: unknown): string | undefined {
+const quoteSnippet = (body: unknown): string | undefined => {
   if (!Array.isArray(body)) return undefined
   const blocks: string[] = []
   for (const block of body as unknown[]) {
@@ -44,7 +44,7 @@ function quoteSnippet(body: unknown): string | undefined {
   return joined.length > 0 ? joined : undefined
 }
 
-export function preparePullQuotePreview(selection: PullQuotePreviewSelection) {
+export const preparePullQuotePreview = (selection: PullQuotePreviewSelection) => {
   const {body, speakerFirstName, speakerLastName, externalName} = selection
   const title = quoteSnippet(body) ?? 'Citaat'
   const referenceName = [

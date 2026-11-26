@@ -18,7 +18,7 @@ export interface StringTitleArticleDoc {
 
 type Patch = ReturnType<typeof at>
 
-export function migrateTitleToPortableText(doc: StringTitleArticleDoc): Patch[] | undefined {
+export const migrateTitleToPortableText = (doc: StringTitleArticleDoc): Patch[] | undefined => {
   const {title} = doc
   if (typeof title !== 'string' || title.trim().length === 0) return undefined
 

@@ -54,9 +54,9 @@ export interface PlayerWithPsdImageDoc {
 
 type Patch = ReturnType<typeof at>
 
-export function migrateUnsetPlayerPlaceholderPsdImage(
+export const migrateUnsetPlayerPlaceholderPsdImage = (
   doc: PlayerWithPsdImageDoc,
-): Patch[] | undefined {
+): Patch[] | undefined => {
   const ref = doc.psdImage?.asset?._ref
   if (ref !== PSD_PLACEHOLDER_ASSET_REF) return undefined
 

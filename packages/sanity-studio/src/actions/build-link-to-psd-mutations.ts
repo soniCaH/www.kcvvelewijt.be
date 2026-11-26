@@ -34,7 +34,7 @@ interface DeleteMutation {
 export type Mutation = CreateMutation | CreateOrReplaceMutation | DeleteMutation
 
 /** Recursively replace all `_ref` values matching `oldId` with `newId`. */
-function deepReplaceRef(value: unknown, oldId: string, newId: string): unknown {
+const deepReplaceRef = (value: unknown, oldId: string, newId: string): unknown => {
   if (value === null || value === undefined || typeof value !== 'object') {
     return value
   }
@@ -55,7 +55,7 @@ function deepReplaceRef(value: unknown, oldId: string, newId: string): unknown {
   return result
 }
 
-export function buildLinkToPsdMutations({oldDoc, psdId, referencingDocs}: LinkToPsdInput): Mutation[] {
+export const buildLinkToPsdMutations = ({oldDoc, psdId, referencingDocs}: LinkToPsdInput): Mutation[] => {
   const oldId = oldDoc._id
   const newId = `staffMember-psd-${psdId}`
 

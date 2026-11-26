@@ -74,7 +74,7 @@ interface StagingPlayer {
   lastName?: string
 }
 
-async function main() {
+const main = async () => {
   const player = await client.fetch<StagingPlayer | null>(
     `*[_type == "player" && defined(psdId) && defined(firstName) && defined(lastName)] | order(psdId asc) [0]{_id, firstName, lastName}`,
   )

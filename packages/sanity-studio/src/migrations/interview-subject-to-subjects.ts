@@ -28,17 +28,17 @@ type Patch = ReturnType<typeof at>
 const DEFAULT_KEY_LENGTH = 12
 const KEY_ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789'
 
-function defaultGenKey(): string {
+const defaultGenKey = (): string => {
   return Array.from(
     {length: DEFAULT_KEY_LENGTH},
     () => KEY_ALPHABET[Math.floor(Math.random() * KEY_ALPHABET.length)],
   ).join('')
 }
 
-export function migrateInterviewSubjectToSubjects(
+export const migrateInterviewSubjectToSubjects = (
   doc: InterviewArticleDoc,
   genKey: () => string = defaultGenKey,
-): Patch[] | undefined {
+): Patch[] | undefined => {
   const subjectsArr = Array.isArray(doc.subjects) ? doc.subjects : null
   // Arrays are `typeof === 'object'` — exclude them explicitly so a malformed
   // `subject: [...]` doesn't get spread as a numeric-indexed object.

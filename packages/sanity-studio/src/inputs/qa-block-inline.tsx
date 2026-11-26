@@ -32,14 +32,14 @@ type InputMembers = ObjectItemProps['inputProps']
  * callback so Portable Text (answer) and custom inputs (RespondentPicker)
  * render fully. Field-level validation renders where each field lives.
  */
-function InlineMembers({
+const InlineMembers = ({
   inputProps,
   skipFieldNames,
 }: {
   inputProps: InputMembers
   /** Field names to omit from the inline render (e.g. the picker on solos). */
   skipFieldNames?: readonly string[]
-}): JSX.Element {
+}): JSX.Element => {
   return (
     <Stack gap={4}>
       {inputProps.members.map((member) => {
@@ -73,7 +73,7 @@ function InlineMembers({
  * a bordered card, with a remove control. No dialog — the answer editor is
  * reachable without a further modal.
  */
-export function QaPairRespondentItem(props: ObjectItemProps): JSX.Element {
+export const QaPairRespondentItem = (props: ObjectItemProps): JSX.Element => {
   const {inputProps, onRemove, readOnly, index} = props
   // On single-subject interviews the answer auto-attributes to the sole
   // subject (frontend + validator already skip enforcement), so the
@@ -114,7 +114,7 @@ export function QaPairRespondentItem(props: ObjectItemProps): JSX.Element {
  * a long interview stays scannable. The collapsed header shows the question
  * (via the pair's preview title) rather than a raw key.
  */
-export function QaPairItem(props: ObjectItemProps): JSX.Element {
+export const QaPairItem = (props: ObjectItemProps): JSX.Element => {
   const {
     inputProps,
     onRemove,

@@ -21,7 +21,7 @@ export interface ArticleTypeDoc {
 
 type Patch = ReturnType<typeof at>
 
-export function migrateBackfillArticleType(doc: ArticleTypeDoc): Patch[] | undefined {
+export const migrateBackfillArticleType = (doc: ArticleTypeDoc): Patch[] | undefined => {
   if (typeof doc.articleType === 'string' && doc.articleType.length > 0) return undefined
   return [at('articleType', set('announcement'))]
 }

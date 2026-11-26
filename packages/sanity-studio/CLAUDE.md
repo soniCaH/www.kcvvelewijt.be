@@ -137,6 +137,8 @@ Used verbatim by the Phase 5+ propagation issues (#1503–#1511, #2181). Everyth
 
 **No nested ternary** — lint rule `no-nested-ternary` (`eslint.config.mjs`, #3855), tests included. A multi-way choice becomes a small arrow helper whose `switch`/`if` chain returns, or a lookup object when every branch is a plain value; a single ternary inside a branch may stay.
 
+**Arrow functions only** — write arrow functions. Lint (`eslint.config.mjs`, #3867) fails every `function` declaration, `export default function` included (core `func-style: ["error", "expression"]` plus a `kcvv/no-default-function` selector), tests included; it does not check function expressions such as `const f = function () {}`. A helper is `const name = () => …` and goes above its first use at module load (a `const` has no hoisting). A default export is `const Name = () => …;` then `export default Name;`. A generator is `const name = function* () { … }`; `Effect.gen(function* () { … })` is an expression and passes. Class and object methods are not declarations.
+
 ## No Duplication With Root CLAUDE.md
 
 This file covers package-local concerns. For monorepo-wide conventions (TypeScript compiler setup, commit style, PR workflow, Turborepo tasks), see `.claude/CLAUDE.md`.

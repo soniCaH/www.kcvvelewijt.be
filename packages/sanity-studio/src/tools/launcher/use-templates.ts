@@ -15,7 +15,7 @@ import {filterLauncherTemplates} from './filter-launcher-templates'
  * templates with unknown `schemaType`; logs once to console for
  * unknown types. (Issue #1499)
  */
-export function useTemplates(): LauncherTemplate[] {
+export const useTemplates = (): LauncherTemplate[] => {
   const allTemplates = useSanityTemplates()
   const {schema} = useSource()
 

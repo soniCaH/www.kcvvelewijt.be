@@ -3,7 +3,7 @@ import { runSeed, type SeedClient } from "./run";
 import { SHORT_LINK_SEED, shortLinkId, type ExistingDoc } from "./plan";
 
 /** A client that records writes and never touches the network. */
-function fakeClient(dataset: string, existing: ExistingDoc[] = []) {
+const fakeClient = (dataset: string, existing: ExistingDoc[] = []) => {
   const createOrReplace = vi.fn();
   const commit = vi.fn().mockResolvedValue({ transactionId: "tx1" });
   const tx = { createOrReplace, commit };
@@ -16,16 +16,16 @@ function fakeClient(dataset: string, existing: ExistingDoc[] = []) {
     transaction,
   } as unknown as SeedClient;
   return { client, fetch, transaction, createOrReplace, commit };
-}
+};
 
-function run(
+const run = (
   fake: ReturnType<typeof fakeClient>,
   options: {
     execute?: boolean;
     requestedDataset?: string;
     confirmed?: boolean;
   } = {},
-) {
+) => {
   const lines: string[] = [];
   const errors: string[] = [];
   return runSeed({
@@ -36,7 +36,7 @@ function run(
     log: (line) => lines.push(line),
     error: (line) => errors.push(line),
   }).then((code) => ({ code, lines, errors }));
-}
+};
 
 describe("runSeed", () => {
   it("is a dry run by default: prints the dataset and the plan, writes nothing", async () => {

@@ -14,7 +14,7 @@ export const playerPreviewSelect = {
   jerseyNumber: 'jerseyNumber',
 }
 
-export function preparePlayerPreview(selection: Record<keyof typeof playerPreviewSelect, any>) {
+export const preparePlayerPreview = (selection: Record<keyof typeof playerPreviewSelect, any>) => {
   const {firstName, lastName, media, jerseyNumber} = selection
 
   return {

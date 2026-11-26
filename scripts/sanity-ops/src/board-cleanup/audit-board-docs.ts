@@ -34,7 +34,7 @@ interface TeamDoc {
   members: Array<{ _ref: string }> | null;
 }
 
-async function main() {
+const main = async () => {
   // 1. Fetch all remaining board docs. Draft-aware: referencedBy must see draft
   // referrers: this audit checks that the board docs are unreferenced after
   // relinking (#2839).
@@ -142,7 +142,7 @@ async function main() {
   const outPath = new URL("audit-result.json", packageRoot);
   writeFileSync(outPath, JSON.stringify(output, null, 2));
   console.log("\nFull data written to audit-result.json");
-}
+};
 
 main().catch((err) => {
   console.error("Fatal error:", err);

@@ -29,7 +29,7 @@ export interface LauncherTemplate extends Template {
  * is not enough — the field could be present but malformed; this guard
  * checks the three required string fields explicitly.
  */
-export function isLauncherTemplate(template: Template): template is LauncherTemplate {
+export const isLauncherTemplate = (template: Template): template is LauncherTemplate => {
   const ui = (template as Partial<LauncherTemplate>).ui
   return (
     !!ui &&

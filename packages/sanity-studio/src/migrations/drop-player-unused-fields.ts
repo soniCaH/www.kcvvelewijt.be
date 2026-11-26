@@ -27,9 +27,9 @@ type Patch = ReturnType<typeof at>
 
 const FIELDS = ['nationality', 'height', 'weight'] as const
 
-export function migrateDropPlayerUnusedFields(
+export const migrateDropPlayerUnusedFields = (
   doc: PlayerWithUnusedFieldsDoc,
-): Patch[] | undefined {
+): Patch[] | undefined => {
   const patches: Patch[] = []
   for (const field of FIELDS) {
     if (doc[field] !== undefined) {

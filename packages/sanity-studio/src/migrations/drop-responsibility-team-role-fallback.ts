@@ -52,9 +52,9 @@ export interface ResponsibilityWithTeamRoleFallbackDoc {
 
 type Patch = ReturnType<typeof at>
 
-export function migrateDropResponsibilityTeamRoleFallback(
+export const migrateDropResponsibilityTeamRoleFallback = (
   doc: ResponsibilityWithTeamRoleFallbackDoc,
-): Patch[] | undefined {
+): Patch[] | undefined => {
   const patches: Patch[] = []
 
   if (doc.primaryContact?.teamRoleFallback !== undefined) {

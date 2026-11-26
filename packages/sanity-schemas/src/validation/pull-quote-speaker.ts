@@ -36,10 +36,10 @@ export interface PullQuoteSpeakerReferenceContext {
   parent?: {externalName?: string}
 }
 
-export function validatePullQuoteSpeakerReference(
+export const validatePullQuoteSpeakerReference = (
   value: unknown,
   context: PullQuoteSpeakerReferenceContext,
-): true | string {
+): true | string => {
   const hasReference = value !== undefined && value !== null
   const externalName = context.parent?.externalName?.trim()
   if (hasReference && externalName) {
@@ -48,7 +48,7 @@ export function validatePullQuoteSpeakerReference(
   return true
 }
 
-function hasSpeakerReference(speaker: unknown): boolean {
+const hasSpeakerReference = (speaker: unknown): boolean => {
   return speaker !== undefined && speaker !== null
 }
 
@@ -57,10 +57,10 @@ export interface PullQuoteExternalRoleSourceContext {
 }
 
 /** Shared by `externalRole` and `externalSource` — rule 2 above. */
-export function validatePullQuoteExternalRoleOrSource(
+export const validatePullQuoteExternalRoleOrSource = (
   value: unknown,
   context: PullQuoteExternalRoleSourceContext,
-): true | string {
+): true | string => {
   const filled = typeof value === 'string' && value.trim().length > 0
   if (filled && hasSpeakerReference(context.parent?.speaker)) {
     return 'Rol en bron horen alleen bij een externe spreker — maak ze leeg.'
@@ -72,10 +72,10 @@ export interface PullQuoteExternalNameContext {
   parent?: {externalRole?: string; externalSource?: string; speaker?: unknown}
 }
 
-export function validatePullQuoteExternalName(
+export const validatePullQuoteExternalName = (
   value: unknown,
   context: PullQuoteExternalNameContext,
-): true | string {
+): true | string => {
   // A reference speaker already covers this quote — a role/source filled in
   // alongside it is flagged on those fields instead (rule 2, above), so this
   // validator stays silent rather than also demanding a name (rule 3's job

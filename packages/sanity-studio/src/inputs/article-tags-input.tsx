@@ -32,7 +32,7 @@ type TagOption = {value: string}
  * tags; existing matches are mapped to their canonical casing on commit so that
  * GROQ `in` queries (which are case-sensitive) stay consistent.
  */
-export function ArticleTagsInput(props: ArrayOfPrimitivesInputProps<string>): JSX.Element {
+export const ArticleTagsInput = (props: ArrayOfPrimitivesInputProps<string>): JSX.Element => {
   const {value, onChange, readOnly, elementProps} = props
   const client = useClient({apiVersion: API_VERSION})
   const [canonicalTags, setCanonicalTags] = useState<string[]>([])
@@ -109,7 +109,8 @@ export function ArticleTagsInput(props: ArrayOfPrimitivesInputProps<string>): JS
         <Flex gap={2} wrap="wrap">
           {current.map((tag, index) => (
             <Card
-              key={`${tag}-${index}`}
+              // Unique: appendTag skips a tag that is already in the list.
+              key={tag}
               padding={1}
               paddingLeft={3}
               radius={4}

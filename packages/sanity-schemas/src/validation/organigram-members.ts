@@ -10,10 +10,10 @@ interface Reference {
  * marker level comes from the Rule it is registered on (`Rule.warning()`
  * in organigramNode.ts), not from this return value.
  */
-export async function validateOrganigramMember(
+export const validateOrganigramMember = async (
   ref: Reference | undefined,
   context: ValidationContext,
-): Promise<true | {message: string}> {
+): Promise<true | {message: string}> => {
   if (!ref?._ref) return true
 
   const client = context.getClient({apiVersion: '2024-01-01'})

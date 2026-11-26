@@ -27,18 +27,18 @@ export interface AssetRow {
 export const PSD_PORTRAIT_FILENAME = /^(player|staffMember)-psd-.+/;
 
 /** Staff documents (published and draft) that still hold a birth date. */
-export function selectStaffToUnset(rows: readonly StaffRow[]): StaffRow[] {
+export const selectStaffToUnset = (rows: readonly StaffRow[]): StaffRow[] => {
   return rows.filter((r) => r.birthDate != null);
-}
+};
 
 /** PSD portrait assets nothing references: safe to delete. */
-export function selectUnreferencedPortraitAssets(
+export const selectUnreferencedPortraitAssets = (
   rows: readonly AssetRow[],
-): AssetRow[] {
+): AssetRow[] => {
   return rows.filter(
     (r) =>
       r.refs === 0 &&
       r.originalFilename != null &&
       PSD_PORTRAIT_FILENAME.test(r.originalFilename),
   );
-}
+};

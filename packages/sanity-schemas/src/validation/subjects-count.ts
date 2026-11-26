@@ -8,10 +8,10 @@ export interface SubjectsCountContext {
   document?: {articleType?: string}
 }
 
-export function validateSubjectsCount(
+export const validateSubjectsCount = (
   subjects: unknown,
   context: SubjectsCountContext,
-): true | string {
+): true | string => {
   if (context.document?.articleType !== 'interview') return true
   const count = Array.isArray(subjects) ? subjects.length : 0
   if (count < 1) return 'Interview articles need at least one subject.'

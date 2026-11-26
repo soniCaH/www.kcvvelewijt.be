@@ -14,9 +14,9 @@ export const galleryImagePreviewSelect = {
   media: 'asset',
 }
 
-export function prepareGalleryImagePreview(
+export const prepareGalleryImagePreview = (
   selection: Record<keyof typeof galleryImagePreviewSelect, any>,
-) {
+) => {
   const {title, subtitle, media} = selection
   return {title: title || 'Foto', subtitle, media}
 }
@@ -28,9 +28,9 @@ export const photoGalleryPreviewSelect = {
   images: 'images',
 }
 
-export function preparePhotoGalleryPreview(
+export const preparePhotoGalleryPreview = (
   selection: Record<keyof typeof photoGalleryPreviewSelect, any>,
-) {
+) => {
   const {title, media, publishedAt, images} = selection
   const count = Array.isArray(images) ? images.length : 0
   const parsed = typeof publishedAt === 'string' ? new Date(publishedAt) : null

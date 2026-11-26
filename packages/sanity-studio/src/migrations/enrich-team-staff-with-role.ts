@@ -24,7 +24,7 @@ export interface TeamWithStaffDoc {
 
 type Patch = ReturnType<typeof at>
 
-export function migrateEnrichTeamStaffWithRole(doc: TeamWithStaffDoc): Patch[] | undefined {
+export const migrateEnrichTeamStaffWithRole = (doc: TeamWithStaffDoc): Patch[] | undefined => {
   const {staff} = doc
   if (!Array.isArray(staff) || staff.length === 0) return undefined
   if (!staff.some((entry) => entry._ref && entry.member === undefined)) return undefined

@@ -5,7 +5,7 @@ import { homedir } from "os";
 
 export const dataset = process.env.SANITY_DATASET ?? "staging";
 
-function resolveToken(): string {
+const resolveToken = (): string => {
   if (process.env.SANITY_API_TOKEN) return process.env.SANITY_API_TOKEN;
 
   try {
@@ -20,7 +20,7 @@ function resolveToken(): string {
     "No Sanity auth token found (checked SANITY_API_TOKEN env var and ~/.config/sanity/config.json)",
   );
   process.exit(1);
-}
+};
 
 console.log(`Using dataset: ${dataset}`);
 

@@ -14,10 +14,10 @@ import {launcherTemplates} from '../../templates'
  * Lives in its own file (separate from any React/Studio runtime) so the vitest
  * suite can import it without dragging Sanity's CSS bundle into the graph.
  */
-export function curateDefaultTemplateItems(
+export const curateDefaultTemplateItems = (
   prev: ReadonlyArray<TemplateItem>,
   curatedSchemaTypes: ReadonlySet<string>,
-): TemplateItem[] {
+): TemplateItem[] => {
   return prev.filter((item) => !curatedSchemaTypes.has(item.templateId))
 }
 
@@ -40,9 +40,9 @@ const CURATED_SCHEMA_TYPES: ReadonlySet<string> = new Set(launcherTemplates.map(
  * unused: defaults are hidden in every creation context (global / structure /
  * reference) for a consistent curated experience.
  */
-export function curatedNewDocumentOptions(
+export const curatedNewDocumentOptions = (
   prev: TemplateItem[],
   _context: NewDocumentOptionsContext,
-): TemplateItem[] {
+): TemplateItem[] => {
   return curateDefaultTemplateItems(prev, CURATED_SCHEMA_TYPES)
 }

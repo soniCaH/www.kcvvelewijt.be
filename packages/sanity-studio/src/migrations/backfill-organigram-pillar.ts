@@ -85,7 +85,7 @@ export const KEY_BOX_WHY_LINES: Readonly<Record<string, string>> = {
   API: 'Vertrouwenspersoon integriteit',
 }
 
-export function migrateBackfillOrganigramPillar(doc: OrganigramNodeDoc): Patch[] | undefined {
+export const migrateBackfillOrganigramPillar = (doc: OrganigramNodeDoc): Patch[] | undefined => {
   const code = doc.roleCode
   if (!code) return undefined
 

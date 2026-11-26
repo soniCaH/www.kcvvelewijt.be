@@ -34,10 +34,10 @@ export interface RespondentKeyContext {
   }
 }
 
-export function validateRespondentKey(
+export const validateRespondentKey = (
   value: unknown,
   context: RespondentKeyContext,
-): true | string {
+): true | string => {
   const tag = context.parent?.tag ?? 'standard'
   if (!['key', 'quote'].includes(tag)) return true
 

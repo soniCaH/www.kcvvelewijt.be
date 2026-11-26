@@ -14,10 +14,10 @@ import type {SchemaTypeDefinition} from 'sanity'
  * Not re-exported from the package barrel; imported only by the decorator
  * graft tests.
  */
-export function collectBlockDecoratorComponents(
+export const collectBlockDecoratorComponents = (
   types: readonly SchemaTypeDefinition[],
   value: string,
-): unknown[] {
+): unknown[] => {
   const out: unknown[] = []
   for (const type of types) {
     const fields = (type as {fields?: unknown[]}).fields

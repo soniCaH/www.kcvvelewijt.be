@@ -18,11 +18,11 @@ interface BulkImageUploadTarget {
  * e.g. `applyRespondentPicker`) so promoting the bulk-upload input to another
  * image array later is one more apply line, never a rewrite (#2369).
  */
-export function applyBulkImageUploadInput(
+export const applyBulkImageUploadInput = (
   schemaTypes: readonly SchemaTypeDefinition[],
   InputComponent: BulkImageUploadComponent,
   {typeName, fieldName}: BulkImageUploadTarget,
-): SchemaTypeDefinition[] {
+): SchemaTypeDefinition[] => {
   return schemaTypes.map((schemaType) => {
     if (schemaType.name !== typeName) return schemaType
     const fields = (schemaType as unknown as {fields?: readonly Record<string, unknown>[]}).fields

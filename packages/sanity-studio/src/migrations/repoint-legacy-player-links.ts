@@ -44,7 +44,7 @@ import {at, defineMigration, set} from 'sanity/migrate'
 // re-derived. Keep the two in lockstep: a drift here means this migration
 // and the resolver disagree on which slugs match, which is exactly the bug
 // class this migration exists to fix.
-function nameToSlug(firstName: string, lastName: string): string {
+const nameToSlug = (firstName: string, lastName: string): string => {
   return `${firstName} ${lastName}`
     .normalize('NFKD')
     .replace(/\p{M}+/gu, '')
@@ -66,10 +66,10 @@ export interface PlayerRow {
  * `resolvePersonPsdId`'s `/players/<psdId>` fallback). Returns `null` when
  * no player matches — the slug is dead.
  */
-export function resolvePlayerPsdId(
+export const resolvePlayerPsdId = (
   slug: string,
   rows: readonly PlayerRow[],
-): string | null {
+): string | null => {
   const target = slug.toLowerCase()
   for (const row of rows) {
     if (!row.psdId) continue
@@ -89,7 +89,7 @@ export function resolvePlayerPsdId(
 const PLAYER_HREF_RE =
   /^https:\/\/www\.kcvvelewijt\.be\/player\/([^/"]+)\/?$/i
 
-function matchPlayerSlug(href: string): string | null {
+const matchPlayerSlug = (href: string): string | null => {
   return PLAYER_HREF_RE.exec(href)?.[1] ?? null
 }
 
@@ -98,11 +98,11 @@ function matchPlayerSlug(href: string): string | null {
 const ANCHOR_RE = /<a\b[^>]*>[\s\S]*?<\/a>/gi
 const HREF_ATTR_RE = /\shref\s*=\s*"([^"]*)"/i
 
-function extractHref(anchorHtml: string): string | null {
+const extractHref = (anchorHtml: string): string | null => {
   return HREF_ATTR_RE.exec(anchorHtml)?.[1] ?? null
 }
 
-function extractAnchorText(anchorHtml: string): string {
+const extractAnchorText = (anchorHtml: string): string => {
   return anchorHtml.replace(/^<a\b[^>]*>/i, '').replace(/<\/a>\s*$/i, '')
 }
 
@@ -119,10 +119,10 @@ function extractAnchorText(anchorHtml: string): string {
  * (`<a href="…">text</a>`, no nested anchors, no other attributes on a
  * player link — verified against the two live transfer-overview tables).
  */
-export function rewritePlayerLinksInHtml(
+export const rewritePlayerLinksInHtml = (
   html: string,
   rows: readonly PlayerRow[],
-): {html: string; changed: boolean} {
+): {html: string; changed: boolean} => {
   const next = html.replace(ANCHOR_RE, (anchorHtml) => {
     const href = extractHref(anchorHtml)
     if (!href) return anchorHtml
@@ -169,10 +169,10 @@ export interface PortableTextBlockLike {
  * span's `marks[]` that referenced it, unwrapping the link while keeping
  * the span's text untouched.
  */
-export function rewritePlayerLinksInBlock(
+export const rewritePlayerLinksInBlock = (
   block: PortableTextBlockLike,
   rows: readonly PlayerRow[],
-): {block: PortableTextBlockLike; changed: boolean} {
+): {block: PortableTextBlockLike; changed: boolean} => {
   const markDefs = block.markDefs
   if (!Array.isArray(markDefs) || markDefs.length === 0) {
     return {block, changed: false}
@@ -227,9 +227,9 @@ export interface ArticleOrPageDoc {
 
 type Patch = ReturnType<typeof at>
 
-function isHtmlTableBlock(
+const isHtmlTableBlock = (
   value: unknown,
-): value is {_type: 'htmlTable'; html?: unknown; [k: string]: unknown} {
+): value is {_type: 'htmlTable'; html?: unknown; [k: string]: unknown} => {
   return (
     value !== null &&
     typeof value === 'object' &&
@@ -237,7 +237,7 @@ function isHtmlTableBlock(
   )
 }
 
-function isPortableTextBlock(value: unknown): value is PortableTextBlockLike {
+const isPortableTextBlock = (value: unknown): value is PortableTextBlockLike => {
   return (
     value !== null &&
     typeof value === 'object' &&
@@ -245,10 +245,10 @@ function isPortableTextBlock(value: unknown): value is PortableTextBlockLike {
   )
 }
 
-export function migrateRepointLegacyPlayerLinks(
+export const migrateRepointLegacyPlayerLinks = (
   doc: ArticleOrPageDoc,
   rows: readonly PlayerRow[],
-): Patch[] | undefined {
+): Patch[] | undefined => {
   const body = doc.body
   if (!Array.isArray(body) || body.length === 0) return undefined
 
@@ -296,7 +296,7 @@ interface MigrationFetchClient {
  * transient API failure would all look identical from the migration's own
  * output — nothing about the run itself would look wrong.
  */
-export function assertPlayerRowsNonEmpty(rows: readonly PlayerRow[]): void {
+export const assertPlayerRowsNonEmpty = (rows: readonly PlayerRow[]): void => {
   if (rows.length > 0) return
   throw new Error(
     'repoint-legacy-player-links: the player-rows query ' +
@@ -317,7 +317,7 @@ export function assertPlayerRowsNonEmpty(rows: readonly PlayerRow[]): void {
 // same way rather than only the first one.
 const playerRowsCache: {promise?: Promise<PlayerRow[]>} = {}
 
-function fetchPlayerRows(client: MigrationFetchClient): Promise<PlayerRow[]> {
+const fetchPlayerRows = (client: MigrationFetchClient): Promise<PlayerRow[]> => {
   playerRowsCache.promise ??= client
     .fetch<PlayerRow[]>(PLAYER_ROWS_QUERY)
     .then((rows) => {

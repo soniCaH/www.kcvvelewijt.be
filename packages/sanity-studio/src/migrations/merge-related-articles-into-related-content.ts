@@ -30,14 +30,14 @@ type Patch = ReturnType<typeof at>
 const DEFAULT_KEY_LENGTH = 12
 const KEY_ALPHABET = 'abcdefghijklmnopqrstuvwxyz0123456789'
 
-function defaultGenKey(): string {
+const defaultGenKey = (): string => {
   return Array.from(
     {length: DEFAULT_KEY_LENGTH},
     () => KEY_ALPHABET[Math.floor(Math.random() * KEY_ALPHABET.length)],
   ).join('')
 }
 
-function isRelatedRef(value: unknown): value is RelatedRef {
+const isRelatedRef = (value: unknown): value is RelatedRef => {
   return (
     value !== null &&
     typeof value === 'object' &&
@@ -47,15 +47,15 @@ function isRelatedRef(value: unknown): value is RelatedRef {
   )
 }
 
-function takeRelatedRefs(value: unknown): RelatedRef[] {
+const takeRelatedRefs = (value: unknown): RelatedRef[] => {
   if (!Array.isArray(value)) return []
   return value.filter(isRelatedRef)
 }
 
-export function migrateMergeRelatedArticlesIntoRelatedContent(
+export const migrateMergeRelatedArticlesIntoRelatedContent = (
   doc: ArticleDoc,
   genKey: () => string = defaultGenKey,
-): Patch[] | undefined {
+): Patch[] | undefined => {
   const legacy = takeRelatedRefs(doc.relatedArticles)
 
   // No legacy data — nothing to migrate. The legacy field may exist as an

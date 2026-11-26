@@ -60,9 +60,9 @@ const ASSET_REF_DIMENSIONS_RE = /-(\d+)x(\d+)-\w+$/
  * asset that Studio merely failed to read, which is the wrong failure mode
  * for a check that exists to catch a mistake.
  */
-export function validateBannerAspectRatio(
+export const validateBannerAspectRatio = (
   value: ImageValue | undefined,
-): true | {message: string} {
+): true | {message: string} => {
   const ref = value?.asset?._ref
   if (!ref) return true
 

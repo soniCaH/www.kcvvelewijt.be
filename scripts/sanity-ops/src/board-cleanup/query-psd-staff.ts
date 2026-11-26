@@ -1,6 +1,6 @@
 import { client } from "../shared/sanity-client";
 
-async function main() {
+const main = async () => {
   const allStaff = await client.fetch<
     Array<{
       _id: string;
@@ -32,7 +32,7 @@ async function main() {
     console.log(`\n${t._id}:`);
     console.log(JSON.stringify(t.members, null, 2));
   }
-}
+};
 
 main().catch((err) => {
   console.error("Fatal error:", err);

@@ -31,7 +31,7 @@ const keys = (name: string) =>
 const line = (e: EmptyRoleEntry) =>
   `  ${e.team.padEnd(28)} ${e.name.padEnd(28)} ${(e.functionTitle ?? "(geen PSD-titel)").padEnd(28)} ${e.key}${e.docId.startsWith("drafts.") ? "  [draft]" : ""}`;
 
-async function main() {
+const main = async () => {
   // Draft-aware on purpose: a team draft still holds the empty role, and
   // publishing it later would undo the fill on the published document.
   const rows = await draftAwareClient.fetch<TeamRow[]>(
@@ -78,7 +78,7 @@ async function main() {
   console.log(
     `\nWrote ${mutations.length} patches (${andere.length} entries) to ${mutationsPath}\nApply: bash ${join(dir, "apply.sh")}`,
   );
-}
+};
 
 main().catch((err) => {
   console.error("Fatal error:", err);

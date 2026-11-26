@@ -22,7 +22,7 @@ import {GuideFormInput} from './guide-input'
 
 const DEFAULT_MARKER = 'default-form-render'
 
-function makeProps(overrides: Record<string, unknown>): InputProps {
+const makeProps = (overrides: Record<string, unknown>): InputProps => {
   return {
     path: [],
     schemaType: {name: 'player'},

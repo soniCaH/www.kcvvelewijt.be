@@ -4,7 +4,7 @@ import type {StructureBuilder} from 'sanity/structure'
  * Staff desk structure with 9 views.
  * All labels in Dutch.
  */
-export function staffStructure(S: StructureBuilder) {
+export const staffStructure = (S: StructureBuilder) => {
   return S.listItem()
     .title('Staff')
     .child(

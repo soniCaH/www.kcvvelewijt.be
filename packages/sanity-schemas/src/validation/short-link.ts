@@ -23,10 +23,10 @@ const DUPLICATE_QUERY = `count(*[_type == "shortLink" && name == $name && !(_id 
  * uniqueness across `shortLink` documents. Empty passes: `.required()` stays
  * the field's own call.
  */
-export async function validateShortLinkName(
+export const validateShortLinkName = async (
   value: unknown,
   context: ShortLinkNameContext,
-): Promise<true | string> {
+): Promise<true | string> => {
   if (typeof value !== 'string' || value.length === 0) return true
 
   if (!SHORT_LINK_NAME_PATTERN.test(value)) {
@@ -63,7 +63,7 @@ export async function validateShortLinkName(
  */
 const TARGET_PATTERN = /^(https:\/\/[^/\s]|\/(?![/\\]))/
 
-export function validateShortLinkTarget(value: unknown): true | string {
+export const validateShortLinkTarget = (value: unknown): true | string => {
   if (typeof value !== 'string' || value.length === 0) return true
   const unsafe = /\s/.test(value) || [...value].some((ch) => ch.charCodeAt(0) < 32 || ch.charCodeAt(0) === 127)
   if (!TARGET_PATTERN.test(value) || unsafe) {
@@ -83,7 +83,7 @@ export function validateShortLinkTarget(value: unknown): true | string {
 const OWN_SITE_URL = /^https:\/\/(?:www\.)?kcvvelewijt\.be\.?(?::\d*)?(?=[/?#]|$)([^?#]*)/i
 
 /** The path of an `https://` URL on the club's own host, else `null`: `https://www.kcvvelewijt.be/stage` loops like `/stage`. */
-function ownSitePath(value: string): string | null {
+const ownSitePath = (value: string): string | null => {
   const match = OWN_SITE_URL.exec(value)
   return match ? match[1] || '/' : null
 }

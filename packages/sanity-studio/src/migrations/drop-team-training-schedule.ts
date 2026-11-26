@@ -31,9 +31,9 @@ export interface TeamWithTrainingScheduleDoc {
 
 type Patch = ReturnType<typeof at>
 
-export function migrateDropTeamTrainingSchedule(
+export const migrateDropTeamTrainingSchedule = (
   doc: TeamWithTrainingScheduleDoc,
-): Patch[] | undefined {
+): Patch[] | undefined => {
   if (doc.trainingSchedule === undefined) return undefined
   return [at('trainingSchedule', unset())]
 }

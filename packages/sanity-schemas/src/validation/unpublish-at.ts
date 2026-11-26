@@ -6,10 +6,10 @@ export interface UnpublishAtContext {
   document?: {publishedAt?: string}
 }
 
-export function validateUnpublishAt(
+export const validateUnpublishAt = (
   unpublishAt: string | undefined,
   context: UnpublishAtContext,
-): true | string {
+): true | string => {
   const publishedAt = context.document?.publishedAt
   if (!unpublishAt || !publishedAt) return true
   if (Date.parse(unpublishAt) <= Date.parse(publishedAt))

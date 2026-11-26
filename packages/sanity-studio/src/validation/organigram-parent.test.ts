@@ -10,11 +10,11 @@ import {
 type Row = {_id: string; parent?: string}
 
 /** A client whose `fetch` answers every query with the given rows. */
-function clientWith(rows: Row[]) {
+const clientWith = (rows: Row[]) => {
   return {fetch: vi.fn().mockResolvedValue(rows)}
 }
 
-function field() {
+const field = () => {
   const f = organigramNode.fields.find((x) => x.name === 'parentNode')
   if (!f) throw new Error('organigramNode.parentNode field not found')
   return f as unknown as {
@@ -23,7 +23,7 @@ function field() {
   }
 }
 
-async function validateParent(selfId: string, parentRef: string | undefined, rows: Row[]) {
+const validateParent = async (selfId: string, parentRef: string | undefined, rows: Row[]) => {
   const rule = field().validation(new ConcreteRuleClass())
   const context = {
     document: {_id: selfId, _type: 'organigramNode'},

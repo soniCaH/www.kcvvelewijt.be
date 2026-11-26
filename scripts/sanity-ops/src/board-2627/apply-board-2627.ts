@@ -28,7 +28,7 @@ import {
 
 const EXECUTE = process.argv.includes("--execute");
 
-async function readSnapshot(): Promise<Snapshot> {
+const readSnapshot = async (): Promise<Snapshot> => {
   const nodeIds = [
     ...NODE_UPDATES.map((n) => n.id),
     ...NODE_CREATES.map((n) => n._id),
@@ -105,9 +105,9 @@ async function readSnapshot(): Promise<Snapshot> {
     ),
     pending,
   };
-}
+};
 
-function printPlan(snap: Snapshot) {
+const printPlan = (snap: Snapshot) => {
   const names = (list?: string[]) => (list?.length ? list.join(", ") : "—");
   const planned = (ids: string[]) => names(ids.map((id) => STAFF[id]!));
 
@@ -146,9 +146,9 @@ function printPlan(snap: Snapshot) {
     console.log(`  ${t.id}${topicDone(t, snap) ? "  (already applied)" : ""}`);
     for (const c of t.changes) console.log(`      ${c.path}: "${c.to}"`);
   }
-}
+};
 
-async function write(snap: Snapshot) {
+const write = async (snap: Snapshot) => {
   const tx = client.transaction();
 
   for (const s of STAFF_CREATES) tx.createIfNotExists(s);
@@ -195,9 +195,9 @@ async function write(snap: Snapshot) {
 
   const result = await tx.commit();
   console.log(`\nDone. Transaction ${result.transactionId} on ${dataset}.`);
-}
+};
 
-async function main() {
+const main = async () => {
   const snap = await readSnapshot();
 
   const errors = preflight(snap);
@@ -224,7 +224,7 @@ async function main() {
     process.exit(1);
   }
   await write(snap);
-}
+};
 
 main().catch((err) => {
   console.error("Fatal error:", err);

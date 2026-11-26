@@ -17,7 +17,7 @@ import type {BlockDecoratorProps} from 'sanity'
 // --color-jersey-deep (apps/web/src/app/globals.css).
 const JERSEY_DEEP = '#007c46'
 
-export function PullquoteDecorator(props: BlockDecoratorProps) {
+export const PullquoteDecorator = (props: BlockDecoratorProps) => {
   return (
     <span
       style={{
@@ -30,7 +30,7 @@ export function PullquoteDecorator(props: BlockDecoratorProps) {
   )
 }
 
-export function AccentDecorator(props: BlockDecoratorProps) {
+export const AccentDecorator = (props: BlockDecoratorProps) => {
   return (
     <span style={{color: JERSEY_DEEP, fontStyle: 'italic', fontWeight: 900}}>
       {props.children}
