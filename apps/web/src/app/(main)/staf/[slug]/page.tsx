@@ -42,9 +42,9 @@ interface StaffPageProps {
 // killed the whole build. Each slug renders on its first request instead and
 // ISR caches it; a failed first request is a 500 that is never cached.
 // Required all the same: without this export `revalidate` is inert (#2391).
-export async function generateStaticParams() {
+export const generateStaticParams = async () => {
   return [];
-}
+};
 
 // Subject read: the staff member is this page's entire content, so a failed
 // read takes it down with it via `Effect.orDie` (#2864). Wrapped in React
@@ -62,9 +62,9 @@ export const fetchStaffMemberOrNull = cache(
   },
 );
 
-export async function generateMetadata({
+export const generateMetadata = async ({
   params,
-}: StaffPageProps): Promise<Metadata> {
+}: StaffPageProps): Promise<Metadata> => {
   const { slug } = await params;
   try {
     const member = await fetchStaffMemberOrNull(slug);
@@ -105,9 +105,9 @@ export async function generateMetadata({
       // carries it.
     };
   }
-}
+};
 
-export default async function StafPage({ params }: StaffPageProps) {
+const StafPage = async ({ params }: StaffPageProps) => {
   const { slug } = await params;
 
   // Subject read: the staff member is this page's entire content, so a
@@ -258,7 +258,9 @@ export default async function StafPage({ params }: StaffPageProps) {
       <RelatedRow items={relatedRowItems} pageType="staff" pageSlug={slug} />
     </>
   );
-}
+};
+
+export default StafPage;
 
 // 24h ISR — staff data is PSD-synced + editor-published; on-demand
 // revalidation keeps it fresh via /api/revalidate (revalidateTag 'staff').

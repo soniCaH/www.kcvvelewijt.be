@@ -48,11 +48,13 @@ export const fetchPage = cache(async function fetchPage(slug: string) {
 // Deliberately empty — CMS pages are not enumerated at build time, so a new
 // page goes live without a redeploy. Required all the same: without this export
 // the segment never enters the ISR cache and `revalidate` is inert (#2391).
-export async function generateStaticParams() {
+export const generateStaticParams = async () => {
   return [];
-}
+};
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export const generateMetadata = async ({
+  params,
+}: Props): Promise<Metadata> => {
   const { slug } = await params;
   const page = await fetchPage(slug);
   if (!page)
@@ -76,11 +78,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ogTitle: `${page.title} - KCVV Elewijt`,
     ogImage,
   });
-}
+};
 
 export const revalidate = 3600;
 
-export default async function DynamicClubPage({ params }: Props) {
+const DynamicClubPage = async ({ params }: Props) => {
   const { slug } = await params;
   const page = await fetchPage(slug);
 
@@ -146,4 +148,6 @@ export default async function DynamicClubPage({ params }: Props) {
       ) : null}
     </div>
   );
-}
+};
+
+export default DynamicClubPage;

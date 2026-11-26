@@ -8,9 +8,9 @@ export const MIN_ARTICLES_PER_CHIP = 3;
  * below `MIN_ARTICLES_PER_CHIP` left out. A left-out tag still filters
  * through `?categorie=` — the page passes every tag to the client for that.
  */
-export function toCategoryChips(tags: TagCount[]) {
+export const toCategoryChips = (tags: TagCount[]) => {
   return tags
     .filter((t) => t.count >= MIN_ARTICLES_PER_CHIP)
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
     .map(({ name }) => ({ id: name, attributes: { name, slug: name } }));
-}
+};

@@ -26,10 +26,7 @@ interface OpponentLayoutProps {
  * is identical to before, only *when* the response header leaves changes.
  * The file is kept, not deleted.
  */
-export default async function OpponentLayout({
-  children,
-  params,
-}: OpponentLayoutProps) {
+const OpponentLayout = async ({ children, params }: OpponentLayoutProps) => {
   const { clubId: clubIdStr } = await params;
   const clubId = parsePsdId(clubIdStr);
   if (clubId === null) notFound();
@@ -37,4 +34,6 @@ export default async function OpponentLayout({
   const data = await fetchOpponentData(clubId);
   if (!data) notFound();
   return children;
-}
+};
+
+export default OpponentLayout;

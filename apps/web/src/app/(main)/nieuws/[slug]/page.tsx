@@ -106,14 +106,14 @@ interface RenderArticleHeroArgs {
   heroMatch?: HeroMatchData | null;
 }
 
-function renderArticleHero({
+const renderArticleHero = ({
   article,
   title,
   primaryCategory,
   firstTransferFact,
   firstEventFact,
   heroMatch,
-}: RenderArticleHeroArgs) {
+}: RenderArticleHeroArgs) => {
   // EditorialHero accepts string OR PortableTextBlock[] — prefer the
   // rich shape so editor-marked `accent` spans render italic +
   // jersey-deep on the H1. The Sanity typegen's PT shape is
@@ -213,7 +213,7 @@ function renderArticleHero({
         />
       );
   }
-}
+};
 
 /**
  * Find the first transferFact / eventFact block in the article body.
@@ -221,30 +221,30 @@ function renderArticleHero({
  * but `ArticleDetailVM` (slug projection) inlines them in `body[]` — we
  * scan once at the page level rather than touching the GROQ projection.
  */
-function findFirstBlock<T>(
+const findFirstBlock = <T,>(
   body: PortableTextBlock[] | null,
   type: string,
-): T | null {
+): T | null => {
   if (!body) return null;
   const match = body.find((b) => (b as { _type?: string })._type === type);
   return (match as T | undefined) ?? null;
-}
+};
 
-function shouldRenderArticleCredits(article: ArticleDetailVM): boolean {
+const shouldRenderArticleCredits = (article: ArticleDetailVM): boolean => {
   if (article.articleType === "interview") return true;
   const hasAuthor = !!article.author?.trim();
   const hasPhotographer = !!article.photographer?.trim();
   return hasAuthor || hasPhotographer;
-}
+};
 
 // Deliberately empty (#3135, flake class H): an enumerated slug is rendered at
 // build, so its own subject read runs against live Sanity and one 503 there
 // killed the whole build. Each slug renders on its first request instead and
 // ISR caches it; a failed first request is a 500 that is never cached.
 // Required all the same: without this export `revalidate` is inert (#2391).
-export async function generateStaticParams() {
+export const generateStaticParams = async () => {
   return [];
-}
+};
 
 /**
  * Produce page and Open Graph metadata for the article identified by the route params.
@@ -268,7 +268,7 @@ export const fetchArticleOrNull = cache(async function fetchArticleOrNull(
   );
 });
 
-export async function generateMetadata({ params }: ArticlePageProps) {
+export const generateMetadata = async ({ params }: ArticlePageProps) => {
   const { slug } = await params;
   // Subject read: this route's metadata is entirely about this one article,
   // so a failed read takes it down with it — `null` (genuinely no such
@@ -305,7 +305,7 @@ export async function generateMetadata({ params }: ArticlePageProps) {
       images: [ogImage],
     },
   };
-}
+};
 
 /**
  * Render the article detail page for the provided route slug.
@@ -316,7 +316,7 @@ export async function generateMetadata({ params }: ArticlePageProps) {
  * @param params - Route parameters object whose `slug` resolves to the article's slug string
  * @returns A JSX element representing the complete article page (or causes a 404 when the article is missing)
  */
-export default async function ArticlePage({ params }: ArticlePageProps) {
+const ArticlePage = async ({ params }: ArticlePageProps) => {
   const { slug } = await params;
 
   // Subject read: the article is this page's entire content, so a failed
@@ -676,7 +676,9 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
       />
     </div>
   );
-}
+};
+
+export default ArticlePage;
 
 // 15m ISR — article publishes invalidate on demand via /api/revalidate
 // (revalidatePath '/nieuws/<slug>' + revalidateTag 'articles'), so the window

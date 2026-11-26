@@ -75,12 +75,12 @@ const fetchBoardTeamOrNotFound = cache(async function fetchBoardTeamOrNotFound(
  *  - `Page`: a React component that renders the BestuurPage using the fetched Sanity team data (header, players, and staff)
  *  - `Layout`: the same-segment existence check that turns a missing team into a real 404 (#3483)
  */
-export function createBoardPage({
+export const createBoardPage = ({
   slug,
   fallbackDescription,
   fallbackTitle,
-}: BoardPageConfig) {
-  async function generateMetadata(): Promise<Metadata> {
+}: BoardPageConfig) => {
+  const generateMetadata = async (): Promise<Metadata> => {
     try {
       const team = await fetchBoardTeamOrNotFound(slug);
       const description = team.tagline
@@ -107,9 +107,9 @@ export function createBoardPage({
         path: `/club/${slug}`,
       });
     }
-  }
+  };
 
-  async function Page() {
+  const Page = async () => {
     const team = await fetchBoardTeamOrNotFound(slug);
 
     return (
@@ -135,7 +135,7 @@ export function createBoardPage({
         />
       </>
     );
-  }
+  };
 
   /**
    * Same-segment layout — `loading.tsx` never wraps the layout of its own
@@ -144,10 +144,10 @@ export function createBoardPage({
    * pattern of `club/[slug]/layout.tsx`, #2968). The read is the `cache()`d
    * one `Page` and `generateMetadata` share, so Sanity is still read once.
    */
-  async function Layout({ children }: { children: React.ReactNode }) {
+  const Layout = async ({ children }: { children: React.ReactNode }) => {
     await fetchBoardTeamOrNotFound(slug);
     return children;
-  }
+  };
 
   return { generateMetadata, Page, Layout };
-}
+};

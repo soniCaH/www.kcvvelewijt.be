@@ -16,13 +16,13 @@ import { userAgentFromString } from "next/server";
  * Server-only: its own file, not `./utils`, because client components import
  * `./utils` and `next/server` must stay out of their bundle.
  */
-export function guessIsPhone(request: {
+export const guessIsPhone = (request: {
   get(name: string): string | null;
-}): boolean {
+}): boolean => {
   const hint = request.get("sec-ch-ua-mobile");
   if (hint !== null) return hint === "?1";
   return (
     userAgentFromString(request.get("user-agent") ?? undefined).device.type ===
     "mobile"
   );
-}
+};

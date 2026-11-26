@@ -20,11 +20,11 @@ const ArticlesParams = S.Struct({
 });
 const decodeArticlesParams = S.decodeUnknownSync(ArticlesParams);
 
-export async function fetchArticlesAction(params: {
+export const fetchArticlesAction = async (params: {
   offset: number;
   limit: number;
   category?: string;
-}): Promise<Paginated<ArticleVM>> {
+}): Promise<Paginated<ArticleVM>> => {
   // `"use server"` makes this a public endpoint: decode, then clamp, before GROQ.
   const decoded = decodeArticlesParams(params);
   const { offset, limit } = clampListingWindow(decoded);
@@ -56,4 +56,4 @@ export async function fetchArticlesAction(params: {
   );
 
   return paginateResults(articles, limit);
-}
+};

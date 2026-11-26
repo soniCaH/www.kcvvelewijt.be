@@ -48,14 +48,14 @@ interface NewsListingClientProps {
   }) => Promise<Paginated<ArticleVM>>;
 }
 
-export function NewsListingClient({
+export const NewsListingClient = ({
   initialArticles,
   categories,
   filterSlugs,
   hasMore: initialHasMore,
   initialCategory,
   fetchArticles,
-}: NewsListingClientProps) {
+}: NewsListingClientProps) => {
   // Every valid `?categorie=` value — the same array both the initial seed
   // below and the `popstate` listener further down narrow against, so a
   // stale/bogus slug (e.g. a category since renamed or removed) can never
@@ -441,4 +441,4 @@ export function NewsListingClient({
       </PageContainer>
     </div>
   );
-}
+};

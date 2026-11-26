@@ -26,7 +26,7 @@ export const metadata = buildPageMetadata({
   path: "/sponsors",
 });
 
-function mapToSponsor(s: SponsorVM): Sponsor {
+const mapToSponsor = (s: SponsorVM): Sponsor => {
   return {
     id: s.id,
     name: s.name,
@@ -36,9 +36,9 @@ function mapToSponsor(s: SponsorVM): Sponsor {
     featured: s.featured,
     description: s.description ?? undefined,
   };
-}
+};
 
-export default async function SponsorsPageRoute() {
+const SponsorsPageRoute = async () => {
   // Uncaught by design (#2433 rule 2/3): the sponsor wall is this page's
   // subject, and under ISR a caught failure *succeeds* — the empty wall would
   // be written into the cache and hold for the full window below. A throw
@@ -75,7 +75,9 @@ export default async function SponsorsPageRoute() {
       <SponsorsPage sponsors={allSponsors} />
     </>
   );
-}
+};
+
+export default SponsorsPageRoute;
 
 // 15m ISR — the sponsor list itself changes rarely and editor publishes
 // invalidate it on demand via /api/revalidate (revalidateTag 'sponsors'), so

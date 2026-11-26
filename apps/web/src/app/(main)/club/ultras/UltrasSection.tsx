@@ -22,13 +22,13 @@ export interface UltrasSectionProps {
   children: ReactNode;
 }
 
-export function UltrasSection({
+export const UltrasSection = ({
   id,
   kicker,
   heading,
   accent,
   children,
-}: UltrasSectionProps) {
+}: UltrasSectionProps) => {
   return (
     <section id={id} className="mt-14 first:mt-0">
       <SectionHeader
@@ -52,4 +52,4 @@ export function UltrasSection({
       </div>
     </section>
   );
-}
+};

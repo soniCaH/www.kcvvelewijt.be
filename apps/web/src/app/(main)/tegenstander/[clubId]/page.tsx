@@ -65,9 +65,9 @@ const NOT_FOUND_METADATA: Metadata = {
  * — #2464 asks for the page's existing lead verbatim, not a second phrasing
  * invented beside it, so both surfaces call this one function.
  */
-function opponentHistoryDescription(opponentName: string): string {
+const opponentHistoryDescription = (opponentName: string): string => {
   return `Alle onderlinge duels tussen KCVV Elewijt en ${opponentName}, per seizoen.`;
-}
+};
 
 /**
  * Build SEO metadata for the opponent history page using the route `clubId`.
@@ -84,9 +84,9 @@ function opponentHistoryDescription(opponentName: string): string {
  * record, not one match, so it borrows the page's own "Onderlinge
  * geschiedenis" kicker instead.
  */
-export async function generateMetadata({
+export const generateMetadata = async ({
   params,
-}: OpponentPageProps): Promise<Metadata> {
+}: OpponentPageProps): Promise<Metadata> => {
   const { clubId: clubIdStr } = await params;
   const clubId = parsePsdId(clubIdStr);
 
@@ -126,7 +126,7 @@ export async function generateMetadata({
     // boundary (or notFound() for a genuinely unknown club).
     return NOT_FOUND_METADATA;
   }
-}
+};
 
 // 15 min ISR — renders live PSD opponent-match history, aligned to the BFF
 // freshness window.
@@ -135,9 +135,9 @@ export const revalidate = 900;
 // No static prerendering — the body fetches live PSD data via the rate-limited
 // BFF. Empty, but required: without this export the segment never enters the
 // ISR cache and `revalidate` is inert (#2391).
-export async function generateStaticParams() {
+export const generateStaticParams = async () => {
   return [];
-}
+};
 
 interface OpponentPageProps {
   params: Promise<{ clubId: string }>;
@@ -149,16 +149,16 @@ interface OpponentPageProps {
  * tally). Mirrors the BFF summary computation so per-season tallies sum to the
  * hero card totals.
  */
-function getMatchOutcome(match: Match): "win" | "draw" | "loss" | null {
+const getMatchOutcome = (match: Match): "win" | "draw" | "loss" | null => {
   if (match.status !== "finished" || match.is_home == null) return null;
   const homeScore = match.home_team.score;
   const awayScore = match.away_team.score;
   if (homeScore == null || awayScore == null) return null;
   return getResultColor(homeScore, awayScore, match.is_home);
-}
+};
 
 /** Per-season tally caption, e.g. `"2W · 1G"` or `"1 gepland"`. */
-function seasonTally(matches: readonly Match[]): string {
+const seasonTally = (matches: readonly Match[]): string => {
   const outcomes = matches.map(getMatchOutcome);
   const wins = outcomes.filter((o) => o === "win").length;
   const draws = outcomes.filter((o) => o === "draw").length;
@@ -172,10 +172,10 @@ function seasonTally(matches: readonly Match[]): string {
   if (losses) parts.push(`${losses}V`);
   if (scheduled) parts.push(`${scheduled} gepland`);
   return parts.join(" · ");
-}
+};
 
 /** Warm mono band that opens each season group. */
-function SeasonBand({ label, tally }: { label: string; tally: string }) {
+const SeasonBand = ({ label, tally }: { label: string; tally: string }) => {
   return (
     <div className="mb-2.5 flex items-center gap-2.5">
       <span className="border-ink bg-warm text-ink border-2 px-2.5 py-1 font-mono text-[10px] font-bold tracking-[0.12em] uppercase">
@@ -195,7 +195,7 @@ function SeasonBand({ label, tally }: { label: string; tally: string }) {
       ) : null}
     </div>
   );
-}
+};
 
 /**
  * Retrieve each flagship senior squad's own head-to-head history against
@@ -331,13 +331,13 @@ export const fetchOpponentData = cache(async function fetchOpponentData(
  * `<section aria-label={seasonLabel}>`, which would collide once the same
  * season appears under both squads.
  */
-function SquadHistorySection({
+const SquadHistorySection = ({
   section,
   className,
 }: {
   section: SquadOpponentSection;
   className?: string;
-}) {
+}) => {
   const seasons = groupBySeason(section.matches, (m) => m.date);
   const countLabel = matchCountLabel(section.matches.length);
 
@@ -390,9 +390,9 @@ function SquadHistorySection({
       ))}
     </section>
   );
-}
+};
 
-export default async function OpponentPage({ params }: OpponentPageProps) {
+const OpponentPage = async ({ params }: OpponentPageProps) => {
   const { clubId: clubIdStr } = await params;
   const clubId = parsePsdId(clubIdStr);
 
@@ -463,4 +463,6 @@ export default async function OpponentPage({ params }: OpponentPageProps) {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default OpponentPage;

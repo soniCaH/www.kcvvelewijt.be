@@ -75,7 +75,7 @@ const fetchContacts = async (): Promise<MembershipContacts> => {
   }
 };
 
-export default async function WordLidPage() {
+const WordLidPage = async () => {
   const contacts = await fetchContacts();
 
   return (
@@ -116,4 +116,6 @@ export default async function WordLidPage() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default WordLidPage;

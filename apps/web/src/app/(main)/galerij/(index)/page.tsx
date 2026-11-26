@@ -34,7 +34,7 @@ export const metadata = buildPageMetadata({
 // Galleries change rarely — 24h ISR (align with #1921).
 export const revalidate = 86400;
 
-export default async function GalerijPage() {
+const GalerijPage = async () => {
   const initial = await fetchGalleriesAction({
     offset: 0,
     limit: LISTING_INITIAL_TOTAL,
@@ -70,4 +70,6 @@ export default async function GalerijPage() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default GalerijPage;

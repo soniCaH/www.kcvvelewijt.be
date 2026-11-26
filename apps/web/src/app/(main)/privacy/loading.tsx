@@ -20,7 +20,7 @@ import {
   LoadingAnnouncement,
 } from "@/components/design-system";
 
-export default function PrivacyLoading() {
+const PrivacyLoading = () => {
   return (
     <div className="bg-cream py-12 sm:py-16">
       <LoadingAnnouncement label="Privacyverklaring laden…" />
@@ -54,4 +54,6 @@ export default function PrivacyLoading() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default PrivacyLoading;

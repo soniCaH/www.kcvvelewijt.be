@@ -23,7 +23,7 @@ import {
 import { PageHero } from "@/components/layout/PageHero";
 import { PLOEGEN_KICKER, PLOEGEN_TITLE, PLOEGEN_LEAD } from "./copy";
 
-export default function TeamsLoading() {
+const TeamsLoading = () => {
   return (
     <PageContainer width="index" className="py-12 sm:py-16">
       <LoadingAnnouncement label="Ploegen laden…" />
@@ -41,4 +41,6 @@ export default function TeamsLoading() {
       <SkeletonBars className="mt-16" />
     </PageContainer>
   );
-}
+};
+
+export default TeamsLoading;

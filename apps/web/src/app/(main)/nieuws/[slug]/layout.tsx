@@ -13,12 +13,11 @@ interface ArticleLayoutProps {
  * sits above this segment: the list page lives at `(landing)/nieuws/`, a
  * different route-group branch.
  */
-export default async function ArticleLayout({
-  children,
-  params,
-}: ArticleLayoutProps) {
+const ArticleLayout = async ({ children, params }: ArticleLayoutProps) => {
   const { slug } = await params;
   const article = await fetchArticleOrNull(slug);
   if (!article) notFound();
   return children;
-}
+};
+
+export default ArticleLayout;

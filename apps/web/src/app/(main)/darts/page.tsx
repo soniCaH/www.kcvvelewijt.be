@@ -85,7 +85,7 @@ const ROWS: Array<{ label: string; value: string }> = [
   { label: "Muziek", value: darts.muziek.tekst },
 ];
 
-export default function DartsPage() {
+const DartsPage = () => {
   return (
     <>
       {/* The opening gets its own container with the site's standard vertical
@@ -164,4 +164,6 @@ export default function DartsPage() {
       </PageContainer>
     </>
   );
-}
+};
+
+export default DartsPage;

@@ -14,7 +14,7 @@ export interface UltrasAnalyticsProps {
  * Facebook link) to `ultras_join_click` — so the body stays server-rendered. A native listener on the container catches the
  * bubbled click from mouse and keyboard activation alike.
  */
-export function UltrasAnalytics({ children }: UltrasAnalyticsProps) {
+export const UltrasAnalytics = ({ children }: UltrasAnalyticsProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const { trackUltrasView, trackUltrasJoinClick } = useUltrasAnalytics();
 
@@ -28,4 +28,4 @@ export function UltrasAnalytics({ children }: UltrasAnalyticsProps) {
   });
 
   return <div ref={ref}>{children}</div>;
-}
+};

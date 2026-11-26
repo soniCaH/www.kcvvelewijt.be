@@ -70,7 +70,7 @@ const ARTICLE_ROW_CEILING = 1000;
  * defect elsewhere in the same `Effect.gen` would still slip past it, where
  * `degradeSection`'s `catchAllCause` catches both.
  */
-async function fetchSiteContents() {
+const fetchSiteContents = async () => {
   return runPromise(
     Effect.gen(function* () {
       const teamRepo = yield* TeamRepository;
@@ -117,9 +117,9 @@ async function fetchSiteContents() {
       );
     }),
   );
-}
+};
 
-export default async function InhoudPage() {
+const InhoudPage = async () => {
   const groups = buildSiteContents(await fetchSiteContents());
 
   return (
@@ -147,6 +147,8 @@ export default async function InhoudPage() {
       </PageContainer>
     </>
   );
-}
+};
+
+export default InhoudPage;
 
 export const revalidate = 3600;

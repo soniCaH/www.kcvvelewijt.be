@@ -15,7 +15,7 @@ import {
   UpLink,
 } from "@/components/design-system";
 
-export default function StaffDetailLoading() {
+const StaffDetailLoading = () => {
   return (
     <div className="min-h-screen">
       <LoadingAnnouncement label="Stafprofiel laden…" />
@@ -63,4 +63,6 @@ export default function StaffDetailLoading() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default StaffDetailLoading;

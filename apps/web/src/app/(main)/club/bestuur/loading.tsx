@@ -9,6 +9,8 @@
 
 import { BoardPageLoading } from "@/components/club/BestuurPage/BoardPageLoading";
 
-export default function BoardLoading() {
+const BoardLoading = () => {
   return <BoardPageLoading label="Bestuur laden…" />;
-}
+};
+
+export default BoardLoading;

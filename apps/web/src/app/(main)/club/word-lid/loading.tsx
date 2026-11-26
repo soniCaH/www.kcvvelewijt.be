@@ -24,7 +24,7 @@ import { PageHero } from "@/components/layout/PageHero";
 import { MembershipForm } from "@/components/club/MembershipForm/MembershipForm";
 import { INTERN_REGLEMENT_JEUGD_PDF } from "@/lib/constants";
 
-export default function WordLidLoading() {
+const WordLidLoading = () => {
   return (
     <div className="bg-cream pb-12 lg:pb-16">
       <LoadingAnnouncement label="Word lid laden…" />
@@ -58,4 +58,6 @@ export default function WordLidLoading() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default WordLidLoading;

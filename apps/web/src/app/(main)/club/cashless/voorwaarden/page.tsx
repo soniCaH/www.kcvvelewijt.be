@@ -18,10 +18,12 @@ const SLUG = "cashless/voorwaarden";
 
 export const revalidate = 3600;
 
-export function generateMetadata(): Promise<Metadata> {
+export const generateMetadata = (): Promise<Metadata> => {
   return clubPageMetadata({ params: Promise.resolve({ slug: SLUG }) });
-}
+};
 
-export default function CashlessTermsPage() {
+const CashlessTermsPage = () => {
   return DynamicClubPage({ params: Promise.resolve({ slug: SLUG }) });
-}
+};
+
+export default CashlessTermsPage;

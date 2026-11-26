@@ -6,15 +6,17 @@ import { MatchStripSlot } from "@/components/layout/MatchStrip";
  * (`docs/design/mockups/phase-3-c-header-and-matchstrip/matchstrip-locked.md`).
  * Detail-page surfaces live under (main) which omits the strip.
  */
-export default function LandingLayout({
+const LandingLayout = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
+}>) => {
   return (
     <>
       <MatchStripSlot />
       {children}
     </>
   );
-}
+};
+
+export default LandingLayout;

@@ -35,7 +35,7 @@ export const metadata = buildPageMetadata({
   path: "/ploegen",
 });
 
-async function fetchTeams() {
+const fetchTeams = async () => {
   // The outer try/catch is not the dead-catchAll anti-pattern this ticket
   // removes elsewhere: it covers `AppLayer` construction failing (e.g. a
   // missing `KCVV_API_URL`), which happens outside the effect
@@ -57,9 +57,9 @@ async function fetchTeams() {
     console.error("[ploegen] failed to fetch teams:", error);
     return [];
   }
-}
+};
 
-export default async function TeamsPage() {
+const TeamsPage = async () => {
   const teams = await fetchTeams();
   const { aTeam, bTeam, youthByDivision } = groupTeamsForLanding(teams);
 
@@ -114,6 +114,8 @@ export default async function TeamsPage() {
       </PageContainer>
     </>
   );
-}
+};
+
+export default TeamsPage;
 
 export const revalidate = 3600;

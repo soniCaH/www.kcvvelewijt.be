@@ -26,10 +26,10 @@ const decodeGalleriesParams = S.decodeUnknownSync(GalleriesParams);
  * caught empty list would be cached as if it were the truth (#2433). On the
  * load-more path the client catches it and offers a retry.
  */
-export async function fetchGalleriesAction(params: {
+export const fetchGalleriesAction = async (params: {
   offset: number;
   limit: number;
-}): Promise<Paginated<GalleryCardGridItem>> {
+}): Promise<Paginated<GalleryCardGridItem>> => {
   const { offset, limit } = clampListingWindow(decodeGalleriesParams(params));
 
   const rows = await runPromise(
@@ -40,4 +40,4 @@ export async function fetchGalleriesAction(params: {
   );
 
   return paginateResults(toGalleryCardGridItems(rows), limit);
-}
+};

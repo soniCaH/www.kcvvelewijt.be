@@ -103,9 +103,9 @@ interface MatchPageProps {
 // No static prerendering — the body fetches live PSD match data via the
 // rate-limited BFF. Empty, but required: without this export the segment never
 // enters the ISR cache and `revalidate` is inert (#2391).
-export async function generateStaticParams() {
+export const generateStaticParams = async () => {
   return [];
-}
+};
 
 /**
  * Build SEO metadata for a match page using the route `matchId`.
@@ -114,9 +114,9 @@ export async function generateStaticParams() {
  * object containing a page `title`; when match data is available, also adds
  * `description` and `openGraph` fields populated from the match.
  */
-export async function generateMetadata({
+export const generateMetadata = async ({
   params,
-}: MatchPageProps): Promise<Metadata> {
+}: MatchPageProps): Promise<Metadata> => {
   const { matchId } = await params;
   const numericId = parsePsdId(matchId);
 
@@ -166,7 +166,7 @@ export async function generateMetadata({
       title: "Wedstrijd niet gevonden",
     };
   }
-}
+};
 
 /**
  * Retrieve match details for the given match ID. Routes the BFF's tagged
@@ -284,9 +284,9 @@ export const fetchMatchOrNotFound = cache(async function fetchMatchOrNotFound(
  * exactly one phase. Flattening instead would double a club that appears in
  * an autumn and a spring poule.
  */
-async function fetchStandings(
+const fetchStandings = async (
   match: MatchDetail,
-): Promise<readonly RankingEntry[] | null> {
+): Promise<readonly RankingEntry[] | null> => {
   // A pitch-reservation placeholder (#2606) carries no result vocabulary — a
   // standings table is exactly that, so it never fetches for one, even on
   // the defensive off-chance a reservation is ever miscategorised `league`
@@ -338,23 +338,23 @@ async function fetchStandings(
       (t) => holds(t, match.home_team.id) || holds(t, match.away_team.id),
     );
   return table?.entries ?? [];
-}
+};
 
 /** Shared warn-and-degrade for `fetchStandings`'s two genuine-failure tags —
  *  `ParseError`/`HttpApiDecodeError` mean this deploy cannot read what PSD
  *  sent, unlike `HttpNotFound` (handled inline above; see the docblock). */
-function warnAndDegradeRankingRead(
+const warnAndDegradeRankingRead = (
   tag: "ParseError" | "HttpApiDecodeError",
   error: unknown,
-) {
+) => {
   console.warn(
     `[fetchStandings] "${tag}" classified as permanent; degrading instead of retrying.`,
     { error },
   );
   return Effect.succeed(null);
-}
+};
 
-export default async function MatchPage({ params }: MatchPageProps) {
+const MatchPage = async ({ params }: MatchPageProps) => {
   const { matchId } = await params;
   const numericId = parsePsdId(matchId);
 
@@ -725,7 +725,9 @@ export default async function MatchPage({ params }: MatchPageProps) {
       <RelatedRow items={relatedRowItems} pageType="match" pageSlug={matchId} />
     </>
   );
-}
+};
+
+export default MatchPage;
 
 /**
  * ISR at 15 minutes: the cap for a route carrying a BFF-fed section (#2433

@@ -29,7 +29,7 @@ import {
   UpLink,
 } from "@/components/design-system";
 
-export default function EventDetailLoading() {
+const EventDetailLoading = () => {
   return (
     <div className="bg-cream">
       <LoadingAnnouncement label="Evenement laden…" />
@@ -91,4 +91,6 @@ export default function EventDetailLoading() {
       </section>
     </div>
   );
-}
+};
+
+export default EventDetailLoading;

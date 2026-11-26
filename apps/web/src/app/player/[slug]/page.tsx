@@ -15,9 +15,7 @@ interface LegacyPlayerProps {
  * `permanentRedirect` emits a 308 — the SEO-equivalent of the AC's "301", and
  * consistent with every `permanent: true` rename in next.config.
  */
-export default async function LegacyPlayerRedirect({
-  params,
-}: LegacyPlayerProps) {
+const LegacyPlayerRedirect = async ({ params }: LegacyPlayerProps) => {
   const { slug } = await params;
   // Subject read: this route exists only to resolve the redirect target, so a
   // failed read takes the page down with it (#2864).
@@ -25,4 +23,6 @@ export default async function LegacyPlayerRedirect({
   const psdId = resolvePersonPsdId(slug, rows);
   if (!psdId) notFound();
   permanentRedirect(`/spelers/${psdId}`);
-}
+};
+
+export default LegacyPlayerRedirect;

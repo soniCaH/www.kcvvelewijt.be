@@ -37,12 +37,12 @@ export const metadata: Metadata = {
 };
 
 /** `Zaterdag · 15:00` — one consumer, so the shape stays local (#2430 rule 2). */
-function formatDateTime(match: Match): string | undefined {
+const formatDateTime = (match: Match): string | undefined => {
   const weekday = capitalize(toMatchDisplayZone(match.date).toFormat("cccc"));
   return match.time ? `${weekday} · ${match.time}` : weekday;
-}
+};
 
-function toMatchOption(match: Match): MatchOption {
+const toMatchOption = (match: Match): MatchOption => {
   const home = match.home_team.name;
   const away = match.away_team.name;
   const teamLabel = match.kcvv_team_label ? ` (${match.kcvv_team_label})` : "";
@@ -56,16 +56,16 @@ function toMatchOption(match: Match): MatchOption {
     awayLogo: match.away_team.logo,
     kcvvTeamLabel: match.kcvv_team_label,
   };
-}
+};
 
 /**
  * `zaterdag 18 oktober` (or a multi-day `zaterdag 12 – zondag 13 oktober`) +
  * the date block's `18` / `okt` for the first day, in the club's zone.
  */
-function dateParts(
+const dateParts = (
   iso: string | null | undefined,
   endIso?: string | null | undefined,
-) {
+) => {
   const dt = iso ? toDisplayZone(iso) : null;
   if (!dt?.isValid)
     return { dt: null, multiDay: false, date: "", day: "", month: "" };
@@ -77,9 +77,9 @@ function dateParts(
     day: dt.toFormat("d"),
     month: dt.toFormat("MMM").replace(".", ""),
   };
-}
+};
 
-function toArticleItem(row: ShareArticleRow): ShareItem {
+const toArticleItem = (row: ShareArticleRow): ShareItem => {
   // An event article is dated by its event, every other one by publication.
   const fact = row.eventFact;
   const {
@@ -101,9 +101,9 @@ function toArticleItem(row: ShareArticleRow): ShareItem {
     location: fact?.location ?? "",
     cover: shareCover(row),
   };
-}
+};
 
-function toEventItem(row: ShareEventRow): ShareItem {
+const toEventItem = (row: ShareEventRow): ShareItem => {
   const { dt, multiDay, ...date } = dateParts(row.dateStart, row.dateEnd);
   const hour = dt?.toFormat("HH:mm");
   return {
@@ -119,14 +119,14 @@ function toEventItem(row: ShareEventRow): ShareItem {
     location: row.location ?? "",
     cover: shareCover(row),
   };
-}
+};
 
 /**
  * Section reads (#3540): the news and event pickers degrade to empty on a
  * failed Sanity read, so a broken read never blocks a match share. The
  * deep-linked slug rides along in the same read; unknown = `null`.
  */
-async function fetchShareItems(
+const fetchShareItems = async (
   articleSlug: string | undefined,
   eventSlug: string | undefined,
 ): Promise<{
@@ -134,7 +134,7 @@ async function fetchShareItems(
   events: ShareItem[];
   pickedArticle: ShareItem | null;
   pickedEvent: ShareItem | null;
-}> {
+}> => {
   return runPromise(
     Effect.gen(function* () {
       const articleRepo = yield* ArticleRepository;
@@ -163,16 +163,16 @@ async function fetchShareItems(
       };
     }),
   );
-}
+};
 
 // Subject read: both pickers are this internal tool's entire content, so a
 // failed read (Sanity players or the BFF match window) takes the page down
 // with it — this route is `force-dynamic`, so there is no ISR fallback to
 // protect either way (#2864).
-async function fetchSharePageData(): Promise<{
+const fetchSharePageData = async (): Promise<{
   matches: MatchOption[];
   players: PlayerForShare[];
-}> {
+}> => {
   return runPromise(
     Effect.gen(function* () {
       const bff = yield* BffService;
@@ -216,16 +216,16 @@ async function fetchSharePageData(): Promise<{
       return { matches, players };
     }).pipe(Effect.orDie),
   );
-}
+};
 
-export default async function ShareRoute({
+const ShareRoute = async ({
   searchParams,
 }: {
   searchParams: Promise<{
     article?: string | string[];
     event?: string | string[];
   }>;
-}) {
+}) => {
   const params = await searchParams;
   const articleSlug = firstParam(params.article);
   const eventSlug = firstParam(params.event);
@@ -256,4 +256,6 @@ export default async function ShareRoute({
       initial={initial}
     />
   );
-}
+};
+
+export default ShareRoute;

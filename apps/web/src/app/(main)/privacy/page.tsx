@@ -56,7 +56,7 @@ const proseClasses = [
   "[&_strong]:font-semibold",
 ].join(" ");
 
-export default function PrivacyPage() {
+const PrivacyPage = () => {
   return (
     <div className="bg-cream py-12 sm:py-16">
       <PageContainer width="prose">
@@ -299,4 +299,6 @@ export default function PrivacyPage() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default PrivacyPage;

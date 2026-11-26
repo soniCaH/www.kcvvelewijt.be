@@ -19,12 +19,14 @@ interface TeamSegmentLayoutProps {
  * what keeps this one check ahead of either child's boundary. Covers both
  * `/ploegen/[slug]` (`(detail)/page.tsx`) and `/ploegen/[slug]/wedstrijden`.
  */
-export default async function TeamSegmentLayout({
+const TeamSegmentLayout = async ({
   children,
   params,
-}: TeamSegmentLayoutProps) {
+}: TeamSegmentLayoutProps) => {
   const { slug } = await params;
   const team = await fetchTeamOrNull(slug);
   if (!team) notFound();
   return children;
-}
+};
+
+export default TeamSegmentLayout;

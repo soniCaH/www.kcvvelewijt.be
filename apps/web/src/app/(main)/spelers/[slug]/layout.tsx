@@ -34,10 +34,7 @@ interface PlayerLayoutProps {
  * so the strip stays on screen with its real data while the page loads,
  * instead of a stand-in guessing its height (#3027).
  */
-export default async function PlayerLayout({
-  children,
-  params,
-}: PlayerLayoutProps) {
+const PlayerLayout = async ({ children, params }: PlayerLayoutProps) => {
   const { slug } = await params;
   const player = await fetchPlayerOrNull(slug);
   if (!player) notFound();
@@ -47,4 +44,6 @@ export default async function PlayerLayout({
       {children}
     </>
   );
-}
+};
+
+export default PlayerLayout;

@@ -19,7 +19,7 @@ import {
   UpLink,
 } from "@/components/design-system";
 
-export default function PlayerDetailLoading() {
+const PlayerDetailLoading = () => {
   return (
     <div className="min-h-screen">
       <LoadingAnnouncement label="Spelersprofiel laden…" />
@@ -68,4 +68,6 @@ export default function PlayerDetailLoading() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default PlayerDetailLoading;

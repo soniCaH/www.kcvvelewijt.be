@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 import { SITE_CONFIG } from "@/lib/constants";
 import { readOptionalServerEnv } from "@/lib/env/server";
 
-export default function robots(): MetadataRoute.Robots {
+const robots = (): MetadataRoute.Robots => {
   const isProduction = readOptionalServerEnv().VERCEL_ENV === "production";
 
   return {
@@ -19,4 +19,6 @@ export default function robots(): MetadataRoute.Robots {
     },
     sitemap: `${SITE_CONFIG.siteUrl}/sitemap.xml`,
   };
-}
+};
+
+export default robots;

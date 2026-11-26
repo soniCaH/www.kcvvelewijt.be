@@ -30,7 +30,7 @@ export const metadata = buildPageMetadata({
  * boundary; the fallback renders the masthead skeleton (heading + inert field)
  * so the band and `<h1>` ship in the initial HTML with no layout shift.
  */
-export default function SearchPage() {
+const SearchPage = () => {
   return (
     <div className="bg-cream flex flex-1 flex-col">
       <Suspense fallback={<SearchMastheadSkeleton />}>
@@ -38,4 +38,6 @@ export default function SearchPage() {
       </Suspense>
     </div>
   );
-}
+};
+
+export default SearchPage;

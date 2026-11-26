@@ -34,11 +34,11 @@ export interface OpponentSummaryCardProps {
  * description) rendered value-on-top via `flex-col-reverse`, with the full Dutch
  * word exposed to assistive tech via an `.sr-only` span.
  */
-export function OpponentSummaryCard({
+export const OpponentSummaryCard = ({
   summary,
   className,
   testId = "opponent-summary",
-}: OpponentSummaryCardProps) {
+}: OpponentSummaryCardProps) => {
   const cells: ReadonlyArray<{
     value: number;
     label: string;
@@ -96,4 +96,4 @@ export function OpponentSummaryCard({
       ))}
     </dl>
   );
-}
+};

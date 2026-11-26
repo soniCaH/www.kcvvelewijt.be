@@ -54,7 +54,7 @@ export const metadata = buildPageMetadata({
 // (revalidatePath '/evenementen') makes new/edited events appear sooner.
 export const revalidate = 3600;
 
-export default async function EvenementenPage() {
+const EvenementenPage = async () => {
   // Subject read: the events feed is this page's entire content, so a
   // failed read takes the page down with it (#2864).
   const events = await runPromise(
@@ -86,4 +86,6 @@ export default async function EvenementenPage() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default EvenementenPage;

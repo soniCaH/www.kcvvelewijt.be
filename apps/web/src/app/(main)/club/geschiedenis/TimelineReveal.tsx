@@ -19,7 +19,7 @@ const ENTERED_CLASS = "timeline-item--entered";
  * is never permanently hidden. When `prefers-reduced-motion: reduce` is set the
  * component short-circuits before touching the DOM: no class, no observer.
  */
-export function TimelineReveal({ children }: { children: ReactNode }) {
+export const TimelineReveal = ({ children }: { children: ReactNode }) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -46,4 +46,4 @@ export function TimelineReveal({ children }: { children: ReactNode }) {
   }, []);
 
   return <div ref={ref}>{children}</div>;
-}
+};

@@ -27,7 +27,7 @@ import {
 } from "@/components/club/ContactPage/contact-copy";
 
 /** A paper TapedCard footprint (border-2 ink + offset shadow). */
-function CardSkeleton({ className = "" }: { className?: string }) {
+const CardSkeleton = ({ className = "" }: { className?: string }) => {
   return (
     <div
       className={`border-ink bg-cream shadow-paper-sm space-y-3 border-2 p-5 ${className}`}
@@ -37,9 +37,9 @@ function CardSkeleton({ className = "" }: { className?: string }) {
       <Skeleton className="h-3 w-4/5" />
     </div>
   );
-}
+};
 
-export default function ContactLoading() {
+const ContactLoading = () => {
   return (
     <div className="bg-cream min-h-screen">
       <LoadingAnnouncement label="Contactpagina laden…" />
@@ -94,4 +94,6 @@ export default function ContactLoading() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default ContactLoading;

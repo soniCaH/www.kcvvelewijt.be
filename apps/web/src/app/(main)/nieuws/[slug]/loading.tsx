@@ -23,7 +23,7 @@ import {
   UpLink,
 } from "@/components/design-system";
 
-export default function ArticleDetailLoading() {
+const ArticleDetailLoading = () => {
   return (
     <div className="min-h-screen">
       <LoadingAnnouncement label="Artikel laden…" />
@@ -130,4 +130,6 @@ export default function ArticleDetailLoading() {
       </section>
     </div>
   );
-}
+};
+
+export default ArticleDetailLoading;

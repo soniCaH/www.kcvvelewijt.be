@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function NieuwsNotFound() {
+const NieuwsNotFound = () => {
   return (
     <ErrorAnalytics code="404">
       <ErrorState
@@ -43,4 +43,6 @@ export default function NieuwsNotFound() {
       />
     </ErrorAnalytics>
   );
-}
+};
+
+export default NieuwsNotFound;

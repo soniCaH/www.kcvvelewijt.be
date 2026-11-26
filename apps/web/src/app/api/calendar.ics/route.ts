@@ -33,10 +33,10 @@ export const runtime = "nodejs";
 const CACHE_MAX_AGE = 900;
 const MAX_TEAM_IDS = 20;
 
-function parseSide(raw: string | null): MatchSide {
+const parseSide = (raw: string | null): MatchSide => {
   if (raw === "home" || raw === "away") return raw;
   return "all";
-}
+};
 
 /** Sanity `psdId`s → numbers by the same strict rule as a request's `teamIds` (#3486). */
 const toPsdIds = (psdIds: readonly (string | null)[]): number[] =>
@@ -99,10 +99,10 @@ const fetchSelectableTeamIds = async (): Promise<SelectableTeamIds | null> => {
  * as for an absent `teamIds`. `knownIds` `null` (the team read failed) skips
  * the known-team filter, so a known selection still lands on its usual key.
  */
-function selectTeamIds(
+const selectTeamIds = (
   raw: string | null,
   knownIds: readonly number[] | null,
-): number[] {
+): number[] => {
   if (!raw) return [];
   const known = knownIds && new Set(knownIds);
   const ids = new Set(
@@ -112,12 +112,12 @@ function selectTeamIds(
       .filter((id): id is number => id !== null && (!known || known.has(id))),
   );
   return [...ids].sort((a, b) => a - b).slice(0, MAX_TEAM_IDS);
-}
+};
 
 /** `teamIds` `null` = the all-teams feed whose list could not be read up front; it is read here, on a cache miss only. */
-async function fetchMatchesUncached(
+const fetchMatchesUncached = async (
   teamIds: readonly number[] | null,
-): Promise<readonly Match[]> {
+): Promise<readonly Match[]> => {
   const program = Effect.gen(function* () {
     const ids = teamIds ?? (yield* knownTeamIds);
     const bff = yield* BffService;
@@ -135,7 +135,7 @@ async function fetchMatchesUncached(
   // own outer `try/catch` in `GET` turns an unhandled failure into a 500
   // (#2864).
   return runPromise(program.pipe(Effect.orDie));
-}
+};
 
 /**
  * Fixtures, cached under a matches-only key (`normalizeCacheKey`, no longer
@@ -146,14 +146,14 @@ async function fetchMatchesUncached(
  * request-dependent (`teamIds`/`side`); `unstable_cache` still dedupes across
  * requests that land on the same key, same as pre-#2704.
  */
-function fetchMatches(
+const fetchMatches = (
   teamIds: readonly number[] | null,
   cacheKey: string,
-): Promise<readonly Match[]> {
+): Promise<readonly Match[]> => {
   return unstable_cache(() => fetchMatchesUncached(teamIds), [cacheKey], {
     revalidate: CACHE_MAX_AGE,
   })();
-}
+};
 
 /**
  * Club activities (#2704) — the same merged feed `/kalender` renders
@@ -189,7 +189,7 @@ const fetchUpcomingEventsCached = unstable_cache(
 );
 
 /** Degrades the read above to `[]` on failure — see its doc for why the catch lives here, outside the cache boundary. */
-async function fetchEvents(): Promise<EventListItemVM[]> {
+const fetchEvents = async (): Promise<EventListItemVM[]> => {
   try {
     return await fetchUpcomingEventsCached();
   } catch (error) {
@@ -199,9 +199,9 @@ async function fetchEvents(): Promise<EventListItemVM[]> {
     );
     return [];
   }
-}
+};
 
-export async function GET(request: NextRequest) {
+export const GET = async (request: NextRequest) => {
   const searchParams = request.nextUrl.searchParams;
   const rawTeamIds = searchParams.get("teamIds");
   const side = parseSide(searchParams.get("side"));
@@ -270,4 +270,4 @@ export async function GET(request: NextRequest) {
       { status: 500 },
     );
   }
-}
+};

@@ -48,7 +48,7 @@ describe("ISR route config", () => {
       if (!/^export const revalidate\b/m.test(source)) return;
 
       expect(source).toMatch(
-        /^export (async )?function generateStaticParams\b/m,
+        /^export const generateStaticParams = (async )?\(/m,
       );
     },
   );
@@ -57,12 +57,12 @@ describe("ISR route config", () => {
     "%s — `generateStaticParams` enumerates nothing at build",
     (relPath) => {
       const source = readFileSync(resolve(appDir, relPath), "utf8");
-      // Any declaration form counts (an arrow `const` too), so the one
-      // accepted spelling below is the only way through.
+      // Any mention counts, so the one accepted spelling below is the only
+      // way through.
       if (!/\bgenerateStaticParams\b/.test(source)) return;
 
       expect(source).toMatch(
-        /^export (async )?function generateStaticParams\(\)(: [^{]+)? \{\n  return \[\];\n\}/m,
+        /^export const generateStaticParams = (async )?\(\)(: [^=]+)? => \{\n  return \[\];\n\};/m,
       );
     },
   );

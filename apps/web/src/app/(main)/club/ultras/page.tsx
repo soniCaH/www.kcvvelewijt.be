@@ -26,7 +26,7 @@ export const metadata = buildPageMetadata({
   keywords: ["ultras", "supporters", "KCVV Elewijt", "sfeeracties"],
 });
 
-export default function UltrasPage() {
+const UltrasPage = () => {
   return (
     <>
       <JsonLd
@@ -172,4 +172,6 @@ export default function UltrasPage() {
       </UltrasAnalytics>
     </>
   );
-}
+};
+
+export default UltrasPage;

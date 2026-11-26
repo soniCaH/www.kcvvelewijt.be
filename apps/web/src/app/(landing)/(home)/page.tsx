@@ -89,7 +89,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { buildSportsClubJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import type { Metadata } from "next";
 
-export async function generateMetadata(): Promise<Metadata> {
+export const generateMetadata = async (): Promise<Metadata> => {
   const title = MOTTO;
   const description = "Startpagina van stamnummer 00055: KCVV Elewijt.";
   return {
@@ -106,7 +106,7 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [DEFAULT_OG_IMAGE],
     },
   };
-}
+};
 
 /**
  * Narrow the `ArticleVM.articleType` union (which includes `null` for
@@ -117,9 +117,9 @@ export async function generateMetadata(): Promise<Metadata> {
  * compile time. `<FeaturedUitgelichtRow>` already accepts those wider
  * literals, so the new branches just return the same value through.
  */
-function toUitgelichtArticleType(
+const toUitgelichtArticleType = (
   type: ArticleVM["articleType"],
-): UitgelichtArticleType | null {
+): UitgelichtArticleType | null => {
   if (type === null || type === undefined) return null;
   switch (type) {
     case "transfer":
@@ -136,9 +136,9 @@ function toUitgelichtArticleType(
       );
     }
   }
-}
+};
 
-function toUitgelichtArticle(article: ArticleVM): UitgelichtArticle {
+const toUitgelichtArticle = (article: ArticleVM): UitgelichtArticle => {
   return {
     href: `/nieuws/${article.slug}`,
     title: article.title,
@@ -148,9 +148,9 @@ function toUitgelichtArticle(article: ArticleVM): UitgelichtArticle {
     articleType: toUitgelichtArticleType(article.articleType),
     badge: article.tags[0],
   };
-}
+};
 
-export default async function HomePage() {
+const HomePage = async () => {
   const [
     articlesResult,
     matchesResult,
@@ -537,17 +537,19 @@ export default async function HomePage() {
       </HomepageAnalytics>
     </>
   );
-}
+};
+
+export default HomePage;
 
 /**
  * One homepage banner slot, instrumented (#2400). The three slots differ only
  * in their content and scroll depth, so they share a builder rather than three
  * near-identical literals — `position` is what tells them apart in GA4.
  */
-function toBannerSection(
+const toBannerSection = (
   slot: "a" | "b" | "c",
   banner: BannerSlotVM | null,
-): SectionConfig | null {
+): SectionConfig | null => {
   if (!banner) return null;
   return {
     key: `banner-${slot}`,
@@ -573,7 +575,7 @@ function toBannerSection(
     paddingTop: "pt-0",
     paddingBottom: "pb-0",
   };
-}
+};
 
 /**
  * Enable ISR with 15 minute revalidation — the homepage renders live PSD

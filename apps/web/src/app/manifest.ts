@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { BRAND, SITE_CONFIG } from "@/lib/constants";
 
-export default function manifest(): MetadataRoute.Manifest {
+const manifest = (): MetadataRoute.Manifest => {
   return {
     name: SITE_CONFIG.title,
     short_name: "KCVV",
@@ -32,4 +32,6 @@ export default function manifest(): MetadataRoute.Manifest {
       },
     ],
   };
-}
+};
+
+export default manifest;

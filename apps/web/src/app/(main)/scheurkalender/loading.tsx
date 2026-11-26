@@ -13,7 +13,7 @@ import {
 } from "@/components/design-system";
 
 /** One column: a month heading, then rows of date-tab + match. */
-function ColumnSkeleton({ rows }: { rows: number }) {
+const ColumnSkeleton = ({ rows }: { rows: number }) => {
   return (
     <>
       <Skeleton className="mt-5 mb-[7px] h-7 w-40 first:mt-0.5" />
@@ -27,9 +27,9 @@ function ColumnSkeleton({ rows }: { rows: number }) {
       ))}
     </>
   );
-}
+};
 
-export default function ScheurkalenderLoading() {
+const ScheurkalenderLoading = () => {
   return (
     <div className="bg-cream min-h-screen">
       <LoadingAnnouncement label="Scheurkalender laden…" />
@@ -54,4 +54,6 @@ export default function ScheurkalenderLoading() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default ScheurkalenderLoading;

@@ -15,9 +15,7 @@ interface LegacyPlayerProps {
  * The old static `/players/:slug → /spelers/:slug` rename was removed because
  * it passed a name-slug to the psdId-keyed route and 404'd (#2227, SEO-7).
  */
-export default async function LegacyPlayersRedirect({
-  params,
-}: LegacyPlayerProps) {
+const LegacyPlayersRedirect = async ({ params }: LegacyPlayerProps) => {
   const { slug } = await params;
   // Subject read: this route exists only to resolve the redirect target, so a
   // failed read takes the page down with it (#2864).
@@ -25,4 +23,6 @@ export default async function LegacyPlayersRedirect({
   const psdId = resolvePersonPsdId(slug, rows);
   if (!psdId) notFound();
   permanentRedirect(`/spelers/${psdId}`);
-}
+};
+
+export default LegacyPlayersRedirect;

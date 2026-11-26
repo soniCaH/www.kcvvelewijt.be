@@ -18,12 +18,11 @@ interface EventLayoutProps {
  * `!event || !event.dateStart` copies, which is exactly the kind of
  * duplicate that can drift when one side is tightened later (#2968 review).
  */
-export default async function EventLayout({
-  children,
-  params,
-}: EventLayoutProps) {
+const EventLayout = async ({ children, params }: EventLayoutProps) => {
   const { slug } = await params;
   const event = await fetchEventOrNull(slug);
   if (isEventNotFound(event)) notFound();
   return children;
-}
+};
+
+export default EventLayout;

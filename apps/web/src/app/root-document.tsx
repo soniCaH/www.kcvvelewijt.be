@@ -22,14 +22,14 @@ const ibmPlexMono = IBM_Plex_Mono({
   variable: "--font-ibm-plex-mono",
 });
 
-export function RootDocument({
+export const RootDocument = ({
   head,
   children,
 }: {
   /** Extra `<head>` content, after the Typekit loader (e.g. a `<title>`). */
   head?: ReactNode;
   children: ReactNode;
-}) {
+}) => {
   const typekitId = readPublicEnv().NEXT_PUBLIC_TYPEKIT_ID;
 
   return (
@@ -110,4 +110,4 @@ export function RootDocument({
       </body>
     </html>
   );
-}
+};

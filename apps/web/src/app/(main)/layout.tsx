@@ -10,10 +10,12 @@
  * (#3027). Any read the strip performs therefore co-renders with those pages — which is why their team-feed reads go
  * through `getTeamMatches` rather than `bff.getMatches` (#2441).
  */
-export default function MainLayout({
+const MainLayout = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
+}>) => {
   return <>{children}</>;
-}
+};
+
+export default MainLayout;

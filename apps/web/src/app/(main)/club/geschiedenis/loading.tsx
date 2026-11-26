@@ -23,7 +23,7 @@ import {
 import { HeritageHero } from "./HistoryTimeline";
 
 /** A timeline TapedCard footprint on one side of the centre line. */
-function TimelineItemSkeleton({ side }: { side: "left" | "right" }) {
+const TimelineItemSkeleton = ({ side }: { side: "left" | "right" }) => {
   const card = (
     <div className="border-ink bg-cream-soft shadow-paper-md space-y-3 border-2 p-5">
       <Skeleton className="h-5 w-28" />
@@ -46,9 +46,9 @@ function TimelineItemSkeleton({ side }: { side: "left" | "right" }) {
       </div>
     </div>
   );
-}
+};
 
-export default function HistoryLoading() {
+const HistoryLoading = () => {
   return (
     <div className="min-h-screen">
       <LoadingAnnouncement label="Geschiedenis laden…" />
@@ -71,4 +71,6 @@ export default function HistoryLoading() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default HistoryLoading;

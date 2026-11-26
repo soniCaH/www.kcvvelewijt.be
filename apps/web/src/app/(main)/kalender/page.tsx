@@ -81,7 +81,7 @@ interface CalendarData {
  * cost the other twenty-seven, and the event feed is a second stream layered on
  * the matches, not the calendar itself.
  */
-async function fetchCalendarData(): Promise<CalendarData> {
+const fetchCalendarData = async (): Promise<CalendarData> => {
   return runPromise(
     Effect.gen(function* () {
       const bff = yield* BffService;
@@ -164,9 +164,9 @@ async function fetchCalendarData(): Promise<CalendarData> {
       };
     }).pipe(Effect.orDie),
   );
-}
+};
 
-export default async function CalendarPage({
+const CalendarPage = async ({
   searchParams,
 }: {
   searchParams: Promise<{
@@ -174,7 +174,7 @@ export default async function CalendarPage({
     view?: string | string[];
     [KALENDER_ABONNEER_PARAM]?: string | string[];
   }>;
-}) {
+}) => {
   // Reading the query costs nothing here (`force-dynamic`). It only seeds the
   // widget's first render so a deep link is not painted as month/"all" and then
   // flipped after hydration; the widget narrows both, and the URL stays the
@@ -240,7 +240,9 @@ export default async function CalendarPage({
       </PageContainer>
     </div>
   );
-}
+};
+
+export default CalendarPage;
 
 // Skip build-time prerendering — the page depends on BFF + Sanity APIs
 // that aren't available during build. Runtime caching is handled by the BFF

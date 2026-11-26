@@ -56,7 +56,7 @@ const CTA_BASE = cn(
  * deliberately distinct from the article surface's `event_cta_click` so the two
  * param shapes don't collide in GA4 (owner decision, #1967).
  */
-export function EventDetailCtas({
+export const EventDetailCtas = ({
   eventSlug,
   eventId,
   eventTitle,
@@ -67,7 +67,7 @@ export function EventDetailCtas({
   canonicalUrl,
   externalUrl,
   externalLabel,
-}: EventDetailCtasProps) {
+}: EventDetailCtasProps) => {
   const reserveLabel = externalLabel?.trim() || "Reserveer";
 
   const handleReserveerClick = () => {
@@ -129,4 +129,4 @@ export function EventDetailCtas({
       </button>
     </>
   );
-}
+};

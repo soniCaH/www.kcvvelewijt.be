@@ -22,11 +22,11 @@ import { sendShortLinkClick } from "@/lib/server/short-link-click";
  */
 export const dynamic = "force-dynamic";
 
-export default async function ShortLinkPage({
+const ShortLinkPage = async ({
   params,
 }: {
   params: Promise<{ shortLink: string }>;
-}) {
+}) => {
   const { shortLink } = await params;
   const link = await findShortLink(shortLink);
   if (!link) notFound();
@@ -34,4 +34,6 @@ export default async function ShortLinkPage({
   // Only known names are counted, so bots on random paths never reach GA4.
   after(() => sendShortLinkClick(link.name));
   redirect(link.target);
-}
+};
+
+export default ShortLinkPage;

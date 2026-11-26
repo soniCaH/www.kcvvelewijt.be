@@ -31,7 +31,7 @@ import {
   UpLink,
 } from "@/components/design-system";
 
-export default function OpponentLoading() {
+const OpponentLoading = () => {
   return (
     <div className="bg-cream-deep min-h-screen">
       <LoadingAnnouncement label="Tegenstander laden…" />
@@ -112,4 +112,6 @@ export default function OpponentLoading() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default OpponentLoading;

@@ -26,10 +26,7 @@ interface MatchLayoutProps {
  * so the strip stays on screen with its real data while the page loads,
  * instead of a stand-in guessing its height (#3027).
  */
-export default async function MatchLayout({
-  children,
-  params,
-}: MatchLayoutProps) {
+const MatchLayout = async ({ children, params }: MatchLayoutProps) => {
   const { matchId } = await params;
   const numericId = parsePsdId(matchId);
   if (numericId === null) notFound();
@@ -41,4 +38,6 @@ export default async function MatchLayout({
       {children}
     </>
   );
-}
+};
+
+export default MatchLayout;

@@ -128,7 +128,7 @@ export interface CalendarTeamInfo {
  * `@/components/match/transform` for why the unreachable
  * `default: assertNever(kind)` is load-bearing.
  */
-export function transformMatchToCalendar(match: Match): CalendarMatch {
+export const transformMatchToCalendar = (match: Match): CalendarMatch => {
   const kind = matchRowKind(match);
 
   switch (kind) {
@@ -189,7 +189,7 @@ export function transformMatchToCalendar(match: Match): CalendarMatch {
     default:
       return assertNever(kind);
   }
-}
+};
 
 /**
  * Project a merged-feed item (`EventRepository.findUpcomingForList()`) onto the
@@ -201,9 +201,9 @@ export function transformMatchToCalendar(match: Match): CalendarMatch {
  * the event-docs-only `EventVM` is not assignable to — it lacks `source`) keeps
  * the page on the 3-source feed; a revert to `findAll()` is a compile error.
  */
-export function eventListItemToCalendarEvent(
+export const eventListItemToCalendarEvent = (
   item: EventListItemVM,
-): CalendarEvent {
+): CalendarEvent => {
   return {
     id: item.id,
     title: item.title,
@@ -213,7 +213,7 @@ export function eventListItemToCalendarEvent(
     eventType: item.eventType ?? DEFAULT_EVENT_TYPE,
     source: item.source,
   };
-}
+};
 
 /**
  * The kalender filter facet (#1992 — Phase 6.D Phase 2): the four event
@@ -268,26 +268,26 @@ export type CalendarFeedItem =
  * `toMatchDisplayZone` returns a correct instant, so `toMillis()` is comparable
  * with the event key.
  */
-function toFeedSortKey(item: CalendarFeedItem): number {
+const toFeedSortKey = (item: CalendarFeedItem): number => {
   const dt =
     item.source === "match"
       ? toMatchDisplayZone(item.dateStart)
       : DateTime.fromISO(item.dateStart, { zone: "utc" });
   const ms = dt.toMillis();
   return Number.isNaN(ms) ? Number.POSITIVE_INFINITY : ms;
-}
+};
 
 /**
  * First of a calendar month in the club's zone — the month grid, the month nav
  * label and the agenda window all start from the same construction rather than
  * `DateTime.local()`, which would take the runtime zone.
  */
-function clubMonthStart(year: number, month: number): DateTime {
+const clubMonthStart = (year: number, month: number): DateTime => {
   return DateTime.fromObject(
     { year, month, day: 1 },
     { zone: CLUB_TIMEZONE, locale: "nl" },
   );
-}
+};
 
 /**
  * Compose PSD matches + the 6.E event feed into one chronological
@@ -296,10 +296,10 @@ function clubMonthStart(year: number, month: number): DateTime {
  * same fallback `/evenementen` applies). Match ids are source-prefixed
  * (`match-<id>`) so a numeric PSD id can never collide with a Sanity `_id`.
  */
-export function buildCalendarFeed(
+export const buildCalendarFeed = (
   matches: CalendarMatch[],
   events: EventListItemVM[],
-): CalendarFeedItem[] {
+): CalendarFeedItem[] => {
   const matchItems = matches.map((match): CalendarFeedItem => ({
     source: "match",
     id: `match-${match.id}`,
@@ -321,7 +321,7 @@ export function buildCalendarFeed(
     .map((item) => ({ item, key: toFeedSortKey(item) }))
     .sort((a, b) => a.key - b.key)
     .map(({ item }) => item);
-}
+};
 
 /**
  * The `ItemList` entry's label for one match — a `name`, not a fixture
@@ -330,7 +330,7 @@ export function buildCalendarFeed(
  * Switched exhaustively over `kind` (#2802 review) rather than a nested
  * ternary, so a fourth member is a compile error here too.
  */
-function matchEntryName(match: CalendarMatch): string {
+const matchEntryName = (match: CalendarMatch): string => {
   switch (match.kind) {
     case "match":
       return `${match.homeTeam.name} — ${match.awayTeam.name}`;
@@ -341,7 +341,7 @@ function matchEntryName(match: CalendarMatch): string {
     default:
       return assertNever(match);
   }
-}
+};
 
 /**
  * Project the feed onto upcoming `{ name, url }` entries for the page's
@@ -351,11 +351,11 @@ function matchEntryName(match: CalendarMatch): string {
  * capped at `limit`. Pure — `nowMs` is injectable for deterministic tests. The
  * entry shape (`ItemListEntry`) is owned by the seo builder it feeds.
  */
-export function buildKalenderItemListEntries(
+export const buildKalenderItemListEntries = (
   feed: CalendarFeedItem[],
   siteUrl: string,
   options: { nowMs?: number; limit?: number } = {},
-): ItemListEntry[] {
+): ItemListEntry[] => {
   const nowMs = options.nowMs ?? Date.now();
   const limit = options.limit ?? 30;
   return feed
@@ -369,7 +369,7 @@ export function buildKalenderItemListEntries(
           }
         : { name: item.event.title, url: `${siteUrl}${item.event.href}` },
     );
-}
+};
 
 /** A single day's bucketed feed — matches + events, each time-sorted. */
 export interface DayFeed {
@@ -377,13 +377,13 @@ export interface DayFeed {
   events: CalendarEvent[];
 }
 
-function ensureDayFeed(map: Map<string, DayFeed>, day: string): DayFeed {
+const ensureDayFeed = (map: Map<string, DayFeed>, day: string): DayFeed => {
   const existing = map.get(day);
   if (existing) return existing;
   const entry: DayFeed = { matches: [], events: [] };
   map.set(day, entry);
   return entry;
-}
+};
 
 /**
  * Bucket the whole feed into a `dayISO → { matches, events }` map in a single
@@ -397,10 +397,10 @@ function ensureDayFeed(map: Map<string, DayFeed>, day: string): DayFeed {
  * `toDisplayZone` — the two sources carry opposite conventions, and a match
  * bucketed as an instant lands on the wrong day for any kickoff at/after 22:00.
  */
-export function groupFeedByDay(
+export const groupFeedByDay = (
   matches: CalendarMatch[],
   events: CalendarEvent[],
-): Map<string, DayFeed> {
+): Map<string, DayFeed> => {
   const map = new Map<string, DayFeed>();
 
   for (const match of matches) {
@@ -440,7 +440,7 @@ export function groupFeedByDay(
     entry.events.sort((a, b) => a.dateStart.localeCompare(b.dateStart));
   }
   return map;
-}
+};
 
 /** Empty day feed — a stable reference for cells/days with no items. */
 export const EMPTY_DAY_FEED: DayFeed = { matches: [], events: [] };
@@ -449,7 +449,7 @@ export const EMPTY_DAY_FEED: DayFeed = { matches: [], events: [] };
  * Returns YYYY-MM-DD strings for all day cells in a month grid.
  * Always starts on Monday and ends on Sunday, producing 35 or 42 cells.
  */
-export function getDaysInMonth(year: number, month: number): string[] {
+export const getDaysInMonth = (year: number, month: number): string[] => {
   const firstOfMonth = clubMonthStart(year, month);
   // ISO weekday: 1=Monday, 7=Sunday
   const startOffset = firstOfMonth.weekday - 1;
@@ -461,16 +461,16 @@ export function getDaysInMonth(year: number, month: number): string[] {
   return Array.from({ length: totalCells }, (_, i) =>
     gridStart.plus({ days: i }).toISODate()!,
   );
-}
+};
 
 /** Returns 7 YYYY-MM-DD strings (Mon-Sun) for the week containing `dateStr` */
-export function getDaysInWeek(dateStr: string): string[] {
+export const getDaysInWeek = (dateStr: string): string[] => {
   const dt = toDisplayZone(dateStr);
   const monday = dt.startOf("week"); // Luxon weeks start on Monday by default
   return Array.from({ length: 7 }, (_, i) =>
     monday.plus({ days: i }).toISODate()!,
   );
-}
+};
 
 /**
  * Determine the match-day pip's venue class. `"reservation"` for a
@@ -484,7 +484,7 @@ export function getDaysInWeek(dateStr: string): string[] {
  */
 export type MatchDotType = "home" | "away" | "reservation";
 
-export function getMatchDotType(match: CalendarMatch): MatchDotType {
+export const getMatchDotType = (match: CalendarMatch): MatchDotType => {
   switch (match.kind) {
     case "reservation":
     case "reduced":
@@ -500,7 +500,7 @@ export function getMatchDotType(match: CalendarMatch): MatchDotType {
     default:
       return assertNever(match);
   }
-}
+};
 
 /**
  * The visual treatment for a match-day pip/dot, keyed by `getMatchDotType`'s
@@ -539,9 +539,9 @@ export const MATCH_DOT_CLASS: Record<MatchDotType, string> = {
  * not). The opponent keeps no designation (the BFF gives none for the calendar
  * feed).
  */
-export function calendarMatchToScheduleMatch(
+export const calendarMatchToScheduleMatch = (
   match: CalendarMatch,
-): ScheduleRow {
+): ScheduleRow => {
   switch (match.kind) {
     case "reservation":
       return {
@@ -594,7 +594,7 @@ export function calendarMatchToScheduleMatch(
     default:
       return assertNever(match);
   }
-}
+};
 
 // The date labels below are route chrome, not site vocabulary — a week-range
 // label is not a shape any other route renders — so they stay local (#2430
@@ -608,20 +608,20 @@ export function calendarMatchToScheduleMatch(
  * capitalised, club locale). Used by the grid's selected-day detail and the
  * agenda's per-day groups so both read identically.
  */
-export function formatDayDetailHeading(day: string): string {
+export const formatDayDetailHeading = (day: string): string => {
   const dt = toDisplayZone(day);
   if (!dt.isValid) return day;
   return capitalize(dt.toFormat("cccc d MMMM"));
-}
+};
 
 /**
  * Count caption for a day group — `"10 wedstrijden · 1 evenement"`. Pluralised
  * for Dutch; only non-zero parts appear; returns `null` when the day is empty.
  */
-export function formatItemCount(
+export const formatItemCount = (
   matchCount: number,
   eventCount: number,
-): string | null {
+): string | null => {
   const parts: string[] = [];
   if (matchCount > 0) {
     parts.push(
@@ -634,7 +634,7 @@ export function formatItemCount(
     );
   }
   return parts.length > 0 ? parts.join(" · ") : null;
-}
+};
 
 /**
  * Compact month label for the shared period nav + the agenda header —
@@ -642,15 +642,15 @@ export function formatItemCount(
  * keeps the toolbar nav (grid/agenda) and the agenda's `<EditorialHeading>` in
  * sync.
  */
-export function formatMonthNavLabel(year: number, month: number): string {
+export const formatMonthNavLabel = (year: number, month: number): string => {
   return `${capitalize(clubMonthStart(year, month).toFormat("MMMM"))} '${String(year).slice(-2)}`;
-}
+};
 
 /**
  * Week-range label for the shared period nav in Week view —
  * `"9 - 15 maart 2026"`, or `"28 feb - 6 maart 2026"` across a month boundary.
  */
-export function formatWeekRangeLabel(weekStart: string): string {
+export const formatWeekRangeLabel = (weekStart: string): string => {
   const days = getDaysInWeek(weekStart);
   const first = toDisplayZone(days[0]!);
   const last = toDisplayZone(days[6]!);
@@ -658,7 +658,7 @@ export function formatWeekRangeLabel(weekStart: string): string {
   return sameMonth
     ? `${first.day} - ${last.day} ${first.toFormat("MMMM yyyy")}`
     : `${first.day} ${first.toFormat("MMMM")} - ${last.day} ${last.toFormat("MMMM yyyy")}`;
-}
+};
 
 /**
  * Local kickoff/start time (`"18:00"`) for a feed item, or `null` for an all-day
@@ -671,9 +671,9 @@ const clockShape = (dt: DateTime): string | null => {
   return time === "00:00" ? null : time;
 };
 
-export function formatEventTime(iso: string): string | null {
+export const formatEventTime = (iso: string): string | null => {
   return clockShape(toDisplayZone(iso));
-}
+};
 
 /**
  * The same rule over a *match* date, which is wall-clock rather than an
@@ -682,9 +682,9 @@ export function formatEventTime(iso: string): string | null {
  * where the agenda should show none (#2601). As in `@/lib/utils/dates`, the
  * fork is at the parse and the shape is written once.
  */
-export function formatMatchTime(iso: string): string | null {
+export const formatMatchTime = (iso: string): string | null => {
   return clockShape(toMatchDisplayZone(iso));
-}
+};
 
 /** One day's worth of feed items in the agenda's labelled wall. */
 export interface AgendaDayGroup {
@@ -704,12 +704,12 @@ export interface AgendaDayGroup {
  * event surfaces under every day it spans within the window — the same span
  * semantics the grid uses. Buckets once via `groupFeedByDay`, then windows.
  */
-export function buildMonthAgenda(
+export const buildMonthAgenda = (
   matches: CalendarMatch[],
   events: CalendarEvent[],
   year: number,
   month: number,
-): AgendaDayGroup[] {
+): AgendaDayGroup[] => {
   const byDay = groupFeedByDay(matches, events);
   const first = clubMonthStart(year, month);
   const daysInMonth = first.daysInMonth!;
@@ -722,4 +722,4 @@ export function buildMonthAgenda(
       ? []
       : [{ date: day, matches: entry.matches, events: entry.events }],
   );
-}
+};

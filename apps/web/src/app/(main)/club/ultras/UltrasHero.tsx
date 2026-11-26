@@ -18,7 +18,7 @@ export interface UltrasHeroProps {
   upLink?: Pick<UpLinkProps, "href" | "label">;
 }
 
-export function UltrasHero({ upLink }: UltrasHeroProps) {
+export const UltrasHero = ({ upLink }: UltrasHeroProps) => {
   const { kicker, headline, accent, lead, image } = ULTRAS_HERO;
   return (
     <header data-testid="ultras-hero" className="overflow-x-clip">
@@ -69,4 +69,4 @@ export function UltrasHero({ upLink }: UltrasHeroProps) {
       </PageContainer>
     </header>
   );
-}
+};

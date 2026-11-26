@@ -24,9 +24,9 @@ interface WedstrijdenPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({
+export const generateMetadata = async ({
   params,
-}: WedstrijdenPageProps): Promise<Metadata> {
+}: WedstrijdenPageProps): Promise<Metadata> => {
   const { slug } = await params;
   // Subject read: this route's metadata is entirely about this one team, so
   // a failed read takes it down with it — `null` (genuinely no such team) is
@@ -62,7 +62,7 @@ export async function generateMetadata({
         : [DEFAULT_OG_IMAGE],
     },
   };
-}
+};
 
 interface MonthGroup {
   label: string;
@@ -71,7 +71,7 @@ interface MonthGroup {
   matches: ScheduleRow[];
 }
 
-function groupByMonth(matches: ScheduleRow[]): MonthGroup[] {
+const groupByMonth = (matches: ScheduleRow[]): MonthGroup[] => {
   const sorted = [...matches].sort(
     (a, b) => a.date.getTime() - b.date.getTime(),
   );
@@ -96,11 +96,9 @@ function groupByMonth(matches: ScheduleRow[]): MonthGroup[] {
   }
 
   return Array.from(grouped.values());
-}
+};
 
-export default async function WedstrijdenPage({
-  params,
-}: WedstrijdenPageProps) {
+const WedstrijdenPage = async ({ params }: WedstrijdenPageProps) => {
   const { slug } = await params;
 
   // Subject read: the team is this page's entire content, so a failed read
@@ -254,7 +252,9 @@ export default async function WedstrijdenPage({
       </PageContainer>
     </>
   );
-}
+};
+
+export default WedstrijdenPage;
 
 // Render on every request so the "next match" highlight and live scores
 // reflect the current time instead of a stale 1-hour ISR snapshot (this
