@@ -13,13 +13,13 @@ import { POST } from "./route";
 
 const TEST_BFF_URL = "http://localhost:8787";
 
-function makeRequest(body: BodyInit): Request {
+const makeRequest = (body: BodyInit): Request => {
   return new Request("http://localhost:3000/api/membership", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body,
   });
-}
+};
 
 describe("POST /api/membership", () => {
   beforeEach(() => {

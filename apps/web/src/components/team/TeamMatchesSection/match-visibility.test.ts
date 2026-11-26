@@ -8,7 +8,7 @@ import {
 
 const NOW = new Date("2026-09-15T12:00:00.000Z");
 
-function row(overrides: Partial<ScheduleRow> = {}): ScheduleRow {
+const row = (overrides: Partial<ScheduleRow> = {}): ScheduleRow => {
   return {
     id: 1,
     date: new Date("2026-09-20T15:00:00.000Z"),
@@ -18,7 +18,7 @@ function row(overrides: Partial<ScheduleRow> = {}): ScheduleRow {
     awayTeam: { id: 42, name: "FC Perk" },
     ...overrides,
   } as ScheduleRow;
-}
+};
 
 describe("hasVisibleMatches", () => {
   it("is false for an empty list", () => {

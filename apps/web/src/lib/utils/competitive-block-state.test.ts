@@ -18,7 +18,7 @@ import {
   isNumberlessTable,
 } from "./competitive-block-state";
 
-function match(overrides: Partial<Match> = {}): Match {
+const match = (overrides: Partial<Match> = {}): Match => {
   return {
     id: 1,
     date: new Date("2026-09-05T14:00:00.000Z"),
@@ -28,9 +28,9 @@ function match(overrides: Partial<Match> = {}): Match {
     competitionType: "league",
     ...overrides,
   } as Match;
-}
+};
 
-function entry(overrides: Partial<RankingEntry> = {}): RankingEntry {
+const entry = (overrides: Partial<RankingEntry> = {}): RankingEntry => {
   return {
     position: 1,
     team_id: 1,
@@ -45,16 +45,16 @@ function entry(overrides: Partial<RankingEntry> = {}): RankingEntry {
     points: 20,
     ...overrides,
   } as RankingEntry;
-}
+};
 
-function table(overrides: Partial<RankingTable> = {}): RankingTable {
+const table = (overrides: Partial<RankingTable> = {}): RankingTable => {
   return {
     competition_id: 222464,
     competition_name: "3de Afdeling Voetb Vl A",
     entries: [],
     ...overrides,
   } as RankingTable;
-}
+};
 
 describe("deriveCompetitiveBlockState", () => {
   it("returns not-in-competition for the null fetch result (no usable PSD id)", () => {

@@ -11,7 +11,7 @@ const CLUB_ID = 11001;
 const A_TEAM = { psdId: "1", squadLabel: "A-ploeg" };
 const B_TEAM = { psdId: "2", squadLabel: "B-ploeg" };
 
-function match(p: {
+const match = (p: {
   id: number;
   date: string;
   homeId?: number;
@@ -19,7 +19,7 @@ function match(p: {
   homeLogo?: string;
   awayId?: number;
   awayName?: string;
-}): Match {
+}): Match => {
   return {
     id: p.id,
     date: new Date(p.date),
@@ -34,16 +34,16 @@ function match(p: {
     competitionType: "league",
     is_home: true,
   } as unknown as Match;
-}
+};
 
-function history(p: {
+const history = (p: {
   wins: number;
   draws: number;
   losses: number;
   matches: Match[];
   opponentName?: string;
   opponentLogo?: string;
-}): OpponentHistory {
+}): OpponentHistory => {
   return {
     opponent: {
       id: CLUB_ID,
@@ -59,7 +59,7 @@ function history(p: {
     },
     matches: p.matches,
   } as unknown as OpponentHistory;
-}
+};
 
 describe("buildOpponentPageData", () => {
   it("keeps each squad's summary unreduced — no figure is summed across squads", () => {

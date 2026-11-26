@@ -21,16 +21,16 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
 
-function runWithRepo<A>(
+const runWithRepo = <A>(
   effect: Effect.Effect<A, SanityReadError, PlayerRepository>,
-) {
+) => {
   return Effect.runPromise(Effect.provide(effect, PlayerRepositoryLive));
-}
+};
 
 // Fixture: a full player row as returned by the GROQ query
-function makePlayerRow(
+const makePlayerRow = (
   overrides: Partial<PLAYERS_QUERY_RESULT[number]> = {},
-): PLAYERS_QUERY_RESULT[number] {
+): PLAYERS_QUERY_RESULT[number] => {
   return {
     _id: "player-1",
     psdId: "12345",
@@ -54,7 +54,7 @@ function makePlayerRow(
     ],
     ...overrides,
   };
-}
+};
 
 describe("PlayerRepository", () => {
   describe("findAll", () => {

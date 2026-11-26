@@ -30,7 +30,7 @@ const STOCK_TEXT_TOKENS = new Set([
  * step name and the modifier — filtering those out is what keeps this to
  * exactly the 12 base steps.
  */
-function deriveCustomSizeTokensFromGlobalsCss(): string[] {
+const deriveCustomSizeTokensFromGlobalsCss = (): string[] => {
   const css = readFileSync(join(__dirname, "../../app/globals.css"), "utf8");
   const themeStart = css.indexOf("@theme {");
   const themeEnd = css.indexOf("\n}", themeStart);
@@ -41,7 +41,7 @@ function deriveCustomSizeTokensFromGlobalsCss(): string[] {
     if (!name.includes("--")) names.add(name);
   }
   return [...names].filter((name) => !STOCK_TEXT_TOKENS.has(name)).sort();
-}
+};
 
 describe("CUSTOM_SIZE_TOKENS — derived from globals.css, not hand-copied", () => {
   it("matches every custom --text-* step in the @theme block", () => {

@@ -125,7 +125,7 @@ import TeamPage from "./page";
  *  (`match-visibility.ts`) reads it as a real "next" fixture — the exact
  *  shape that proves the team is in competition and that `#wedstrijden` has
  *  something to render, independent of whichever way the ranking read goes. */
-function leagueFixture(id: number): Match {
+const leagueFixture = (id: number): Match => {
   return {
     id,
     date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
@@ -137,12 +137,12 @@ function leagueFixture(id: number): Match {
     competitionType: "league",
     is_home: true,
   } as Match;
-}
+};
 
 /** A youth team fixture — no players/staff/editorial content, so those
  *  sections auto-hide and the assertions below stay scoped to the
  *  competitive block this suite actually exercises. */
-function teamFixture(psdId: string): TeamDetailVM {
+const teamFixture = (psdId: string): TeamDetailVM => {
   return {
     id: "team-u13",
     name: "KCVV Elewijt U13",
@@ -165,7 +165,7 @@ function teamFixture(psdId: string): TeamDetailVM {
     players: [],
     staff: [],
   };
-}
+};
 
 describe("/ploegen/[slug] classifies a failed ranking read against the real BFF shape (#2795)", () => {
   beforeEach(() => {
@@ -292,7 +292,7 @@ describe("/ploegen/[slug] classifies a failed ranking read against the real BFF 
  * so the sponsor wall's own heading is out of reach here and out of this
  * ticket's scope regardless.
  */
-function headingSweepTeamFixture(): TeamDetailVM {
+const headingSweepTeamFixture = (): TeamDetailVM => {
   return {
     id: "team-u8",
     name: "KCVV Elewijt U8",
@@ -319,7 +319,7 @@ function headingSweepTeamFixture(): TeamDetailVM {
       { id: "s1", firstName: "Marc", lastName: "Van Damme", role: "Trainer" },
     ],
   };
-}
+};
 
 describe("/ploegen/[slug] heading sweep — every gated section gets a real <h2> (#2637)", () => {
   beforeEach(() => {

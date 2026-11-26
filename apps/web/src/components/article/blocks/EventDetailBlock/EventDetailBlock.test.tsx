@@ -20,7 +20,7 @@ const note: PortableTextBlock[] = [
   } as PortableTextBlock,
 ];
 
-function eventFact(overrides: Partial<EventFactValue> = {}): EventFactValue {
+const eventFact = (overrides: Partial<EventFactValue> = {}): EventFactValue => {
   return {
     _key: "ef1",
     _type: "eventFact",
@@ -41,11 +41,11 @@ function eventFact(overrides: Partial<EventFactValue> = {}): EventFactValue {
     note,
     ...overrides,
   };
-}
+};
 
 // A plain single-day event whose facts the panel must surface on its own
 // (it now replaces the old always-present hero strip).
-function singleDay(overrides: Partial<EventFactValue> = {}): EventFactValue {
+const singleDay = (overrides: Partial<EventFactValue> = {}): EventFactValue => {
   return {
     _key: "ef2",
     _type: "eventFact",
@@ -57,7 +57,7 @@ function singleDay(overrides: Partial<EventFactValue> = {}): EventFactValue {
     competitionTag: "Clubfeest",
     ...overrides,
   };
-}
+};
 
 describe("hasEventFactContent", () => {
   it.each([

@@ -3,18 +3,18 @@ import { render, fireEvent } from "@testing-library/react";
 import { HeightGrow } from "./HeightGrow";
 
 /** happy-dom's TransitionEvent drops `propertyName` from its init: set it by hand. */
-function transitionEnd(el: Element, propertyName: string) {
+const transitionEnd = (el: Element, propertyName: string) => {
   const event = new Event("transitionend", { bubbles: true });
   Object.defineProperty(event, "propertyName", { value: propertyName });
   fireEvent(el, event);
-}
+};
 
-function reduceMotion(reduced: boolean) {
+const reduceMotion = (reduced: boolean) => {
   vi.stubGlobal(
     "matchMedia",
     (query: string) => ({ matches: reduced, media: query }) as MediaQueryList,
   );
-}
+};
 
 afterEach(() => vi.unstubAllGlobals());
 

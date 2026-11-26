@@ -1,11 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { readEmptyStateUndoAttrs } from "./empty-state-undo-attrs";
 
-function el(attrs: Record<string, string>): HTMLElement {
+const el = (attrs: Record<string, string>): HTMLElement => {
   const node = document.createElement("button");
   for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
   return node;
-}
+};
 
 describe("readEmptyStateUndoAttrs", () => {
   it("reads the source and facet", () => {

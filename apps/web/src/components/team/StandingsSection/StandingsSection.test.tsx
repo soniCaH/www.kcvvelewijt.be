@@ -18,7 +18,7 @@ import { render, screen } from "@testing-library/react";
 import type { RankingEntry, RankingTable } from "@kcvv/api-contract";
 import { StandingsSection } from "./StandingsSection";
 
-function entry(overrides: Partial<RankingEntry> = {}): RankingEntry {
+const entry = (overrides: Partial<RankingEntry> = {}): RankingEntry => {
   return {
     position: 1,
     team_id: 1,
@@ -33,9 +33,9 @@ function entry(overrides: Partial<RankingEntry> = {}): RankingEntry {
     points: 20,
     ...overrides,
   } as RankingEntry;
-}
+};
 
-function table(overrides: Partial<RankingTable> = {}): RankingTable {
+const table = (overrides: Partial<RankingTable> = {}): RankingTable => {
   return {
     competition_id: 222464,
     competition_name: "3de Afdeling Voetb Vl A",
@@ -50,7 +50,7 @@ function table(overrides: Partial<RankingTable> = {}): RankingTable {
     ],
     ...overrides,
   } as RankingTable;
-}
+};
 
 const AUTUMN = table();
 const SPRING = table({

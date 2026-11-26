@@ -2,7 +2,9 @@ import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { QARow, type QARowRespondent } from "./QARow";
 
-function respondent(overrides: Partial<QARowRespondent> = {}): QARowRespondent {
+const respondent = (
+  overrides: Partial<QARowRespondent> = {},
+): QARowRespondent => {
   return {
     firstName: "Lars",
     fullName: "Lars Janssens",
@@ -10,7 +12,7 @@ function respondent(overrides: Partial<QARowRespondent> = {}): QARowRespondent {
     answer: "Halfweg de eerste helft tegen Tervuren.",
     ...overrides,
   };
-}
+};
 
 describe("<QARow>", () => {
   describe("single-respondent", () => {

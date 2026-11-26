@@ -19,9 +19,9 @@ import { BioBlock } from "./BioBlock";
  * Build a minimal Portable Text block from `(text, marks)` segments. Keys
  * are deterministic to keep render output stable across tests + VR.
  */
-function block(
+const block = (
   ...spans: ReadonlyArray<{ text: string; marks?: string[] }>
-): PortableTextBlock {
+): PortableTextBlock => {
   return {
     _type: "block",
     _key: `block-${spans.map((s) => s.text.slice(0, 3)).join("-")}`,
@@ -34,7 +34,7 @@ function block(
     })),
     markDefs: [],
   } as unknown as PortableTextBlock;
-}
+};
 
 const BIO_TWO_MARKS: PortableTextBlock[] = [
   block(

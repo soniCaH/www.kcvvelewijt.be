@@ -14,7 +14,7 @@ import {
   stubAnimationFrame,
 } from "@/../tests/helpers/scroll-hint.helpers";
 
-function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
+const mockScrollDimensions = (scrollWidth: number, clientWidth: number) => {
   Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
     configurable: true,
     value: scrollWidth,
@@ -23,7 +23,7 @@ function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
     configurable: true,
     value: clientWidth,
   });
-}
+};
 
 describe("ScrollOverlay", () => {
   afterEach(() => {
@@ -187,15 +187,15 @@ describe("ScrollOverlay", () => {
 
   describe("bottom fade — the vertical cue (#3340)", () => {
     const restores: Array<() => void> = [];
-    function mockVerticalDimensions(
+    const mockVerticalDimensions = (
       scrollHeight: number,
       clientHeight: number,
       offsetHeight = clientHeight,
-    ) {
+    ) => {
       restores.push(
         mockLayoutProps({ scrollHeight, clientHeight, offsetHeight }),
       );
-    }
+    };
 
     afterEach(() => {
       restores
@@ -411,13 +411,13 @@ describe("ScrollOverlay", () => {
       value: 400,
     });
 
-    function ZoomHost({ scaleStep }: { scaleStep: number }) {
+    const ZoomHost = ({ scaleStep }: { scaleStep: number }) => {
       return (
         <ScrollOverlay direction="both" remeasureOn={[scaleStep]}>
           <span>Item</span>
         </ScrollOverlay>
       );
-    }
+    };
 
     const { rerender } = render(<ZoomHost scaleStep={0} />);
     expect(screen.queryByLabelText("Scroll right")).not.toBeInTheDocument();

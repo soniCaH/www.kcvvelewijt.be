@@ -3,7 +3,7 @@ import type { ArticleVM } from "@/lib/repositories/article.repository";
 import { toEditorialHeroProps } from "./to-editorial-hero-props";
 
 /** Only the fields the mapper reads; the rest of the VM is structural. */
-function article(p: Partial<ArticleVM> = {}): ArticleVM {
+const article = (p: Partial<ArticleVM> = {}): ArticleVM => {
   return {
     id: "article-1",
     title: "Kampioen! 58 punten en titel in eerste provinciale.",
@@ -19,7 +19,7 @@ function article(p: Partial<ArticleVM> = {}): ArticleVM {
     firstEventFact: null,
     ...p,
   } as unknown as ArticleVM;
-}
+};
 
 describe("toEditorialHeroProps", () => {
   // #2393: the lead reached the VM but never the hero, so the largest element

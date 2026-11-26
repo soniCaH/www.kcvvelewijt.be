@@ -17,9 +17,9 @@ vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 // Both facets live in the URL and are written with `history.pushState` /
 // `replaceState`, so the tests drive the real `window.history` and spy on it
 // rather than mocking the Next router.
-function setUrl(url: string) {
+const setUrl = (url: string) => {
   window.history.replaceState({}, "", url);
-}
+};
 
 /** The URL argument of the last `pushState` (or `replaceState`) call. */
 const lastUrl = (spy: MockInstance<History["pushState"]>) =>

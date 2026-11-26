@@ -17,11 +17,11 @@ const _unavailableWithEntries: MatchStandingsSectionUnavailableProps = {
   entries: [],
 };
 
-function entry(
+const entry = (
   position: number,
   team_id: number,
   team_name: string,
-): RankingEntry {
+): RankingEntry => {
   return {
     position,
     team_id,
@@ -36,7 +36,7 @@ function entry(
     goal_difference: 4,
     points: 17,
   } as RankingEntry;
-}
+};
 
 const fullDivision: RankingEntry[] = [
   entry(1, 101, "KSK Kampenhout"),

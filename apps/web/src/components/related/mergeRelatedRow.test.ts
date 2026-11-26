@@ -10,11 +10,11 @@ interface Fixture {
   href: string;
 }
 
-function item(href: string): Fixture {
+const item = (href: string): Fixture => {
   return { href };
-}
+};
 
-function tiers(overrides: Partial<RelatedRowTiers<Fixture>> = {}) {
+const tiers = (overrides: Partial<RelatedRowTiers<Fixture>> = {}) => {
   const empty: RelatedRowTiers<Fixture> = {
     domain: [],
     curated: [],
@@ -23,7 +23,7 @@ function tiers(overrides: Partial<RelatedRowTiers<Fixture>> = {}) {
     siblings: [],
   };
   return { ...empty, ...overrides };
-}
+};
 
 describe("mergeRelatedRow", () => {
   it("orders items domain → curated → reference → semantic → siblings", () => {

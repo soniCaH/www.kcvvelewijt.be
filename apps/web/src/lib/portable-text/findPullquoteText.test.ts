@@ -11,10 +11,10 @@ import {
   hasRenderableBioContent,
 } from "./findPullquoteText";
 
-function block(
+const block = (
   key: string,
   ...spans: ReadonlyArray<{ text: string; marks?: string[] }>
-): PortableTextBlock {
+): PortableTextBlock => {
   return {
     _type: "block",
     _key: `block-${key}`,
@@ -27,7 +27,7 @@ function block(
     })),
     markDefs: [],
   } as unknown as PortableTextBlock;
-}
+};
 
 describe("hasRenderableBioContent", () => {
   it("returns false for an empty array", () => {

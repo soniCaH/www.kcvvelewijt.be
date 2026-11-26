@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { PortableTextBlock } from "@portabletext/react";
 import { ArticleBody } from "./ArticleBody";
 
-function paragraph(text: string, key = text.slice(0, 8)): PortableTextBlock {
+const paragraph = (text: string, key = text.slice(0, 8)): PortableTextBlock => {
   return {
     _type: "block",
     _key: key,
@@ -11,9 +11,12 @@ function paragraph(text: string, key = text.slice(0, 8)): PortableTextBlock {
     children: [{ _type: "span", _key: `${key}-c`, text, marks: [] }],
     markDefs: [],
   } as PortableTextBlock;
-}
+};
 
-function heading(text: string, level: "h2" | "h3" = "h2"): PortableTextBlock {
+const heading = (
+  text: string,
+  level: "h2" | "h3" = "h2",
+): PortableTextBlock => {
   return {
     _type: "block",
     _key: `${level}-${text.slice(0, 8)}`,
@@ -21,9 +24,9 @@ function heading(text: string, level: "h2" | "h3" = "h2"): PortableTextBlock {
     children: [{ _type: "span", _key: `${level}-c`, text, marks: [] }],
     markDefs: [],
   } as PortableTextBlock;
-}
+};
 
-function transferFactBlock(
+const transferFactBlock = (
   overrides: {
     _key?: string;
     direction?: "incoming" | "outgoing" | "extension";
@@ -32,7 +35,7 @@ function transferFactBlock(
     kcvvContext?: string;
     until?: string;
   } = {},
-): PortableTextBlock {
+): PortableTextBlock => {
   return {
     _type: "transferFact",
     _key: overrides._key ?? `tf-${overrides.playerName ?? "x"}`,
@@ -42,12 +45,12 @@ function transferFactBlock(
     kcvvContext: overrides.kcvvContext ?? "#14",
     until: overrides.until,
   } as unknown as PortableTextBlock;
-}
+};
 
-function paragraphWithAccent(
+const paragraphWithAccent = (
   plain: string,
   accented: string,
-): PortableTextBlock {
+): PortableTextBlock => {
   return {
     _type: "block",
     _key: "accent-block",
@@ -58,9 +61,9 @@ function paragraphWithAccent(
     ],
     markDefs: [],
   } as PortableTextBlock;
-}
+};
 
-function paragraphWithLink(text: string, href: string): PortableTextBlock {
+const paragraphWithLink = (text: string, href: string): PortableTextBlock => {
   return {
     _type: "block",
     _key: "link-block",
@@ -68,12 +71,12 @@ function paragraphWithLink(text: string, href: string): PortableTextBlock {
     children: [{ _type: "span", _key: "lc", text, marks: ["lk"] }],
     markDefs: [{ _type: "link", _key: "lk", href }],
   } as PortableTextBlock;
-}
+};
 
-function paragraphWithTeamLink(
+const paragraphWithTeamLink = (
   text: string,
   reference: { slug: string; archived?: boolean | null },
-): PortableTextBlock {
+): PortableTextBlock => {
   return {
     _type: "block",
     _key: "team-link-block",
@@ -87,7 +90,7 @@ function paragraphWithTeamLink(
       },
     ],
   } as PortableTextBlock;
-}
+};
 
 describe("<ArticleBody>", () => {
   describe("DropCap injection", () => {
@@ -531,7 +534,10 @@ describe("<ArticleBody>", () => {
     // `pullQuote.body` is itself constrained Portable Text (one Normal
     // block, no lists, an optional `accent`-marked span) — not a plain
     // string. `accented`, when given, must be a literal substring of `text`.
-    function quoteBodyPT(text: string, accented?: string): PortableTextBlock[] {
+    const quoteBodyPT = (
+      text: string,
+      accented?: string,
+    ): PortableTextBlock[] => {
       const key = `pq-body-${text.slice(0, 8).replace(/\s/g, "-")}`;
       if (!accented) {
         return [
@@ -565,11 +571,11 @@ describe("<ArticleBody>", () => {
           markDefs: [],
         } as PortableTextBlock,
       ];
-    }
+    };
 
-    function pullQuoteBlock(
+    const pullQuoteBlock = (
       overrides: Record<string, unknown> = {},
-    ): PortableTextBlock {
+    ): PortableTextBlock => {
       return {
         _type: "pullQuote",
         _key: `pq-${Math.random().toString(36).slice(2, 8)}`,
@@ -578,7 +584,7 @@ describe("<ArticleBody>", () => {
         ),
         ...overrides,
       } as unknown as PortableTextBlock;
-    }
+    };
 
     it("renders nothing when body is missing or empty", () => {
       const { container } = render(
@@ -749,7 +755,7 @@ describe("<ArticleBody>", () => {
   });
 
   describe("blockquote PT style serializer (#2566, decision #2515 rule 2)", () => {
-    function blockquoteBlock(text: string): PortableTextBlock {
+    const blockquoteBlock = (text: string): PortableTextBlock => {
       return {
         _type: "block",
         _key: `bq-${Math.random().toString(36).slice(2, 8)}`,
@@ -757,7 +763,7 @@ describe("<ArticleBody>", () => {
         children: [{ _type: "span", _key: "bq-c", text, marks: [] }],
         markDefs: [],
       } as PortableTextBlock;
-    }
+    };
 
     it("renders a CMS blockquote as the full <PullQuote> taped card, not the deleted <BodyQuote>", () => {
       const content = [

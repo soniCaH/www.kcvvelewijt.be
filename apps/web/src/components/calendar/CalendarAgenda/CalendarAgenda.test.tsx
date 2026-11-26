@@ -51,9 +51,9 @@ vi.mock("next/link", () => ({
 
 // ── Fixtures ───────────────────────────────────────────────────────────────
 
-function makeMatch(
+const makeMatch = (
   overrides: Partial<CalendarMatchFixture> & { id: number },
-): CalendarMatchFixture {
+): CalendarMatchFixture => {
   const merged = {
     date: "2026-09-12T10:00:00", // Saturday
     homeTeam: { id: 1, name: "KCVV Elewijt", logo: "/kcvv.png" },
@@ -74,11 +74,11 @@ function makeMatch(
         status: merged.status,
       }),
   };
-}
+};
 
-function makeEvent(
+const makeEvent = (
   overrides: Partial<CalendarEvent> & { id: string },
-): CalendarEvent {
+): CalendarEvent => {
   return {
     title: "Spaghetti-avond",
     dateStart: "2026-09-12T18:00:00",
@@ -87,7 +87,7 @@ function makeEvent(
     source: "event",
     ...overrides,
   };
-}
+};
 
 const baseProps = { currentMonth: 9, currentYear: 2026 };
 
@@ -426,11 +426,11 @@ describe("CalendarAgenda", () => {
   // viewport; the actual breakpoint switch is proved in the PR body against
   // a real browser/VR capture.
   describe("mobile stacked row (#2599)", () => {
-    function mobileLayout(row: HTMLElement): HTMLElement {
+    const mobileLayout = (row: HTMLElement): HTMLElement => {
       const layout = row.querySelector('[data-layout="mobile"]');
       expect(layout).not.toBeNull();
       return layout as HTMLElement;
-    }
+    };
 
     // #2599 review: below `sm` the visible content is two unpaired lists
     // (names, then scores each on their own line), so the row needs one

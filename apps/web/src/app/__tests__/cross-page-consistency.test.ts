@@ -256,11 +256,11 @@ const OPTIONS_INDEX: Record<string, number> = { fromFormat: 2 };
  */
 const CLOCK_READS = new Set(["now", "local"]);
 
-function optionsArg(method: string, args: string[]): string | undefined {
+const optionsArg = (method: string, args: string[]): string | undefined => {
   if (!CLOCK_READS.has(method)) return args[OPTIONS_INDEX[method] ?? 1];
   const last = args.at(-1)?.trim();
   return last?.startsWith("{") ? last : undefined;
-}
+};
 
 /**
  * Split a call's arguments at depth 0, honouring nesting and string literals.
@@ -268,7 +268,7 @@ function optionsArg(method: string, args: string[]): string | undefined {
  * call, which a truncated or unparseable file can produce — treated as "not a
  * finding" rather than crashing the run.
  */
-function topLevelArgs(source: string, open: number): string[] | null {
+const topLevelArgs = (source: string, open: number): string[] | null => {
   const args: string[] = [];
   const scan = {
     depth: 0,
@@ -297,19 +297,19 @@ function topLevelArgs(source: string, open: number): string[] | null {
     }
   }
   return null;
-}
+};
 
 /** An options argument counts only if it could carry a zone. */
-function namesZone(arg: string | undefined): boolean {
+const namesZone = (arg: string | undefined): boolean => {
   if (arg === undefined) return false;
   const trimmed = arg.trim();
   // An object literal is readable, so read it. Anything else — an identifier, a
   // spread, a call — is opaque, and accepted rather than guessed at.
   return trimmed.startsWith("{") ? /\bzone\b/.test(trimmed) : true;
-}
+};
 
 /** Every unzoned parse in one file, as the source text that produced it. */
-function findRuntimeZoneParses(source: string): string[] {
+const findRuntimeZoneParses = (source: string): string[] => {
   const found: string[] = [];
   for (const match of source.matchAll(PARSE_CALL)) {
     const method = match[1]!;
@@ -327,10 +327,10 @@ function findRuntimeZoneParses(source: string): string[] {
     found.push(match[0]);
   }
   return found;
-}
+};
 
 /** Offset from a call's `(` to just past its matching `)`. */
-function rest(source: string, open: number): number {
+const rest = (source: string, open: number): number => {
   const scan = { depth: 0, quote: null as string | null, i: open };
   for (; scan.i < source.length; scan.i++) {
     const ch = source[scan.i]!;
@@ -346,7 +346,7 @@ function rest(source: string, open: number): number {
     }
   }
   return source.length - open;
-}
+};
 
 /** The two parses' home, and the only file allowed to reach for either shape. */
 const DATE_PARSE_HOME = "lib/utils/dates.ts";
@@ -720,21 +720,21 @@ const BARE_CH_MAX_WIDTH = /max-w-\[\d*\.?\d+ch\]/;
 const BARE_CH_MAX_WIDTH_G = /max-w-\[\d*\.?\d+ch\]/g;
 
 /** Every match of `BARE_CH_MAX_WIDTH` in an already-stripped source. */
-function chOccurrences(strippedSource: string): number {
+const chOccurrences = (strippedSource: string): number => {
   return [...strippedSource.matchAll(BARE_CH_MAX_WIDTH_G)].length;
-}
+};
 
 /**
  * Strip-then-scan, exactly as the shared `code` map already does for every
  * file below — exposed separately so the self-test can run it against raw
  * snippets that were never loaded into that map.
  */
-function hasBareChMaxWidth(source: string): boolean {
+const hasBareChMaxWidth = (source: string): boolean => {
   const stripped = source.replace(COMMENT_OR_STRING, (token) =>
     token.startsWith("/") ? "" : token,
   );
   return BARE_CH_MAX_WIDTH.test(stripped);
-}
+};
 
 /**
  * The exact declaration text DESIGN.md's Reading-Measure Exemption Rule
@@ -919,20 +919,20 @@ const IMPORT_SPECIFIER = /\bfrom\s+["']([^"']+)["']/g;
  * trail's literal `` `${SITE_CONFIG.siteUrl}/kalender` `` and an up-link's
  * `"/kalender"` — or both sides' `` `/ploegen/${slug}` `` — compare equal.
  */
-function normalizeHref(raw: string): string {
+const normalizeHref = (raw: string): string => {
   return raw
     .trim()
     .replace(/^[`"']|[`"']$/g, "")
     .replace(/\$\{SITE_CONFIG\.siteUrl\}/g, "");
-}
+};
 
 /** Every `url:` value in a route's first `buildBreadcrumbJsonLd([...])` call,
  *  in trail order — `undefined` when the source makes no such call. */
-function breadcrumbUrls(source: string): string[] | undefined {
+const breadcrumbUrls = (source: string): string[] | undefined => {
   const call = BREADCRUMB_CALL.exec(source);
   if (!call) return undefined;
   return [...call[1]!.matchAll(BREADCRUMB_URL)].map((m) => m[1]!.trim());
-}
+};
 
 /**
  * A matched href is a route-owned literal — a quoted string or a template
@@ -946,20 +946,20 @@ function breadcrumbUrls(source: string): string[] | undefined {
  * (#2799 review round 3) — a naive collect-and-count over-counts on every
  * route whose bundle reaches either component's own pass-through line.
  */
-function isLiteralHref(raw: string): boolean {
+const isLiteralHref = (raw: string): boolean => {
   return /^[`"']/.test(raw.trim());
-}
+};
 
 /**
  * Every up-link href *literal* the bundle renders — real call sites only,
  * pass-through forwards filtered out — in the order they appear. Empty when
  * the source renders none.
  */
-function upLinkHrefs(source: string): string[] {
+const upLinkHrefs = (source: string): string[] => {
   const propHrefs = [...source.matchAll(UP_LINK_PROP_HREF)].map((m) => m[1]!);
   const tagHrefs = [...source.matchAll(UP_LINK_TAG_HREF)].map((m) => m[1]!);
   return [...propHrefs, ...tagHrefs].filter(isLiteralHref);
-}
+};
 
 /** Resolve one `import … from "SPECIFIER"` to a repo-relative source path —
  *  `@/x` → `x`, `./x` / `../x` → resolved against `fromPath`'s own
@@ -967,10 +967,10 @@ function upLinkHrefs(source: string): string[] {
  *  …) or a target this tree doesn't have (an asset, a type-only `.json`).
  *  Barrel `index.ts` targets resolve to `undefined` too — see the docblock
  *  above. */
-function resolveImport(
+const resolveImport = (
   fromPath: string,
   specifier: string,
-): string | undefined {
+): string | undefined => {
   const dir = fromPath.split("/").slice(0, -1).join("/");
   const toTarget = (): string | undefined => {
     if (specifier.startsWith("@/")) return specifier.slice(2);
@@ -983,11 +983,11 @@ function resolveImport(
     if (code.has(`${target}${ext}`)) return `${target}${ext}`;
   }
   return undefined;
-}
+};
 
 /** Every source a route file imports directly — package specifiers and
  *  barrels dropped, per `resolveImport`. */
-function importedSources(relPath: string): string[] {
+const importedSources = (relPath: string): string[] => {
   const specifiers = [
     ...(code.get(relPath) ?? "").matchAll(IMPORT_SPECIFIER),
   ].map((m) => m[1]!);
@@ -995,24 +995,24 @@ function importedSources(relPath: string): string[] {
     .map((spec) => resolveImport(relPath, spec))
     .filter((f): f is string => f !== undefined);
   return [...new Set(resolved)];
-}
+};
 
 /** The route file's own source, plus everything it imports (hop 1) and
  *  everything *those* import (hop 2) — see the docblock above for why two
  *  hops and why barrels are excluded rather than walked. */
-function routeBundleSources(relPath: string): string[] {
+const routeBundleSources = (relPath: string): string[] => {
   const hop1 = importedSources(relPath);
   const hop2 = hop1.flatMap((f) => importedSources(f));
   return [relPath, ...hop1, ...hop2];
-}
+};
 
 /** A route's own source concatenated with its two-hop import bundle. */
-function bundleCode(relPath: string): string {
+const bundleCode = (relPath: string): string => {
   return routeBundleSources(relPath)
     .map((f) => code.get(f))
     .filter((s): s is string => s !== undefined)
     .join("\n");
-}
+};
 
 /** Route files whose bundle reaches a `buildBreadcrumbJsonLd` call — the
  *  ones this rule can hold to anything. */
@@ -1272,32 +1272,32 @@ const repositories: RepositoryDeclaration[] = repositoryFiles.map((file) => {
  *  the docblock's "two independent signals" paragraph for why both are
  *  required together (a bare `.findAll(` match alone is not repository-
  *  specific enough to mean anything). */
-function referencesCaller(
+const referencesCaller = (
   source: string,
   tag: string,
   method: string,
-): boolean {
+): boolean => {
   return (
     new RegExp(`\\b${tag}\\b`).test(source) &&
     new RegExp(`\\.${method}\\(`).test(source)
   );
-}
+};
 
 /** Every scannable source that could plausibly call `repo`'s methods —
  *  everything except the repository's own declaration file and its own
  *  test file (see the docblock's "what this cannot see" for the boundary). */
-function callerCandidates(repo: RepositoryDeclaration): string[] {
+const callerCandidates = (repo: RepositoryDeclaration): string[] => {
   const ownTest = repo.file.replace(/\.ts$/, ".test.ts");
   return scannableSources.filter(
     (relPath) => relPath !== repo.file && relPath !== ownTest,
   );
-}
+};
 
-function hasCaller(repo: RepositoryDeclaration, method: string): boolean {
+const hasCaller = (repo: RepositoryDeclaration, method: string): boolean => {
   return callerCandidates(repo).some((relPath) =>
     referencesCaller(code.get(relPath)!, repo.tag, method),
   );
-}
+};
 
 /**
  * Pinned by declaration, not by file — rule 8's own convention (see that
@@ -1308,9 +1308,9 @@ function hasCaller(repo: RepositoryDeclaration, method: string): boolean {
  */
 const ORPHAN_EXEMPTIONS: Record<string, readonly string[]> = {};
 
-function isExempt(file: string, method: string): boolean {
+const isExempt = (file: string, method: string): boolean => {
   return (ORPHAN_EXEMPTIONS[file] ?? []).includes(method);
-}
+};
 
 describe("a repository method with no caller renders nothing, silently (#2505)", () => {
   const cases = repositories.flatMap((repo) =>
@@ -1506,15 +1506,15 @@ const INTERNAL_ARROW_GLYPH = "→";
 const ENGLISH_ANNOUNCEMENT = "opens in new tab";
 
 /** True when `source` contains the retired external-mark glyph ↗ at all. */
-function hasExternalArrowGlyph(source: string): boolean {
+const hasExternalArrowGlyph = (source: string): boolean => {
   return source.includes(EXTERNAL_ARROW_GLYPH);
-}
+};
 
 /** True when `source` still carries the pre-#2578 English sr-only
  *  announcement anywhere — every announcement is Dutch now (rule 4). */
-function hasEnglishAnnouncement(source: string): boolean {
+const hasEnglishAnnouncement = (source: string): boolean => {
   return source.includes(ENGLISH_ANNOUNCEMENT);
-}
+};
 
 /** An anchor-like opening tag (`<a>` or `<Link>`) whose own attributes
  *  carry a literal `target="_blank"` — group 1 captures the tag name so
@@ -1529,7 +1529,7 @@ const ANCHOR_LIKE_OPEN_WITH_BLANK = /<(a|Link)\b[^>]*\btarget="_blank"[^>]*>/g;
  * codebase, so the next matching closer after an opening tag is
  * unambiguously that element's own.
  */
-function hasRelatedInternalArrow(source: string): boolean {
+const hasRelatedInternalArrow = (source: string): boolean => {
   for (const match of source.matchAll(ANCHOR_LIKE_OPEN_WITH_BLANK)) {
     const tagName = match[1]!;
     const bodyStart = match.index + match[0].length;
@@ -1542,7 +1542,7 @@ function hasRelatedInternalArrow(source: string): boolean {
     if (body.includes(INTERNAL_ARROW_GLYPH)) return true;
   }
   return false;
-}
+};
 
 /**
  * Handed to #2402 by #2547's own resolution comment, not this ticket's
@@ -1826,7 +1826,7 @@ interface VmFieldGroup {
  *  (`source[i]` is `undefined` there, so neither brace branch ever fires
  *  and `depth` never reaches 0) — hanging the test file instead of failing
  *  it, which reads as an unexplained CI timeout rather than a red assertion. */
-function interfaceBody(source: string, name: string): string {
+const interfaceBody = (source: string, name: string): string => {
   const marker = `export interface ${name} {`;
   const markerIndex = source.indexOf(marker);
   if (markerIndex === -1) {
@@ -1847,22 +1847,22 @@ function interfaceBody(source: string, name: string): string {
     scan.i++;
   }
   return source.slice(bodyStart, scan.i - 1);
-}
+};
 
 /** Every field name declared directly inside an interface `body` — a
  *  single-level inline object type value (e.g. `highlightImage?: { ... }`)
  *  is stripped first, so its own fields aren't picked up as top-level
  *  fields of the outer interface. */
-function fieldNamesOf(body: string): string[] {
+const fieldNamesOf = (body: string): string[] => {
   const topLevelOnly = body.replace(/\{[^{}]*\}/g, "");
   return [...topLevelOnly.matchAll(/^\s*(\w+)\??:/gm)].map((m) => m[1]!);
-}
+};
 
 /** The inline object-type body of one field inside an interface `body`
  *  (e.g. `highlightImage`'s own `{ alt: string; url: string; ... }`).
  *  Throws loudly if `field` isn't declared as an inline object — the same
  *  contract `interfaceBody` uses. */
-function nestedFieldBody(body: string, field: string): string {
+const nestedFieldBody = (body: string, field: string): string => {
   const match = new RegExp(`\\b${field}\\??:\\s*\\{([^{}]*)\\}`).exec(body);
   if (!match) {
     throw new Error(
@@ -1870,7 +1870,7 @@ function nestedFieldBody(body: string, field: string): string {
     );
   }
   return match[1]!;
-}
+};
 
 const HOMEPAGE_REPOSITORY_FILE = "lib/repositories/homepage.repository.ts";
 const homepageRepositorySource = code.get(HOMEPAGE_REPOSITORY_FILE)!;
@@ -1906,16 +1906,19 @@ const VM_FIELD_GROUPS: readonly VmFieldGroup[] = [
  *  optional chaining — `?.field` still contains a literal `.field`) inside
  *  `source`. A bare word boundary, so `.urlMobile` does not count as a
  *  reader of `url`. */
-function hasFieldAccess(source: string, field: string): boolean {
+const hasFieldAccess = (source: string, field: string): boolean => {
   return new RegExp(`\\.${field}\\b`).test(source);
-}
+};
 
 /** True when at least one of `consumers` reads `field` — see the docblock's
  *  "why this is a hand-list" paragraph for why the search is scoped to a
  *  named file set rather than the whole tree. */
-function fieldHasReader(field: string, consumers: readonly string[]): boolean {
+const fieldHasReader = (
+  field: string,
+  consumers: readonly string[],
+): boolean => {
   return consumers.some((relPath) => hasFieldAccess(code.get(relPath)!, field));
-}
+};
 
 describe("a named view-model field with no reader renders nothing, silently (#2865)", () => {
   const namedConsumers = [
@@ -2108,7 +2111,10 @@ const UP_LINK_SITE_TEST = /<UpLink\b|\bupLink=\{/;
  * would walk straight past it (#2877 review round 3 — six of this ticket's
  * own routes render the chip through exactly one such wrapper).
  */
-function enclosingAncestorAttrs(source: string, matchIndex: number): string[] {
+const enclosingAncestorAttrs = (
+  source: string,
+  matchIndex: number,
+): string[] => {
   const stack: { name: string; attrs: string }[] = [];
   for (const tag of source.matchAll(UP_LINK_JSX_TAG)) {
     if (tag.index >= matchIndex) break;
@@ -2120,7 +2126,7 @@ function enclosingAncestorAttrs(source: string, matchIndex: number): string[] {
     }
   }
   return stack.map((frame) => frame.attrs);
-}
+};
 
 /** A Tailwind class token — an optional `variant:` chain, then `pt-`/`py-`.
  *  Matches `pt-12`, `lg:pt-16`, `sm:py-16` — not `pb-12` or `pt-2` used as
@@ -2132,7 +2138,7 @@ const PADS_TOP = /(?:^|\s)(?:[\w-]+:)*(?:pt|py)-/;
  *  `className` carries `pt-*`/`py-*` — the match index of each violation.
  *  Checks the whole ancestor chain, not just the nearest element, so a
  *  padded container one wrapper removed from the chip still counts. */
-function enclosingPaddingViolations(source: string): number[] {
+const enclosingPaddingViolations = (source: string): number[] => {
   const violations: number[] = [];
   for (const m of source.matchAll(UP_LINK_SITE)) {
     const padded = enclosingAncestorAttrs(source, m.index).some((attrs) => {
@@ -2142,7 +2148,7 @@ function enclosingPaddingViolations(source: string): number[] {
     if (padded) violations.push(m.index);
   }
   return violations;
-}
+};
 
 /** The shared opening's own defining files — excluded as files (see the
  *  docblock above), not matched-and-exempted. */
@@ -2363,13 +2369,13 @@ const WEDSTRIJD_LOADING = "app/(main)/wedstrijd/[matchId]/loading.tsx";
  *  `className` attribute at all, matching `enclosingPaddingViolations`'
  *  own shape (operates on source text directly, so a self-test can call it
  *  with a synthetic snippet instead of duplicating the regex). */
-function extractHeroContainerClassName(source: string): string {
+const extractHeroContainerClassName = (source: string): string => {
   const span = /<PageContainer\b[^>]*>[\s\S]*?<UpLink\b/.exec(source);
   if (!span) {
     throw new Error("no <PageContainer> found wrapping <UpLink>");
   }
   return /className="([^"]*)"/.exec(span[0])?.[1] ?? "";
-}
+};
 
 /** `extractHeroContainerClassName`, reading straight from `code`. */
 const heroContainerClassName = (relPath: string): string =>
@@ -2512,9 +2518,9 @@ const SECTION_SPACING_VARIANT = "sm:py-16";
  *  are non-word characters, so `\bpt-12\b` would match inside `sm:pt-12` or
  *  `md:pb-10`'s tail. This way `py-12` never matches inside `py-120` or a
  *  variant-prefixed `lg:py-12`, and `sm:py-16` is matched as a whole. */
-function classToken(token: string): RegExp {
+const classToken = (token: string): RegExp => {
   return new RegExp(`(?<![\\w:-])${token}(?![\\w-])`);
-}
+};
 
 const sectionSpacingBaseToken = classToken(SECTION_SPACING_BASE);
 const sectionSpacingVariantToken = classToken(SECTION_SPACING_VARIANT);
@@ -2532,7 +2538,7 @@ const sectionSpacingVariantToken = classToken(SECTION_SPACING_VARIANT);
  * prose (this rule's own, for instance) is already blanked before it gets
  * here.
  */
-function sectionSpacingOccurrences(source: string): number {
+const sectionSpacingOccurrences = (source: string): number => {
   return source
     .split("\n")
     .filter(
@@ -2540,7 +2546,7 @@ function sectionSpacingOccurrences(source: string): number {
         sectionSpacingBaseToken.test(line) &&
         sectionSpacingVariantToken.test(line),
     ).length;
-}
+};
 
 /**
  * Every site this ticket's own walk found, file → exact count. Nine files
@@ -2629,7 +2635,9 @@ const SEAM_SPACING_MATCHERS = (
   .map(([shape, tokens]) => ({ shape, tokens: tokens.map(classToken) }))
   .sort((a, b) => b.tokens.length - a.tokens.length);
 
-function seamSpacingShapes(source: string): Record<SeamSpacingShape, number> {
+const seamSpacingShapes = (
+  source: string,
+): Record<SeamSpacingShape, number> => {
   const counts: Record<SeamSpacingShape, number> = {
     both: 0,
     below: 0,
@@ -2643,7 +2651,7 @@ function seamSpacingShapes(source: string): Record<SeamSpacingShape, number> {
     if (carried) counts[carried.shape] += 1;
   }
   return counts;
-}
+};
 
 /**
  * Every file whose sections touch a seam, with the exact number of lines of
@@ -2826,24 +2834,24 @@ const RETIRED_SECTION_PADDING_PAIRS: readonly (readonly [string, string])[] = [
 /** True when `base` and `variant` land on the same source line — the same
  *  token-boundary, same-line test `sectionSpacingOccurrences` uses for the
  *  target value, applied here to a retired one instead. */
-function hasPairOnSameLine(
+const hasPairOnSameLine = (
   source: string,
   base: string,
   variant: string,
-): boolean {
+): boolean => {
   const baseToken = classToken(base);
   const variantToken = classToken(variant);
   return source
     .split("\n")
     .some((line) => baseToken.test(line) && variantToken.test(line));
-}
+};
 
 /** True when `source` carries any of the eight retired pairs at all. */
-function hasAnyRetiredPair(source: string): boolean {
+const hasAnyRetiredPair = (source: string): boolean => {
   return RETIRED_SECTION_PADDING_PAIRS.some(([base, variant]) =>
     hasPairOnSameLine(source, base, variant),
   );
-}
+};
 
 /**
  * Every file that legitimately still carries exactly one retired pair, and
@@ -3115,7 +3123,7 @@ const STRING_LITERAL_G = new RegExp(STRING_LITERAL.source, "g");
 const CLASS_EXPRESSION_START = /\bclassName=|\bcn\(/g;
 
 /** The `{...}` / `(...)` / `"..."` expression opening at `open`, string-aware. */
-function expressionAt(source: string, open: number): string {
+const expressionAt = (source: string, open: number): string => {
   if (!/[{(]/.test(source[open] ?? "")) {
     STRING_LITERAL_G.lastIndex = open;
     const literal = STRING_LITERAL_G.exec(source);
@@ -3135,10 +3143,10 @@ function expressionAt(source: string, open: number): string {
     scan.i = next + (literal?.[0].length ?? 0);
   }
   return source.slice(open);
-}
+};
 
 /** The class lists in `source`: one joined unit per outermost className / cn(). */
-function classUnits(source: string): string[][] {
+const classUnits = (source: string): string[][] => {
   const units: string[][] = [];
   const spans: [number, number][] = [];
   for (const m of source.matchAll(CLASS_EXPRESSION_START)) {
@@ -3154,10 +3162,10 @@ function classUnits(source: string): string[][] {
     }
   }
   return units;
-}
+};
 
 /** Every class list in `source` that is a round disc. */
-function roundDiscs(source: string): string[][] {
+const roundDiscs = (source: string): string[][] => {
   return classUnits(source).filter((literals) => {
     const tokens = new Set(
       literals.flatMap((literal) => literal.slice(1, -1).split(/\s+/)),
@@ -3169,7 +3177,7 @@ function roundDiscs(source: string): string[][] {
         (tokens.has("items-center") && tokens.has("justify-center")))
     );
   });
-}
+};
 
 /** The one file that draws the family's disc. */
 const ROUND_AVATAR_HOME =

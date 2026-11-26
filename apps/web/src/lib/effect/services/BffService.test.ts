@@ -43,7 +43,7 @@ const sampleRankingTable = {
   ],
 };
 
-function mockFetchWith(data: unknown, status = 200) {
+const mockFetchWith = (data: unknown, status = 200) => {
   vi.stubGlobal(
     "fetch",
     vi.fn().mockResolvedValue(
@@ -53,16 +53,16 @@ function mockFetchWith(data: unknown, status = 200) {
       }),
     ),
   );
-}
+};
 
 /** Like `mockFetchWith`, but the caller controls the raw body text —
  * for reproducing an empty or non-JSON body on a declared-error status. */
-function mockFetchWithRawBody(body: string, status: number) {
+const mockFetchWithRawBody = (body: string, status: number) => {
   vi.stubGlobal(
     "fetch",
     vi.fn().mockResolvedValue(new Response(body, { status })),
   );
-}
+};
 
 /**
  * Runs `bff.getRanking(1)` against whatever `fetch` stub is currently
@@ -72,10 +72,10 @@ function mockFetchWithRawBody(body: string, status: number) {
  * real `BffServiceLive` client rather than a synthetic fixture, so it
  * exercises the actual decode path a stale/misconfigured worker hits.
  */
-async function runRankingAndClassify(): Promise<{
+const runRankingAndClassify = async (): Promise<{
   tag: unknown;
   permanent: boolean;
-}> {
+}> => {
   try {
     await Effect.runPromise(
       Effect.gen(function* () {
@@ -94,7 +94,7 @@ async function runRankingAndClassify(): Promise<{
     return { tag, permanent };
   }
   throw new Error("expected getRanking to fail");
-}
+};
 
 describe("BffService", () => {
   beforeEach(() => {

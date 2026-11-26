@@ -13,14 +13,14 @@ const spies = {} as {
   scrollIntoView: MockInstance<Element["scrollIntoView"]>;
 };
 
-function mountRows() {
+const mountRows = () => {
   document.body.innerHTML = `
     <ul>
       <li><details data-node-ids="tvjo jc-ob"><summary id="s1">TVJO</summary><p>card</p></details></li>
       <li><details data-node-ids="jc-ob-2"><summary id="s2">Other</summary></details></li>
     </ul>
     <ul><li id="card" data-key-node-id="sec" tabindex="-1">Secretaris</li></ul>`;
-}
+};
 
 beforeEach(() => {
   spies.scrollIntoView = vi

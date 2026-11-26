@@ -34,30 +34,30 @@ vi.mock("next/script", () => ({
   ),
 }));
 
-function render() {
+const render = () => {
   return renderToStaticMarkup(
     <RootDocument>
       <main />
     </RootDocument>,
   );
-}
+};
 
 /**
  * Parses the markup into an inert `<template>` fragment — a parsed document
  * would make happy-dom fetch the preload/stylesheet links over the network.
  */
-function parse(markup: string) {
+const parse = (markup: string) => {
   const template = document.createElement("template");
   template.innerHTML = markup;
   return template.content;
-}
+};
 
 /**
  * Runs the inline `typekit-init` script against a stub document and returns
  * what it appended to `<head>` — the real happy-dom document would try to
  * fetch the stylesheet over the network.
  */
-function runLoader(markup: string) {
+const runLoader = (markup: string) => {
   const script = parse(markup).querySelector("#typekit-init");
   expect(script, "typekit-init script is rendered").not.toBeNull();
   const appended: Record<string, string>[] = [];
@@ -67,7 +67,7 @@ function runLoader(markup: string) {
   };
   new Function("document", script!.textContent ?? "")(fakeDocument);
   return appended;
-}
+};
 
 describe("RootDocument — Typekit loader", () => {
   afterEach(() => {

@@ -25,7 +25,7 @@ import { vi } from "vitest";
  * `vi.restoreAllMocks()`) restores them — this helper does not register
  * its own.
  */
-export function stubAnimationFrame() {
+export const stubAnimationFrame = () => {
   const queue = new Map<number, FrameRequestCallback>();
   const ids = { next: 1 };
 
@@ -52,7 +52,7 @@ export function stubAnimationFrame() {
       callbacks.forEach((cb) => cb(0));
     },
   };
-}
+};
 
 /**
  * Overrides numeric layout getters (`scrollHeight`, `clientHeight`,
@@ -63,9 +63,9 @@ export function stubAnimationFrame() {
  * getter from every later test in the file; restore the saved descriptor
  * instead (or delete only when there was none).
  */
-export function mockLayoutProps(
+export const mockLayoutProps = (
   props: Record<string, number | (() => number)>,
-) {
+) => {
   const saved = Object.keys(props).map(
     (prop) =>
       [
@@ -91,4 +91,4 @@ export function mockLayoutProps(
       }
     }
   };
-}
+};

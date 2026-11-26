@@ -19,7 +19,7 @@ import { render } from "@testing-library/react";
 import WedstrijdLoading from "./loading";
 
 /** The two `flex` team-slot rows inside the `1fr_auto_1fr` scoreboard grid. */
-function getTeamRows(container: HTMLElement): HTMLElement[] {
+const getTeamRows = (container: HTMLElement): HTMLElement[] => {
   const scoreboard = container.querySelector<HTMLElement>(
     '[class*="1fr_auto_1fr"]',
   );
@@ -27,7 +27,7 @@ function getTeamRows(container: HTMLElement): HTMLElement[] {
   return Array.from(
     scoreboard!.querySelectorAll<HTMLElement>(":scope > div"),
   ).filter((el) => el.className.split(/\s+/).includes("flex"));
-}
+};
 
 describe("Match detail loading skeleton — scoreboard overflow guard", () => {
   it("renders two team-slot rows that can shrink below content width (min-w-0)", () => {

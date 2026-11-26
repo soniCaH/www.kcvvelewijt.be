@@ -4,7 +4,7 @@ import {
   scrollToTopMotionSafe,
 } from "./scroll-into-view";
 
-function stubReducedMotion(reduce: boolean) {
+const stubReducedMotion = (reduce: boolean) => {
   // happy-dom's matchMedia ignores the query, so answer it explicitly.
   vi.stubGlobal(
     "matchMedia",
@@ -13,7 +13,7 @@ function stubReducedMotion(reduce: boolean) {
       media: query,
     })),
   );
-}
+};
 
 describe("scrollIntoViewMotionSafe", () => {
   afterEach(() => vi.unstubAllGlobals());

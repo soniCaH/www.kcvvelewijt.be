@@ -429,7 +429,7 @@ describe("formatMatchDescription", () => {
 
 describe("enrichLineupWithKeeperFlag", () => {
   const keeperIds: ReadonlySet<string> = new Set(["100", "200"]);
-  function makePlayer(overrides: Partial<LineupPlayer> = {}): LineupPlayer {
+  const makePlayer = (overrides: Partial<LineupPlayer> = {}): LineupPlayer => {
     return {
       id: 100,
       name: "Ben Lievens",
@@ -438,7 +438,7 @@ describe("enrichLineupWithKeeperFlag", () => {
       status: "starter",
       ...overrides,
     };
-  }
+  };
 
   it("flags KCVV-side players whose PSD id is in the Sanity keeper set", () => {
     const player = makePlayer({ id: 100, number: 11 });

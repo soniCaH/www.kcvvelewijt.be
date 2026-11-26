@@ -11,7 +11,7 @@ import {
 import { Headline, Kicker, Scoreline, ShareName } from "./ShareElements";
 
 /** Fake element width measurement (happy-dom has no layout); returns a restore. */
-function fakeMeasuredWidths(clientWidth: number, scrollWidth: number) {
+const fakeMeasuredWidths = (clientWidth: number, scrollWidth: number) => {
   const proto = HTMLElement.prototype;
   const origClient = Object.getOwnPropertyDescriptor(proto, "clientWidth");
   const origScroll = Object.getOwnPropertyDescriptor(proto, "scrollWidth");
@@ -29,21 +29,21 @@ function fakeMeasuredWidths(clientWidth: number, scrollWidth: number) {
     if (origScroll) Object.defineProperty(proto, "scrollWidth", origScroll);
     else delete (proto as unknown as Record<string, unknown>).scrollWidth;
   };
-}
+};
 
 /** Temporarily fake element width measurement (happy-dom has no layout). */
-function withMeasuredWidths(
+const withMeasuredWidths = (
   clientWidth: number,
   scrollWidth: number,
   fn: () => void,
-) {
+) => {
   const restore = fakeMeasuredWidths(clientWidth, scrollWidth);
   try {
     fn();
   } finally {
     restore();
   }
-}
+};
 
 describe("ShareName auto-fit", () => {
   it("keeps long names on a single line (never wraps)", () => {

@@ -33,7 +33,7 @@ const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js";
 
 type RenderOpts = Parameters<NonNullable<Window["turnstile"]>["render"]>[1];
 
-function installFakeTurnstile() {
+const installFakeTurnstile = () => {
   const turnstile = {
     render: vi.fn((_el: HTMLElement, _opts: RenderOpts) => "widget-1"),
     remove: vi.fn(),
@@ -41,15 +41,15 @@ function installFakeTurnstile() {
   };
   window.turnstile = turnstile;
   return turnstile;
-}
+};
 
-function renderedOpts(turnstile: ReturnType<typeof installFakeTurnstile>) {
+const renderedOpts = (turnstile: ReturnType<typeof installFakeTurnstile>) => {
   return turnstile.render.mock.calls[0]![1];
-}
+};
 
-function scriptTags() {
+const scriptTags = () => {
   return document.querySelectorAll(`script[src="${SCRIPT_SRC}"]`);
-}
+};
 
 describe("TurnstileWidget", () => {
   afterAll(() => {

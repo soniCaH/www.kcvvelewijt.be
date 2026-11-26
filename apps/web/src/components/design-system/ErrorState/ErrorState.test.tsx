@@ -24,7 +24,7 @@ const notFoundActions: ErrorStateAction[] = [
   { label: "Zoeken", href: "/zoeken", variant: "ghost" },
 ];
 
-function renderNotFound() {
+const renderNotFound = () => {
   return render(
     <ErrorState
       code="404"
@@ -34,7 +34,7 @@ function renderNotFound() {
       actions={notFoundActions}
     />,
   );
-}
+};
 
 describe("ErrorState", () => {
   it("renders the mono code line", () => {

@@ -19,28 +19,28 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
 
-function runWithRepo<A>(
+const runWithRepo = <A>(
   effect: Effect.Effect<A, SanityReadError, ResponsibilityRepository>,
-) {
+) => {
   return Effect.runPromise(
     Effect.provide(effect, ResponsibilityRepositoryLive),
   );
-}
+};
 
-function runFindAll() {
+const runFindAll = () => {
   return runWithRepo(
     Effect.gen(function* () {
       const repo = yield* ResponsibilityRepository;
       return yield* repo.findAll();
     }),
   );
-}
+};
 
 type PathRow = RESPONSIBILITY_PATHS_QUERY_RESULT[number];
 
-function makeContact(
+const makeContact = (
   overrides: Partial<NonNullable<PathRow["primaryContact"]>> = {},
-): NonNullable<PathRow["primaryContact"]> {
+): NonNullable<PathRow["primaryContact"]> => {
   return {
     contactType: "position",
     teamRole: null,
@@ -63,9 +63,9 @@ function makeContact(
     department: null,
     ...overrides,
   };
-}
+};
 
-function makePathRow(overrides: Partial<PathRow> = {}): PathRow {
+const makePathRow = (overrides: Partial<PathRow> = {}): PathRow => {
   return {
     id: "blessure-melden",
     title: "Blessure melden",
@@ -105,7 +105,7 @@ function makePathRow(overrides: Partial<PathRow> = {}): PathRow {
     relatedPaths: ["transfer-aanvragen", "verzekering"],
     ...overrides,
   };
-}
+};
 
 describe("ResponsibilityRepository", () => {
   describe("findAll", () => {

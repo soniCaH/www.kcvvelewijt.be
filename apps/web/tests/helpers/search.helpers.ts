@@ -83,16 +83,16 @@ export const mockSearchResults: SearchResult[] = [
 /**
  * Create a mock SearchResponse
  */
-export function createMockSearchResponse(
+export const createMockSearchResponse = (
   query: string,
   results: SearchResult[] = mockSearchResults,
-): SearchResponse {
+): SearchResponse => {
   return {
     query,
     results,
     count: results.length,
   };
-}
+};
 
 /**
  * Per-type counters for generating deterministic IDs in tests
@@ -104,18 +104,18 @@ const idCounters = { article: 0, player: 0, team: 0 };
  * Reset all ID counters to 0
  * Call this in beforeEach if tests assert on specific ID values
  */
-export function resetIdCounter() {
+export const resetIdCounter = () => {
   idCounters.article = 0;
   idCounters.player = 0;
   idCounters.team = 0;
-}
+};
 
 /**
  * Factory function to create mock article results
  */
-export function createMockArticle(
+export const createMockArticle = (
   overrides: Partial<SearchResult> = {},
-): SearchResult {
+): SearchResult => {
   return {
     type: "article",
     id: `article-${++idCounters.article}`,
@@ -127,14 +127,14 @@ export function createMockArticle(
     tags: ["Test", "Article"],
     ...overrides,
   };
-}
+};
 
 /**
  * Factory function to create mock player results
  */
-export function createMockPlayer(
+export const createMockPlayer = (
   overrides: Partial<SearchResult> = {},
-): SearchResult {
+): SearchResult => {
   return {
     type: "player",
     id: `player-${++idCounters.player}`,
@@ -144,14 +144,14 @@ export function createMockPlayer(
     imageUrl: "/images/player.jpg",
     ...overrides,
   };
-}
+};
 
 /**
  * Factory function to create mock team results
  */
-export function createMockTeam(
+export const createMockTeam = (
   overrides: Partial<SearchResult> = {},
-): SearchResult {
+): SearchResult => {
   return {
     type: "team",
     id: `team-${++idCounters.team}`,
@@ -161,4 +161,4 @@ export function createMockTeam(
     imageUrl: "/images/team.jpg",
     ...overrides,
   };
-}
+};

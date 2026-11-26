@@ -115,7 +115,7 @@ const eventsCacheCallAtImport = unstableCacheCalls.find(
   (call) => JSON.stringify(call.keyParts) === JSON.stringify(["ical:events"]),
 );
 
-function makeMatch(overrides: Partial<Match> = {}): Match {
+const makeMatch = (overrides: Partial<Match> = {}): Match => {
   return {
     id: 12345,
     date: new Date("2026-04-15T14:00:00.000Z"),
@@ -127,7 +127,7 @@ function makeMatch(overrides: Partial<Match> = {}): Match {
     competition: "2e Nationale",
     ...overrides,
   } as Match;
-}
+};
 
 /**
  * Fixture for the merged `/kalender` event feed (`EventRepository.findUpcomingForList()`).
@@ -135,9 +135,9 @@ function makeMatch(overrides: Partial<Match> = {}): Match {
  * `Match.date`) — see `event-datetime.ts`. `2026-04-14T22:00:00.000Z` is
  * Brussels midnight (2026-04-15, CEST +2).
  */
-function makeEventItem(
+const makeEventItem = (
   overrides: Partial<EventListItemVM> = {},
-): EventListItemVM {
+): EventListItemVM => {
   return {
     id: "event-1",
     title: "Mosselfestijn",
@@ -149,9 +149,9 @@ function makeEventItem(
     source: "event",
     ...overrides,
   };
-}
+};
 
-function makeTeam(psdId: number | null): TeamNavVM {
+const makeTeam = (psdId: number | null): TeamNavVM => {
   return {
     id: `team-${psdId}`,
     name: `Team ${psdId}`,
@@ -163,13 +163,13 @@ function makeTeam(psdId: number | null): TeamNavVM {
     divisionFull: null,
     teamImageUrl: null,
   };
-}
+};
 
-function makeRequest(query: string): NextRequest {
+const makeRequest = (query: string): NextRequest => {
   return new NextRequest(
     new URL(`/api/calendar.ics?${query}`, "http://localhost:3000"),
   );
-}
+};
 
 describe("GET /api/calendar.ics", () => {
   beforeEach(() => {
@@ -328,15 +328,15 @@ describe("GET /api/calendar.ics team-id parsing (#3486)", () => {
     mockFindHiddenPsdIds.mockReset().mockReturnValue(Effect.succeed([]));
   });
 
-  async function keyFor(query: string): Promise<string[]> {
+  const keyFor = async (query: string): Promise<string[]> => {
     unstableCacheCalls.length = 0;
     await GET(makeRequest(query));
     return unstableCacheCalls[0]!.keyParts;
-  }
+  };
 
-  function fannedOutIds(): number[] {
+  const fannedOutIds = (): number[] => {
     return mockGetMatches.mock.calls.map(([id]) => id as number);
-  }
+  };
 
   it("gives ?teamIds=1,1,01 and ?teamIds=1 the same cache key", async () => {
     expect(await keyFor("teamIds=1,1,01")).toEqual(await keyFor("teamIds=1"));

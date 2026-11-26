@@ -3,10 +3,10 @@ import { describe, expect, it } from "vitest";
 import { RelatedRow } from "./RelatedRow";
 import type { RelatedRowItem } from "@/components/related/types";
 
-function item(
+const item = (
   i: number,
   overrides: Partial<RelatedRowItem> = {},
-): RelatedRowItem {
+): RelatedRowItem => {
   return {
     title: `Artikel ${i}`,
     href: `/nieuws/artikel-${i}`,
@@ -15,7 +15,7 @@ function item(
     articleType: "announcement",
     ...overrides,
   };
-}
+};
 
 describe("<RelatedRow>", () => {
   describe("slider behaviour (5.d4 slider variant, carried over)", () => {

@@ -1,11 +1,11 @@
 import { describe, it, expect } from "vitest";
 import { readSponsorAttrs } from "./sponsor-attrs";
 
-function el(attrs: Record<string, string>): HTMLElement {
+const el = (attrs: Record<string, string>): HTMLElement => {
   const node = document.createElement("a");
   for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
   return node;
-}
+};
 
 describe("readSponsorAttrs", () => {
   it("reads the id and tier", () => {

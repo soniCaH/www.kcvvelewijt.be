@@ -20,7 +20,7 @@ vi.mock("next/image", () => ({
 
 const mockFetchArticles = vi.fn();
 
-function makeArticle(overrides: Partial<ArticleVM> = {}): ArticleVM {
+const makeArticle = (overrides: Partial<ArticleVM> = {}): ArticleVM => {
   const id = overrides.id ?? `article-${Math.random().toString(36).slice(2)}`;
   return {
     id,
@@ -36,7 +36,7 @@ function makeArticle(overrides: Partial<ArticleVM> = {}): ArticleVM {
     firstEventFact: null,
     ...overrides,
   };
-}
+};
 
 const categories = [
   {

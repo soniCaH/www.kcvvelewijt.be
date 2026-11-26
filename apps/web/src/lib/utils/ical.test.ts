@@ -20,14 +20,14 @@ import {
  * `buildIcalFeed`'s own contract that it never re-gates `events` on
  * `variant` itself (see that function's doc).
  */
-function renderIcal(
+const renderIcal = (
   matches: readonly Match[],
   options: {
     side?: MatchSide;
     includeEvents?: boolean;
     events?: readonly EventListItemVM[];
   } = {},
-): string {
+): string => {
   const { side = "all", includeEvents = false, events = [] } = options;
   return buildIcalFeed(
     matches,
@@ -35,9 +35,9 @@ function renderIcal(
     resolveFeedVariant(includeEvents),
     side,
   );
-}
+};
 
-function makeMatch(overrides: Partial<Match> = {}): Match {
+const makeMatch = (overrides: Partial<Match> = {}): Match => {
   return {
     id: 12345,
     date: new Date("2025-03-22T14:00:00.000Z"),
@@ -49,13 +49,13 @@ function makeMatch(overrides: Partial<Match> = {}): Match {
     competition: "2e Nationale",
     ...overrides,
   } as Match;
-}
+};
 
 /**
  * A pitch-reservation placeholder (#2606): both sides are the same club, so
  * `home_team`/`away_team` carry identical ids and names.
  */
-function makePlaceholderMatch(overrides: Partial<Match> = {}): Match {
+const makePlaceholderMatch = (overrides: Partial<Match> = {}): Match => {
   return makeMatch({
     id: 54321,
     home_team: { id: 5, name: "KCVV Elewijt", score: undefined },
@@ -64,7 +64,7 @@ function makePlaceholderMatch(overrides: Partial<Match> = {}): Match {
     competition: "Jeugdtornooi",
     ...overrides,
   });
-}
+};
 
 describe("generateIcal", () => {
   it("generates a valid iCal with a scheduled match", () => {
@@ -400,9 +400,9 @@ describe("normalizeCacheKey", () => {
  * `Match.date`) — see `event-datetime.ts`. `2026-04-14T22:00:00.000Z` is
  * Brussels midnight (2026-04-15, CEST +2).
  */
-function makeEventItem(
+const makeEventItem = (
   overrides: Partial<EventListItemVM> = {},
-): EventListItemVM {
+): EventListItemVM => {
   return {
     id: "event-1",
     title: "Mosselfestijn",
@@ -414,7 +414,7 @@ function makeEventItem(
     source: "event",
     ...overrides,
   };
-}
+};
 
 describe("generateIcal — club activities (events flag)", () => {
   it("emits no event VEVENT when the events option is omitted (flag off)", () => {

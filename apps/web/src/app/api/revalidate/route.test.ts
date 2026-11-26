@@ -21,21 +21,21 @@ vi.mock("@sanity/webhook", () => ({
 
 import { POST } from "./route";
 
-function makeRequest(body: unknown, signature = "sig"): Request {
+const makeRequest = (body: unknown, signature = "sig"): Request => {
   return new Request("http://localhost:3000/api/revalidate", {
     method: "POST",
     headers: { "sanity-webhook-signature": signature },
     body: JSON.stringify(body),
   });
-}
+};
 
 /** POST, then let the deferred `after()` revalidation run to completion. */
-async function post(body: unknown): Promise<Response> {
+const post = async (body: unknown): Promise<Response> => {
   const res = await POST(makeRequest(body));
   await vi.runAllTimersAsync();
   await Promise.all(after.mock.results.map((r) => r.value));
   return res;
-}
+};
 
 describe("POST /api/revalidate", () => {
   const saved: { value?: string } = {};

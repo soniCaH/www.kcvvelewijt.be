@@ -8,7 +8,7 @@ import {
 
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
-function renderHero() {
+const renderHero = () => {
   return render(
     <OrganigramHero
       members={HUB_SEARCH_MEMBERS}
@@ -16,7 +16,7 @@ function renderHero() {
       structureIndex={{ posities: 23, mensen: 30, afdelingen: 2 }}
     />,
   );
-}
+};
 
 describe("OrganigramHero", () => {
   it("renders the help-forward heading as an h1", () => {

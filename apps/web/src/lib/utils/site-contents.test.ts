@@ -50,11 +50,11 @@ const PAGE = {
   updatedAt: "2026-02-07T12:00:00Z",
 };
 
-function groupById(groups: ContentsGroup[], id: string) {
+const groupById = (groups: ContentsGroup[], id: string) => {
   const found = groups.find((g) => g.id === id);
   if (!found) throw new Error(`no "${id}" group in the result`);
   return found;
-}
+};
 
 describe("buildSiteContents", () => {
   it("returns nothing when every repository is empty", () => {

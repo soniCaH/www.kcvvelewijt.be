@@ -100,7 +100,7 @@ describe("VolledigOrganigram — keeping the root centred", () => {
     layout.rootLeft = 1000;
   });
 
-  function mountWithLayout() {
+  const mountWithLayout = () => {
     vi.stubGlobal(
       "ResizeObserver",
       class {
@@ -131,7 +131,7 @@ describe("VolledigOrganigram — keeping the root centred", () => {
     const track = view.container.querySelector<HTMLElement>(".vo-chart");
     if (!track) throw new Error("track missing");
     return { scrollTo, track };
-  }
+  };
 
   it("centres the root on arrival and again when the layout changes", () => {
     const { scrollTo, track } = mountWithLayout();

@@ -21,14 +21,14 @@ interface MinimalMatch {
   status: MatchStatus;
 }
 
-function createMatch(overrides: Partial<MinimalMatch> = {}): MinimalMatch {
+const createMatch = (overrides: Partial<MinimalMatch> = {}): MinimalMatch => {
   return {
     home_team: { score: 2 },
     away_team: { score: 1 },
     status: "finished",
     ...overrides,
   };
-}
+};
 
 describe("hasScore", () => {
   it("returns true for finished match with both scores", () => {
@@ -309,16 +309,16 @@ describe("otherClubSide (#2696, positional since #2802 review)", () => {
 });
 
 describe("matchRowKind (#2696, #2802, #2825)", () => {
-  function rawMatch(
+  const rawMatch = (
     overrides: Partial<MatchRowKindSource> = {},
-  ): MatchRowKindSource {
+  ): MatchRowKindSource => {
     return {
       status: "scheduled",
       home_team: {},
       away_team: {},
       ...overrides,
     };
-  }
+  };
 
   it('returns "reservation" when is_placeholder is set — checked before competitionType', () => {
     expect(

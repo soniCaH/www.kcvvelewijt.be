@@ -7,7 +7,7 @@ import {
 import { groupPathsByCategory } from "./groupPathsByCategory";
 import type { ResponsibilityPath } from "@/types/responsibility";
 
-function mk(id: string, category: ResponsibilityPath["category"]) {
+const mk = (id: string, category: ResponsibilityPath["category"]) => {
   return {
     id,
     category,
@@ -19,7 +19,7 @@ function mk(id: string, category: ResponsibilityPath["category"]) {
     steps: [],
     primaryContact: { contactType: "manual" },
   } as ResponsibilityPath;
-}
+};
 
 describe("categoryMeta", () => {
   it("has a label + Phosphor icon for every category", () => {

@@ -44,7 +44,7 @@ const fixture: ScheduleMatch = {
  * pinned in `MatchStrip.test.tsx`. These tests are about layout and wording, so
  * they get the labels the server would hand over.
  */
-function MatchStripView(props: Omit<MatchStripViewProps, "dates">) {
+const MatchStripView = (props: Omit<MatchStripViewProps, "dates">) => {
   return (
     <MatchStripViewBase
       {...props}
@@ -54,7 +54,7 @@ function MatchStripView(props: Omit<MatchStripViewProps, "dates">) {
       }}
     />
   );
-}
+};
 
 describe("MatchStripView", () => {
   it("renders both matches as links to their own match-detail route", () => {

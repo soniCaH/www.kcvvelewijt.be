@@ -34,7 +34,7 @@ describe("selectSeniorTeams", () => {
 const NOW = new Date("2026-06-23T12:00:00Z");
 
 /** Minimal structural Match factory — the derive logic only reads these fields. */
-function match(p: {
+const match = (p: {
   id: number;
   date: string;
   status: Match["status"];
@@ -46,7 +46,7 @@ function match(p: {
   time?: string;
   competition?: string;
   isReservation?: boolean;
-}): Match {
+}): Match => {
   return {
     id: p.id,
     date: new Date(p.date),
@@ -58,7 +58,7 @@ function match(p: {
     is_home: p.isHome,
     is_placeholder: p.isReservation,
   } as unknown as Match;
-}
+};
 
 const team = { label: "A-ploeg", slug: "a-ploeg", division: "3de Nationale" };
 

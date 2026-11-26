@@ -136,7 +136,7 @@ describe("NavTakeover", () => {
   });
 
   it("returns focus to the trigger when closed", () => {
-    function Harness({ open }: { open: boolean }) {
+    const Harness = ({ open }: { open: boolean }) => {
       const triggerRef = useRef<HTMLButtonElement>(null);
       return (
         <>
@@ -154,14 +154,14 @@ describe("NavTakeover", () => {
           </NavTakeover>
         </>
       );
-    }
+    };
     const { rerender } = render(<Harness open />);
     rerender(<Harness open={false} />);
     expect(document.activeElement).toBe(screen.getByTestId("trigger"));
   });
 
   it("does not steal focus on initial mount when open=false", () => {
-    function Harness() {
+    const Harness = () => {
       const triggerRef = useRef<HTMLButtonElement>(null);
       return (
         <>
@@ -179,7 +179,7 @@ describe("NavTakeover", () => {
           </NavTakeover>
         </>
       );
-    }
+    };
     render(<Harness />);
     expect(document.activeElement).not.toBe(screen.getByTestId("trigger"));
   });
@@ -199,7 +199,7 @@ describe("NavTakeover", () => {
     // is stubbed here too, extended with a settable `matches` and a captured
     // `change` listener so a transition can actually be simulated via
     // `trigger()`, which the peer's static mock has no need for.
-    function mockMatchMedia(initialMatches: boolean) {
+    const mockMatchMedia = (initialMatches: boolean) => {
       const state = { matches: initialMatches };
       const listeners = new Set<(event: { matches: boolean }) => void>();
       const mql = {
@@ -224,7 +224,7 @@ describe("NavTakeover", () => {
           listeners.forEach((cb) => cb({ matches }));
         },
       };
-    }
+    };
 
     // A custom (non-1024) breakpoint, read from the same custom property
     // `globals.css` defines — proves the value came off the DOM rather than
@@ -244,7 +244,7 @@ describe("NavTakeover", () => {
       document.documentElement.style.removeProperty("--breakpoint-lg");
     });
 
-    function Harness() {
+    const Harness = () => {
       const [open, setOpen] = useState(true);
       const triggerRef = useRef<HTMLButtonElement>(null);
       const desktopLinkRef = useRef<HTMLAnchorElement>(null);
@@ -268,7 +268,7 @@ describe("NavTakeover", () => {
           </NavTakeover>
         </>
       );
-    }
+    };
 
     it("retires the panel and moves focus to autoCloseFocusRef, not the now-hidden trigger, when the viewport crosses lg", () => {
       document.documentElement.style.setProperty(

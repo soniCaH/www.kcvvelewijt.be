@@ -14,11 +14,11 @@ vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 // `#hub-hero` is in the DOM, the scroll-spy one when `appendSectionTargets()`
 // has added `#hulp`/`#structuur` — and each test below sets up exactly one
 // of the two.
-function emitHeroIntersecting(isIntersecting: boolean) {
+const emitHeroIntersecting = (isIntersecting: boolean) => {
   act(() => {
     FakeIntersectionObserver.latest()!.trigger([{ isIntersecting }]);
   });
-}
+};
 
 beforeEach(() => {
   FakeIntersectionObserver.reset();
@@ -33,26 +33,26 @@ afterEach(() => {
   document.documentElement.style.scrollPaddingTop = "";
 });
 
-function renderNav() {
+const renderNav = () => {
   return render(
     <OrganigramSectionNav
       members={HUB_SEARCH_MEMBERS}
       responsibilityPaths={HUB_SEARCH_PATHS}
     />,
   );
-}
+};
 
 /** Appends real `#hulp`/`#structuur` targets so the shared `useSectionNav`
  *  hook's scroll-spy observer actually mounts (it bails on zero targets) —
  *  mirroring the two sections the hub always renders. */
-function appendSectionTargets() {
+const appendSectionTargets = () => {
   const hulp = document.createElement("div");
   hulp.id = "hulp";
   const structuur = document.createElement("div");
   structuur.id = "structuur";
   document.body.append(hulp, structuur);
   return { hulp, structuur };
-}
+};
 
 describe("OrganigramSectionNav", () => {
   it("renders a distinctly-labelled nav landmark", () => {

@@ -28,16 +28,16 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
 
-function runWithRepo<A>(
+const runWithRepo = <A>(
   effect: Effect.Effect<A, SanityReadError, EventRepository>,
-) {
+) => {
   return Effect.runPromise(Effect.provide(effect, EventRepositoryLive));
-}
+};
 
 /** Fixture matches the new GROQ projection shape (field renaming + coalescing done in GROQ) */
-function makeEventRow(
+const makeEventRow = (
   overrides: Partial<EVENTS_QUERY_RESULT[number]> = {},
-): EVENTS_QUERY_RESULT[number] {
+): EVENTS_QUERY_RESULT[number] => {
   return {
     id: "event-1",
     title: "Spaghetti-avond",
@@ -51,7 +51,7 @@ function makeEventRow(
     featuredOnHome: false,
     ...overrides,
   };
-}
+};
 
 /**
  * Fixture for an `articleType:event` article row (EVENT_ARTICLES_QUERY shape).
@@ -60,11 +60,11 @@ function makeEventRow(
  */
 type ArticleRow = EVENT_ARTICLES_QUERY_RESULT[number];
 type ArticleFact = NonNullable<ArticleRow["fact"]>;
-function makeArticleRow(
+const makeArticleRow = (
   overrides: Partial<Omit<ArticleRow, "fact">> & {
     fact?: Partial<ArticleFact> | null;
   } = {},
-): ArticleRow {
+): ArticleRow => {
   const { fact, ...rest } = overrides;
   const base: ArticleFact = {
     date: "2026-09-14",
@@ -80,11 +80,11 @@ function makeArticleRow(
     fact: fact === null ? null : { ...base, ...fact },
     ...rest,
   };
-}
+};
 
-function makeEventDetailRow(
+const makeEventDetailRow = (
   overrides: Partial<NonNullable<EVENT_BY_SLUG_QUERY_RESULT>> = {},
-): NonNullable<EVENT_BY_SLUG_QUERY_RESULT> {
+): NonNullable<EVENT_BY_SLUG_QUERY_RESULT> => {
   return {
     id: "event-1",
     updatedAt: "2026-04-01T12:00:00Z",
@@ -99,11 +99,11 @@ function makeEventDetailRow(
     externalLink: { url: "https://tickets.example.com", label: "Tickets" },
     ...overrides,
   };
-}
+};
 
-function makeFeaturedEventRow(
+const makeFeaturedEventRow = (
   overrides: Partial<NonNullable<NEXT_FEATURED_EVENT_QUERY_RESULT>> = {},
-): NonNullable<NEXT_FEATURED_EVENT_QUERY_RESULT> {
+): NonNullable<NEXT_FEATURED_EVENT_QUERY_RESULT> => {
   return {
     id: "event-2",
     title: "Seizoensopener",
@@ -117,7 +117,7 @@ function makeFeaturedEventRow(
     featuredOnHome: true,
     ...overrides,
   };
-}
+};
 
 describe("EventRepository", () => {
   describe("findAll", () => {

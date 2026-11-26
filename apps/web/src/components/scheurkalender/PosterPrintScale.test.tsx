@@ -14,7 +14,7 @@ import { BLOCK_HEIGHT_PX, WIDTH_FIT_SCALE } from "./poster-geometry";
  * carries the print-only dateline the real sheet has, so the branch that forces
  * that into the measurement is exercised.
  */
-function mountSheet(scrollHeight: number): HTMLElement {
+const mountSheet = (scrollHeight: number): HTMLElement => {
   const sheet = document.createElement("div");
   sheet.className = "sk-poster-sheet";
   Object.defineProperty(sheet, "scrollHeight", {
@@ -27,13 +27,13 @@ function mountSheet(scrollHeight: number): HTMLElement {
   sheet.appendChild(footer);
   document.body.appendChild(sheet);
   return sheet;
-}
+};
 
-function readScale(): number {
+const readScale = (): number => {
   return Number(
     document.documentElement.style.getPropertyValue("--sk-poster-scale"),
   );
-}
+};
 
 afterEach(() => {
   document.documentElement.style.removeProperty("--sk-poster-scale");

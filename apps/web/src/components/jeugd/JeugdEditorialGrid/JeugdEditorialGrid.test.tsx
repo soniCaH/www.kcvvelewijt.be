@@ -25,7 +25,7 @@ vi.mock("next/link", () => ({
   ),
 }));
 
-function makeArticle(overrides: Partial<ArticleVM> = {}): ArticleVM {
+const makeArticle = (overrides: Partial<ArticleVM> = {}): ArticleVM => {
   return {
     id: "art-1",
     title: "Test Article",
@@ -40,7 +40,7 @@ function makeArticle(overrides: Partial<ArticleVM> = {}): ArticleVM {
     firstEventFact: null,
     ...overrides,
   };
-}
+};
 
 describe("JeugdEditorialGrid", () => {
   it("renders the section kicker", () => {
@@ -239,9 +239,9 @@ describe("JeugdEditorialGrid", () => {
   });
 
   describe("with Sanity editorialConfig", () => {
-    function makeNavConfig(
+    const makeNavConfig = (
       overrides: Partial<EditorialCardConfig> = {},
-    ): EditorialCardConfig {
+    ): EditorialCardConfig => {
       return {
         tag: "Aansluiten",
         title: "Word lid van KCVV",
@@ -253,7 +253,7 @@ describe("JeugdEditorialGrid", () => {
         cardType: "nav",
         ...overrides,
       };
-    }
+    };
 
     it("renders nav card titles from Sanity config instead of hardcoded", () => {
       const config: EditorialCardConfig[] = [

@@ -207,7 +207,7 @@ describe("TeamAgendaRow", () => {
     });
 
     /** The row's rendered kickoff, day and month under one runtime zone. */
-    function renderIn(tz: string): string {
+    const renderIn = (tz: string): string => {
       process.env.TZ = tz;
       const { unmount } = render(<TeamAgendaRow match={TIMELESS} />);
       const text = screen.getByTestId("team-agenda-row").textContent ?? "";
@@ -216,7 +216,7 @@ describe("TeamAgendaRow", () => {
         .querySelector("[aria-label]");
       unmount();
       return `${text}|${stub?.getAttribute("aria-label")}`;
-    }
+    };
 
     it("renders identically on a UTC host and in a far-off browser zone", () => {
       expect(renderIn("America/New_York")).toBe(renderIn("UTC"));

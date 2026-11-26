@@ -30,7 +30,7 @@ const testLayer = Layer.succeed(PageRepository, {
 // Dynamic import after mocks are set up
 const { default: DynamicClubPage } = await import("./page");
 
-function makePage(overrides: Partial<PageVM> = {}): PageVM {
+const makePage = (overrides: Partial<PageVM> = {}): PageVM => {
   return {
     id: "page-1",
     title: "Downloads",
@@ -61,7 +61,7 @@ function makePage(overrides: Partial<PageVM> = {}): PageVM {
     ],
     ...overrides,
   };
-}
+};
 
 describe("/club/[slug] page", () => {
   beforeEach(() => {

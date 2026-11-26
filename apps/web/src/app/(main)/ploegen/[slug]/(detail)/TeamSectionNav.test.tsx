@@ -23,7 +23,7 @@ import { stubAnimationFrame } from "@/../tests/helpers/scroll-hint.helpers";
 // Only the `useSectionNav` scroll-spy tests below register a section target
 // with a matching id, so every other test in this file simply never creates
 // an observer instance (see the hook's own early-return on zero targets).
-function emitIntersecting(target: Element, top: number) {
+const emitIntersecting = (target: Element, top: number) => {
   act(() => {
     FakeIntersectionObserver.latest()!.trigger([
       {
@@ -33,7 +33,7 @@ function emitIntersecting(target: Element, top: number) {
       },
     ]);
   });
-}
+};
 
 const THREE_ITEMS: TeamSectionNavItem[] = [
   { id: "wedstrijden", label: "Wedstrijden" },
@@ -53,14 +53,14 @@ const FIVE_ITEMS: TeamSectionNavItem[] = [
  *  engine, so this file's rail-geometry tests (the track-scrolling effect)
  *  supply their own left/right edges the way the scroll-arrow tests above
  *  already supply their own `scrollWidth`/`clientWidth`. */
-function mockRect(el: Element, rect: { left: number; right: number }) {
+const mockRect = (el: Element, rect: { left: number; right: number }) => {
   Object.defineProperty(el, "getBoundingClientRect", {
     configurable: true,
     value: () => rect,
   });
-}
+};
 
-function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
+const mockScrollDimensions = (scrollWidth: number, clientWidth: number) => {
   const originalScrollWidth = Object.getOwnPropertyDescriptor(
     HTMLElement.prototype,
     "scrollWidth",
@@ -101,7 +101,7 @@ function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
       delete (HTMLElement.prototype as any).clientWidth;
     }
   };
-}
+};
 
 // Section target elements are appended straight to `document.body` — tracked
 // here so `afterEach` can remove them by reference, without a bespoke marker
@@ -159,7 +159,7 @@ describe("TeamSectionNav", () => {
   // right chip's `aria-current`.
 
   describe("scroll-spy — the fill means the section being read, not the one last clicked", () => {
-    function renderWithSections(items: TeamSectionNavItem[]) {
+    const renderWithSections = (items: TeamSectionNavItem[]) => {
       for (const item of items) {
         const el = document.createElement("div");
         el.id = item.id;
@@ -167,7 +167,7 @@ describe("TeamSectionNav", () => {
         appendedSectionTargets.push(el);
       }
       return render(<TeamSectionNav items={items} />);
-    }
+    };
 
     it("wires the topmost intersecting section's id into aria-current on its chip", () => {
       renderWithSections(THREE_ITEMS);
