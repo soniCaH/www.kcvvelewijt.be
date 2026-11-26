@@ -17,6 +17,7 @@ import { TeamRepository } from "@/lib/repositories/team.repository";
 import type { PlayerVM } from "@/lib/repositories/player.repository";
 import type { OrgChartMember } from "@/types/organigram";
 import type { SearchResult } from "@/types/search";
+import { readOptionalServerEnv } from "@/lib/env/server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -26,7 +27,7 @@ export const dynamic = "force-dynamic";
  */
 const debugLog = (...args: unknown[]) => {
   if (
-    process.env.DEBUG_SEARCH === "true" ||
+    readOptionalServerEnv().DEBUG_SEARCH === "true" ||
     process.env.NODE_ENV === "development"
   ) {
     console.log(...args);

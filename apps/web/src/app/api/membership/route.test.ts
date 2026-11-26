@@ -48,6 +48,15 @@ describe("POST /api/membership", () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
+  it("returns 503 without calling the BFF when KCVV_API_URL is blank", async () => {
+    vi.stubEnv("KCVV_API_URL", "  ");
+
+    const response = await POST(makeRequest(JSON.stringify({ name: "Jan" })));
+
+    expect(response.status).toBe(503);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
   it("returns 503 without calling the BFF when BFF_SHARED_SECRET is unset", async () => {
     vi.stubEnv("BFF_SHARED_SECRET", undefined);
 

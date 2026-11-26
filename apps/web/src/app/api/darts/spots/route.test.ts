@@ -42,6 +42,15 @@ describe("GET /api/darts/spots", () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
+  it("answers 503 without calling the BFF when KCVV_API_URL is blank", async () => {
+    vi.stubEnv("KCVV_API_URL", "  ");
+
+    const response = await GET();
+
+    expect(response.status).toBe(503);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
   it("answers 500 when the BFF cannot be reached", async () => {
     vi.mocked(fetch).mockRejectedValue(new Error("down"));
 

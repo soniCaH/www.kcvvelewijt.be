@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { CLIENT_IP_HEADER } from "@kcvv/api-contract";
+import { Either } from "effect";
+import { readBffEnv } from "@/lib/env/server";
 import { bffKeyHeader } from "./bff-key";
 
 const parseBody = (text: string): unknown => {
@@ -16,15 +18,15 @@ const parseBody = (text: string): unknown => {
  * out of the client bundle. `/api/search` and `/api/search/team-guess` (#3559).
  */
 export async function proxyPostToBff(request: NextRequest, path: string) {
-  const bffUrl = process.env.KCVV_API_URL;
-  const bffKey = bffKeyHeader();
-  if (!bffUrl || !bffKey) {
+  const env = readBffEnv();
+  if (Either.isLeft(env)) {
     return NextResponse.json(
       { error: "Search service not configured" },
       { status: 503 },
     );
   }
 
+  const { KCVV_API_URL: bffUrl, BFF_SHARED_SECRET: secret } = env.right;
   try {
     const body = (await request.json()) as unknown;
     // The worker rate-limits per visitor (#3468) but only sees Vercel's IP.
@@ -37,7 +39,7 @@ export async function proxyPostToBff(request: NextRequest, path: string) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        ...bffKey,
+        ...bffKeyHeader(secret),
         ...(clientIp ? { [CLIENT_IP_HEADER]: clientIp } : {}),
       },
       body: JSON.stringify(body),

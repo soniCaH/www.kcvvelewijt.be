@@ -3,6 +3,7 @@ import { isValidSignature, SIGNATURE_HEADER_NAME } from "@sanity/webhook";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { Either, ParseResult, Schema as S } from "effect";
 import { SANITY_TAGS } from "@/lib/sanity/cache-tags";
+import { readOptionalServerEnv } from "@/lib/env/server";
 
 /**
  * How long to wait before revalidating (#2959). Our reads go through Sanity's
@@ -177,7 +178,7 @@ const decodeError = (error: ParseResult.ParseError): string => {
 const decodeWebhookBody = S.decodeUnknownEither(WebhookBody);
 
 export async function POST(request: Request) {
-  const secret = process.env.SANITY_REVALIDATE_SECRET;
+  const secret = readOptionalServerEnv().SANITY_REVALIDATE_SECRET;
   if (!secret) {
     return NextResponse.json(
       { ok: false, error: "Revalidation not configured" },

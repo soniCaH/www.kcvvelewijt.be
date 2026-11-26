@@ -11,11 +11,13 @@
  * secret, a network error or a non-2xx answer must never touch the redirect, so
  * every failure ends here.
  */
+import { readOptionalServerEnv } from "@/lib/env/server";
+
 const ENDPOINT = "https://www.google-analytics.com/mp/collect";
 
 export async function sendShortLinkClick(name: string): Promise<void> {
-  const measurementId = process.env.GA4_MEASUREMENT_ID;
-  const apiSecret = process.env.GA4_API_SECRET;
+  const { GA4_MEASUREMENT_ID: measurementId, GA4_API_SECRET: apiSecret } =
+    readOptionalServerEnv();
   if (!measurementId || !apiSecret) return;
 
   const url = new URL(ENDPOINT);
