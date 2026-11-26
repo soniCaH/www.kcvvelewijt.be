@@ -109,7 +109,8 @@ export const ArticleTagsInput = (props: ArrayOfPrimitivesInputProps<string>): JS
         <Flex gap={2} wrap="wrap">
           {current.map((tag, index) => (
             <Card
-              key={`${tag}-${index}`}
+              // Unique: appendTag skips a tag that is already in the list.
+              key={tag}
               padding={1}
               paddingLeft={3}
               radius={4}
