@@ -8,8 +8,15 @@ const kcvvPlugin = {
     "no-let": builtinRules.get("no-restricted-syntax"),
     // `func-style` skips `export default function`, so that shape gets its own selector.
     "no-default-function": builtinRules.get("no-restricted-syntax"),
+    "no-json-cast": builtinRules.get("no-restricted-syntax"),
   },
 };
+
+// `JSON.parse(x) as T` and `(await r.json()) as T` assert a shape nobody
+// checked. `as unknown` is honest, so it stays allowed (#3877).
+const NOT_UNKNOWN = '[typeAnnotation.type!="TSUnknownKeyword"]';
+const JSON_CAST_MESSAGE =
+  "No cast on parsed JSON: decode it with `S.decodeUnknown*(S.parseJson(schema))`, or `S.decodeUnknown*(schema)` on the result of `.json()`. `as unknown` is fine. Rule: #3877.";
 
 export default tseslint.config(
   ...tseslint.configs.recommended,
@@ -47,6 +54,26 @@ export default tseslint.config(
           selector: "ExportDefaultDeclaration > FunctionDeclaration",
           message:
             "No `export default function` — write `const Name = () => …;` then `export default Name;`. Rule: #3865.",
+        },
+      ],
+    },
+  },
+  {
+    plugins: { kcvv: kcvvPlugin },
+    rules: {
+      "kcvv/no-json-cast": [
+        "error",
+        {
+          selector: `TSAsExpression${NOT_UNKNOWN} > CallExpression[callee.object.name="JSON"][callee.property.name="parse"]`,
+          message: JSON_CAST_MESSAGE,
+        },
+        {
+          selector: `TSAsExpression${NOT_UNKNOWN} > AwaitExpression > CallExpression[callee.property.name="json"]`,
+          message: JSON_CAST_MESSAGE,
+        },
+        {
+          selector: `TSAsExpression${NOT_UNKNOWN} > AwaitExpression > CallExpression[callee.property.name="catch"][callee.object.callee.property.name="json"]`,
+          message: JSON_CAST_MESSAGE,
         },
       ],
     },

@@ -26,6 +26,7 @@ import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import { noopDurableKv } from "../test-helpers/kv-cache-mock";
 import { WorkerEnvTag } from "../env";
 import { testEnvLayer } from "../test-helpers/env-layer";
+import { decodeCachedPartial } from "../test-helpers/cached-partial";
 import { wireDate } from "../test-helpers/wire-date";
 import { PsdGateService, PsdGateTest } from "../psd/gate";
 import {
@@ -385,7 +386,7 @@ describe("partial fan-outs are stored flagged (#3489)", () => {
       ),
     );
     const raw = store.get(`${keyPrefix}:${CACHE_VERSION}`);
-    return raw ? (JSON.parse(raw) as { partial?: boolean }) : undefined;
+    return raw ? decodeCachedPartial(raw) : undefined;
   };
 
   it("matches:window with a failed team is flagged partial", async () => {

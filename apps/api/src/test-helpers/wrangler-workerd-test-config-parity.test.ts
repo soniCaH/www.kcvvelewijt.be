@@ -1,6 +1,21 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { Schema as S } from "effect";
 import { describe, expect, it } from "vitest";
+
+const decodeWorkerdTestConfig = S.decodeUnknownSync(
+  S.parseJson(
+    S.Struct({
+      compatibility_date: S.optional(S.String),
+      compatibility_flags: S.optional(S.Array(S.String)),
+      migrations: S.optional(
+        S.Array(
+          S.Struct({ new_sqlite_classes: S.optional(S.Array(S.String)) }),
+        ),
+      ),
+    }),
+  ),
+);
 
 /**
  * `wrangler.workerd-test.jsonc` (vitest.workers.config.ts's test-only Worker
@@ -47,11 +62,7 @@ const readWorkerdTestConfig = (source: string) => {
   // Strip `//` line comments — wrangler.workerd-test.jsonc is JSONC, and
   // JSON.parse doesn't tolerate them.
   const stripped = source.replace(/^\s*\/\/.*$/gm, "");
-  const config = JSON.parse(stripped) as {
-    compatibility_date?: string;
-    compatibility_flags?: string[];
-    migrations?: { new_sqlite_classes?: string[] }[];
-  };
+  const config = decodeWorkerdTestConfig(stripped);
   return {
     date: config.compatibility_date,
     flags: config.compatibility_flags,

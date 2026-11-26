@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Schema as S } from "effect";
 import {
   decideJobAlert,
   reportScheduledJobOutcome,
@@ -28,13 +28,19 @@ const makeCacheDouble = () => {
   return { cache, store };
 };
 
+const decodeJobAlertState = S.decodeUnknownSync(
+  S.parseJson(
+    S.Struct({ consecutiveFailures: S.Number, announced: S.Boolean }),
+  ),
+);
+
 /** Read back the persisted state the way `reportScheduledJobOutcome` writes it. */
 const readState = (
   store: Map<string, string>,
   job: string,
 ): JobAlertState | undefined => {
   const raw = store.get(jobAlertKey(job));
-  return raw === undefined ? undefined : (JSON.parse(raw) as JobAlertState);
+  return raw === undefined ? undefined : decodeJobAlertState(raw);
 };
 
 const run = (

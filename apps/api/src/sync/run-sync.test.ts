@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { Effect, Either, Layer, Logger } from "effect";
+import { Effect, Either, Layer, Logger, Schema as S } from "effect";
 import { runSync } from "./psd-sanity-sync";
 import type { SanityMutationInterface } from "../sanity/mutation";
 import { SanityMutation, SanityMutationError } from "../sanity/mutation";
@@ -1886,7 +1886,7 @@ describe("runSync", () => {
         kvStub.put as ReturnType<typeof vi.fn>
       ).mock.calls
         .filter(([key]) => key === "sync:team-checkpoint")
-        .map(([, value]) => JSON.parse(value as string) as TeamCheckpointShape);
+        .map(([, value]) => decodeCheckpoint(value as string));
       for (const snapshot of checkpointWrites) {
         expect(snapshot.donePlayerIds).not.toContain("7001");
       }
@@ -1980,7 +1980,7 @@ describe("runSync", () => {
     };
 
     const idsIn = async (kvStub: ReturnType<typeof makeKvStub>, key: string) =>
-      JSON.parse((await kvStub.get(key)) ?? "[]") as string[];
+      decodeIds((await kvStub.get(key)) ?? "[]");
 
     it("walks teams in numeric id order, whatever order PSD returns them in", async () => {
       const kvStub = makeKvStub();
@@ -2334,8 +2334,10 @@ describe("runSync", () => {
   });
 });
 
-interface TeamCheckpointShape {
-  teamId: number;
-  donePlayerIds: string[];
-  doneStaffIds: string[];
-}
+const TeamCheckpointShape = S.Struct({
+  teamId: S.Number,
+  donePlayerIds: S.Array(S.String),
+  doneStaffIds: S.Array(S.String),
+});
+const decodeCheckpoint = S.decodeUnknownSync(S.parseJson(TeamCheckpointShape));
+const decodeIds = S.decodeUnknownSync(S.parseJson(S.Array(S.String)));
