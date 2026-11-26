@@ -413,56 +413,69 @@ export const SanityMutationLive = Layer.effect(
           // directly, so they take the gate token themselves, as in every PSD
           // client (#3469) — the grant is what counts the call (#3490).
           yield* gate.acquireToken;
-          const response = yield* Effect.tryPromise({
-            try: async () => {
-              const psdAbort = new AbortController();
-              const psdTimeout = setTimeout(() => psdAbort.abort(), 10_000);
-
-              try {
-                // The profilePictureURL already embeds a per-member profileAccessKey
-                // query param that IS the auth token for this endpoint.
-                // Sending the regular PSD API headers (x-api-key / Authorization)
-                // alongside it causes a 404 — the image endpoint uses key-based auth
-                // only, not the REST API credentials.
-                return await fetch(imageUrl, {
-                  signal: psdAbort.signal,
-                  redirect: "follow",
+          const psdAbort = new AbortController();
+          // The timer runs from the request until the body is read, not just
+          // until the headers arrive: a stalled body fails after 10 s (#3884).
+          const download = yield* Effect.acquireUseRelease(
+            Effect.sync(() => setTimeout(() => psdAbort.abort(), 10_000)),
+            () =>
+              Effect.gen(function* () {
+                const response = yield* Effect.tryPromise({
+                  // The profilePictureURL already embeds a per-member profileAccessKey
+                  // query param that IS the auth token for this endpoint.
+                  // Sending the regular PSD API headers (x-api-key / Authorization)
+                  // alongside it causes a 404 — the image endpoint uses key-based auth
+                  // only, not the REST API credentials.
+                  try: () =>
+                    fetch(imageUrl, {
+                      signal: psdAbort.signal,
+                      redirect: "follow",
+                    }),
+                  catch: (cause) =>
+                    new SanityMutationError(
+                      `Failed to download PSD image for ${entityLabel} ${psdId}`,
+                      cause,
+                    ),
                 });
-              } finally {
-                clearTimeout(psdTimeout);
-              }
-            },
-            catch: (cause) =>
-              new SanityMutationError(
-                `Failed to upload image for ${entityLabel} ${psdId}`,
-                cause,
-              ),
-          });
 
-          yield* Effect.log(
-            `[${logName}] ${entityLabel}=${psdId} psd_status=${response.status} content-type=${response.headers.get("content-type") ?? "(none)"} url=${imageUrl.split("?")[0]}`,
+                yield* Effect.log(
+                  `[${logName}] ${entityLabel}=${psdId} psd_status=${response.status} content-type=${response.headers.get("content-type") ?? "(none)"} url=${imageUrl.split("?")[0]}`,
+                );
+
+                if (!response.ok) {
+                  // Free the connection: a Worker holds only a few at a time.
+                  yield* Effect.ignore(
+                    Effect.tryPromise(
+                      async () => await response.body?.cancel(),
+                    ),
+                  );
+                  // 404 = no photo in PSD for this member — skip silently
+                  if (response.status === 404) return undefined;
+                  return yield* Effect.fail(
+                    new SanityMutationError(
+                      `PSD image fetch failed: ${response.status} ${response.statusText}`,
+                    ),
+                  );
+                }
+
+                const arrayBuffer = yield* Effect.tryPromise({
+                  try: () => response.arrayBuffer(),
+                  catch: (cause) =>
+                    new SanityMutationError(
+                      `Failed to download PSD image for ${entityLabel} ${psdId}`,
+                      cause,
+                    ),
+                });
+                return {
+                  arrayBuffer,
+                  contentType:
+                    response.headers.get("content-type") ?? "image/jpeg",
+                };
+              }),
+            (timeout) => Effect.sync(() => clearTimeout(timeout)),
           );
-
-          // 404 = no photo in PSD for this member — skip silently
-          if (response.status === 404) return;
-          if (!response.ok) {
-            return yield* Effect.fail(
-              new SanityMutationError(
-                `PSD image fetch failed: ${response.status} ${response.statusText}`,
-              ),
-            );
-          }
-
-          const contentType =
-            response.headers.get("content-type") ?? "image/jpeg";
-          const arrayBuffer = yield* Effect.tryPromise({
-            try: () => response.arrayBuffer(),
-            catch: (cause) =>
-              new SanityMutationError(
-                `Failed to read image body for ${entityLabel} ${psdId}`,
-                cause,
-              ),
-          });
+          if (download === undefined) return;
+          const { arrayBuffer, contentType } = download;
 
           yield* Effect.log(
             `[${logName}] ${entityLabel}=${psdId} body_bytes=${arrayBuffer.byteLength} content-type=${contentType}`,
@@ -510,30 +523,36 @@ export const SanityMutationLive = Layer.effect(
                 () => sanityAbort.abort(),
                 10_000,
               );
-              const uploadRes = await fetch(uploadUrl, {
-                signal: sanityAbort.signal,
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${env.SANITY_API_TOKEN}`,
-                  "Content-Type": contentType,
-                },
-                body: arrayBuffer,
-              }).finally(() => clearTimeout(sanityTimeout));
-              if (!uploadRes.ok) {
-                const text = await uploadRes.text();
-                throw new Error(
-                  `Sanity upload failed: ${uploadRes.status} ${text}`,
+              // The timer runs until the body is read, not just the headers:
+              // a stalled body fails after 10 s instead of hanging (#3884).
+              try {
+                const uploadRes = await fetch(uploadUrl, {
+                  signal: sanityAbort.signal,
+                  method: "POST",
+                  headers: {
+                    Authorization: `Bearer ${env.SANITY_API_TOKEN}`,
+                    "Content-Type": contentType,
+                  },
+                  body: arrayBuffer,
+                });
+                if (!uploadRes.ok) {
+                  const text = await uploadRes.text();
+                  throw new Error(
+                    `Sanity upload failed: ${uploadRes.status} ${text}`,
+                  );
+                }
+                const decoded = S.decodeUnknownEither(UploadResponse)(
+                  await uploadRes.json(),
                 );
+                if (Either.isLeft(decoded)) {
+                  throw new Error(
+                    `Sanity upload response invalid at: ${parseErrorPaths(decoded.left)}`,
+                  );
+                }
+                return decoded.right.document;
+              } finally {
+                clearTimeout(sanityTimeout);
               }
-              const decoded = S.decodeUnknownEither(UploadResponse)(
-                await uploadRes.json(),
-              );
-              if (Either.isLeft(decoded)) {
-                throw new Error(
-                  `Sanity upload response invalid at: ${parseErrorPaths(decoded.left)}`,
-                );
-              }
-              return decoded.right.document;
             },
             catch: (cause) =>
               new SanityMutationError(

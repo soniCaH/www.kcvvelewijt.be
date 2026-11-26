@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { Effect, Layer } from "effect";
 import {
   PSD_PLACEHOLDER_IMAGE_SHA1,
@@ -931,6 +931,145 @@ describe("uploadPlayerImage", () => {
 
     digestSpy.mockRestore();
     fetchSpy.mockRestore();
+  });
+
+  describe("a stalled response body (#3884)", () => {
+    afterEach(() => {
+      vi.useRealTimers();
+      vi.restoreAllMocks();
+    });
+
+    const PSD_IMAGE =
+      "https://kcvv.prosoccerdata.com/img/stall.jpg?profileAccessKey=abc";
+
+    /** Headers arrive at once; the body read only ends when the request's
+     * signal aborts, like a body stream cut by `AbortController.abort()`. */
+    const stalledBody = (init: RequestInit | undefined) =>
+      new Promise<never>((_resolve, reject) => {
+        init?.signal?.addEventListener("abort", () =>
+          reject(new DOMException("aborted", "AbortError")),
+        );
+      });
+
+    const runStalled = async () => {
+      vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+      const outcome = Effect.runPromise(
+        Effect.either(
+          Effect.gen(function* () {
+            const mutation = yield* SanityMutation;
+            yield* mutation.uploadPlayerImage("77", PSD_IMAGE, PSD_IMAGE);
+          }).pipe(Effect.provide(makeTestLayer())),
+        ),
+      );
+      // Let the run reach the stalled read (the 10 s timer is armed on the
+      // way), then jump the fake clock past it. Nothing waits in real time.
+      await vi.advanceTimersByTimeAsync(0);
+      await vi.advanceTimersByTimeAsync(10_000);
+      // A hung run never settles: report that as a plain assertion failure.
+      return Promise.race([outcome, Promise.resolve("hung" as const)]);
+    };
+
+    it("fails the Sanity upload with a SanityMutationError after 10 s", async () => {
+      vi.spyOn(crypto.subtle, "digest").mockResolvedValueOnce(
+        new Uint8Array(20).buffer,
+      );
+      const fetchSpy = vi.spyOn(globalThis, "fetch");
+      fetchSpy.mockResolvedValueOnce(
+        new Response(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]), {
+          status: 200,
+          headers: { "content-type": "image/jpeg" },
+        }),
+      );
+      fetchSpy.mockImplementationOnce(async (_url, init) => {
+        const res = new Response(null, { status: 200 });
+        vi.spyOn(res, "json").mockImplementation(() => stalledBody(init));
+        return res;
+      });
+
+      const result = await runStalled();
+
+      expect(result).not.toBe("hung");
+      if (result === "hung") return;
+      expect(result._tag).toBe("Left");
+      if (result._tag === "Left") {
+        expect(result.left).toBeInstanceOf(SanityMutationError);
+        expect(result.left.message).toContain("Failed to upload image");
+      }
+    });
+
+    it("fails the Sanity upload when the error body of a non-OK response stalls", async () => {
+      vi.spyOn(crypto.subtle, "digest").mockResolvedValueOnce(
+        new Uint8Array(20).buffer,
+      );
+      const fetchSpy = vi.spyOn(globalThis, "fetch");
+      fetchSpy.mockResolvedValueOnce(
+        new Response(new Uint8Array([0xff, 0xd8, 0xff, 0xe0]), {
+          status: 200,
+          headers: { "content-type": "image/jpeg" },
+        }),
+      );
+      fetchSpy.mockImplementationOnce(async (_url, init) => {
+        const res = new Response(null, { status: 500 });
+        vi.spyOn(res, "text").mockImplementation(() => stalledBody(init));
+        return res;
+      });
+
+      const result = await runStalled();
+
+      expect(result).not.toBe("hung");
+      if (result === "hung") return;
+      expect(result._tag).toBe("Left");
+      if (result._tag === "Left") {
+        expect(result.left).toBeInstanceOf(SanityMutationError);
+      }
+    });
+
+    it("fails the PSD image download when its body stalls", async () => {
+      const fetchSpy = vi.spyOn(globalThis, "fetch");
+      fetchSpy.mockImplementationOnce(async (_url, init) => {
+        const res = new Response(null, {
+          status: 200,
+          headers: { "content-type": "image/jpeg" },
+        });
+        vi.spyOn(res, "arrayBuffer").mockImplementation(() =>
+          stalledBody(init),
+        );
+        return res;
+      });
+
+      const result = await runStalled();
+
+      expect(result).not.toBe("hung");
+      if (result === "hung") return;
+      expect(result._tag).toBe("Left");
+      if (result._tag === "Left") {
+        expect(result.left).toBeInstanceOf(SanityMutationError);
+        expect(result.left.message).toContain("Failed to download PSD image");
+      }
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("cancels the body of a non-OK PSD response", async () => {
+      const fetchSpy = vi.spyOn(globalThis, "fetch");
+      const cancel = vi.fn(async () => undefined);
+      fetchSpy.mockImplementationOnce(async () => {
+        const res = new Response("nope", { status: 503 });
+        vi.spyOn(res.body!, "cancel").mockImplementation(cancel);
+        return res;
+      });
+
+      const result = await run(
+        Effect.gen(function* () {
+          const mutation = yield* SanityMutation;
+          return yield* Effect.either(
+            mutation.uploadPlayerImage("77", PSD_IMAGE, PSD_IMAGE),
+          );
+        }),
+      );
+
+      expect(result._tag).toBe("Left");
+      expect(cancel).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("rejects invalid URLs", async () => {
