@@ -128,14 +128,14 @@ interface PreviewFieldProps {
   span2?: boolean;
 }
 
-function PreviewField({
+const PreviewField = ({
   label,
   value,
   placeholder,
   optional,
   error,
   span2,
-}: PreviewFieldProps) {
+}: PreviewFieldProps) => {
   const fieldTone = (() => {
     if (error) return "border-alert text-alert";
     if (value) return "border-ink/60 text-ink";
@@ -161,4 +161,4 @@ function PreviewField({
       </span>
     </label>
   );
-}
+};

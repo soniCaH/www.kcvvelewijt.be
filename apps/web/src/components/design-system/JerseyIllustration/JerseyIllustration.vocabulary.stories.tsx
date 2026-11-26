@@ -24,7 +24,7 @@ const VOCABULARY: { label: string; seed: string }[] = [
   { label: "plain · long sleeve", seed: "vocab-22" },
 ];
 
-function VocabularyGrid() {
+const VocabularyGrid = () => {
   return (
     <div className="grid grid-cols-4 gap-4">
       {VOCABULARY.map(({ label, seed }) => (
@@ -39,7 +39,7 @@ function VocabularyGrid() {
       ))}
     </div>
   );
-}
+};
 
 const meta = {
   title: "UI/JerseyIllustration/Vocabulary",

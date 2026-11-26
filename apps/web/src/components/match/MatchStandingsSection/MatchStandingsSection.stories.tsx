@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { RankingEntry } from "@kcvv/api-contract";
 import { MatchStandingsSection } from "./MatchStandingsSection";
 
-function entry(
+const entry = (
   position: number,
   team_id: number,
   team_name: string,
@@ -13,7 +13,7 @@ function entry(
   goals_for: number,
   goals_against: number,
   points: number,
-): RankingEntry {
+): RankingEntry => {
   return {
     position,
     team_id,
@@ -30,7 +30,7 @@ function entry(
     goal_difference: goals_for - goals_against,
     points,
   } as RankingEntry;
-}
+};
 
 // A realistic provincial division with KCVV mid-table (team_id 1235).
 const fullDivision: RankingEntry[] = [

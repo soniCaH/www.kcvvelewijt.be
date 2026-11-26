@@ -5,9 +5,9 @@ import type { ArticleVM } from "@/lib/repositories/article.repository";
 // Local committed asset served by Storybook `staticDirs` (deterministic VR).
 const COVER = "/images/youth-trainers.jpg";
 
-function makeArticle(
+const makeArticle = (
   overrides: Partial<ArticleVM> & { id: string },
-): ArticleVM {
+): ArticleVM => {
   return {
     title: `Jeugd artikel ${overrides.id}`,
     slug: `jeugd-artikel-${overrides.id}`,
@@ -21,7 +21,7 @@ function makeArticle(
     firstEventFact: null,
     ...overrides,
   };
-}
+};
 
 const threeArticles: ArticleVM[] = [
   makeArticle({

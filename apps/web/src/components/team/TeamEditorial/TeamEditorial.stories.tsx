@@ -2,9 +2,9 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { PortableTextBlock } from "@portabletext/react";
 import { TeamEditorial } from "./TeamEditorial";
 
-function block(
+const block = (
   ...spans: ReadonlyArray<{ text: string; marks?: string[] }>
-): PortableTextBlock {
+): PortableTextBlock => {
   return {
     _type: "block",
     _key: `block-${spans.map((s) => s.text.slice(0, 4)).join("-")}`,
@@ -17,7 +17,7 @@ function block(
     })),
     markDefs: [],
   } as unknown as PortableTextBlock;
-}
+};
 
 const body: PortableTextBlock[] = [
   block(

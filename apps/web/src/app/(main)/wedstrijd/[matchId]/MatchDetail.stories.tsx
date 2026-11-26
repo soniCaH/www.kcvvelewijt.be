@@ -157,7 +157,7 @@ const events: MatchEvent[] = [
   },
 ];
 
-function entry(
+const entry = (
   position: number,
   team_id: number,
   team_name: string,
@@ -168,7 +168,7 @@ function entry(
   goals_for: number,
   goals_against: number,
   points: number,
-): RankingEntry {
+): RankingEntry => {
   return {
     position,
     team_id,
@@ -183,7 +183,7 @@ function entry(
     goal_difference: goals_for - goals_against,
     points,
   } as RankingEntry;
-}
+};
 
 // KCVV (club 1235) vs RC Mechelen (club 103) — both rows surface from the full
 // division, KCVV tinted.
@@ -235,7 +235,7 @@ const spacing = Object.fromEntries(
  * section ordering, the `<StripedSeam>` cadence and the section spacing of
  * `page.tsx`.
  */
-function MatchDetailAssembly() {
+const MatchDetailAssembly = () => {
   return (
     <>
       <PageContainer className="pb-12 lg:pb-16">
@@ -309,7 +309,7 @@ function MatchDetailAssembly() {
       <RelatedRow items={relatedRowItems} />
     </>
   );
-}
+};
 
 const meta = {
   title: "Pages/Matches/MatchDetail",

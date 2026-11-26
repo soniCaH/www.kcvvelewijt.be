@@ -8,14 +8,14 @@ const PHOTOS = {
   c: "/player-fixtures/player-vartolomaios.jpg",
 };
 
-function p(
+const p = (
   id: string,
   firstName: string,
   lastName: string,
   position: string | undefined,
   number: number,
   imageUrl?: string,
-): PlayerVM {
+): PlayerVM => {
   return {
     id,
     firstName,
@@ -25,7 +25,7 @@ function p(
     imageUrl,
     href: `/spelers/${id}`,
   };
-}
+};
 
 const meta = {
   title: "Features/Teams/SquadGrid",

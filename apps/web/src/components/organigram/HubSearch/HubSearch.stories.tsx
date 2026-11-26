@@ -10,7 +10,7 @@ import {
 import type { SemanticSearchResult } from "@/hooks/useSemanticSearch";
 
 /** A canned semantic hit for a fixture path (slug == path id). */
-function hit(slug: string, score: number): SemanticSearchResult {
+const hit = (slug: string, score: number): SemanticSearchResult => {
   return {
     id: slug,
     slug,
@@ -19,7 +19,7 @@ function hit(slug: string, score: number): SemanticSearchResult {
     title: "",
     excerpt: "",
   };
-}
+};
 
 /**
  * Stub `POST /api/search` so the (otherwise backend-dependent) semantic answer
@@ -28,7 +28,7 @@ function hit(slug: string, score: number): SemanticSearchResult {
  * answers the first request then hangs (a re-search left in flight), and
  * `"late"` answers after `delayMs` (the answer lands after the member rows).
  */
-function SemanticStub({
+const SemanticStub = ({
   results,
   mode = "ok",
   delayMs = 0,
@@ -38,7 +38,7 @@ function SemanticStub({
   mode?: "ok" | "error" | "hang" | "once" | "late";
   delayMs?: number;
   children: ReactNode;
-}) {
+}) => {
   useEffect(() => {
     const original = window.fetch;
     const calls = { count: 0 };
@@ -69,7 +69,7 @@ function SemanticStub({
     };
   }, [results, mode, delayMs]);
   return <>{children}</>;
-}
+};
 
 const heroBand = (node: ReactNode) => (
   <div className="bg-jersey-deep-dark p-10">{node}</div>

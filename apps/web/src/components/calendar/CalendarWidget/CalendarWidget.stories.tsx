@@ -133,7 +133,7 @@ const feedWithPlayedMatch = buildCalendarFeed(
  * hard-navigate between stories, so a leaked `?view=` would seed the next
  * story's mount.
  */
-function seedUrl(search: string): StoryObj["beforeEach"] {
+const seedUrl = (search: string): StoryObj["beforeEach"] => {
   return () => {
     const { pathname, hash, search: original } = window.location;
     window.history.replaceState(
@@ -148,7 +148,7 @@ function seedUrl(search: string): StoryObj["beforeEach"] {
         `${pathname}${original}${hash}`,
       );
   };
-}
+};
 
 const meta = {
   title: "Features/Calendar/CalendarWidget",

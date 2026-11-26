@@ -13,7 +13,7 @@ import type { ShareItem } from "./share-content";
 const SCALE = 0.33;
 
 /** A news or event story in one of the four new looks (#3540). */
-function LookStory({ look, ...props }: LookProps & { look: LookId }) {
+const LookStory = ({ look, ...props }: LookProps & { look: LookId }) => {
   const Look = LOOKS.find((l) => l.id === look)!.Component;
   return (
     <div
@@ -30,7 +30,7 @@ function LookStory({ look, ...props }: LookProps & { look: LookId }) {
       </div>
     </div>
   );
-}
+};
 
 // VR rule (#3535): a flat, same-origin colour block — never a photo or a
 // fallback webp (photo decode flakes) and never a blur (GPU-dependent).

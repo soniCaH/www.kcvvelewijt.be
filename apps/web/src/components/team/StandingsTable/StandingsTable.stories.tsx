@@ -3,7 +3,7 @@ import { within, expect } from "storybook/test";
 import type { RankingEntry } from "@kcvv/api-contract";
 import { StandingsTable } from "./StandingsTable";
 
-function entry(
+const entry = (
   position: number,
   team_id: number,
   team_name: string,
@@ -14,7 +14,7 @@ function entry(
   goals_for: number,
   goals_against: number,
   points: number,
-): RankingEntry {
+): RankingEntry => {
   return {
     position,
     team_id,
@@ -30,7 +30,7 @@ function entry(
     goal_difference: goals_for - goals_against,
     points,
   } as RankingEntry;
-}
+};
 
 // A realistic 14-team provincial division with KCVV mid-table.
 const fullDivision: RankingEntry[] = [

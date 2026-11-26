@@ -33,7 +33,7 @@ export const Default: Story = {};
  * the root box sits in the middle of the scroll track on arrival, fully in view,
  * with no sideways scrolling.
  */
-async function expectRootInView(canvasElement: HTMLElement) {
+const expectRootInView = async (canvasElement: HTMLElement) => {
   const track = canvasElement.querySelector<HTMLElement>(".vo-chart");
   const root = canvasElement.querySelector<HTMLElement>('[data-state="root"]');
   if (!track || !root) throw new Error("chart track or root box missing");
@@ -46,7 +46,7 @@ async function expectRootInView(canvasElement: HTMLElement) {
   await expect(
     Math.abs(r.left + r.width / 2 - (t.left + t.width / 2)),
   ).toBeLessThanOrEqual(2);
-}
+};
 
 export const OpensWithTheRootInViewAt390: Story = {
   tags: ["!vr"],
@@ -60,20 +60,20 @@ export const OpensWithTheRootInViewOnDesktop: Story = {
   play: ({ canvasElement }) => expectRootInView(canvasElement),
 };
 
-function chartParts(canvasElement: HTMLElement) {
+const chartParts = (canvasElement: HTMLElement) => {
   const track = canvasElement.querySelector<HTMLElement>(".vo-chart");
   const root = canvasElement.querySelector<HTMLElement>('[data-state="root"]');
   if (!track || !root) throw new Error("chart track or root box missing");
   return { track, root };
-}
+};
 
 /** How far the root's centre is from the track's centre, in px. */
-function rootOffset(canvasElement: HTMLElement) {
+const rootOffset = (canvasElement: HTMLElement) => {
   const { track, root } = chartParts(canvasElement);
   const t = track.getBoundingClientRect();
   const r = root.getBoundingClientRect();
   return Math.abs(r.left + r.width / 2 - (t.left + t.width / 2));
-}
+};
 
 /**
  * The root stays centred while the layout changes under it (a resize, a rotation,

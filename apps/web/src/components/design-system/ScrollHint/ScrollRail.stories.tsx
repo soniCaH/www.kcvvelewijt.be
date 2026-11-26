@@ -114,10 +114,10 @@ const INTERACTIVE =
  * scrolling past. Every other neighbour — including the row's OTHER arrow,
  * a sibling of the track rather than inside it — still counts.
  */
-function measureHitArea(
+const measureHitArea = (
   el: HTMLElement,
   trackEl: HTMLElement,
-): { coverage: number; overlaps: string[] } {
+): { coverage: number; overlaps: string[] } => {
   const r = el.getBoundingClientRect();
   const cx = r.left + r.width / 2;
   const cy = r.top + r.height / 2;
@@ -159,7 +159,7 @@ function measureHitArea(
 
   // Unrounded: 224 of 225 samples must not round up to a passing 100.
   return { coverage: (100 * covered) / total, overlaps };
-}
+};
 
 /**
  * Re-homed from `apps/web/test/e2e/scroll-arrows.spec.ts` (#3146, deleted by
@@ -302,11 +302,11 @@ export const NoOverflowNoArrows: Story = {
  * whole window is what actually proves stability rather than a lucky
  * snapshot.
  */
-async function sampleArrowCountOverTime(
+const sampleArrowCountOverTime = async (
   canvas: ReturnType<typeof within>,
   track: HTMLElement,
   durationMs: number,
-) {
+) => {
   return new Promise<{ counts: number[]; flips: number }>((resolve) => {
     const counts: number[] = [];
     const start = performance.now();
@@ -325,7 +325,7 @@ async function sampleArrowCountOverTime(
     };
     requestAnimationFrame(tick);
   });
-}
+};
 
 export const StaysStableAsAFlexItem: Story = {
   render: (args) => (

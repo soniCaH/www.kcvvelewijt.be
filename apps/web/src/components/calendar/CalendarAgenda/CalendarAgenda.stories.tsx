@@ -38,13 +38,13 @@ const kcvv = {
   logo: fixtureImage("sponsor-logo", 0),
 };
 
-function match(
+const match = (
   id: number,
   date: string,
   team: string,
   opponent: string,
   opts: Partial<CalendarMatchFixture> = {},
-): CalendarMatchFixture {
+): CalendarMatchFixture => {
   const isHome = opts.isHome ?? true;
   return {
     id,
@@ -60,14 +60,14 @@ function match(
     isHome,
     ...opts,
   };
-}
+};
 
-function event(
+const event = (
   id: string,
   dateStart: string,
   title: string,
   eventType: CalendarEvent["eventType"],
-): CalendarEvent {
+): CalendarEvent => {
   return {
     id,
     dateStart,
@@ -76,7 +76,7 @@ function event(
     eventType,
     source: "event",
   };
-}
+};
 
 const baseProps = { currentMonth: 9, currentYear: 2026 };
 

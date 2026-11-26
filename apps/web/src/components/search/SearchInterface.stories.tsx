@@ -173,7 +173,7 @@ const relatedResponse: SemanticResponse = {
 };
 
 // Method-aware: GET (lexical) -> `lexical`; POST (semantic) -> `semantic`.
-function mockFetch(
+const mockFetch = (
   lexical: SearchResponse,
   {
     semantic = noSemantic,
@@ -185,7 +185,7 @@ function mockFetch(
     /** Extra wait on the semantic POST only — the answer lands after the list. */
     semanticDelay?: number;
   } = {},
-) {
+) => {
   const original = globalThis.fetch;
   globalThis.fetch = async (_url: RequestInfo | URL, init?: RequestInit) => {
     const isSemantic = init?.method === "POST";
@@ -200,28 +200,28 @@ function mockFetch(
   return () => {
     globalThis.fetch = original;
   };
-}
+};
 
-function mockFetchError() {
+const mockFetchError = () => {
   const original = globalThis.fetch;
   globalThis.fetch = async () =>
     new Response("Internal Server Error", { status: 500 });
   return () => {
     globalThis.fetch = original;
   };
-}
+};
 
-function mockFetchPending() {
+const mockFetchPending = () => {
   const original = globalThis.fetch;
   globalThis.fetch = async () => new Promise(() => {});
   return () => {
     globalThis.fetch = original;
   };
-}
+};
 
 // The first lexical GET resolves; every later one never does — a re-search left
 // in flight, so the dimmed list and its floating scarf hold still.
-function mockFetchFirstThenPending(lexical: SearchResponse) {
+const mockFetchFirstThenPending = (lexical: SearchResponse) => {
   const original = globalThis.fetch;
   const lexicalCalls = { count: 0 };
   globalThis.fetch = async (_url: RequestInfo | URL, init?: RequestInit) => {
@@ -241,7 +241,7 @@ function mockFetchFirstThenPending(lexical: SearchResponse) {
   return () => {
     globalThis.fetch = original;
   };
-}
+};
 
 // Shared Next.js navigation parameters used by stories that simulate ?q=KCVV.
 const SEARCH_NAVIGATION_PARAMS = {

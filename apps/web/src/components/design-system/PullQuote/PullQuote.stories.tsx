@@ -51,11 +51,11 @@ export default meta;
 type Story = StoryObj<typeof PullQuote>;
 type AvatarStory = StoryObj<AvatarStoryArgs>;
 
-function renderWithAvatar({
+const renderWithAvatar = ({
   avatarFirstName,
   avatarPhotoUrl,
   ...pullQuoteProps
-}: AvatarStoryArgs) {
+}: AvatarStoryArgs) => {
   return (
     <PullQuote
       {...pullQuoteProps}
@@ -68,7 +68,7 @@ function renderWithAvatar({
       }
     />
   );
-}
+};
 
 export const Playground: Story = {
   args: {

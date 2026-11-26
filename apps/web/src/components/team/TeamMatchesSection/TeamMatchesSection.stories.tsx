@@ -21,20 +21,20 @@ const OPP_D = { id: 45, name: "Racing Gent B" };
 const STORY_ANCHOR = VR_FROZEN_NOW_ISO;
 
 /** Every fixture in this file is dated relative to the frozen VR anchor. */
-function dateFromAnchor(daysOffset: number): Date {
+const dateFromAnchor = (daysOffset: number): Date => {
   const date = new Date(STORY_ANCHOR);
   date.setDate(date.getDate() + daysOffset);
   return date;
-}
+};
 
-function m(
+const m = (
   id: number,
   daysOffset: number,
   status: ScheduleMatch["status"],
   scores?: [number, number],
   isHome = true,
   opp = OPP_A,
-): ScheduleMatch {
+): ScheduleMatch => {
   return {
     kind: "match",
     id,
@@ -48,7 +48,7 @@ function m(
     homeScore: scores?.[0],
     awayScore: scores?.[1],
   };
-}
+};
 
 /** Mid-season: a mix of recent results + featured next match. */
 const midSeason: ScheduleMatch[] = [

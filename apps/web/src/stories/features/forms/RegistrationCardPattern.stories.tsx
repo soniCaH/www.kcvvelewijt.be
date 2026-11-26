@@ -48,7 +48,7 @@ const meta: Meta<StoryArgs> = {
 export default meta;
 type Story = StoryObj<StoryArgs>;
 
-function RegistrationForm({ onSubmit }: StoryArgs) {
+const RegistrationForm = ({ onSubmit }: StoryArgs) => {
   return (
     <ClippedCard>
       <StampBadge tone="jersey" rotation={2} position="top-right">
@@ -154,11 +154,11 @@ function RegistrationForm({ onSubmit }: StoryArgs) {
       </form>
     </ClippedCard>
   );
-}
+};
 
-function renderRegistrationCardPattern(args: StoryArgs) {
+const renderRegistrationCardPattern = (args: StoryArgs) => {
   return <RegistrationForm onSubmit={args.onSubmit} />;
-}
+};
 
 export const Default: Story = {
   render: renderRegistrationCardPattern,
