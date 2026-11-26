@@ -22,6 +22,7 @@ const VIOLATIONS = [
   "const { env } = process;",
   "const a = globalThis.process.env.KCVV_API_URL;",
   'const a = process.env["NODE_ENV"];',
+  'const NODE_ENV = "x"; const a = process.env[NODE_ENV];',
 ];
 
 const ALLOWED = [

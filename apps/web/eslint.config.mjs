@@ -546,7 +546,7 @@ const eslintConfig = [
           // `process.env`, `process["env"]` and `globalThis.process.env`, unless it is
           // the object of `.NODE_ENV`.
           selector:
-            ':matches(MemberExpression[object.name="process"][property.name="env"], MemberExpression[object.name="process"][property.value="env"], MemberExpression[object.object.name=/^(globalThis|window|self|global)$/][object.property.name="process"][property.name="env"]):not(MemberExpression[property.name="NODE_ENV"] > .object)',
+            ':matches(MemberExpression[object.name="process"][property.name="env"], MemberExpression[object.name="process"][property.value="env"], MemberExpression[object.object.name=/^(globalThis|window|self|global)$/][object.property.name="process"][property.name="env"]):not(MemberExpression[computed=false][property.name="NODE_ENV"] > .object)',
           message: PROCESS_ENV_MESSAGE,
         },
         {
