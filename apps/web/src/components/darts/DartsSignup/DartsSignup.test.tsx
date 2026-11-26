@@ -12,10 +12,13 @@ import { trackEvent } from "@/lib/analytics/track-event";
 
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
-const tokenGiven = vi.hoisted(() => vi.fn());
+// The widget's latest `onToken`, so a test decides when a retry token arrives.
+const widget = vi.hoisted(() => ({
+  onToken: (_token: string) => {},
+}));
 
 vi.mock("@/components/club/MembershipForm/TurnstileWidget", () => ({
-  // A token on mount, and a fresh single-use one each time `resetKey` changes.
+  // A token on mount. After a reset the test hands over the fresh one itself.
   TurnstileWidget: ({
     onToken,
     resetKey,
@@ -24,8 +27,8 @@ vi.mock("@/components/club/MembershipForm/TurnstileWidget", () => ({
     resetKey: number;
   }) => {
     useEffect(() => {
-      tokenGiven(`token-${resetKey}`);
-      onToken(`token-${resetKey}`);
+      widget.onToken = onToken;
+      if (resetKey === 0) onToken("token-0");
     }, [onToken, resetKey]);
     return <span data-testid="turnstile" data-reset-key={resetKey} />;
   },
@@ -73,7 +76,6 @@ const submit = () =>
 describe("DartsSignupForm", () => {
   beforeEach(() => {
     vi.mocked(trackEvent).mockClear();
-    tokenGiven.mockClear();
   });
   afterEach(() => {
     vi.unstubAllGlobals();
@@ -298,9 +300,7 @@ describe("DartsSignupForm", () => {
         "1",
       ),
     );
-    // The reset key renders before the widget hands its new token to the form.
-    await waitFor(() => expect(tokenGiven).toHaveBeenLastCalledWith("token-1"));
-    await act(async () => {});
+    act(() => widget.onToken("token-1"));
     submit();
     await waitFor(() =>
       expect(
