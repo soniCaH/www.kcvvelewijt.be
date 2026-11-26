@@ -76,7 +76,7 @@ const DEV_VARS = [
 const fixture = {} as { dir: string; stubPath: string; devVarsDir: string };
 
 /** OS-assigned, released before use — see `trigger-psd-sync.test.ts` (#3109). */
-function freePort(): Promise<number> {
+const freePort = (): Promise<number> => {
   return new Promise((resolve, reject) => {
     const s = createServer();
     s.once("error", reject);
@@ -85,7 +85,7 @@ function freePort(): Promise<number> {
       s.close(() => resolve(port));
     });
   });
-}
+};
 
 beforeAll(() => {
   fixture.dir = mkdtempSync(join(tmpdir(), "staging-search-fixture-"));
@@ -102,10 +102,10 @@ afterAll(() => {
 
 type Run = SpawnSyncReturns<string> & { hits: string[]; log: string };
 
-async function run(
+const run = async (
   outcome: "ok" | "failed",
   extraEnv: Record<string, string> = {},
-): Promise<Run> {
+): Promise<Run> => {
   const n = randomUUID();
   const port = await freePort();
   const hitsFile = join(fixture.dir, `hits-${n}.txt`);
@@ -131,7 +131,7 @@ async function run(
     .split("\n")
     .filter(Boolean);
   return { ...result, hits, log };
-}
+};
 
 describe("backfill-staging-search.sh", () => {
   /** One happy-path run, shared by every test that only reads its output. */

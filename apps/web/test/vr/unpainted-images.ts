@@ -35,7 +35,7 @@ const isVisible = (sample: ImageSample) =>
  * the viewer cannot see (zero box, `display:none`, `visibility:hidden`) never
  * counts, so a lazy image parked in a closed panel cannot fail a story.
  */
-export function unpaintedImages(samples: readonly ImageSample[]): string[] {
+export const unpaintedImages = (samples: readonly ImageSample[]): string[] => {
   return samples
     .filter(
       (sample) =>
@@ -43,4 +43,4 @@ export function unpaintedImages(samples: readonly ImageSample[]): string[] {
         !(sample.complete && sample.naturalWidth > 0 && sample.decoded),
     )
     .map((sample) => sample.currentSrc);
-}
+};

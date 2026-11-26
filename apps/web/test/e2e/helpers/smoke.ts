@@ -49,10 +49,10 @@ const DEFAULT_IGNORE_CONSOLE_ERRORS: Array<string | RegExp> = [
  *   - no broken images (`naturalWidth > 0` for all visible `<img>`s)
  *   - no `console.error` (modulo the default + caller-supplied ignore-list)
  */
-export async function smokeTest(
+export const smokeTest = async (
   page: Page,
   options: SmokeOptions,
-): Promise<void> {
+): Promise<void> => {
   const { path, expectedStatus = 200 } = options;
   const ignoreConsoleErrors = [
     ...DEFAULT_IGNORE_CONSOLE_ERRORS,
@@ -166,8 +166,8 @@ export async function smokeTest(
     page.off("requestfailed", requestFailedHandler);
     page.off("response", responseHandler);
   }
-}
+};
 
-function matches(text: string, m: string | RegExp): boolean {
+const matches = (text: string, m: string | RegExp): boolean => {
   return typeof m === "string" ? text.includes(m) : m.test(text);
-}
+};

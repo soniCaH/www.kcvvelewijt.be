@@ -23,7 +23,7 @@ import { expect, type Locator } from "@playwright/test";
  * never raises a timeout; a genuinely broken hydration still fails the
  * test at the suite's normal budget.
  */
-export async function waitForHydrated(locator: Locator): Promise<void> {
+export const waitForHydrated = async (locator: Locator): Promise<void> => {
   await locator.waitFor();
   await expect
     .poll(() =>
@@ -32,4 +32,4 @@ export async function waitForHydrated(locator: Locator): Promise<void> {
       ),
     )
     .toBe(true);
-}
+};

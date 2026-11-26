@@ -39,18 +39,18 @@ export const FIXTURES = {
  * (`apps/web/src/app/sitemap.ts`), so any week without a match turned this red
  * (#3625). The season list keeps past and future matches, winter break included.
  */
-export async function discoverMatchId(
+export const discoverMatchId = async (
   request: APIRequestContext,
-): Promise<string | null> {
+): Promise<string | null> => {
   const path = `/ploegen/${FIXTURES.teamSlug}/wedstrijden`;
   const response = await request.get(path);
   if (!response.ok()) {
     throw new Error(`Failed to fetch ${path}: ${response.status()}`);
   }
   return matchIdIn(await response.text());
-}
+};
 
 /** The first `/wedstrijd/<id>` link in an HTML body, or `null`. */
-export function matchIdIn(html: string): string | null {
+export const matchIdIn = (html: string): string | null => {
   return html.match(/href="\/wedstrijd\/([^/"?#]+)/)?.[1] ?? null;
-}
+};
