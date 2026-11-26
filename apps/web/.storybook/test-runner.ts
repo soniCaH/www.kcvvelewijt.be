@@ -181,13 +181,13 @@ const INITIAL_NAVIGATION_TIMEOUT_MS = 90000;
 //     in the same test file.
 // Animations are disabled separately via Playwright's `animations: "disabled"`
 // screenshot option plus a stylesheet injected per story (see postVisit).
-const determinismInitScript = function ({
+const determinismInitScript = ({
   fixedNowMs,
   prngSeed,
 }: {
   fixedNowMs: number;
   prngSeed: number;
-}) {
+}) => {
   const RealDate = Date;
   // `unknown[]`, not `ConstructorParameters<typeof Date>`: that resolves to
   // the last overload (year, monthIndex, ...), so `args.length === 0` — the
