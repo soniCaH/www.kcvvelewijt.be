@@ -38,25 +38,48 @@ function parseSide(raw: string | null): MatchSide {
   return "all";
 }
 
-/** Every known team's `psdId`, in Sanity order — the all-teams feed and the only ids `teamIds` may select. */
+const toPsdIds = (psdIds: readonly (string | null)[]): number[] =>
+  psdIds
+    .filter((psdId) => psdId != null)
+    .map(Number)
+    .filter((id) => !isNaN(id) && id > 0);
+
+/** Every shown team's `psdId`, in Sanity order — the all-teams feed. */
 const knownTeamIds = Effect.gen(function* () {
   const repo = yield* TeamRepository;
   const teams = yield* repo.findAll();
-  return teams
-    .filter((t) => t.psdId != null)
-    .map((t) => Number(t.psdId))
-    .filter((id) => !isNaN(id) && id > 0);
+  return toPsdIds(teams.map((t) => t.psdId));
 });
 
 /**
- * `knownTeamIds`, or `null` when the Sanity read fails. A failed read must not
- * take down a feed whose matches are already cached: the caller then keys on
- * the strict ids alone, and the all-teams feed reads the list only on a miss.
+ * The ids `teamIds` may select: every shown team's, plus every hidden team's
+ * (`showInNavigation: false`). Only `shown` ever makes the all-teams feed, so
+ * a hidden team is served only when its id is named (#3898).
  */
-async function fetchKnownTeamIds(): Promise<number[] | null> {
+interface KnownTeamIds {
+  readonly shown: readonly number[];
+  readonly hidden: readonly number[];
+}
+
+const knownAndHiddenTeamIds = Effect.gen(function* () {
+  const repo = yield* TeamRepository;
+  const [shown, hidden] = yield* Effect.all(
+    [knownTeamIds, repo.findHiddenPsdIds()],
+    { concurrency: "unbounded" },
+  );
+  return { shown, hidden: toPsdIds(hidden) } satisfies KnownTeamIds;
+});
+
+/**
+ * `knownAndHiddenTeamIds`, or `null` when a Sanity read fails. A failed read
+ * must not take down a feed whose matches are already cached: the caller then
+ * keys on the strict ids alone, and the all-teams feed reads the shown list
+ * only on a miss — so a failed read never adds a hidden team to it.
+ */
+async function fetchKnownTeamIds(): Promise<KnownTeamIds | null> {
   try {
     // Section read: the feed still works without the known-team filter.
-    return await runPromise(knownTeamIds.pipe(Effect.orDie));
+    return await runPromise(knownAndHiddenTeamIds.pipe(Effect.orDie));
   } catch (error) {
     unstable_rethrow(error);
     console.warn(
@@ -69,8 +92,8 @@ async function fetchKnownTeamIds(): Promise<number[] | null> {
 
 /**
  * `teamIds` → the one list both the cache key and the fan-out use (#3486):
- * strict ids only (`parsePsdId`), deduped, sorted, known-team `psdId`s only,
- * capped at `MAX_TEAM_IDS` after dedupe. `?teamIds=1,1,01`, `?teamIds=1,x1`
+ * strict ids only (`parsePsdId`), deduped, sorted, shown or hidden team
+ * `psdId`s only (#3898), capped at `MAX_TEAM_IDS` after dedupe. `?teamIds=1,1,01`, `?teamIds=1,x1`
  * and `?teamIds=1` therefore share one cache entry and one PSD call. Empty
  * when nothing valid remains — the caller falls back to the all-teams feed,
  * as for an absent `teamIds`. `knownIds` `null` (the team read failed) skips
@@ -196,10 +219,13 @@ export async function GET(request: NextRequest) {
   try {
     // Outside the matches cache on purpose (#3486): the key is built from
     // this list, so it must be resolved before the cache is looked up.
-    // `findAll` is itself a revalidating Sanity fetch, not a fresh read, and a
+    // Both team reads are revalidating Sanity fetches, not fresh reads, and a
     // failure only drops the known-team filter (see `fetchKnownTeamIds`).
-    const knownIds = await fetchKnownTeamIds();
-    const selected = selectTeamIds(rawTeamIds, knownIds);
+    const known = await fetchKnownTeamIds();
+    const selected = selectTeamIds(
+      rawTeamIds,
+      known && [...known.shown, ...known.hidden],
+    );
     const matchesCacheKey = normalizeCacheKey(
       selected.length > 0 ? selected : null,
       side,
@@ -212,7 +238,10 @@ export async function GET(request: NextRequest) {
     // string building over a few hundred matches, next to the I/O it
     // replaces (#2711 round 2).
     const [matches, events] = await Promise.all([
-      fetchMatches(selected.length > 0 ? selected : knownIds, matchesCacheKey),
+      fetchMatches(
+        selected.length > 0 ? selected : (known?.shown ?? null),
+        matchesCacheKey,
+      ),
       variant === "matches-and-events"
         ? fetchEvents()
         : Promise.resolve<EventListItemVM[]>([]),

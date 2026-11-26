@@ -39,6 +39,7 @@ vi.mock("@/lib/repositories/team.repository", async (importOriginal) => {
     ...actual,
     TeamRepositoryLive: Layer.succeed(actual.TeamRepository, {
       findAll: mockFindAll,
+      findHiddenPsdIds: () => Effect.die("not used by this suite"),
       findBySlug: () => Effect.die("not used by this suite"),
       findAllForLanding: () => Effect.succeed([]),
       findByMemberId: () => Effect.succeed([]),

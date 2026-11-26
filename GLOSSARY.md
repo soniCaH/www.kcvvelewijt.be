@@ -55,6 +55,9 @@ The football year a match or team belongs to, written `’25/’26`. _Seizoen_.
 **Team**:
 A KCVV team registered with the club and usually with the football federation. _Ploeg_.
 
+**Hidden Team**:
+A team with `showInNavigation: false`, such as a team that rents the pitch. No page, list or feed shows it. The one exception: the match calendar serves its matches when its PSD id is named in `teamIds`. [Rule](docs/domain-reference.md#team).
+
 **Team Display Name**:
 What a team is called wherever a person reads it. Distinct from the team's registered name in PSD.
 _Avoid_: age group (as a name)

@@ -16,6 +16,8 @@ vi.mock("../sanity/client", () => ({
 
 import { sanityClient } from "../sanity/client";
 import {
+  HIDDEN_TEAM_PSD_IDS_QUERY,
+  TEAMS_QUERY,
   TEAM_BY_SLUG_QUERY,
   TeamRepository,
   TeamRepositoryLive,
@@ -105,6 +107,32 @@ describe("TeamRepository", () => {
       expect(t.division).toBeNull();
       expect(t.divisionFull).toBeNull();
       expect(t.teamImageUrl).toBeNull();
+    });
+  });
+
+  // The match calendar serves a hidden team only for a `teamIds` that names
+  // it (#3898): exactly the teams `TEAMS_QUERY` leaves out, minus archived.
+  describe("findHiddenPsdIds", () => {
+    it("selects the non-archived teams TEAMS_QUERY hides", () => {
+      expect(TEAMS_QUERY).toContain("showInNavigation != false");
+      expect(HIDDEN_TEAM_PSD_IDS_QUERY).toContain("showInNavigation == false");
+      expect(HIDDEN_TEAM_PSD_IDS_QUERY).toContain("archived != true");
+    });
+
+    it("returns the psdIds under the teams tag", async () => {
+      mockFetch.mockResolvedValueOnce(["23"]);
+
+      const ids = await runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findHiddenPsdIds();
+        }),
+      );
+
+      expect(ids).toEqual(["23"]);
+      const [query, , options] = mockFetch.mock.calls.at(-1)!;
+      expect(query).toBe(HIDDEN_TEAM_PSD_IDS_QUERY);
+      expect(options.next.tags).toEqual(["teams"]);
     });
   });
 
