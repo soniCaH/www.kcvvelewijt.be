@@ -1497,12 +1497,12 @@ describe("TypedKvCache — drift is measured from the first unfixed stale read (
 
   /** A runner that drops the refresh fork — a `waitUntil` killed before it
    * reports anything — but still runs the drift ping. */
-  function killedRefreshRunner(
+  const killedRefreshRunner = (
     mockKv: ReturnType<typeof makeMockKv>,
     /** The detached work runs on the runner's own env, which is where it reads
      * its config (the Slack webhook) from. */
     envOverrides: Partial<TestEnv> = {},
-  ) {
+  ) => {
     const pending: Promise<void>[] = [];
     const layer = Layer.mergeAll(KvCacheLive, PsdGateTest).pipe(
       Layer.provideMerge(makeEnvLayer(mockKv, envOverrides)),
@@ -1519,7 +1519,7 @@ describe("TypedKvCache — drift is measured from the first unfixed stale read (
         }),
     });
     return { runnerLayer, settle: () => Promise.all(pending) };
-  }
+  };
 
   const read = (
     mockKv: ReturnType<typeof makeMockKv>,

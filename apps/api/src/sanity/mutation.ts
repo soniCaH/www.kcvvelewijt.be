@@ -1,9 +1,8 @@
-import { createClient } from "@sanity/client";
 import { Context, Effect, Either, Layer, Schema as S } from "effect";
-import { psdImageBaseUrl, dieOnConfigError } from "../config";
+import { dieOnConfigError, psdImageBaseUrl } from "../config";
 import { PsdGateService } from "../psd/gate";
 import { parseErrorPaths } from "../parse-error-paths";
-import { sanityClientConfig } from "./config";
+import { makeSanityClient, sanityClientConfig } from "./config";
 
 /**
  * SHA-1 (hex, lowercase, 40 chars) of PSD's "no image available" placeholder
@@ -258,8 +257,7 @@ export const SanityMutationLive = Layer.effect(
     // Portrait downloads are PSD calls: they take a gate token like every
     // other one (#3469), or they run outside the ≤5/s worldwide budget.
     const gate = yield* PsdGateService;
-    const sanity = yield* sanityClientConfig.pipe(dieOnConfigError);
-    const client = createClient({ ...sanity, useCdn: false });
+    const sanityClient = yield* makeSanityClient;
 
     const docId = (type: string, psdId: string) => `${type}-psd-${psdId}`;
 
@@ -271,7 +269,7 @@ export const SanityMutationLive = Layer.effect(
             .reduce(
               (tx, psdId) =>
                 tx.patch(docId(type, psdId), (p) => p.set({ archived: true })),
-              client.transaction(),
+              sanityClient().transaction(),
             )
             .commit();
         },
@@ -287,9 +285,9 @@ export const SanityMutationLive = Layer.effect(
       Effect.tryPromise({
         try: async () => {
           const id = docId(type, psdId);
-          const stored = await client.getDocument(id);
+          const stored = await sanityClient().getDocument(id);
           if (alreadyStored(stored, psdFields)) return;
-          await client
+          await sanityClient()
             .transaction()
             .createIfNotExists({ _id: id, _type: type, psdId })
             .patch(id, (p) => p.set(psdFields))
@@ -303,7 +301,9 @@ export const SanityMutationLive = Layer.effect(
     const readStoredImage = (entityType: string, psdId: string) =>
       Effect.tryPromise({
         try: async () => {
-          const doc = (await client.getDocument(docId(entityType, psdId))) as {
+          const doc = (await sanityClient().getDocument(
+            docId(entityType, psdId),
+          )) as {
             psdImageUrl?: string;
             psdImage?: { asset?: { _ref?: string } };
           } | null;
@@ -329,12 +329,12 @@ export const SanityMutationLive = Layer.effect(
         try: async () => {
           // `raw`: the client's `published` perspective (#3477) would not count
           // a reference held only by an open draft.
-          const refs = await client.fetch<number>(
+          const refs = await sanityClient().fetch<number>(
             "count(*[references($assetId)])",
             { assetId },
             { perspective: "raw" },
           );
-          if (refs === 0) await client.delete(assetId);
+          if (refs === 0) await sanityClient().delete(assetId);
         },
         catch: (cause) => cause,
       }).pipe(
@@ -353,7 +353,7 @@ export const SanityMutationLive = Layer.effect(
           if (!stored.url && !stored.assetId) return;
           yield* Effect.tryPromise({
             try: () =>
-              client
+              sanityClient()
                 .patch(docId(entityType, psdId))
                 .unset(["psdImage", "psdImageUrl"])
                 .commit(),
@@ -514,6 +514,7 @@ export const SanityMutationLive = Layer.effect(
 
           // Use REST API directly — client.assets.upload() uses Node.js internals
           // incompatible with Cloudflare Workers runtime.
+          const sanity = yield* sanityClientConfig.pipe(dieOnConfigError);
           const uploadUrl = `https://${sanity.projectId}.api.sanity.io/v2024-01-01/assets/images/${sanity.dataset}?filename=${entityType}-psd-${psdId}.jpg`;
           const asset = yield* Effect.tryPromise({
             try: async () => {
@@ -529,7 +530,7 @@ export const SanityMutationLive = Layer.effect(
                   signal: sanityAbort.signal,
                   method: "POST",
                   headers: {
-                    Authorization: `Bearer ${sanity.token}`,
+                    Authorization: `Bearer ${sanity.token ?? ""}`,
                     "Content-Type": contentType,
                   },
                   body: arrayBuffer,
@@ -568,7 +569,7 @@ export const SanityMutationLive = Layer.effect(
 
           yield* Effect.tryPromise({
             try: () =>
-              client
+              sanityClient()
                 .patch(docId(entityType, psdId))
                 .set({
                   psdImage: {
@@ -643,7 +644,7 @@ export const SanityMutationLive = Layer.effect(
 
           // Read existing doc to preserve editorial `role` values and capture _rev for conflict detection
           const existing = yield* Effect.tryPromise({
-            try: () => client.getDocument(id),
+            try: () => sanityClient().getDocument(id),
             catch: (cause) =>
               new SanityMutationError(
                 `Failed to read existing team ${doc.psdId}`,
@@ -724,7 +725,7 @@ export const SanityMutationLive = Layer.effect(
           // Use ifRevisionId when document exists to detect concurrent edits
           yield* Effect.tryPromise({
             try: () => {
-              const tx = client
+              const tx = sanityClient()
                 .transaction()
                 .createIfNotExists({ _id: id, _type: "team", psdId: doc.psdId })
                 .patch(id, (p) =>
@@ -759,7 +760,7 @@ export const SanityMutationLive = Layer.effect(
       writeMembershipApplication: (doc) =>
         Effect.tryPromise({
           try: () =>
-            client.create({
+            sanityClient().create({
               _type: "membershipApplication",
               status: "new",
               role: doc.role,
@@ -788,7 +789,7 @@ export const SanityMutationLive = Layer.effect(
       writeDartsSignup: (doc) =>
         Effect.tryPromise({
           try: () =>
-            client.create({
+            sanityClient().create({
               _type: "dartsSignup",
               teamName: doc.teamName,
               captainName: doc.captainName,

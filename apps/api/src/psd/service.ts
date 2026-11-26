@@ -1,5 +1,16 @@
-import { Context, Effect, Layer, Option, Redacted, Schema as S } from "effect";
-import { footbalistoLogoCdnUrl, psdApi, dieOnConfigError } from "../config";
+import {
+  Context,
+  Effect,
+  Layer,
+  Option,
+  Schema as S,
+  type ConfigError,
+} from "effect";
+import {
+  footbalistoLogoCdnUrl,
+  logConfigError,
+  psdApiRequest,
+} from "../config";
 import { KvCacheService, TTL } from "../cache/kv-cache";
 import { PsdGateService, withFlight } from "./gate";
 import { SanityProjection } from "../sanity/projection";
@@ -80,6 +91,22 @@ export class PsdService extends Context.Tag("PsdService")<
   PsdService,
   PsdServiceInterface
 >() {}
+
+// A PSD var that cannot be read is an upstream failure the cache can ride out
+// by serving stale, not a defect that skips the stale path (#3880). The log
+// names the var.
+const unavailableOnConfigError = <A>(
+  read: Effect.Effect<A, ConfigError.ConfigError>,
+): Effect.Effect<A, UpstreamUnavailableError> =>
+  read.pipe(
+    Effect.tapError(logConfigError),
+    Effect.mapError(
+      (error) =>
+        new UpstreamUnavailableError({
+          message: `PSD is not configured: ${error}`,
+        }),
+    ),
+  );
 
 function classifyHttpError(
   url: string,
@@ -257,30 +284,18 @@ export const PsdServiceLive = Layer.effect(
     // ≤5/s worldwide token is free (best-effort — proceeds if the gate is down),
     // capping the fan-out below PSD's rate limit. The grant also counts the call (#3490).
     // `path` is relative to PSD_API_BASE_URL. The credentials are read here, per
-    // call: a missing one dies with the ConfigError naming it, ahead of the
-    // token, and only the requests that reach PSD notice.
+    // call, ahead of the token: a missing one is a transient upstream failure
+    // naming the var, so the SWR cache serves stale instead of dying (#3880).
     const countedFetch = <A, I>(
       path: string,
       schema: S.Schema<A, I>,
       options?: { readonly emptyBodyIsNotFound: EmptyBodyNotFoundOptions },
     ) =>
-      psdApi.pipe(
-        dieOnConfigError,
-        Effect.flatMap(({ baseUrl, apiKey, club, auth }) =>
+      unavailableOnConfigError(psdApiRequest).pipe(
+        Effect.flatMap(({ baseUrl, headers }) =>
           gate.acquireToken.pipe(
             Effect.zipRight(
-              fetchJson(
-                `${baseUrl}${path}`,
-                schema,
-                {
-                  "x-api-key": Redacted.value(apiKey),
-                  "x-api-club": Redacted.value(club),
-                  Authorization: Redacted.value(auth),
-                  "Accept-Language": "nl-BE",
-                  "Content-Type": "application/json",
-                },
-                options,
-              ),
+              fetchJson(`${baseUrl}${path}`, schema, headers, options),
             ),
           ),
         ),
@@ -1091,6 +1106,11 @@ export const PsdServiceLive = Layer.effect(
 
       getRanking: (teamId: number) =>
         Effect.gen(function* () {
+          // Read before the PSD call, so a missing value cannot spend the
+          // daily call budget on every request.
+          const logoCdnUrl = yield* unavailableOnConfigError(
+            footbalistoLogoCdnUrl,
+          );
           const competitions = yield* countedFetch(
             `/teams/${teamId}/ranking`,
             FootbalistoRankingArray,
@@ -1109,8 +1129,6 @@ export const PsdServiceLive = Layer.effect(
             (c) => c.teams.length > 0 && resolveCompetitionType(c) === "league",
           );
 
-          const logoCdnUrl =
-            yield* footbalistoLogoCdnUrl.pipe(dieOnConfigError);
           const tables: RankingTable[] = [];
 
           for (const competition of official) {

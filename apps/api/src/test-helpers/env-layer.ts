@@ -62,14 +62,13 @@ const defaultTestEnv: TestEnv = {
  * or to build several env variants before wrapping just one in a Layer)
  * rather than an already-built layer. `makeTestEnvLayer` builds on this, so
  * there is one source of truth for the defaults. */
-export function makeTestEnv(overrides: Partial<TestEnv> = {}): TestEnv {
-  return { ...defaultTestEnv, ...overrides };
-}
+export const makeTestEnv = (overrides: Partial<TestEnv> = {}): TestEnv => ({
+  ...defaultTestEnv,
+  ...overrides,
+});
 
 export const testEnvLayer = WorkerEnvLive(defaultTestEnv);
 
-export function makeTestEnvLayer(
+export const makeTestEnvLayer = (
   overrides: Partial<TestEnv> = {},
-): Layer.Layer<WorkerEnvTag> {
-  return WorkerEnvLive(makeTestEnv(overrides));
-}
+): Layer.Layer<WorkerEnvTag> => WorkerEnvLive(makeTestEnv(overrides));

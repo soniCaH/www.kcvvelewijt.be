@@ -1,9 +1,17 @@
 import { createClient } from "@sanity/client";
-import { Array as Arr, Effect, Either, Ref, Schedule } from "effect";
 import {
+  Array as Arr,
+  Effect,
+  Either,
+  Ref,
+  Schedule,
+  type ConfigError,
+} from "effect";
+import {
+  dieOnConfigError,
+  logConfigError,
   sanityDataset,
   searchIndexPruneDryRun,
-  dieOnConfigError,
 } from "../config";
 import { KvCacheService } from "../cache/kv-cache";
 import { reconcileOrphans } from "../reconciliation";
@@ -246,8 +254,14 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
     // Scoped once for the whole sweep (#2873) — every manifest/pending-marker
     // call below shares this handle rather than repeating the dataset at each
     // call site, so they can't drift onto different datasets.
+    // An unreadable dataset refuses the run like a mismatched one (#3880).
+    const refuseUnreadable = (error: ConfigError.ConfigError) =>
+      new Error(`[search-sync] refusing to sync: ${error}`);
     const manifestKv = cache.durable.forDataset(
-      yield* sanityDataset.pipe(dieOnConfigError),
+      yield* sanityDataset.pipe(
+        Effect.tapError(logConfigError),
+        Effect.mapError(refuseUnreadable),
+      ),
     );
 
     // Refuse the whole run when this worker's dataset doesn't match its
@@ -256,7 +270,10 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
     // cron" reasoning this issue was filed to retire for the webhook, and
     // it stops being true the moment anything triggers this run manually
     // (see the staging backfill instructions in apps/api/CLAUDE.md).
-    const mismatch = yield* datasetIndexMismatch.pipe(dieOnConfigError);
+    const mismatch = yield* datasetIndexMismatch.pipe(
+      Effect.tapError(logConfigError),
+      Effect.mapError(refuseUnreadable),
+    );
     if (mismatch) {
       return yield* Effect.fail(
         new Error(`[search-sync] refusing to sync: ${mismatch}`),

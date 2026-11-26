@@ -7,6 +7,7 @@ import {
   cacheLongTtl,
   footbalistoLogoCdnUrl,
   psdApi,
+  psdApiRequest,
   psdImageBaseUrl,
   psdOndemandDailyBudget,
   resendApiKey,
@@ -74,10 +75,7 @@ describe("required vars", () => {
 });
 
 describe("required secrets", () => {
-  const secrets = [
-    ["SANITY_API_TOKEN", sanityApiToken],
-    ["SANITY_WEBHOOK_SECRET", sanityWebhookSecret],
-  ] as const;
+  const secrets = [["SANITY_WEBHOOK_SECRET", sanityWebhookSecret]] as const;
 
   it.each(secrets)("%s reads redacted", async (name, config) => {
     const value = await load(config, { [name]: "s3cret" });
@@ -110,6 +108,7 @@ describe("required secrets", () => {
 
 describe("optional secrets", () => {
   const optional = [
+    ["SANITY_API_TOKEN", sanityApiToken],
     ["BFF_SHARED_SECRET", bffSharedSecret],
     ["RESEND_API_KEY", resendApiKey],
     ["TURNSTILE_SECRET", turnstileSecret],
@@ -203,4 +202,44 @@ describe.each([
       expect(await load(config, { [name]: raw })).toBeUndefined();
     },
   );
+});
+
+describe("workerConfigProvider", () => {
+  it("reads an unquoted number or boolean var as its string", async () => {
+    // `AI_ANSWER_DAILY_CAP = 2000` without quotes in wrangler.toml [vars].
+    expect(await load(aiAnswerDailyCap, { AI_ANSWER_DAILY_CAP: 2000 })).toBe(
+      2000,
+    );
+    expect(await load(cacheLongTtl, { CACHE_LONG_TTL: true })).toBe(true);
+  });
+
+  it("skips bindings, objects and functions", async () => {
+    const env = { PSD_CACHE: { get: () => null }, AI: () => null };
+    expect(String(await failure(Config.string("PSD_CACHE"), env))).toContain(
+      "PSD_CACHE",
+    );
+    expect(String(await failure(Config.string("AI"), env))).toContain("AI");
+  });
+});
+
+describe("psdApiRequest", () => {
+  it("builds the base URL and the headers of a PSD call", async () => {
+    expect(
+      await load(psdApiRequest, {
+        PSD_API_BASE_URL: "https://psd.test",
+        PSD_API_KEY: "k",
+        PSD_API_CLUB: "c",
+        PSD_API_AUTH: "a",
+      }),
+    ).toEqual({
+      baseUrl: "https://psd.test",
+      headers: {
+        "x-api-key": "k",
+        "x-api-club": "c",
+        Authorization: "a",
+        "Accept-Language": "nl-BE",
+        "Content-Type": "application/json",
+      },
+    });
+  });
 });

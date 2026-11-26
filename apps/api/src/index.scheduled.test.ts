@@ -135,13 +135,18 @@ describe("scheduled() — a missing required var", () => {
     expect(job.logged()).toBe(true);
   });
 
-  it("fails the weekly staff-gaps check with the ConfigError naming SANITY_API_TOKEN", async () => {
+  it("fails the weekly staff-gaps check, and logs SANITY_PROJECT_ID, when it is missing", async () => {
     const job = settled(
-      "SANITY_API_TOKEN",
-      makeTestEnv({ PSD_CACHE: kv, SANITY_API_TOKEN: undefined }),
+      "SANITY_PROJECT_ID",
+      makeTestEnv({
+        PSD_CACHE: kv,
+        SANITY_PROJECT_ID: undefined,
+        SLACK_ALERT_WEBHOOK_URL: WEBHOOK,
+      }),
     );
 
-    await expect(job.run(STAFF_GAPS_CRON)).rejects.toThrow(/SANITY_API_TOKEN/);
+    await expect(job.run(STAFF_GAPS_CRON)).rejects.toThrow();
+    expect(job.logged()).toBe(true);
     expect(sanityFetch).not.toHaveBeenCalled();
   });
 });

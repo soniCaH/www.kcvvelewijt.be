@@ -1,5 +1,5 @@
-import { Context, Effect, Layer, Redacted, Schema as S } from "effect";
-import { psdApi, dieOnConfigError } from "../config";
+import { Context, Effect, Layer, Schema as S } from "effect";
+import { logConfigError, psdApiRequest } from "../config";
 import { PsdGateService } from "../psd/gate";
 import {
   PsdClubStaffMember,
@@ -115,22 +115,18 @@ export const PsdTeamClientLive = Layer.effect(
     // separate, debounced job-failure signal (#2870), which never touches
     // `IncidentTracker` and cannot escalate the read path's serve-stale logs.
     //
-    // `path` is relative to PSD_API_BASE_URL. The credentials are read per call:
-    // a missing one dies with the ConfigError naming it, ahead of the token.
+    // `path` is relative to PSD_API_BASE_URL. The credentials are read per call,
+    // ahead of the token: a missing one fails the job with a typed error naming
+    // the var (#3880).
     const countedFetch = <A, I>(path: string, schema: S.Schema<A, I>) =>
-      psdApi.pipe(
-        dieOnConfigError,
-        Effect.flatMap(({ baseUrl, apiKey, club, auth }) =>
+      psdApiRequest.pipe(
+        Effect.tapError(logConfigError),
+        Effect.mapError(
+          (error) => new PsdTeamClientError(`PSD is not configured: ${error}`),
+        ),
+        Effect.flatMap(({ baseUrl, headers }) =>
           gate.acquireToken.pipe(
-            Effect.zipRight(
-              fetchJson(`${baseUrl}${path}`, schema, {
-                "x-api-key": Redacted.value(apiKey),
-                "x-api-club": Redacted.value(club),
-                Authorization: Redacted.value(auth),
-                "Accept-Language": "nl-BE",
-                "Content-Type": "application/json",
-              }),
-            ),
+            Effect.zipRight(fetchJson(`${baseUrl}${path}`, schema, headers)),
           ),
         ),
       );

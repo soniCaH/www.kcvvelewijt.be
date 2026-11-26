@@ -13,10 +13,15 @@ import {
   UpstreamUnavailableError,
   UpstreamDecodeError,
   ResourceNotFoundError,
+  shouldServeStale,
   type BffError,
 } from "./errors";
-import { makeTestEnvLayer } from "../test-helpers/env-layer";
-import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
+import { makeTestEnvLayer, type TestEnv } from "../test-helpers/env-layer";
+import {
+  KvCacheService,
+  TypedKvCache,
+  type KvCacheInterface,
+} from "../cache/kv-cache";
 import { noopDurableKv } from "../test-helpers/kv-cache-mock";
 import {
   SanityProjection,
@@ -32,10 +37,11 @@ const kvGetFrom =
   (key) =>
     Effect.succeed(seed[key] ?? null);
 
-function makeEnvLayer() {
+function makeEnvLayer(overrides: Partial<TestEnv> = {}) {
   return makeTestEnvLayer({
     SANITY_PROJECT_ID: "test-project",
     SANITY_WEBHOOK_SECRET: "",
+    ...overrides,
   });
 }
 
@@ -146,6 +152,7 @@ function runService<A>(
   options: {
     sanityMock?: SanityProjectionInterface;
     kvMock?: KvCacheInterface;
+    envOverrides?: Partial<TestEnv>;
   } = {},
 ) {
   const sanity = options.sanityMock ?? makeSanityMock();
@@ -159,7 +166,7 @@ function runService<A>(
       program.pipe(
         Effect.provide(PsdServiceLive),
         Effect.provide(PsdGateTest),
-        Effect.provide(makeEnvLayer()),
+        Effect.provide(makeEnvLayer(options.envOverrides)),
         Effect.provide(Layer.succeed(KvCacheService, kv)),
         Effect.provide(Layer.succeed(SanityProjection, sanity)),
       ),
@@ -1299,6 +1306,74 @@ const rawRankingCompetitions = [
     teams: [rawRankingEntry(5, 1, 50, 500, "Spring Poule FC", 12)],
   },
 ];
+
+describe("PsdService — a PSD var that cannot be read (#3880)", () => {
+  it.each(["PSD_API_KEY", "PSD_API_CLUB", "PSD_API_AUTH", "PSD_API_BASE_URL"])(
+    "a missing %s is an upstream-unavailable error naming it, with no PSD call",
+    async (name) => {
+      const result = await runService((svc) => svc.getRanking(1), {
+        envOverrides: { [name]: undefined },
+      });
+
+      expect(result._tag).toBe("Left");
+      if (result._tag === "Left") {
+        expect(result.left._tag).toBe("UpstreamUnavailable");
+        expect(result.left.message).toContain(name);
+        expect(shouldServeStale(result.left)).toBe(true);
+      }
+      expect(global.fetch).not.toHaveBeenCalled();
+    },
+  );
+
+  it("reads FOOTBALISTO_LOGO_CDN_URL before the PSD call, so a missing one spends no call", async () => {
+    const result = await runService((svc) => svc.getRanking(1), {
+      envOverrides: { FOOTBALISTO_LOGO_CDN_URL: undefined },
+    });
+
+    expect(result._tag).toBe("Left");
+    if (result._tag === "Left") {
+      expect(result.left.message).toContain("FOOTBALISTO_LOGO_CDN_URL");
+    }
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("lets the cache serve its stale entry when a credential is missing", async () => {
+    const staleKv: KvCacheInterface = {
+      ...cacheMock,
+      get: (key) =>
+        key === "ranking:1"
+          ? Effect.succeed(
+              JSON.stringify({
+                value: [],
+                fetchedAt: Date.now() - 3 * 24 * 60 * 60 * 1000,
+              }),
+            )
+          : cacheMock.get(key),
+    };
+
+    const served = await Effect.runPromise(
+      Effect.gen(function* () {
+        const svc = yield* PsdService;
+        return yield* TypedKvCache(S.Array(RankingTable)).getOrFetch(
+          "ranking:1",
+          svc.getRanking(1),
+          60,
+          undefined,
+          { shouldServeStale },
+        );
+      }).pipe(
+        Effect.provide(PsdServiceLive),
+        Effect.provide(PsdGateTest),
+        Effect.provide(makeEnvLayer({ PSD_API_KEY: undefined })),
+        Effect.provide(Layer.succeed(KvCacheService, staleKv)),
+        Effect.provide(Layer.succeed(SanityProjection, makeSanityMock())),
+      ),
+    );
+
+    expect(served).toEqual([]);
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+});
 
 describe("PsdService.getRanking", () => {
   it("returns every OFFICIAL table in feed order and drops CUP and FRIENDLY", async () => {

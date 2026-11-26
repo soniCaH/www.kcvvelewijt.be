@@ -23,12 +23,16 @@ import {
   Schema,
 } from "effect";
 
-/** The string entries of the Worker `env`. Bindings are objects and stay out of
- * the provider: `fromJson` would walk into them. */
+/** The vars of the Worker `env`: strings, and the numbers and booleans a
+ * `wrangler.toml` `[vars]` entry may hold unquoted (`fromJson` reads them as
+ * their string). Bindings are objects and stay out of the provider: `fromJson`
+ * would walk into them. */
 export const workerConfigProvider = (env: object) =>
   ConfigProvider.fromJson(
     Object.fromEntries(
-      Object.entries(env).filter(([, value]) => typeof value === "string"),
+      Object.entries(env).filter(
+        ([, value]) => typeof value !== "object" && typeof value !== "function",
+      ),
     ),
   );
 
@@ -73,6 +77,20 @@ export const psdApi = Config.all({
   auth: secret("PSD_API_AUTH"), // the Authorization header value
 });
 
+/** What one PSD call needs: the base URL and the request headers. */
+export const psdApiRequest = psdApi.pipe(
+  Config.map(({ baseUrl, apiKey, club, auth }) => ({
+    baseUrl,
+    headers: {
+      "x-api-key": Redacted.value(apiKey),
+      "x-api-club": Redacted.value(club),
+      Authorization: Redacted.value(auth),
+      "Accept-Language": "nl-BE",
+      "Content-Type": "application/json",
+    },
+  })),
+);
+
 /** Club subdomain that serves player images. */
 export const psdImageBaseUrl = text("PSD_IMAGE_BASE_URL");
 export const footbalistoLogoCdnUrl = text("FOOTBALISTO_LOGO_CDN_URL");
@@ -86,7 +104,8 @@ export const psdOndemandDailyBudget = ceiling("PSD_ONDEMAND_DAILY_BUDGET");
 export const sanityProjectId = text("SANITY_PROJECT_ID");
 /** "production" or "staging". */
 export const sanityDataset = text("SANITY_DATASET");
-export const sanityApiToken = secret("SANITY_API_TOKEN"); // write token
+/** The write token. Optional: without one the client reads anonymously. */
+export const sanityApiToken = optionalSecret("SANITY_API_TOKEN");
 /** Signing secret of the Sanity webhooks; the same value is set on the hook. */
 export const sanityWebhookSecret = secret("SANITY_WEBHOOK_SECRET");
 
@@ -144,13 +163,14 @@ export const cacheLongTtl = flag("CACHE_LONG_TTL", "true");
  * cycle-end reconciliation and every accumulator write/clear (#3465). */
 export const syncManualRun = flag("SYNC_MANUAL_RUN", "1");
 
+/** Logs a ConfigError, which names the var. */
+export const logConfigError = (error: ConfigError.ConfigError) =>
+  Effect.logError(`[config] ${error}`);
+
 /** A missing or malformed var is a deploy mistake, not something a caller
  * recovers from: log it (the ConfigError names the var; a request's 500 would
  * not) and die with it. */
 export const dieOnConfigError = <A, R>(
   read: Effect.Effect<A, ConfigError.ConfigError, R>,
 ): Effect.Effect<A, never, R> =>
-  read.pipe(
-    Effect.tapError((error) => Effect.logError(`[config] ${error}`)),
-    Effect.orDie,
-  );
+  read.pipe(Effect.tapError(logConfigError), Effect.orDie);

@@ -964,6 +964,28 @@ describe("handleIndexWebhook", () => {
     expect(upsertSpy).not.toHaveBeenCalled();
   });
 
+  it("refuses with the same 409, and logs the var, when SANITY_DATASET cannot be read (#3880)", async () => {
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    const body = JSON.stringify({ _id: "resp-123", _type: "responsibility" });
+    const request = await makeSignedRequest(body);
+
+    const response = await handleIndexWebhook(
+      request,
+      makeEnv({ SANITY_DATASET: undefined }),
+      defaultLayer,
+    );
+
+    expect(response.status).toBe(409);
+    expect(await response.json()).toMatchObject({ code: "dataset_mismatch" });
+    expect([...log.mock.calls, ...error.mock.calls].flat().join(" ")).toContain(
+      "SANITY_DATASET",
+    );
+    expect(upsertSpy).not.toHaveBeenCalled();
+    log.mockRestore();
+    error.mockRestore();
+  });
+
   it("returns 400 for malformed JSON body", async () => {
     const body = "not valid json{{{";
     const request = await makeSignedRequest(body);

@@ -1,7 +1,11 @@
 import { createClient } from "@sanity/client";
 import { Effect, Layer, Redacted, Schema as S } from "effect";
 import { WorkerEnvLive, type WorkerEnv } from "../env";
-import { sanityWebhookSecret, dieOnConfigError } from "../config";
+import {
+  dieOnConfigError,
+  logConfigError,
+  sanityWebhookSecret,
+} from "../config";
 import { KvCacheLive } from "../cache/kv-cache";
 import { sanityClientConfig } from "../sanity/config";
 import { datasetIndexMismatch } from "../search/dataset-index-guard";
@@ -247,7 +251,18 @@ const webhookEffect = (request: Request) =>
     // upsert and the delete paths: a delete from a mismatched worker could
     // just as easily remove a production vector that happens to share an id
     // with a staging document.
-    const mismatch = yield* datasetIndexMismatch.pipe(dieOnConfigError);
+    // An unreadable dataset is that same refusal, as it was before Config
+    // (#3880); the log names the var.
+    const mismatch = yield* datasetIndexMismatch.pipe(
+      Effect.tapError(logConfigError),
+      Effect.mapError(
+        (error) =>
+          new WebhookServiceError(
+            "dataset_mismatch",
+            `SANITY_DATASET cannot be read: ${error}`,
+          ),
+      ),
+    );
     if (mismatch) {
       return yield* Effect.fail(
         new WebhookServiceError("dataset_mismatch", mismatch),

@@ -615,6 +615,19 @@ describe("runSanityIndexSync", () => {
     expect(upsertCalls).toHaveLength(0);
   });
 
+  it("refuses to sync, naming SANITY_DATASET, when the dataset cannot be read (#3880)", async () => {
+    const { upsertCalls, mock } = makeVectorizeCapture();
+
+    const failure = await Effect.runPromise(
+      sweep({ fetchResponsibility: noopFetch([mockDoc]) }, mock, {
+        SANITY_DATASET: undefined,
+      }).pipe(Effect.flip),
+    );
+
+    expect(String(failure)).toMatch(/refusing to sync.*SANITY_DATASET/s);
+    expect(upsertCalls).toHaveLength(0);
+  });
+
   describe("reconciliation (#2831) — pruning what no longer matches", () => {
     it("deletes the vector for a document that drops out of the query on the next sweep", async () => {
       const kv = makeKvNamespaceMock();
