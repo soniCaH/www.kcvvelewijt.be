@@ -129,14 +129,14 @@ const F = {
   image: false,
 };
 
-function meta(
+const meta = (
   id: TemplateId,
   label: string,
   icon: ComponentType<RedesignIconProps>,
   aspect: Aspect,
   flags: Partial<typeof F>,
   iconClassName?: string,
-): TemplateMeta {
+): TemplateMeta => {
   const f = { ...F, ...flags };
   return {
     id,
@@ -152,7 +152,7 @@ function meta(
     requiresDateTime: f.dateTime,
     imageCapable: f.image,
   };
-}
+};
 
 const TEMPLATES: TemplateMeta[] = [
   meta("goal-kcvv", "Goal KCVV", SoccerBall, "story", {
@@ -286,7 +286,7 @@ const COVER_MODES: { value: CoverMode; label: string }[] = [
 ];
 
 /** One labelled row of mutually exclusive pressed buttons. */
-function Choice<T extends string>({
+const Choice = <T extends string>({
   id,
   label,
   options,
@@ -300,7 +300,7 @@ function Choice<T extends string>({
   value: T;
   onChange: (next: T) => void;
   disabled?: boolean;
-}) {
+}) => {
   return (
     <div role="group" aria-labelledby={id}>
       <h2
@@ -330,7 +330,7 @@ function Choice<T extends string>({
       </div>
     </div>
   );
-}
+};
 
 const MOODS: { value: ResultMood; label: string }[] = [
   { value: "win", label: "Gewonnen" },
@@ -383,7 +383,7 @@ interface RenderOpts {
   imageUrl?: string;
 }
 
-function renderTemplate(id: TemplateId, o: RenderOpts): React.ReactNode {
+const renderTemplate = (id: TemplateId, o: RenderOpts): React.ReactNode => {
   const playerName = o.player
     ? `${o.player.firstName} ${o.player.lastName}`
     : "";
@@ -506,14 +506,14 @@ function renderTemplate(id: TemplateId, o: RenderOpts): React.ReactNode {
         />
       );
   }
-}
+};
 
 /**
  * The tool restores the story in progress from browser storage, which the
  * server cannot see: render it only after hydration, so the first client
  * render already starts from the stored story instead of flashing defaults.
  */
-export function SharePage(props: SharePageProps) {
+export const SharePage = (props: SharePageProps) => {
   const hydrated = useSyncExternalStore(
     noSubscribe,
     () => true,
@@ -527,7 +527,7 @@ export function SharePage(props: SharePageProps) {
   ) : (
     <ShareSkeleton />
   );
-}
+};
 
 /** The longest side an own photo keeps: the photo slot is at most 1080 wide. */
 const OWN_PHOTO_MAX = 1600;
@@ -538,7 +538,7 @@ const OWN_PHOTO_MAX = 1600;
  * which drops the oversized image while it rasterizes the capture. Where the
  * browser cannot decode or redraw the file, the original is kept.
  */
-async function shrinkPhoto(file: File): Promise<Blob> {
+const shrinkPhoto = async (file: File): Promise<Blob> => {
   try {
     // Explicit: Safari's default for EXIF orientation has varied by version.
     const bitmap = await createImageBitmap(file, {
@@ -566,7 +566,7 @@ async function shrinkPhoto(file: File): Promise<Blob> {
   } catch {
     return file;
   }
-}
+};
 
 /**
  * The stored session for this render: a deep link to another item than the
@@ -577,7 +577,7 @@ async function shrinkPhoto(file: File): Promise<Blob> {
  * place the picture moves: a reload of a story in progress (an iOS tab
  * eviction, the new-day remount) shows the next picture too.
  */
-function bootSession(initial: SharePageProps["initial"]): StorySession {
+const bootSession = (initial: SharePageProps["initial"]): StorySession => {
   const stored = readSession();
   const session: StorySession = {
     ...stored,
@@ -597,16 +597,16 @@ function bootSession(initial: SharePageProps["initial"]): StorySession {
     return { ...session, story: null };
   }
   return session;
-}
+};
 
-function ShareTool({
+const ShareTool = ({
   matches,
   players,
   articles = NO_ITEMS,
   events = NO_ITEMS,
   initial,
   onNewDay,
-}: SharePageProps & { onNewDay: () => void }) {
+}: SharePageProps & { onNewDay: () => void }) => {
   const [boot] = useState(() => bootSession(initial));
   const saved = boot.story;
   // The Brussels day this story belongs to: written as is, never re-dated.
@@ -1868,4 +1868,4 @@ function ShareTool({
       </div>
     </div>
   );
-}
+};

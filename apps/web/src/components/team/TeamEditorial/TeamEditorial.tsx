@@ -73,18 +73,18 @@ const pullquoteComponents: PortableTextComponents = {
   },
 };
 
-function hasBody(body: PortableTextBlock[] | null | undefined): boolean {
+const hasBody = (body: PortableTextBlock[] | null | undefined): boolean => {
   return (
     Array.isArray(body) && body.length > 0 && hasRenderableBioContent(body)
   );
-}
+};
 
-export function TeamEditorial({
+export const TeamEditorial = ({
   body,
   contactInfo,
   teamLabel,
   className,
-}: TeamEditorialProps) {
+}: TeamEditorialProps) => {
   const showVerhaal = hasBody(body);
   const showContact = hasBody(contactInfo);
 
@@ -164,4 +164,4 @@ export function TeamEditorial({
       ) : null}
     </div>
   );
-}
+};

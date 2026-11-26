@@ -48,22 +48,22 @@ export const DRAFT_STORAGE_KEY = "kcvv:membership-draft";
 
 /** Every reader and writer swallows a throwing accessor (private mode,
  * blocked site data): no storage means today's behaviour, never an error. */
-function storage(): Storage | null {
+const storage = (): Storage | null => {
   try {
     return window.sessionStorage;
   } catch {
     return null;
   }
-}
+};
 
 /** Whether a draft carries no answer at all — nothing worth restoring. */
-export function isEmptyDraft(draft: MembershipDraft): boolean {
+export const isEmptyDraft = (draft: MembershipDraft): boolean => {
   return (Object.keys(EMPTY_DRAFT) as (keyof MembershipDraft)[]).every(
     (key) => draft[key] === EMPTY_DRAFT[key],
   );
-}
+};
 
-function isDraft(value: unknown): value is MembershipDraft {
+const isDraft = (value: unknown): value is MembershipDraft => {
   if (typeof value !== "object" || value === null) return false;
   const draft = value as Record<string, unknown>;
   const typesMatch = Object.entries(EMPTY_DRAFT).every(
@@ -78,10 +78,10 @@ function isDraft(value: unknown): value is MembershipDraft {
     (draft.gender === "" ||
       GENDER_OPTIONS.some((option) => option.value === draft.gender))
   );
-}
+};
 
 /** The stored draft, or `null` when there is none, it is malformed or empty, or storage is blocked. */
-export function readDraft(): MembershipDraft | null {
+export const readDraft = (): MembershipDraft | null => {
   try {
     const raw = storage()?.getItem(DRAFT_STORAGE_KEY);
     if (!raw) return null;
@@ -96,20 +96,20 @@ export function readDraft(): MembershipDraft | null {
   } catch {
     return null;
   }
-}
+};
 
-export function writeDraft(draft: MembershipDraft): void {
+export const writeDraft = (draft: MembershipDraft): void => {
   try {
     storage()?.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
   } catch {
     // Quota or blocked storage — the form keeps working without a draft.
   }
-}
+};
 
-export function clearDraft(): void {
+export const clearDraft = (): void => {
   try {
     storage()?.removeItem(DRAFT_STORAGE_KEY);
   } catch {
     // Blocked storage — nothing to clear.
   }
-}
+};

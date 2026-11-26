@@ -131,7 +131,7 @@ const VIEW_VALUES: readonly ViewMode[] = ["month", "week", "agenda"];
  * (mirrors the Week tab's `hidden md:inline-flex`). `addEventListener` keeps it
  * live across rotation.
  */
-function useIsPhoneViewport(initial: boolean): boolean {
+const useIsPhoneViewport = (initial: boolean): boolean => {
   const [isPhone, setIsPhone] = useState(initial);
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)");
@@ -141,9 +141,9 @@ function useIsPhoneViewport(initial: boolean): boolean {
     return () => mq.removeEventListener("change", sync);
   }, []);
   return isPhone;
-}
+};
 
-export function CalendarWidget({
+export const CalendarWidget = ({
   feed,
   teams,
   today,
@@ -151,7 +151,7 @@ export function CalendarWidget({
   initialView,
   initialAbonneer,
   initialIsPhone = false,
-}: CalendarWidgetProps) {
+}: CalendarWidgetProps) => {
   // No explicit `?view=` → branch the default on the md breakpoint: agenda on
   // phones, month on tablet/desktop. An explicit choice (incl. tapping a tab,
   // which sets `?view=`) always wins.
@@ -228,15 +228,15 @@ export function CalendarWidget({
       ? formatWeekRangeLabel(weekStart)
       : formatMonthNavLabel(currentYear, currentMonth);
 
-  function setView(newView: ViewMode) {
+  const setView = (newView: ViewMode) => {
     // Dedup guard (repo analytics policy): re-selecting the active view is a
     // no-op, so neither the URL push nor `kalender_view_toggle` fires twice.
     if (newView === view) return;
     setRawView(newView);
     trackEvent("kalender_view_toggle", { view: newView });
-  }
+  };
 
-  function stepPeriod(direction: 1 | -1) {
+  const stepPeriod = (direction: 1 | -1) => {
     const next = toDisplayZone(cursor).plus(
       view === "week" ? { weeks: direction } : { months: direction },
     );
@@ -248,19 +248,19 @@ export function CalendarWidget({
     if (view !== "week") {
       setSelectedDate(next.startOf("month").toISODate()!);
     }
-  }
+  };
 
   const handlePrev = () => stepPeriod(-1);
   const handleNext = () => stepPeriod(1);
 
-  function toggleSubscribe() {
+  const toggleSubscribe = () => {
     const next = !subscribePanelOpen;
     setSubscribePanelOpen(next);
     // Fire only on open (the panel revealing), not on collapse.
     if (next) trackEvent("kalender_subscribe_open", { source: "kalender" });
-  }
+  };
 
-  function setType(value: KalenderFilterValue) {
+  const setType = (value: KalenderFilterValue) => {
     // Dedup guard: re-pressing the active chip is a no-op, so neither the URL
     // push nor the `kalender_filter` analytics event fires twice (repo
     // policy) — `useHistoryFilterParam`'s own dedup guard covers the URL
@@ -269,7 +269,7 @@ export function CalendarWidget({
     if (value === activeTypeFilter) return;
     setActiveTypeFilter(value);
     trackEvent("kalender_filter", { kalender_type: value });
-  }
+  };
 
   // Narrow the unified feed to the active type, then partition the survivors
   // back into the match/event arrays the renderers consume — in one pass, and
@@ -454,4 +454,4 @@ export function CalendarWidget({
       </div>
     </div>
   );
-}
+};

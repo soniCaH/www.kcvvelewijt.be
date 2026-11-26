@@ -39,10 +39,10 @@ const ACCENT_TONE_CLASS: Record<AccentTone, string> = {
  * `accentText` is empty or not found — the caller decides whether/how to
  * warn (each of today's two callers has a different dev-warning shape).
  */
-export function splitOnAccent(
+export const splitOnAccent = (
   text: string,
   accentText: string,
-): { before: string; match: string; after: string } | null {
+): { before: string; match: string; after: string } | null => {
   if (!accentText) return null;
   const idx = text.indexOf(accentText);
   if (idx < 0) return null;
@@ -51,19 +51,19 @@ export function splitOnAccent(
     match: text.slice(idx, idx + accentText.length),
     after: text.slice(idx + accentText.length),
   };
-}
+};
 
 /** The accented `<em>` itself: `font-display italic` + the tone's colour. */
-export function AccentEm({
+export const AccentEm = ({
   tone = "jersey-deep",
   children,
 }: {
   tone?: AccentTone;
   children: ReactNode;
-}) {
+}) => {
   return (
     <em className={cn("font-display italic", ACCENT_TONE_CLASS[tone])}>
       {children}
     </em>
   );
-}
+};

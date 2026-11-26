@@ -30,11 +30,11 @@ export interface ClubBookProps {
  *
  * The root carries `club-book-print`: the PDF prints this and nothing else.
  */
-export function ClubBook({
+export const ClubBook = ({
   nodes,
   responsibilityPaths,
   now = new Date(),
-}: ClubBookProps) {
+}: ClubBookProps) => {
   const book = buildClubBook(nodes, responsibilityPaths);
 
   return (
@@ -79,4 +79,4 @@ export function ClubBook({
       </div>
     </div>
   );
-}
+};

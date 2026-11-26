@@ -89,30 +89,30 @@ const EXT_MAP: Record<string, string> = {
   mov: "video",
 };
 
-function getExtension(str: string): string | undefined {
+const getExtension = (str: string): string | undefined => {
   const match = str.match(/\.(\w+)(?:\?.*)?$/);
   return match?.[1]?.toLowerCase();
-}
+};
 
 const SAFE_PROTOCOLS = new Set(["http:", "https:", "mailto:", "tel:"]);
 
-function isSafeHref(href: string): boolean {
+const isSafeHref = (href: string): boolean => {
   try {
     return SAFE_PROTOCOLS.has(new URL(href).protocol);
   } catch {
     return false;
   }
-}
+};
 
-function normalizeMimeType(mimeType: string): string {
+const normalizeMimeType = (mimeType: string): string => {
   return mimeType.split(";")[0].trim().toLowerCase();
-}
+};
 
-function detectFileType(
+const detectFileType = (
   mimeType?: string,
   href?: string,
   fileName?: string,
-): FileTypeInfo {
+): FileTypeInfo => {
   if (mimeType) {
     const normalized = normalizeMimeType(mimeType);
     if (MIME_MAP[normalized]) {
@@ -131,9 +131,9 @@ function detectFileType(
   }
 
   return FILE_TYPES.other;
-}
+};
 
-function extractLabelFromUrl(href: string): string | undefined {
+const extractLabelFromUrl = (href: string): string | undefined => {
   try {
     const url = new URL(href);
     const lastSegment = url.pathname.split("/").pop() ?? "";
@@ -145,13 +145,13 @@ function extractLabelFromUrl(href: string): string | undefined {
   } catch {
     return undefined;
   }
-}
+};
 
-function formatFileSize(bytes: number): string {
+const formatFileSize = (bytes: number): string => {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
+};
 
 export const DownloadButton = ({
   href,

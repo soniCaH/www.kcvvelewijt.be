@@ -68,11 +68,11 @@ export interface QASectionDividerProps {
   kicker?: string;
 }
 
-export function QASectionDivider({
+export const QASectionDivider = ({
   variant = "title",
   title,
   kicker,
-}: QASectionDividerProps) {
+}: QASectionDividerProps) => {
   if (variant === "dotted") {
     return (
       // A plain `<div>`, not `<aside>` (#3188): `role="separator"` is not an
@@ -180,4 +180,4 @@ export function QASectionDivider({
       ) : null}
     </div>
   );
-}
+};

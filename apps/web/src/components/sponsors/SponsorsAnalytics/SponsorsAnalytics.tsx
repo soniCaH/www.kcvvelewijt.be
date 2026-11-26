@@ -19,7 +19,7 @@ export interface SponsorsAnalyticsProps {
  * the container (not a JSX `onClick` on a non-interactive div) catches the
  * bubbled click from mouse and keyboard activation alike.
  */
-export function SponsorsAnalytics({ children }: SponsorsAnalyticsProps) {
+export const SponsorsAnalytics = ({ children }: SponsorsAnalyticsProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const { trackSponsorView, trackSponsorCtaClick } = useSponsorAnalytics();
 
@@ -35,4 +35,4 @@ export function SponsorsAnalytics({ children }: SponsorsAnalyticsProps) {
   });
 
   return <div ref={ref}>{children}</div>;
-}
+};

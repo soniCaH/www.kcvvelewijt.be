@@ -43,10 +43,10 @@ export interface IndexedSubject extends SubjectValue {
  * article was authored before the schema required it (or a subject was
  * removed after the fact) and the helper returns `null`.
  */
-export function resolvePairRespondent(
+export const resolvePairRespondent = (
   respondentKey: string | null | undefined,
   subjects: IndexedSubject[] | null | undefined,
-): SubjectValue | null {
+): SubjectValue | null => {
   const arr = Array.isArray(subjects) ? subjects : [];
   if (arr.length === 0) return null;
   if (respondentKey) {
@@ -60,7 +60,7 @@ export function resolvePairRespondent(
   // legacy/pre-migration docs. Render without attribution rather than
   // guessing a respondent.
   return null;
-}
+};
 
 export interface ResolvedSubject {
   name: string;
@@ -82,12 +82,12 @@ export interface ResolvedSubject {
  * photo fields, just from different parent schemas (`subject` vs. a direct
  * reference).
  */
-export function resolvePersonPhotoUrl(
+export const resolvePersonPhotoUrl = (
   editorial: string | null | undefined,
   synced: string | null | undefined,
-): string | null {
+): string | null => {
   return editorial ?? synced ?? null;
-}
+};
 
 /**
  * Normalise the `subject` discriminated union from GROQ into a flat shape
@@ -104,9 +104,9 @@ export function resolvePersonPhotoUrl(
  * Staff photo fallback (#2895 review): editorial `photo` wins when set, else
  * the sync-owned `psdImage` — same shape as the player fallback above.
  */
-export function resolveSubject(
+export const resolveSubject = (
   subject: SubjectValue | null | undefined,
-): ResolvedSubject | null {
+): ResolvedSubject | null => {
   if (!subject?.kind) return null;
 
   if (subject.kind === "player") {
@@ -152,7 +152,7 @@ export function resolveSubject(
   // Unknown discriminator (legacy data, failed migration, bad cast). Do not
   // silently fall through to a branch — the caller must handle null.
   return null;
-}
+};
 
 /**
  * Reserved `respondentKey` value meaning "all subjects, unanimous". Mirror
@@ -167,10 +167,10 @@ export const ALL_RESPONDENTS_KEY = "__all__";
  * splitting the joined `resolveSubject().name`, so monogram/tag derivation
  * stays stable if `resolveSubject` ever changes how it joins name parts.
  */
-export function deriveSubjectFirstName(
+export const deriveSubjectFirstName = (
   subject: SubjectValue | null | undefined,
   resolvedName: string,
-): string {
+): string => {
   if (subject?.kind === "player") {
     const fromRef = subject.playerRef?.firstName?.trim();
     if (fromRef) return fromRef;
@@ -186,14 +186,14 @@ export function deriveSubjectFirstName(
   }
   const trimmed = resolvedName.trim();
   return trimmed.split(/\s+/)[0] || trimmed;
-}
+};
 
 /** Join first names for the unaniem tag: "Julien & Niels", "A, B & C". */
-export function joinFirstNames(names: string[]): string {
+export const joinFirstNames = (names: string[]): string => {
   if (names.length === 0) return "";
   if (names.length === 1) return names[0]!;
   return `${names.slice(0, -1).join(", ")} & ${names[names.length - 1]}`;
-}
+};
 
 export interface UnanimousMember {
   firstName: string;
@@ -207,9 +207,9 @@ export interface UnanimousMember {
  * The caller decides how to present the result (0 → no speaker, 1 → single
  * avatar, ≥2 → overlapping cluster).
  */
-export function buildUnanimousAttribution(
+export const buildUnanimousAttribution = (
   subjects: IndexedSubject[] | null | undefined,
-): UnanimousMember[] {
+): UnanimousMember[] => {
   const arr = Array.isArray(subjects) ? subjects : [];
   const members: UnanimousMember[] = [];
   for (const s of arr) {
@@ -221,4 +221,4 @@ export function buildUnanimousAttribution(
     });
   }
   return members;
-}
+};

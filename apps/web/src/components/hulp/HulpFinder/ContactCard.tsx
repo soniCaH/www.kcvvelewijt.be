@@ -49,11 +49,11 @@ const ACTION =
 const CROSS_LINK =
   "text-jersey-deep border-jersey-deep hover:bg-jersey-deep hover:text-cream mt-2 inline-flex items-center gap-1.5 border-[1.5px] px-2.5 py-2 font-mono text-[10px] font-semibold tracking-[0.05em] uppercase transition-colors";
 
-export function ContactCard({
+export const ContactCard = ({
   contact,
   onContactClick,
   onShowInStructure,
-}: ContactCardProps) {
+}: ContactCardProps) => {
   const { lead, rest } = splitDisplayName(contact.name);
   const { nodeId } = contact;
   const hasName = contact.name.trim().length > 0;
@@ -134,4 +134,4 @@ export function ContactCard({
       )}
     </div>
   );
-}
+};

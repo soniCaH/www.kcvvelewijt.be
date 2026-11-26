@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils/cn";
  * `className` is the panel's own classes, merged with the fade ones. Keep the
  * class list below a full literal: Tailwind's scanner has to see it.
  */
-export function overlayFade(open: boolean, className?: string) {
+export const overlayFade = (open: boolean, className?: string) => {
   return {
     hidden: !open,
     inert: !open,
@@ -39,4 +39,4 @@ export function overlayFade(open: boolean, className?: string) {
       className,
     ),
   };
-}
+};

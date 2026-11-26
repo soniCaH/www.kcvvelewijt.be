@@ -41,11 +41,11 @@ export interface RelatedRowTiers<T extends { href: string }> {
   siblings: readonly T[];
 }
 
-function takeUnseen<T extends { href: string }>(
+const takeUnseen = <T extends { href: string }>(
   items: readonly T[],
   seen: Set<string>,
   limit?: number,
-): T[] {
+): T[] => {
   const out: T[] = [];
   for (const item of items) {
     if (seen.has(item.href)) continue;
@@ -54,11 +54,11 @@ function takeUnseen<T extends { href: string }>(
     if (limit !== undefined && out.length >= limit) break;
   }
   return out;
-}
+};
 
-export function mergeRelatedRow<T extends { href: string }>(
+export const mergeRelatedRow = <T extends { href: string }>(
   tiers: RelatedRowTiers<T>,
-): T[] {
+): T[] => {
   const seen = new Set<string>();
   const merged = [
     ...takeUnseen(tiers.domain, seen),
@@ -69,4 +69,4 @@ export function mergeRelatedRow<T extends { href: string }>(
   ];
 
   return merged.slice(0, RELATED_ROW_MAX_ITEMS);
-}
+};

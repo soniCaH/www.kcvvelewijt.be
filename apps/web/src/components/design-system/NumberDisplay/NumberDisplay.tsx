@@ -38,7 +38,7 @@ const TONE_CLASS: Record<NumberDisplayTone, string> = {
   cream: "text-cream",
 };
 
-export function NumberDisplay({
+export const NumberDisplay = ({
   value,
   size = "display-xl",
   tone = "ink",
@@ -46,7 +46,7 @@ export function NumberDisplay({
   label,
   as = "span",
   className,
-}: NumberDisplayProps) {
+}: NumberDisplayProps) => {
   // The "#" glyph reads awkwardly in italic Freight; render it in mono
   // (hashtag-style) at a smaller size for that case. Other prefixes (e.g.
   // "nr.") stay in italic Freight Display.
@@ -120,4 +120,4 @@ export function NumberDisplay({
     numberSection,
     labelSection,
   );
-}
+};

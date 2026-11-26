@@ -53,10 +53,10 @@ const FALLBACK_SET: Record<LookId, { letter: string; picks: number[] }> = {
 /** How many pictures a look's fallback set holds (the rotation wraps there). */
 export const fallbackCount = (look: LookId) => FALLBACK_SET[look].picks.length;
 
-export function fallbackPicture(look: LookId, index: number): string {
+export const fallbackPicture = (look: LookId, index: number): string => {
   const { letter, picks } = FALLBACK_SET[look];
   return `/images/share-fallback/${letter}-${picks[index % picks.length]}.webp`;
-}
+};
 
 /**
  * True inside a look-strip thumbnail: a 48 px thumbnail asks the optimizer
@@ -89,7 +89,7 @@ export const washRgb = (theme: ShareTheme) =>
   theme === "donker" ? "8,26,18" : "245,241,230";
 
 /** The spec's 5-stop gradient for one theme + step. */
-export function washGradient(theme: ShareTheme, step: WashStep): string {
+export const washGradient = (theme: ShareTheme, step: WashStep): string => {
   const s = WASH[theme][step];
   const c = washRgb(theme);
   const r = (n: number) => Math.round(n * 1000) / 1000;
@@ -98,7 +98,7 @@ export function washGradient(theme: ShareTheme, step: WashStep): string {
     `rgba(${c},${r(s.bottom * 0.16)}) ${s.ramp}%, ` +
     `rgba(${c},${r(s.bottom * 0.86)}) ${s.plateau}%, rgba(${c},${s.bottom}) 100%)`
   );
-}
+};
 
 /** Title accent: jersey-deep on a light ground, warm on a dark one. */
 export const accentOf = (theme: ShareTheme) =>
@@ -111,7 +111,7 @@ export const accentOf = (theme: ShareTheme) =>
  * item or absolutely positioned, so its z-index applies without a
  * `position` of its own; a moved block is translated by its offset.
  */
-export function Block({
+export const Block = ({
   id,
   blocks,
   style,
@@ -121,7 +121,7 @@ export function Block({
   blocks: BlockLayout;
   style?: React.CSSProperties;
   children: React.ReactNode;
-}) {
+}) => {
   const at = blocks[id];
   return (
     <div
@@ -135,8 +135,8 @@ export function Block({
       {children}
     </div>
   );
-}
-export function Canvas({
+};
+export const Canvas = ({
   format,
   bg,
   children,
@@ -144,7 +144,7 @@ export function Canvas({
   format: ShareFormat;
   bg: string;
   children: React.ReactNode;
-}) {
+}) => {
   return (
     <div
       style={{
@@ -159,9 +159,9 @@ export function Canvas({
       {children}
     </div>
   );
-}
+};
 
-export function Grain() {
+export const Grain = () => {
   return (
     <div
       style={{
@@ -174,10 +174,10 @@ export function Grain() {
       }}
     />
   );
-}
+};
 
 /** The club crest; a match story adds its squad badge (`A`, `U17`) beside it. */
-export function Crest({ size, squad }: { size: number; squad?: string }) {
+export const Crest = ({ size, squad }: { size: number; squad?: string }) => {
   const crest = (
     <img
       src={KCVV_LOGO}
@@ -207,10 +207,10 @@ export function Crest({ size, squad }: { size: number; squad?: string }) {
       </span>
     </div>
   );
-}
+};
 
 /** The match block: both crests before kick-off, the score after. */
-export function Hero({
+export const Hero = ({
   content,
   color,
   size,
@@ -218,7 +218,7 @@ export function Hero({
   content: ShareContent;
   color: string;
   size: number;
-}) {
+}) => {
   const hero = content.hero;
   if (!hero) return null;
   if (hero.kind === "crests")
@@ -246,10 +246,10 @@ export function Hero({
       {hero.score}
     </span>
   );
-}
+};
 
 /** Tilted mono tab, ink border, hard paper shadow. */
-export function Stamp({
+export const Stamp = ({
   label,
   fill,
   onFill,
@@ -259,7 +259,7 @@ export function Stamp({
   fill: string;
   onFill: string;
   size: number;
-}) {
+}) => {
   return (
     <span
       style={{
@@ -281,10 +281,10 @@ export function Stamp({
       {label}
     </span>
   );
-}
+};
 
 /** Mono uppercase kicker with a rule. */
-export function RuleKicker({
+export const RuleKicker = ({
   text,
   color,
   size,
@@ -292,7 +292,7 @@ export function RuleKicker({
   text: string;
   color: string;
   size: number;
-}) {
+}) => {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 24, color }}>
       <span
@@ -310,18 +310,18 @@ export function RuleKicker({
       <span style={{ flex: 1, height: 4, background: color }} />
     </div>
   );
-}
+};
 
-function titleSize(runs: TitleRun[], base: number): number {
+const titleSize = (runs: TitleRun[], base: number): number => {
   // Long titles step down so they never run off the canvas.
   const length = runs.reduce((n, r) => n + r.text.length, 0);
   if (length > 80) return Math.round(base * 0.62);
   if (length > 55) return Math.round(base * 0.76);
   if (length > 35) return Math.round(base * 0.88);
   return base;
-}
+};
 
-export function Title({
+export const Title = ({
   runs,
   size,
   color,
@@ -331,7 +331,7 @@ export function Title({
   size: number;
   color: string;
   accent: string;
-}) {
+}) => {
   return (
     <h1
       lang="nl"
@@ -358,9 +358,9 @@ export function Title({
       )}
     </h1>
   );
-}
+};
 
-export function Info({
+export const Info = ({
   lines,
   color,
   size,
@@ -368,7 +368,7 @@ export function Info({
   lines: string[];
   color: string;
   size: number;
-}) {
+}) => {
   if (lines.length === 0) return null;
   return (
     <div
@@ -388,10 +388,10 @@ export function Info({
       ))}
     </div>
   );
-}
+};
 
 /** Never "link in bio": there is no link to promise. */
-export function Cta({ color, size }: { color: string; size: number }) {
+export const Cta = ({ color, size }: { color: string; size: number }) => {
   return (
     <span
       style={{
@@ -406,9 +406,9 @@ export function Cta({ color, size }: { color: string; size: number }) {
       Meer op kcvvelewijt.be
     </span>
   );
-}
+};
 
-export function Tape({
+export const Tape = ({
   color,
   rotate,
   style,
@@ -416,7 +416,7 @@ export function Tape({
   color: string;
   rotate: number;
   style: React.CSSProperties;
-}) {
+}) => {
   return (
     <span
       style={{
@@ -431,10 +431,10 @@ export function Tape({
       }}
     />
   );
-}
+};
 
 /** Day + month block — the event detail. */
-export function DateBlock({
+export const DateBlock = ({
   content,
   color,
   background,
@@ -444,7 +444,7 @@ export function DateBlock({
   color: string;
   background?: string;
   size: number;
-}) {
+}) => {
   return (
     <span
       style={{
@@ -480,10 +480,10 @@ export function DateBlock({
       </span>
     </span>
   );
-}
+};
 
 /** One detail per type — the thing that tells two stories apart. */
-export function Detail({
+export const Detail = ({
   content,
   color,
   size,
@@ -491,7 +491,7 @@ export function Detail({
   content: ShareContent;
   color: string;
   size: number;
-}) {
+}) => {
   const mono: React.CSSProperties = {
     fontFamily: MONO_FONT,
     fontWeight: 700,
@@ -616,31 +616,31 @@ export function Detail({
     case "none":
       return null;
   }
-}
+};
 
 /**
  * True when the slot shows the look's own AI fallback set — the same branch
  * `LookPhoto` takes. This, not `usesFallback`, drives the fallback rotation:
  * the event fallback picture is not part of any set.
  */
-export function usesAiFallback(content: ShareContent, coverMode: CoverMode) {
+export const usesAiFallback = (content: ShareContent, coverMode: CoverMode) => {
   return (
     !content.photo ||
     (coverMode === "reservefoto" && content.photo.source === "cover")
   );
-}
+};
 
 /**
  * True when the slot shows any fallback picture (AI set or event fallback) —
  * the spec's `fallback_used` for analytics (#3539).
  */
-export function usesFallback(content: ShareContent, coverMode: CoverMode) {
+export const usesFallback = (content: ShareContent, coverMode: CoverMode) => {
   return (
     !content.photo ||
     content.photo.source === "fallback" ||
     (coverMode === "reservefoto" && content.photo.source === "cover")
   );
-}
+};
 
 /**
  * The look's photo slot, filling its positioned parent, whatever its size.
@@ -650,7 +650,7 @@ export function usesFallback(content: ShareContent, coverMode: CoverMode) {
  * blur does not fade at the edges; `Reservefoto` swaps in the look's own
  * fallback picture. An empty slot always takes the fallback.
  */
-export function LookPhoto({
+export const LookPhoto = ({
   look,
   content,
   coverMode,
@@ -665,7 +665,7 @@ export function LookPhoto({
   /** Where a fallback or own picture anchors; a cover uses its hotspot. */
   position?: string;
   filter?: string;
-}) {
+}) => {
   const photo = content.photo;
   const thumb = useContext(ShareThumbContext);
   const fill: React.CSSProperties = {
@@ -778,4 +778,4 @@ export function LookPhoto({
       </div>
     </>,
   );
-}
+};

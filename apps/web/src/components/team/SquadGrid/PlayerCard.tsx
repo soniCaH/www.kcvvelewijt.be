@@ -56,7 +56,7 @@ export interface PlayerCardProps {
   className?: string;
 }
 
-export function PlayerCard({
+export const PlayerCard = ({
   id,
   firstName,
   lastName,
@@ -68,7 +68,7 @@ export function PlayerCard({
   blendPhoto = true,
   linkAffordance = false,
   className,
-}: PlayerCardProps) {
+}: PlayerCardProps) => {
   const hasPhoto = photoUrl !== undefined && photoUrl !== "";
   const hasPosition = position !== undefined && position !== "";
 
@@ -193,4 +193,4 @@ export function PlayerCard({
   }
 
   return card;
-}
+};

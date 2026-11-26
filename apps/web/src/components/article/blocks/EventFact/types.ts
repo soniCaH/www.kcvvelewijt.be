@@ -138,7 +138,7 @@ export type ResolvedEventRange =
  * reusing it keeps Dutch locale rendering + validation in one place
  * rather than maintaining a second Dutch weekday/month table.
  */
-export function resolveEventDate(iso?: string): ResolvedEvent {
+export const resolveEventDate = (iso?: string): ResolvedEvent => {
   if (!iso || typeof iso !== "string") return { hasDate: false };
   const dt = DateTime.fromISO(iso.trim(), { zone: "utc" }).setLocale("nl");
   if (!dt.isValid) return { hasDate: false };
@@ -151,7 +151,7 @@ export function resolveEventDate(iso?: string): ResolvedEvent {
     weekday: dt.toFormat("cccc"),
     dateIso: iso,
   };
-}
+};
 
 /**
  * Resolve an event's schedule into a discriminated union the rendering
@@ -170,11 +170,11 @@ export function resolveEventDate(iso?: string): ResolvedEvent {
  * render as `single` using the start date than to reverse the range
  * silently.
  */
-export function resolveEventRange(
+export const resolveEventRange = (
   startIso?: string,
   endIso?: string,
   sessions?: EventFactSession[],
-): ResolvedEventRange {
+): ResolvedEventRange => {
   // ── 1. Sessions take precedence ─────────────────────────────────
   if (Array.isArray(sessions) && sessions.length > 0) {
     const resolved: ResolvedSession[] = [];
@@ -230,6 +230,6 @@ export function resolveEventRange(
     sameMonth: start.monthLong === end.monthLong && start.year === end.year,
     sameYear: start.year === end.year,
   };
-}
+};
 
 export const DEFAULT_TICKET_LABEL = "Inschrijven";

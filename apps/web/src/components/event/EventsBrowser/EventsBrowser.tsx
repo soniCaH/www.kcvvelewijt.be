@@ -84,7 +84,7 @@ export interface EventsBrowserProps {
  * Months whose tickets are all filtered out drop their header automatically —
  * `groupEventsByMonth` only buckets the events `<EventMonthList>` receives.
  */
-export function EventsBrowser({ events }: EventsBrowserProps) {
+export const EventsBrowser = ({ events }: EventsBrowserProps) => {
   const [selected, setSelected] = useHistoryFilterParam<EventFilterValue>(
     TYPE_PARAM,
     EVENT_TYPE_ORDER,
@@ -170,4 +170,4 @@ export function EventsBrowser({ events }: EventsBrowserProps) {
       )}
     </div>
   );
-}
+};

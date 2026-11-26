@@ -78,7 +78,7 @@ const UNANIMOUS_ROLE = "Unaniem";
  * over the input — all mutation is local to this helper so the caller's
  * render body stays immutable.
  */
-function groupPairs(pairs: QaPairValue[]): Unit[] {
+const groupPairs = (pairs: QaPairValue[]): Unit[] => {
   const units: Unit[] = [];
   for (const pair of pairs) {
     if (pair.tag === "rapid-fire") {
@@ -97,12 +97,12 @@ function groupPairs(pairs: QaPairValue[]): Unit[] {
     units.push({ kind: "standard", pair });
   }
   return units;
-}
+};
 
-function mapStandardRespondents(
+const mapStandardRespondents = (
   pair: QaPairValue,
   subjects: IndexedSubject[] | null,
-): QARowRespondent[] {
+): QARowRespondent[] => {
   const sources = pair.respondents ?? [];
   return sources.map((src, i) => {
     const answer: ReactNode = src.answer ? (
@@ -156,7 +156,7 @@ function mapStandardRespondents(
       respondentKey,
     };
   });
-}
+};
 
 interface RenderedUnit {
   kind: Unit["kind"];

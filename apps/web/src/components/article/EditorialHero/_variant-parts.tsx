@@ -46,7 +46,7 @@ export interface HeroCreditChipProps {
  * display name. Reads as a byline-ish row
  * rather than a feature list.
  */
-export function HeroCreditChip({ subject }: HeroCreditChipProps) {
+export const HeroCreditChip = ({ subject }: HeroCreditChipProps) => {
   // The avatar is the round family's 24px step (`<RoundAvatar>`, #3332): photo
   // when the subject has one, monogram otherwise. The chip drops its own chrome
   // on purpose (#1749): `[avatar] Name` reads as a byline-ish row that doesn't
@@ -62,7 +62,7 @@ export function HeroCreditChip({ subject }: HeroCreditChipProps) {
       </span>
     </span>
   );
-}
+};
 
 // ─── Event ───────────────────────────────────────────────────────────────────
 
@@ -79,10 +79,10 @@ export interface HeroDayBlockOverlayProps {
  * visual hook locked at R1.5b — keeps the Event variant identifiable
  * without competing with the H1 typography.
  */
-export function HeroDayBlockOverlay({
+export const HeroDayBlockOverlay = ({
   weekday,
   date,
-}: HeroDayBlockOverlayProps) {
+}: HeroDayBlockOverlayProps) => {
   return (
     <div
       data-testid="hero-day-block"
@@ -97,7 +97,7 @@ export function HeroDayBlockOverlay({
       <span className="text-base font-semibold">{date}</span>
     </div>
   );
-}
+};
 
 export interface HeroCompressedEventStripProps {
   location?: string | null;
@@ -113,12 +113,12 @@ export interface HeroCompressedEventStripProps {
  * ink rules top + bottom: `▸ ${location} · ${date} · ${start}–${end}`.
  * Each segment is graceful-omit so a partial event still reads.
  */
-export function HeroCompressedEventStrip({
+export const HeroCompressedEventStrip = ({
   location,
   date,
   startTime,
   endTime,
-}: HeroCompressedEventStripProps) {
+}: HeroCompressedEventStripProps) => {
   const timeRange =
     startTime && endTime
       ? `${startTime}–${endTime}`
@@ -161,7 +161,7 @@ export function HeroCompressedEventStrip({
       ))}
     </div>
   );
-}
+};
 
 // ─── Transfer ────────────────────────────────────────────────────────────────
 
@@ -177,7 +177,7 @@ export interface HeroTransferClubRowProps {
   resolved: ResolvedTransfer;
 }
 
-function ClubBadge({
+const ClubBadge = ({
   logoUrl,
   name,
   isKcvv,
@@ -185,7 +185,7 @@ function ClubBadge({
   logoUrl: string | null;
   name: string;
   isKcvv: boolean;
-}) {
+}) => {
   return (
     <span
       data-testid="hero-transfer-club-badge"
@@ -217,9 +217,9 @@ function ClubBadge({
       </span>
     </span>
   );
-}
+};
 
-export function HeroTransferClubRow({ resolved }: HeroTransferClubRowProps) {
+export const HeroTransferClubRow = ({ resolved }: HeroTransferClubRowProps) => {
   if (resolved.kind === "extension") {
     return (
       <div
@@ -265,7 +265,7 @@ export function HeroTransferClubRow({ resolved }: HeroTransferClubRowProps) {
       />
     </div>
   );
-}
+};
 
 export interface HeroTransferMetaLineProps {
   feature: TransferFactValue;
@@ -283,7 +283,9 @@ export interface HeroTransferMetaLineProps {
  * on direction without churning callers; today only `feature` drives
  * the rendered segments.
  */
-export function HeroTransferMetaLine({ feature }: HeroTransferMetaLineProps) {
+export const HeroTransferMetaLine = ({
+  feature,
+}: HeroTransferMetaLineProps) => {
   const segments: string[] = [];
 
   if (typeof feature.age === "number") segments.push(`${feature.age} jaar`);
@@ -308,7 +310,7 @@ export function HeroTransferMetaLine({ feature }: HeroTransferMetaLineProps) {
       ))}
     </p>
   );
-}
+};
 
 // ─── Match (5.d-mat H3 score-forward hero) ──────────────────────────────────
 
@@ -356,7 +358,7 @@ export interface HeroMatchScoreBarProps extends HeroMatchData {
  * kicker into this subline, so the bar carries the full match facts and the
  * kicker stays a clean type label. Reuses `<Crest>` + `<MatchStatusBadge>`.
  */
-export function HeroMatchScoreBar({
+export const HeroMatchScoreBar = ({
   variant,
   homeTeam,
   awayTeam,
@@ -367,7 +369,7 @@ export function HeroMatchScoreBar({
   status,
   competition,
   matchDate,
-}: HeroMatchScoreBarProps) {
+}: HeroMatchScoreBarProps) => {
   const hasScore =
     typeof homeScore === "number" && typeof awayScore === "number";
   const scoreText = hasScore
@@ -430,7 +432,7 @@ export function HeroMatchScoreBar({
       ) : null}
     </div>
   );
-}
+};
 
 // ─── Interview kicker meta (ported from InterviewHero) ──────────────────────
 
@@ -441,10 +443,10 @@ export function HeroMatchScoreBar({
  * the meta segments as an array so the caller can splice them into the
  * EditorialKicker `items` prop.
  */
-export function buildInterviewKickerMeta(
+export const buildInterviewKickerMeta = (
   count: number,
   soleSubject: ResolvedSubject | undefined,
-): string[] {
+): string[] => {
   if (count !== 1 || !soleSubject) return [];
   const meta: string[] = [];
   if (soleSubject.jerseyNumber != null) {
@@ -452,4 +454,4 @@ export function buildInterviewKickerMeta(
   }
   if (soleSubject.position) meta.push(soleSubject.position.toUpperCase());
   return meta;
-}
+};

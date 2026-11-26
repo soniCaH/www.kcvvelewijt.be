@@ -34,7 +34,7 @@ import {
  * person opens to export a poster, so that costs nothing worth caching
  * against.
  */
-export function PosterPrintScale() {
+export const PosterPrintScale = () => {
   const applyScale = useCallback(() => {
     const sheet = document.querySelector<HTMLElement>(".sk-poster-sheet");
     if (!sheet) return;
@@ -82,4 +82,4 @@ export function PosterPrintScale() {
   }, [applyScale]);
 
   return null;
-}
+};

@@ -124,10 +124,10 @@ const DEFAULT_HEADING = "Blijf nog even hangen.";
 // R3 per-articleType card-background lookup. Drives both `<NewsGrid>`
 // and `<RelatedRow>` so related-articles read with the same chrome
 // register as the homepage grid.
-function bgForArticleType(type: RelatedRowItem["articleType"]): NewsCardBg {
+const bgForArticleType = (type: RelatedRowItem["articleType"]): NewsCardBg => {
   if (type === "transfer") return "jersey-deep";
   return "cream";
-}
+};
 
 // Slot-deterministic lean cycle so adjacent cards don't twin: the site's slight
 // tier (#3302 / #3329) in sign-alternating order, plus an explicit flat card.
@@ -135,9 +135,9 @@ function bgForArticleType(type: RelatedRowItem["articleType"]): NewsCardBg {
 // well off-screen so a repeat reads as fresh tilt rather than a twin.
 const ROTATION_CYCLE = ["a", "c", "b", "d", "none"] as const;
 
-function deriveImpressionSource(
+const deriveImpressionSource = (
   items: RelatedRowItem[],
-): RelatedContentSource | "mixed" {
+): RelatedContentSource | "mixed" => {
   const sources = new Set(
     items
       .map((i) => i.analyticsSource)
@@ -146,18 +146,18 @@ function deriveImpressionSource(
   if (sources.size === 0) return "mixed";
   if (sources.size === 1) return [...sources][0]!;
   return "mixed";
-}
+};
 
 const CARD_SELECTOR = '[data-slot="related-row-card"]';
 
-export function RelatedRow({
+export const RelatedRow = ({
   items,
   heading = DEFAULT_HEADING,
   pageType,
   pageSlug,
   sourceArticleType,
   className,
-}: RelatedRowProps) {
+}: RelatedRowProps) => {
   const rowRef = useRef<HTMLElement>(null);
   const hasFired = useRef(false);
   const { trackRelatedArticleClick } = useArticleAnalytics();
@@ -313,4 +313,4 @@ export function RelatedRow({
       </div>
     </section>
   );
-}
+};

@@ -24,7 +24,7 @@ export interface FeaturedSponsorCardProps {
  *   on hover (canonical paper-stamp); without a `url` it renders as a static
  *   card.
  */
-export function FeaturedSponsorCard({ sponsor }: FeaturedSponsorCardProps) {
+export const FeaturedSponsorCard = ({ sponsor }: FeaturedSponsorCardProps) => {
   const content = (
     <>
       <div className="bg-jersey-deep border-ink border-b-2 px-4 py-2">
@@ -110,4 +110,4 @@ export function FeaturedSponsorCard({ sponsor }: FeaturedSponsorCardProps) {
       {content}
     </div>
   );
-}
+};

@@ -27,12 +27,12 @@ export interface FirstTeamAgendaRowProps {
  * press-down <Link> wrapper is gone — the row is a single, touch-friendly
  * interactive element with no nested-interactive nesting.
  */
-export function FirstTeamAgendaRow({
+export const FirstTeamAgendaRow = ({
   match,
   teamSlug,
   kind,
   featured,
-}: FirstTeamAgendaRowProps) {
+}: FirstTeamAgendaRowProps) => {
   return (
     <TeamAgendaRow
       match={match}
@@ -63,4 +63,4 @@ export function FirstTeamAgendaRow({
       }
     />
   );
-}
+};

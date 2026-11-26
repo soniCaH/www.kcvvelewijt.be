@@ -28,7 +28,7 @@ export interface OrganigramHeroProps {
  * hieronder" bridge · audience chips → Hulp. Right: a cream taped **structure
  * artefact** — an abstract paper org-tree motif + the derivable structure index.
  */
-export function OrganigramHero({
+export const OrganigramHero = ({
   members,
   responsibilityPaths,
   structureIndex,
@@ -36,7 +36,7 @@ export function OrganigramHero({
   kicker,
   heading = "Waarmee kunnen we je helpen?",
   lead = "Typ je vraag of een naam — wij wijzen je naar het antwoord én de juiste persoon.",
-}: OrganigramHeroProps) {
+}: OrganigramHeroProps) => {
   return (
     <header
       id="hub-hero"
@@ -218,9 +218,9 @@ export function OrganigramHero({
       </div>
     </header>
   );
-}
+};
 
-function StructureStat({ value, label }: { value: number; label: string }) {
+const StructureStat = ({ value, label }: { value: number; label: string }) => {
   // `<dt>` precedes `<dd>` for correct `<dl>` semantics; `flex-col-reverse`
   // keeps the value visually above the label.
   return (
@@ -233,4 +233,4 @@ function StructureStat({ value, label }: { value: number; label: string }) {
       </dd>
     </div>
   );
-}
+};

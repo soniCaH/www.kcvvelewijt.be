@@ -28,10 +28,10 @@ export interface OrganigramOverviewProps {
   collapsible?: boolean;
 }
 
-export function OrganigramOverview({
+export const OrganigramOverview = ({
   nodes,
   collapsible = false,
-}: OrganigramOverviewProps) {
+}: OrganigramOverviewProps) => {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(!collapsible);
   const [focusId, setFocusId] = useState<string | undefined>(undefined);
@@ -108,4 +108,4 @@ export function OrganigramOverview({
       />
     </>
   );
-}
+};

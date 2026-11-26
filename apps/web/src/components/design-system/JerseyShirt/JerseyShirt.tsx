@@ -50,7 +50,7 @@ const STRIPE_STROKE_WIDTH = 2;
 const LETTER_TEXT_SHADOW =
   "2px 2px 0 var(--color-ink), -1px -1px 0 var(--color-ink), 1px -1px 0 var(--color-ink), -1px 1px 0 var(--color-ink)";
 
-export function JerseyShirt({ letterOverlay, className }: JerseyShirtProps) {
+export const JerseyShirt = ({ letterOverlay, className }: JerseyShirtProps) => {
   const figureClass = cn(
     "@container relative mx-auto my-0 h-60 w-60",
     className,
@@ -111,4 +111,4 @@ export function JerseyShirt({ letterOverlay, className }: JerseyShirtProps) {
       ) : null}
     </figure>
   );
-}
+};

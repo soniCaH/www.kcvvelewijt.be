@@ -32,13 +32,13 @@ const TONE_CLASS: Record<RemovableChipTone, string> = {
  * clear-the-whole-field "×" on a search input is a *different* idiom (see the
  * organigram search bars) and is NOT a RemovableChip.
  */
-export function RemovableChip({
+export const RemovableChip = ({
   label,
   onRemove,
   removeLabel = "Verwijder",
   tone = "ink",
   className,
-}: RemovableChipProps) {
+}: RemovableChipProps) => {
   return (
     <span
       data-testid="removable-chip"
@@ -61,4 +61,4 @@ export function RemovableChip({
       ) : null}
     </span>
   );
-}
+};

@@ -51,14 +51,14 @@ const SCROLL_KEYS = new Set([
  * (DESIGN.md → The Derived Anchor Offset Rule), which `scrollIntoView` also
  * honours. Most taps never trigger it.
  */
-function showHeaderIfAbove(card: HTMLElement) {
+const showHeaderIfAbove = (card: HTMLElement) => {
   const offset =
     parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) ||
     0;
   if (card.getBoundingClientRect().top < offset) {
     scrollIntoViewMotionSafe(card, { block: "start" });
   }
-}
+};
 
 export interface QuestionCardProps {
   path: ResponsibilityPath;
@@ -78,7 +78,7 @@ export interface QuestionCardProps {
   ) => void;
 }
 
-export function QuestionCard({
+export const QuestionCard = ({
   path,
   open,
   onToggle,
@@ -86,7 +86,7 @@ export function QuestionCard({
   onContactClick,
   onStepLinkClick,
   onShowInStructure,
-}: QuestionCardProps) {
+}: QuestionCardProps) => {
   const meta = CATEGORY_META[path.category];
   const Icon = meta.icon;
   const baseId = useId();
@@ -252,4 +252,4 @@ export function QuestionCard({
       </HeightGrow>
     </div>
   );
-}
+};

@@ -24,12 +24,12 @@ import { cookieConsentState } from "./cookieConsentState";
 // icon language.
 const ACCEPT_NECESSARY_LABEL = `${bracketAffordanceHtml("close")} Alleen noodzakelijk`;
 
-function syncConsentState() {
+const syncConsentState = () => {
   const analyticsAccepted = CookieConsent.acceptedCategory("analytics");
   updateConsentState(analyticsAccepted);
-}
+};
 
-export function CookieConsentBanner() {
+export const CookieConsentBanner = () => {
   // The preferences modal's close button (#2675). The library draws its own
   // thin stroke X there and has no option to replace it, so the house close
   // icon — the Phosphor Fill `X` every other close on the site uses — is
@@ -131,4 +131,4 @@ export function CookieConsentBanner() {
   return closeIconHost
     ? createPortal(<X size={20} aria-hidden="true" />, closeIconHost)
     : null;
-}
+};

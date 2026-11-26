@@ -85,7 +85,7 @@ export interface FirstTeamsBlockProps {
 export const HELD_OPEN_FRAME =
   "border-cream/40 border-2 border-dashed text-center";
 
-function SkipCard({ children }: { children: React.ReactNode }) {
+const SkipCard = ({ children }: { children: React.ReactNode }) => {
   return (
     <div
       className={`${HELD_OPEN_FRAME} text-cream-quiet flex items-center justify-center px-4 py-3 font-mono text-xs tracking-wide uppercase`}
@@ -93,7 +93,7 @@ function SkipCard({ children }: { children: React.ReactNode }) {
       {children}
     </div>
   );
-}
+};
 
 /**
  * Row grid, shared with the homepage route skeleton so the two can't drift.
@@ -137,7 +137,7 @@ export const FIRST_TEAMS_ROW_GRID =
  * `<FirstTeamsBlock>`'s held-open notice only, not a candidate for the
  * shared roster (review finding 7).
  */
-function Mededeling({ text, href }: MededelingVM) {
+const Mededeling = ({ text, href }: MededelingVM) => {
   if (!href) return <>{text}</>;
   const isExternal = href.startsWith("http");
   return (
@@ -150,7 +150,7 @@ function Mededeling({ text, href }: MededelingVM) {
       <LinkPendingDots tone="light" />
     </Link>
   );
-}
+};
 
 /**
  * The whole six-state copy table in one place — `state.kind` is the single
@@ -159,7 +159,7 @@ function Mededeling({ text, href }: MededelingVM) {
  * `PlaceholderState` precisely so this switch could be the only place the
  * table is spelled out).
  */
-function renderPlaceholderCopy(state: PlaceholderState): React.ReactNode {
+const renderPlaceholderCopy = (state: PlaceholderState): React.ReactNode => {
   switch (state.kind) {
     case "unavailable":
       return "Uitslagen en wedstrijden zijn even niet beschikbaar. Probeer het later opnieuw.";
@@ -184,7 +184,7 @@ function renderPlaceholderCopy(state: PlaceholderState): React.ReactNode {
     default:
       return assertNever(state);
   }
-}
+};
 
 /**
  * The no-rows notice, for every state including the outage (#2505 round-3
@@ -198,7 +198,7 @@ function renderPlaceholderCopy(state: PlaceholderState): React.ReactNode {
  * `resolvePlaceholderState`'s `unavailable` member carries no `image` field
  * at all, so the outage state structurally cannot render one.
  */
-function PlaceholderNotice({
+const PlaceholderNotice = ({
   placeholder,
   now,
   unavailable,
@@ -206,7 +206,7 @@ function PlaceholderNotice({
   placeholder?: MatchesSliderPlaceholderVM | null;
   now: Date;
   unavailable: boolean;
-}) {
+}) => {
   const state = resolvePlaceholderState(placeholder, now, unavailable);
   const image = state.kind === "unavailable" ? undefined : state.image;
 
@@ -234,9 +234,9 @@ function PlaceholderNotice({
       <p className="text-cream">{renderPlaceholderCopy(state)}</p>
     </div>
   );
-}
+};
 
-function FirstTeamRow({ team }: { team: FirstTeamVM }) {
+const FirstTeamRow = ({ team }: { team: FirstTeamVM }) => {
   return (
     <div className={`${FIRST_TEAMS_ROW_GRID} xl:items-stretch`}>
       <div className="flex flex-col justify-center">
@@ -270,7 +270,7 @@ function FirstTeamRow({ team }: { team: FirstTeamVM }) {
       )}
     </div>
   );
-}
+};
 
 /**
  * Render the "Eerste ploegen" band. Teams with neither a result nor a fixture
@@ -279,12 +279,12 @@ function FirstTeamRow({ team }: { team: FirstTeamVM }) {
  * band left the homepage looking finished during a BFF outage, so a supporter
  * concluded the club had never posted the result.
  */
-export function FirstTeamsBlock({
+export const FirstTeamsBlock = ({
   teams,
   unavailable = false,
   placeholder = null,
   now = new Date(),
-}: FirstTeamsBlockProps) {
+}: FirstTeamsBlockProps) => {
   const rows = teams.filter((t) => t.result || t.fixture);
   const headingId = useId();
 
@@ -328,4 +328,4 @@ export function FirstTeamsBlock({
       <StripedSeam colorPair="cream-jersey-deep" height="md" flip />
     </section>
   );
-}
+};

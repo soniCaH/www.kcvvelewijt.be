@@ -65,9 +65,9 @@ const BG_BY_TYPE: Record<ArticleType, NewsCardBg> = {
   matchRecap: "cream",
 };
 
-function bgForArticle(type: NewsGridArticle["articleType"]): NewsCardBg {
+const bgForArticle = (type: NewsGridArticle["articleType"]): NewsCardBg => {
   return type ? BG_BY_TYPE[type] : "cream";
-}
+};
 
 // Six-entry rotation pool covering the full 3×2 grid. The four
 // canonical pool entries cycle and the last two repeat the first two

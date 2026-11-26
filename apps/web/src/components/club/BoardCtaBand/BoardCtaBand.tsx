@@ -7,7 +7,7 @@ import { CtaBand } from "@/components/design-system";
  * member lands on the full "wie doet wat" overview. Render full-bleed as the
  * page's last element.
  */
-export function BoardCtaBand() {
+export const BoardCtaBand = () => {
   return (
     <CtaBand
       ariaLabel="Organigram"
@@ -18,4 +18,4 @@ export function BoardCtaBand() {
       href="/hulp#structuur"
     />
   );
-}
+};

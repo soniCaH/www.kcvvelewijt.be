@@ -175,7 +175,7 @@ const POSTER_PRINT_CSS = `
  * Bucket fixtures per weekend (ISO week — Mon–Sun share a group), split on the
  * month where a weekend crosses one.
  */
-function groupByWeekend(matches: ScheurkalenderMatch[]): Weekend[] {
+const groupByWeekend = (matches: ScheurkalenderMatch[]): Weekend[] => {
   const order: string[] = [];
   const buckets = new Map<string, ScheurkalenderMatch[]>();
   for (const match of matches) {
@@ -209,10 +209,10 @@ function groupByWeekend(matches: ScheurkalenderMatch[]): Weekend[] {
       matches: bucket,
     };
   });
-}
+};
 
 /** Bucket weekends per month, labelled from the weekend's Saturday. */
-function groupByMonth(weekends: Weekend[]): MonthGroup[] {
+const groupByMonth = (weekends: Weekend[]): MonthGroup[] => {
   const groups: MonthGroup[] = [];
   for (const weekend of weekends) {
     const key = weekend.saturday.toFormat("yyyy-MM");
@@ -229,22 +229,22 @@ function groupByMonth(weekends: Weekend[]): MonthGroup[] {
     });
   }
   return groups;
-}
+};
 
 /**
  * Split weekends into the poster's two columns on the calendar year: the first
  * year left, everything after it right. Returns a single column when the
  * fixtures span only one year, so the sheet never renders an empty half.
  */
-function splitByYear(weekends: Weekend[]): Weekend[][] {
+const splitByYear = (weekends: Weekend[]): Weekend[][] => {
   const firstYear = weekends[0]?.saturday.year;
   if (firstYear === undefined) return [];
   const left = weekends.filter((w) => w.saturday.year === firstYear);
   const right = weekends.filter((w) => w.saturday.year !== firstYear);
   return right.length > 0 ? [left, right] : [left];
-}
+};
 
-function FixtureRow({ match }: { match: ScheurkalenderMatch }) {
+const FixtureRow = ({ match }: { match: ScheurkalenderMatch }) => {
   const dt = toDisplayZone(match.date);
   const kcvvName = (
     <>
@@ -283,14 +283,14 @@ function FixtureRow({ match }: { match: ScheurkalenderMatch }) {
       </div>
     </div>
   );
-}
+};
 
 const columnClassName = (index: number, columnCount: number) => {
   if (columnCount <= 1) return "";
   return index === 0 ? "border-ink/15 border-r pr-[17px]" : "pl-[17px]";
 };
 
-function FixtureColumn({ weekends }: { weekends: Weekend[] }) {
+const FixtureColumn = ({ weekends }: { weekends: Weekend[] }) => {
   return (
     <>
       {groupByMonth(weekends).map((group) => (
@@ -330,12 +330,12 @@ function FixtureColumn({ weekends }: { weekends: Weekend[] }) {
       ))}
     </>
   );
-}
+};
 
-export function ScheurkalenderPage({
+export const ScheurkalenderPage = ({
   matches,
   season,
-}: ScheurkalenderPageProps) {
+}: ScheurkalenderPageProps) => {
   const columns = splitByYear(groupByWeekend(matches));
   const hasMatches = columns.length > 0;
 
@@ -410,4 +410,4 @@ export function ScheurkalenderPage({
       </PageContainer>
     </div>
   );
-}
+};

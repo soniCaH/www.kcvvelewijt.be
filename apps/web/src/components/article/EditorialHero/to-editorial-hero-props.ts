@@ -20,18 +20,20 @@ import type { EditorialHeroProps } from "./EditorialHero";
  * variant types expect. Generic enough to work for both transfer and
  * event projections.
  */
-function nullsToUndefined<T extends object>(
+const nullsToUndefined = <T extends object>(
   src: T | null | undefined,
-): { [K in keyof T]?: NonNullable<T[K]> } | undefined {
+): { [K in keyof T]?: NonNullable<T[K]> } | undefined => {
   if (src == null) return undefined;
   const out: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(src)) {
     if (value !== null) out[key] = value;
   }
   return out as { [K in keyof T]?: NonNullable<T[K]> };
-}
+};
 
-export function toEditorialHeroProps(article: ArticleVM): EditorialHeroProps {
+export const toEditorialHeroProps = (
+  article: ArticleVM,
+): EditorialHeroProps => {
   const shared = {
     placement: "homepage" as const,
     slug: article.slug,
@@ -84,4 +86,4 @@ export function toEditorialHeroProps(article: ArticleVM): EditorialHeroProps {
       );
     }
   }
-}
+};

@@ -22,7 +22,10 @@ export interface QaTailSectionProps {
  * `<QaBlock>` renders `null` for a block without pairs, and `:last-child`
  * targets the last block that actually rendered.
  */
-export function QaTailSection({ blocks, subjects = null }: QaTailSectionProps) {
+export const QaTailSection = ({
+  blocks,
+  subjects = null,
+}: QaTailSectionProps) => {
   return (
     <section
       data-qa-tail-section="true"
@@ -50,4 +53,4 @@ export function QaTailSection({ blocks, subjects = null }: QaTailSectionProps) {
       </div>
     </section>
   );
-}
+};

@@ -83,11 +83,11 @@ const buildLead = (start: DateTime, end: DateTime | null): string | null => {
   return null;
 };
 
-function buildMeta(
+const buildMeta = (
   start: DateTime,
   end: DateTime | null,
   location: string | null | undefined,
-): string | null {
+): string | null => {
   const trimmedLocation = location?.trim();
   const lead = buildLead(start, end);
 
@@ -95,7 +95,7 @@ function buildMeta(
     Boolean(part),
   );
   return parts.length > 0 ? parts.join(" · ") : null;
-}
+};
 
 /**
  * Events-list ticket (Phase 6.E). A whole-stub link to `/evenementen/[slug]`
@@ -104,14 +104,14 @@ function buildMeta(
  * meta. Consumed by the month-grouped `/evenementen` list and the detail
  * page's "Andere evenementen" grid.
  */
-export function TicketStub({
+export const TicketStub = ({
   title,
   href,
   dateStart,
   dateEnd,
   eventType,
   location,
-}: TicketStubProps) {
+}: TicketStubProps) => {
   const type = eventType ?? DEFAULT_EVENT_TYPE;
   const start = parseEventDateTime(dateStart);
   const end = dateEnd ? parseEventDateTime(dateEnd) : null;
@@ -175,4 +175,4 @@ export function TicketStub({
       <LinkPendingDots placement="corner" />
     </Link>
   );
-}
+};

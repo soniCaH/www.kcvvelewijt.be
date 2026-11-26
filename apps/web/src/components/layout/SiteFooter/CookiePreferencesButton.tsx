@@ -3,7 +3,7 @@
 import * as CookieConsent from "vanilla-cookieconsent";
 import { cookieConsentState } from "../CookieConsentBanner/cookieConsentState";
 
-export function CookiePreferencesButton() {
+export const CookiePreferencesButton = () => {
   return (
     <button
       type="button"
@@ -17,4 +17,4 @@ export function CookiePreferencesButton() {
       Cookie-instellingen
     </button>
   );
-}
+};

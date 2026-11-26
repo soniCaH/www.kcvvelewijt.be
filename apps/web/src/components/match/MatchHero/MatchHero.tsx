@@ -12,7 +12,7 @@ import { MatchStatusBadge } from "../MatchStatusBadge";
 
 type MatchHeroKicker = "VOORBESCHOUWING" | "MATCHVERSLAG";
 
-function getKicker(status: MatchStatus): MatchHeroKicker {
+const getKicker = (status: MatchStatus): MatchHeroKicker => {
   switch (status) {
     case "scheduled":
       return "VOORBESCHOUWING";
@@ -25,7 +25,7 @@ function getKicker(status: MatchStatus): MatchHeroKicker {
     default:
       return assertNever(status);
   }
-}
+};
 
 export interface MatchHeroTeam {
   id: number;
@@ -104,25 +104,25 @@ interface StubDateParts {
   month: string;
 }
 
-function formatStubDate(date: Date): StubDateParts {
+const formatStubDate = (date: Date): StubDateParts => {
   const dt = toMatchDisplayZone(date);
   return {
     weekday: dt.toFormat("ccc").replace(/\.$/, "").toUpperCase(),
     day: dt.toFormat("d"),
     month: dt.toFormat("MMM").replace(/\.$/, "").toUpperCase(),
   };
-}
+};
 
 // The KCVV team is a chip in its own slot (#3705), not a meta part.
-function buildCompetitionMeta(
+const buildCompetitionMeta = (
   competition: string | undefined,
   date: Date,
-): string[] {
+): string[] => {
   const parts: string[] = [];
   if (competition) parts.push(competition);
   parts.push(deriveSeason(date).label);
   return parts;
-}
+};
 
 /**
  * The mono meta line under the header — one `·`-interleaved render, shared
@@ -131,7 +131,7 @@ function buildCompetitionMeta(
  * used to exist, one per hero, with the separator on opposite edges of the
  * `.map()` — same rendered output, two spellings.
  */
-function MetaLine({ parts }: { parts: string[] }) {
+const MetaLine = ({ parts }: { parts: string[] }) => {
   return (
     <div className="border-ink border-t pt-3">
       <div className="text-ink font-mono text-[10.5px] tracking-[0.14em] uppercase">
@@ -148,9 +148,9 @@ function MetaLine({ parts }: { parts: string[] }) {
       </div>
     </div>
   );
-}
+};
 
-function VsMark() {
+const VsMark = () => {
   return (
     <span
       data-score-state="vs"
@@ -159,9 +159,9 @@ function VsMark() {
       vs
     </span>
   );
-}
+};
 
-function ScoreRegion({
+const ScoreRegion = ({
   status,
   homeScore,
   awayScore,
@@ -169,7 +169,7 @@ function ScoreRegion({
   status: MatchStatus;
   homeScore?: number;
   awayScore?: number;
-}) {
+}) => {
   switch (status) {
     case "scheduled":
       return <VsMark />;
@@ -206,9 +206,9 @@ function ScoreRegion({
     default:
       return assertNever(status);
   }
-}
+};
 
-function TeamShieldFallback({ name }: { name: string }) {
+const TeamShieldFallback = ({ name }: { name: string }) => {
   const initial = name.trim().charAt(0).toLocaleUpperCase("nl-BE") || "·";
   return (
     <span
@@ -219,7 +219,7 @@ function TeamShieldFallback({ name }: { name: string }) {
       {initial}
     </span>
   );
-}
+};
 
 /**
  * `stacked` (the full hero only): below `md` the slot is a centred column —
@@ -232,7 +232,7 @@ function TeamShieldFallback({ name }: { name: string }) {
  * the name in the DOM so the `<h1>` reads "KCVV Elewijt U13"; `order` moves
  * it visually.
  */
-function TeamSlot({
+const TeamSlot = ({
   team,
   align,
   stacked = false,
@@ -242,7 +242,7 @@ function TeamSlot({
   align: "start" | "end";
   stacked?: boolean;
   label?: string;
-}) {
+}) => {
   const isEnd = align === "end";
   return (
     <div
@@ -291,7 +291,7 @@ function TeamSlot({
       )}
     </div>
   );
-}
+};
 
 /**
  * The reduced hero for a pitch-reservation placeholder (#2606, #2688) or a
@@ -316,13 +316,13 @@ function TeamSlot({
  * its opponent — it *is* a preview or report, so it keeps `getKicker(status)`
  * like the full hero, rather than also being announced as "GERESERVEERD".
  */
-function ReservationHero({
+const ReservationHero = ({
   match,
   className,
 }: {
   match: MatchHeroReservation | MatchHeroReduced;
   className?: string;
-}) {
+}) => {
   const { team, date, time, venue, status, competition, kcvvTeamLabel } = match;
   const stubDate = formatStubDate(date);
   const {
@@ -395,7 +395,7 @@ function ReservationHero({
       </div>
     </TapedCard>
   );
-}
+};
 
 /**
  * The card a tapped fixture row grows into (#3397). Only the full hero joins:
@@ -404,21 +404,21 @@ function ReservationHero({
  * and never on a plain arrival, a leave or a live score refresh. No `id`
  * (stories, previews): nothing to pair with, the card renders bare.
  */
-function FullHero(props: { match: MatchHeroMatch; className?: string }) {
+const FullHero = (props: { match: MatchHeroMatch; className?: string }) => {
   return (
     <TravelDestination kind="match" id={props.match.id}>
       <FullHeroCard {...props} />
     </TravelDestination>
   );
-}
+};
 
-function FullHeroCard({
+const FullHeroCard = ({
   match,
   className,
 }: {
   match: MatchHeroMatch;
   className?: string;
-}) {
+}) => {
   const {
     homeTeam,
     awayTeam,
@@ -521,7 +521,7 @@ function FullHeroCard({
       </div>
     </TapedCard>
   );
-}
+};
 
 /**
  * The match-detail page's hero — state-aware, never auto-hides (#2802
@@ -529,7 +529,7 @@ function FullHeroCard({
  * `matchDetailToHeroRow()`; this component narrows and renders, it never
  * asks `matchRowKind` or `otherClubSide` itself.
  */
-export function MatchHero({ match, className }: MatchHeroProps) {
+export const MatchHero = ({ match, className }: MatchHeroProps) => {
   switch (match.kind) {
     case "reservation":
     case "reduced":
@@ -539,4 +539,4 @@ export function MatchHero({ match, className }: MatchHeroProps) {
     default:
       return assertNever(match);
   }
-}
+};

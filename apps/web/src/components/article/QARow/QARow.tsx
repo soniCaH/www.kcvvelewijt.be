@@ -100,12 +100,12 @@ interface SpeakerHeaderProps {
   cluster?: SubjectAvatarClusterMember[];
 }
 
-function SpeakerHeader({
+const SpeakerHeader = ({
   firstName,
   fullName,
   role,
   cluster,
-}: SpeakerHeaderProps) {
+}: SpeakerHeaderProps) => {
   const tagName = (fullName ?? firstName).trim();
   const isCluster = cluster != null && cluster.length > 1;
   return (
@@ -135,9 +135,9 @@ function SpeakerHeader({
       </p>
     </header>
   );
-}
+};
 
-export function QARow({ question, respondents, className }: QARowProps) {
+export const QARow = ({ question, respondents, className }: QARowProps) => {
   const isMulti = respondents.length > 1;
   if (respondents.length === 0) return null;
 
@@ -253,4 +253,4 @@ export function QARow({ question, respondents, className }: QARowProps) {
       </div>
     </article>
   );
-}
+};

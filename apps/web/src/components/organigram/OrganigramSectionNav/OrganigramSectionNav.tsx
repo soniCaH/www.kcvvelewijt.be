@@ -43,12 +43,12 @@ export interface OrganigramSectionNavProps {
   className?: string;
 }
 
-export function OrganigramSectionNav({
+export const OrganigramSectionNav = ({
   members,
   responsibilityPaths,
   youthTeamCard,
   className,
-}: OrganigramSectionNavProps) {
+}: OrganigramSectionNavProps) => {
   const { navRef, activeId, topInset } = useSectionNav(SECTION_IDS);
 
   // The repeated search stays hidden until the hero (which carries its own
@@ -121,4 +121,4 @@ export function OrganigramSectionNav({
       </PageContainer>
     </nav>
   );
-}
+};

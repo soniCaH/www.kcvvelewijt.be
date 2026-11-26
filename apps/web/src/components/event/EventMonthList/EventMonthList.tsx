@@ -21,7 +21,7 @@ export interface EventMonthListProps {
  * carries no year to accent (#2239 EVT-2). The earlier `<StripedSeam>` rule was
  * dropped as overkill here (#2239 EVT-1).
  */
-export function EventMonthList({ events }: EventMonthListProps) {
+export const EventMonthList = ({ events }: EventMonthListProps) => {
   const groups = groupEventsByMonth(events);
 
   return (
@@ -56,4 +56,4 @@ export function EventMonthList({ events }: EventMonthListProps) {
       ))}
     </div>
   );
-}
+};

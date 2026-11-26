@@ -17,7 +17,10 @@ import { useState } from "react";
  *
  * Render-phase state, so no effect has to run a frame late.
  */
-export function useGrowOnLanding(listShown: boolean, landed: boolean): boolean {
+export const useGrowOnLanding = (
+  listShown: boolean,
+  landed: boolean,
+): boolean => {
   const [latch, setLatch] = useState({
     listShown: false,
     landed: false,
@@ -32,4 +35,4 @@ export function useGrowOnLanding(listShown: boolean, landed: boolean): boolean {
     });
   }
   return latch.grow;
-}
+};

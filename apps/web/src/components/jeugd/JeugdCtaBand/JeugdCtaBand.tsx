@@ -19,7 +19,9 @@ export interface JeugdCtaBandProps {
  * the hero so the hero's line count at 320 px stays as it is. No trial-training invitation:
  * club feedback v2 asked for none for now (#3427).
  */
-export function JeugdCtaBand({ href = "/club/word-lid" }: JeugdCtaBandProps) {
+export const JeugdCtaBand = ({
+  href = "/club/word-lid",
+}: JeugdCtaBandProps) => {
   return (
     <CtaBand
       ariaLabel="Schrijf je in"
@@ -34,4 +36,4 @@ export function JeugdCtaBand({ href = "/club/word-lid" }: JeugdCtaBandProps) {
       href={href}
     />
   );
-}
+};

@@ -7,9 +7,9 @@ import type { Sponsor } from "./Sponsors";
 const TIER_RANK = { hoofdsponsor: 0, sponsor: 1, sympathisant: 2 } as const;
 const UNTIERED_RANK = 3;
 
-function rank(sponsor: Sponsor): number {
+const rank = (sponsor: Sponsor): number => {
   return sponsor.tier ? TIER_RANK[sponsor.tier] : UNTIERED_RANK;
-}
+};
 
 /**
  * Picks the single sponsor to feature in the `/sponsors` hero marquee
@@ -22,7 +22,7 @@ function rank(sponsor: Sponsor): number {
  * full-width headline (7.d2 lock). The selected sponsor still appears in its
  * tier grid below; deliberate double-emphasis, no dedup.
  */
-export function selectFeaturedSponsor(sponsors: Sponsor[]): Sponsor | null {
+export const selectFeaturedSponsor = (sponsors: Sponsor[]): Sponsor | null => {
   const featured = sponsors.filter((sponsor) => sponsor.featured === true);
   if (featured.length === 0) return null;
 
@@ -34,4 +34,4 @@ export function selectFeaturedSponsor(sponsors: Sponsor[]): Sponsor | null {
     }
     return candidate.name.localeCompare(best.name, "nl") < 0 ? candidate : best;
   });
-}
+};

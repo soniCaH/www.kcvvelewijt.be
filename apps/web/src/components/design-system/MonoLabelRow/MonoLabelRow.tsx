@@ -37,9 +37,9 @@ export interface MonoLabelRowProps {
 // same string under three tone keys.
 type DividerShade = "light" | "dark";
 
-function shadeFor(tone: MonoLabelTone): DividerShade {
+const shadeFor = (tone: MonoLabelTone): DividerShade => {
   return tone === "cream" ? "dark" : "light";
-}
+};
 
 // Full class strings per shade, built by template-literal concatenation —
 // no `cn()`. `--text-label` is a custom @theme *size* token, so passing it
@@ -57,14 +57,14 @@ const GLYPH_CLASS: Record<DividerShade, string> = {
   dark: "text-cream text-label font-mono",
 };
 
-export function MonoLabelRow({
+export const MonoLabelRow = ({
   items,
   divider = "·",
   as: Tag = "div",
   wrap = true,
   tone = "ink",
   className,
-}: MonoLabelRowProps) {
+}: MonoLabelRowProps) => {
   if (items.length === 0) return null;
 
   const isList = Tag === "ol" || Tag === "ul";
@@ -129,4 +129,4 @@ export function MonoLabelRow({
       })}
     </Tag>
   );
-}
+};

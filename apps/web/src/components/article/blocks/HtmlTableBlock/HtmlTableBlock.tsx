@@ -68,7 +68,7 @@ const SANITIZED_ANCHOR_OPEN_TAG_RE = /<a\b([^>]*)>/gi;
  * one) is left as a bare, unstyled `<a>` rather than dressed up as a live
  * link that goes nowhere.
  */
-function addProseLinkClassToAnchors(sanitizedHtml: string): string {
+const addProseLinkClassToAnchors = (sanitizedHtml: string): string => {
   return sanitizedHtml.replace(
     SANITIZED_ANCHOR_OPEN_TAG_RE,
     (tag, attrs: string) => {
@@ -76,7 +76,7 @@ function addProseLinkClassToAnchors(sanitizedHtml: string): string {
       return `<a class="prose-link"${attrs}>`;
     },
   );
-}
+};
 
 export interface HtmlTableBlockProps {
   /** Raw HTML — sanitized through `TABLE_SANITIZE_OPTIONS` before render. */
@@ -93,7 +93,7 @@ export interface HtmlTableBlockProps {
  * file so `<ContactPage>` (a client component) can render its static table
  * without importing the sanitizer.
  */
-export function HtmlTableBlock({ html, className }: HtmlTableBlockProps) {
+export const HtmlTableBlock = ({ html, className }: HtmlTableBlockProps) => {
   const trimmed = typeof html === "string" ? html.trim() : "";
   if (trimmed.length === 0) return null;
 
@@ -105,4 +105,4 @@ export function HtmlTableBlock({ html, className }: HtmlTableBlockProps) {
       className={className}
     />
   );
-}
+};

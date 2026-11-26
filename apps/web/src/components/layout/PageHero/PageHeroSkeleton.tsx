@@ -83,7 +83,7 @@ export interface PageHeroSkeletonProps {
 }
 
 /** Kicker → headline → lead, at `<PageHero>`'s own rhythm. */
-function OpeningBars({
+const OpeningBars = ({
   tone,
   lead,
   kicker,
@@ -91,7 +91,7 @@ function OpeningBars({
   tone: PageHeroTone;
   lead: boolean;
   kicker: boolean;
-}) {
+}) => {
   return (
     <>
       {kicker ? <Skeleton tone={tone} className="h-3 w-44" /> : null}
@@ -104,11 +104,11 @@ function OpeningBars({
       ) : null}
     </>
   );
-}
+};
 
 /** The up-link footprint — real (unshimmered) when the label is fixed copy,
  *  a shimmer bar the same size when it is data. */
-function UpLinkSlot({
+const UpLinkSlot = ({
   upLink,
   shimmer,
   tone,
@@ -116,7 +116,7 @@ function UpLinkSlot({
   upLink: Pick<UpLinkProps, "href" | "label"> | undefined;
   shimmer: boolean | undefined;
   tone: "ink" | "cream";
-}) {
+}) => {
   if (upLink) {
     return (
       <UpLink
@@ -144,9 +144,9 @@ function UpLinkSlot({
     );
   }
   return null;
-}
+};
 
-export function PageHeroSkeleton({
+export const PageHeroSkeleton = ({
   register = "band",
   tone = "cream",
   width,
@@ -157,7 +157,7 @@ export function PageHeroSkeleton({
   upLinkShimmer,
   size = "compact",
   className,
-}: PageHeroSkeletonProps) {
+}: PageHeroSkeletonProps) => {
   if (register === "minimal") {
     return (
       <>
@@ -226,4 +226,4 @@ export function PageHeroSkeleton({
       </PageContainer>
     </header>
   );
-}
+};

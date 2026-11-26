@@ -17,7 +17,7 @@ const TITLE = "text-body-md text-ink print:text-body-sm min-w-0";
  * that screen readers cannot reach reliably. `openStructureRow` finds it through
  * the same marker a key-figure card carries.
  */
-function VacantRow({ row }: { row: LedgerRowVM }) {
+const VacantRow = ({ row }: { row: LedgerRowVM }) => {
   return (
     <li data-key-node-id={row.id} tabIndex={-1} className="break-inside-avoid">
       <span className={ROW_LINE}>
@@ -27,9 +27,9 @@ function VacantRow({ row }: { row: LedgerRowVM }) {
       </span>
     </li>
   );
-}
+};
 
-function HeldRow({ row }: { row: LedgerRowVM }) {
+const HeldRow = ({ row }: { row: LedgerRowVM }) => {
   const { trackMemberClicked } = useOrganigramAnalytics();
 
   return (
@@ -83,7 +83,7 @@ function HeldRow({ row }: { row: LedgerRowVM }) {
       </details>
     </li>
   );
-}
+};
 
 /**
  * One ledger line: `box title ······ name(s)  +`. The dotted leader already
@@ -96,10 +96,10 @@ function HeldRow({ row }: { row: LedgerRowVM }) {
  * member event (`openStructureRow` only flips `open`). A key-figure card or a
  * vacant row has nothing to toggle; `openStructureRow` fires its event itself.
  */
-export function LedgerRow({ row }: { row: LedgerRowVM }) {
+export const LedgerRow = ({ row }: { row: LedgerRowVM }) => {
   return row.holders.length === 0 ? (
     <VacantRow row={row} />
   ) : (
     <HeldRow row={row} />
   );
-}
+};

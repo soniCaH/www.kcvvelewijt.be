@@ -79,13 +79,13 @@ const REGISTER_CLASSES: Record<ScrollArrowButtonRegister, string> = {
  * first: a dark-panel `control` arrow (the organigram breadcrumb) still
  * takes the `className` soft-shadow override same as before.
  */
-export function ScrollArrowButton({
+export const ScrollArrowButton = ({
   direction,
   onClick,
   register,
   disabled = false,
   className,
-}: ScrollArrowButtonProps) {
+}: ScrollArrowButtonProps) => {
   const glyph = direction === "left" ? "←" : "→";
   const positionClass = direction === "left" ? "left-0" : "right-0";
 
@@ -119,4 +119,4 @@ export function ScrollArrowButton({
       <span aria-hidden="true">{glyph}</span>
     </button>
   );
-}
+};

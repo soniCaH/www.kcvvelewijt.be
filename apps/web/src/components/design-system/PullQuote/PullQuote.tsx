@@ -139,7 +139,7 @@ const PLACEMENT_TONE: Record<PullQuotePlacement, PullQuoteTone> = {
   flow: "cream",
 };
 
-export function PullQuote({
+export const PullQuote = ({
   children,
   attribution,
   labels,
@@ -149,7 +149,7 @@ export function PullQuote({
   interactive,
   avatarSlot,
   className,
-}: PullQuoteProps) {
+}: PullQuoteProps) => {
   const tone = PLACEMENT_TONE[placement];
   const palette = TONE[tone];
   // An authored-but-blank name (`{ name: "" }` — the shape a caller gets by
@@ -202,7 +202,7 @@ export function PullQuote({
       </div>
     </TapedCard>
   );
-}
+};
 
 interface PullQuoteAttributionRowProps {
   attribution: PullQuoteAttribution;
@@ -210,11 +210,11 @@ interface PullQuoteAttributionRowProps {
   palette: TonePalette;
 }
 
-function PullQuoteAttributionRow({
+const PullQuoteAttributionRow = ({
   attribution,
   avatarSlot,
   palette,
-}: PullQuoteAttributionRowProps) {
+}: PullQuoteAttributionRowProps) => {
   const meta = [attribution.role, attribution.source].filter(
     (v): v is string => typeof v === "string" && v.length > 0,
   );
@@ -302,4 +302,4 @@ function PullQuoteAttributionRow({
       </div>
     </div>
   );
-}
+};

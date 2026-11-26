@@ -23,7 +23,7 @@ export interface ErrorAnalyticsProps {
  * `<ErrorState>` on each action button/link → `"home"` | `"search"` | `"retry"` | `"news"`)
  * supplies the `action` param.
  */
-export function ErrorAnalytics({ code, children }: ErrorAnalyticsProps) {
+export const ErrorAnalytics = ({ code, children }: ErrorAnalyticsProps) => {
   const ref = useRef<HTMLDivElement>(null);
   // `path` is read once at mount (the URL the visitor hit) and shared with the
   // delegated click handler below, which fires after mount.
@@ -55,4 +55,4 @@ export function ErrorAnalytics({ code, children }: ErrorAnalyticsProps) {
   });
 
   return <div ref={ref}>{children}</div>;
-}
+};

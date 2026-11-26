@@ -234,7 +234,7 @@ interface EditorialHeroCoverProps {
   placement?: EditorialHeroPlacement;
 }
 
-function EditorialHeroCover({
+const EditorialHeroCover = ({
   coverImage,
   aspect,
   overlay,
@@ -243,7 +243,7 @@ function EditorialHeroCover({
   seed,
   slug,
   placement,
-}: EditorialHeroCoverProps) {
+}: EditorialHeroCoverProps) => {
   const photo = (
     <SanityImage
       src={coverImage.url}
@@ -279,7 +279,7 @@ function EditorialHeroCover({
       {overlay}
     </TapedFigure>
   );
-}
+};
 
 // ─── Kicker helpers ──────────────────────────────────────────────────────────
 
@@ -289,26 +289,26 @@ function EditorialHeroCover({
  * can't carry — that variant renders its kicker manually instead
  * (see `renderTransferKicker`).
  */
-function buildPlainKickerItems(
+const buildPlainKickerItems = (
   type: string,
   meta: string[],
   date: string | undefined,
-): MonoLabelRowItem[] {
+): MonoLabelRowItem[] => {
   const items: MonoLabelRowItem[] = [{ label: type }];
   for (const segment of meta) items.push({ label: segment });
   if (date) items.push({ label: date });
   return items;
-}
+};
 
 // ─── Variant editorial renderers ────────────────────────────────────────────
 
-function renderAnnouncementEditorial(
+const renderAnnouncementEditorial = (
   title: EditorialHeroSharedProps["title"],
   lead: string | undefined,
   author: string | undefined,
   category: string | undefined,
   date: string | undefined,
-) {
+) => {
   const meta = category?.trim() ? [category.trim()] : [];
   const items = buildPlainKickerItems("Aankondiging", meta, date);
   return (
@@ -321,15 +321,15 @@ function renderAnnouncementEditorial(
       <EditorialByline author={author} />
     </>
   );
-}
+};
 
-function renderInterviewEditorial(
+const renderInterviewEditorial = (
   title: EditorialHeroSharedProps["title"],
   lead: string | undefined,
   author: string | undefined,
   subjects: IndexedSubject[] | null | undefined,
   date: string | undefined,
-) {
+) => {
   const resolvedSubjects = (subjects ?? [])
     .map((s) => resolveSubject(s))
     .filter((r): r is ResolvedSubject => r !== null);
@@ -358,15 +358,15 @@ function renderInterviewEditorial(
       <EditorialByline author={author} />
     </>
   );
-}
+};
 
-function renderEventEditorial(
+const renderEventEditorial = (
   title: EditorialHeroSharedProps["title"],
   lead: string | undefined,
   author: string | undefined,
   feature: EventFactValue | null | undefined,
   date: string | undefined,
-) {
+) => {
   // ageGroup wins, else competitionTag — the kicker secondary slot.
   const kickerMeta =
     feature?.ageGroup?.trim() || feature?.competitionTag?.trim();
@@ -382,15 +382,15 @@ function renderEventEditorial(
       <EditorialByline author={author} />
     </>
   );
-}
+};
 
-function renderTransferEditorial(
+const renderTransferEditorial = (
   fallbackTitle: EditorialHeroSharedProps["title"],
   lead: string | undefined,
   author: string | undefined,
   feature: TransferFactValue | null | undefined,
   date: string | undefined,
-) {
+) => {
   const resolved = feature ? resolveTransfer(feature) : null;
 
   // R1.5 PR-review revision (#1749): the dirChip + meta line were
@@ -421,15 +421,15 @@ function renderTransferEditorial(
       <EditorialByline author={author} />
     </>
   );
-}
+};
 
-function renderMatchEditorial(
+const renderMatchEditorial = (
   title: EditorialHeroSharedProps["title"],
   lead: string | undefined,
   author: string | undefined,
   variant: "matchPreview" | "matchRecap",
   date: string | undefined,
-) {
+) => {
   // Kicker mirrors the match-page status vocabulary (<MatchHero>): preview →
   // VOORBESCHOUWING, recap → MATCHVERSLAG. When the cover score bar is present
   // it carries the competition + match date (so `date` is passed undefined).
@@ -447,7 +447,7 @@ function renderMatchEditorial(
       <EditorialByline author={author} />
     </>
   );
-}
+};
 
 interface VariantSlots {
   editorial: React.ReactNode;
@@ -605,7 +605,7 @@ const resolveVariantSlots = (
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export function EditorialHero(props: EditorialHeroProps) {
+export const EditorialHero = (props: EditorialHeroProps) => {
   const { title, coverImage, placement, slug, date, priority } = props;
   // The publish date reaches the kicker on the homepage only (#2531): the
   // detail page's metadata bar owns it there, and `date` stays untouched for
@@ -704,7 +704,7 @@ export function EditorialHero(props: EditorialHeroProps) {
       {body}
     </div>
   );
-}
+};
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -715,9 +715,9 @@ const DUTCH_WEEKDAY_SHORT = ["ZO", "MA", "DI", "WO", "DO", "VR", "ZA"] as const;
  * Returns null on unparseable input so the overlay simply doesn't
  * render — better than a placeholder stamp that misleads.
  */
-function deriveEventDayBlock(
+const deriveEventDayBlock = (
   isoDate: string,
-): { weekday: string; date: string } | null {
+): { weekday: string; date: string } | null => {
   const parsed = new Date(`${isoDate}T00:00:00`);
   if (Number.isNaN(parsed.getTime())) return null;
   const weekday = DUTCH_WEEKDAY_SHORT[parsed.getDay()] ?? "";
@@ -725,4 +725,4 @@ function deriveEventDayBlock(
     weekday,
     date: `${parsed.getDate()}/${parsed.getMonth() + 1}`,
   };
-}
+};

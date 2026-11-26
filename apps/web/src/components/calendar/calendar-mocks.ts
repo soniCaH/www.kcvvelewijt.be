@@ -23,9 +23,9 @@ export const tournamentOpponent = {
  * ever differ on `date` (each needs a date inside the range it renders) —
  * `isHome` is left unset deliberately: a reservation has no side to name.
  */
-export function reservationMatch(
+export const reservationMatch = (
   overrides: Partial<CalendarReservation> = {},
-): CalendarReservation {
+): CalendarReservation => {
   return {
     id: 90,
     kind: "reservation",
@@ -37,7 +37,7 @@ export function reservationMatch(
     team: "U8",
     ...overrides,
   };
-}
+};
 
 /**
  * A tournament fixture (#2696/#2715/#2802) — `competitionType ===
@@ -47,9 +47,9 @@ export function reservationMatch(
  * by `transformMatchToCalendar` (see `match-display.ts`'s `matchRowKind`
  * for the function deciding this member applies).
  */
-export function tournamentMatch(
+export const tournamentMatch = (
   overrides: Partial<CalendarReducedMatch> = {},
-): CalendarReducedMatch {
+): CalendarReducedMatch => {
   return {
     id: 91,
     kind: "reduced",
@@ -62,4 +62,4 @@ export function tournamentMatch(
     team: "U9",
     ...overrides,
   };
-}
+};

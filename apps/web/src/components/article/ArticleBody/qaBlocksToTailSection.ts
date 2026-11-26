@@ -55,9 +55,9 @@ export interface QaBlocksToTailSectionResult {
  * because the in-flow set contains no `groupAtTail === true` blocks
  * by construction.
  */
-export function qaBlocksToTailSection(
+export const qaBlocksToTailSection = (
   body: PortableTextBlock[] | null | undefined,
-): QaBlocksToTailSectionResult {
+): QaBlocksToTailSectionResult => {
   if (!Array.isArray(body) || body.length === 0) {
     return { inFlow: [], tailBlocks: [] };
   }
@@ -77,4 +77,4 @@ export function qaBlocksToTailSection(
   }
 
   return { inFlow, tailBlocks };
-}
+};

@@ -38,12 +38,12 @@ const FILL_CLASS: Record<FilterTabsSurface, string> = {
 
 const DEFAULT_WIDTHS = ["w-16", "w-24", "w-28", "w-20", "w-24"] as const;
 
-export function FilterTabsSkeleton({
+export const FilterTabsSkeleton = ({
   surface = "paper",
   count = 5,
   widths = DEFAULT_WIDTHS,
   className,
-}: FilterTabsSkeletonProps) {
+}: FilterTabsSkeletonProps) => {
   return (
     <div
       aria-hidden
@@ -61,4 +61,4 @@ export function FilterTabsSkeleton({
       ))}
     </div>
   );
-}
+};

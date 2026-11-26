@@ -8,7 +8,7 @@ import { CLUB_BOOK_PRINT_CSS, CLUB_BOOK_PRINT_STYLE_ID } from "./print-style";
  * "Download als PDF" — prints the clubboek on A4. The browser's print dialog is
  * the PDF writer; this only adds the print sheet for the length of the print.
  */
-export function PdfButton({ className }: { className?: string }) {
+export const PdfButton = ({ className }: { className?: string }) => {
   const handleClick = () => {
     // Idempotent — clear any leftover from a previous (or cancelled) print.
     document.getElementById(CLUB_BOOK_PRINT_STYLE_ID)?.remove();
@@ -46,4 +46,4 @@ export function PdfButton({ className }: { className?: string }) {
       Download als PDF
     </button>
   );
-}
+};

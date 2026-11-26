@@ -15,7 +15,7 @@ import { FilterTabsSkeleton, Skeleton } from "@/components/design-system";
  * one definition of the real row's shape (single-line, non-wrapping,
  * `gap-3`, `h-9` chips), not a bespoke redraw of it.
  */
-export function EventsBrowserSkeleton() {
+export const EventsBrowserSkeleton = () => {
   return (
     <div aria-hidden className="flex flex-col gap-8">
       <FilterTabsSkeleton
@@ -50,4 +50,4 @@ export function EventsBrowserSkeleton() {
       </div>
     </div>
   );
-}
+};

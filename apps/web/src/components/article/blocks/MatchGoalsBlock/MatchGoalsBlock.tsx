@@ -34,11 +34,11 @@ export interface MatchGoalsBlockProps {
  * Exported so the page can tell if something sits between the article body
  * and what follows (#2531).
  */
-export function hasGoalEvents(events: readonly MatchEvent[]): boolean {
+export const hasGoalEvents = (events: readonly MatchEvent[]): boolean => {
   return events.some((event) => event.type === "goal");
-}
+};
 
-export function MatchGoalsBlock({
+export const MatchGoalsBlock = ({
   homeTeamName,
   awayTeamName,
   homeTeamLogo,
@@ -46,7 +46,7 @@ export function MatchGoalsBlock({
   events,
   kcvvSide,
   className,
-}: MatchGoalsBlockProps) {
+}: MatchGoalsBlockProps) => {
   // Auto-hide when there are no goals (preview has none; a 0-0 recap none
   // either) — the section only earns its space when there is a roll-call.
   if (!hasGoalEvents(events)) return null;
@@ -79,4 +79,4 @@ export function MatchGoalsBlock({
       </div>
     </section>
   );
-}
+};

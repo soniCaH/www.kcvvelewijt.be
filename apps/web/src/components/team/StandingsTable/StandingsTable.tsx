@@ -58,12 +58,12 @@ const ANCHOR_DIVIDER_CLASSES = [
  * both tint. Census 2026-10-17: all 8 published KCVV tables hold exactly one
  * KCVV row, and PSD's ranking row carries no stable team-level id (`team_id`
  * is per-competition). Upgrade when a poule with two KCVV sides appears. */
-function isHighlighted(
+const isHighlighted = (
   entry: RankingEntry,
   highlightClubId: number | undefined,
-): boolean {
+): boolean => {
   return highlightClubId !== undefined && entry.club_id === highlightClubId;
-}
+};
 
 /** Crest + truncating team name, italic unless it's the KCVV row. The one
  * piece both the numbered table and the numberless list render identically.
@@ -71,7 +71,7 @@ function isHighlighted(
  * to engage at all — the numbered table's overflow floor lives on the
  * `Ploeg` column itself (#2582 review M4), not here, since the numberless
  * list renders this same identity outside any scroll container. */
-function ClubIdentity({
+const ClubIdentity = ({
   teamName,
   teamLogo,
   isKcvv,
@@ -79,7 +79,7 @@ function ClubIdentity({
   teamName: string;
   teamLogo: string | undefined;
   isKcvv: boolean;
-}) {
+}) => {
   return (
     <>
       <Crest name={teamName} logo={teamLogo} size={16} />
@@ -94,9 +94,9 @@ function ClubIdentity({
       </span>
     </>
   );
-}
+};
 
-function NumberlessClubList({
+const NumberlessClubList = ({
   entries,
   highlightClubId,
   caption,
@@ -104,7 +104,7 @@ function NumberlessClubList({
   entries: readonly RankingEntry[];
   highlightClubId: number | undefined;
   caption: string | undefined;
-}) {
+}) => {
   return (
     <div
       data-testid="standings-table"
@@ -141,13 +141,13 @@ function NumberlessClubList({
       </ul>
     </div>
   );
-}
+};
 
-export function StandingsTable({
+export const StandingsTable = ({
   entries,
   highlightClubId,
   caption,
-}: StandingsTableProps) {
+}: StandingsTableProps) => {
   if (entries.length === 0) return null;
 
   // Derived from the entries themselves rather than taken as a prop: a
@@ -317,4 +317,4 @@ export function StandingsTable({
       </ScrollOverlay>
     </div>
   );
-}
+};

@@ -11,10 +11,7 @@ export type StripedSeamHeight = "sm" | "md" | "lg" | "xl";
  *   YouthSection top frame.
  */
 export type StripedSeamColorPair =
-  | "ink-cream"
-  | "jersey-cream"
-  | "jersey-tonal-dark"
-  | "cream-jersey-deep";
+  "ink-cream" | "jersey-cream" | "jersey-tonal-dark" | "cream-jersey-deep";
 
 export interface StripedSeamProps {
   direction?: StripedSeamDirection;
@@ -57,12 +54,12 @@ const COLOR_PAIR_STROKES: Record<
   },
 };
 
-export function StripedSeam({
+export const StripedSeam = ({
   direction = "horizontal",
   height = "md",
   colorPair = "ink-cream",
   flip = false,
-}: StripedSeamProps) {
+}: StripedSeamProps) => {
   const h = HEIGHT_PX[height];
   const isVertical = direction === "vertical";
   const { stroke1, stroke2 } = COLOR_PAIR_STROKES[colorPair];
@@ -95,4 +92,4 @@ export function StripedSeam({
       <rect width="100%" height="100%" fill={`url(#${patternId})`} />
     </svg>
   );
-}
+};

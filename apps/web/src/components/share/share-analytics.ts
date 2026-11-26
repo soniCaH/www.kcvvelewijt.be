@@ -58,7 +58,7 @@ export interface ShareImageSaved {
   fallbackUsed: boolean;
 }
 
-export function trackShareImageSaved(saved: ShareImageSaved): void {
+export const trackShareImageSaved = (saved: ShareImageSaved): void => {
   const { mode, look } = saved;
   trackEvent("share_image_saved", {
     content_type: mode,
@@ -77,4 +77,4 @@ export function trackShareImageSaved(saved: ShareImageSaved): void {
     ),
     fallback_used: saved.fallbackUsed,
   });
-}
+};

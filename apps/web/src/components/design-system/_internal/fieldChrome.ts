@@ -104,6 +104,6 @@ const fieldChromeError = [
 ].join(" ");
 
 /** Selects the chrome string for a given error state. */
-export function fieldChrome(error: boolean): string {
+export const fieldChrome = (error: boolean): string => {
   return error ? fieldChromeError : fieldChromeIdle;
-}
+};

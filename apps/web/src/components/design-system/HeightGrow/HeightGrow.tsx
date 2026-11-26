@@ -59,14 +59,14 @@ export interface HeightGrowProps {
   children: ReactNode;
 }
 
-export function HeightGrow({
+export const HeightGrow = ({
   open = true,
   enter = false,
   bleed = true,
   className,
   onOpenSettled,
   children,
-}: HeightGrowProps) {
+}: HeightGrowProps) => {
   // Reduced motion runs no transition, so no `transitionend`: the height is
   // final as soon as the open has committed.
   const wasOpen = useRef(open);
@@ -106,4 +106,4 @@ export function HeightGrow({
       </div>
     </div>
   );
-}
+};

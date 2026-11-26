@@ -23,10 +23,10 @@ const NO_DATES: StripDates = { widget: "", day: "", month: "" };
  * read it through `toMatchDisplayZone` — never `toDisplayZone`, which would
  * push a late kickoff onto the next day.
  */
-export function stripDates(row: ScheduleRow | null): StripDates {
+export const stripDates = (row: ScheduleRow | null): StripDates => {
   if (!row) return NO_DATES;
   return {
     widget: formatMatchWidgetDate(row.date),
     ...formatMatchDayMonth(row.date),
   };
-}
+};

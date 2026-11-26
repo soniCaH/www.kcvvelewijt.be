@@ -77,7 +77,7 @@ const Wordmark = () => (
   </Link>
 );
 
-export function SiteHeader({ seniorTeams, className }: SiteHeaderProps) {
+export const SiteHeader = ({ seniorTeams, className }: SiteHeaderProps) => {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   // The drawer stays open on a tap so the tapped row's `LinkPendingDots`
@@ -301,4 +301,4 @@ export function SiteHeader({ seniorTeams, className }: SiteHeaderProps) {
       </NavTakeover>
     </>
   );
-}
+};

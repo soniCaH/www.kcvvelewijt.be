@@ -23,7 +23,7 @@ export interface CrestProps {
  * saves negligible bytes for these tiny (16–20px) CDN crests across a full
  * division.
  */
-export function Crest({ name, logo, size = 20, className }: CrestProps) {
+export const Crest = ({ name, logo, size = 20, className }: CrestProps) => {
   if (logo) {
     return (
       <Image
@@ -61,4 +61,4 @@ export function Crest({ name, logo, size = 20, className }: CrestProps) {
       {initial}
     </span>
   );
-}
+};

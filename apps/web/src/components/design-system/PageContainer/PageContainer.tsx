@@ -49,7 +49,7 @@ export interface PageContainerProps {
  * Full-bleed elements (`<StripedSeam>`, heroes, `<CtaBand>`, coloured section
  * bands) must NOT be wrapped — they span the viewport as siblings of the container.
  */
-export function PageContainer({
+export const PageContainer = ({
   children,
   width = "default",
   as: Tag = "div",
@@ -57,7 +57,7 @@ export function PageContainer({
   tabIndex,
   ariaLabel,
   className,
-}: PageContainerProps) {
+}: PageContainerProps) => {
   return (
     <Tag
       id={id}
@@ -72,4 +72,4 @@ export function PageContainer({
       {children}
     </Tag>
   );
-}
+};

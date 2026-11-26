@@ -27,12 +27,12 @@ export interface TeamPhotoLightboxProps {
  * loads on the first click and stays mounted after, so it can animate closed.
  * The library returns focus to the trigger on close.
  */
-export function TeamPhotoLightbox({
+export const TeamPhotoLightbox = ({
   displayName,
   teamSlug,
   fullUrl,
   children,
-}: TeamPhotoLightboxProps) {
+}: TeamPhotoLightboxProps) => {
   const [open, setOpen] = useState(false);
   const [requested, setRequested] = useState(false);
 
@@ -67,4 +67,4 @@ export function TeamPhotoLightbox({
       ) : null}
     </>
   );
-}
+};

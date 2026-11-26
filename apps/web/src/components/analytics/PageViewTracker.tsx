@@ -17,7 +17,10 @@ export interface PageViewTrackerProps {
   params?: Record<string, unknown>;
 }
 
-export function PageViewTracker({ eventName, params }: PageViewTrackerProps) {
+export const PageViewTracker = ({
+  eventName,
+  params,
+}: PageViewTrackerProps) => {
   useEffect(() => {
     trackEvent(eventName, params);
     // Mount-once semantics: deliberately omit `params` from deps so a
@@ -27,4 +30,4 @@ export function PageViewTracker({ eventName, params }: PageViewTrackerProps) {
   }, [eventName]);
 
   return null;
-}
+};

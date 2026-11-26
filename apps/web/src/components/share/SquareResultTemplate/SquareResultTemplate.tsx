@@ -34,7 +34,7 @@ export interface SquareResultTemplateProps {
  * Result template — 1:1 (1080×1080) Instagram feed post. Score + result
  * headline over the mood register, or a fullscreen newsprint photo.
  */
-export function SquareResultTemplate({
+export const SquareResultTemplate = ({
   matchName,
   score,
   mood,
@@ -42,7 +42,7 @@ export function SquareResultTemplate({
   homeLogo,
   awayLogo,
   imageUrl,
-}: SquareResultTemplateProps) {
+}: SquareResultTemplateProps) => {
   const m = resolveResultMood(mood);
   const hasImage = Boolean(imageUrl);
   const crests = resolveCrests(matchName, homeLogo, awayLogo);
@@ -91,4 +91,4 @@ export function SquareResultTemplate({
       <ShareFoot left={matchName} align="center" />
     </ShareFrame>
   );
-}
+};

@@ -39,11 +39,11 @@ export const CLUB_ROOT_NODE: OrgChartNode = {
 };
 
 /** The boxes with the club root in front, unless the list already has one. */
-export function withClubRoot(nodes: OrgChartNode[]): OrgChartNode[] {
+export const withClubRoot = (nodes: OrgChartNode[]): OrgChartNode[] => {
   return nodes.some((node) => node.id === CLUB_ROOT_ID)
     ? nodes
     : [CLUB_ROOT_NODE, ...nodes];
-}
+};
 
 export interface SpotlightTree {
   rootId: string;
@@ -80,10 +80,10 @@ export interface SpotlightView {
  * (#3478), so the builder breaks each cycle itself: the member that comes first
  * in incoming order is re-attached to the root.
  */
-export function buildSpotlightTree(
+export const buildSpotlightTree = (
   nodes: OrgChartNode[],
   rootId: string = CLUB_ROOT_ID,
-): SpotlightTree {
+): SpotlightTree => {
   const byId = new Map<string, OrgChartNode>();
   for (const node of nodes) byId.set(node.id, node);
 
@@ -114,7 +114,7 @@ export function buildSpotlightTree(
   }
 
   return { rootId, byId, childrenOf, parentOf };
-}
+};
 
 /** Climb parent links until the root, a settled node or a revisit; `end` is where it stopped. */
 const walkUp = (
@@ -132,11 +132,11 @@ const walkUp = (
  * Walks up from each node; a walk that revisits a node of its own path has
  * found a cycle, and the cycle's first member in incoming order is cut loose.
  */
-function breakParentCycles(
+const breakParentCycles = (
   nodes: OrgChartNode[],
   parentOf: Map<string, string | null>,
   rootId: string,
-): void {
+): void => {
   const order = new Map(nodes.map((node, index) => [node.id, index]));
   const settled = new Set<string>();
 
@@ -151,12 +151,12 @@ function breakParentCycles(
     }
     for (const id of path) settled.add(id);
   }
-}
+};
 
 /** Children of a node (empty when leaf or unknown). */
-export function childrenOf(tree: SpotlightTree, id: string): OrgChartNode[] {
+export const childrenOf = (tree: SpotlightTree, id: string): OrgChartNode[] => {
   return tree.childrenOf.get(id) ?? [];
-}
+};
 
 /**
  * The node the explorer opens on by default: the most substantive top-level
@@ -165,7 +165,7 @@ export function childrenOf(tree: SpotlightTree, id: string): OrgChartNode[] {
  * holds whatever the real org shape is; falls back to the root when there are no
  * top nodes. The root stays reachable via the breadcrumb.
  */
-export function primaryFocusId(tree: SpotlightTree): string {
+export const primaryFocusId = (tree: SpotlightTree): string => {
   const best = childrenOf(tree, tree.rootId).reduce<OrgChartNode | undefined>(
     (top, node) =>
       !top || childrenOf(tree, node.id).length > childrenOf(tree, top.id).length
@@ -174,12 +174,12 @@ export function primaryFocusId(tree: SpotlightTree): string {
     undefined,
   );
   return best?.id ?? tree.rootId;
-}
+};
 
 /** Parent id of a node, or null for the root / unknown nodes. */
-function parentIdOf(tree: SpotlightTree, id: string): string | null {
+const parentIdOf = (tree: SpotlightTree, id: string): string | null => {
   return tree.parentOf.get(id) ?? null;
-}
+};
 
 /** Nodes from `current` up to the root, stopping on an unknown or revisited node. */
 const collectTrail = (
@@ -199,19 +199,19 @@ const collectTrail = (
  * The reporting line from the root down to `id`, inclusive. Guards against
  * cycles by stopping if a node is revisited.
  */
-export function trailTo(tree: SpotlightTree, id: string): OrgChartNode[] {
+export const trailTo = (tree: SpotlightTree, id: string): OrgChartNode[] => {
   return collectTrail(tree, id, []).reverse();
-}
+};
 
 /**
  * Resolve the spotlight neighbourhood for a focused node. Throws if the id is
  * unknown — callers hold a valid focus id (it starts at the root and only moves
  * via the navigation helpers below, which return existing ids or null).
  */
-export function getSpotlightView(
+export const getSpotlightView = (
   tree: SpotlightTree,
   focusId: string,
-): SpotlightView {
+): SpotlightView => {
   const focus = tree.byId.get(focusId);
   if (!focus) {
     throw new Error(`getSpotlightView: unknown node "${focusId}"`);
@@ -232,22 +232,25 @@ export function getSpotlightView(
     focusIndex: focusIndex === -1 ? 0 : focusIndex,
     children: childrenOf(tree, focusId),
   };
-}
+};
 
 // ─── Navigation (return a target node id, or null when the move is unavailable) ──
 
 /** ↑ — move to the parent. Null at the root. */
-export function parentTarget(tree: SpotlightTree, id: string): string | null {
-  return parentIdOf(tree, id);
-}
-
-/** ↓ — move to the first child. Null on a leaf. */
-export function firstChildTarget(
+export const parentTarget = (
   tree: SpotlightTree,
   id: string,
-): string | null {
+): string | null => {
+  return parentIdOf(tree, id);
+};
+
+/** ↓ — move to the first child. Null on a leaf. */
+export const firstChildTarget = (
+  tree: SpotlightTree,
+  id: string,
+): string | null => {
   return childrenOf(tree, id)[0]?.id ?? null;
-}
+};
 
 /**
  * ← / → — move to the previous/next sibling. Stops at the ends (returns null)
@@ -255,11 +258,11 @@ export function firstChildTarget(
  * (a11y research 7o3b); Home/End jump to the ends and the `n / N` indicator +
  * the sibling jump-list (tap) cover longer hops.
  */
-export function siblingTarget(
+export const siblingTarget = (
   tree: SpotlightTree,
   id: string,
   offset: 1 | -1,
-): string | null {
+): string | null => {
   const parentId = parentIdOf(tree, id);
   const siblings = parentId ? childrenOf(tree, parentId) : [];
   if (siblings.length === 0) return null;
@@ -268,20 +271,20 @@ export function siblingTarget(
   const next = index + offset;
   if (next < 0 || next >= siblings.length) return null;
   return siblings[next]?.id ?? null;
-}
+};
 
 /** Home / End — jump to the first/last sibling at this level. */
-export function edgeSiblingTarget(
+export const edgeSiblingTarget = (
   tree: SpotlightTree,
   id: string,
   edge: "first" | "last",
-): string | null {
+): string | null => {
   const parentId = parentIdOf(tree, id);
   const siblings = parentId ? childrenOf(tree, parentId) : [];
   if (siblings.length === 0) return null;
   const target = edge === "first" ? siblings[0] : siblings.at(-1);
   return target?.id ?? null;
-}
+};
 
 /** Keys the spotlight stage handles for navigation (Enter/Escape are owned by the component). */
 export type SpotlightNavKey =
@@ -292,11 +295,11 @@ export type SpotlightNavKey =
  * unavailable at this position). The locked scheme (7o3): ↑ parent · ↓ first
  * child · ← / → prev/next sibling · Home/End first/last sibling.
  */
-export function targetForKey(
+export const targetForKey = (
   tree: SpotlightTree,
   id: string,
   key: SpotlightNavKey,
-): string | null {
+): string | null => {
   switch (key) {
     case "ArrowUp":
       return parentTarget(tree, id);
@@ -313,18 +316,18 @@ export function targetForKey(
     default:
       return null;
   }
-}
+};
 
 /**
  * Count-then-expand split for a large children fan (competitive analysis 7o3b
  * §3 — the converged industry answer to 11–12-wide fan-outs). Returns the
  * visible slice and how many are hidden; when expanded, everything is visible.
  */
-export function splitFan<T>(
+export const splitFan = <T>(
   items: T[],
   cap: number,
   expanded: boolean,
-): { visible: T[]; hidden: number } {
+): { visible: T[]; hidden: number } => {
   if (expanded) {
     return { visible: items, hidden: 0 };
   }
@@ -333,4 +336,4 @@ export function splitFan<T>(
   const integerCap = Math.min(Math.max(0, Math.floor(cap)), items.length);
   const visible = items.slice(0, integerCap);
   return { visible, hidden: items.length - visible.length };
-}
+};

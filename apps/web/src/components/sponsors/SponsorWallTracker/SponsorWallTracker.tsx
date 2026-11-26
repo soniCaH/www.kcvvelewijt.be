@@ -37,10 +37,10 @@ const IMPRESSION_THRESHOLD = 0.5;
  * `contents` keeps the wrapper out of layout: it generates no box, so the wall
  * renders exactly as before.
  */
-export function SponsorWallTracker({
+export const SponsorWallTracker = ({
   source,
   children,
-}: SponsorWallTrackerProps) {
+}: SponsorWallTrackerProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const {
     trackSponsorClick,
@@ -134,4 +134,4 @@ export function SponsorWallTracker({
       {children}
     </div>
   );
-}
+};

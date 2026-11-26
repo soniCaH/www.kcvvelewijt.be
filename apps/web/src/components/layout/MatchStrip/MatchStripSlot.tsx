@@ -13,10 +13,10 @@ import { MatchStripSkeleton } from "./MatchStripSkeleton";
  * strip's data-dependent height. `cross-page-consistency.test.ts` Rule 14
  * pins the four mounts.
  */
-export function MatchStripSlot() {
+export const MatchStripSlot = () => {
   return (
     <Suspense fallback={<MatchStripSkeleton />}>
       <MatchStrip />
     </Suspense>
   );
-}
+};

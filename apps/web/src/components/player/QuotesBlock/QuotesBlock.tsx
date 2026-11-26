@@ -39,7 +39,11 @@ export interface QuotesBlockProps {
   className?: string;
 }
 
-export function QuotesBlock({ bio, playerName, className }: QuotesBlockProps) {
+export const QuotesBlock = ({
+  bio,
+  playerName,
+  className,
+}: QuotesBlockProps) => {
   if (!bio || bio.length === 0) return null;
   if (!hasRenderableBioContent(bio)) return null;
 
@@ -69,4 +73,4 @@ export function QuotesBlock({ bio, playerName, className }: QuotesBlockProps) {
       </div>
     </section>
   );
-}
+};

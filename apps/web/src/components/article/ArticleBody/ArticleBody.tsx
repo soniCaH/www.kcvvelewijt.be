@@ -144,9 +144,9 @@ export interface ArticleBodyProps {
   className?: string;
 }
 
-function endMarkLabelFor(articleType: string | null | undefined): string {
+const endMarkLabelFor = (articleType: string | null | undefined): string => {
   return articleType === "interview" ? "EINDE GESPREK" : "EINDE ARTIKEL";
-}
+};
 
 interface PullQuoteBlock {
   _type: "pullQuote";
@@ -201,7 +201,7 @@ interface InternalLinkValue {
   reference?: InternalLinkReference;
 }
 
-function isNormalParagraph(block: PortableTextBlock): boolean {
+const isNormalParagraph = (block: PortableTextBlock): boolean => {
   if (block._type !== "block") return false;
   const b = block as PortableTextBlockLike;
   // A list item carries style "normal" too — but it must render as a bullet,
@@ -209,16 +209,16 @@ function isNormalParagraph(block: PortableTextBlock): boolean {
   if (b.listItem !== undefined) return false;
   const style = b.style;
   return style === undefined || style === "normal";
-}
+};
 
-function extractBlockText(block: PortableTextBlock): string {
+const extractBlockText = (block: PortableTextBlock): string => {
   const children = (block as PortableTextBlockLike).children;
   if (!Array.isArray(children)) return "";
   return children
     .map((span) => span.text ?? "")
     .join("")
     .trim();
-}
+};
 
 /**
  * `pullQuote.body` is schema-constrained to one block (`.max(1)` in
@@ -228,9 +228,9 @@ function extractBlockText(block: PortableTextBlock): string {
  * (`blockHasRenderableOutput`) and the actual render (`renderPullQuote`)
  * go through this so they agree on what "the quote" is.
  */
-function firstQuoteBlock(body: PortableTextBlock[]): PortableTextBlock[] {
+const firstQuoteBlock = (body: PortableTextBlock[]): PortableTextBlock[] => {
   return body.slice(0, 1);
-}
+};
 
 /**
  * Does the block actually render something? Used to decide whether
@@ -239,7 +239,7 @@ function firstQuoteBlock(body: PortableTextBlock[]): PortableTextBlock[] {
  * empty `pullQuote` block shouldn't get an orphan closer below blank
  * space.
  */
-function blockHasRenderableOutput(block: PortableTextBlock): boolean {
+const blockHasRenderableOutput = (block: PortableTextBlock): boolean => {
   if (block._type === "block") {
     return extractBlockText(block).length > 0;
   }
@@ -264,16 +264,16 @@ function blockHasRenderableOutput(block: PortableTextBlock): boolean {
   // qaBlock / eventFact / videoBlock / unknown types are assumed to
   // render — they own their own empty-state checks.
   return true;
-}
+};
 
 /**
  * Does any block of `content` render something? `<ArticleBody>` closes with
  * `<EndMark>` exactly when this holds, and the article page skips the body
  * shell when it does not (#2531) — both go through this one predicate.
  */
-export function hasRenderableBody(content: PortableTextBlock[]): boolean {
+export const hasRenderableBody = (content: PortableTextBlock[]): boolean => {
   return content.some(blockHasRenderableOutput);
-}
+};
 
 /**
  * Known social hosts → the brand icon that turns a plain body link into a
@@ -288,9 +288,9 @@ const hostnameOf = (href: string): string | null => {
   }
 };
 
-function socialBrandFor(
+const socialBrandFor = (
   href: string,
-): { Icon: typeof FacebookLogo; label: string } | null {
+): { Icon: typeof FacebookLogo; label: string } | null => {
   const host = hostnameOf(href);
   if (host === null) return null; // relative / malformed href → not a social affordance
   // Match a registrable domain OR any of its subdomains (www., m., web.,
@@ -307,14 +307,14 @@ function socialBrandFor(
   // it's Twitter's shortener for ALL outbound links, so it can point anywhere.
   if (isHost(["x.com", "twitter.com"])) return { Icon: X, label: "X" };
   return null;
-}
+};
 
 /**
  * A list item whose only visible text is one or more social links. A bullet
  * list made only of these renders as a row of brand buttons, not as bullets
  * with a box on each line.
  */
-function isSocialOnlyListItem(item: PortableTextBlock): boolean {
+const isSocialOnlyListItem = (item: PortableTextBlock): boolean => {
   const socialKeys = new Set(
     (item.markDefs ?? [])
       .filter(
@@ -339,9 +339,9 @@ function isSocialOnlyListItem(item: PortableTextBlock): boolean {
     spans.length > 0 &&
     spans.every((c) => (c.marks ?? []).some((m) => socialKeys.has(m)))
   );
-}
+};
 
-function TransferFactGroup({ facts }: { facts: TransferFactValue[] }) {
+const TransferFactGroup = ({ facts }: { facts: TransferFactValue[] }) => {
   if (facts.length === 0) return null;
   if (facts.length === 1) {
     return (
@@ -370,28 +370,28 @@ function TransferFactGroup({ facts }: { facts: TransferFactValue[] }) {
       })}
     </div>
   );
-}
+};
 
 // The one shared spacer wrapper for a card that stands alone in the body
 // flow — a `pullQuote` block's card and a blockquote-group's card are the
 // same object rendered from two different authoring paths (#2515 rule 2),
 // so they share one wrapper. Keeps the pre-existing `data-pullquote-spacer`
 // attribute name.
-function QuoteSpacer({ children }: { children: ReactNode }) {
+const QuoteSpacer = ({ children }: { children: ReactNode }) => {
   return (
     <div data-pullquote-spacer="true" className="my-10">
       {children}
     </div>
   );
-}
+};
 
 // One source `blockquote`-style block becomes one `<p>` inside a merged
 // blockquote-group card. Hoisted to module scope (not a closure allocated
 // fresh per group per render) so `@portabletext/react` sees the same
 // component reference across renders.
-function BlockquoteGroupParagraph({ children }: { children?: ReactNode }) {
+const BlockquoteGroupParagraph = ({ children }: { children?: ReactNode }) => {
   return <p className="mb-3 last:mb-0">{children}</p>;
-}
+};
 
 /**
  * Components for rendering the merged children of a blockquote group —
@@ -405,9 +405,9 @@ function BlockquoteGroupParagraph({ children }: { children?: ReactNode }) {
  * or (behind a cast) silently accept the single-component member and drop
  * every other style handler inside a quote.
  */
-function buildBlockquoteGroupComponents(
+const buildBlockquoteGroupComponents = (
   base: PortableTextComponents,
-): PortableTextComponents {
+): PortableTextComponents => {
   return {
     ...base,
     block: {
@@ -415,15 +415,15 @@ function buildBlockquoteGroupComponents(
       blockquote: BlockquoteGroupParagraph,
     },
   };
-}
+};
 
-function BlockquoteGroup({
+const BlockquoteGroup = ({
   blocks,
   components,
 }: {
   blocks: PortableTextBlock[];
   components: PortableTextComponents;
-}) {
+}) => {
   return (
     <QuoteSpacer>
       {/* Editor blockquotes carry no structured attribution — the null
@@ -434,13 +434,13 @@ function BlockquoteGroup({
       </PullQuote>
     </QuoteSpacer>
   );
-}
+};
 
-function renderSegments(
+const renderSegments = (
   segments: ArticleBodySegment[],
   components: PortableTextComponents,
   blockquoteGroupComponents: PortableTextComponents,
-): ReactNode {
+): ReactNode => {
   return segments.map((seg) => {
     if (seg.kind === "pt") {
       return (
@@ -462,14 +462,14 @@ function renderSegments(
       />
     );
   });
-}
+};
 
 // accent — italic + jersey-deep inline emphasis (5.A.1). Hoisted so it can
 // be shared between the main body's `marks.accent` and the constrained
 // `pullQuote.body` sub-tree below — same visual rule, one implementation.
-function AccentMark({ children }: { children?: ReactNode }) {
+const AccentMark = ({ children }: { children?: ReactNode }) => {
   return <em className="text-jersey-deep font-black italic">{children}</em>;
-}
+};
 
 /**
  * Renders `pullQuote.body` through the SAME `components` map the surrounding
@@ -481,10 +481,10 @@ function AccentMark({ children }: { children?: ReactNode }) {
  * `accent` decorator (`pullQuote.ts`), so nothing else in `components` ever
  * actually fires here — reusing the full map costs nothing and can't drift.
  */
-function renderPullQuote(
+const renderPullQuote = (
   value: PullQuoteBlock,
   components: PortableTextComponents,
-): ReactNode {
+): ReactNode => {
   if (!Array.isArray(value.body) || !hasRenderableBioContent(value.body)) {
     return null;
   }
@@ -542,7 +542,7 @@ function renderPullQuote(
       )}
     </QuoteSpacer>
   );
-}
+};
 
 /**
  * Map the `articleImage.width` enum to (a) the wrapper width class /
@@ -555,14 +555,14 @@ function renderPullQuote(
  */
 type ArticleImageWidth = "prose" | "wide" | "bleed";
 
-function resolveArticleImageWidth(
+const resolveArticleImageWidth = (
   width: ArticleImageValue["width"] | undefined,
-): ArticleImageWidth {
+): ArticleImageWidth => {
   if (width === "wide" || width === "bleed") return width;
   return "prose";
-}
+};
 
-function renderArticleImage(value: ArticleImageValue): ReactNode {
+const renderArticleImage = (value: ArticleImageValue): ReactNode => {
   const url = value.asset?.url?.trim();
   if (!url) return null;
   const width = resolveArticleImageWidth(value.width);
@@ -639,7 +639,7 @@ function renderArticleImage(value: ArticleImageValue): ReactNode {
       </TapedFigure>
     </div>
   );
-}
+};
 
 /**
  * Builds the 1-indexed position map for every `videoBlock` in the body.
@@ -647,9 +647,9 @@ function renderArticleImage(value: ArticleImageValue): ReactNode {
  * `video_position` analytics field. Pure: a fresh map per render is
  * cheap (one pass, no allocations beyond the Map itself).
  */
-function buildVideoBlockPositions(
+const buildVideoBlockPositions = (
   content: PortableTextBlock[],
-): Map<string, number> {
+): Map<string, number> => {
   const keys = content.flatMap((block) =>
     block._type === "videoBlock" &&
     typeof block._key === "string" &&
@@ -658,7 +658,7 @@ function buildVideoBlockPositions(
       : [],
   );
   return new Map(keys.map((key, i) => [key, i + 1]));
-}
+};
 
 interface ComponentsBuildArgs {
   subjects: IndexedSubject[] | null;
@@ -730,11 +730,11 @@ const ARTICLE_BLOCK_STYLE_HANDLERS = {
  * handler here — a missing entry (the shipped `qaSectionDivider` bug) renders
  * nothing, which no type-check catches.
  */
-export function buildComponents({
+export const buildComponents = ({
   subjects,
   articleSlug,
   videoBlockPositions,
-}: ComponentsBuildArgs): PortableTextComponents {
+}: ComponentsBuildArgs): PortableTextComponents => {
   // `types.pullQuote` needs the fully-built `components` object as its own
   // `marks` source (see `renderPullQuote`'s docstring), which is a genuine
   // circular need: the map isn't done until pullQuote is in it, and pullQuote
@@ -903,16 +903,16 @@ export function buildComponents({
     renderPullQuote(value, components);
 
   return components;
-}
+};
 
-export function ArticleBody({
+export const ArticleBody = ({
   content,
   subjects = null,
   articleSlug,
   articleType,
   endMarkOwnsTrailingGap = false,
   className,
-}: ArticleBodyProps) {
+}: ArticleBodyProps) => {
   const dropCapIdx = content.findIndex(isNormalParagraph);
   const hasDropCap = dropCapIdx >= 0;
   const dropCapBlock = hasDropCap ? content[dropCapIdx] : null;
@@ -970,4 +970,4 @@ export function ArticleBody({
       </div>
     </div>
   );
-}
+};

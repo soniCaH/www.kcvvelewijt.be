@@ -27,12 +27,12 @@ const FIRST_LETTER_TONE_CLASS: Record<DropCapParagraphTone, string> = {
 // The first character stays in the DOM as normal text so screen readers
 // pronounce it correctly without the aria-hidden + sr-only duplicate that
 // the float-based approach required.
-export function DropCapParagraph({
+export const DropCapParagraph = ({
   children,
   as = "p",
   tone = "jersey",
   className,
-}: DropCapParagraphProps) {
+}: DropCapParagraphProps) => {
   if (!children || children.trim().length === 0) {
     if (process.env.NODE_ENV === "development") {
       console.warn(
@@ -63,4 +63,4 @@ export function DropCapParagraph({
     },
     children,
   );
-}
+};

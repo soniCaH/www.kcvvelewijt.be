@@ -24,7 +24,7 @@ const TAG_BASE =
  * Type-coloured tag for an event row — the event's category, filled with its
  * locked `EVENT_TYPE_FILL` colour (bg + WCAG-safe text tone baked into the map).
  */
-export function EventTypeTag({ eventType }: { eventType: EventType }) {
+export const EventTypeTag = ({ eventType }: { eventType: EventType }) => {
   return (
     <span
       data-testid="event-type-tag"
@@ -34,14 +34,14 @@ export function EventTypeTag({ eventType }: { eventType: EventType }) {
       {eventType}
     </span>
   );
-}
+};
 
 /**
  * Thuis / Uit venue tag for a match row — `card-red` filled when KCVV plays at
  * home, an outline pill (transparent) when away. Mirrors the grid cell's
  * filled-vs-ring pip language at row scale.
  */
-export function MatchVenueTag({ isHome }: { isHome: boolean }) {
+export const MatchVenueTag = ({ isHome }: { isHome: boolean }) => {
   return (
     <span
       data-testid="match-venue-tag"
@@ -53,4 +53,4 @@ export function MatchVenueTag({ isHome }: { isHome: boolean }) {
       {isHome ? HOME_AWAY_WORD.home : HOME_AWAY_WORD.away}
     </span>
   );
-}
+};

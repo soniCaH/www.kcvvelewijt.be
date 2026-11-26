@@ -33,7 +33,7 @@ export interface EventFactInlineProps {
 
 const PAST_LABEL = "Afgelopen";
 
-function safeExternalHref(raw: string | undefined | null): string | null {
+const safeExternalHref = (raw: string | undefined | null): string | null => {
   const trimmed = raw?.trim();
   if (!trimmed) return null;
   try {
@@ -44,9 +44,9 @@ function safeExternalHref(raw: string | undefined | null): string | null {
   } catch {
     return null;
   }
-}
+};
 
-function formatDateLine(range: ResolvedEventRange): string | null {
+const formatDateLine = (range: ResolvedEventRange): string | null => {
   switch (range.kind) {
     case "none":
       return null;
@@ -77,12 +77,12 @@ function formatDateLine(range: ResolvedEventRange): string | null {
       return `${start.day} ${start.monthShort} ${start.year} – ${end.day} ${end.monthShort} ${end.year}`;
     }
   }
-}
+};
 
-function buildDateAndTimeLine(
+const buildDateAndTimeLine = (
   range: ResolvedEventRange,
   value: EventFactValue,
-): string | null {
+): string | null => {
   const datePart = formatDateLine(range);
   if (!datePart) return null;
   // Append a top-level time range only when sessions/range haven't
@@ -94,16 +94,16 @@ function buildDateAndTimeLine(
     if (time) return `${datePart} · ${time}`;
   }
   return datePart;
-}
+};
 
-function buildMetaParts(value: EventFactValue): string[] {
+const buildMetaParts = (value: EventFactValue): string[] => {
   const parts: string[] = [];
   if (value.location?.trim()) parts.push(value.location.trim());
   if (typeof value.capacity === "number" && value.capacity > 0) {
     parts.push(`Max ${value.capacity} plaatsen`);
   }
   return parts;
-}
+};
 
 /**
  * <EventFactInline> — Phase 5 inline polaroid renderer for body-block
@@ -124,12 +124,12 @@ function buildMetaParts(value: EventFactValue): string[] {
  * exclusive to `<EventDetailBlock>` per the compression rules in the
  * lock doc.
  */
-export function EventFactInline({
+export const EventFactInline = ({
   value,
   isPast,
   linkedEventSlug,
   className,
-}: EventFactInlineProps) {
+}: EventFactInlineProps) => {
   const range = resolveEventRange(value.date, value.endDate, value.sessions);
   const title = value.title?.trim();
   const tag = value.competitionTag?.trim();
@@ -254,4 +254,4 @@ export function EventFactInline({
       </TapedCard>
     </div>
   );
-}
+};

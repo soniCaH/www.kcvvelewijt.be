@@ -29,12 +29,12 @@ export interface SearchMastheadProps {
  * (jersey-deep is invisible on the dark ground, 8s1.1); an optional mono hint
  * line under the field. Results render on cream below the band (8s2/8s4).
  */
-export function SearchMasthead({
+export const SearchMasthead = ({
   children,
   heading = "Wat zoek je?",
   accent = "zoek",
   hint,
-}: SearchMastheadProps) {
+}: SearchMastheadProps) => {
   return (
     <header className="bg-jersey-deep-dark border-ink relative overflow-hidden border-b-2">
       {/* Diagonal stripe texture — decorative (8s1). */}
@@ -82,4 +82,4 @@ export function SearchMasthead({
       </PageContainer>
     </header>
   );
-}
+};

@@ -13,9 +13,9 @@ export interface SponsorCtaBandProps {
  * shared `<CtaBand>` with sponsor copy and a `warm` paper-stamp
  * "Word sponsor +".
  */
-export function SponsorCtaBand({
+export const SponsorCtaBand = ({
   href = "/club/contact",
-}: SponsorCtaBandProps) {
+}: SponsorCtaBandProps) => {
   return (
     <CtaBand
       ariaLabel="Word sponsor"
@@ -31,4 +31,4 @@ export function SponsorCtaBand({
       buttonData={{ "data-sponsor-cta": "true" }}
     />
   );
-}
+};

@@ -17,11 +17,11 @@ export interface SectionKickerProps {
  * `<SponsorTiers>` — which has since moved to the run-label heading
  * (`<RunLabel>`, #3334): a card-run label is not a section kicker.
  */
-export function SectionKicker({ children, className }: SectionKickerProps) {
+export const SectionKicker = ({ children, className }: SectionKickerProps) => {
   return (
     <div className={cn("flex items-center gap-2.5", className)}>
       <MonoLabel variant="plain">{children}</MonoLabel>
       <span aria-hidden="true" className="bg-paper-edge h-0.5 flex-1" />
     </div>
   );
-}
+};

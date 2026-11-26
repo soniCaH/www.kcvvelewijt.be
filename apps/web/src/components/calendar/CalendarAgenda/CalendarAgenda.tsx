@@ -96,11 +96,11 @@ const LIST_ROW_FOCUS_CLASSES = "focus-ring-inset";
  * ZEMST SPORTIEF" subject for that case; `undefined` for a placeholder keeps
  * its subject at the competition alone.
  */
-function ReservationAgendaRow({
+const ReservationAgendaRow = ({
   match,
 }: {
   match: CalendarReservation | CalendarReducedMatch;
-}) {
+}) => {
   const otherClub = match.kind === "reduced" ? match.club : undefined;
   const { subject } = reservationView(match, otherClub);
   const crestTeam = match.club;
@@ -142,9 +142,9 @@ function ReservationAgendaRow({
       <span />
     </div>
   );
-}
+};
 
-function AgendaMatchRow({ match }: { match: CalendarMatch }) {
+const AgendaMatchRow = ({ match }: { match: CalendarMatch }) => {
   // Enumerated positively (#2802 review), not `kind !== "match"`
   // — a negated catch-all would silently route any future fourth `kind`
   // into the reduced row too, with no compile error.
@@ -368,14 +368,14 @@ function AgendaMatchRow({ match }: { match: CalendarMatch }) {
       <LinkPendingDots placement="corner" className="top-1 right-1" />
     </MatchTravelLink>
   );
-}
+};
 
 /**
  * One event row — tinted (jersey-deep wash) so it never gets buried in the match
  * stack (the labelled-wall's one rescue, 6.D lock). Title in body sans +
  * its type tag.
  */
-function AgendaEventRow({ event }: { event: CalendarEvent }) {
+const AgendaEventRow = ({ event }: { event: CalendarEvent }) => {
   const when = formatEventTime(event.dateStart) ?? "";
   return (
     <Link
@@ -399,14 +399,14 @@ function AgendaEventRow({ event }: { event: CalendarEvent }) {
       <LinkPendingDots placement="corner" className="bottom-1 left-2" />
     </Link>
   );
-}
+};
 
 /** Merge a day's matches + events into one chronological, type-tagged list. */
 type AgendaItem =
   | { kind: "match"; iso: string; match: CalendarMatch }
   | { kind: "event"; iso: string; event: CalendarEvent };
 
-function mergeDayItems(group: AgendaDayGroup): AgendaItem[] {
+const mergeDayItems = (group: AgendaDayGroup): AgendaItem[] => {
   const items: AgendaItem[] = [
     ...group.matches.map((match): AgendaItem => ({
       kind: "match",
@@ -420,9 +420,9 @@ function mergeDayItems(group: AgendaDayGroup): AgendaItem[] {
     })),
   ];
   return items.sort((a, b) => a.iso.localeCompare(b.iso));
-}
+};
 
-function DayGroup({ group }: { group: AgendaDayGroup }) {
+const DayGroup = ({ group }: { group: AgendaDayGroup }) => {
   const items = mergeDayItems(group);
   const caption = formatItemCount(group.matches.length, group.events.length);
   const heading = formatDayDetailHeading(group.date);
@@ -451,7 +451,7 @@ function DayGroup({ group }: { group: AgendaDayGroup }) {
       </div>
     </section>
   );
-}
+};
 
 /**
  * Agenda view (6.D lock — the "labelled wall"). A month-windowed list: an
@@ -460,12 +460,12 @@ function DayGroup({ group }: { group: AgendaDayGroup }) {
  * a dense Saturday never buries them. Shares the navigated month window with the
  * grid views; never the whole season, never a flat upcoming feed.
  */
-export function CalendarAgenda({
+export const CalendarAgenda = ({
   matches,
   events,
   currentMonth,
   currentYear,
-}: CalendarAgendaProps) {
+}: CalendarAgendaProps) => {
   const groups = useMemo(
     () => buildMonthAgenda(matches, events, currentYear, currentMonth),
     [matches, events, currentYear, currentMonth],
@@ -510,4 +510,4 @@ export function CalendarAgenda({
       )}
     </div>
   );
-}
+};

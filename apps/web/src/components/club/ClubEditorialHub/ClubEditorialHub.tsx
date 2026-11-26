@@ -172,9 +172,9 @@ export interface ClubEditorialHubProps {
  * the `/club` cards are static — no article bubbling. Supersedes the retired
  * bento-style `<ClubEditorialGrid>` + `<EditorialCard>`.
  */
-export function ClubEditorialHub({
+export const ClubEditorialHub = ({
   cards = CLUB_HUB_CARDS,
-}: ClubEditorialHubProps) {
+}: ClubEditorialHubProps) => {
   return (
     <div>
       <SectionHeader
@@ -202,4 +202,4 @@ export function ClubEditorialHub({
       </TapedCardGrid>
     </div>
   );
-}
+};

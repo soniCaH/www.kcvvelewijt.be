@@ -26,7 +26,7 @@ import type { ScheduleRow, ScheduleTeam } from "./types";
  * @param match - Match from PSD API via the BFF
  * @returns ScheduleRow object for display
  */
-export function transformMatchToSchedule(match: Match): ScheduleRow {
+export const transformMatchToSchedule = (match: Match): ScheduleRow => {
   const kind = matchRowKind(match);
 
   switch (kind) {
@@ -69,13 +69,13 @@ export function transformMatchToSchedule(match: Match): ScheduleRow {
     default:
       return assertNever(kind);
   }
-}
+};
 
-function transformTeam(team: Match["home_team"]): ScheduleTeam {
+const transformTeam = (team: Match["home_team"]): ScheduleTeam => {
   return {
     id: team.id,
     name: team.name,
     logo: team.logo,
     teamLabel: team.team_label,
   };
-}
+};

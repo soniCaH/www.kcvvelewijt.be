@@ -4,9 +4,9 @@ import {
 } from "@/components/article/NewsCard/NewsCard";
 
 /** Dutch photo count — "1 foto" / "12 foto's". */
-export function formatImageCount(count: number): string {
+export const formatImageCount = (count: number): string => {
   return `${count} foto${count === 1 ? "" : "'s"}`;
-}
+};
 
 export interface GalleryCardProps {
   title: string;

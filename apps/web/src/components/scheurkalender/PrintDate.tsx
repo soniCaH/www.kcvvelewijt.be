@@ -25,6 +25,6 @@ const getToday = () => formatter.format(new Date());
  * then fills in today's date. `suppressHydrationWarning` alone would keep the
  * stale server date instead.
  */
-export function PrintDate() {
+export const PrintDate = () => {
   return <>{useSyncExternalStore(noopSubscribe, getToday, () => "")}</>;
-}
+};

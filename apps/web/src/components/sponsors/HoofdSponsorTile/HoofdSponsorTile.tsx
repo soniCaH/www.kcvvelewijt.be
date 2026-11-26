@@ -21,7 +21,7 @@ export interface HoofdSponsorTileProps {
  * jersey-deep focus ring and the canonical paper press-down on hover. Without a
  * `url` it renders as a static taped tile (no press).
  */
-export function HoofdSponsorTile({ sponsor }: HoofdSponsorTileProps) {
+export const HoofdSponsorTile = ({ sponsor }: HoofdSponsorTileProps) => {
   const tile = (
     <TapedCard
       rotation="auto"
@@ -85,4 +85,4 @@ export function HoofdSponsorTile({ sponsor }: HoofdSponsorTileProps) {
   }
 
   return tile;
-}
+};

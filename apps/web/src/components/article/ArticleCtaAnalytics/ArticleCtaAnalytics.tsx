@@ -23,11 +23,11 @@ export interface ArticleCtaAnalyticsProps {
  * band and no click listener, rather than an empty delegator sitting idle
  * on every article page.
  */
-export function ArticleCtaAnalytics({
+export const ArticleCtaAnalytics = ({
   articleId,
   articleType,
   children,
-}: ArticleCtaAnalyticsProps) {
+}: ArticleCtaAnalyticsProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const { trackArticleCtaClick } = useArticleAnalytics();
 
@@ -39,4 +39,4 @@ export function ArticleCtaAnalytics({
   });
 
   return <div ref={ref}>{children}</div>;
-}
+};

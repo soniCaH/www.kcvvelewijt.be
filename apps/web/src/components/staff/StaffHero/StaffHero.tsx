@@ -57,7 +57,7 @@ export interface StaffHeroProps {
   phone?: string;
 }
 
-function ContactLink({
+const ContactLink = ({
   href,
   icon: Icon,
   label,
@@ -65,7 +65,7 @@ function ContactLink({
   href: string;
   icon: ComponentType<RedesignIconProps>;
   label: string;
-}) {
+}) => {
   return (
     <a
       href={href}
@@ -75,9 +75,9 @@ function ContactLink({
       {label}
     </a>
   );
-}
+};
 
-export function StaffHero({
+export const StaffHero = ({
   id,
   firstName,
   lastName,
@@ -85,7 +85,7 @@ export function StaffHero({
   roles = [],
   email,
   phone,
-}: StaffHeroProps) {
+}: StaffHeroProps) => {
   const photoUrl = imageUrl?.trim() ?? "";
   const hasPhoto = photoUrl !== "";
   const showContact = Boolean(email || phone);
@@ -187,4 +187,4 @@ export function StaffHero({
       </div>
     </section>
   );
-}
+};

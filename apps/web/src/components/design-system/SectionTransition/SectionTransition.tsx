@@ -54,16 +54,16 @@ export interface SectionTransitionProps {
  * `<SectionStack>` can extend a neighbour-section's backdrop into the
  * transition strip by the right amount.
  */
-export function getTransitionBleed(config: SectionTransitionConfig): string {
+export const getTransitionBleed = (config: SectionTransitionConfig): string => {
   return `${STRIPED_SEAM_HEIGHT_PX[config.height]}px`;
-}
+};
 
-export function SectionTransition({
+export const SectionTransition = ({
   direction,
   height,
   colorPair,
   className,
-}: SectionTransitionProps) {
+}: SectionTransitionProps) => {
   // Equality narrow rather than a cast so a stray value can't slip through.
   const seamDirection: StripedSeamDirection =
     direction === "vertical" ? "vertical" : "horizontal";
@@ -89,4 +89,4 @@ export function SectionTransition({
       />
     </div>
   );
-}
+};

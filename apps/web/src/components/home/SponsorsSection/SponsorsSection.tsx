@@ -13,10 +13,10 @@ export interface SponsorsSectionProps {
   className?: string;
 }
 
-export async function SponsorsSection({
+export const SponsorsSection = async ({
   source,
   className,
-}: SponsorsSectionProps) {
+}: SponsorsSectionProps) => {
   const sponsors = await runPromise(
     // `degradeSection`, not `Effect.catchAll` — `SponsorRepository.findAll()`
     // carries a typed `SanityReadError` (#2864), and a `catchAll` would only
@@ -53,4 +53,4 @@ export async function SponsorsSection({
       <SponsorsBlock sponsors={sponsors} className={className} />
     </SponsorWallTracker>
   );
-}
+};

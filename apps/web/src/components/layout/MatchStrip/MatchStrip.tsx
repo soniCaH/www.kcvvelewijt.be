@@ -42,7 +42,7 @@ import { stripDates } from "./strip-dates";
  * the club yet — excluding only the reservation case would still pass a
  * reduced tournament fixture through, since it isn't a reservation either.
  */
-export async function MatchStrip() {
+export const MatchStrip = async () => {
   const data = await getFirstTeamStripData();
   if (!data) return null;
   const { fixture } = data;
@@ -60,4 +60,4 @@ export async function MatchStrip() {
       }}
     />
   );
-}
+};

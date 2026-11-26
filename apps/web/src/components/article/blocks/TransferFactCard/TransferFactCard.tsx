@@ -38,9 +38,9 @@ import { cn } from "@/lib/utils/cn";
 const ROTATION_POOL = ["a", "b", "c", "d"] as const;
 type CardRotation = (typeof ROTATION_POOL)[number];
 
-function deriveRotation(seed: string): CardRotation {
+const deriveRotation = (seed: string): CardRotation => {
   return ROTATION_POOL[seededIndex(seed, ROTATION_POOL.length)]!;
-}
+};
 
 const DIRECTION_CHIP: Record<
   TransferDirection,
@@ -57,10 +57,10 @@ const TAPE_COLOR: Record<TransferDirection, TapeStripProps["color"]> = {
   outgoing: "warm",
 };
 
-function renderRouteLine(
+const renderRouteLine = (
   fact: TransferFactValue,
   direction: TransferDirection,
-): ReactNode {
+): ReactNode => {
   const otherClub = fact.otherClubName?.trim() ?? "";
   const kcvv = fact.kcvvContext?.trim();
   const until = fact.until?.trim();
@@ -100,14 +100,17 @@ function renderRouteLine(
       {otherClub}
     </>
   );
-}
+};
 
 export interface TransferFactCardProps {
   fact: TransferFactValue;
   className?: string;
 }
 
-export function TransferFactCard({ fact, className }: TransferFactCardProps) {
+export const TransferFactCard = ({
+  fact,
+  className,
+}: TransferFactCardProps) => {
   const resolved = resolveTransfer(fact);
   const direction = resolved.direction;
   const chip = DIRECTION_CHIP[direction];
@@ -171,4 +174,4 @@ export function TransferFactCard({ fact, className }: TransferFactCardProps) {
       </article>
     </TapedCard>
   );
-}
+};

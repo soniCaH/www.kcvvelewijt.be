@@ -36,7 +36,7 @@ const stepRange = (start: number, end: number, step: number): number[] =>
     (_, i) => start + i * step,
   );
 
-function buildDotPositions(): { cx: number; cy: number }[] {
+const buildDotPositions = (): { cx: number; cy: number }[] => {
   return stepRange(DOT_GRID.startY, DOT_GRID.endY, DOT_GRID.stepY).flatMap(
     (y) => {
       const rowOffset = ((y / DOT_GRID.stepY) % 2) * (DOT_GRID.stepX / 2);
@@ -45,7 +45,7 @@ function buildDotPositions(): { cx: number; cy: number }[] {
       );
     },
   );
-}
+};
 
 // `DOT_GRID` is frozen and `buildDotPositions` takes no arguments, so the
 // result is the same every render — compute it once at module load rather
@@ -58,11 +58,11 @@ export interface ShirtPatternMarksProps {
   strokeWidth: number;
 }
 
-export function ShirtPatternMarks({
+export const ShirtPatternMarks = ({
   pattern,
   stripeCount,
   strokeWidth,
-}: ShirtPatternMarksProps) {
+}: ShirtPatternMarksProps) => {
   if (pattern === "plain") return null;
 
   if (pattern === "bands") {
@@ -101,4 +101,4 @@ export function ShirtPatternMarks({
       ))}
     </g>
   );
-}
+};

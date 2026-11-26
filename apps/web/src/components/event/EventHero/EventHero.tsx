@@ -57,7 +57,7 @@ const MONO_META_CLASS =
  * NOT a variant of `<EditorialHero>` (lock §6). Composes the locked primitives
  * (`MonoLabel`, `EditorialHeading`, `TapedFigure`).
  */
-export function EventHero({
+export const EventHero = ({
   title,
   eventType,
   dateStart,
@@ -65,7 +65,7 @@ export function EventHero({
   location,
   cover,
   ctas,
-}: EventHeroProps) {
+}: EventHeroProps) => {
   const type = eventType ?? DEFAULT_EVENT_TYPE;
   const start = parseEventDateTime(dateStart);
   const end = dateEnd ? parseEventDateTime(dateEnd) : null;
@@ -112,4 +112,4 @@ export function EventHero({
       )}
     </article>
   );
-}
+};

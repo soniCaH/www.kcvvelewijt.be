@@ -77,10 +77,10 @@ const ROLE_BUCKET_LABELS: Record<string, string | null> = {
  *      nobody. `role` is empty club-wide today but is the board's path
  *      elsewhere.
  */
-export function resolveFunctionLabel(
+export const resolveFunctionLabel = (
   functionTitle: string | null | undefined,
   role: string | null | undefined,
-): string | null {
+): string | null => {
   const ft = functionTitle?.trim();
   if (ft) return ft;
   const roleText = role?.trim();
@@ -91,7 +91,7 @@ export function resolveFunctionLabel(
       : roleText;
   }
   return null;
-}
+};
 
 /**
  * `<TeamStaff>` — one `<PersonCardRun>` of the shared `<PlayerCard>`
@@ -108,12 +108,12 @@ export function resolveFunctionLabel(
  * is never silently overridden by a repair for data the board isn't
  * PSD-tracked to have anyway (#2638 review).
  */
-export function TeamStaff({
+export const TeamStaff = ({
   staff,
   heading,
   unlabelledNotice = false,
   hideHeading = false,
-}: TeamStaffProps) {
+}: TeamStaffProps) => {
   if (staff.length === 0) return null;
 
   const resolved = staff.map((member) => ({
@@ -170,4 +170,4 @@ export function TeamStaff({
       ) : null}
     </>
   );
-}
+};

@@ -54,10 +54,10 @@ export interface BracketAffordanceProps {
   className?: string;
 }
 
-export function BracketAffordance({
+export const BracketAffordance = ({
   glyph,
   className,
-}: BracketAffordanceProps) {
+}: BracketAffordanceProps) => {
   return (
     <span
       aria-hidden="true"
@@ -67,7 +67,7 @@ export function BracketAffordance({
       {BRACKET_GLYPH[glyph]}
     </span>
   );
-}
+};
 
 /**
  * The same affordance as an HTML string, for the one surface that is not
@@ -83,6 +83,8 @@ export function BracketAffordance({
  * globals.css). Inheriting the control's own label size is also what keeps
  * the bracket from introducing a smaller step than the label it prefixes.
  */
-export function bracketAffordanceHtml(glyph: BracketAffordanceGlyph): string {
+export const bracketAffordanceHtml = (
+  glyph: BracketAffordanceGlyph,
+): string => {
   return `<span aria-hidden="true">${BRACKET_GLYPH[glyph]}</span>`;
-}
+};

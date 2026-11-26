@@ -110,7 +110,7 @@ export interface HulpFinderProps {
   responsibilityPaths: ResponsibilityPath[];
 }
 
-export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
+export const HulpFinder = ({ responsibilityPaths }: HulpFinderProps) => {
   const {
     trackView,
     trackContactClicked,
@@ -485,10 +485,10 @@ export function HulpFinder({ responsibilityPaths }: HulpFinderProps) {
       <div className="mt-6">{renderContent()}</div>
     </div>
   );
-}
+};
 
 /** One category block in the "Alles" preview: header · top-3 · "Alle N →". */
-function CategoryPreview({
+const CategoryPreview = ({
   category,
   paths,
   renderCard,
@@ -498,7 +498,7 @@ function CategoryPreview({
   paths: ResponsibilityPath[];
   renderCard: (path: ResponsibilityPath) => React.ReactNode;
   onSeeAll: () => void;
-}) {
+}) => {
   const meta = CATEGORY_META[category];
   const Icon = meta.icon;
   return (
@@ -530,4 +530,4 @@ function CategoryPreview({
       )}
     </section>
   );
-}
+};

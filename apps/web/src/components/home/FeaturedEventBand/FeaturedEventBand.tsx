@@ -105,7 +105,7 @@ export interface FeaturedEventBandProps {
  * own generic-heading size rather than this band's `display-lg` hero
  * treatment (reserved for an actual title).
  */
-function FeaturedEventUnavailableNotice() {
+const FeaturedEventUnavailableNotice = () => {
   return (
     <section
       data-testid="featured-event-band"
@@ -128,7 +128,7 @@ function FeaturedEventUnavailableNotice() {
       </div>
     </section>
   );
-}
+};
 
 /**
  * Formats the "when" line per locked spec:
@@ -136,7 +136,7 @@ function FeaturedEventUnavailableNotice() {
  *  - Same day, midnight only: "26 apr"
  *  - Multi-day:               "26 apr 10:00 – 28 apr 12:00" (no separator dot)
  */
-function formatDateTime(dateStart: string, dateEnd?: string | null): string {
+const formatDateTime = (dateStart: string, dateEnd?: string | null): string => {
   // Belgian wall-clock and nl locale both come from the shared parse — the
   // rendered "when" line must not drift with the deploy/CI/test timezone.
   const start = toDisplayZone(dateStart);
@@ -160,7 +160,7 @@ function formatDateTime(dateStart: string, dateEnd?: string | null): string {
     return `${start.toFormat("d MMM")} · ${startTime}`;
   }
   return start.toFormat("d MMM");
-}
+};
 
 /**
  * Shown when the event has no cover of its own (#3434) — most club events
@@ -185,14 +185,14 @@ const FALLBACK_COVER: FeaturedEventBandImage = {
  * reintroducing the vanish this ticket removed) and narrows `event` for the
  * populated render that follows.
  */
-function isRenderableEvent(
+const isRenderableEvent = (
   event: FeaturedEventBandEvent | null,
   now: DateTime,
-): event is FeaturedEventBandEvent {
+): event is FeaturedEventBandEvent => {
   if (!event || !event.title.trim() || !event.slug) return false;
   const start = toDisplayZone(event.dateStart);
   return start.isValid && start >= now;
-}
+};
 
 export const FeaturedEventBand = ({
   event,

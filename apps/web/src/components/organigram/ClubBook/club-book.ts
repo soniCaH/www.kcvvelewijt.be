@@ -149,18 +149,18 @@ const named = (members: OrgChartMember[]) =>
   members.filter((m) => m.name?.trim());
 
 /** `Ann, Bob` — names only, so a nameless holder never leaves a stray comma. */
-export function joinNames(members: OrgChartMember[]): string {
+export const joinNames = (members: OrgChartMember[]): string => {
   return named(members)
     .map((m) => m.name?.trim())
     .join(", ");
-}
+};
 
 /** The questions `holder` answers from this box: primary contact is this box and includes them. */
-function questionsFor(
+const questionsFor = (
   holder: OrgChartMember,
   nodeIds: string[],
   paths: ResponsibilityPath[],
-): RowQuestion[] {
+): RowQuestion[] => {
   return paths
     .filter(
       ({ primaryContact: c }) =>
@@ -170,17 +170,17 @@ function questionsFor(
         (c.members ?? []).some((m) => m.id === holder.id),
     )
     .map(({ id, question }) => ({ id, question }));
-}
+};
 
 /**
  * One row per box — except that boxes a single person holds alone merge into
  * one row. A shared box never merges. Rows with a holder come first, vacant
  * rows last; within both groups the incoming order holds.
  */
-function toRows(
+const toRows = (
   boxes: OrgChartNode[],
   paths: ResponsibilityPath[],
-): LedgerRow[] {
+): LedgerRow[] => {
   const holders = (box: OrgChartNode) => named(box.members);
   const ordered = [
     ...boxes.filter((b) => holders(b).length > 0),
@@ -214,12 +214,12 @@ function toRows(
       })),
     };
   });
-}
+};
 
-export function buildClubBook(
+export const buildClubBook = (
   nodes: OrgChartNode[],
   paths: ResponsibilityPath[],
-): ClubBookVM {
+): ClubBookVM => {
   const byCode = (code: string) => nodes.find((n) => n.roleCode === code);
 
   // Boxes a card or the Raad line already shows. Any other box lands in a
@@ -288,4 +288,4 @@ export function buildClubBook(
     chapters,
     overige: toRows(nodes.filter(isLeftover), paths),
   };
-}
+};

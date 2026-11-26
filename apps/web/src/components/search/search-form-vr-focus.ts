@@ -24,8 +24,8 @@
  * `focus-ring-within` shell are untouched, so a real visitor on `/zoeken` is
  * unaffected.
  */
-export function forceSearchFocusRing(root: ParentNode): void {
+export const forceSearchFocusRing = (root: ParentNode): void => {
   root
     .querySelector<HTMLFormElement>("[data-search-form]")
     ?.setAttribute("data-vr-force-ring", "true");
-}
+};

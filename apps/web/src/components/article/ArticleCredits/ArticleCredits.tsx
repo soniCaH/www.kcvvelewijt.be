@@ -61,20 +61,20 @@ interface CreditRow {
   value: string;
 }
 
-function resolveSubjectNames(
+const resolveSubjectNames = (
   subjects: IndexedSubject[] | null | undefined,
-): string[] {
+): string[] => {
   if (!Array.isArray(subjects)) return [];
   return subjects
     .map((s) => resolveSubject(s)?.name)
     .filter((n): n is string => typeof n === "string" && n.length > 0);
-}
+};
 
-function buildRows({
+const buildRows = ({
   author,
   photographer,
   subjects,
-}: ArticleCreditsProps): CreditRow[] {
+}: ArticleCreditsProps): CreditRow[] => {
   const rows: CreditRow[] = [];
   const trimmedAuthor = author?.trim();
   if (trimmedAuthor) {
@@ -89,9 +89,9 @@ function buildRows({
     rows.push({ key: "beeld", label: "Beeld", value: trimmedPhotographer });
   }
   return rows;
-}
+};
 
-export function ArticleCredits(props: ArticleCreditsProps) {
+export const ArticleCredits = (props: ArticleCreditsProps) => {
   const rows = buildRows(props);
   if (rows.length === 0) return null;
 
@@ -134,4 +134,4 @@ export function ArticleCredits(props: ArticleCreditsProps) {
       </dl>
     </aside>
   );
-}
+};

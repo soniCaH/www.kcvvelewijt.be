@@ -72,7 +72,7 @@ export interface ScrollRailProps {
  * wrapper, out of reach. No consumer does either today; if one needs to,
  * carry `min-width: 0` down to whichever box is the flex item.
  */
-export function ScrollRail({
+export const ScrollRail = ({
   as: Tag = "div",
   children,
   trackClassName,
@@ -81,7 +81,7 @@ export function ScrollRail({
   arrowClassName,
   fadeFromClassName = "from-cream",
   className,
-}: ScrollRailProps) {
+}: ScrollRailProps) => {
   const {
     scrollRef,
     canScrollLeft,
@@ -158,4 +158,4 @@ export function ScrollRail({
       )}
     </div>
   );
-}
+};

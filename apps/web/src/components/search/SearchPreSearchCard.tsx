@@ -21,7 +21,7 @@ const TYPE_HINTS = [
 /**
  * Pre-search paper card with a helper prompt + example chips (8s4 E2).
  */
-export function SearchPreSearchCard() {
+export const SearchPreSearchCard = () => {
   return (
     <section className="border-ink bg-cream-soft shadow-paper-sm border-2 p-7 sm:p-8">
       <EditorialHeading
@@ -48,4 +48,4 @@ export function SearchPreSearchCard() {
       </div>
     </section>
   );
-}
+};

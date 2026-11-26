@@ -49,11 +49,11 @@ const FILL_CLASS: Record<SkeletonTone, string> = {
   deep: "bg-ink/15",
 };
 
-export function Skeleton({ tone = "cream", className }: SkeletonProps) {
+export const Skeleton = ({ tone = "cream", className }: SkeletonProps) => {
   return (
     <div
       aria-hidden="true"
       className={cn("motion-safe:animate-pulse", FILL_CLASS[tone], className)}
     />
   );
-}
+};

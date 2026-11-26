@@ -37,13 +37,13 @@ export interface PersonCardRunProps {
  * a card run outside this module (`<SponsorTiers>`' Hoofdsponsors) renders the
  * same heading instead of a lookalike (#3334).
  */
-export function RunLabel({ children }: { children: ReactNode }) {
+export const RunLabel = ({ children }: { children: ReactNode }) => {
   return (
     <h3 className="text-ink-muted border-paper-edge text-label mb-3 border-b pb-1.5 font-mono uppercase">
       {children}
     </h3>
   );
-}
+};
 
 /**
  * `<PersonCardRun>` — one labelled run of person cards: a mono-caps
@@ -57,12 +57,12 @@ export function RunLabel({ children }: { children: ReactNode }) {
  * exists to close. This is now the one place the grid track lives;
  * `minmax(140px,1fr)` never appears a second time in either caller.
  */
-export function PersonCardRun({
+export const PersonCardRun = ({
   label,
   children,
   "data-testid": dataTestId,
   hideHeading = false,
-}: PersonCardRunProps) {
+}: PersonCardRunProps) => {
   return (
     <section aria-label={hideHeading ? undefined : label}>
       {hideHeading ? null : <RunLabel>{label}</RunLabel>}
@@ -74,4 +74,4 @@ export function PersonCardRun({
       </div>
     </section>
   );
-}
+};

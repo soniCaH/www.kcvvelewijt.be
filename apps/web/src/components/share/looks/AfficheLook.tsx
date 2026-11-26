@@ -22,7 +22,7 @@ import { PINNED_Z } from "./block-layout";
  * only look with a wash (Zacht / Normaal / Sterk, #3522); the kicker sits on
  * a solid plate. Square anchors its picture to the top.
  */
-export function AfficheLook({
+export const AfficheLook = ({
   content,
   format,
   theme,
@@ -30,7 +30,7 @@ export function AfficheLook({
   coverMode,
   blocks,
   fallbackIndex,
-}: LookProps) {
+}: LookProps) => {
   const dark = theme === "donker";
   const sq = format === "square";
   const footH = sq ? 88 : 120;
@@ -190,4 +190,4 @@ export function AfficheLook({
       </div>
     </Canvas>
   );
-}
+};

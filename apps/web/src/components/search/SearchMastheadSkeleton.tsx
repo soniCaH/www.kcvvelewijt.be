@@ -13,7 +13,7 @@ import { searchFieldShellClasses } from "./search-field-styles";
  * `reference_phosphor_data_module_use_client`). The warm cell stands in for the
  * magnifier button.
  */
-export function SearchMastheadSkeleton() {
+export const SearchMastheadSkeleton = () => {
   return (
     <SearchMasthead>
       <div
@@ -27,4 +27,4 @@ export function SearchMastheadSkeleton() {
       </div>
     </SearchMasthead>
   );
-}
+};

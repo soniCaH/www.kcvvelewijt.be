@@ -19,7 +19,7 @@ import { useDelegatedClick } from "@/hooks/useDelegatedClick";
  * ref identity, so a plain `useRef` initializer is enough — no effect needed
  * to set it.
  */
-export function EmptyStateUndoTracker() {
+export const EmptyStateUndoTracker = () => {
   const ref = useRef<HTMLElement | null>(
     typeof document === "undefined" ? null : document.body,
   );
@@ -42,4 +42,4 @@ export function EmptyStateUndoTracker() {
   });
 
   return null;
-}
+};

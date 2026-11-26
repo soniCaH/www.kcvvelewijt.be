@@ -88,7 +88,7 @@ const KCVV_SIDE: TransferSide = {
  * value without it. Fall back to `incoming` and surface a console warning
  * in non-production so editors notice the gap in Studio previews.
  */
-export function resolveTransfer(value: TransferFactValue): ResolvedTransfer {
+export const resolveTransfer = (value: TransferFactValue): ResolvedTransfer => {
   const direction = value.direction ?? "incoming";
   if (!value.direction && process.env.NODE_ENV !== "production") {
     console.warn(
@@ -143,4 +143,4 @@ export function resolveTransfer(value: TransferFactValue): ResolvedTransfer {
     from: otherSide,
     to: KCVV_SIDE,
   };
-}
+};

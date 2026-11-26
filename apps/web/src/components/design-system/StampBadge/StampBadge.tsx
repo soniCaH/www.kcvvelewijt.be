@@ -35,13 +35,13 @@ const POSITION_CLASS: Record<StampBadgePosition, string> = {
  * Children can include a leading glyph (★ / ✱) inline; promote to a
  * dedicated `glyph?` prop only if ≥ 2 consumers want it.
  */
-export function StampBadge({
+export const StampBadge = ({
   children,
   rotation = 2,
   position = "top-right",
   tone = "jersey",
   className,
-}: StampBadgeProps) {
+}: StampBadgeProps) => {
   return (
     <span
       data-component="stamp-badge"
@@ -60,4 +60,4 @@ export function StampBadge({
       {children}
     </span>
   );
-}
+};

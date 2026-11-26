@@ -4,7 +4,7 @@ import type { KeyFigure, KeyGroup } from "./club-book";
 import { MemberContact, MemberName } from "./MemberContact";
 import { VacantLink } from "./Vacant";
 
-function KeyFigureCard({ figure }: { figure: KeyFigure }) {
+const KeyFigureCard = ({ figure }: { figure: KeyFigure }) => {
   return (
     <li
       data-key-node-id={figure.nodeId}
@@ -43,10 +43,10 @@ function KeyFigureCard({ figure }: { figure: KeyFigure }) {
       )}
     </li>
   );
-}
+};
 
 /** The top row: the people a visitor needs first, contact visible without a click. */
-export function KeyFigureCards({ groups }: { groups: KeyGroup[] }) {
+export const KeyFigureCards = ({ groups }: { groups: KeyGroup[] }) => {
   return (
     <>
       {groups
@@ -74,4 +74,4 @@ export function KeyFigureCards({ groups }: { groups: KeyGroup[] }) {
         ))}
     </>
   );
-}
+};

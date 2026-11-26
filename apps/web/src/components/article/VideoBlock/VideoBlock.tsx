@@ -56,24 +56,24 @@ interface AnalyticsContext {
   videoPosition: number;
 }
 
-function resolveAnalyticsContext(
+const resolveAnalyticsContext = (
   articleSlug: string | undefined,
   videoPosition: number | undefined,
-): AnalyticsContext | null {
+): AnalyticsContext | null => {
   if (typeof articleSlug !== "string" || articleSlug.length === 0) return null;
   if (typeof videoPosition !== "number" || videoPosition <= 0) return null;
   return { articleSlug, videoPosition };
-}
+};
 
 type ResolvedWidth = "prose" | "wide" | "bleed";
 
-function resolveWidth(value: VideoBlockValue): ResolvedWidth {
+const resolveWidth = (value: VideoBlockValue): ResolvedWidth => {
   // One-release fallback (#1843): prefer the new `width` enum, fall back
   // to the legacy `fullBleed` boolean for un-migrated content.
   if (value.width === "wide" || value.width === "bleed") return value.width;
   if (value.fullBleed === true) return "bleed";
   return "prose";
-}
+};
 
 // Width → container styling. Mobile (< 640px) collapses `wide` → `prose`
 // per the articleImage R3b lock (inherited).
@@ -97,11 +97,11 @@ const VIDEO_TAPE: TapeStripProps = {
   length: "sm",
 };
 
-function trimmedCaption(value: VideoBlockValue): string | null {
+const trimmedCaption = (value: VideoBlockValue): string | null => {
   if (typeof value.caption !== "string") return null;
   const trimmed = value.caption.trim();
   return trimmed.length > 0 ? trimmed : null;
-}
+};
 
 /**
  * Phase 5 (#1849) re-frames the renderer around `<TapedFigure>` — same
@@ -118,12 +118,12 @@ function trimmedCaption(value: VideoBlockValue): string | null {
  * render a neutral DOM fallback — never inject a raw URL into an
  * iframe/src attribute.
  */
-export function VideoBlock({
+export const VideoBlock = ({
   value,
   className,
   articleSlug,
   videoPosition,
-}: VideoBlockProps) {
+}: VideoBlockProps) => {
   const analyticsContext = useMemo(
     () => resolveAnalyticsContext(articleSlug, videoPosition),
     [articleSlug, videoPosition],
@@ -141,11 +141,11 @@ export function VideoBlock({
       analyticsContext={analyticsContext}
     />
   );
-}
+};
 
 // ─── Width wrapper ──────────────────────────────────────────────────────
 
-function WidthWrapper({
+const WidthWrapper = ({
   width,
   children,
   className,
@@ -153,7 +153,7 @@ function WidthWrapper({
   width: ResolvedWidth;
   children: React.ReactNode;
   className?: string;
-}) {
+}) => {
   return (
     <div
       data-video-width={width}
@@ -163,11 +163,11 @@ function WidthWrapper({
       {children}
     </div>
   );
-}
+};
 
 // ─── Upload path ────────────────────────────────────────────────────────
 
-function VideoBlockUpload({
+const VideoBlockUpload = ({
   value,
   className,
   analyticsContext,
@@ -175,7 +175,7 @@ function VideoBlockUpload({
   value: VideoBlockValue;
   className: string | undefined;
   analyticsContext: AnalyticsContext | null;
-}) {
+}) => {
   // `isPlaying` is lifted here (from `UploadFigureContent`) so the figure
   // aspect can react to it — see `figureAspect` below (#2279).
   const [isPlaying, setIsPlaying] = useState(false);
@@ -237,7 +237,7 @@ function VideoBlockUpload({
       />
     </WidthWrapper>
   );
-}
+};
 
 interface UploadFigureContentProps {
   src: string;
@@ -248,14 +248,14 @@ interface UploadFigureContentProps {
   analyticsContext: AnalyticsContext | null;
 }
 
-function UploadFigureContent({
+const UploadFigureContent = ({
   src,
   mimeType,
   posterUrl,
   isPlaying,
   onPlayClick,
   analyticsContext,
-}: UploadFigureContentProps) {
+}: UploadFigureContentProps) => {
   const { trackVideoPlay, trackVideoComplete } = useVideoAnalytics();
 
   const handlePlay = useCallback(() => {
@@ -354,9 +354,9 @@ function UploadFigureContent({
       )}
     </div>
   );
-}
+};
 
-function PlayTriangleIcon({ className }: { className?: string }) {
+const PlayTriangleIcon = ({ className }: { className?: string }) => {
   // Locked glyph (videoblock-locked.md §"Play affordance contract"):
   // M8 5v14l11-7z, 24×24 viewBox, fill="currentColor".
   return (
@@ -369,7 +369,7 @@ function PlayTriangleIcon({ className }: { className?: string }) {
       <path d="M8 5v14l11-7z" fill="currentColor" />
     </svg>
   );
-}
+};
 
 // ─── Embed path ─────────────────────────────────────────────────────────
 
@@ -377,7 +377,7 @@ const assertNever = (value: never): never => {
   throw new Error(`Unhandled VideoProvider: ${JSON.stringify(value)}`);
 };
 
-function embedSrc(provider: VideoProvider, videoId: string): string {
+const embedSrc = (provider: VideoProvider, videoId: string): string => {
   switch (provider) {
     case "youtube":
       return `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}`;
@@ -386,9 +386,9 @@ function embedSrc(provider: VideoProvider, videoId: string): string {
     default:
       return assertNever(provider);
   }
-}
+};
 
-function embedTitle(provider: VideoProvider): string {
+const embedTitle = (provider: VideoProvider): string => {
   switch (provider) {
     case "youtube":
       return "YouTube-video";
@@ -397,14 +397,14 @@ function embedTitle(provider: VideoProvider): string {
     default:
       return assertNever(provider);
   }
-}
+};
 
-function renderEmbed(
+const renderEmbed = (
   value: VideoBlockValue,
   url: string,
   className: string | undefined,
   analyticsContext: AnalyticsContext | null,
-) {
+) => {
   const width = resolveWidth(value);
   const caption = trimmedCaption(value);
   const parsed = parseEmbedUrl(url);
@@ -458,7 +458,7 @@ function renderEmbed(
       />
     </WidthWrapper>
   );
-}
+};
 
 interface EmbedIframeProps {
   src: string;
@@ -467,12 +467,12 @@ interface EmbedIframeProps {
   analyticsContext: AnalyticsContext | null;
 }
 
-function EmbedIframe({
+const EmbedIframe = ({
   src,
   title,
   provider,
   analyticsContext,
-}: EmbedIframeProps) {
+}: EmbedIframeProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const { trackVideoPlay } = useVideoAnalytics();
 
@@ -510,4 +510,4 @@ function EmbedIframe({
       data-testid="video-block-iframe"
     />
   );
-}
+};

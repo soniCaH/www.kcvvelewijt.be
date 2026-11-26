@@ -42,7 +42,7 @@ export interface CtaBandProps {
  * band and its seam span the viewport — as the last element of a page, or
  * directly before a page's `<RelatedRow>` (the article-foot position).
  */
-export function CtaBand({
+export const CtaBand = ({
   ariaLabel,
   heading,
   emphasis,
@@ -50,7 +50,7 @@ export function CtaBand({
   buttonLabel,
   href,
   buttonData,
-}: CtaBandProps) {
+}: CtaBandProps) => {
   const isExternal = EXTERNAL_HREF.test(href);
   const isHttp = /^https?:/i.test(href);
   const buttonClassName = "bg-warm hover:bg-warm";
@@ -112,4 +112,4 @@ export function CtaBand({
       </section>
     </>
   );
-}
+};

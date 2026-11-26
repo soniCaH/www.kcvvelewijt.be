@@ -24,7 +24,7 @@ export interface EditorialBylineProps {
   author?: string;
 }
 
-export function EditorialByline({ author }: EditorialBylineProps) {
+export const EditorialByline = ({ author }: EditorialBylineProps) => {
   const trimmed = author?.trim();
   if (!trimmed) return null;
   return (
@@ -44,4 +44,4 @@ export function EditorialByline({ author }: EditorialBylineProps) {
       <span>Door {trimmed}</span>
     </p>
   );
-}
+};

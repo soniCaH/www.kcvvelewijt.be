@@ -27,7 +27,10 @@ const COLOR_CLASS: Record<QuoteMarkColor, string> = {
 // gives the solid stroke. Tight letter-spacing pulls the two parts of the
 // double-mark glyph closer together. Negative bottom margin tucks the mark
 // up so its tail sits above the quote body.
-export function QuoteMark({ color = "jersey", hang = false }: QuoteMarkProps) {
+export const QuoteMark = ({
+  color = "jersey",
+  hang = false,
+}: QuoteMarkProps) => {
   return (
     <span
       data-color={color}
@@ -38,4 +41,4 @@ export function QuoteMark({ color = "jersey", hang = false }: QuoteMarkProps) {
       &rdquo;
     </span>
   );
-}
+};

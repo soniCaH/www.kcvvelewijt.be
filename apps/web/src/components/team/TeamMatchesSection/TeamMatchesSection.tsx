@@ -49,14 +49,14 @@ export interface TeamMatchesSectionProps {
   className?: string;
 }
 
-export function TeamMatchesSection({
+export const TeamMatchesSection = ({
   matches,
   teamSlug,
   kcvvTeamId,
   now = new Date(),
   subscribeTeam,
   className,
-}: TeamMatchesSectionProps) {
+}: TeamMatchesSectionProps) => {
   const [subscribeOpen, setSubscribeOpen] = useState(false);
   const subscribePanelId = useId();
 
@@ -151,4 +151,4 @@ export function TeamMatchesSection({
       ) : null}
     </section>
   );
-}
+};

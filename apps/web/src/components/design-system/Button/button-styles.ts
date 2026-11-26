@@ -9,13 +9,13 @@ export interface ButtonStyleProps {
   className?: string;
 }
 
-export function getButtonClasses({
+export const getButtonClasses = ({
   variant = "primary",
   size = "md",
   fullWidth = false,
   disabled = false,
   className,
-}: ButtonStyleProps): string {
+}: ButtonStyleProps): string => {
   // All variants are "stamped" — they share the retro paper-shadow + press-down
   // hover. Inverted uses the muted shadow so the offset stays visible against
   // the dark surface it sits on.
@@ -67,4 +67,4 @@ export function getButtonClasses({
 
     className,
   );
-}
+};

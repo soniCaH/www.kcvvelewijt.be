@@ -82,12 +82,12 @@ const FADE_RIGHT =
 const FADE_LEFT =
   "[mask-image:linear-gradient(to_right,transparent_0,black_24px)]";
 
-function pickFadeMask(canScrollLeft: boolean, canScrollRight: boolean) {
+const pickFadeMask = (canScrollLeft: boolean, canScrollRight: boolean) => {
   if (canScrollLeft && canScrollRight) return FADE_BOTH;
   if (canScrollRight) return FADE_RIGHT;
   if (canScrollLeft) return FADE_LEFT;
   return undefined;
-}
+};
 
 export const HorizontalSlider = ({
   children,

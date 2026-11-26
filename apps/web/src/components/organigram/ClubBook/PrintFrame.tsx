@@ -36,7 +36,7 @@ const stripes = Array.from(
   },
 );
 
-export function PrintBand() {
+export const PrintBand = () => {
   return (
     <svg
       aria-hidden="true"
@@ -50,9 +50,9 @@ export function PrintBand() {
       ))}
     </svg>
   );
-}
+};
 
-export function PrintHeader({ now }: { now: Date }) {
+export const PrintHeader = ({ now }: { now: Date }) => {
   return (
     <div className="hidden print:block">
       <div className="flex items-start justify-between gap-[6mm]">
@@ -83,7 +83,7 @@ export function PrintHeader({ now }: { now: Date }) {
       <div className="bg-ink mt-[3mm] h-[1mm]" />
     </div>
   );
-}
+};
 
 /**
  * The bands and the footer, repeated on every sheet. The sheet has `@page`
@@ -92,7 +92,7 @@ export function PrintHeader({ now }: { now: Date }) {
  * edge, and the footer sits just above the lower band. The content keeps clear
  * of all three through the print root's padding (see `print-style.ts`).
  */
-export function PrintSheetFrame() {
+export const PrintSheetFrame = () => {
   return (
     <div className="hidden print:block">
       <div className="fixed inset-x-0 top-0">
@@ -112,4 +112,4 @@ export function PrintSheetFrame() {
       </div>
     </div>
   );
-}
+};

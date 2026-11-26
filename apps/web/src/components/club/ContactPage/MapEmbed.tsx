@@ -9,7 +9,7 @@ const MAP_BBOX = "4.4962,50.9680,4.5062,50.9730";
 const MAP_SRC = `https://www.openstreetmap.org/export/embed.html?bbox=${MAP_BBOX}&layer=mapnik&marker=${MAP_LAT}%2C${MAP_LON}`;
 const MAP_TITLE = "Locatie KCVV Elewijt - Driesstraat 32, 1982 Elewijt";
 
-export function MapEmbed() {
+export const MapEmbed = () => {
   return (
     <TapedCard
       shadow="sm"
@@ -29,4 +29,4 @@ export function MapEmbed() {
       />
     </TapedCard>
   );
-}
+};

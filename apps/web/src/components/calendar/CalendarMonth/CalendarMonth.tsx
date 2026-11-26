@@ -41,7 +41,7 @@ const DAY_HEADERS = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
  * row of match pips below — `card-red` filled = thuis, `card-red` ring = uit.
  * No count badge; the pip row is the volume signal.
  */
-function DayCellBody({
+const DayCellBody = ({
   day,
   dayMatches,
   dayEvents,
@@ -49,7 +49,7 @@ function DayCellBody({
   day: string;
   dayMatches: CalendarMatch[];
   dayEvents: CalendarEvent[];
-}) {
+}) => {
   if (dayMatches.length === 0 && dayEvents.length === 0) return null;
 
   return (
@@ -97,7 +97,7 @@ function DayCellBody({
       )}
     </div>
   );
-}
+};
 
 /**
  * Selected-day detail below the grid. Matches reuse the 6.C `<TeamAgendaRow>`
@@ -105,7 +105,7 @@ function DayCellBody({
  * stub omitted since the day is already the heading; events render as a
  * type-tagged title row linking to their detail route.
  */
-function SelectedDayDetail({
+const SelectedDayDetail = ({
   date,
   dayMatches,
   dayEvents,
@@ -113,7 +113,7 @@ function SelectedDayDetail({
   date: string;
   dayMatches: CalendarMatch[];
   dayEvents: CalendarEvent[];
-}) {
+}) => {
   const heading = formatDayDetailHeading(date);
   const caption = formatItemCount(dayMatches.length, dayEvents.length);
 
@@ -206,16 +206,16 @@ function SelectedDayDetail({
       )}
     </div>
   );
-}
+};
 
-export function CalendarMonth({
+export const CalendarMonth = ({
   matches,
   events,
   selectedDate,
   onSelectDate,
   currentMonth,
   currentYear,
-}: CalendarMonthProps) {
+}: CalendarMonthProps) => {
   const days = useMemo(
     () => getDaysInMonth(currentYear, currentMonth),
     [currentYear, currentMonth],
@@ -311,4 +311,4 @@ export function CalendarMonth({
       />
     </div>
   );
-}
+};

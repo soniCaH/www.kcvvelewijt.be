@@ -22,10 +22,10 @@ export interface LoadingAnnouncementProps {
  * skeleton bars are hidden from assistive tech, but the announcement is the
  * one thing in a `loading.tsx` that must not be.
  */
-export function LoadingAnnouncement({ label }: LoadingAnnouncementProps) {
+export const LoadingAnnouncement = ({ label }: LoadingAnnouncementProps) => {
   return (
     <span role="status" aria-busy="true" aria-live="polite" className="sr-only">
       {label}
     </span>
   );
-}
+};

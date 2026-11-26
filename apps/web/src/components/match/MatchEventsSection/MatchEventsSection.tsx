@@ -22,14 +22,14 @@ export interface MatchEventsSectionProps {
  * matches). The caller mounts this unconditionally; this component owns the
  * "render or not" decision.
  */
-export function MatchEventsSection({
+export const MatchEventsSection = ({
   homeTeamName,
   awayTeamName,
   homeTeamLogo,
   awayTeamLogo,
   events,
   className,
-}: MatchEventsSectionProps) {
+}: MatchEventsSectionProps) => {
   if (events.length === 0) return null;
 
   return (
@@ -52,4 +52,4 @@ export function MatchEventsSection({
       />
     </PageContainer>
   );
-}
+};

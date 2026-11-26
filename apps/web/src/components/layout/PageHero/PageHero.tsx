@@ -180,11 +180,11 @@ export interface PageHeroProps {
  * On a dark field the accent goes warm too: jersey-deep italic on
  * `jersey-deep-dark` is the one pairing that disappears.
  */
-function headlineEmphasis(
+const headlineEmphasis = (
   headline: string,
   accent: string | undefined,
   tone: PageHeroTone,
-): EditorialHeadingEmphasis | undefined {
+): EditorialHeadingEmphasis | undefined => {
   if (accent && headline.includes(accent)) {
     return { text: accent, tone: tone === "dark" ? "warm" : "jersey-deep" };
   }
@@ -196,7 +196,7 @@ function headlineEmphasis(
   return terminated || headline.includes(".")
     ? undefined
     : { text: ".", tone: "warm" };
-}
+};
 
 /**
  * The kicker follows the field: a jersey-deep raw label-token span on cream
@@ -204,7 +204,13 @@ function headlineEmphasis(
  * on dark. `tracking-[0.18em]` is the 10h5 lock value, intentionally wider than
  * the `--text-label--tracking` (0.08em) token used by inline label rows.
  */
-function Kicker({ children, tone }: { children: string; tone: PageHeroTone }) {
+const Kicker = ({
+  children,
+  tone,
+}: {
+  children: string;
+  tone: PageHeroTone;
+}) => {
   if (tone === "dark") {
     return (
       <span data-testid="page-hero-kicker">
@@ -222,7 +228,7 @@ function Kicker({ children, tone }: { children: string; tone: PageHeroTone }) {
       {children}
     </span>
   );
-}
+};
 
 /**
  * The lead's colour follows the field, and both registers that can sit on dark
@@ -234,7 +240,7 @@ const LEAD_TONE_CLASS: Record<PageHeroTone, string> = {
 };
 
 /** `register="minimal"` — no band, no photo. Content starts immediately. */
-function MinimalOpening({
+const MinimalOpening = ({
   kicker,
   headline,
   accent,
@@ -254,7 +260,7 @@ function MinimalOpening({
   | "upLink"
 > & {
   tone: PageHeroTone;
-}) {
+}) => {
   return (
     <>
       {/* Its own element above the opening, not inside the <header> — the
@@ -318,7 +324,7 @@ function MinimalOpening({
       </header>
     </>
   );
-}
+};
 
 /**
  * `register="band"` · `tone="dark"` — the group-portrait front door. Full-bleed
@@ -326,7 +332,7 @@ function MinimalOpening({
  * NOT be wrapped in one. Ported from the retired `<BoardHero>` unchanged, which
  * is why the three board routes are a pixel-stable component swap.
  */
-function DarkBand({
+const DarkBand = ({
   kicker,
   headline,
   accent,
@@ -345,7 +351,7 @@ function DarkBand({
   | "width"
   | "className"
   | "upLink"
->) {
+>) => {
   return (
     <header
       data-testid="page-hero"
@@ -416,9 +422,9 @@ function DarkBand({
       </PageContainer>
     </header>
   );
-}
+};
 
-export function PageHero(props: PageHeroProps) {
+export const PageHero = (props: PageHeroProps) => {
   const { register = "band", tone = "cream" } = props;
 
   // Each register takes the whole prop bag and reads the slice its `Pick<>`
@@ -576,4 +582,4 @@ export function PageHero(props: PageHeroProps) {
       </TapedCard>
     </>
   );
-}
+};

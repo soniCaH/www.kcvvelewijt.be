@@ -6,7 +6,7 @@ export const CONTACT_HREF = "/club/contact";
 const VACANT_LABEL = "plek vrij — iets voor jou?";
 
 /** The vacancy as a link to the contact page. */
-export function VacantLink({ className }: { className?: string }) {
+export const VacantLink = ({ className }: { className?: string }) => {
   return (
     <Link
       href={CONTACT_HREF}
@@ -15,4 +15,4 @@ export function VacantLink({ className }: { className?: string }) {
       {VACANT_LABEL}
     </Link>
   );
-}
+};

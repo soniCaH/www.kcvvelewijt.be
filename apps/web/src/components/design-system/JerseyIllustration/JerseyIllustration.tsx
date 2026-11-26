@@ -115,13 +115,13 @@ export interface JerseyIllustrationProps {
   "data-testid"?: string;
 }
 
-export function JerseyIllustration({
+export const JerseyIllustration = ({
   variant,
   seed,
   garment = "jersey",
   className,
   "data-testid": dataTestId = "jersey-illustration",
-}: JerseyIllustrationProps) {
+}: JerseyIllustrationProps) => {
   const positioning =
     variant === "hero" ? "relative h-full w-full" : "absolute inset-0";
   const isCoat = garment === "coat";
@@ -257,4 +257,4 @@ export function JerseyIllustration({
       </div>
     </div>
   );
-}
+};

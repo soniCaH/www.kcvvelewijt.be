@@ -20,7 +20,10 @@ export interface FooterAnalyticsProps {
  * It renders the grid `<div>` rather than wrapping one, so the delegation costs
  * zero extra DOM nodes.
  */
-export function FooterAnalytics({ children, className }: FooterAnalyticsProps) {
+export const FooterAnalytics = ({
+  children,
+  className,
+}: FooterAnalyticsProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const { trackFooterClick } = useNavigationAnalytics();
 
@@ -39,4 +42,4 @@ export function FooterAnalytics({ children, className }: FooterAnalyticsProps) {
       {children}
     </div>
   );
-}
+};

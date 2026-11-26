@@ -31,14 +31,14 @@ export interface HalftimeTemplateProps {
  * with a club-crest matchup anchoring the top. Register A cream sheet, or a
  * fullscreen newsprint photo when an image is given.
  */
-export function HalftimeTemplate({
+export const HalftimeTemplate = ({
   matchName,
   score,
   competition,
   homeLogo,
   awayLogo,
   imageUrl,
-}: HalftimeTemplateProps) {
+}: HalftimeTemplateProps) => {
   const { home, away } = splitMatchName(matchName);
   const hasImage = Boolean(imageUrl);
   const crests = resolveCrests(matchName, homeLogo, awayLogo);
@@ -100,4 +100,4 @@ export function HalftimeTemplate({
       <ShareFoot align="center" />
     </ShareFrame>
   );
-}
+};

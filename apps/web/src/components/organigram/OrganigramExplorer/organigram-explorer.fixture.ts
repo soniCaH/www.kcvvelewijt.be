@@ -127,9 +127,9 @@ const LAST_NAMES = [
   "De Smet",
 ];
 
-function holderName(seed: number, i: number): string {
+const holderName = (seed: number, i: number): string => {
   return `${FIRST_NAMES[(seed + i) % FIRST_NAMES.length]} ${LAST_NAMES[(seed + i * 3) % LAST_NAMES.length]}`;
-}
+};
 
 export const explorerFixture: OrgChartNode[] = SPEC.map(
   ([id, title, parentId, count], idx) => ({

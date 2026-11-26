@@ -8,6 +8,6 @@ export type KalenderItemSource = "match" | "event" | "article";
  * route. Centralised so the event name + `source` param shape stay identical
  * across the agenda, week, and month-detail surfaces (taxonomy PRD §9).
  */
-export function trackKalenderItemClick(source: KalenderItemSource): void {
+export const trackKalenderItemClick = (source: KalenderItemSource): void => {
   trackEvent("kalender_item_click", { source });
-}
+};

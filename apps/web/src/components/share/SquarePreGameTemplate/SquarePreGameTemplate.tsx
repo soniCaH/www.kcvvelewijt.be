@@ -30,14 +30,14 @@ export interface SquarePreGameTemplateProps {
  * Pre-game template — 1:1 (1080×1080) Instagram feed post. Club-crest matchup
  * over a cream sheet, or a fullscreen newsprint photo when an image is given.
  */
-export function SquarePreGameTemplate({
+export const SquarePreGameTemplate = ({
   matchName,
   competition,
   dateTime,
   homeLogo,
   awayLogo,
   imageUrl,
-}: SquarePreGameTemplateProps) {
+}: SquarePreGameTemplateProps) => {
   const { home, away } = splitMatchName(matchName);
   const hasImage = Boolean(imageUrl);
   const crests = resolveCrests(matchName, homeLogo, awayLogo);
@@ -83,4 +83,4 @@ export function SquarePreGameTemplate({
       <ShareFoot left={hasImage ? dateTime : undefined} align="center" />
     </ShareFrame>
   );
-}
+};

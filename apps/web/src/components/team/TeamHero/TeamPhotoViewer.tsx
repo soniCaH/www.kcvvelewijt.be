@@ -23,12 +23,7 @@ export interface TeamPhotoViewerProps {
  * `TeamPhotoLightbox` can load it on the first click: few visitors open it, and
  * the library + Zoom are ~25 KB gzipped on every team page otherwise.
  */
-export default function TeamPhotoViewer({
-  open,
-  close,
-  src,
-  alt,
-}: TeamPhotoViewerProps) {
+const TeamPhotoViewer = ({ open, close, src, alt }: TeamPhotoViewerProps) => {
   return (
     <Lightbox
       open={open}
@@ -46,4 +41,6 @@ export default function TeamPhotoViewer({
       styles={{ container: LIGHTBOX_BACKDROP }}
     />
   );
-}
+};
+
+export default TeamPhotoViewer;

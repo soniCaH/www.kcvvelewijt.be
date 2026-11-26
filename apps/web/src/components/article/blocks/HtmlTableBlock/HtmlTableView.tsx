@@ -81,7 +81,10 @@ export interface HtmlTableViewProps {
  * element that carries the scroll ref — the pattern `<ScrollOverlay>`
  * exists specifically to support.
  */
-export function HtmlTableView({ trustedHtml, className }: HtmlTableViewProps) {
+export const HtmlTableView = ({
+  trustedHtml,
+  className,
+}: HtmlTableViewProps) => {
   return (
     <div data-html-table="true" className={cn("my-6", className)}>
       <ScrollOverlay
@@ -121,4 +124,4 @@ export function HtmlTableView({ trustedHtml, className }: HtmlTableViewProps) {
       />
     </div>
   );
-}
+};

@@ -59,9 +59,9 @@ const BG_BY_TYPE: Record<ArticleType, NewsCardBg> = {
   matchRecap: "cream",
 };
 
-function bgForArticle(type: UitgelichtArticle["articleType"]): NewsCardBg {
+const bgForArticle = (type: UitgelichtArticle["articleType"]): NewsCardBg => {
   return type ? BG_BY_TYPE[type] : "cream";
-}
+};
 
 /**
  * Row + card classes for the Uitgelicht three-up, exported as a pair and shared

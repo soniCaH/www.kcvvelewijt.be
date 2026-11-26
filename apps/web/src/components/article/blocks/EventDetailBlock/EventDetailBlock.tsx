@@ -33,7 +33,7 @@ export interface EventDetailBlockProps {
  * (#2237 ART-3), so it now renders for *every* event with content, not
  * just those with extra detail beyond the strip.
  */
-export function hasEventFactContent(value: EventFactValue): boolean {
+export const hasEventFactContent = (value: EventFactValue): boolean => {
   const hasDate =
     !!value.date?.trim() ||
     (Array.isArray(value.sessions) &&
@@ -50,7 +50,7 @@ export function hasEventFactContent(value: EventFactValue): boolean {
     hasNote ||
     !!value.title?.trim()
   );
-}
+};
 
 /**
  * Past when the *resolved* event range ends before today (Europe/Brussels).
@@ -64,10 +64,10 @@ export function hasEventFactContent(value: EventFactValue): boolean {
  * request time) to keep the comparison deterministic per ISR cache
  * entry — `new Date()` default is only intended for client renders.
  */
-export function deriveIsPast(
+export const deriveIsPast = (
   value: EventFactValue,
   now: Date = new Date(),
-): boolean {
+): boolean => {
   // Compare against the Belgian calendar day, not UTC — otherwise an
   // event flips to "past" up to ~2h early around the UTC midnight
   // boundary (Brussels is UTC+1/+2). The reference dates are timezone-less
@@ -82,12 +82,12 @@ export function deriveIsPast(
   })();
   if (!reference) return false;
   return reference < today;
-}
+};
 
-function weekdayAbbrev(date: ResolvedEvent): string {
+const weekdayAbbrev = (date: ResolvedEvent): string => {
   if (!date.hasDate) return "";
   return date.weekday.slice(0, 2).toUpperCase();
-}
+};
 
 /**
  * Whitelist http(s) for the editor-authored ticket URL — Sanity's `url`
@@ -95,7 +95,7 @@ function weekdayAbbrev(date: ResolvedEvent): string {
  * keeps `javascript:` / `data:` payloads out of the CTA href even if
  * draft content sneaks through.
  */
-function safeExternalHref(raw: string | undefined | null): string | null {
+const safeExternalHref = (raw: string | undefined | null): string | null => {
   const trimmed = raw?.trim();
   if (!trimmed) return null;
   try {
@@ -106,17 +106,17 @@ function safeExternalHref(raw: string | undefined | null): string | null {
   } catch {
     return null;
   }
-}
+};
 
 /** Compact `19 sep 2026` head date — start of the range. */
-function formatCompactDate(range: ResolvedEventRange): string | null {
+const formatCompactDate = (range: ResolvedEventRange): string | null => {
   if (range.kind === "none") return null;
   const start = range.kind === "single" ? range.date : range.start;
   return `${start.day} ${start.monthShort} ${start.year}`;
-}
+};
 
 /** Long `Za 19 september 2026` / span `25 – 27 september 2026` Datum cell. */
-function formatDatumCell(range: ResolvedEventRange): string {
+const formatDatumCell = (range: ResolvedEventRange): string => {
   if (range.kind === "none") return "Datum volgt";
   if (range.kind === "single") {
     // Reuse the canonical Dutch `ccc d MMMM` formatter + append the year.
@@ -130,7 +130,7 @@ function formatDatumCell(range: ResolvedEventRange): string {
     return `${start.day} ${start.monthShort} – ${end.day} ${end.monthShort} ${start.year}`;
   }
   return `${start.day} ${start.monthShort} ${start.year} – ${end.day} ${end.monthShort} ${end.year}`;
-}
+};
 
 /**
  * Tijd cell — a single range for single/continuous events, "Zie schema"
@@ -139,14 +139,14 @@ function formatDatumCell(range: ResolvedEventRange): string {
  * times resolved by the caller (which recovers a lone session's hours that
  * `resolveEventRange` drops when it collapses to `kind: "single"`).
  */
-function formatTijdCell(
+const formatTijdCell = (
   range: ResolvedEventRange,
   startTime?: string,
   endTime?: string,
-) {
+) => {
   if (range.kind === "sessions") return "Zie schema";
   return formatTimeRange(startTime, endTime) ?? "—";
-}
+};
 
 /** The `dates` param: UTC date-times when a start time is set, else all-day days. */
 const googleCalendarDates = ({
@@ -186,12 +186,12 @@ const googleCalendarDates = ({
  * ponytail: a Google Calendar URL is the zero-dependency option; swap
  * for an `.ics` download if non-Google users ask for it.
  */
-function buildGoogleCalendarUrl(
+const buildGoogleCalendarUrl = (
   value: EventFactValue,
   range: ResolvedEventRange,
   startTime?: string,
   endTime?: string,
-): string | null {
+): string | null => {
   if (range.kind === "none") return null;
   const startIso =
     range.kind === "single" ? range.date.dateIso : range.start.dateIso;
@@ -223,9 +223,9 @@ function buildGoogleCalendarUrl(
   const location = value.address?.trim() || value.location?.trim();
   if (location) params.set("location", location);
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
-}
+};
 
-function Pill({ label, muted }: { label: string; muted: boolean }) {
+const Pill = ({ label, muted }: { label: string; muted: boolean }) => {
   return (
     <span
       data-event-detail-pill={muted ? "muted" : "active"}
@@ -239,9 +239,9 @@ function Pill({ label, muted }: { label: string; muted: boolean }) {
       {label}
     </span>
   );
-}
+};
 
-function FactCell({ label, value }: { label: string; value: string }) {
+const FactCell = ({ label, value }: { label: string; value: string }) => {
   return (
     <div
       data-event-detail-fact={label.toLowerCase()}
@@ -255,9 +255,9 @@ function FactCell({ label, value }: { label: string; value: string }) {
       </span>
     </div>
   );
-}
+};
 
-function SessionsGrid({ sessions }: { sessions: ResolvedSession[] }) {
+const SessionsGrid = ({ sessions }: { sessions: ResolvedSession[] }) => {
   return (
     <dl
       data-event-detail-sessions="true"
@@ -282,7 +282,7 @@ function SessionsGrid({ sessions }: { sessions: ResolvedSession[] }) {
       })}
     </dl>
   );
-}
+};
 
 interface MetaRow {
   key: string;
@@ -290,7 +290,7 @@ interface MetaRow {
   value: string;
 }
 
-function MetaList({ rows }: { rows: MetaRow[] }) {
+const MetaList = ({ rows }: { rows: MetaRow[] }) => {
   if (rows.length === 0) return null;
   return (
     <dl
@@ -309,11 +309,11 @@ function MetaList({ rows }: { rows: MetaRow[] }) {
       ))}
     </dl>
   );
-}
+};
 
 /** Address (only when it's not already standing in as the Locatie cell)
  *  + capacity, rendered as a compact secondary dl below the fact grid. */
-function buildExtraRows(value: EventFactValue): MetaRow[] {
+const buildExtraRows = (value: EventFactValue): MetaRow[] => {
   const rows: MetaRow[] = [];
   if (value.address?.trim() && value.location?.trim()) {
     rows.push({ key: "address", label: "Adres", value: value.address.trim() });
@@ -326,9 +326,9 @@ function buildExtraRows(value: EventFactValue): MetaRow[] {
     });
   }
   return rows;
-}
+};
 
-function Note({ blocks }: { blocks: PortableTextBlock[] }) {
+const Note = ({ blocks }: { blocks: PortableTextBlock[] }) => {
   return (
     <div
       data-event-detail-note="true"
@@ -337,7 +337,7 @@ function Note({ blocks }: { blocks: PortableTextBlock[] }) {
       <PortableText value={blocks} />
     </div>
   );
-}
+};
 
 /**
  * <EventDetailBlock> — the contained event-fact panel (ART-3 Variant B,
@@ -355,11 +355,11 @@ function Note({ blocks }: { blocks: PortableTextBlock[] }) {
  * whole card greyscales, and the CTA row is hidden. `isPast` is computed
  * page-level via `deriveIsPast` so this stays a pure renderer.
  */
-export function EventDetailBlock({
+export const EventDetailBlock = ({
   value,
   isPast,
   className,
-}: EventDetailBlockProps) {
+}: EventDetailBlockProps) => {
   if (!hasEventFactContent(value)) return null;
 
   const range = resolveEventRange(value.date, value.endDate, value.sessions);
@@ -491,4 +491,4 @@ export function EventDetailBlock({
       </div>
     </div>
   );
-}
+};

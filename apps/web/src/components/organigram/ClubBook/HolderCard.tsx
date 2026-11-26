@@ -11,7 +11,7 @@ import { MemberContact, MemberName } from "./MemberContact";
  * the questions this person answers **in this role**, each linking to that
  * question in the finder.
  */
-export function HolderCard({ holder }: { holder: RowHolder }) {
+export const HolderCard = ({ holder }: { holder: RowHolder }) => {
   return (
     <div className={`${KAARTENBAK} flex gap-3 p-3`}>
       <RoundAvatar
@@ -55,4 +55,4 @@ export function HolderCard({ holder }: { holder: RowHolder }) {
       </div>
     </div>
   );
-}
+};

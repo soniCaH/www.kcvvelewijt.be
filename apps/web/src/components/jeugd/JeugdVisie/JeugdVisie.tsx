@@ -26,7 +26,7 @@ const VISIE_TAGS = [
  * under `<PageHero tone="dark">` + the seam that just closed the dark
  * band — so it stays at the default flow placement (cream) on purpose.
  */
-export function JeugdVisie() {
+export const JeugdVisie = () => {
   return (
     <section id="visie" tabIndex={-1} className="focus:outline-none">
       <SectionKicker className="mb-4">Onze jeugdvisie</SectionKicker>
@@ -34,4 +34,4 @@ export function JeugdVisie() {
       <PullQuote labels={VISIE_TAGS}>{YOUTH_MISSION}</PullQuote>
     </section>
   );
-}
+};

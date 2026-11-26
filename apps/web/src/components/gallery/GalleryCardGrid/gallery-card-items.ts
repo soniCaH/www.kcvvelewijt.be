@@ -9,13 +9,13 @@ import type { GalleryCardGridItem } from "./GalleryCardGrid";
  * the load-more path, so anything the grid imports crosses the client boundary
  * — and `formatArticleDate` pulls in Luxon. Only server code imports this.
  */
-export function toGalleryCardGridItems(
+export const toGalleryCardGridItems = (
   galleries: GalleryCardVM[],
-): GalleryCardGridItem[] {
+): GalleryCardGridItem[] => {
   return galleries.map((gallery) => ({
     ...gallery,
     date: gallery.publishedAt
       ? formatArticleDate(gallery.publishedAt)
       : undefined,
   }));
-}
+};

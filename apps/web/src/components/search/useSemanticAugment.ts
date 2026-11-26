@@ -80,7 +80,7 @@ export type SemanticAugment =
  * `<HubSearch>` conventions: articles → /nieuws, pages → /club, responsibilities
  * deep-link the `/hulp` finder by slug (which equals the path id it reveals by).
  */
-export function semanticResultUrl(result: SemanticSearchResult): string {
+export const semanticResultUrl = (result: SemanticSearchResult): string => {
   switch (result.type) {
     case "article":
       return `/nieuws/${result.slug}`;
@@ -89,16 +89,16 @@ export function semanticResultUrl(result: SemanticSearchResult): string {
     case "responsibility":
       return `/hulp#${result.slug}`;
   }
-}
+};
 
 /**
  * @param query - the committed search query (changes on submit / URL `?q=`).
  * @param excludeUrls - URLs already shown in the lexical results (for de-dup).
  */
-export function useSemanticAugment(
+export const useSemanticAugment = (
   query: string,
   excludeUrls: ReadonlySet<string>,
-): SemanticAugment {
+): SemanticAugment => {
   const { results, answer, executedQuery, search } = useSemanticSearch({
     limit: 5,
   });
@@ -125,14 +125,14 @@ export function useSemanticAugment(
   }
 
   return settled;
-}
+};
 
 /** Run the score gate over one fetch's results. */
-function settle(
+const settle = (
   results: SemanticSearchResult[],
   answer: string | undefined,
   excludeUrls: ReadonlySet<string>,
-): SettledAugment {
+): SettledAugment => {
   // Gate on the genuine top score (BEFORE de-dup) — using `!(x >= n)` so a
   // missing / NaN score is treated as below-threshold rather than slipping
   // through (`undefined < 0.35` is `false`).
@@ -166,4 +166,4 @@ function settle(
       href: semanticResultUrl(result),
     })),
   };
-}
+};

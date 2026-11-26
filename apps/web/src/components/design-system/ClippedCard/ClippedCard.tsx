@@ -20,11 +20,11 @@ export interface ClippedCardProps {
  * card means using <ClippedCard> — anyone reaching for "rotation",
  * "shadow", or "tape" should use <TapedCard> instead.
  */
-export function ClippedCard({
+export const ClippedCard = ({
   children,
   className,
   as: Tag = "div",
-}: ClippedCardProps) {
+}: ClippedCardProps) => {
   const Component = Tag as ElementType;
   return (
     <Component
@@ -45,7 +45,7 @@ export function ClippedCard({
       {children}
     </Component>
   );
-}
+};
 
 interface CornerClipDecorationProps {
   corner: "tl" | "br";
@@ -56,7 +56,7 @@ interface CornerClipDecorationProps {
  * card's border edge (translated 6px outward on both axes) and renders
  * only the relevant two sides per corner.
  */
-function CornerClipDecoration({ corner }: CornerClipDecorationProps) {
+const CornerClipDecoration = ({ corner }: CornerClipDecorationProps) => {
   const isTl = corner === "tl";
   return (
     <span
@@ -70,4 +70,4 @@ function CornerClipDecoration({ corner }: CornerClipDecorationProps) {
       )}
     />
   );
-}
+};
