@@ -93,9 +93,9 @@ export interface CompetitiveFetchResult {
  * competition` under this gate — that is the decision this ticket implements,
  * not a bug in how it is read.
  */
-function isInCompetition(matches: readonly Match[]): boolean {
+const isInCompetition = (matches: readonly Match[]): boolean => {
   return matches.some((match) => match.competitionType === "league");
-}
+};
 
 /**
  * Every entry reads `played === 0 && points === 0` — before matchday 1, or a
@@ -105,9 +105,11 @@ function isInCompetition(matches: readonly Match[]): boolean {
  * trusting a caller-supplied `numberless` boolean that the data could
  * contradict (#2636 finding 9).
  */
-export function isNumberlessTable(entries: readonly RankingEntry[]): boolean {
+export const isNumberlessTable = (
+  entries: readonly RankingEntry[],
+): boolean => {
   return entries.every((entry) => entry.played === 0 && entry.points === 0);
-}
+};
 
 /**
  * Classifies `#klassement`'s tables as a whole, independent of the fixture
@@ -117,16 +119,16 @@ export function isNumberlessTable(entries: readonly RankingEntry[]): boolean {
  * `tables` prop to decide whether it has any table to show at all) so that
  * predicate has exactly one owner.
  */
-export function classifyStandingsTables(
+export const classifyStandingsTables = (
   tables: readonly RankingTable[],
-): "no-table" | "numberless" | "live" {
+): "no-table" | "numberless" | "live" => {
   const tablesWithRows = tables.filter((table) => table.entries.length > 0);
   if (tablesWithRows.length === 0) return "no-table";
   if (tablesWithRows.every((table) => isNumberlessTable(table.entries))) {
     return "numberless";
   }
   return "live";
-}
+};
 
 /**
  * The pure exported function #2636 AC 1 asks for: takes the (successful)
@@ -146,9 +148,9 @@ export function classifyStandingsTables(
  * into `ranking-unavailable` below — never conflated with `no-table`, whose
  * `standings` is the fulfilled value `[]`.
  */
-export function deriveCompetitiveBlockState(
+export const deriveCompetitiveBlockState = (
   fetchResult: CompetitiveFetchResult | null | "unavailable",
-): CompetitiveBlockState {
+): CompetitiveBlockState => {
   if (fetchResult === "unavailable") return { kind: "fixtures-unavailable" };
   if (fetchResult === null) return { kind: "not-in-competition" };
   if (!isInCompetition(fetchResult.matches)) {
@@ -156,7 +158,7 @@ export function deriveCompetitiveBlockState(
   }
   if (fetchResult.standings === null) return { kind: "ranking-unavailable" };
   return { kind: classifyStandingsTables(fetchResult.standings) };
-}
+};
 
 /**
  * `#klassement`'s heading follows the data (#2605 decision): `"Klassement"`
@@ -175,9 +177,9 @@ export function deriveCompetitiveBlockState(
  * instead of compiling silently against a hand-written exclusion that no
  * longer matches the union.
  */
-export function competitiveBlockHeadingLabel(
+export const competitiveBlockHeadingLabel = (
   state: CompetitiveBlockState,
-): string | null {
+): string | null => {
   switch (state.kind) {
     case "not-in-competition":
     case "fixtures-unavailable":
@@ -195,7 +197,7 @@ export function competitiveBlockHeadingLabel(
       );
     }
   }
-}
+};
 
 /**
  * Whether the competitive block is "open" at all — i.e. whether `#wedstrijden`
@@ -216,7 +218,9 @@ export function competitiveBlockHeadingLabel(
  * Switches on every member, mirroring `competitiveBlockHeadingLabel`, so a
  * state added later fails to compile here instead of defaulting silently.
  */
-export function isCompetitiveBlockOpen(state: CompetitiveBlockState): boolean {
+export const isCompetitiveBlockOpen = (
+  state: CompetitiveBlockState,
+): boolean => {
   switch (state.kind) {
     case "not-in-competition":
     case "fixtures-unavailable":
@@ -233,4 +237,4 @@ export function isCompetitiveBlockOpen(state: CompetitiveBlockState): boolean {
       );
     }
   }
-}
+};

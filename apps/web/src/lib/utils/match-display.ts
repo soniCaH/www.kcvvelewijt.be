@@ -34,26 +34,26 @@ const SETTLED_STATUSES = ["finished", "forfeited"] as const;
 export type SettledMatchStatus = (typeof SETTLED_STATUSES)[number];
 
 /** Whether a match's outcome is final — see `SETTLED_STATUSES`. */
-export function isSettledMatch(
+export const isSettledMatch = (
   status: MatchStatus,
-): status is SettledMatchStatus {
+): status is SettledMatchStatus => {
   return SETTLED_STATUSES.some((settled) => settled === status);
-}
+};
 
-export function hasScore(
+export const hasScore = (
   match: HasScoreMatch,
-): match is HasScoreMatch & HasScoreNarrowed {
+): match is HasScoreMatch & HasScoreNarrowed => {
   return (
     isSettledMatch(match.status) &&
     typeof match.home_team.score === "number" &&
     typeof match.away_team.score === "number"
   );
-}
+};
 
 export type ScoreDisplay =
   { type: "score"; home: number; away: number } | { type: "vs" };
 
-export function getScoreDisplay(match: HasScoreMatch): ScoreDisplay {
+export const getScoreDisplay = (match: HasScoreMatch): ScoreDisplay => {
   if (hasScore(match)) {
     return {
       type: "score",
@@ -62,7 +62,7 @@ export function getScoreDisplay(match: HasScoreMatch): ScoreDisplay {
     };
   }
   return { type: "vs" };
-}
+};
 
 /**
  * A settled match's result from KCVV's side. Named once here so the tint
@@ -71,15 +71,15 @@ export function getScoreDisplay(match: HasScoreMatch): ScoreDisplay {
  */
 export type MatchOutcome = "win" | "draw" | "loss";
 
-export function getResultColor(
+export const getResultColor = (
   homeScore: number,
   awayScore: number,
   isHome: boolean,
-): MatchOutcome {
+): MatchOutcome => {
   if (homeScore === awayScore) return "draw";
   const homeWins = homeScore > awayScore;
   return homeWins === isHome ? "win" : "loss";
-}
+};
 
 /**
  * Whether a match has been played (a score is meaningful). Shared by every row
@@ -91,9 +91,9 @@ export function getResultColor(
  * match's partial scoreline is still what the row should show. Which result
  * *headlines* a surface is the stricter question — use `isSettledMatch` there.
  */
-export function isPlayedMatch(status: MatchStatus): boolean {
+export const isPlayedMatch = (status: MatchStatus): boolean => {
   return isSettledMatch(status) || status === "stopped";
-}
+};
 
 /**
  * Whether a status changes what a row means and so has to be named on it.
@@ -102,9 +102,9 @@ export function isPlayedMatch(status: MatchStatus): boolean {
  * makes the row lie unless it is marked — a forfeit rendering a bare `5 – 0`,
  * an `afgelast` match rendering a kickoff nobody should turn up for (#2423).
  */
-export function isExceptionalMatchStatus(status: MatchStatus): boolean {
+export const isExceptionalMatchStatus = (status: MatchStatus): boolean => {
   return status !== "scheduled" && status !== "finished";
-}
+};
 
 /**
  * The ICS feed's title prefix per exceptional status (#3645) — upper-case with
@@ -172,7 +172,9 @@ export interface MatchRowKindSource {
  * once, and the two answers had already drifted apart by review before
  * being consolidated here.
  */
-export function matchRowKind(match: MatchRowKindSource): ScheduleRow["kind"] {
+export const matchRowKind = (
+  match: MatchRowKindSource,
+): ScheduleRow["kind"] => {
   if (match.is_placeholder) return "reservation";
   if (match.competitionType !== "tournament") return "match";
   const hasScoreline =
@@ -180,7 +182,7 @@ export function matchRowKind(match: MatchRowKindSource): ScheduleRow["kind"] {
     typeof match.home_team.score === "number" &&
     typeof match.away_team.score === "number";
   return hasScoreline ? "match" : "reduced";
-}
+};
 
 /**
  * The raw win/draw/loss tint colour — the same `color-mix()` expression
@@ -390,12 +392,12 @@ export type MatchRowKind = keyof typeof MATCH_KIND_WORD;
  * as `finished` without a score may never get one — "Uitslag volgt" there
  * would be a promise nothing keeps.
  */
-export function isResultPending(
+export const isResultPending = (
   kind: MatchRowKind | undefined,
   status: MatchStatus,
-): boolean {
+): boolean => {
   return kind === "result" && status === "scheduled";
-}
+};
 
 /**
  * The one home/away vocabulary (#2398 AC4). Four surfaces state this same fact
@@ -485,10 +487,10 @@ export interface ReservationView {
  * that composes either subject, rather than the join living a third time in
  * a component.
  */
-export function reservationView(
+export const reservationView = (
   match: ReservationSubjectInput,
   otherClub?: { name: string },
-): ReservationView {
+): ReservationView => {
   const competition = match.competition || RESERVATION_SUBJECT_FALLBACK;
   return {
     subject: otherClub
@@ -499,7 +501,7 @@ export function reservationView(
       : null,
     kicker: RESERVATION_SUBJECT_FALLBACK.toUpperCase(),
   };
-}
+};
 
 /**
  * The club that is not KCVV — derived from the club id, never home/away
@@ -522,12 +524,12 @@ export function reservationView(
  * review class, since a rule change (e.g. a second club id after a merger)
  * would silently miss whichever copies nobody remembered to update.
  */
-export function otherClubSide<Team extends { id: number }>(
+export const otherClubSide = <Team extends { id: number }>(
   home: Team,
   away: Team,
-): Team {
+): Team => {
   return home.id === KCVV_CLUB_ID ? away : home;
-}
+};
 
 /** The fields `reservationTitle()` needs, on top of `matchRowKind()`'s own. */
 export interface ReservationTitleInput extends MatchRowKindSource {
@@ -552,7 +554,7 @@ export interface ReservationTitleInput extends MatchRowKindSource {
  * sides are the same club, so there is no other club to name); a reduced
  * tournament fixture does, naming the real opponent.
  */
-export function reservationTitle(match: ReservationTitleInput): string {
+export const reservationTitle = (match: ReservationTitleInput): string => {
   const kind = matchRowKind(match);
   const otherClub =
     kind === "reduced"
@@ -563,7 +565,7 @@ export function reservationTitle(match: ReservationTitleInput): string {
       ? match.away_team
       : match.home_team;
   return `${reservationView(match, otherClub).subject} — ${kcvvTeam.name}`;
-}
+};
 
 /**
  * The accessible-name sentence for a reservation row — the one grammar three
@@ -582,7 +584,7 @@ export function reservationTitle(match: ReservationTitleInput): string {
  * all (it is prohibited and silently ignored), so a `<div>` here renders
  * with no accessible content whatsoever.
  */
-export function reservationRowLabel({
+export const reservationRowLabel = ({
   kind,
   subject,
   dateLabel,
@@ -596,7 +598,7 @@ export function reservationRowLabel({
   time?: string;
   status: MatchStatus;
   statusWording: { abbreviation: string; longForm: string } | null;
-}): string {
+}): string => {
   // Only the fixture word. A reservation is a booking with no score, so it
   // never carries result vocabulary — "Uitslag: Tornooi" is a contradiction,
   // and this label is the row's sole accessible content (#2688).
@@ -609,4 +611,4 @@ export function reservationRowLabel({
     status === "scheduled" && time ? ` om ${time}` : "",
     statusWording ? ` — ${statusWording.longForm}` : "",
   ].join("");
-}
+};

@@ -51,9 +51,9 @@ export interface BreadcrumbItem {
 
 export type NonEmptyArray<T> = [T, ...T[]];
 
-export function buildBreadcrumbJsonLd(
+export const buildBreadcrumbJsonLd = (
   items: NonEmptyArray<BreadcrumbItem>,
-): WithContext<BreadcrumbList> {
+): WithContext<BreadcrumbList> => {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -64,7 +64,7 @@ export function buildBreadcrumbJsonLd(
       item: item.url,
     })),
   };
-}
+};
 
 /** One entry in an {@link buildItemListJsonLd} summary list. */
 export interface ItemListEntry {
@@ -83,9 +83,9 @@ export interface ItemListEntry {
  * `/evenementen/[slug]`), so duplicating it on the index would be redundant.
  * Used by `/kalender` for its current-window feed.
  */
-export function buildItemListJsonLd(
+export const buildItemListJsonLd = (
   items: ItemListEntry[],
-): WithContext<ItemList> {
+): WithContext<ItemList> => {
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
@@ -96,7 +96,7 @@ export function buildItemListJsonLd(
       url: item.url,
     })),
   };
-}
+};
 
 /**
  * Shape for the `about: Person` branch of NewsArticle. `url` is optional
@@ -140,25 +140,26 @@ export interface NewsArticleInput {
   };
 }
 
-export function buildSportsClubJsonLd(): WithContext<SportsClubOrganization> {
-  return {
-    "@context": "https://schema.org",
-    "@type": ["SportsClub", "Organization"],
-    name: SITE_CONFIG.title,
-    url: SITE_CONFIG.siteUrl,
-    logo: LOGO_URL,
-    // No foundingDate: 1909 is inherited via mergers, and a Date-typed field
-    // has no room for that qualification — see PRODUCT.md "Origin is told,
-    // never asserted" (#2435).
-    sameAs: [EXTERNAL_LINKS.facebook, EXTERNAL_LINKS.instagram],
-    sport: "Soccer",
-    address: CLUB_ADDRESS,
+export const buildSportsClubJsonLd =
+  (): WithContext<SportsClubOrganization> => {
+    return {
+      "@context": "https://schema.org",
+      "@type": ["SportsClub", "Organization"],
+      name: SITE_CONFIG.title,
+      url: SITE_CONFIG.siteUrl,
+      logo: LOGO_URL,
+      // No foundingDate: 1909 is inherited via mergers, and a Date-typed field
+      // has no room for that qualification — see PRODUCT.md "Origin is told,
+      // never asserted" (#2435).
+      sameAs: [EXTERNAL_LINKS.facebook, EXTERNAL_LINKS.instagram],
+      sport: "Soccer",
+      address: CLUB_ADDRESS,
+    };
   };
-}
 
-export function buildNewsArticleJsonLd(
+export const buildNewsArticleJsonLd = (
   input: NewsArticleInput,
-): WithContext<NewsArticle> {
+): WithContext<NewsArticle> => {
   const doc: WithContext<NewsArticle> = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
@@ -211,7 +212,7 @@ export function buildNewsArticleJsonLd(
   }
 
   return doc;
-}
+};
 
 export interface PersonInput {
   name: string;
@@ -220,7 +221,7 @@ export interface PersonInput {
   jobTitle?: string;
 }
 
-export function buildPersonJsonLd(input: PersonInput): JsonLdDocument {
+export const buildPersonJsonLd = (input: PersonInput): JsonLdDocument => {
   return {
     "@context": "https://schema.org",
     "@type": "Person",
@@ -233,14 +234,16 @@ export function buildPersonJsonLd(input: PersonInput): JsonLdDocument {
       name: SITE_CONFIG.title,
     },
   };
-}
+};
 
 export interface SportsTeamInput {
   name: string;
   url: string;
 }
 
-export function buildSportsTeamJsonLd(input: SportsTeamInput): JsonLdDocument {
+export const buildSportsTeamJsonLd = (
+  input: SportsTeamInput,
+): JsonLdDocument => {
   return {
     "@context": "https://schema.org",
     "@type": "SportsTeam",
@@ -252,7 +255,7 @@ export function buildSportsTeamJsonLd(input: SportsTeamInput): JsonLdDocument {
       name: SITE_CONFIG.title,
     },
   };
-}
+};
 
 export interface SportsEventInput {
   name: string;
@@ -269,7 +272,7 @@ export interface SportsEventInput {
   competition?: string;
 }
 
-function mapEventStatus(status: SportsEventInput["status"]): string {
+const mapEventStatus = (status: SportsEventInput["status"]): string => {
   switch (status) {
     case "postponed":
     case "stopped":
@@ -281,7 +284,7 @@ function mapEventStatus(status: SportsEventInput["status"]): string {
     case "forfeited":
       return "https://schema.org/EventScheduled";
   }
-}
+};
 
 export interface FAQEntry {
   /** The user-facing question */
@@ -294,9 +297,9 @@ export interface FAQEntry {
  * Build a Schema.org FAQPage document for the /hulp page so search
  * engines can surface KCVV's responsibility paths as FAQ rich results.
  */
-export function buildFAQPageJsonLd(
+export const buildFAQPageJsonLd = (
   entries: ReadonlyArray<FAQEntry>,
-): WithContext<FAQPage> {
+): WithContext<FAQPage> => {
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -309,7 +312,7 @@ export function buildFAQPageJsonLd(
       },
     })),
   };
-}
+};
 
 export interface EventJsonLdInput {
   name: string;
@@ -333,9 +336,9 @@ export interface EventJsonLdInput {
  * Populated from the first `eventFact` block in the article body via
  * the article page route.
  */
-export function buildEventJsonLd(
+export const buildEventJsonLd = (
   input: EventJsonLdInput,
-): WithContext<EventSchema> {
+): WithContext<EventSchema> => {
   return {
     "@context": "https://schema.org",
     "@type": "Event",
@@ -367,11 +370,11 @@ export function buildEventJsonLd(
         }
       : {}),
   };
-}
+};
 
-export function buildSportsEventJsonLd(
+export const buildSportsEventJsonLd = (
   input: SportsEventInput,
-): JsonLdDocument {
+): JsonLdDocument => {
   const homeTeam = { "@type": "SportsTeam" as const, name: input.homeTeamName };
   const awayTeam = { "@type": "SportsTeam" as const, name: input.awayTeamName };
   const logos = [input.homeTeamLogo, input.awayTeamLogo].filter(
@@ -405,4 +408,4 @@ export function buildSportsEventJsonLd(
       ...(isHome ? { url: SITE_CONFIG.siteUrl } : {}),
     },
   };
-}
+};

@@ -5,9 +5,9 @@
  * deterministic so the same id produces the same hashed bucket across
  * every `trackEvent` call.
  */
-export function hashMemberId(id: string): string {
+export const hashMemberId = (id: string): string => {
   const hash = Array.from({ length: id.length }, (_, i) =>
     id.charCodeAt(i),
   ).reduce((acc, code) => ((acc << 5) + acc + code) | 0, 5381);
   return (hash >>> 0).toString(16);
-}
+};

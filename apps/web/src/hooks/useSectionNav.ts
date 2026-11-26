@@ -8,7 +8,7 @@ const FALLBACK_HEADER_HEIGHT_PX = 65;
 
 /** Reads `--sticky-header-h` off the DOM so a consumer with its own offset
  *  need shares one source instead of hand-copying a number. */
-export function getStickyHeaderHeight(): number {
+export const getStickyHeaderHeight = (): number => {
   if (typeof window === "undefined") return FALLBACK_HEADER_HEIGHT_PX;
   const raw = window
     .getComputedStyle(document.documentElement)
@@ -18,7 +18,7 @@ export function getStickyHeaderHeight(): number {
   return Number.isFinite(parsed) && parsed > 0
     ? parsed
     : FALLBACK_HEADER_HEIGHT_PX;
-}
+};
 
 export interface UseSectionNavResult {
   /** Attach to the sticky bar's own outer element (its `<nav>`). Call this
@@ -55,7 +55,7 @@ export interface UseSectionNavResult {
  * `useHashLandingCorrection` is notified of the same resize, in case a
  * hash navigation is still "armed" against the bar's old, shorter height.
  */
-export function useSectionNav(ids: readonly string[]): UseSectionNavResult {
+export const useSectionNav = (ids: readonly string[]): UseSectionNavResult => {
   const navRef = useRef<HTMLElement | null>(null);
   const [barHeight, setBarHeight] = useState(0);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -178,4 +178,4 @@ export function useSectionNav(ids: readonly string[]): UseSectionNavResult {
   }, [idsKey, topInset]);
 
   return { navRef, barHeight, topInset, activeId };
-}
+};

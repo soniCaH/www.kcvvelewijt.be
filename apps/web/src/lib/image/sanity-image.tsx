@@ -12,10 +12,10 @@ import { isSanityImageUrl, sanityImageLoader } from "./sanity-image-loader";
  * 404, which the local photos and the share capture's same-origin proxy still
  * need (#3664).
  */
-export function SanityImage({ alt, ...props }: ImageProps) {
+export const SanityImage = ({ alt, ...props }: ImageProps) => {
   const loader =
     typeof props.src === "string" && isSanityImageUrl(props.src)
       ? sanityImageLoader
       : undefined;
   return <Image alt={alt} {...props} loader={loader} />;
-}
+};

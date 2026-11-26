@@ -18,7 +18,7 @@
  * rendered it with "Configuration must contain `projectId`" — a JS
  * exception, not a pixel diff, but VR-fatal all the same (#2691 review).
  */
-export function slugify(value: string): string {
+export const slugify = (value: string): string => {
   return value
     .normalize("NFKD")
     .replace(/\p{M}+/gu, "")
@@ -26,4 +26,4 @@ export function slugify(value: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
-}
+};

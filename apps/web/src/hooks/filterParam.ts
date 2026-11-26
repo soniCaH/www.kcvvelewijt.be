@@ -21,15 +21,15 @@
  *  guard every filter-URL call site in this codebase used to hand-roll once
  *  each. Exported so a caller with its own narrow-or-fallback shape for a
  *  facet the hook doesn't own can reuse it (#2783 review finding 9). */
-export function narrowParam<T extends string>(
+export const narrowParam = <T extends string>(
   raw: string | null,
   values: readonly T[],
   fallback: T,
-): T {
+): T => {
   return raw !== null && (values as readonly string[]).includes(raw)
     ? (raw as T)
     : fallback;
-}
+};
 
 /** A Next `searchParams` value is `string | string[]` (`?a=1&a=2` arrives as
  *  an array) whatever the page types it as: take the first one (#3875). */
@@ -41,9 +41,9 @@ export const firstParam = (v: string | string[] | undefined) =>
  *  subscription to prefer instead here (that's the whole reason history
  *  mode exists — see `useHistoryFilterParam`'s docblock), so this is safe in
  *  a way the equivalent read is not in router mode (#2783 review finding 1). */
-export function readParam(name: string): string | null {
+export const readParam = (name: string): string | null => {
   return new URLSearchParams(window.location.search).get(name);
-}
+};
 
 export type SetFilterParam<T extends string> = (
   next: T,
@@ -60,12 +60,12 @@ export type SetFilterParam<T extends string> = (
  * fresh navigation to re-process — same precedent as
  * `lib/utils/same-page-anchor.ts`.
  */
-export function writeHistoryFilterParam<T extends string>(
+export const writeHistoryFilterParam = <T extends string>(
   name: string,
   next: T,
   fallback: T,
   options: { route: string; hash?: string; replace?: boolean },
-): void {
+): void => {
   const params = new URLSearchParams(window.location.search);
   if (next === fallback) params.delete(name);
   else params.set(name, next);
@@ -75,4 +75,4 @@ export function writeHistoryFilterParam<T extends string>(
     ? window.history.replaceState
     : window.history.pushState;
   historyMethod.call(window.history, window.history.state, "", path);
-}
+};

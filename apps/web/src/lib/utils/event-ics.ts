@@ -17,20 +17,20 @@ export interface EventIcsInput {
 }
 
 /** RFC 5545 §3.3.11 text escaping: backslash first, then `;`, `,`, newlines. */
-function escapeText(value: string): string {
+const escapeText = (value: string): string => {
   return value
     .replace(/\\/g, "\\\\")
     .replace(/;/g, "\\;")
     .replace(/,/g, "\\,")
     .replace(/\r?\n/g, "\\n");
-}
+};
 
 /** UTC basic format with the trailing `Z` — `20260912T160000Z`. */
-function toUtcStamp(iso: string): string {
+const toUtcStamp = (iso: string): string => {
   return DateTime.fromISO(iso, { zone: "utc" }).toFormat(
     "yyyyLLdd'T'HHmmss'Z'",
   );
-}
+};
 
 const encoder = new TextEncoder();
 
@@ -41,7 +41,7 @@ const encoder = new TextEncoder();
  * Matters for the URL-bearing `URL:` / `DESCRIPTION:` lines (the canonical event
  * URL alone pushes them past 75 octets).
  */
-function foldLine(line: string): string {
+const foldLine = (line: string): string => {
   if (encoder.encode(line).length <= 75) return line;
 
   const { lines, current } = [...line].reduce<{
@@ -65,7 +65,7 @@ function foldLine(line: string): string {
     { lines: [], current: "", octets: 0 },
   );
   return (current ? [...lines, current] : lines).join("\r\n ");
-}
+};
 
 /**
  * Build a single-VEVENT `.ics` document (string) for the "Zet in agenda" CTA on
@@ -79,7 +79,7 @@ function foldLine(line: string): string {
  *
  * Content lines are folded at 75 octets (RFC 5545 §3.1) and CRLF-joined.
  */
-export function buildEventIcs(input: EventIcsInput): string {
+export const buildEventIcs = (input: EventIcsInput): string => {
   const { isAllDay, start, allDayEndExclusive } = resolveEventDateRange(
     input.dateStart,
     input.dateEnd,
@@ -119,4 +119,4 @@ export function buildEventIcs(input: EventIcsInput): string {
   ];
 
   return lines.map(foldLine).join("\r\n");
-}
+};

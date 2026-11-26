@@ -39,10 +39,10 @@ import {
  *
  * @see https://github.com/soniCaH/www.kcvvelewijt.be/issues/2778
  */
-export function degradeIfPermanent<A, F, R>(
+export const degradeIfPermanent = <A, F, R>(
   effect: Effect.Effect<A, BffError, R>,
   onPermanent: F,
-): Effect.Effect<A | F, Exclude<BffError, { _tag: PermanentBffTag }>, R> {
+): Effect.Effect<A | F, Exclude<BffError, { _tag: PermanentBffTag }>, R> => {
   const warnAndDegrade = (error: { _tag: PermanentBffTag }) => {
     console.warn(
       `[degradeIfPermanent] "${error._tag}" classified as permanent; degrading instead of retrying.`,
@@ -55,4 +55,4 @@ export function degradeIfPermanent<A, F, R>(
   ) as Record<PermanentBffTag, typeof warnAndDegrade>;
 
   return effect.pipe(Effect.catchTags(handlers));
-}
+};

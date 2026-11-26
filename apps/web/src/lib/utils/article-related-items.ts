@@ -20,18 +20,18 @@ import type { GalleryCardVM } from "@/lib/repositories/photoGallery.repository";
 import type { EventVM } from "@/lib/repositories/event.repository";
 import type { RelatedItem } from "@kcvv/api-contract";
 
-function deduplicateById<T extends { _id: string }>(items: T[]): T[] {
+const deduplicateById = <T extends { _id: string }>(items: T[]): T[] => {
   const seen = new Set<string>();
   return items.filter((item) => {
     if (seen.has(item._id)) return false;
     seen.add(item._id);
     return true;
   });
-}
+};
 
-export function mapBffRelatedItems(
+export const mapBffRelatedItems = (
   items: readonly RelatedItem[],
-): RelatedContentItem[] {
+): RelatedContentItem[] => {
   return items.map((item) => {
     if (item.type === "gallery") {
       return {
@@ -65,7 +65,7 @@ export function mapBffRelatedItems(
       excerpt: item.excerpt,
     } satisfies RelatedArticleItem;
   });
-}
+};
 
 type MentionedPlayer = NonNullable<
   NonNullable<ArticleDetailVM["mentionedPlayers"]>[number]
@@ -77,9 +77,9 @@ type MentionedStaff = NonNullable<
   NonNullable<ArticleDetailVM["mentionedStaffMembers"]>[number]
 >;
 
-export function mapMentionedPlayers(
+export const mapMentionedPlayers = (
   players?: ArticleDetailVM["mentionedPlayers"],
-): RelatedPlayerItem[] {
+): RelatedPlayerItem[] => {
   const valid = (players ?? []).filter((p): p is MentionedPlayer => p != null);
   return deduplicateById(valid)
     .filter((p) => p.psdId != null)
@@ -93,11 +93,11 @@ export function mapMentionedPlayers(
       imageUrl: p.imageUrl,
       psdId: p.psdId!,
     }));
-}
+};
 
-export function mapMentionedTeams(
+export const mapMentionedTeams = (
   teams?: ArticleDetailVM["mentionedTeams"],
-): RelatedTeamItem[] {
+): RelatedTeamItem[] => {
   const valid = (teams ?? []).filter((t): t is MentionedTeam => t != null);
   // An archived team (retired in PSD) has no page any more (#3000).
   return deduplicateById(valid)
@@ -111,11 +111,11 @@ export function mapMentionedTeams(
       imageUrl: t.imageUrl,
       tagline: t.tagline,
     }));
-}
+};
 
-export function mapMentionedStaff(
+export const mapMentionedStaff = (
   staff?: ArticleDetailVM["mentionedStaffMembers"],
-): RelatedStaffItem[] {
+): RelatedStaffItem[] => {
   const valid = (staff ?? []).filter((s): s is MentionedStaff => s != null);
   return deduplicateById(valid).map((s) => ({
     type: "staff" as const,
@@ -128,15 +128,15 @@ export function mapMentionedStaff(
     // present (#2895 review) — same ?? chain the other repositories use.
     imageUrl: s.imageUrl ?? s.psdImageUrl ?? null,
   }));
-}
+};
 
 type CuratedRelatedEntry = NonNullable<
   ArticleDetailVM["relatedContent"]
 >[number];
 
-export function mapCuratedRelatedContent(
+export const mapCuratedRelatedContent = (
   items?: ArticleDetailVM["relatedContent"] | null,
-): RelatedContentItem[] {
+): RelatedContentItem[] => {
   if (!items?.length) return [];
   const seen = new Set<string>();
   const mapped: RelatedContentItem[] = [];
@@ -147,11 +147,11 @@ export function mapCuratedRelatedContent(
     if (result) mapped.push(result);
   }
   return mapped;
-}
+};
 
-function mapCuratedEntry(
+const mapCuratedEntry = (
   entry: CuratedRelatedEntry,
-): RelatedContentItem | null {
+): RelatedContentItem | null => {
   switch (entry._type) {
     case "article":
       return {
@@ -236,7 +236,7 @@ function mapCuratedEntry(
       return null;
     }
   }
-}
+};
 
 /**
  * Adapt `ArticleVM[]` — the `ArticleRepository.findRelated()` output rendered
@@ -253,9 +253,9 @@ function mapCuratedEntry(
  * `<RelatedArticlesSection>`. Shared so the detail pages don't each
  * hand-roll the mapping.
  */
-export function articleVMsToRelatedRowItems(
+export const articleVMsToRelatedRowItems = (
   articles: ArticleVM[],
-): RelatedRowItem[] {
+): RelatedRowItem[] => {
   const related: RelatedArticleItem[] = articles.map((article) => ({
     type: "article",
     source: "reference",
@@ -267,7 +267,7 @@ export function articleVMsToRelatedRowItems(
     excerpt: null,
   }));
   return mapRelatedToRelatedRow(related);
-}
+};
 
 /**
  * Adapt `GalleryCardVM[]` — galleries linked to an event or a match — to
@@ -275,9 +275,9 @@ export function articleVMsToRelatedRowItems(
  * photo galleries are bounded and defining). Shared between `/evenementen/[slug]`
  * and `/wedstrijd/[matchId]`, the two former `<GallerySection>` consumers.
  */
-export function mapGalleriesToRelatedRow(
+export const mapGalleriesToRelatedRow = (
   galleries: readonly GalleryCardVM[],
-): RelatedRowItem[] {
+): RelatedRowItem[] => {
   const items: RelatedGalleryItem[] = galleries.map((g) => ({
     type: "gallery",
     source: "domain",
@@ -287,7 +287,7 @@ export function mapGalleriesToRelatedRow(
     imageUrl: g.coverUrl ?? null,
   }));
   return mapRelatedToRelatedRow(items);
-}
+};
 
 /**
  * Adapt `EventVM[]` — other upcoming events — to `<RelatedRow>` cards for the
@@ -296,9 +296,9 @@ export function mapGalleriesToRelatedRow(
  * relation (same document type as the host page), never editorial, AI, or an
  * in-body mention.
  */
-export function eventVMsToSiblingItems(
+export const eventVMsToSiblingItems = (
   events: readonly EventVM[],
-): RelatedRowItem[] {
+): RelatedRowItem[] => {
   const items: RelatedEventItem[] = events
     .filter((e) => e.dateStart !== "")
     .map((e) => ({
@@ -312,7 +312,7 @@ export function eventVMsToSiblingItems(
       imageUrl: e.coverImageUrl,
     }));
   return mapRelatedToRelatedRow(items);
-}
+};
 
 /**
  * Adapt `MatchArticleVM[]` — the `matchPreview`/`matchRecap` article(s)
@@ -332,9 +332,9 @@ export function eventVMsToSiblingItems(
  * apart (review round 1, #2788). Mirrors the retired `selectMatchArticle`'s
  * `RECAP_KICKER` / `PREVIEW_KICKER` distinction.
  */
-export function matchArticlesToRelatedRow(
+export const matchArticlesToRelatedRow = (
   articles: readonly MatchArticleVM[],
-): RelatedRowItem[] {
+): RelatedRowItem[] => {
   return articles.map((a) => ({
     title: a.title,
     href: `/nieuws/${a.slug}`,
@@ -346,7 +346,7 @@ export function matchArticlesToRelatedRow(
     analyticsType: "article",
     analyticsTargetSlug: a.slug,
   }));
-}
+};
 
 /**
  * Adapt the discriminated `RelatedContentItem` union to the flat
@@ -358,18 +358,18 @@ export function matchArticlesToRelatedRow(
  * mappers already null-guard the resolvable fields, this layer just
  * picks the fallback labels and routes.
  */
-export function mapRelatedToRelatedRow(
+export const mapRelatedToRelatedRow = (
   items: RelatedContentItem[],
-): RelatedRowItem[] {
+): RelatedRowItem[] => {
   const out: RelatedRowItem[] = [];
   for (const item of items) {
     const mapped = mapRelatedItem(item);
     if (mapped) out.push(mapped);
   }
   return out;
-}
+};
 
-function mapRelatedItem(item: RelatedContentItem): RelatedRowItem | null {
+const mapRelatedItem = (item: RelatedContentItem): RelatedRowItem | null => {
   switch (item.type) {
     case "article":
       return {
@@ -466,4 +466,4 @@ function mapRelatedItem(item: RelatedContentItem): RelatedRowItem | null {
         analyticsTargetSlug: item.slug,
       };
   }
-}
+};

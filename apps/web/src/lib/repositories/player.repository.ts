@@ -61,9 +61,9 @@ const POSITION_LABELS: Record<string, string> = {
   attacker: "Aanvaller",
 };
 
-function resolvePositionPsd(
+const resolvePositionPsd = (
   positionPsd: string | null | undefined,
-): string | undefined {
+): string | undefined => {
   const key = positionPsd?.trim().toLowerCase();
   // `Object.hasOwn` guard, not a bare index: `POSITION_LABELS` is an object
   // literal, so it inherits `Object.prototype`. A bare lookup on an inherited
@@ -75,7 +75,7 @@ function resolvePositionPsd(
   return key && Object.hasOwn(POSITION_LABELS, key)
     ? POSITION_LABELS[key]
     : undefined;
-}
+};
 
 export interface PlayerVM {
   id: string;
@@ -127,7 +127,7 @@ export interface PlayerVM {
 /** A PlayerVM that has a valid href (i.e. has a psdId) */
 export type RoutablePlayerVM = PlayerVM & { href: string };
 
-export function toPlayerVM(
+export const toPlayerVM = (
   row: SanityPlayerBase & {
     celebrationImageUrl?: string | null;
     bio?: PLAYERS_QUERY_RESULT[number]["bio"] | null;
@@ -140,7 +140,7 @@ export function toPlayerVM(
       teamImageUrl?: string | null;
     } | null;
   },
-): PlayerVM {
+): PlayerVM => {
   const position = row.keeper
     ? "Keeper"
     : (row.position ?? resolvePositionPsd(row.positionPsd) ?? undefined);
@@ -173,7 +173,7 @@ export function toPlayerVM(
     teamSlug: row.currentTeam?.slug ?? undefined,
     teamImageUrl: row.currentTeam?.teamImageUrl ?? undefined,
   };
-}
+};
 
 // ─── Keeper PSD-id lookup ────────────────────────────────────────────────────
 //
@@ -205,9 +205,9 @@ const keeperCache: {
  * Test-only: clear the module-scope keeper cache. Not exported via the
  * repository tag because no production caller needs it.
  */
-export function __resetKeeperCacheForTests() {
+export const __resetKeeperCacheForTests = () => {
   keeperCache.entry = null;
-}
+};
 
 export interface PlayerRepositoryInterface {
   readonly findAll: () => Effect.Effect<PlayerVM[], SanityReadError>;

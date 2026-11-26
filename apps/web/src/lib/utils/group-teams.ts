@@ -43,10 +43,10 @@ export const RESERVEN_PSD_ID = "34";
 export const RESERVEN_LABEL = "Reserven";
 
 /** Parse the numeric age from an age-group string (e.g. "U15" → 15). Returns null if unparseable. */
-function parseAge(ageGroup: string): number | null {
+const parseAge = (ageGroup: string): number | null => {
   const match = ageGroup.match(/^U(\d+)/i);
   return match ? parseInt(match[1], 10) : null;
-}
+};
 
 /**
  * True when a team's `age` is an age code (`U6`, `U15`, …) rather than a senior
@@ -54,9 +54,9 @@ function parseAge(ageGroup: string): number | null {
  * the code to fall inside a bouw band — "U5" is an age code with no division.
  * Callers that render the age (chest letter, card caption) want this one.
  */
-export function isAgeCode(ageGroup: string | undefined): boolean {
+export const isAgeCode = (ageGroup: string | undefined): boolean => {
   return ageGroup != null && parseAge(ageGroup) != null;
-}
+};
 
 /**
  * Derive the youth division name from an age group string (e.g. "U15" →
@@ -64,9 +64,9 @@ export function isAgeCode(ageGroup: string | undefined): boolean {
  * Onderbouw U6–U9 (2v2 → 5v5), Middenbouw U10–U13 (8v8), Bovenbouw U14–U21
  * (11v11).
  */
-export function getYouthDivision(
+export const getYouthDivision = (
   ageGroup: string | undefined,
-): YouthDivisionName | null {
+): YouthDivisionName | null => {
   if (!ageGroup) return null;
   const age = parseAge(ageGroup);
   if (age == null) return null;
@@ -74,7 +74,7 @@ export function getYouthDivision(
   if (age >= 10 && age <= 13) return "Middenbouw";
   if (age >= 6 && age <= 9) return "Onderbouw";
   return null;
-}
+};
 
 /**
  * A closed set of colour-token identities, one per Youth Division plus
@@ -94,19 +94,19 @@ const YOUTH_DIVISION_TONES = {
 } satisfies Record<YouthDivisionName, YouthDivisionTone>;
 
 /** The Senioren tone — also what a `null` division (no Youth Division at all) resolves to. */
-export function getYouthDivisionTone(
+export const getYouthDivisionTone = (
   division: YouthDivisionName | null,
-): YouthDivisionTone {
+): YouthDivisionTone => {
   return division ? YOUTH_DIVISION_TONES[division] : "ink";
-}
+};
 
 /**
  * Youngest first (club feedback v2, #3427). Only teams `getYouthDivision`
  * placed reach this, so every age parses.
  */
-function byAgeAsc(a: TeamLandingItem, b: TeamLandingItem): number {
+const byAgeAsc = (a: TeamLandingItem, b: TeamLandingItem): number => {
   return (parseAge(a.age) ?? 0) - (parseAge(b.age) ?? 0);
-}
+};
 
 /**
  * Extract the trailing single letter from a team name, e.g. "Eerste Elftallen A" → "A".
@@ -114,15 +114,17 @@ function byAgeAsc(a: TeamLandingItem, b: TeamLandingItem): number {
  * Selection only — this decides *which* team fills the A / B flagship slot, not
  * what the slot is called. What it is called comes from `teamDisplayName`.
  */
-function nameSuffix(name: string): string {
+const nameSuffix = (name: string): string => {
   return name.trim().split(/\s+/).at(-1) ?? "";
-}
+};
 
-function isSenior(t: TeamLandingItem): boolean {
+const isSenior = (t: TeamLandingItem): boolean => {
   return t.age === "A";
-}
+};
 
-export function groupTeamsForLanding(teams: TeamLandingItem[]): GroupedTeams {
+export const groupTeamsForLanding = (
+  teams: TeamLandingItem[],
+): GroupedTeams => {
   const seniors = teams.filter(isSenior);
   return {
     aTeam: seniors.find((t) => nameSuffix(t.name) === "A"),
@@ -164,4 +166,4 @@ export function groupTeamsForLanding(teams: TeamLandingItem[]): GroupedTeams {
       },
     ],
   };
-}
+};

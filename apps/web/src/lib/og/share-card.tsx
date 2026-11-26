@@ -56,21 +56,21 @@ const NAME_COLUMN =
  * fits a name is arithmetic rather than a guess — which is what keeps
  * "Vanden Bossche" and "Jan" on the same card without a measurement pass.
  */
-export function fitNameSize(lines: readonly string[]): number {
+export const fitNameSize = (lines: readonly string[]): number => {
   const longest = Math.max(...lines.map((line) => line.length), 1);
   return Math.max(28, Math.min(64, Math.floor(NAME_COLUMN / (longest * 0.6))));
-}
+};
 
 /** The stamp is a fixed square; long identifiers step down to stay inside it. */
-function fitStampSize(value: string): number {
+const fitStampSize = (value: string): number => {
   if (value.length <= 2) return 104;
   if (value.length === 3) return 76;
   return 56;
-}
+};
 
-function readPublicAsset(relativePath: string): Promise<Buffer> {
+const readPublicAsset = (relativePath: string): Promise<Buffer> => {
   return readFile(join(process.cwd(), "public", relativePath));
-}
+};
 
 /**
  * Read once per lambda instance. The card is regenerated rarely (OG images are
@@ -83,7 +83,7 @@ interface OgAssets {
   crest: string;
 }
 
-function loadAssets(): Promise<OgAssets> {
+const loadAssets = (): Promise<OgAssets> => {
   assetsCache.promise ??= Promise.all([
     readPublicAsset("fonts/ibm-plex-mono-400.woff"),
     readPublicAsset("fonts/ibm-plex-mono-700.woff"),
@@ -106,7 +106,7 @@ function loadAssets(): Promise<OgAssets> {
     crest: `data:image/png;base64,${crest.toString("base64")}`,
   }));
   return assetsCache.promise;
-}
+};
 
 export interface ShareCardProps {
   /**
@@ -129,9 +129,9 @@ export interface ShareCardProps {
  * @param props - The subject's stamp, two name lines, and an optional meta line
  * @returns A 1200×630 `image/png` {@link ImageResponse}
  */
-export async function renderShareCard(
+export const renderShareCard = async (
   props: ShareCardProps,
-): Promise<ImageResponse> {
+): Promise<ImageResponse> => {
   const { stampText, nameTop, nameBottom, meta } = props;
   const { fonts, crest } = await loadAssets();
   const nameSize = fitNameSize([nameTop, nameBottom]);
@@ -255,4 +255,4 @@ export async function renderShareCard(
     </div>,
     { ...OG_SIZE, fonts },
   );
-}
+};

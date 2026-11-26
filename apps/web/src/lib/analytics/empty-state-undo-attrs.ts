@@ -29,11 +29,11 @@ export interface EmptyStateUndoAttrs {
  * shared by writer and reader, rather than spelling the attribute name at
  * every call site.
  */
-export function readEmptyStateUndoAttrs(
+export const readEmptyStateUndoAttrs = (
   el: HTMLElement,
-): EmptyStateUndoAttrs | null {
+): EmptyStateUndoAttrs | null => {
   const source = el.getAttribute("data-empty-state-undo-source");
   const facet = el.getAttribute("data-empty-state-undo-facet");
   if (!source || !facet) return null;
   return { source: source as EmptyStateUndoSource, facet };
-}
+};

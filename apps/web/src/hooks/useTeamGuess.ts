@@ -14,10 +14,10 @@ export interface TeamGuess {
  * the people lane's). Pass `null` to ask nothing; each new query aborts the last.
  * Any failure, a 429 or a "none" leaves no guess — the card simply stays away.
  */
-export function useTeamGuess(
+export const useTeamGuess = (
   query: string | null,
   ages: readonly string[],
-): TeamGuess | null {
+): TeamGuess | null => {
   const [guess, setGuess] = useState<TeamGuess | null>(null);
   const agesKey = ages.join(",");
 
@@ -42,4 +42,4 @@ export function useTeamGuess(
   }, [query, agesKey]);
 
   return guess;
-}
+};

@@ -69,13 +69,13 @@ export interface KeyContactVM {
   email: string;
 }
 
-export function toKeyContactVMs(
+export const toKeyContactVMs = (
   rows: Array<{
     title: string | null;
     roleCode: string | null;
     members: Array<{ name: string; email: string }>;
   }>,
-): KeyContactVM[] {
+): KeyContactVM[] => {
   return rows.flatMap((row) =>
     row.members
       .filter((m): m is NonNullable<typeof m> => m != null)
@@ -88,7 +88,7 @@ export function toKeyContactVMs(
         };
       }),
   );
-}
+};
 
 export interface OrganigramPositionVM {
   _id: string;
@@ -119,9 +119,9 @@ export interface StaffDetailVM {
   responsibilityPaths: ResponsibilityPathVM[];
 }
 
-export function toOrgChartNode(
+export const toOrgChartNode = (
   node: ORGANIGRAM_NODES_QUERY_RESULT[number],
-): OrgChartNode {
+): OrgChartNode => {
   return {
     id: node._id,
     title: node.title ?? "",
@@ -147,11 +147,11 @@ export function toOrgChartNode(
         };
       }),
   };
-}
+};
 
-function toStaffDetailVM(
+const toStaffDetailVM = (
   row: NonNullable<STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT>,
-): StaffDetailVM {
+): StaffDetailVM => {
   const psdId = row.psdId != null ? String(row.psdId).trim() : "";
 
   return {
@@ -179,7 +179,7 @@ function toStaffDetailVM(
       ...(r.icon ? { icon: r.icon } : {}),
     })),
   };
-}
+};
 
 // ─── Repository ───────────────────────────────────────────────────────────────
 

@@ -15,19 +15,19 @@
  * the reader another facet to try. `noun` is the destination the undo
  * points at in prose (`"het volledige overzicht"`, `"alle evenementen"`).
  */
-export function filteredEmptyBody(noun: string): string {
+export const filteredEmptyBody = (noun: string): string => {
   return `Probeer een andere categorie, of bekijk ${noun}.`;
-}
+};
 
 /**
  * The genuine-emptiness body — "Zodra {condition}, {verschijnt|verschijnen}
  * {subject} hier." `plural` picks the verb agreement for `subject`
  * ("verschijnen de wedstrijden" vs "verschijnt het").
  */
-export function pendingEmptyBody(
+export const pendingEmptyBody = (
   condition: string,
   subject: string,
   plural = false,
-): string {
+): string => {
   return `Zodra ${condition}, ${plural ? "verschijnen" : "verschijnt"} ${subject} hier.`;
-}
+};

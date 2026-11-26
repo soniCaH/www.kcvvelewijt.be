@@ -20,9 +20,9 @@ export interface SeasonGroup<T> {
   items: T[];
 }
 
-function twoDigit(year: number): string {
+const twoDigit = (year: number): string => {
   return String(year % 100).padStart(2, "0");
-}
+};
 
 /**
  * Derive the football season a date belongs to. **The one derivation** — it
@@ -42,7 +42,7 @@ function twoDigit(year: number): string {
  * `/scheurkalender` passes a `YYYY-MM-DD` string that the route has already
  * normalised through the same helper, so it reads identically.
  */
-export function deriveSeason(date: Date | string): Season {
+export const deriveSeason = (date: Date | string): Season => {
   const { year, month } = toMatchDisplayZone(date);
   const startYear = month >= 7 ? year : year - 1;
   const endYear = startYear + 1;
@@ -50,27 +50,27 @@ export function deriveSeason(date: Date | string): Season {
     key: `${startYear}-${endYear}`,
     label: `’${twoDigit(startYear)}/’${twoDigit(endYear)}`,
   };
-}
+};
 
 /**
  * Start year of the season a true instant (`new Date()`) falls in: a season
  * starts 1 July, Belgian time. Not for match dates — those go through
  * `deriveSeason`, which reads their wall-clock UTC fields.
  */
-export function seasonStartYear(now: Date): number {
+export const seasonStartYear = (now: Date): number => {
   const { year, month } = toDisplayZone(now);
   return month >= 7 ? year : year - 1;
-}
+};
 
 /**
  * Group items by season, preserving the input order both across groups and
  * within each group. Callers pass an already-sorted list (the opponent-history
  * page sorts date-descending) so the first group is the most recent season.
  */
-export function groupBySeason<T>(
+export const groupBySeason = <T>(
   items: readonly T[],
   getDate: (item: T) => Date,
-): SeasonGroup<T>[] {
+): SeasonGroup<T>[] => {
   const groups: SeasonGroup<T>[] = [];
   const byKey = new Map<string, SeasonGroup<T>>();
   for (const item of items) {
@@ -85,4 +85,4 @@ export function groupBySeason<T>(
     }
   }
   return groups;
-}
+};

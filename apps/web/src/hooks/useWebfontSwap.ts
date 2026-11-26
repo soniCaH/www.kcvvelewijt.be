@@ -54,7 +54,7 @@ import { useEffect, useRef } from "react";
  * subscribes **once** — consumers may pass an inline callback without
  * `useCallback` and never get a stale closure or a re-subscribe churn.
  */
-export function useWebfontSwap(onSwap: () => void): void {
+export const useWebfontSwap = (onSwap: () => void): void => {
   const onSwapRef = useRef(onSwap);
   useEffect(() => {
     onSwapRef.current = onSwap;
@@ -68,4 +68,4 @@ export function useWebfontSwap(onSwap: () => void): void {
       document.fonts?.removeEventListener?.("loadingdone", handleLoadingDone);
     };
   }, []);
-}
+};

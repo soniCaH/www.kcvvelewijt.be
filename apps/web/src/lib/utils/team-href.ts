@@ -9,11 +9,11 @@
  */
 export const BOARD_TEAM_SLUGS = ["bestuur", "jeugdbestuur", "angels"] as const;
 
-export function isBoardTeamSlug(slug: string): boolean {
+export const isBoardTeamSlug = (slug: string): boolean => {
   return (BOARD_TEAM_SLUGS as readonly string[]).includes(slug);
-}
+};
 
 /** The public URL of a `team` document: `/club/<slug>` for a board, else `/ploegen/<slug>`. */
-export function teamHref(slug: string): string {
+export const teamHref = (slug: string): string => {
   return isBoardTeamSlug(slug) ? `/club/${slug}` : `/ploegen/${slug}`;
-}
+};

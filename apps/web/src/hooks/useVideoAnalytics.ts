@@ -27,7 +27,7 @@ interface VideoEventInput {
  * without postMessage wiring (`YT.Player`, Vimeo Player SDK), which is
  * explicitly out of scope per `docs/prd/archive/2026/article-video-support.md` §4.
  */
-export function useVideoAnalytics() {
+export const useVideoAnalytics = () => {
   const playFiredRef = useRef(false);
 
   const trackVideoPlay = useCallback(
@@ -67,4 +67,4 @@ export function useVideoAnalytics() {
   );
 
   return { trackVideoPlay, trackVideoComplete };
-}
+};

@@ -15,7 +15,7 @@ import { readOptionalServerEnv } from "@/lib/env/server";
 
 const ENDPOINT = "https://www.google-analytics.com/mp/collect";
 
-export async function sendShortLinkClick(name: string): Promise<void> {
+export const sendShortLinkClick = async (name: string): Promise<void> => {
   const { GA4_MEASUREMENT_ID: measurementId, GA4_API_SECRET: apiSecret } =
     readOptionalServerEnv();
   if (!measurementId || !apiSecret) return;
@@ -44,4 +44,4 @@ export async function sendShortLinkClick(name: string): Promise<void> {
       error instanceof Error ? error.message : "unknown error",
     );
   }
-}
+};

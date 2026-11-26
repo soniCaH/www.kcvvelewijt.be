@@ -29,7 +29,7 @@ import type { UpcomingRow } from "@/components/match/types";
  * @param match - Match data from domain layer
  * @returns UpcomingRow object for UI consumption
  */
-export function mapMatchToUpcomingMatch(match: Match): UpcomingRow {
+export const mapMatchToUpcomingMatch = (match: Match): UpcomingRow => {
   const kind = matchRowKind(match);
 
   switch (kind) {
@@ -91,7 +91,7 @@ export function mapMatchToUpcomingMatch(match: Match): UpcomingRow {
     default:
       return assertNever(kind);
   }
-}
+};
 
 /**
  * Map array of Matches to UpcomingRows
@@ -99,8 +99,8 @@ export function mapMatchToUpcomingMatch(match: Match): UpcomingRow {
  * @param matches - Array of Match objects from domain layer
  * @returns Array of UpcomingRow objects for UI consumption
  */
-export function mapMatchesToUpcomingMatches(
+export const mapMatchesToUpcomingMatches = (
   matches: readonly Match[],
-): UpcomingRow[] {
+): UpcomingRow[] => {
   return matches.map(mapMatchToUpcomingMatch);
-}
+};

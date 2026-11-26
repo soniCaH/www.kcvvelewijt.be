@@ -53,18 +53,18 @@ import {
 const tappedStore: { key: string | null } = { key: null };
 const listeners = new Set<() => void>();
 
-function setTapped(next: string | null) {
+const setTapped = (next: string | null) => {
   if (next === tappedStore.key) return;
   tappedStore.key = next;
   listeners.forEach((listener) => listener());
-}
+};
 
-function subscribe(listener: () => void) {
+const subscribe = (listener: () => void) => {
   listeners.add(listener);
   return () => {
     listeners.delete(listener);
   };
-}
+};
 
 export interface Travel {
   transition: ComponentProps<typeof ViewTransition>;
@@ -80,10 +80,10 @@ export interface Travel {
  *   all): the source takes no part and the plain cut stays. While `href` is the
  *   current page, the source takes no name either (its detail end holds it).
  */
-export function useTravel(
+export const useTravel = (
   kind: TravelKind | undefined,
   href: string | undefined,
-): Travel {
+): Travel => {
   const id = kind === undefined ? undefined : travelId(kind, href);
   const key = useId();
   const pathname = usePathname();
@@ -132,4 +132,4 @@ export function useTravel(
       return true;
     },
   };
-}
+};

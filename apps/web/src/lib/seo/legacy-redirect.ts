@@ -23,9 +23,9 @@ import { slugify } from "@/lib/utils/slugify";
  * `"${firstName} ${lastName}"` through the shared `slugify`
  * (`lib/utils/slugify.ts` — dependency-free on purpose; this file is not).
  */
-export function nameToSlug(firstName: string, lastName: string): string {
+export const nameToSlug = (firstName: string, lastName: string): string => {
   return slugify(`${firstName} ${lastName}`);
-}
+};
 
 export interface PersonRow {
   psdId: string | null;
@@ -38,10 +38,10 @@ export interface PersonRow {
  * slug as a `psdId` directly (covers any `/players/<psdId>` style link).
  * Returns `null` when nothing matches.
  */
-export function resolvePersonPsdId(
+export const resolvePersonPsdId = (
   slug: string,
   rows: readonly PersonRow[],
-): string | null {
+): string | null => {
   const target = slug.toLowerCase();
   for (const row of rows) {
     if (!row.psdId) continue;
@@ -50,7 +50,7 @@ export function resolvePersonPsdId(
     }
   }
   return rows.some((row) => row.psdId === slug) ? slug : null;
-}
+};
 
 export interface YouthTeamRow {
   slug: string | null;
@@ -75,10 +75,10 @@ const compareSlugs = (a: { slug: string }, b: { slug: string }) => {
  *      colour teams) thus resolve to a stable team rather than 404.
  * Returns `null` when no youth team of that age exists.
  */
-export function resolveYouthSlug(
+export const resolveYouthSlug = (
   token: string,
   rows: readonly YouthTeamRow[],
-): string | null {
+): string | null => {
   const lower = token.toLowerCase();
   const teams = rows.filter((row): row is YouthTeamRow & { slug: string } =>
     Boolean(row.slug),
@@ -105,7 +105,7 @@ export function resolveYouthSlug(
     if (match) return match.slug;
   }
   return ofAge[0].slug;
-}
+};
 
 // ─── Cached Sanity reads ─────────────────────────────────────────────────────
 // Mappings change rarely (PSD-synced) → 24h tag-bounded cache, same as the

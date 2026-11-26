@@ -15,7 +15,7 @@ export interface SponsorAttrs {
  * for the "Gesteund door" line; the attribute names and the empty-string
  * coercion live here beside the type.
  */
-export function readSponsorAttrs(el: HTMLElement): SponsorAttrs | null {
+export const readSponsorAttrs = (el: HTMLElement): SponsorAttrs | null => {
   const sponsorId = el.getAttribute("data-sponsor-id");
   if (!sponsorId) return null;
   return {
@@ -23,4 +23,4 @@ export function readSponsorAttrs(el: HTMLElement): SponsorAttrs | null {
     tier: (el.getAttribute("data-sponsor-tier") || undefined) as
       SponsorTier | undefined,
   };
-}
+};

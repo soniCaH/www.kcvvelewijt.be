@@ -11,9 +11,11 @@ import type { BffError } from "@/lib/effect/services/BffService";
  * — both exercise the same tag union against sibling classifiers, so their
  * fixture shouldn't be two hand-copies of the same two-line class.
  */
-export function makeTaggedBffError(tag: BffError["_tag"]): {
+export const makeTaggedBffError = (
+  tag: BffError["_tag"],
+): {
   readonly _tag: BffError["_tag"];
   readonly message: string;
-} {
+} => {
   return { _tag: tag, message: "boom" };
-}
+};

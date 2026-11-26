@@ -17,7 +17,7 @@ const parseBody = (text: string): unknown => {
  * status and JSON back. A server-side proxy avoids CORS and keeps the BFF URL
  * out of the client bundle. `/api/search` and `/api/search/team-guess` (#3559).
  */
-export async function proxyPostToBff(request: NextRequest, path: string) {
+export const proxyPostToBff = async (request: NextRequest, path: string) => {
   const env = readBffEnv();
   if (Either.isLeft(env)) {
     return NextResponse.json(
@@ -56,4 +56,4 @@ export async function proxyPostToBff(request: NextRequest, path: string) {
       { status: 500 },
     );
   }
-}
+};

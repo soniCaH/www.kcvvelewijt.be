@@ -106,7 +106,9 @@ interface ParsedTeam<T> {
   regional: boolean;
 }
 
-function parseTeam<T extends YouthTeamSource>(team: T): ParsedTeam<T> | null {
+const parseTeam = <T extends YouthTeamSource>(
+  team: T,
+): ParsedTeam<T> | null => {
   const m = teamDisplayName(team).match(/^U(\d{1,2})([a-z]*)(?:\s+(.+))?$/i);
   if (!m) return null;
   return {
@@ -116,9 +118,9 @@ function parseTeam<T extends YouthTeamSource>(team: T): ParsedTeam<T> | null {
     variant: (m[3] ?? "").toLowerCase().split(/\s+/).filter(Boolean),
     regional: !/p$/i.test(team.slug),
   };
-}
+};
 
-export function matchYouthTeams<T extends YouthTeamSource>(
+export const matchYouthTeams = <T extends YouthTeamSource>(
   query: string,
   teams: readonly T[],
   /**
@@ -131,7 +133,7 @@ export function matchYouthTeams<T extends YouthTeamSource>(
    * season: 8 in March 2027 is born 2019 or 2018, though the season is 2026.
    */
   calendarYear: number,
-): YouthTeamMatchResult<T> {
+): YouthTeamMatchResult<T> => {
   const parsed = teams
     .filter((t) => t.archived !== true)
     .map(parseTeam)
@@ -258,10 +260,10 @@ export function matchYouthTeams<T extends YouthTeamSource>(
   })).filter((g) => g.matches.length > 0);
 
   return { bands, unmatchedNumber: bands.length === 0 && /\d/.test(query) };
-}
+};
 
 /** The U-codes the club fields, youngest first — the only answers the AI may give (#3559). */
-export function youthTeamAges(teams: readonly YouthTeamSource[]): string[] {
+export const youthTeamAges = (teams: readonly YouthTeamSource[]): string[] => {
   const categories = new Set(
     teams
       .filter((t) => t.archived !== true)
@@ -269,7 +271,7 @@ export function youthTeamAges(teams: readonly YouthTeamSource[]): string[] {
       .flatMap((p) => (p ? [p.category] : [])),
   );
   return [...categories].sort((a, b) => a - b).map((c) => `U${c}`);
-}
+};
 
 /** Senior teams: `A-ploeg`, `B ploeg`, `eerste ploeg`, `reserven` — never a youth card (#3420 mock). */
 const SENIOR_TEAM = /\b(?:[ab]\s*-?\s*ploeg|eerste\s+ploeg|reserve)/i;
@@ -279,22 +281,22 @@ const SENIOR_TEAM = /\b(?:[ab]\s*-?\s*ploeg|eerste\s+ploeg|reserve)/i;
  * child or a youth team, and names no senior team. Prefixes, so `dochtertje`
  * and `ploegen` count too.
  */
-export function hasYouthHint(query: string): boolean {
+export const hasYouthHint = (query: string): boolean => {
   return (
     !SENIOR_TEAM.test(query) &&
     /\b(?:zoon|dochter|kind|ploeg|jeugd|pupil|kadet|nieuweling|belofte|debutant)/i.test(
       query,
     )
   );
-}
+};
 
 /** The card for an AI pick the parent confirmed: the U-code rule's card, found by `ai`. */
-export function aiTeamResult<T extends YouthTeamSource>(
+export const aiTeamResult = <T extends YouthTeamSource>(
   age: string,
   teams: readonly T[],
   seasonYear: number,
   calendarYear: number,
-): YouthTeamMatchResult<T> {
+): YouthTeamMatchResult<T> => {
   const result = matchYouthTeams(age, teams, seasonYear, calendarYear);
   return {
     ...result,
@@ -303,4 +305,4 @@ export function aiTeamResult<T extends YouthTeamSource>(
       matches: band.matches.map((m) => ({ ...m, kind: "ai" as const })),
     })),
   };
-}
+};

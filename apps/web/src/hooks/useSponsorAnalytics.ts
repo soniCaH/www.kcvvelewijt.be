@@ -31,7 +31,7 @@ interface SponsorClickInput {
  * No PII: the internal Sanity sponsor id is hashed via `hashMemberId`, never
  * sent raw; sponsor `url`s are never sent.
  */
-export function useSponsorAnalytics() {
+export const useSponsorAnalytics = () => {
   const trackSponsorView = useCallback(() => {
     trackEvent("sponsor_view");
   }, []);
@@ -85,4 +85,4 @@ export function useSponsorAnalytics() {
     trackSponsorTeamLineClick,
     trackSponsorCtaClick,
   };
-}
+};

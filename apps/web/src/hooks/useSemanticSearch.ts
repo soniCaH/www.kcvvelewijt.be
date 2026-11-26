@@ -56,9 +56,9 @@ export interface UseSemanticSearchReturn {
  *   - `search` — function that initiates a debounced search for a given query string.
  *   - `clear` — function that clears `results` and `error`.
  */
-export function useSemanticSearch(
+export const useSemanticSearch = (
   options: UseSemanticSearchOptions = {},
-): UseSemanticSearchReturn {
+): UseSemanticSearchReturn => {
   const { type, limit = 5, debounceMs = 300 } = options;
   const [results, setResults] = useState<SemanticSearchResult[]>([]);
   const [answer, setAnswer] = useState<string | undefined>(undefined);
@@ -149,4 +149,4 @@ export function useSemanticSearch(
   }, []);
 
   return { results, answer, loading, error, executedQuery, search, clear };
-}
+};

@@ -18,7 +18,7 @@ import { toMatchDisplayZone } from "./dates";
  *
  * @returns The time as `HH:MM` if available, `undefined` otherwise.
  */
-export function extractMatchTime(match: MatchDetail): string | undefined {
+export const extractMatchTime = (match: MatchDetail): string | undefined => {
   if (match.time) {
     return match.time;
   }
@@ -34,4 +34,4 @@ export function extractMatchTime(match: MatchDetail): string | undefined {
   }
 
   return undefined;
-}
+};

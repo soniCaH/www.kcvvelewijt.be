@@ -22,10 +22,10 @@ export interface UseDelegatedClickOptions {
  * without `useCallback` and never get a stale closure or a re-subscribe churn.
  * SSR-safe: the listener is wired in an effect and guards a null `ref.current`.
  */
-export function useDelegatedClick(
+export const useDelegatedClick = (
   ref: RefObject<HTMLElement | null>,
   { selector, onMatch }: UseDelegatedClickOptions,
-): void {
+): void => {
   // Keep the latest callback out of the effect deps so a new `onMatch` identity
   // never re-subscribes the listener. The sync runs after every render, before
   // any click can read it.
@@ -48,4 +48,4 @@ export function useDelegatedClick(
     node.addEventListener("click", handleClick);
     return () => node.removeEventListener("click", handleClick);
   }, [ref, selector]);
-}
+};

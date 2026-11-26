@@ -26,13 +26,13 @@ const DOTLESS_METADATA_ROUTE =
  * `/team/:slug` → `team`; `/:path*`, `/(a|b)/x` and `/` → `null` (the first
  * segment is a parameter, so it names nothing).
  */
-export function firstSegmentOf(source: string): string | null {
+export const firstSegmentOf = (source: string): string | null => {
   const segment = source.split("/")[1] ?? "";
   return segment === "" || /[:()*?+{}\\]/.test(segment) ? null : segment;
-}
+};
 
 /** Folders directly under `dir`, through route groups `(…)`, minus private/dynamic/slot ones. */
-function routeFolders(dir: string, relative: string): TopLevelName[] {
+const routeFolders = (dir: string, relative: string): TopLevelName[] => {
   const found: TopLevelName[] = [];
   for (const entry of readdirSync(dir)) {
     const full = path.join(dir, entry);
@@ -44,7 +44,7 @@ function routeFolders(dir: string, relative: string): TopLevelName[] {
     }
   }
   return found;
-}
+};
 
 /**
  * Every top-level name the site already serves, so a short link must not take
@@ -53,7 +53,7 @@ function routeFolders(dir: string, relative: string): TopLevelName[] {
  * itself), the first segment of each `redirects()` / `rewrites()` source, the
  * `public/` entries and the dotless metadata routes in the app root.
  */
-export function collectTopLevelNames({
+export const collectTopLevelNames = ({
   appDir,
   publicDir,
   redirects,
@@ -63,7 +63,7 @@ export function collectTopLevelNames({
   publicDir: string;
   redirects: Sources;
   rewrites: Awaited<ReturnType<NonNullable<NextConfig["rewrites"]>>> | Sources;
-}): TopLevelName[] {
+}): TopLevelName[] => {
   const fromSources = (label: string, sources: Sources): TopLevelName[] =>
     sources.flatMap(({ source }) => {
       const name = firstSegmentOf(source);
@@ -92,4 +92,4 @@ export function collectTopLevelNames({
     })),
   ];
   return found.filter(({ name }) => NAME.test(name));
-}
+};

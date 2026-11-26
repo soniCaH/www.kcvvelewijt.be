@@ -8,7 +8,7 @@ import { trackEvent } from "@/lib/analytics/track-event";
  *
  * No PII — neither event carries parameters.
  */
-export function useUltrasAnalytics() {
+export const useUltrasAnalytics = () => {
   const trackUltrasView = useCallback(() => {
     trackEvent("ultras_view");
   }, []);
@@ -18,4 +18,4 @@ export function useUltrasAnalytics() {
   }, []);
 
   return { trackUltrasView, trackUltrasJoinClick };
-}
+};

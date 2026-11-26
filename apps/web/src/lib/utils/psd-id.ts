@@ -6,6 +6,6 @@
  * same id — and every fresh entry is a round of PSD calls. Nine digits keeps
  * the value well inside a 32-bit int.
  */
-export function parsePsdId(raw: string): number | null {
+export const parsePsdId = (raw: string): number | null => {
   return /^[1-9]\d{0,8}$/.test(raw) ? Number(raw) : null;
-}
+};

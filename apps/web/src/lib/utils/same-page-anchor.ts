@@ -19,10 +19,10 @@ import { safeDecodeURIComponent } from "./safe-decode";
  *
  * ponytail: only same-page anchors are intercepted; everything else is a no-op.
  */
-export function handleSamePageAnchorClick(
+export const handleSamePageAnchorClick = (
   event: MouseEvent<HTMLAnchorElement>,
   href: string,
-): void {
+): void => {
   if (event.defaultPrevented) return;
   // Modifier / middle clicks: let the browser (new tab, etc.) handle it.
   if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -64,7 +64,7 @@ export function handleSamePageAnchorClick(
   }
   scrollIntoViewMotionSafe(el);
   el.focus({ preventScroll: true });
-}
+};
 
 /**
  * Points `<HulpFinder>` at the question `#<id>`, which it reveals + opens on
@@ -82,10 +82,10 @@ export function handleSamePageAnchorClick(
  * ponytail: the plain hash write still does the work in the common case; this
  * only covers the repeat.
  */
-export function revealHash(id: string): void {
+export const revealHash = (id: string): void => {
   if (safeDecodeURIComponent(window.location.hash).slice(1) === id) {
     window.dispatchEvent(new HashChangeEvent("hashchange"));
     return;
   }
   window.location.hash = id;
-}
+};

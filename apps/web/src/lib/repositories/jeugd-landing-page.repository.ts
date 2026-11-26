@@ -33,7 +33,7 @@ type RawCard = NonNullable<
   NonNullable<JEUGD_LANDING_PAGE_QUERY_RESULT>["editorialCards"]
 >[number];
 
-function toEditorialCardConfig(card: RawCard): EditorialCardConfig | null {
+const toEditorialCardConfig = (card: RawCard): EditorialCardConfig | null => {
   if (
     card.position !== "featured" &&
     card.position !== "medium" &&
@@ -54,11 +54,11 @@ function toEditorialCardConfig(card: RawCard): EditorialCardConfig | null {
     position: card.position,
     cardType: card.cardType,
   };
-}
+};
 
-function toEditorialCardsVM(
+const toEditorialCardsVM = (
   data: JEUGD_LANDING_PAGE_QUERY_RESULT,
-): EditorialCardConfig[] | null {
+): EditorialCardConfig[] | null => {
   if (!data || !data.editorialCards) return null;
   const cards = data.editorialCards
     .map(toEditorialCardConfig)
@@ -67,7 +67,7 @@ function toEditorialCardsVM(
   // and an all-invalid card list both mean "no editor config" (→ the hardcoded
   // nav fallback, design-summary §4).
   return cards.length > 0 ? cards : null;
-}
+};
 
 // ─── Repository ──────────────────────────────────────────────────────────────
 

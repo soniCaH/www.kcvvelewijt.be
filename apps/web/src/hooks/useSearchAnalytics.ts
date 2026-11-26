@@ -3,7 +3,7 @@ import { trackEvent } from "@/lib/analytics/track-event";
 import { sanitizeQuery } from "@/lib/analytics/sanitize-query";
 import type { SearchResultType } from "@/types/search";
 
-export function useSearchAnalytics() {
+export const useSearchAnalytics = () => {
   const trackSearchSubmitted = useCallback((queryText: string) => {
     trackEvent("search_submitted", {
       query_text: sanitizeQuery(queryText),
@@ -75,4 +75,4 @@ export function useSearchAnalytics() {
     trackFilterChanged,
     trackResultClicked,
   };
-}
+};

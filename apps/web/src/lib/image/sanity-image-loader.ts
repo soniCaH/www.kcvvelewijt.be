@@ -17,11 +17,11 @@ export const isSanityImageUrl = (src: string): boolean =>
  * crop input; only the width moves, and `h` scales with it so a crop keeps its
  * shape.
  */
-export function sanityImageLoader({
+export const sanityImageLoader = ({
   src,
   width,
   quality,
-}: ImageLoaderProps): string {
+}: ImageLoaderProps): string => {
   const url = new URL(src);
   const params = url.searchParams;
   const sourceWidth = Number(params.get("w"));
@@ -41,4 +41,4 @@ export function sanityImageLoader({
   params.set("q", String(quality ?? params.get("q") ?? DEFAULT_QUALITY));
 
   return url.toString();
-}
+};

@@ -36,23 +36,25 @@ export type PortableTextBlockLike = {
   children?: PortableTextSpanLike[];
 };
 
-function extractBlockText(block: PortableTextBlock): string {
+const extractBlockText = (block: PortableTextBlock): string => {
   const children = (block as PortableTextBlockLike).children;
   if (!Array.isArray(children)) return "";
   return children
     .map((span) => span.text ?? "")
     .join("")
     .trim();
-}
+};
 
 /**
  * `true` when at least one block in the array has non-whitespace text.
  * Used by both BioBlock and QuotesBlock for their auto-hide branch when
  * `player.bio` is structurally non-empty but textually blank.
  */
-export function hasRenderableBioContent(blocks: PortableTextBlock[]): boolean {
+export const hasRenderableBioContent = (
+  blocks: PortableTextBlock[],
+): boolean => {
   return blocks.some((b) => extractBlockText(b).length > 0);
-}
+};
 
 /** The trimmed, non-empty runs of adjacent `pullquote`-marked spans in one block. */
 const pullquoteRunsOf = (children: PortableTextSpanLike[]): string[] => {
@@ -80,14 +82,14 @@ const pullquoteRunsOf = (children: PortableTextSpanLike[]): string[] => {
  * BioBlock consumes `n = 0`, QuotesBlock consumes `n = 1`. Spans #3+
  * are ignored by both surfaces.
  */
-export function findNthPullquoteText(
+export const findNthPullquoteText = (
   blocks: PortableTextBlock[],
   n: number,
-): string | null {
+): string | null => {
   if (n < 0) return null;
   const runs = blocks.flatMap((block) => {
     const children = (block as PortableTextBlockLike).children;
     return Array.isArray(children) ? pullquoteRunsOf(children) : [];
   });
   return runs[n] ?? null;
-}
+};

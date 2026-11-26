@@ -17,11 +17,11 @@ const PHONE = /[+(]?\d(?:[\s.\-/()]*\d){8,}/g;
  *
  * Names are not detected: a first name still passes through.
  */
-export function sanitizeQuery(query: string): string {
+export const sanitizeQuery = (query: string): string => {
   return query
     .slice(0, MAX_SCAN_LENGTH)
     .replace(EMAIL, REDACTED)
     .replace(PHONE, REDACTED)
     .toLowerCase()
     .slice(0, MAX_QUERY_LENGTH);
-}
+};

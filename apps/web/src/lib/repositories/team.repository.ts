@@ -187,9 +187,9 @@ type TEAM_BY_SLUG_DETAIL = Exclude<TEAM_BY_SLUG_QUERY_RESULT, null>;
 
 // ─── Transforms ──────────────────────────────────────────────────────────────
 
-function toTeamRelationVM(
+const toTeamRelationVM = (
   row: TEAMS_BY_MEMBER_QUERY_RESULT[number],
-): TeamRelationVM {
+): TeamRelationVM => {
   const name = row.name ?? "";
   const slug = row.slug ?? "";
   return {
@@ -199,9 +199,9 @@ function toTeamRelationVM(
     tagline: row.tagline,
     teamImageUrl: row.teamImageUrl,
   };
-}
+};
 
-function toTeamNavVM(row: TEAMS_QUERY_RESULT[number]): TeamNavVM {
+const toTeamNavVM = (row: TEAMS_QUERY_RESULT[number]): TeamNavVM => {
   const name = row.name ?? "";
   const slug = row.slug ?? "";
   return {
@@ -215,22 +215,22 @@ function toTeamNavVM(row: TEAMS_QUERY_RESULT[number]): TeamNavVM {
     divisionFull: row.divisionFull,
     teamImageUrl: row.teamImageUrl,
   };
-}
+};
 
-function computeTeamType(age: string | null): "youth" | "senior" {
+const computeTeamType = (age: string | null): "youth" | "senior" => {
   const lower = (age ?? "").toLowerCase();
   return lower.startsWith("u") || lower.includes("jeugd") ? "youth" : "senior";
-}
+};
 
-function computeAgeGroup(age: string | null): string | undefined {
+const computeAgeGroup = (age: string | null): string | undefined => {
   if (!age) return undefined;
   const match = age.match(/U\d{1,2}[A-Z]?/i);
   return match ? match[0].toUpperCase() : undefined;
-}
+};
 
-function toStaffMemberVM(
+const toStaffMemberVM = (
   row: NonNullable<TEAM_BY_SLUG_DETAIL["staff"]>[number],
-): StaffMemberVM | null {
+): StaffMemberVM | null => {
   if (!row.member) return null;
   // A staff-detail page is reachable only for a non-archived member with a
   // psdId (the `/staf/[slug]` route key + `generateStaticParams` filter).
@@ -257,9 +257,9 @@ function toStaffMemberVM(
     imageUrl: row.member.photoUrl ?? row.member.psdImageUrl ?? undefined,
     ...(hasDetailPage ? { href: `/staf/${psdId}` } : {}),
   };
-}
+};
 
-function toTeamDetailVM(row: TEAM_BY_SLUG_DETAIL): TeamDetailVM {
+const toTeamDetailVM = (row: TEAM_BY_SLUG_DETAIL): TeamDetailVM => {
   const name = row.name ?? "";
   const slug = row.slug ?? "";
   return {
@@ -295,11 +295,11 @@ function toTeamDetailVM(row: TEAM_BY_SLUG_DETAIL): TeamDetailVM {
       .map(toStaffMemberVM)
       .filter((s): s is StaffMemberVM => s !== null),
   };
-}
+};
 
-function toTeamLandingItem(
+const toTeamLandingItem = (
   row: TEAMS_LANDING_QUERY_RESULT[number],
-): TeamLandingItem {
+): TeamLandingItem => {
   const name = row.name ?? "";
   const slug = row.slug ?? "";
   return {
@@ -326,7 +326,7 @@ function toTeamLandingItem(
           role: s.role ?? s.member.functionTitle ?? "",
         })) ?? null,
   };
-}
+};
 
 // ─── Service ─────────────────────────────────────────────────────────────────
 

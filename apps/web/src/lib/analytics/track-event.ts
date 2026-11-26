@@ -1,7 +1,7 @@
-export function trackEvent(
+export const trackEvent = (
   name: string,
   params?: Record<string, unknown>,
-): void {
+): void => {
   if (typeof window === "undefined" || !window.dataLayer) return;
 
   // The GA4 tag maps every Data Layer Variable, and GTM keeps a key until
@@ -12,4 +12,4 @@ export function trackEvent(
     this.reset();
   });
   window.dataLayer.push({ event: name, ...params });
-}
+};

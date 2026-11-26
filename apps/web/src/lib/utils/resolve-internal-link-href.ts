@@ -23,9 +23,9 @@ export interface InternalLinkReference {
  * article-foot `<ArticleCtaBand>` so the two never drift on how a reference
  * becomes a URL, or on when one doesn't.
  */
-export function resolveInternalLinkHref(
+export const resolveInternalLinkHref = (
   ref?: InternalLinkReference,
-): string | null {
+): string | null => {
   if (!ref) return null;
   switch (ref._type) {
     case "player":
@@ -43,4 +43,4 @@ export function resolveInternalLinkHref(
     default:
       return null;
   }
-}
+};

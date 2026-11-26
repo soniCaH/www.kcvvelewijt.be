@@ -17,7 +17,7 @@ export type ShareChannel = "native" | "facebook";
  * page.tsx renderTemplate default branch); mirror that here so reports
  * don't fragment on `null` vs `"announcement"`.
  */
-function normaliseType(articleType: string | null | undefined): ArticleType {
+const normaliseType = (articleType: string | null | undefined): ArticleType => {
   if (
     articleType === "interview" ||
     articleType === "transfer" ||
@@ -28,7 +28,7 @@ function normaliseType(articleType: string | null | undefined): ArticleType {
     return articleType;
   }
   return "announcement";
-}
+};
 
 interface ArticleViewInput {
   articleType: string | null | undefined;
@@ -70,7 +70,7 @@ interface ArticleCtaClickInput {
   articleId: string;
 }
 
-export function useArticleAnalytics() {
+export const useArticleAnalytics = () => {
   const trackArticleView = useCallback(
     ({
       articleType,
@@ -151,4 +151,4 @@ export function useArticleAnalytics() {
     trackEventCtaClick,
     trackArticleCtaClick,
   };
-}
+};

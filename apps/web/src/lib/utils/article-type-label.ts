@@ -49,9 +49,9 @@ const LABEL_BY_TYPE: Record<ArticleType, string | undefined> = {
   event: undefined,
 };
 
-export function articleTypeCardLabel(
+export const articleTypeCardLabel = (
   articleType: ArticleType | string | null | undefined,
-): string | undefined {
+): string | undefined => {
   // The callers' `articleType` is CMS-authored and typed as a union that a
   // stale document can still fall outside of, so this stays a lookup with a
   // guard rather than a bare index.
@@ -59,4 +59,4 @@ export function articleTypeCardLabel(
     return undefined;
   }
   return LABEL_BY_TYPE[articleType as ArticleType];
-}
+};

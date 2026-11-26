@@ -38,9 +38,9 @@ export interface UseHashLandingCorrectionResult {
  * `<useSectionNav>` composes this for both cases (`/jeugd#visie`, the one
  * route that once called it directly, carries a section nav since #3435).
  */
-export function useHashLandingCorrection(
+export const useHashLandingCorrection = (
   ids: readonly string[],
-): UseHashLandingCorrectionResult {
+): UseHashLandingCorrectionResult => {
   const idsKey = ids.join("|");
   const idListRef = useRef<string[]>([]);
   useEffect(() => {
@@ -95,4 +95,4 @@ export function useHashLandingCorrection(
   }, [arm, correct]);
 
   return { notifyLayoutChange: correct };
-}
+};
