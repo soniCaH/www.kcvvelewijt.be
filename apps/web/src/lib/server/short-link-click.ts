@@ -1,4 +1,3 @@
-import { readOptionalServerEnv } from "@/lib/env/server";
 /**
  * Counts a short link hit in GA4 from the server (#3573). A redirect loads no
  * page, so browser GTM never sees it; the Measurement Protocol is the only
@@ -12,6 +11,8 @@ import { readOptionalServerEnv } from "@/lib/env/server";
  * secret, a network error or a non-2xx answer must never touch the redirect, so
  * every failure ends here.
  */
+import { readOptionalServerEnv } from "@/lib/env/server";
+
 const ENDPOINT = "https://www.google-analytics.com/mp/collect";
 
 export async function sendShortLinkClick(name: string): Promise<void> {

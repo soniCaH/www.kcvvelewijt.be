@@ -18,12 +18,18 @@ const VIOLATIONS = [
   "const a = process.env.KCVV_API_URL?.trim();",
   "const env = process.env;",
   "const { NODE_ENV } = process.env;",
+  'const a = process["env"].KCVV_API_URL;',
+  "const { env } = process;",
+  "const a = globalThis.process.env.KCVV_API_URL;",
+  'const a = process.env["NODE_ENV"];',
 ];
 
 const ALLOWED = [
   "const a = readPublicEnv().NODE_ENV;",
   "const env = { process: { env: 1 } }; const a = env.process.env;",
   "const a = processEnv.env;",
+  'if (process.env.NODE_ENV === "development") console.warn(1);',
+  'const dev = process.env.NODE_ENV !== "production";',
 ];
 
 const lint = {} as {

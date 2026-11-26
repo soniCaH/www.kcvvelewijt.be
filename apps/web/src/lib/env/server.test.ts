@@ -1,11 +1,9 @@
-import { Either } from "effect";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   readBffEnv,
   readBffEnvOrThrow,
   readOptionalServerEnv,
-  readSanityEnv,
   readSanityEnvOrThrow,
 } from "./server";
 
@@ -58,10 +56,8 @@ describe("server env (#3879)", () => {
   it("reads the optional vars as they are, unset ones as undefined", () => {
     vi.stubEnv("GA4_MEASUREMENT_ID", "G-TEST");
     vi.stubEnv("GA4_API_SECRET", undefined);
-    expect(readOptionalServerEnv()).toMatchObject({
-      GA4_MEASUREMENT_ID: "G-TEST",
-      GA4_API_SECRET: undefined,
-    });
+    expect(readOptionalServerEnv().GA4_MEASUREMENT_ID).toBe("G-TEST");
+    expect(readOptionalServerEnv().GA4_API_SECRET).toBeUndefined();
   });
 
   it("requires the Sanity project id, not the dataset", () => {
@@ -70,7 +66,6 @@ describe("server env (#3879)", () => {
     expect(readSanityEnvOrThrow().NEXT_PUBLIC_SANITY_DATASET).toBeUndefined();
 
     vi.stubEnv("NEXT_PUBLIC_SANITY_PROJECT_ID", "");
-    expect(Either.isLeft(readSanityEnv())).toBe(true);
     expect(readSanityEnvOrThrow).toThrow(/NEXT_PUBLIC_SANITY_PROJECT_ID/);
   });
 });

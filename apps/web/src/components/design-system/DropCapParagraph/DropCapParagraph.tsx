@@ -1,6 +1,5 @@
 import { createElement } from "react";
 import { cn } from "@/lib/utils/cn";
-import { readPublicEnv } from "@/lib/env/client";
 
 export type DropCapParagraphTone = "jersey" | "ink";
 export type DropCapParagraphAs = "p" | "div";
@@ -35,7 +34,7 @@ export const DropCapParagraph = ({
   className,
 }: DropCapParagraphProps) => {
   if (!children || children.trim().length === 0) {
-    if (readPublicEnv().NODE_ENV === "development") {
+    if (process.env.NODE_ENV === "development") {
       console.warn(
         "[DropCapParagraph] received empty or whitespace-only children",
       );

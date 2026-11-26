@@ -190,7 +190,6 @@ import { MonoLabel } from "../MonoLabel";
 import { TapeStrip } from "../TapeStrip";
 import { AccentEm, splitOnAccent } from "../_internal/accent";
 import type { StateActionBase } from "../_internal/stateAction";
-import { readPublicEnv } from "@/lib/env/client";
 
 /**
  * An undo action — always a button (a filter reset never navigates).
@@ -472,7 +471,7 @@ const SlotNoticeEmptyState = ({
     !split &&
     emphasis &&
     children &&
-    readPublicEnv().NODE_ENV === "development"
+    process.env.NODE_ENV === "development"
   ) {
     console.warn(
       `[EmptyState] emphasis.text "${emphasis.text}" not found in notice children "${children}"`,

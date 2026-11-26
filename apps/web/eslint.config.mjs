@@ -250,6 +250,9 @@ const kcvvPlugin = {
   },
 };
 
+const PROCESS_ENV_MESSAGE =
+  "No `process.env` outside `src/lib/env/` — read a server var through `readBffEnv` / `readOptionalServerEnv` (`src/lib/env/server.ts`), a `NEXT_PUBLIC_*` var through `readPublicEnv` (`src/lib/env/client.ts`). `process.env.NODE_ENV` is the one exception. Rule: #3879.";
+
 const eslintConfig = [
   ...nextCoreWebVitals,
   ...nextTypescript,
@@ -526,26 +529,31 @@ const eslintConfig = [
     // server vars, `client.ts` reads the `NEXT_PUBLIC_*` ones literally. Own rule ID, own
     // block, like `kcvv/no-let` above. Tests and stories set and read env on purpose;
     // config files outside `src` (`next.config.*`, `playwright.config.*`) are not in scope.
+    // `process.env.NODE_ENV` is exempt: it is a compiler constant the minifier folds, so
+    // the dev-only branches vanish from production only when it is written out.
     files: ["src/**/*.{ts,tsx,js,jsx,mjs,cjs,mts,cts}"],
     ignores: [
       "src/lib/env/client.ts",
       "src/lib/env/server.ts",
       "**/*.test.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
-      "**/*.spec.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
       "**/*.stories.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
-      "**/__tests__/**",
-      "**/test/**",
-      "**/tests/**",
     ],
     plugins: { kcvv: kcvvPlugin },
     rules: {
       "kcvv/no-process-env": [
         "error",
         {
+          // `process.env`, `process["env"]` and `globalThis.process.env`, unless it is
+          // the object of `.NODE_ENV`.
           selector:
-            'MemberExpression[object.name="process"][property.name="env"]',
-          message:
-            "No `process.env` outside `src/lib/env/` — read a server var through `readBffEnv` / `readOptionalServerEnv` (`src/lib/env/server.ts`), a `NEXT_PUBLIC_*` var or `NODE_ENV` through `readPublicEnv` (`src/lib/env/client.ts`). Rule: #3879.",
+            ':matches(MemberExpression[object.name="process"][property.name="env"], MemberExpression[object.name="process"][property.value="env"], MemberExpression[object.object.name=/^(globalThis|window|self|global)$/][object.property.name="process"][property.name="env"]):not(MemberExpression[property.name="NODE_ENV"] > .object)',
+          message: PROCESS_ENV_MESSAGE,
+        },
+        {
+          // `const { env } = process`
+          selector:
+            'VariableDeclarator[init.name="process"] > ObjectPattern > Property[key.name="env"]',
+          message: PROCESS_ENV_MESSAGE,
         },
       ],
     },

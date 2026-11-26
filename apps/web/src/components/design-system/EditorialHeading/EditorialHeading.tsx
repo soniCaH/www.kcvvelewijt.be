@@ -10,7 +10,6 @@ interface TitleSpan {
   marks?: string[];
 }
 import { HighlighterStroke } from "../HighlighterStroke";
-import { readPublicEnv } from "@/lib/env/client";
 
 export type EditorialHeadingSize =
   "display-2xl" | "display-xl" | "display-lg" | "display-md" | "display-sm";
@@ -145,7 +144,7 @@ const renderBody = (
   if (!emphasis) return display;
   const split = splitOnAccent(display, emphasis.text);
   if (!split) {
-    if (readPublicEnv().NODE_ENV === "development") {
+    if (process.env.NODE_ENV === "development") {
       console.warn(
         `[EditorialHeading] emphasis.text "${emphasis.text}" not found in heading children "${display}"`,
       );

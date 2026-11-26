@@ -1,5 +1,3 @@
-import { readPublicEnv } from "@/lib/env/client";
-
 export type TransferDirection = "incoming" | "outgoing" | "extension";
 
 /**
@@ -92,7 +90,7 @@ const KCVV_SIDE: TransferSide = {
  */
 export const resolveTransfer = (value: TransferFactValue): ResolvedTransfer => {
   const direction = value.direction ?? "incoming";
-  if (!value.direction && readPublicEnv().NODE_ENV !== "production") {
+  if (!value.direction && process.env.NODE_ENV !== "production") {
     console.warn(
       "[transferFact] direction missing — defaulting to 'incoming'",
       { _key: value._key, playerName: value.playerName },
@@ -113,7 +111,7 @@ export const resolveTransfer = (value: TransferFactValue): ResolvedTransfer => {
   // this via conditional `hidden` rules + field-level validation, but
   // drafts + Studio preview can surface partial data. Surface it so the
   // gap is obvious rather than rendering a blank club pill.
-  if (!value.otherClubName && readPublicEnv().NODE_ENV !== "production") {
+  if (!value.otherClubName && process.env.NODE_ENV !== "production") {
     console.warn(
       "[transferFact] otherClubName missing on non-extension direction — rendering a blank club row",
       { _key: value._key, playerName: value.playerName, direction },
