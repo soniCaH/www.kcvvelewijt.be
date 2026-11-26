@@ -398,7 +398,10 @@ export const EventDetailBlock = ({
     Array.isArray(value.note) && value.note.length > 0 ? value.note : null;
 
   return (
-    <div className="bg-cream w-full px-4 pt-6 pb-2 md:px-8">
+    // pb-6, not less: the card's 6px hard shadow plus the corner drop of its
+    // -0.4deg tilt (~4px at --container-wide) hang below its box and must
+    // clear the ArticleMetadata border that follows (#3893).
+    <div className="bg-cream w-full px-4 pt-6 pb-6 md:px-8">
       <div
         className="mx-auto w-full"
         style={{ maxWidth: "var(--container-wide)" }}
