@@ -18,6 +18,23 @@ overrides:
   # break the Studio type-check at createPreviewSecret(useClient()). Client v7 users stay untouched.
   # A client MAJOR bump must change "^8" here in the same PR, or sanity gets pushed onto the new major.
   "@sanity/client@^8": "catalog:"
+  # Advisory sweep (#3885): each pin targets the latest patch of the fixed line. Drop an entry once no parent resolves the vulnerable range.
+  # @vercel/frameworks (via sanity > @sanity/cli) pins js-yaml 3.13.1 and smol-toml 1.5.2 exactly; no release fixes it.
+  "js-yaml@<3.15.2": "3.15.2"
+  "smol-toml@<1.9.1": "1.9.1"
+  # @storybook/test-runner pins uuid ^8.3.2 (dev only).
+  "uuid@<11.1.1": "11.1.1"
+  # @storybook/addon-mcp 0.7.0 resolves valibot 1.2.0.
+  "valibot@<1.4.2": "1.4.2"
+  # @tailwindcss/typography pins postcss-selector-parser 6.0.10 exactly.
+  "postcss-selector-parser@<6.1.5": "6.1.6"
+  # markdownlint-cli2 > markdownlint > micromark-extension-math (lint:md only).
+  "katex@<0.18.2": "0.18.10"
+  # Jest 30 / test-exclude / Storybook docgen / typescript-estree pull vulnerable glob 9-13 and minimatch 7-10.
+  # These pins cross majors their parents declare (glob 10/13 -> 14, minimatch 10 -> 11, uuid 8 -> 11, katex 0.16 -> 0.18); they stay
+  # while the parents ask for the old ranges. katex 0.18.11 is deprecated on npm, so 0.18.10 is the newest usable 0.18.x.
+  "glob@>=9 <14.0.2": "14.0.6"
+  "minimatch@>=7 <11.0.9": "11.0.9"
 minimumReleaseAgeExclude:
   # Renovate security update: @sanity/ui@4.4.9 || 4.4.10
   - "@sanity/ui@4.4.9 || 4.4.10"
