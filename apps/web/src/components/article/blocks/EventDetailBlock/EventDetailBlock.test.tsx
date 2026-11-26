@@ -428,10 +428,20 @@ describe("<EventDetailBlock>", () => {
         '[data-event-detail-sessions="true"] > div',
       ),
     ].map((row) => [...row.children].map((cell) => cell.textContent));
+    // The abbreviation is hidden from screen readers, which hear the full weekday.
     expect(rows).toEqual([
-      ["MA", "1 februari", "18:30 - 22:30"],
-      ["MA", "1 maart", "18:30 - 22:30"],
+      ["MAmaandag", "1 februari", "18:30 - 22:30"],
+      ["MAmaandag", "1 maart", "18:30 - 22:30"],
     ]);
+    const firstWeekday = container.querySelector(
+      '[data-event-detail-sessions="true"] dt',
+    );
+    expect(
+      firstWeekday?.querySelector('[aria-hidden="true"]')?.textContent,
+    ).toBe("MA");
+    expect(firstWeekday?.querySelector(".sr-only")?.textContent).toBe(
+      "maandag",
+    );
   });
 
   it("omits the sessions schedule for a single-day event", () => {

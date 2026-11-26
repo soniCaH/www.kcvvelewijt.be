@@ -269,7 +269,8 @@ const SessionsGrid = ({ sessions }: { sessions: ResolvedSession[] }) => {
         return (
           <div key={key} className="contents">
             <dt className="text-ink-muted font-mono text-[10px] leading-tight tracking-[0.18em] uppercase">
-              {weekdayAbbrev(session.date)}
+              <span aria-hidden="true">{weekdayAbbrev(session.date)}</span>
+              <span className="sr-only">{session.date.weekday}</span>
             </dt>
             {/* Day + month, so a schedule over several months reads unambiguously (#3891). */}
             <dd className="text-ink font-display m-0 text-[14px] leading-tight font-bold italic">
