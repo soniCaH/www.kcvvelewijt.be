@@ -243,6 +243,8 @@ const kcvvPlugin = {
     "no-let": builtinRules.get("no-restricted-syntax"),
     // `func-style` skips `export default function`, so that shape gets its own selector.
     "no-default-function": builtinRules.get("no-restricted-syntax"),
+    // `process.env` is read in the two env modules only (#3879).
+    "no-process-env": builtinRules.get("no-restricted-syntax"),
     // A real rule, not a selector: "component or type" needs the export's name and kind.
     "use-client-exports": useClientExports,
   },
@@ -515,6 +517,35 @@ const eslintConfig = [
           selector: "ExportDefaultDeclaration > FunctionDeclaration",
           message:
             "No `export default function` — write `const Name = () => …;` then `export default Name;`. Rule: #3865.",
+        },
+      ],
+    },
+  },
+  {
+    // `process.env` is read in `src/lib/env/` only (#3879): `server.ts` decodes the
+    // server vars, `client.ts` reads the `NEXT_PUBLIC_*` ones literally. Own rule ID, own
+    // block, like `kcvv/no-let` above. Tests and stories set and read env on purpose;
+    // config files outside `src` (`next.config.*`, `playwright.config.*`) are not in scope.
+    files: ["src/**/*.{ts,tsx,js,jsx,mjs,cjs,mts,cts}"],
+    ignores: [
+      "src/lib/env/client.ts",
+      "src/lib/env/server.ts",
+      "**/*.test.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
+      "**/*.spec.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
+      "**/*.stories.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
+      "**/__tests__/**",
+      "**/test/**",
+      "**/tests/**",
+    ],
+    plugins: { kcvv: kcvvPlugin },
+    rules: {
+      "kcvv/no-process-env": [
+        "error",
+        {
+          selector:
+            'MemberExpression[object.name="process"][property.name="env"]',
+          message:
+            "No `process.env` outside `src/lib/env/` — read a server var through `readBffEnv` / `readOptionalServerEnv` (`src/lib/env/server.ts`), a `NEXT_PUBLIC_*` var or `NODE_ENV` through `readPublicEnv` (`src/lib/env/client.ts`). Rule: #3879.",
         },
       ],
     },
