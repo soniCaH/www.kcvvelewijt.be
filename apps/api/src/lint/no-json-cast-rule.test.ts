@@ -22,6 +22,13 @@ const VIOLATIONS = [
   "const a = (await (await fetch(url)).json()) as Foo;",
   "const f = () => JSON.parse(cached) as Foo;",
   "const f = () => Effect.try({ try: () => JSON.parse(cached) as Foo, catch: () => null });",
+  "const a = JSON.parse(text) as unknown as Foo;",
+  "const a = (await response.json()) as unknown as Foo;",
+  "const a = (await response.json().catch(() => null)) as unknown as Foo;",
+  "const a = <Foo>JSON.parse(text);",
+  "const a = <Foo>(await response.json());",
+  "const a = await response.json<Foo>();",
+  "const a = await response.json<Foo>().catch(() => null);",
 ];
 
 const ALLOWED = [
@@ -37,6 +44,11 @@ const ALLOWED = [
   "const a = JSON.stringify(foo) as Foo;",
   "const a = Foo.parse(text) as Foo;",
   "const a = value as Foo;",
+  "const a = <unknown>JSON.parse(text);",
+  "const a = <Foo>value;",
+  "const a = (await response.json()) as unknown;",
+  "const a = JSON.parse(text) as unknown as unknown;",
+  "const a = await response.text<Foo>();",
 ];
 
 const lint = {} as {
