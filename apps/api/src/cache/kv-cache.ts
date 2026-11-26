@@ -8,6 +8,12 @@ import {
   Schema as S,
 } from "effect";
 import { WorkerEnvTag } from "../env";
+import {
+  cacheLongTtl,
+  psdOndemandDailyBudget,
+  slackAlertWebhookUrl,
+  dieOnConfigError,
+} from "../config";
 import { PsdGateService, withFlight } from "../psd/gate";
 import { BackgroundRunnerService, type PsdRefreshEnv } from "../psd/background";
 import {
@@ -17,7 +23,7 @@ import {
   postSlack,
 } from "../psd/slack-alert";
 import { ResourceNotFoundError, UpstreamUnavailableError } from "../psd/errors";
-import { oncePerDay, parseCeiling, utcDay } from "./daily-ceiling";
+import { oncePerDay, utcDay } from "./daily-ceiling";
 
 /**
  * Per-endpoint soft TTLs in seconds.
@@ -389,18 +395,14 @@ export const TypedKvCache = <A, I>(
          * because every read served stale and refreshed behind it). */
         refreshInline?: (value: A) => boolean;
       },
-    ): Effect.Effect<
-      A,
-      E,
-      R | KvCacheService | WorkerEnvTag | PsdGateService
-    > =>
+    ): Effect.Effect<A, E, R | KvCacheService | PsdGateService> =>
       Effect.gen(function* () {
         const cache = yield* KvCacheService;
-        const env = yield* WorkerEnvTag;
         const gate = yield* PsdGateService;
         const runnerOpt = yield* Effect.serviceOption(BackgroundRunnerService);
-        const effectiveHardTtl =
-          env.CACHE_LONG_TTL === "true" ? HARD_TTL_LONG : hardTtl;
+        const effectiveHardTtl = (yield* cacheLongTtl.pipe(dieOnConfigError))
+          ? HARD_TTL_LONG
+          : hardTtl;
         const shouldServeStale = options?.shouldServeStale ?? (() => true);
         const backgroundTimeoutMs =
           options?.backgroundTimeoutMs ?? BG_REFRESH_TIMEOUT_MS;
@@ -446,9 +448,11 @@ export const TypedKvCache = <A, I>(
             // Once/day/key: skip if we already pinged within the marker window.
             if ((yield* cache.get(nudgeKey(key))) !== null) return;
             yield* cache.set(nudgeKey(key), "1", NUDGE_MARKER_TTL);
+            const webhookUrl =
+              yield* slackAlertWebhookUrl.pipe(dieOnConfigError);
             yield* Effect.promise(() =>
               postSlack(
-                env.SLACK_ALERT_WEBHOOK_URL,
+                webhookUrl,
                 buildDriftMessage({
                   key,
                   staleAgeMs,
@@ -615,21 +619,23 @@ export const TypedKvCache = <A, I>(
         // miss — a stale key still serves stale and refreshes in the
         // background, and the cron sync never comes through here. Cast as
         // above: every psdBacked cache fetches through PsdService (BffError).
-        const budget = parseCeiling(env.PSD_ONDEMAND_DAILY_BUDGET);
         const checkBudget = Effect.gen(function* () {
-          if (!psdBacked || budget === undefined) return;
+          if (!psdBacked) return;
+          const budget = yield* psdOndemandDailyBudget.pipe(dieOnConfigError);
+          if (budget === undefined) return;
           const spent = yield* gate.getDailyCount;
           if (spent < budget) return;
           const day = utcDay();
           yield* Effect.logError(
             `TypedKvCache "${key}": PSD on-demand budget reached (${spent}/${budget} on ${day}) — cold miss refused`,
           );
+          const webhookUrl = yield* slackAlertWebhookUrl.pipe(dieOnConfigError);
           yield* oncePerDay(
             cache,
             budgetAlertKey(day),
             Effect.promise(() =>
               postSlack(
-                env.SLACK_ALERT_WEBHOOK_URL,
+                webhookUrl,
                 buildPsdBudgetMessage({ day, spent, budget }),
               ),
             ),

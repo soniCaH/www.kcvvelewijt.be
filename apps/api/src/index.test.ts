@@ -6,8 +6,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { BFF_KEY_HEADER, CLIENT_IP_HEADER } from "@kcvv/api-contract";
-import type { WorkerEnv } from "./env";
-import { makeTestEnv } from "./test-helpers/env-layer";
+import { makeTestEnv, type TestEnv } from "./test-helpers/env-layer";
 import { TEST_SECRET, signPayload } from "./test-helpers/webhook-signing";
 
 // gate-do.ts imports `cloudflare:workers`, which only workerd can load.
@@ -60,7 +59,7 @@ const ctx = {
   passThroughOnException: () => {},
 } as unknown as ExecutionContext;
 
-const env = (overrides: Partial<WorkerEnv> = {}) =>
+const env = (overrides: Partial<TestEnv> = {}) =>
   makeTestEnv({
     BFF_SHARED_SECRET: SECRET,
     SANITY_WEBHOOK_SECRET: TEST_SECRET,
@@ -220,6 +219,29 @@ describe("worker fetch — /webhooks/darts-paid is exempt and keeps its HMAC (#3
       action: "skipped_not_applicable",
     });
     expect(handlerSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe("worker fetch — a missing required var", () => {
+  it("fails the request that reads it with the ConfigError naming the var, and 500s", async () => {
+    // Effect's default logger writes every level through `console.log`.
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const res = await worker.fetch(
+      get("/matches/next", { [BFF_KEY_HEADER]: SECRET }),
+      env({ PSD_API_KEY: undefined }),
+      ctx,
+    );
+    expect(res.status).toBe(500);
+    expect(logSpy.mock.calls.flat().join(" ")).toContain("PSD_API_KEY");
+  });
+
+  it("leaves a route that never reads it alone", async () => {
+    const res = await worker.fetch(
+      get("/no-such-route", { [BFF_KEY_HEADER]: SECRET }),
+      env({ PSD_API_KEY: undefined }),
+      ctx,
+    );
+    expect(res.status).toBe(404);
   });
 });
 

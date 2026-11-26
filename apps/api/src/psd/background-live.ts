@@ -8,7 +8,7 @@
  * with `cache/kv-cache.ts`.
  */
 import { Effect, Layer } from "effect";
-import { WorkerEnvTag, type WorkerEnv } from "../env";
+import { WorkerEnvLive, type WorkerEnv } from "../env";
 import { KvCacheLive } from "../cache/kv-cache";
 import { SanityProjectionLive } from "../sanity/projection";
 import { PsdServiceLive } from "./service";
@@ -34,7 +34,7 @@ const backgroundStackLayer = (env: WorkerEnv) =>
     // wired to it, so this second provide resolves that leftover requirement
     // the same way `Layer.mergeAll` never auto-connects sibling layers.
     Layer.provide(KvCacheLive),
-    Layer.provideMerge(Layer.succeed(WorkerEnvTag, env)),
+    Layer.provideMerge(WorkerEnvLive(env)),
   );
 
 const makeBackgroundRunner = (

@@ -26,7 +26,7 @@
  * marker (`cache/kv-cache.ts`).
  */
 import { Effect } from "effect";
-import { WorkerEnvTag } from "../env";
+import { slackAlertWebhookUrl, dieOnConfigError } from "../config";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
 import { buildJobAlertMessage, postSlack, type JobAlert } from "./slack-alert";
 
@@ -112,10 +112,9 @@ export const reportScheduledJobOutcome = (
   job: string,
   outcome:
     { readonly ok: true } | { readonly ok: false; readonly error: unknown },
-): Effect.Effect<void, never, KvCacheService | WorkerEnvTag> =>
+): Effect.Effect<void, never, KvCacheService> =>
   Effect.gen(function* () {
     const cache = yield* KvCacheService;
-    const env = yield* WorkerEnvTag;
     const key = jobAlertKey(job);
     const state = parseState(yield* cache.get(key));
     const { next, alert } = decideJobAlert(state, outcome.ok);
@@ -129,9 +128,10 @@ export const reportScheduledJobOutcome = (
       alert.kind === "job-recovery"
         ? state.consecutiveFailures
         : next.consecutiveFailures;
+    const webhookUrl = yield* slackAlertWebhookUrl.pipe(dieOnConfigError);
     const posted = yield* Effect.promise(() =>
       postSlack(
-        env.SLACK_ALERT_WEBHOOK_URL,
+        webhookUrl,
         buildJobAlertMessage(alert, {
           job,
           consecutiveFailures,

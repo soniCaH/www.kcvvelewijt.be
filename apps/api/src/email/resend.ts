@@ -1,5 +1,9 @@
-import { Context, Effect, Layer } from "effect";
-import { WorkerEnvTag } from "../env";
+import { Context, Effect, Layer, Redacted } from "effect";
+import {
+  allowMissingFormSecrets,
+  resendApiKey,
+  dieOnConfigError,
+} from "../config";
 
 /**
  * Form-agnostic transactional-email transport over Resend.
@@ -60,69 +64,63 @@ export class EmailTransport extends Context.Tag("EmailTransport")<
   EmailTransportInterface
 >() {}
 
-export const EmailTransportLive = Layer.effect(
-  EmailTransport,
-  Effect.gen(function* () {
-    const env = yield* WorkerEnvTag;
+export const EmailTransportLive = Layer.succeed(EmailTransport, {
+  dispatchEmail: (msg) =>
+    Effect.gen(function* () {
+      const apiKey = yield* resendApiKey.pipe(dieOnConfigError);
+      if (!apiKey) {
+        // Fail closed: a missing key in a deployed worker must be loud,
+        // not a silent "success". Only the local dev flag may skip (#3464).
+        if (yield* allowMissingFormSecrets.pipe(dieOnConfigError)) {
+          yield* Effect.logWarning(
+            "[email] RESEND_API_KEY not set — skipping dispatch (ALLOW_MISSING_FORM_SECRETS)",
+          );
+          return;
+        }
+        yield* Effect.logError(
+          "[email] RESEND_API_KEY not set — cannot dispatch",
+        );
+        return yield* Effect.fail(
+          new EmailDeliveryError("RESEND_API_KEY not set"),
+        );
+      }
 
-    return {
-      dispatchEmail: (msg) =>
-        Effect.gen(function* () {
-          if (!env.RESEND_API_KEY) {
-            // Fail closed: a missing key in a deployed worker must be loud,
-            // not a silent "success". Only the local dev flag may skip (#3464).
-            if (env.ALLOW_MISSING_FORM_SECRETS === "true") {
-              yield* Effect.logWarning(
-                "[email] RESEND_API_KEY not set — skipping dispatch (ALLOW_MISSING_FORM_SECRETS)",
-              );
-              return;
-            }
-            yield* Effect.logError(
-              "[email] RESEND_API_KEY not set — cannot dispatch",
-            );
-            return yield* Effect.fail(
-              new EmailDeliveryError("RESEND_API_KEY not set"),
-            );
-          }
+      const response = yield* Effect.tryPromise({
+        try: () =>
+          fetch("https://api.resend.com/emails", {
+            method: "POST",
+            signal: AbortSignal.timeout(8000),
+            headers: {
+              Authorization: `Bearer ${Redacted.value(apiKey)}`,
+              "Content-Type": "application/json",
+              ...(msg.idempotencyKey
+                ? { "Idempotency-Key": msg.idempotencyKey }
+                : {}),
+            },
+            body: JSON.stringify({
+              from: msg.from ?? DEFAULT_FROM,
+              to: Array.isArray(msg.to) ? msg.to : [msg.to],
+              subject: msg.subject,
+              html: msg.html,
+              text: msg.text,
+              ...(msg.replyTo ? { reply_to: msg.replyTo } : {}),
+            }),
+          }),
+        catch: (cause) =>
+          new EmailDeliveryError("Resend request failed", cause),
+      });
 
-          const response = yield* Effect.tryPromise({
-            try: () =>
-              fetch("https://api.resend.com/emails", {
-                method: "POST",
-                signal: AbortSignal.timeout(8000),
-                headers: {
-                  Authorization: `Bearer ${env.RESEND_API_KEY}`,
-                  "Content-Type": "application/json",
-                  ...(msg.idempotencyKey
-                    ? { "Idempotency-Key": msg.idempotencyKey }
-                    : {}),
-                },
-                body: JSON.stringify({
-                  from: msg.from ?? DEFAULT_FROM,
-                  to: Array.isArray(msg.to) ? msg.to : [msg.to],
-                  subject: msg.subject,
-                  html: msg.html,
-                  text: msg.text,
-                  ...(msg.replyTo ? { reply_to: msg.replyTo } : {}),
-                }),
-              }),
-            catch: (cause) =>
-              new EmailDeliveryError("Resend request failed", cause),
-          });
-
-          if (!response.ok) {
-            const body = yield* Effect.promise(() =>
-              response.text().catch(() => ""),
-            );
-            return yield* Effect.fail(
-              new EmailDeliveryError(
-                `Resend responded ${response.status}: ${body}`,
-                undefined,
-                { status: response.status, code: errorName(body) },
-              ),
-            );
-          }
-        }),
-    };
-  }),
-);
+      if (!response.ok) {
+        const body = yield* Effect.promise(() =>
+          response.text().catch(() => ""),
+        );
+        return yield* Effect.fail(
+          new EmailDeliveryError(
+            `Resend responded ${response.status}: ${body}`,
+            undefined,
+            { status: response.status, code: errorName(body) },
+          ),
+        );
+      }
+    }),
+});

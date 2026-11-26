@@ -1,6 +1,6 @@
 import { createClient } from "@sanity/client";
 import { Context, Effect, Either, Layer, Schema as S } from "effect";
-import { WorkerEnvTag } from "../env";
+import { psdImageBaseUrl, dieOnConfigError } from "../config";
 import { PsdGateService } from "../psd/gate";
 import { parseErrorPaths } from "../parse-error-paths";
 import { sanityClientConfig } from "./config";
@@ -255,14 +255,11 @@ export class SanityMutation extends Context.Tag("SanityMutation")<
 export const SanityMutationLive = Layer.effect(
   SanityMutation,
   Effect.gen(function* () {
-    const env = yield* WorkerEnvTag;
     // Portrait downloads are PSD calls: they take a gate token like every
     // other one (#3469), or they run outside the ≤5/s worldwide budget.
     const gate = yield* PsdGateService;
-    const client = createClient({
-      ...sanityClientConfig(env),
-      useCdn: false,
-    });
+    const sanity = yield* sanityClientConfig.pipe(dieOnConfigError);
+    const client = createClient({ ...sanity, useCdn: false });
 
     const docId = (type: string, psdId: string) => `${type}-psd-${psdId}`;
 
@@ -397,7 +394,9 @@ export const SanityMutationLive = Layer.effect(
             catch: () =>
               new SanityMutationError(`Invalid image URL: ${imageUrl}`),
           });
-          const expectedHost = new URL(env.PSD_IMAGE_BASE_URL).hostname;
+          const expectedHost = new URL(
+            yield* psdImageBaseUrl.pipe(dieOnConfigError),
+          ).hostname;
           if (
             parsedUrl.protocol !== "https:" ||
             parsedUrl.hostname !== expectedHost
@@ -515,7 +514,7 @@ export const SanityMutationLive = Layer.effect(
 
           // Use REST API directly — client.assets.upload() uses Node.js internals
           // incompatible with Cloudflare Workers runtime.
-          const uploadUrl = `https://${env.SANITY_PROJECT_ID}.api.sanity.io/v2024-01-01/assets/images/${env.SANITY_DATASET}?filename=${entityType}-psd-${psdId}.jpg`;
+          const uploadUrl = `https://${sanity.projectId}.api.sanity.io/v2024-01-01/assets/images/${sanity.dataset}?filename=${entityType}-psd-${psdId}.jpg`;
           const asset = yield* Effect.tryPromise({
             try: async () => {
               const sanityAbort = new AbortController();
@@ -530,7 +529,7 @@ export const SanityMutationLive = Layer.effect(
                   signal: sanityAbort.signal,
                   method: "POST",
                   headers: {
-                    Authorization: `Bearer ${env.SANITY_API_TOKEN}`,
+                    Authorization: `Bearer ${sanity.token}`,
                     "Content-Type": contentType,
                   },
                   body: arrayBuffer,

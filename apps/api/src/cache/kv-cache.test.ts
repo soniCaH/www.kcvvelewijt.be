@@ -14,8 +14,7 @@ import {
   KvError,
   makeDurableKv,
 } from "./kv-cache";
-import { makeTestEnvLayer } from "../test-helpers/env-layer";
-import type { WorkerEnv } from "../env";
+import { makeTestEnvLayer, type TestEnv } from "../test-helpers/env-layer";
 import { ResourceNotFoundError, UpstreamUnavailableError } from "../psd/errors";
 import { PsdGateService, PsdGateTest, makePsdGateLayer } from "../psd/gate";
 import { GateLogic } from "../psd/gate-logic";
@@ -66,7 +65,7 @@ function makeMockKv(options: { pageSize?: number } = {}) {
 
 function makeEnvLayer(
   mockKv: ReturnType<typeof makeMockKv>,
-  overrides: Partial<WorkerEnv> = {},
+  overrides: Partial<TestEnv> = {},
 ) {
   return makeTestEnvLayer({
     PSD_CACHE: mockKv as unknown as KVNamespace,
@@ -1498,10 +1497,15 @@ describe("TypedKvCache — drift is measured from the first unfixed stale read (
 
   /** A runner that drops the refresh fork — a `waitUntil` killed before it
    * reports anything — but still runs the drift ping. */
-  function killedRefreshRunner(mockKv: ReturnType<typeof makeMockKv>) {
+  function killedRefreshRunner(
+    mockKv: ReturnType<typeof makeMockKv>,
+    /** The detached work runs on the runner's own env, which is where it reads
+     * its config (the Slack webhook) from. */
+    envOverrides: Partial<TestEnv> = {},
+  ) {
     const pending: Promise<void>[] = [];
     const layer = Layer.mergeAll(KvCacheLive, PsdGateTest).pipe(
-      Layer.provideMerge(makeEnvLayer(mockKv)),
+      Layer.provideMerge(makeEnvLayer(mockKv, envOverrides)),
     );
     const runnerLayer = Layer.succeed(BackgroundRunnerService, {
       fork: (label, effect) =>
@@ -1666,7 +1670,9 @@ describe("TypedKvCache — drift is measured from the first unfixed stale read (
         makeWrapper({ name: "stale", value: 1 }, 3 * dayMs),
       );
       seedStaleSince(mockKv, 26 * hourMs);
-      const { runnerLayer, settle } = killedRefreshRunner(mockKv);
+      const { runnerLayer, settle } = killedRefreshRunner(mockKv, {
+        SLACK_ALERT_WEBHOOK_URL: "https://hooks.slack.test/x",
+      });
       await Effect.runPromise(
         TypedKvCache(TestSchema, { psdBacked })
           .getOrFetch("test-key", Effect.never, 60)

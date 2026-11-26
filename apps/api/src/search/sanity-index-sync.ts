@@ -1,6 +1,10 @@
 import { createClient } from "@sanity/client";
 import { Array as Arr, Effect, Either, Ref, Schedule } from "effect";
-import { WorkerEnvTag } from "../env";
+import {
+  sanityDataset,
+  searchIndexPruneDryRun,
+  dieOnConfigError,
+} from "../config";
 import { KvCacheService } from "../cache/kv-cache";
 import { reconcileOrphans } from "../reconciliation";
 import { sanityClientConfig } from "../sanity/config";
@@ -238,12 +242,13 @@ export type PrunePhaseOutcome =
 
 export const runSanityIndexSync = (options?: SyncOptions) =>
   Effect.gen(function* () {
-    const env = yield* WorkerEnvTag;
     const cache = yield* KvCacheService;
     // Scoped once for the whole sweep (#2873) — every manifest/pending-marker
-    // call below shares this handle rather than repeating `env.SANITY_DATASET`
-    // at each call site, so they can't drift onto different datasets.
-    const manifestKv = cache.durable.forDataset(env.SANITY_DATASET);
+    // call below shares this handle rather than repeating the dataset at each
+    // call site, so they can't drift onto different datasets.
+    const manifestKv = cache.durable.forDataset(
+      yield* sanityDataset.pipe(dieOnConfigError),
+    );
 
     // Refuse the whole run when this worker's dataset doesn't match its
     // configured index (#2833). This job is unreachable on staging today
@@ -251,7 +256,7 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
     // cron" reasoning this issue was filed to retire for the webhook, and
     // it stops being true the moment anything triggers this run manually
     // (see the staging backfill instructions in apps/api/CLAUDE.md).
-    const mismatch = datasetIndexMismatch(env);
+    const mismatch = yield* datasetIndexMismatch.pipe(dieOnConfigError);
     if (mismatch) {
       return yield* Effect.fail(
         new Error(`[search-sync] refusing to sync: ${mismatch}`),
@@ -264,7 +269,7 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
     // Fails safe: anything other than the literal "false" is dry-run, so an
     // absent var (local dev, a test that doesn't set it) or a typo never
     // silently starts deleting production vectors (#2831).
-    const dryRun = env.SEARCH_INDEX_PRUNE_DRY_RUN !== "false";
+    const dryRun = yield* searchIndexPruneDryRun.pipe(dieOnConfigError);
 
     // Whether every degradable fetch this sweep ran actually succeeded.
     // fetchPhase below is the only way any phase gets its items, and it
@@ -306,12 +311,10 @@ export const runSanityIndexSync = (options?: SyncOptions) =>
         ),
       );
 
+    const sanity = yield* sanityClientConfig.pipe(dieOnConfigError);
     const clientHolder: { client?: ReturnType<typeof createClient> } = {};
     const sanityClient = () =>
-      (clientHolder.client ??= createClient({
-        ...sanityClientConfig(env),
-        useCdn: false,
-      }));
+      (clientHolder.client ??= createClient({ ...sanity, useCdn: false }));
 
     // A failed embedding drops just its own document from the batch.
     const embedDoc = (

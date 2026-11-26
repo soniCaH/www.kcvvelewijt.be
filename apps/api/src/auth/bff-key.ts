@@ -5,9 +5,9 @@
  * Sanity webhook is exempt — `index.ts` routes it before this check, and it
  * keeps its own HMAC.
  */
-import { Effect } from "effect";
+import { Effect, Redacted } from "effect";
 import { BFF_KEY_HEADER } from "@kcvv/api-contract";
-import type { WorkerEnv } from "../env";
+import { bffSharedSecret, dieOnConfigError } from "../config";
 
 const encoder = new TextEncoder();
 
@@ -29,17 +29,17 @@ export const bffKeyMatches = (given: string | null, expected: string) => {
 /** `401` when the request may not reach the app, `null` when it may. */
 export const refuseUnlessBffKey = (
   request: Request,
-  env: WorkerEnv,
-): Response | null => {
-  const secret = env.BFF_SHARED_SECRET;
-  if (!secret) {
-    Effect.runSync(
-      Effect.logError(
+): Effect.Effect<Response | null> =>
+  Effect.gen(function* () {
+    const secret = yield* bffSharedSecret.pipe(dieOnConfigError);
+    if (!secret) {
+      yield* Effect.logError(
         "[auth] BFF_SHARED_SECRET not set — refusing all requests",
-      ),
-    );
-  } else if (bffKeyMatches(request.headers.get(BFF_KEY_HEADER), secret)) {
-    return null;
-  }
-  return new Response("Unauthorized", { status: 401 });
-};
+      );
+    } else if (
+      bffKeyMatches(request.headers.get(BFF_KEY_HEADER), Redacted.value(secret))
+    ) {
+      return null;
+    }
+    return new Response("Unauthorized", { status: 401 });
+  });

@@ -4,11 +4,11 @@ import {
   TVJO_ROLE_CODE,
   YOUTH_COORDINATOR_ROLE_CODES,
 } from "@kcvv/api-contract";
-import { WorkerEnvTag } from "../env";
 import { derivePsdTeamLabel } from "../psd/transforms";
 import type { PlayerImageState, StaffImageState } from "./types";
 import { parseErrorPaths } from "../parse-error-paths";
 import { sanityClientConfig } from "./config";
+import { dieOnConfigError } from "../config";
 
 // ─── Error ────────────────────────────────────────────────────────────────────
 
@@ -238,9 +238,8 @@ export class SanityProjection extends Context.Tag("SanityProjection")<
 export const SanityProjectionLive = Layer.effect(
   SanityProjection,
   Effect.gen(function* () {
-    const env = yield* WorkerEnvTag;
     const client = createClient({
-      ...sanityClientConfig(env),
+      ...(yield* sanityClientConfig.pipe(dieOnConfigError)),
       useCdn: false,
     });
 

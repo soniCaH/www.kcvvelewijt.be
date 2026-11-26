@@ -13,8 +13,7 @@ import {
   EmailTransport,
   type EmailTransportInterface,
 } from "../email/resend";
-import type { WorkerEnv } from "../env";
-import { makeTestEnvLayer } from "../test-helpers/env-layer";
+import { makeTestEnvLayer, type TestEnv } from "../test-helpers/env-layer";
 import {
   decodeMembership,
   validMembershipRaw,
@@ -63,7 +62,7 @@ function run(
     routing?: FormRoutingConfig;
     /** The KV copy of the routing config, as a raw string. */
     cached?: string;
-    env?: Partial<WorkerEnv>;
+    env?: Partial<TestEnv>;
     errors?: string[];
   } = {},
 ) {

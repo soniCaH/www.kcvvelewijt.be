@@ -1,8 +1,8 @@
 import { createClient } from "@sanity/client";
-import { Either, Effect, Layer, Schema as S } from "effect";
+import { Either, Effect, Layer, Redacted, Schema as S } from "effect";
 import { EmailAddress } from "@kcvv/api-contract";
-import type { WorkerEnv } from "../env";
-import { WorkerEnvTag } from "../env";
+import { WorkerEnvLive, type WorkerEnv } from "../env";
+import { sanityWebhookSecret, dieOnConfigError } from "../config";
 import { EmailTransport, EmailTransportLive } from "../email/resend";
 import { buildDartsPaidEmail } from "../forms/darts-emails";
 import { parseErrorPaths } from "../parse-error-paths";
@@ -51,7 +51,7 @@ const QUERY = `*[_id == $id && _type == "dartsSignup"][0]{
   _id, teamName, captainName, captainEmail, paid, waitlist, paidMailSentAt
 }`;
 
-const webhookEffect = (request: Request, env: WorkerEnv) =>
+const webhookEffect = (request: Request) =>
   Effect.gen(function* () {
     const transport = yield* EmailTransport;
 
@@ -60,12 +60,20 @@ const webhookEffect = (request: Request, env: WorkerEnv) =>
       catch: () => new WebhookParseError("invalid_json", "failed to read body"),
     });
 
+    // A secret that is not configured refuses the request, as an unset one
+    // always has; the log names the var.
+    const webhookSecret = yield* sanityWebhookSecret.pipe(
+      Effect.tapError((error) =>
+        Effect.logError(`[webhook:darts-paid] ${error}`),
+      ),
+      Effect.mapError(() => new WebhookAuthError()),
+    );
     const valid = yield* Effect.tryPromise({
       try: () =>
         verifySanitySignature(
           request.headers,
           rawBody,
-          env.SANITY_WEBHOOK_SECRET,
+          Redacted.value(webhookSecret),
         ),
       catch: () => new WebhookAuthError(),
     });
@@ -91,7 +99,10 @@ const webhookEffect = (request: Request, env: WorkerEnv) =>
       return Response.json({ ok: true, action: "skipped_not_applicable" });
     }
 
-    const client = createClient({ ...sanityClientConfig(env), useCdn: false });
+    const client = createClient({
+      ...(yield* sanityClientConfig.pipe(dieOnConfigError)),
+      useCdn: false,
+    });
     const raw = yield* Effect.tryPromise({
       try: () => client.fetch<unknown>(QUERY, { id: _id }),
       catch: (err) =>
@@ -170,12 +181,12 @@ export const handleDartsPaidWebhook = async (
   env: WorkerEnv,
   layer?: DartsPaidWebhookLayer,
 ): Promise<Response> => {
-  const envLayer = Layer.succeed(WorkerEnvTag, env);
+  const envLayer = WorkerEnvLive(env);
   const serviceLayer =
     layer ?? EmailTransportLive.pipe(Layer.provide(envLayer));
 
   return await Effect.runPromise(
-    webhookEffect(request, env).pipe(
+    webhookEffect(request).pipe(
       Effect.provide(serviceLayer),
       Effect.provide(envLayer),
       Effect.tapError((error) =>

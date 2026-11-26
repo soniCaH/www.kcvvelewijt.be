@@ -1,5 +1,9 @@
-import { Effect, Option, Schema as S } from "effect";
-import { WorkerEnvTag } from "../env";
+import { Effect, Option, Redacted, Schema as S } from "effect";
+import {
+  allowMissingFormSecrets,
+  turnstileSecret,
+  dieOnConfigError,
+} from "../config";
 
 const SITEVERIFY_URL =
   "https://challenges.cloudflare.com/turnstile/v0/siteverify";
@@ -19,13 +23,11 @@ const decodeSiteverify = S.decodeUnknownOption(
  *   retrying; failing open let spam through (and made Resend mail made-up
  *   addresses) during a Cloudflare outage. The honeypot is checked first.
  */
-export const verifyTurnstile = (
-  token: string,
-): Effect.Effect<boolean, never, WorkerEnvTag> =>
+export const verifyTurnstile = (token: string): Effect.Effect<boolean> =>
   Effect.gen(function* () {
-    const env = yield* WorkerEnvTag;
-    if (!env.TURNSTILE_SECRET) {
-      if (env.ALLOW_MISSING_FORM_SECRETS === "true") {
+    const secret = yield* turnstileSecret.pipe(dieOnConfigError);
+    if (!secret) {
+      if (yield* allowMissingFormSecrets.pipe(dieOnConfigError)) {
         yield* Effect.logWarning(
           "[turnstile] TURNSTILE_SECRET not set — skipping verification (ALLOW_MISSING_FORM_SECRETS)",
         );
@@ -44,7 +46,7 @@ export const verifyTurnstile = (
           signal: AbortSignal.timeout(5000),
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            secret: env.TURNSTILE_SECRET,
+            secret: Redacted.value(secret),
             response: token,
           }),
         });

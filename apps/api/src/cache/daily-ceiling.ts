@@ -8,14 +8,6 @@ import type { KvCacheInterface } from "./kv-cache";
 export const utcDay = (d: Date = new Date()): string =>
   d.toISOString().slice(0, 10);
 
-/** A non-negative integer `[vars]` ceiling, or `undefined` (no ceiling) when
- * the var is unset or not a number. `0` is accepted on purpose: it refuses
- * everything, a kill switch. */
-export const parseCeiling = (raw: string | undefined): number | undefined => {
-  const n = Number.parseInt(raw ?? "", 10);
-  return Number.isFinite(n) && n >= 0 ? n : undefined;
-};
-
 /** A raw KV counter value as a number: absent or malformed reads as `0`, so a
  * stray "NaN" can never persist and poison every later increment. */
 export const parseCount = (raw: string | null): number => {

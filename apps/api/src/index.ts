@@ -16,7 +16,8 @@ import {
 } from "@effect/platform";
 import { Effect, Layer } from "effect";
 import { PsdApi } from "@kcvv/api-contract";
-import { WorkerEnvTag, type WorkerEnv } from "./env";
+import { WorkerEnvLive, type WorkerEnv } from "./env";
+import { workerConfigProvider } from "./config";
 import { PsdTeamClientLive } from "./sync/psd-team-client";
 import { PsdServiceLive } from "./psd/service";
 import { PsdGateLive } from "./psd/gate";
@@ -100,7 +101,7 @@ function buildAppLayer(env: WorkerEnv, ctx: ExecutionContext) {
     // on purpose: the portrait download takes a gate token too (#3469).
     Layer.provide(PsdGateLive),
     Layer.provide(KvCacheLive),
-    Layer.provide(Layer.succeed(WorkerEnvTag, env)),
+    Layer.provide(WorkerEnvLive(env)),
     Layer.provideMerge(WorkerPlatformLayer),
   );
 }
@@ -163,7 +164,11 @@ export default {
     // Everything else: only the website's Next server, holding the shared
     // secret, gets past here — before any KV/DO/PSD/Sanity/AI work (#3485).
     // No CORS middleware: no browser ever calls this worker.
-    const refused = refuseUnlessBffKey(request, env);
+    const refused = await Effect.runPromise(
+      refuseUnlessBffKey(request).pipe(
+        Effect.withConfigProvider(workerConfigProvider(env)),
+      ),
+    );
     if (refused) return refused;
 
     const { handler, dispose } = HttpApiBuilder.toWebHandler(
@@ -181,7 +186,7 @@ export default {
     env: WorkerEnv,
     _ctx: ExecutionContext,
   ): Promise<void> {
-    const envLayer = Layer.succeed(WorkerEnvTag, env);
+    const envLayer = WorkerEnvLive(env);
 
     // Debounced Slack failure/recovery signal for both nightly crons (#2870).
     // Deliberately independent of PsdGateLive/IncidentTracker — see the
