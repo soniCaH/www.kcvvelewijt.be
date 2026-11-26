@@ -15,6 +15,7 @@ import {
 } from "@/lib/utils/calendar-feed-query";
 import { overlayFade } from "@/components/design-system/overlay-fade";
 import type { CalendarTeamInfo } from "@/app/(main)/kalender/utils";
+import { readPublicEnv } from "@/lib/env/client";
 
 export interface CalendarSubscribePanelProps {
   teams: CalendarTeamInfo[];
@@ -107,7 +108,7 @@ export const CalendarSubscribePanel = ({
   const host = useSyncExternalStore(
     subscribeNever,
     () => window.location.host,
-    () => process.env.NEXT_PUBLIC_HOST ?? "kcvvelewijt.be",
+    () => readPublicEnv().NEXT_PUBLIC_HOST ?? "kcvvelewijt.be",
   );
 
   const selectedPsdIds = teams

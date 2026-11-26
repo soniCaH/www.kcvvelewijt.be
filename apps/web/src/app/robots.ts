@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
 
 import { SITE_CONFIG } from "@/lib/constants";
+import { readOptionalServerEnv } from "@/lib/env/server";
 
 export default function robots(): MetadataRoute.Robots {
-  const isProduction = process.env.VERCEL_ENV === "production";
+  const isProduction = readOptionalServerEnv().VERCEL_ENV === "production";
 
   return {
     rules: {

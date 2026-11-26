@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Script from "next/script";
 import { IBM_Plex_Mono } from "next/font/google";
+import { readPublicEnv } from "@/lib/env/client";
 
 /**
  * The `<html>`/`<head>`/`<body>` shell shared by `layout.tsx` and
@@ -29,7 +30,7 @@ export function RootDocument({
   head?: ReactNode;
   children: ReactNode;
 }) {
-  const typekitId = process.env.NEXT_PUBLIC_TYPEKIT_ID;
+  const typekitId = readPublicEnv().NEXT_PUBLIC_TYPEKIT_ID;
 
   return (
     <html

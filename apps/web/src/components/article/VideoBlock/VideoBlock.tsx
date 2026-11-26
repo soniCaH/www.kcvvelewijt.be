@@ -14,6 +14,7 @@ import { PRESS_DOWN_CLASSES } from "@/components/design-system/press-down";
 import { TapedFigure } from "@/components/design-system/TapedFigure";
 import type { TapeStripProps } from "@/components/design-system/TapeStrip/TapeStrip";
 import { parseEmbedUrl, type VideoProvider } from "./parseEmbedUrl";
+import { readPublicEnv } from "@/lib/env/client";
 
 export interface VideoBlockValue {
   _type: "videoBlock";
@@ -409,7 +410,7 @@ const renderEmbed = (
   const caption = trimmedCaption(value);
   const parsed = parseEmbedUrl(url);
   if (parsed === null) {
-    if (process.env.NODE_ENV !== "production") {
+    if (readPublicEnv().NODE_ENV !== "production") {
       console.warn(
         "[VideoBlock] Unknown embed URL provider — refusing to render an iframe. Allowed: YouTube, Vimeo.",
       );

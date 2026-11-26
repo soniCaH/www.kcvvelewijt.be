@@ -23,6 +23,7 @@ import {
   type TeamNavVM,
 } from "@/lib/repositories/team.repository";
 import { BRAND, SITE_CONFIG, DEFAULT_OG_IMAGE } from "@/lib/constants";
+import { readPublicEnv } from "@/lib/env/client";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_CONFIG.siteUrl),
@@ -113,7 +114,7 @@ export default async function RootLayout({
       </a>
       {preview && <PreviewBanner />}
       <TagManagerScripts
-        gtmId={process.env.NEXT_PUBLIC_GTM_ID}
+        gtmId={readPublicEnv().NEXT_PUBLIC_GTM_ID}
         preview={preview}
       />
       <ScrollToTop />

@@ -153,6 +153,13 @@ describe("POST /api/search", () => {
     expect(response.status).toBe(503);
   });
 
+  it("returns 503 without calling the BFF when KCVV_API_URL is blank", async () => {
+    vi.stubEnv("KCVV_API_URL", "  ");
+    const response = await POST(makePostRequest({ query: "test" }));
+    expect(response.status).toBe(503);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
   it("returns 500 when BFF fetch throws", async () => {
     vi.mocked(fetch).mockRejectedValueOnce(new Error("network error"));
     const response = await POST(makePostRequest({ query: "test" }));

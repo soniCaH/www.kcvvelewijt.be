@@ -49,6 +49,7 @@ import {
   ShortLinkRepository,
   ShortLinkRepositoryLive,
 } from "../repositories/short-link.repository";
+import { readOptionalServerEnv } from "@/lib/env/server";
 
 const AppLayer = Layer.mergeAll(
   BffServiceLive,
@@ -166,7 +167,7 @@ export const runPromise = <A>(
       if (
         squashed instanceof SanityReadError &&
         squashed.transient &&
-        process.env.NEXT_PHASE === PHASE_PRODUCTION_BUILD
+        readOptionalServerEnv().NEXT_PHASE === PHASE_PRODUCTION_BUILD
       ) {
         await connection();
       }

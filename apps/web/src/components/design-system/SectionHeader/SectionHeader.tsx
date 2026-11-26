@@ -6,6 +6,7 @@ import {
 } from "../EditorialHeading";
 import { EditorialLink } from "../EditorialLink";
 import { MonoLabelRow, type MonoLabelRowItem } from "../MonoLabelRow";
+import { readPublicEnv } from "@/lib/env/client";
 
 type SectionHeaderCta = { linkText: string; linkHref: string };
 
@@ -129,7 +130,7 @@ export const SectionHeader = ({
   const isDark = variant === "dark";
   const isRuled = ruled && title.trim().length <= RULED_TITLE_MAX_LENGTH;
 
-  if (ruled && !isRuled && process.env.NODE_ENV === "development") {
+  if (ruled && !isRuled && readPublicEnv().NODE_ENV === "development") {
     console.warn(
       `[SectionHeader] ruled treatment ignored for title "${title}" — see RULED_TITLE_MAX_LENGTH's doc comment in SectionHeader.tsx for the constraint.`,
     );

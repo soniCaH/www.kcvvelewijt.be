@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { Either } from "effect";
+import { readBffEnv } from "@/lib/env/server";
 import { bffKeyHeader } from "./bff-key";
 
 const NO_STORE = { "Cache-Control": "no-store" };
@@ -11,15 +13,15 @@ const call = async (opts: {
   noStore?: boolean;
 }) => {
   const headers = opts.noStore ? NO_STORE : undefined;
-  const bffUrl = process.env.KCVV_API_URL;
-  const bffKey = bffKeyHeader();
-  if (!bffUrl || !bffKey) {
+  const env = readBffEnv();
+  if (Either.isLeft(env)) {
     return NextResponse.json(
       { ok: false, error: "Het formulier is momenteel niet beschikbaar." },
       { status: 503, headers },
     );
   }
 
+  const { KCVV_API_URL: bffUrl, BFF_SHARED_SECRET: secret } = env.right;
   try {
     const res = await fetch(`${bffUrl}${opts.path}`, {
       method: opts.method,
@@ -27,7 +29,7 @@ const call = async (opts: {
         ...(opts.method === "POST"
           ? { "Content-Type": "application/json" }
           : {}),
-        ...bffKey,
+        ...bffKeyHeader(secret),
       },
       ...(opts.method === "POST" ? { body: JSON.stringify(opts.body) } : {}),
       ...(opts.noStore ? { cache: "no-store" as const } : {}),
