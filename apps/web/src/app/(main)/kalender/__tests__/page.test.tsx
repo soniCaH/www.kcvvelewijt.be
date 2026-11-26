@@ -6,7 +6,7 @@
  * section failure, not a page failure.
  */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import { Effect, Layer } from "effect";
 import { HttpBadGateway, type Match } from "@kcvv/api-contract";
 
@@ -16,12 +16,15 @@ vi.mock("@/components/calendar/CalendarWidget", () => ({
   CalendarWidget: ({
     initialIsPhone,
     initialAbonneer,
+    initialType,
   }: {
     initialIsPhone?: boolean;
     initialAbonneer?: string;
+    initialType?: string;
   }) => (
     <div
       data-testid="calendar-widget"
+      data-initial-type={initialType}
       data-initial-is-phone={String(initialIsPhone)}
       data-initial-abonneer={initialAbonneer}
     />
@@ -91,7 +94,11 @@ vi.mock("@/lib/repositories/event.repository", async (importOriginal) => {
 const { default: CalendarPage } = await import("../page");
 
 const renderPage = async (
-  searchParams: { view?: string; abonneer?: string | string[] } = {},
+  searchParams: {
+    type?: string | string[];
+    view?: string;
+    abonneer?: string | string[];
+  } = {},
 ) =>
   render(await CalendarPage({ searchParams: Promise.resolve(searchParams) }));
 
@@ -208,7 +215,7 @@ describe("/kalender — ?abonneer= (#3788)", () => {
       "102",
       "102",
     ],
-    ["a repeated param, dropped", ["1", "2"], null],
+    ["a repeated param, narrowed to its first value", ["1", "2"], "1"],
     ["an absent param", undefined, null],
   ])("%s", async (_label, abonneer, expected) => {
     await renderPage({ abonneer });
@@ -217,5 +224,25 @@ describe("/kalender — ?abonneer= (#3788)", () => {
         .getByTestId("calendar-widget")
         .getAttribute("data-initial-abonneer"),
     ).toBe(expected);
+  });
+});
+
+describe("/kalender — ?type= (#3875)", () => {
+  beforeEach(() => {
+    mockRequestHeaders.mockReturnValue({});
+    mockGetNextMatches.mockReturnValue(Effect.succeed([]));
+  });
+
+  it("seeds a repeated type the same as a single one", async () => {
+    await renderPage({ type: ["a", "b"] });
+    const repeated = screen
+      .getByTestId("calendar-widget")
+      .getAttribute("data-initial-type");
+    cleanup();
+    await renderPage({ type: "a" });
+    expect(repeated).toBe("a");
+    expect(
+      screen.getByTestId("calendar-widget").getAttribute("data-initial-type"),
+    ).toBe(repeated);
   });
 });

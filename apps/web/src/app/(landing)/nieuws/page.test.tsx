@@ -44,6 +44,7 @@ vi.mock("./actions", () => ({
 }));
 
 import NewsPage, { metadata } from "./page";
+import { fetchArticlesAction } from "./actions";
 
 describe("/nieuws degrades on a failed tag-list read (#2863)", () => {
   beforeEach(() => {
@@ -71,5 +72,25 @@ describe("/nieuws metadata ignores ?categorie (#3483)", () => {
       "Bekijk al het nieuws van KCVV Elewijt. Filter op categorie of zoek naar specifieke artikelen.",
     );
     expect(metadata.alternates?.canonical).toMatch(/\/nieuws$/);
+  });
+});
+
+describe("/nieuws narrows a repeated ?categorie to its first value (#3875)", () => {
+  beforeEach(() => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.mocked(fetchArticlesAction).mockClear();
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("reads ?categorie=a&categorie=b as ?categorie=a", async () => {
+    await NewsPage({
+      searchParams: Promise.resolve({ categorie: ["a", "b"] }),
+    });
+    await NewsPage({ searchParams: Promise.resolve({ categorie: "a" }) });
+    const [repeated, single] = vi.mocked(fetchArticlesAction).mock.calls;
+    expect(repeated).toEqual(single);
+    expect(repeated[0].category).toBe("a");
   });
 });

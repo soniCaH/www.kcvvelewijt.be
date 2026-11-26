@@ -1,6 +1,6 @@
 "use server";
 
-import { Effect } from "effect";
+import { Effect, Schema as S } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
 import { PhotoGalleryRepository } from "@/lib/repositories/photoGallery.repository";
 import {
@@ -10,6 +10,9 @@ import {
 } from "@/lib/utils/pagination";
 import type { GalleryCardGridItem } from "@/components/gallery/GalleryCardGrid/GalleryCardGrid";
 import { toGalleryCardGridItems } from "@/components/gallery/GalleryCardGrid/gallery-card-items";
+
+const GalleriesParams = S.Struct({ offset: S.Number, limit: S.Number });
+const decodeGalleriesParams = S.decodeUnknownSync(GalleriesParams);
 
 /**
  * One page of `/galerij`, on the same 24 + 12 contract as `/nieuws` (#2569).
@@ -27,7 +30,7 @@ export async function fetchGalleriesAction(params: {
   offset: number;
   limit: number;
 }): Promise<Paginated<GalleryCardGridItem>> {
-  const { offset, limit } = clampListingWindow(params);
+  const { offset, limit } = clampListingWindow(decodeGalleriesParams(params));
 
   const rows = await runPromise(
     Effect.gen(function* () {

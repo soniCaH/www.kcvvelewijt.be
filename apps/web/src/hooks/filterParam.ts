@@ -1,6 +1,7 @@
 /**
  * Shared, non-hook primitives behind `useHistoryFilterParam` (#2779, #2783
- * review finding 2).
+ * review finding 2), plus `firstParam`, which narrows Next's server-side
+ * `searchParams` and is imported by Server Components (#3875).
  *
  * `useHistoryFilterParam` is the only filter-param hook: a router-backed twin
  * (`useRouterFilterParam`) existed until #3382 moved its last caller,
@@ -29,6 +30,11 @@ export function narrowParam<T extends string>(
     ? (raw as T)
     : fallback;
 }
+
+/** A Next `searchParams` value is `string | string[]` (`?a=1&a=2` arrives as
+ *  an array) whatever the page types it as: take the first one (#3875). */
+export const firstParam = (v: string | string[] | undefined) =>
+  Array.isArray(v) ? v[0] : v;
 
 /** Reads one `?<name>=` value from the LIVE `window.location.search` —
  *  history mode's own canonical read source. There is no `useSearchParams()`

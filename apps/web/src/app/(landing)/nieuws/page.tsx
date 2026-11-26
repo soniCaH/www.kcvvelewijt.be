@@ -26,9 +26,10 @@ import { NewsListingClient } from "./NewsListingClient";
 import { fetchArticlesAction } from "./actions";
 import { NEWS_KICKER, NEWS_HEADLINE } from "./copy";
 import { toCategoryChips } from "./categories";
+import { firstParam } from "@/hooks/filterParam";
 
 interface NewsPageProps {
-  searchParams: Promise<{ categorie?: string }>;
+  searchParams: Promise<{ categorie?: string | string[] }>;
 }
 
 // `?categorie=` is deliberately not read: echoing a visitor-supplied value into
@@ -44,7 +45,7 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default async function NewsPage({ searchParams }: NewsPageProps) {
   const params = await searchParams;
-  const categorySlug = params.categorie;
+  const categorySlug = firstParam(params.categorie);
 
   // Fetch tag counts (lightweight) and initial paginated batch in parallel.
   // `ArticleRepository.findTags` carries a typed `SanityReadError` (#2864),

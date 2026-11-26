@@ -1,6 +1,6 @@
 "use server";
 
-import { Effect } from "effect";
+import { Effect, Schema as S } from "effect";
 import { runPromise } from "@/lib/effect/runtime";
 import {
   ArticleRepository,
@@ -12,13 +12,22 @@ import {
   type Paginated,
 } from "@/lib/utils/pagination";
 
+const ArticlesParams = S.Struct({
+  offset: S.Number,
+  limit: S.Number,
+  // Tags carry no length limit in the Studio schema; 100 is a generous bound.
+  category: S.optional(S.String.pipe(S.maxLength(100))),
+});
+const decodeArticlesParams = S.decodeUnknownSync(ArticlesParams);
+
 export async function fetchArticlesAction(params: {
   offset: number;
   limit: number;
   category?: string;
 }): Promise<Paginated<ArticleVM>> {
-  // `"use server"` makes this a public endpoint — clamp before GROQ.
-  const { offset, limit } = clampListingWindow(params);
+  // `"use server"` makes this a public endpoint: decode, then clamp, before GROQ.
+  const decoded = decodeArticlesParams(params);
+  const { offset, limit } = clampListingWindow(decoded);
 
   // `ArticleRepository.findPaginated`'s typed `SanityReadError` is converted
   // to a defect here on purpose (`Effect.orDie`) rather than caught with
@@ -41,7 +50,7 @@ export async function fetchArticlesAction(params: {
       return yield* repo.findPaginated({
         offset,
         limit: limit + 1,
-        category: params.category,
+        category: decoded.category,
       });
     }).pipe(Effect.orDie),
   );

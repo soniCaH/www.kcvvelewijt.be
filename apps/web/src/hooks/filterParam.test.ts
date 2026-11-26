@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { narrowParam, readParam, writeHistoryFilterParam } from "./filterParam";
+import {
+  firstParam,
+  narrowParam,
+  readParam,
+  writeHistoryFilterParam,
+} from "./filterParam";
 
 type Facet = "a" | "b" | "c";
 const VALUES: readonly Facet[] = ["a", "b", "c"];
@@ -99,5 +104,19 @@ describe("writeHistoryFilterParam", () => {
       "/evenementen?type=b",
     );
     expect(pushStateSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe("firstParam", () => {
+  it("returns a plain value as is", () => {
+    expect(firstParam("a")).toBe("a");
+  });
+
+  it("takes the first of a repeated value", () => {
+    expect(firstParam(["a", "b"])).toBe("a");
+  });
+
+  it("passes undefined through", () => {
+    expect(firstParam(undefined)).toBeUndefined();
   });
 });
