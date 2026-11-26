@@ -33,7 +33,7 @@ const WAY_FORWARD_LINK_CLASS = "prose-link";
 /**
  * No-results paper card with taped jersey artefact + way-forward links.
  */
-export function SearchNoResultsCard({ query }: SearchNoResultsCardProps) {
+export const SearchNoResultsCard = ({ query }: SearchNoResultsCardProps) => {
   return (
     <EmptyState tier="surface" heading="Geen treffers">
       Niets gevonden voor &ldquo;
@@ -56,4 +56,4 @@ export function SearchNoResultsCard({ query }: SearchNoResultsCardProps) {
       .
     </EmptyState>
   );
-}
+};

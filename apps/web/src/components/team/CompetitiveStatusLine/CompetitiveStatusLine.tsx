@@ -50,9 +50,9 @@ export interface CompetitiveStatusLineProps {
  * entry. This is the one place the page's nav/render invariant intentionally
  * does not apply — see the comment beside `navItems` in `page.tsx`.
  */
-export function CompetitiveStatusLine({
+export const CompetitiveStatusLine = ({
   variant = "not-in-competition",
-}: CompetitiveStatusLineProps) {
+}: CompetitiveStatusLineProps) => {
   return (
     <div className="flex">
       <EmptyState tier="slot" background="cream-soft">
@@ -60,4 +60,4 @@ export function CompetitiveStatusLine({
       </EmptyState>
     </div>
   );
-}
+};

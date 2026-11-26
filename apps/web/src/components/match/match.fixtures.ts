@@ -38,7 +38,7 @@ import type { Match } from "@/lib/effect/schemas/match.schema";
  * needs one of those three set, pass it as an override at the call site,
  * don't add it here.
  */
-export function createRawMatch(overrides: Partial<Match> = {}): Match {
+export const createRawMatch = (overrides: Partial<Match> = {}): Match => {
   return {
     id: 123,
     date: new Date("2025-02-15T15:00:00"),
@@ -59,4 +59,4 @@ export function createRawMatch(overrides: Partial<Match> = {}): Match {
     competition: "3e Nationale",
     ...overrides,
   } as Match;
-}
+};

@@ -23,7 +23,7 @@ export interface SearchRelatedProps {
   items: SemanticRelatedItem[];
 }
 
-export function SearchRelated({ items }: SearchRelatedProps) {
+export const SearchRelated = ({ items }: SearchRelatedProps) => {
   return (
     <section className="border-paper-edge bg-cream-soft border">
       <h2 className="text-ink-muted border-paper-edge flex items-center gap-1.5 border-b px-3 py-2 font-mono text-[10px] font-semibold tracking-[0.1em] uppercase">
@@ -55,4 +55,4 @@ export function SearchRelated({ items }: SearchRelatedProps) {
       </ul>
     </section>
   );
-}
+};

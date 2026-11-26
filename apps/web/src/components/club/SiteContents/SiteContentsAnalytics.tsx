@@ -25,10 +25,10 @@ export interface SiteContentsAnalyticsProps {
  * question the route was approved with an open verdict on — whether a contents
  * page earns a route — and group + rank answers it.
  */
-export function SiteContentsAnalytics({
+export const SiteContentsAnalytics = ({
   className,
   children,
-}: SiteContentsAnalyticsProps) {
+}: SiteContentsAnalyticsProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useDelegatedClick(ref, {
@@ -53,4 +53,4 @@ export function SiteContentsAnalytics({
       {children}
     </div>
   );
-}
+};

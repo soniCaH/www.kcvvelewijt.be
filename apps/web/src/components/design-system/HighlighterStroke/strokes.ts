@@ -16,7 +16,7 @@ const COLOR_FILL: Record<HighlighterStrokeColor, string> = {
   cream: "%23f5f1e6",
 };
 
-export function buildStrokeDataUrl(color: HighlighterStrokeColor): string {
+export const buildStrokeDataUrl = (color: HighlighterStrokeColor): string => {
   const fill = COLOR_FILL[color];
   return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 14' preserveAspectRatio='none'><path d='${STROKE_PATH}' fill='${fill}' opacity='0.85'/></svg>`;
-}
+};

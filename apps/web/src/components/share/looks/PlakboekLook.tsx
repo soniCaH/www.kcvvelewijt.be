@@ -22,14 +22,14 @@ import { PINNED_Z } from "./block-layout";
  * B · Plakboek — paper ground, the photo taped on as a print. Donker is
  * dark-green paper with cream text and a warm accent (#3509).
  */
-export function PlakboekLook({
+export const PlakboekLook = ({
   content,
   format,
   theme,
   coverMode,
   blocks,
   fallbackIndex,
-}: LookProps) {
+}: LookProps) => {
   const dark = theme === "donker";
   const sq = format === "square";
   const ground = dark ? TOKENS.jerseyDeepDark : TOKENS.cream;
@@ -231,4 +231,4 @@ export function PlakboekLook({
       </div>
     </Canvas>
   );
-}
+};

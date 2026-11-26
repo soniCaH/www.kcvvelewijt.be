@@ -49,7 +49,7 @@ export interface NavGlyphProps {
  * without importing `@phosphor-icons/react`, which calls `createContext` at
  * module scope and is therefore client-only.
  */
-export function NavGlyph({ name, className }: NavGlyphProps) {
+export const NavGlyph = ({ name, className }: NavGlyphProps) => {
   const Icon = NAV_GLYPHS[name];
   return (
     <Icon
@@ -58,4 +58,4 @@ export function NavGlyph({ name, className }: NavGlyphProps) {
       aria-hidden="true"
     />
   );
-}
+};

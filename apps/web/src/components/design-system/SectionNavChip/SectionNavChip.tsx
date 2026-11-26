@@ -32,7 +32,11 @@ export interface SectionNavChipProps {
  * alone leaves focus on `<body>` (#2478 rule 8); hash navigation performs
  * the scroll itself.
  */
-export function SectionNavChip({ id, label, isActive }: SectionNavChipProps) {
+export const SectionNavChip = ({
+  id,
+  label,
+  isActive,
+}: SectionNavChipProps) => {
   return (
     <li>
       <a
@@ -56,4 +60,4 @@ export function SectionNavChip({ id, label, isActive }: SectionNavChipProps) {
       </a>
     </li>
   );
-}
+};

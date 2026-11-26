@@ -25,7 +25,7 @@ export interface SponsorTiersProps {
  * case is handled upstream — `<SponsorsPage>` only renders this when there are
  * sponsors.)
  */
-export function SponsorTiers({ sponsors }: SponsorTiersProps) {
+export const SponsorTiers = ({ sponsors }: SponsorTiersProps) => {
   const ordered = [...sponsors].sort(sortByTierThenName);
   const hoofd = ordered.filter((sponsor) => sponsor.tier === "hoofdsponsor");
   const wall = ordered.filter((sponsor) => sponsor.tier !== "hoofdsponsor");
@@ -54,4 +54,4 @@ export function SponsorTiers({ sponsors }: SponsorTiersProps) {
       )}
     </div>
   );
-}
+};

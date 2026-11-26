@@ -13,11 +13,11 @@ import { formatScore, toSameOriginImage, type CrestEntry } from "./theme";
  * otherwise use the fallback font and then overflow when Freight swaps in).
  * No-ops where the DOM can't be measured (happy-dom in tests) → keeps base.
  */
-function useAutoFit<T extends HTMLElement>(
+const useAutoFit = <T extends HTMLElement>(
   fontSize: number,
   minFontSize: number,
   dep: React.ReactNode,
-) {
+) => {
   const ref = useRef<T>(null);
   const [size, setSize] = useState(fontSize);
   // `useWebfontSwap` already holds the LATEST callback it's given in its
@@ -103,16 +103,16 @@ function useAutoFit<T extends HTMLElement>(
   }, [fontSize, minFontSize, dep]);
 
   return { ref, size };
-}
+};
 
 /** Mono uppercase kicker label. */
-export function Kicker({
+export const Kicker = ({
   children,
   style,
 }: {
   children: React.ReactNode;
   style?: React.CSSProperties;
-}) {
+}) => {
   const palette = useSharePalette();
   return (
     <span
@@ -129,7 +129,7 @@ export function Kicker({
       {children}
     </span>
   );
-}
+};
 
 const PUNCTUATION_MARK = { bang: "!", dot: ".", none: "" } as const;
 
@@ -137,7 +137,7 @@ const PUNCTUATION_MARK = { bang: "!", dot: ".", none: "" } as const;
  * Freight Display headline: an italic accent word plus sentiment punctuation —
  * a warm `!` for positive shouts, a sober `.` elsewhere.
  */
-export function Headline({
+export const Headline = ({
   children,
   punctuation,
   fontSize,
@@ -150,7 +150,7 @@ export function Headline({
   /** Floor the auto-fit so the shout stays loud (default 80px). */
   minFontSize?: number;
   style?: React.CSSProperties;
-}) {
+}) => {
   const palette = useSharePalette();
   const mark = PUNCTUATION_MARK[punctuation];
   const { ref, size } = useAutoFit<HTMLHeadingElement>(
@@ -181,7 +181,7 @@ export function Headline({
       {mark && <span style={{ color: palette.punct }}>{mark}</span>}
     </h1>
   );
-}
+};
 
 /**
  * Freight Display italic name (player / club). Pass `accent` to colour it with
@@ -194,7 +194,7 @@ export function Headline({
  * DOM before `html-to-image` captures it. Degrades to the base size where the
  * DOM can't be measured (e.g. happy-dom in tests).
  */
-export function ShareName({
+export const ShareName = ({
   children,
   fontSize,
   color,
@@ -209,7 +209,7 @@ export function ShareName({
   /** Floor the auto-fit so names stay legible (default 56px). */
   minFontSize?: number;
   style?: React.CSSProperties;
-}) {
+}) => {
   const palette = useSharePalette();
   const { ref, size } = useAutoFit<HTMLDivElement>(
     fontSize,
@@ -234,10 +234,10 @@ export function ShareName({
       {children}
     </div>
   );
-}
+};
 
 /** Big Freight Display score (renders a tight en-dash between digits). */
-export function Scoreline({
+export const Scoreline = ({
   children,
   fontSize,
   minFontSize = 140,
@@ -248,7 +248,7 @@ export function Scoreline({
   /** Floor the auto-fit so the score stays the hero (default 140px). */
   minFontSize?: number;
   style?: React.CSSProperties;
-}) {
+}) => {
   const palette = useSharePalette();
   const display = formatScore(children);
   const { ref, size } = useAutoFit<HTMLDivElement>(
@@ -274,10 +274,10 @@ export function Scoreline({
       {display}
     </div>
   );
-}
+};
 
 /** Mono secondary/meta text. */
-export function Meta({
+export const Meta = ({
   children,
   color,
   style,
@@ -285,7 +285,7 @@ export function Meta({
   children: React.ReactNode;
   color?: string;
   style?: React.CSSProperties;
-}) {
+}) => {
   const palette = useSharePalette();
   return (
     <div
@@ -301,13 +301,13 @@ export function Meta({
       {children}
     </div>
   );
-}
+};
 
 /**
  * Stylish club-crest tile — a square paper chip (ink border + hard offset
  * shadow, slight rotation) holding a club logo. Used for the matchup hero.
  */
-function CrestTile({
+const CrestTile = ({
   logoUrl,
   alt,
   size = 300,
@@ -317,7 +317,7 @@ function CrestTile({
   alt: string;
   size?: number;
   rotate?: number;
-}) {
+}) => {
   return (
     <div
       style={{
@@ -344,10 +344,10 @@ function CrestTile({
       />
     </div>
   );
-}
+};
 
 /** A centred row of club-crest tiles (the matchup hero). */
-export function CrestMatchup({
+export const CrestMatchup = ({
   crests,
   size = 300,
   gap = 72,
@@ -357,7 +357,7 @@ export function CrestMatchup({
   size?: number;
   gap?: number;
   style?: React.CSSProperties;
-}) {
+}) => {
   if (crests.length === 0) return null;
   return (
     <div
@@ -380,16 +380,16 @@ export function CrestMatchup({
       ))}
     </div>
   );
-}
+};
 
 /** Freight em-dash separator in the register's accent hue. */
-export function Dash({
+export const Dash = ({
   fontSize = 90,
   style,
 }: {
   fontSize?: number;
   style?: React.CSSProperties;
-}) {
+}) => {
   const palette = useSharePalette();
   return (
     <div
@@ -406,10 +406,10 @@ export function Dash({
       —
     </div>
   );
-}
+};
 
 /** Square shirt-number disc (sharp corners — design-system rule). */
-export function NumDisc({
+export const NumDisc = ({
   children,
   size = 168,
   fontSize = 100,
@@ -419,7 +419,7 @@ export function NumDisc({
   size?: number;
   fontSize?: number;
   style?: React.CSSProperties;
-}) {
+}) => {
   const palette = useSharePalette();
   return (
     <span
@@ -451,16 +451,16 @@ export function NumDisc({
       </span>
     </span>
   );
-}
+};
 
 /** Striped jersey/cream seam (StripedSeam vocabulary). */
-export function Seam({
+export const Seam = ({
   width = "78%",
   style,
 }: {
   width?: string;
   style?: React.CSSProperties;
-}) {
+}) => {
   return (
     <div
       aria-hidden="true"
@@ -475,10 +475,10 @@ export function Seam({
       }}
     />
   );
-}
+};
 
 /** Dotted halftone band — a textured rule. */
-export function HalftoneBand({
+export const HalftoneBand = ({
   width = "70%",
   color,
   height = 50,
@@ -488,7 +488,7 @@ export function HalftoneBand({
   color?: string;
   height?: number;
   style?: React.CSSProperties;
-}) {
+}) => {
   const palette = useSharePalette();
   return (
     <div
@@ -504,20 +504,20 @@ export function HalftoneBand({
       }}
     />
   );
-}
+};
 
 /**
  * Full-bleed, subtle vertical pitch-stripe texture for the dark register.
  * Faint cream bands over the jersey-deep-dark ground — no hard seam, just a
  * cohesive "pitch" texture across the whole poster.
  */
-export function PitchStripes({
+export const PitchStripes = ({
   opacity = 0.05,
   bandWidth = 84,
 }: {
   opacity?: number;
   bandWidth?: number;
-}) {
+}) => {
   return (
     <div
       aria-hidden="true"
@@ -529,10 +529,10 @@ export function PitchStripes({
       }}
     />
   );
-}
+};
 
 /** Oversized faint ghost numeral behind the content. */
-export function GhostNumeral({
+export const GhostNumeral = ({
   children,
   fontSize,
   color,
@@ -542,7 +542,7 @@ export function GhostNumeral({
   fontSize: number;
   color?: string;
   style?: React.CSSProperties;
-}) {
+}) => {
   const palette = useSharePalette();
   return (
     <div
@@ -562,10 +562,10 @@ export function GhostNumeral({
       {children}
     </div>
   );
-}
+};
 
 /** Oversized faint ghost letter (italic) behind the content. */
-export function GhostLetter({
+export const GhostLetter = ({
   children,
   fontSize,
   color,
@@ -575,7 +575,7 @@ export function GhostLetter({
   fontSize: number;
   color?: string;
   style?: React.CSSProperties;
-}) {
+}) => {
   const palette = useSharePalette();
   return (
     <div
@@ -596,14 +596,14 @@ export function GhostLetter({
       {children}
     </div>
   );
-}
+};
 
 /**
  * Blown-up disciplinary card (yellow = warm, red = brick). A single rotated
  * group holds the card plus the tape strip, so the texture, inner keyline,
  * and tape all share the card's exact angle.
  */
-export function CardGraphic({
+export const CardGraphic = ({
   color,
   rotate = 0,
   width = 460,
@@ -615,7 +615,7 @@ export function CardGraphic({
   width?: number;
   height?: number;
   style?: React.CSSProperties;
-}) {
+}) => {
   const tape: React.CSSProperties = {
     position: "absolute",
     width: "188px",
@@ -687,4 +687,4 @@ export function CardGraphic({
       />
     </div>
   );
-}
+};

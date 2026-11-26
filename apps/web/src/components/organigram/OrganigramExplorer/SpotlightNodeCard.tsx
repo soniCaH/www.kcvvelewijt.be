@@ -26,12 +26,12 @@ export interface SpotlightNodeCardProps {
 }
 
 /** The sub-label under the position title: holder name · "N personen" · "vacant". */
-export function holderLabel(node: OrgChartNode): string {
+export const holderLabel = (node: OrgChartNode): string => {
   const state = deriveCardState(node.members.length);
   if (state === "vacant") return "vacature";
   if (state === "shared") return `${node.members.length} personen`;
   return node.members[0]?.name?.trim() || "—";
-}
+};
 
 /**
  * Every spotlight card has the SAME footprint and type scale (a 144px-wide box,
@@ -42,12 +42,12 @@ export function holderLabel(node: OrgChartNode): string {
  * larger box or font — which also keeps the FLIP travel a pure translate (no
  * scale distortion) since source and destination cards are identical in size.
  */
-export function SpotlightNodeCard({
+export const SpotlightNodeCard = ({
   node,
   variant = "node",
   isRoot = false,
   className,
-}: SpotlightNodeCardProps) {
+}: SpotlightNodeCardProps) => {
   const state = isRoot ? "root" : deriveCardState(node.members.length);
   const isCenter = variant === "center";
   const sublabel = isRoot ? "de club" : holderLabel(node);
@@ -78,4 +78,4 @@ export function SpotlightNodeCard({
       </span>
     </span>
   );
-}
+};

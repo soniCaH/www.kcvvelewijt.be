@@ -23,11 +23,11 @@ export interface EditorialHubAnalyticsProps {
  * `data-tag`, and `data-article-id-hashed` (news only) → fires
  * `trackEvent(eventName, { card_type, tag, article_id_hashed? })`.
  */
-export function EditorialHubAnalytics({
+export const EditorialHubAnalytics = ({
   eventName,
   className,
   children,
-}: EditorialHubAnalyticsProps) {
+}: EditorialHubAnalyticsProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useDelegatedClick(ref, {
@@ -50,4 +50,4 @@ export function EditorialHubAnalytics({
       {children}
     </div>
   );
-}
+};

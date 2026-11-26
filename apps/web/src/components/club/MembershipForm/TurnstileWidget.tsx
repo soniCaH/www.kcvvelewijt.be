@@ -46,13 +46,13 @@ const getTurnstileScript = (): HTMLScriptElement => {
  * did not accept and the widget re-runs the challenge for a fresh one.
  * ponytail: global `window.turnstile` lock; the widget is the only consumer.
  */
-export function TurnstileWidget({
+export const TurnstileWidget = ({
   onToken,
   resetKey,
 }: {
   onToken: (token: string) => void;
   resetKey: number;
-}) {
+}) => {
   const ref = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
   const lastResetKey = useRef(resetKey);
@@ -100,4 +100,4 @@ export function TurnstileWidget({
 
   if (!SITE_KEY) return null;
   return <div ref={ref} className="mt-2" />;
-}
+};

@@ -30,14 +30,14 @@ export interface GoalOpponentTemplateProps {
  * Register A, sober/negative sentiment — acknowledgement, not celebration.
  * Crest matchup centres the card; a brick halftone band sits under the score.
  */
-export function GoalOpponentTemplate({
+export const GoalOpponentTemplate = ({
   score,
   matchName,
   minute,
   competition,
   homeLogo,
   awayLogo,
-}: GoalOpponentTemplateProps) {
+}: GoalOpponentTemplateProps) => {
   const opponent = opponentName(matchName);
   const crests = resolveCrests(matchName, homeLogo, awayLogo);
   const metaLine = competition ? `${minute}' · ${competition}` : `${minute}'`;
@@ -79,4 +79,4 @@ export function GoalOpponentTemplate({
       <ShareFoot left={matchName} />
     </ShareFrame>
   );
-}
+};

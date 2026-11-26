@@ -8,7 +8,7 @@ import { Skeleton, LoadingAnnouncement } from "@/components/design-system";
  * shows it while the server reads; `SharePage` shows it again until
  * hydration, when the tool restores the stored story.
  */
-export function ShareSkeleton() {
+export const ShareSkeleton = () => {
   return (
     <div
       id="share-tool"
@@ -42,4 +42,4 @@ export function ShareSkeleton() {
       </div>
     </div>
   );
-}
+};

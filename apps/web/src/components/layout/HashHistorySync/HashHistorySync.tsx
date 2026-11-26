@@ -23,7 +23,7 @@ import { useEffect } from "react";
  *   fix shipped) reloads. Re-writing it would pair the shown page's tree with
  *   the other page's URL for good.
  */
-export function HashHistorySync() {
+export const HashHistorySync = () => {
   useEffect(() => {
     const onHashChange = (event: HashChangeEvent) => {
       const state: unknown = window.history.state;
@@ -42,4 +42,4 @@ export function HashHistorySync() {
   }, []);
 
   return null;
-}
+};

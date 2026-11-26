@@ -61,7 +61,7 @@ export interface BestuurPageProps {
   staff?: readonly TeamStaffMemberData[];
 }
 
-export function BestuurPage({ header, body, staff = [] }: BestuurPageProps) {
+export const BestuurPage = ({ header, body, staff = [] }: BestuurPageProps) => {
   const showDescription =
     Array.isArray(body) && body.length > 0 && hasRenderableBioContent(body);
   const hasMembers = staff.length > 0;
@@ -127,4 +127,4 @@ export function BestuurPage({ header, body, staff = [] }: BestuurPageProps) {
       <BoardCtaBand />
     </>
   );
-}
+};

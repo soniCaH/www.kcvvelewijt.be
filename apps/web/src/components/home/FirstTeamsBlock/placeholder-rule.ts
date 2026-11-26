@@ -33,11 +33,11 @@ import type { MatchesSliderPlaceholderVM } from "@/lib/repositories/homepage.rep
 // clothing, see `toMatchDisplayZone`) — `nextSeasonKickoff` reaches this
 // function as `new Date(sanityDateString)`, a real instant, which is
 // `toDisplayZone`'s documented case. Do not "fix" this to use the other one.
-export function clubCalendarDaysBetween(from: Date, to: Date): number {
+export const clubCalendarDaysBetween = (from: Date, to: Date): number => {
   const fromDay = toDisplayZone(from).startOf("day");
   const toDay = toDisplayZone(to).startOf("day");
   return Math.round(toDay.diff(fromDay, "days").days);
-}
+};
 
 /** One authored value, one shape — text plus its optional link. Replaces
  *  two differently-named carriers (`countdown.mededeling` vs
@@ -68,16 +68,16 @@ export type PlaceholderState =
   | { kind: "mededeling"; mededeling: Mededeling; image?: PlaceholderImage }
   | { kind: "empty"; image?: PlaceholderImage };
 
-function toMededeling(
+const toMededeling = (
   text: string | undefined,
   href: string | undefined,
-): Mededeling | undefined {
+): Mededeling | undefined => {
   return text ? { text, ...(href ? { href } : {}) } : undefined;
-}
+};
 
-function toPlaceholderImage(
+const toPlaceholderImage = (
   image: MatchesSliderPlaceholderVM["highlightImage"],
-): PlaceholderImage | undefined {
+): PlaceholderImage | undefined => {
   return image
     ? {
         url: image.url,
@@ -85,7 +85,7 @@ function toPlaceholderImage(
         ...(image.lqip ? { lqip: image.lqip } : {}),
       }
     : undefined;
-}
+};
 
 /**
  * `unavailable` is checked first and unconditionally short-circuits: a match
@@ -93,11 +93,11 @@ function toPlaceholderImage(
  * neither a mededeling nor an image, so a caller can't accidentally render
  * either by forgetting to check `kind` first (#2505/#2844).
  */
-export function resolvePlaceholderState(
+export const resolvePlaceholderState = (
   placeholder: MatchesSliderPlaceholderVM | null | undefined,
   now: Date,
   unavailable: boolean,
-): PlaceholderState {
+): PlaceholderState => {
   if (unavailable) return { kind: "unavailable" };
 
   const mededeling = toMededeling(
@@ -128,9 +128,9 @@ export function resolvePlaceholderState(
   }
 
   return { kind: "empty", ...(image ? { image } : {}) };
-}
+};
 
 /** "1 dag" / "23 dagen" — the only pluralisation this sentence needs. */
-export function formatDaysUntil(daysUntil: number): string {
+export const formatDaysUntil = (daysUntil: number): string => {
   return `${daysUntil} ${daysUntil === 1 ? "dag" : "dagen"}`;
-}
+};

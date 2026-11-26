@@ -26,7 +26,7 @@ export const SNAP_PX = 24;
  * block whose horizontal centre lands within {@link SNAP_PX} of the canvas
  * centre snaps onto it.
  */
-export function moveBlock({
+export const moveBlock = ({
   from,
   dx,
   dy,
@@ -47,7 +47,7 @@ export function moveBlock({
   /** Canvas width in capture px. */
   width: number;
   snap: boolean;
-}): { x: number; y: number; snapped: boolean } {
+}): { x: number; y: number; snapped: boolean } => {
   const x = from.x + dx / scale;
   const y = from.y + dy / scale;
   const target = width / 2 - (centre - from.x);
@@ -55,17 +55,17 @@ export function moveBlock({
     return { x: target, y, snapped: true };
   }
   return { x, y, snapped: false };
-}
+};
 
 /** `layout` with `id` moved to `at`, as the last key (on top). */
-export function placeBlock(
+export const placeBlock = (
   layout: BlockLayout,
   id: string,
   at: { x: number; y: number },
-): BlockLayout {
+): BlockLayout => {
   const { [id]: prev, ...rest } = layout;
   return { ...rest, [id]: { x: at.x, y: at.y, layer: prev?.layer ?? "voor" } };
-}
+};
 
 // Stacking tiers in the four new looks: photo (and wash) below 10, `achter`
 // blocks from 10, pinned parts (crest, footer, seam, frame) at 20, `voor`
@@ -73,17 +73,17 @@ export function placeBlock(
 export const PINNED_Z = 20;
 
 /** z-index of a block in looks A–E: its tier plus its move order. */
-export function blockZ(layout: BlockLayout, id: string): number {
+export const blockZ = (layout: BlockLayout, id: string): number => {
   const order = Object.keys(layout).indexOf(id) + 1;
   return (layout[id]?.layer === "achter" ? 10 : 30) + order;
-}
+};
 
 /**
  * z-index of a W Wedstrijd block. W's top row and footer are plain flow
  * content, so an `achter` block takes a negative z-index (under them, still
  * over the photo, which sits below the content column); `voor` is positive.
  */
-export function wedstrijdZ(layout: BlockLayout, id: string): number {
+export const wedstrijdZ = (layout: BlockLayout, id: string): number => {
   const order = Object.keys(layout).indexOf(id) + 1;
   return layout[id]?.layer === "achter" ? order - 50 : order;
-}
+};

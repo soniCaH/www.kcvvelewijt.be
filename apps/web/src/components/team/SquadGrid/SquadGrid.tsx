@@ -41,7 +41,7 @@ const lastNameCollator = new Intl.Collator("nl");
  * 2026-09-09, unset on every active player, so on today's data this is
  * pure last-name order; it becomes number order as editors fill it in.
  */
-function compareSquadOrder(a: PlayerVM, b: PlayerVM): number {
+const compareSquadOrder = (a: PlayerVM, b: PlayerVM): number => {
   if (a.number !== undefined && b.number !== undefined) {
     return (
       a.number - b.number || lastNameCollator.compare(a.lastName, b.lastName)
@@ -50,7 +50,7 @@ function compareSquadOrder(a: PlayerVM, b: PlayerVM): number {
   if (a.number !== undefined) return -1;
   if (b.number !== undefined) return 1;
   return lastNameCollator.compare(a.lastName, b.lastName);
-}
+};
 
 interface PositionGroup {
   /** Stable identifier — never rendered, never compared against display text. */
@@ -100,14 +100,14 @@ const SHAPES: Record<NonNullable<SquadGridProps["teamType"]>, SquadShape> = {
   youth: { groups: [KEEPERS], catchAllLabel: "Veldspelers" },
 };
 
-function partition(
+const partition = (
   players: readonly PlayerVM[],
   { groups, catchAllLabel }: SquadShape,
 ): {
   id: string;
   label: string;
   players: PlayerVM[];
-}[] {
+}[] => {
   const assigned = new Set<string>();
   const result: { id: string; label: string; players: PlayerVM[] }[] = [];
 
@@ -132,9 +132,9 @@ function partition(
   }
 
   return result;
-}
+};
 
-export function SquadGrid({ players, teamType }: SquadGridProps) {
+export const SquadGrid = ({ players, teamType }: SquadGridProps) => {
   if (players.length === 0) return null;
 
   const groups = partition(players, SHAPES[teamType ?? "senior"]);
@@ -175,4 +175,4 @@ export function SquadGrid({ players, teamType }: SquadGridProps) {
       ))}
     </div>
   );
-}
+};

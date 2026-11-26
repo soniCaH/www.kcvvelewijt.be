@@ -138,10 +138,10 @@ export interface TeamAgendaRowProps {
 
 type Outcome = MatchOutcome | null;
 
-function computeOutcome(
+const computeOutcome = (
   match: ScheduleMatch,
   isHome: boolean | undefined,
-): Outcome {
+): Outcome => {
   // Settled, not merely finished: a forfeit is a real win or loss and must be
   // tinted like one. `<MatchStripView>` derives its outcome from the scores
   // alone, so gating on `=== "finished"` here made the two surfaces disagree
@@ -155,28 +155,28 @@ function computeOutcome(
     return null;
   }
   return getResultColor(match.homeScore, match.awayScore, isHome);
-}
+};
 
 // `"use client"`: every date below renders twice, once on the UTC host and once
 // in the visitor's browser, so an unpinned parse is a React text mismatch and
 // not merely a wrong time. A BFF match date carries Belgian wall-clock in its
 // UTC fields — `toMatchDisplayZone` is the parse that reads it (#2601).
 
-function formatDay(date: Date): string {
+const formatDay = (date: Date): string => {
   return toMatchDisplayZone(date).toFormat("d");
-}
+};
 
-function formatMonth(date: Date): string {
+const formatMonth = (date: Date): string => {
   return toMatchDisplayZone(date)
     .toFormat("MMM")
     .replace(/\.$/, "")
     .toLowerCase();
-}
+};
 
-function formatKickoff(match: { time?: string; date: Date }): string {
+const formatKickoff = (match: { time?: string; date: Date }): string => {
   if (match.time) return match.time;
   return toMatchDisplayZone(match.date).toFormat("HH:mm");
-}
+};
 
 /**
  * Team name with an optional designation suffix ("A" / "B" / "U23").
@@ -193,7 +193,7 @@ function formatKickoff(match: { time?: string; date: Date }): string {
  * and `overflow: hidden` does nothing on an inline box. In the desktop flex row
  * the flex container blockifies it anyway, so one class serves both.
  */
-function TeamName({
+const TeamName = ({
   team,
   featured,
   bold = false,
@@ -203,7 +203,7 @@ function TeamName({
   featured: boolean;
   bold?: boolean;
   align?: "left" | "right";
-}) {
+}) => {
   return (
     <span
       className={cn(
@@ -233,9 +233,9 @@ function TeamName({
       ) : null}
     </span>
   );
-}
+};
 
-export function TeamAgendaRow({
+export const TeamAgendaRow = ({
   match,
   kcvvTeamId,
   featured = false,
@@ -245,7 +245,7 @@ export function TeamAgendaRow({
   upcomingLabel,
   kind,
   className,
-}: TeamAgendaRowProps) {
+}: TeamAgendaRowProps) => {
   // The adapter (`transformMatchToSchedule`) has already asked
   // `matchRowKind()` once and baked the answer into `kind` — this reads
   // that discriminant rather than re-deriving the same question a second
@@ -806,4 +806,4 @@ export function TeamAgendaRow({
       />
     </MatchTravelLink>
   );
-}
+};

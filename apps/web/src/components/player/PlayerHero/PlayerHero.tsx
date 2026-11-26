@@ -117,11 +117,11 @@ export interface PlayerHeroProps {
   className?: string;
 }
 
-function pad2(n: number): string {
+const pad2 = (n: number): string => {
   return n < 10 ? `0${n}` : String(n);
-}
+};
 
-function computeAge(birth: Date, now: Date): number {
+const computeAge = (birth: Date, now: Date): number => {
   const monthDelta = now.getUTCMonth() - birth.getUTCMonth();
   const birthdayPending =
     monthDelta < 0 ||
@@ -129,11 +129,14 @@ function computeAge(birth: Date, now: Date): number {
   return (
     now.getUTCFullYear() - birth.getUTCFullYear() - (birthdayPending ? 1 : 0)
   );
-}
+};
 
 const ISO_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 
-function formatAgeGradedBirthDate(iso: string, now: Date): string | undefined {
+const formatAgeGradedBirthDate = (
+  iso: string,
+  now: Date,
+): string | undefined => {
   const match = ISO_DATE_PATTERN.exec(iso);
   if (match === null) return undefined;
   const year = Number.parseInt(match[1] ?? "", 10);
@@ -171,9 +174,9 @@ function formatAgeGradedBirthDate(iso: string, now: Date): string | undefined {
   }
   const yy = pad2(birth.getUTCFullYear() % 100);
   return `${age} jaar · '${yy}`;
-}
+};
 
-export function PlayerHero({
+export const PlayerHero = ({
   id,
   firstName,
   lastName,
@@ -184,7 +187,7 @@ export function PlayerHero({
   teamLabel,
   slug,
   className,
-}: PlayerHeroProps) {
+}: PlayerHeroProps) => {
   const hasPhoto = photoUrl !== undefined && photoUrl !== "";
   const figureState: "photo" | "illustration" = hasPhoto
     ? "photo"
@@ -320,4 +323,4 @@ export function PlayerHero({
       </div>
     </section>
   );
-}
+};

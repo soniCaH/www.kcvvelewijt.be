@@ -8,9 +8,9 @@ import type { PortableTextBlock } from "@portabletext/react";
  * blocks are joined with a single space (matching the rendered prose flow
  * after CSS collapse).
  */
-export function flattenAnswerToString(
+export const flattenAnswerToString = (
   blocks: PortableTextBlock[] | undefined,
-): string {
+): string => {
   if (!blocks || blocks.length === 0) return "";
   return blocks
     .map((block) => {
@@ -33,4 +33,4 @@ export function flattenAnswerToString(
     .filter((s) => s.trim().length > 0)
     .join(" ")
     .trim();
-}
+};

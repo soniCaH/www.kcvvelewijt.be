@@ -25,16 +25,16 @@ export interface ArticleCtaBandProps {
  * neither works — `resolveInternalLinkHref` already folds in the archived-
  * team guard (#3000) and the missing-identifier case.
  */
-function resolveHref({
+const resolveHref = ({
   href,
   reference,
-}: Pick<ArticleCallToAction, "href" | "reference">): string | null {
+}: Pick<ArticleCallToAction, "href" | "reference">): string | null => {
   if (reference) {
     return resolveInternalLinkHref(reference);
   }
   const trimmedHref = href?.trim();
   return trimmedHref ? trimmedHref : null;
-}
+};
 
 /**
  * <ArticleCtaBand> — the optional, editor-filled call-to-action closing an
@@ -47,11 +47,11 @@ function resolveHref({
  * `<ArticleCtaAnalytics>` itself so the click-delegation listener only
  * exists on the pages that actually have a button to delegate for.
  */
-export function ArticleCtaBand({
+export const ArticleCtaBand = ({
   articleId,
   articleType,
   callToAction,
-}: ArticleCtaBandProps) {
+}: ArticleCtaBandProps) => {
   const trimmedQuestion = callToAction?.question?.trim();
   const trimmedLead = callToAction?.lead?.trim();
   const trimmedButtonLabel = callToAction?.buttonLabel?.trim();
@@ -86,4 +86,4 @@ export function ArticleCtaBand({
       />
     </ArticleCtaAnalytics>
   );
-}
+};

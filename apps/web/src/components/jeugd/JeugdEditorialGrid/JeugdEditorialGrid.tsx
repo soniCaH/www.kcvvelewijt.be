@@ -151,11 +151,11 @@ const NAV_CARDS: NavCardConfig[] = [
  */
 const DEFAULT_NAV_GLYPH: NavGlyphName = "House";
 
-function assertNever(value: never): never {
+const assertNever = (value: never): never => {
   throw new Error(`Unhandled editorialCards.cardType: ${String(value)}`);
-}
+};
 
-function renderNavCard(nav: NavCardConfig): React.ReactNode {
+const renderNavCard = (nav: NavCardConfig): React.ReactNode => {
   return (
     <EditorialHubCard
       key={`nav-${nav.tag.toLowerCase()}`}
@@ -169,9 +169,9 @@ function renderNavCard(nav: NavCardConfig): React.ReactNode {
       external={nav.external}
     />
   );
-}
+};
 
-function renderArticleCard(article: ArticleVM): React.ReactNode {
+const renderArticleCard = (article: ArticleVM): React.ReactNode => {
   return (
     <EditorialHubCard
       key={`article-${article.id}`}
@@ -190,12 +190,12 @@ function renderArticleCard(article: ArticleVM): React.ReactNode {
       // duplicate it.
     />
   );
-}
+};
 
-function buildItemsFromConfig(
+const buildItemsFromConfig = (
   config: EditorialCardConfig[],
   articles: ArticleVM[],
-): React.ReactNode[] {
+): React.ReactNode[] => {
   return config.flatMap((entry, i): React.ReactNode[] => {
     if (entry.cardType === "article") {
       // Article slots bubble: fill with the latest Jeugd articles in order.
@@ -229,9 +229,9 @@ function buildItemsFromConfig(
     // render doesn't handle (schema drift).
     return assertNever(entry.cardType);
   });
-}
+};
 
-function buildItemsFromHardcoded(articles: ArticleVM[]): React.ReactNode[] {
+const buildItemsFromHardcoded = (articles: ArticleVM[]): React.ReactNode[] => {
   const [article0, article1, article2] = articles;
 
   // No articles: the hub collapses to the pinned nav cards only.
@@ -252,7 +252,7 @@ function buildItemsFromHardcoded(articles: ArticleVM[]): React.ReactNode[] {
   items.push(...NAV_CARDS.slice(3).map(renderNavCard));
 
   return items;
-}
+};
 
 interface JeugdEditorialGridProps {
   articles: ArticleVM[];
@@ -271,10 +271,10 @@ interface JeugdEditorialGridProps {
  * design-summary §4). With no articles, the hub collapses to the pinned nav
  * cards.
  */
-export function JeugdEditorialGrid({
+export const JeugdEditorialGrid = ({
   articles,
   editorialConfig,
-}: JeugdEditorialGridProps) {
+}: JeugdEditorialGridProps) => {
   const items =
     editorialConfig != null && editorialConfig.length > 0
       ? buildItemsFromConfig(editorialConfig, articles)
@@ -289,4 +289,4 @@ export function JeugdEditorialGrid({
       </TapedCardGrid>
     </div>
   );
-}
+};

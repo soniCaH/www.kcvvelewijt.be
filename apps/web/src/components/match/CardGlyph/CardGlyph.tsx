@@ -39,12 +39,12 @@ const DEFAULT_LABELS: Record<CardType, string> = {
   double_yellow: "Tweede gele kaart",
 };
 
-export function CardGlyph({
+export const CardGlyph = ({
   type,
   size = 12,
   label,
   className,
-}: CardGlyphProps) {
+}: CardGlyphProps) => {
   const ariaLabel = label ?? DEFAULT_LABELS[type];
   const stroke = "var(--color-ink)";
 
@@ -109,4 +109,4 @@ export function CardGlyph({
       />
     </svg>
   );
-}
+};

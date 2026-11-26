@@ -23,7 +23,7 @@ export interface EditorialKickerProps {
   items: MonoLabelRowItem[];
 }
 
-export function EditorialKicker({ items }: EditorialKickerProps) {
+export const EditorialKicker = ({ items }: EditorialKickerProps) => {
   if (items.length === 0) return null;
   return (
     <div className="text-ink-muted flex items-center gap-2 font-mono leading-none">
@@ -32,4 +32,4 @@ export function EditorialKicker({ items }: EditorialKickerProps) {
       <MonoStar />
     </div>
   );
-}
+};

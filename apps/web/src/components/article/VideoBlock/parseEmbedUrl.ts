@@ -22,7 +22,7 @@ export interface ParsedEmbed {
 const YOUTUBE_ID_RE = /^[A-Za-z0-9_-]{6,32}$/;
 const VIMEO_ID_RE = /^\d{5,15}$/;
 
-function parseYoutube(url: URL): ParsedEmbed | null {
+const parseYoutube = (url: URL): ParsedEmbed | null => {
   const host = url.hostname.toLowerCase();
   // youtu.be/<id>
   if (host === "youtu.be") {
@@ -50,16 +50,16 @@ function parseYoutube(url: URL): ParsedEmbed | null {
     }
   }
   return null;
-}
+};
 
-function parseVimeo(url: URL): ParsedEmbed | null {
+const parseVimeo = (url: URL): ParsedEmbed | null => {
   const host = url.hostname.toLowerCase();
   if (host !== "vimeo.com" && host !== "www.vimeo.com") return null;
   // vimeo.com/<numericId> — the first path segment must be all digits.
   // Ignore trailing segments (album slugs, review hashes, etc.).
   const first = url.pathname.replace(/^\//, "").split("/")[0];
   return VIMEO_ID_RE.test(first) ? { provider: "vimeo", videoId: first } : null;
-}
+};
 
 const toUrl = (raw: string): URL | null => {
   try {
@@ -69,9 +69,9 @@ const toUrl = (raw: string): URL | null => {
   }
 };
 
-export function parseEmbedUrl(raw: string): ParsedEmbed | null {
+export const parseEmbedUrl = (raw: string): ParsedEmbed | null => {
   if (typeof raw !== "string" || raw.length === 0) return null;
   const url = toUrl(raw);
   if (url === null || url.protocol !== "https:") return null;
   return parseYoutube(url) ?? parseVimeo(url);
-}
+};

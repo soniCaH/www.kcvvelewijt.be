@@ -38,7 +38,7 @@ export interface GoalKcvvTemplateProps {
  * With a photo: fullscreen newsprint image + shout overlay. Without: a filled
  * register-B poster (jersey-stripe ground + giant ghost shirt number).
  */
-export function GoalKcvvTemplate({
+export const GoalKcvvTemplate = ({
   playerName,
   shirtNumber,
   score,
@@ -47,7 +47,7 @@ export function GoalKcvvTemplate({
   homeLogo,
   awayLogo,
   imageUrl,
-}: GoalKcvvTemplateProps) {
+}: GoalKcvvTemplateProps) => {
   const hasImage = Boolean(imageUrl);
   const hasNumber = shirtNumber != null;
   const standScore = formatScore(score);
@@ -157,4 +157,4 @@ export function GoalKcvvTemplate({
       <ShareFoot left={matchName} />
     </ShareFrame>
   );
-}
+};

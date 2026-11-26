@@ -47,11 +47,11 @@ export interface StaffRolesProps {
   className?: string;
 }
 
-export function StaffRoles({
+export const StaffRoles = ({
   positions,
   responsibilities,
   className,
-}: StaffRolesProps) {
+}: StaffRolesProps) => {
   if (positions.length === 0 && responsibilities.length === 0) return null;
 
   return (
@@ -133,4 +133,4 @@ export function StaffRoles({
       ) : null}
     </PageContainer>
   );
-}
+};

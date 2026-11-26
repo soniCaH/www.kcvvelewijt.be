@@ -27,7 +27,7 @@ type Target =
   | { kind: "row"; el: HTMLDetailsElement }
   | { kind: "card"; el: HTMLElement; memberId: string | undefined };
 
-function findTarget(nodeId: string): Target | null {
+const findTarget = (nodeId: string): Target | null => {
   const row = Array.from(
     document.querySelectorAll<HTMLDetailsElement>("details[data-node-ids]"),
   ).find((el) => el.dataset.nodeIds?.split(" ").includes(nodeId));
@@ -39,17 +39,17 @@ function findTarget(nodeId: string): Target | null {
   return card
     ? { kind: "card", el: card, memberId: card.dataset.keyMemberId }
     : null;
-}
+};
 
-export function hasStructureTarget(nodeId: string): boolean {
+export const hasStructureTarget = (nodeId: string): boolean => {
   return findTarget(nodeId) !== null;
-}
+};
 
 /** Returns whether there was a row or card to open, so a caller can fall back. */
-export function openStructureRow(
+export const openStructureRow = (
   nodeId: string,
   view: ViewType = "cards",
-): boolean {
+): boolean => {
   const target = findTarget(nodeId);
   if (!target) return false;
 
@@ -70,4 +70,4 @@ export function openStructureRow(
     view,
   );
   return true;
-}
+};

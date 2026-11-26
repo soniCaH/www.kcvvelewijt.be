@@ -38,34 +38,34 @@ const TAPE_ROTATION_POOL = ["a", "b", "c", "d", "e", "f"] as const;
 // djb2-light string hash — deterministic, so an angle derived from a seed is
 // stable across renders (no hydration mismatch, stable VR baselines).
 // Exported so a card deriving its own lean from its identity reuses it.
-export function seededIndex(seed: string, modulo: number): number {
+export const seededIndex = (seed: string, modulo: number): number => {
   const h = Array.from({ length: seed.length }, (_, i) =>
     seed.charCodeAt(i),
   ).reduce((acc, code) => ((acc << 5) + acc + code) >>> 0, 5381);
   return h % modulo;
-}
+};
 
 /**
  * The tape angle a card's identity derives: the same seed gives the same
  * angle on every page the card appears on.
  */
-export function tapeRotationFor(
+export const tapeRotationFor = (
   seed: string,
-): (typeof TAPE_ROTATION_POOL)[number] {
+): (typeof TAPE_ROTATION_POOL)[number] => {
   return TAPE_ROTATION_POOL[seededIndex(seed, TAPE_ROTATION_POOL.length)]!;
-}
+};
 
 /**
  * The strip that leans the other way, mirrored: opposite sign, equal size
  * (`a`↔`f` ±6°, `b`↔`e` ±4°, `c`↔`d` ±2°).
  */
-export function oppositeTapeRotation(
+export const oppositeTapeRotation = (
   rotation: (typeof TAPE_ROTATION_POOL)[number],
-): (typeof TAPE_ROTATION_POOL)[number] {
+): (typeof TAPE_ROTATION_POOL)[number] => {
   return TAPE_ROTATION_POOL[
     TAPE_ROTATION_POOL.length - 1 - TAPE_ROTATION_POOL.indexOf(rotation)
   ]!;
-}
+};
 
 export interface TapeStripProps {
   color?: TapeStripColor;
@@ -135,14 +135,14 @@ const ROTATION_TOKEN: Record<TapeStripRotation, string> = {
   none: "0deg",
 };
 
-export function TapeStrip({
+export const TapeStrip = ({
   color = "jersey",
   length = "lg",
   position = "left",
   verticalEdge = "top",
   rotation,
   seed,
-}: TapeStripProps) {
+}: TapeStripProps) => {
   const resolved: TapeStripRotation =
     rotation ?? (seed === undefined ? "none" : tapeRotationFor(seed));
   const transform = `translateY(${TRANSLATE_Y[verticalEdge]}) rotate(${ROTATION_TOKEN[resolved]})`;
@@ -169,4 +169,4 @@ export function TapeStrip({
       aria-hidden="true"
     />
   );
-}
+};

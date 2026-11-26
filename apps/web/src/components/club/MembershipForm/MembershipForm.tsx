@@ -73,7 +73,7 @@ interface MembershipFormProps {
 type SubmitState =
   "idle" | "submitting" | "success" | "invalid" | "transport-error";
 
-export function CheckboxField({
+export const CheckboxField = ({
   id,
   checked,
   onChange,
@@ -85,7 +85,7 @@ export function CheckboxField({
   onChange: (checked: boolean) => void;
   error?: string;
   children: ReactNode;
-}) {
+}) => {
   return (
     <div>
       <label htmlFor={id} className="flex cursor-pointer items-start gap-3">
@@ -101,7 +101,7 @@ export function CheckboxField({
       {error ? <p className="text-alert text-body-sm mt-1">{error}</p> : null}
     </div>
   );
-}
+};
 
 const subscribeNever = () => () => {};
 
@@ -112,7 +112,7 @@ const subscribeNever = () => () => {};
  * the fields remount once, only when a draft exists, with it as their initial state. A plain
  * client render (Storybook, tests) reads it on the first render.
  */
-export function MembershipForm(props: MembershipFormProps) {
+export const MembershipForm = (props: MembershipFormProps) => {
   const hydrated = useSyncExternalStore(
     subscribeNever,
     () => true,
@@ -132,14 +132,14 @@ export function MembershipForm(props: MembershipFormProps) {
       draft={draft ?? null}
     />
   );
-}
+};
 
-function MembershipFormFields({
+const MembershipFormFields = ({
   defaultRole = "",
   defaultBirthDate = "",
   contacts,
   draft,
-}: MembershipFormProps & { draft: MembershipDraft | null }) {
+}: MembershipFormProps & { draft: MembershipDraft | null }) => {
   const uid = useId();
   const fieldId = (name: string) => `${uid}-${name}`;
   const roleRef = useRef<HTMLSelectElement>(null);
@@ -752,4 +752,4 @@ function MembershipFormFields({
       </form>
     </ClippedCard>
   );
-}
+};

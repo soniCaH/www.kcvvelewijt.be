@@ -116,7 +116,7 @@ const SCALE_STEPS = [1, 1.15, 1.3] as const;
 
 const subscribeNever = () => () => {};
 
-export function OrganigramExplorer({
+export const OrganigramExplorer = ({
   nodes,
   open,
   onClose,
@@ -125,7 +125,7 @@ export function OrganigramExplorer({
   returnFocusRef,
   onOpenMember,
   canOpenMember,
-}: OrganigramExplorerProps) {
+}: OrganigramExplorerProps) => {
   const tree = useMemo(() => buildSpotlightTree(withClubRoot(nodes)), [nodes]);
   // Open on the deep-linked node when valid, else the primary top node
   // (Voorzitter-equivalent) rather than the thin synthetic club root.
@@ -596,4 +596,4 @@ export function OrganigramExplorer({
       </div>
     </div>
   );
-}
+};

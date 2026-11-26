@@ -42,17 +42,17 @@ const SIDE_TABS: { value: Side; label: string }[] = [
 
 /** `includeEvents` off omits the param entirely (rather than `events=0`), so
  * the URL stays byte-identical to the pre-#2704 matches-only feed. */
-function buildWebcalUrl(
+const buildWebcalUrl = (
   teamIds: number[],
   side: Side,
   host: string,
   includeEvents: boolean,
-): string {
+): string => {
   const base = `webcal://${host}/api/calendar.ics?teamIds=${teamIds.join(",")}&side=${side}`;
   return includeEvents
     ? `${base}&${CALENDAR_EVENTS_PARAM}=${CALENDAR_EVENTS_PARAM_VALUE}`
     : base;
-}
+};
 
 const computeInitialSelection = (
   teams: CalendarTeamInfo[],
@@ -69,14 +69,14 @@ const ACTION_BUTTON_CLASSES =
 
 const subscribeNever = () => () => {};
 
-export function CalendarSubscribePanel({
+export const CalendarSubscribePanel = ({
   teams,
   preselectedTeamId,
   isOpen,
   source = "kalender",
   id,
   moreTeamsHref,
-}: CalendarSubscribePanelProps) {
+}: CalendarSubscribePanelProps) => {
   const [selectedTeamIds, setSelectedTeamIds] = useState(() =>
     computeInitialSelection(teams, preselectedTeamId),
   );
@@ -116,17 +116,17 @@ export function CalendarSubscribePanel({
 
   const webcalUrl = buildWebcalUrl(selectedPsdIds, side, host, includeEvents);
 
-  function removeTeam(teamId: string) {
+  const removeTeam = (teamId: string) => {
     setSelectedTeamIds((prev) => {
       const next = new Set(prev);
       next.delete(teamId);
       return next;
     });
-  }
+  };
 
-  function addTeam(teamId: string) {
+  const addTeam = (teamId: string) => {
     setSelectedTeamIds((prev) => new Set(prev).add(teamId));
-  }
+  };
 
   const canSubscribe = selectedPsdIds.length > 0;
   // The Team page panel is for that one team: no × (removing it would leave a
@@ -140,7 +140,7 @@ export function CalendarSubscribePanel({
     source,
   });
 
-  async function handleCopy() {
+  const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(webcalUrl);
       setCopiedUrl(webcalUrl);
@@ -166,7 +166,7 @@ export function CalendarSubscribePanel({
       console.error("Failed to copy to clipboard:", err);
       setFailedUrl(webcalUrl);
     }
-  }
+  };
 
   const unselectedTeams = teams.filter((t) => !selectedTeamIds.has(t.id));
 
@@ -384,4 +384,4 @@ export function CalendarSubscribePanel({
       </div>
     </div>
   );
-}
+};

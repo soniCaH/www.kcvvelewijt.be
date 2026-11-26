@@ -18,11 +18,11 @@ const COLOR_CLASS: Record<DividerColor, string> = {
   "paper-edge": "border-paper-edge",
 };
 
-function Divider({
+const Divider = ({
   style = "solid",
   color = "ink",
   inset = false,
-}: DividerProps) {
+}: DividerProps) => {
   return (
     <div
       role="separator"
@@ -33,7 +33,7 @@ function Divider({
       className={`${STYLE_CLASS[style]} ${COLOR_CLASS[color]} ${inset ? "ml-12 w-[calc(100%-3rem)]" : "w-full"}`}
     />
   );
-}
+};
 
 export const DottedDivider = (props: Omit<DividerProps, "style">) => (
   <Divider {...props} style="dotted" />

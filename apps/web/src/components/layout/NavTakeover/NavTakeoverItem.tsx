@@ -49,13 +49,13 @@ const ROW =
  * One row of the mobile nav takeover. Every row is a leaf link — the nav lost
  * its submenus with #2415, so there is no expandable variant.
  */
-export function NavTakeoverItem({
+export const NavTakeoverItem = ({
   label,
   href,
   active,
   onNavigate,
   index = 0,
-}: NavTakeoverItemProps) {
+}: NavTakeoverItemProps) => {
   return (
     <Link
       href={href}
@@ -75,4 +75,4 @@ export function NavTakeoverItem({
       <LinkPendingDots spaced={false} />
     </Link>
   );
-}
+};

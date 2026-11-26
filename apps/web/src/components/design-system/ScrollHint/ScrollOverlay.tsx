@@ -80,7 +80,7 @@ export interface ScrollOverlayProps {
  * Consumers: `<HtmlTableBlock>`, `<StandingsTable>`'s numbered variant,
  * `<VolledigOrganigram>`'s chart, the organigram explorer's stage.
  */
-export function ScrollOverlay({
+export const ScrollOverlay = ({
   as: Tag = "div",
   children,
   dangerouslySetInnerHTML,
@@ -94,7 +94,7 @@ export function ScrollOverlay({
   fadeFromClassName = "from-cream",
   remeasureOn,
   className,
-}: ScrollOverlayProps) {
+}: ScrollOverlayProps) => {
   const {
     scrollRef,
     canScrollLeft,
@@ -183,4 +183,4 @@ export function ScrollOverlay({
       )}
     </div>
   );
-}
+};

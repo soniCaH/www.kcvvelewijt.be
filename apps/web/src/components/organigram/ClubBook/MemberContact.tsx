@@ -9,16 +9,16 @@ import type { OrgChartMember } from "@/types/organigram";
  * nobody has a phone, so the fallback line is the common case, not an error.
  */
 /** An email may break after "@" and "." and nowhere else — never inside a word. */
-function BreakableEmail({ email }: { email: string }) {
+const BreakableEmail = ({ email }: { email: string }) => {
   return email.split(/(?<=[@.])/).map((part, i) => (
     <Fragment key={i}>
       {i > 0 && <wbr />}
       {part}
     </Fragment>
   ));
-}
+};
 
-export function MemberContact({ member }: { member: OrgChartMember }) {
+export const MemberContact = ({ member }: { member: OrgChartMember }) => {
   if (!member.email && !member.phone) {
     return (
       <p className="text-ink-muted text-body-sm">
@@ -46,16 +46,16 @@ export function MemberContact({ member }: { member: OrgChartMember }) {
       )}
     </p>
   );
-}
+};
 
 /** The holder's name, linked to the staff profile when there is one. */
-export function MemberName({
+export const MemberName = ({
   member,
   className,
 }: {
   member: OrgChartMember;
   className: string;
-}) {
+}) => {
   const classes = `${className} hyphens-auto break-words`;
   return member.href ? (
     <Link
@@ -67,4 +67,4 @@ export function MemberName({
   ) : (
     <span className={classes}>{member.name}</span>
   );
-}
+};

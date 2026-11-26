@@ -6,9 +6,9 @@
 import type { EventVM } from "@/lib/repositories/event.repository";
 import type { FeaturedEventBandEvent } from "./FeaturedEventBand";
 
-export function toFeaturedEventBandEvent(
+export const toFeaturedEventBandEvent = (
   event: EventVM | null,
-): FeaturedEventBandEvent | null {
+): FeaturedEventBandEvent | null => {
   if (!event || !event.dateStart) return null;
   const isExternalLink = event.href && event.href !== "#" && event.href !== "";
   return {
@@ -24,4 +24,4 @@ export function toFeaturedEventBandEvent(
       : null,
     externalLink: isExternalLink ? { url: event.href, label: null } : null,
   };
-}
+};

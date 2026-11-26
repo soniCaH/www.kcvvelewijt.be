@@ -33,7 +33,7 @@ export interface VolledigOrganigramProps {
   className?: string;
 }
 
-function OrgBranch({
+const OrgBranch = ({
   node,
   childrenByParent,
   onNodeClick,
@@ -45,7 +45,7 @@ function OrgBranch({
   onNodeClick?: (id: string, trigger: HTMLElement) => void;
   isRoot?: boolean;
   rootRef?: React.RefObject<HTMLLIElement | null>;
-}) {
+}) => {
   const kids = childrenByParent(node.id);
   const state = isRoot ? "root" : deriveCardState(node.members.length);
   const boxClass = cn(
@@ -103,14 +103,14 @@ function OrgBranch({
       )}
     </li>
   );
-}
+};
 
-export function VolledigOrganigram({
+export const VolledigOrganigram = ({
   nodes,
   onNodeClick,
   onOpenExplorer,
   className,
-}: VolledigOrganigramProps) {
+}: VolledigOrganigramProps) => {
   const tree = useMemo(() => buildSpotlightTree(withClubRoot(nodes)), [nodes]);
   const childrenByParent = (id: string) => childrenOf(tree, id);
   const root = tree.byId.get(CLUB_ROOT_ID);
@@ -225,4 +225,4 @@ export function VolledigOrganigram({
       </ScrollOverlay>
     </div>
   );
-}
+};

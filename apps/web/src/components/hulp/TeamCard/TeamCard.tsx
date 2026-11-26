@@ -47,30 +47,36 @@ const BIRTH_YEAR_CLASS =
 const code = (category: number) => `U${category}`;
 
 /** "U12 · Middenbouw" — U5 has no band, so it reads bare. */
-function BandTitle({ label, match }: { label: string; match: YouthTeamMatch }) {
+const BandTitle = ({
+  label,
+  match,
+}: {
+  label: string;
+  match: YouthTeamMatch;
+}) => {
   if (match.category === 5) return <>{label}</>;
   return (
     <>
       {label} · <em className="font-normal italic">{match.band}</em>
     </>
   );
-}
+};
 
 /** The box for `roleCode` and its named holders; `null` when it is missing or vacant. */
-function filledBox(nodes: OrgChartNode[], roleCode: string) {
+const filledBox = (nodes: OrgChartNode[], roleCode: string) => {
   const node = nodes.find((n) => n.roleCode === roleCode);
   const holders = node?.members.filter((m) => m.name?.trim()) ?? [];
   return node && holders.length > 0 ? { node, holders } : null;
-}
+};
 
 /** The holders of one box, as `<ContactCard>` rows; nothing when it is vacant. */
-function People({
+const People = ({
   nodes,
   roleCode,
 }: {
   nodes: OrgChartNode[];
   roleCode: string;
-}) {
+}) => {
   const box = filledBox(nodes, roleCode);
   if (!box) return null;
   const { node, holders } = box;
@@ -90,9 +96,9 @@ function People({
       ))}
     </div>
   );
-}
+};
 
-function StaffLinks({ teams }: { teams: YouthTeamSource[] }) {
+const StaffLinks = ({ teams }: { teams: YouthTeamSource[] }) => {
   return (
     <div className="mt-1 flex flex-wrap gap-2">
       {teams.map((team) => (
@@ -109,9 +115,9 @@ function StaffLinks({ teams }: { teams: YouthTeamSource[] }) {
       ))}
     </div>
   );
-}
+};
 
-function NextTeamUpHint({ match }: { match: YouthTeamMatch }) {
+const NextTeamUpHint = ({ match }: { match: YouthTeamMatch }) => {
   if (!match.nextTeamUp) return null;
   return (
     <p className="text-ink mb-2.5 text-sm">
@@ -119,9 +125,9 @@ function NextTeamUpHint({ match }: { match: YouthTeamMatch }) {
       spelen bij de {code(match.category)}.
     </p>
   );
-}
+};
 
-function LateBornNote({ match }: { match: YouthTeamMatch }) {
+const LateBornNote = ({ match }: { match: YouthTeamMatch }) => {
   const alt = match.lateBornAlternative;
   if (!alt) return null;
   return (
@@ -137,10 +143,10 @@ function LateBornNote({ match }: { match: YouthTeamMatch }) {
       </div>
     </div>
   );
-}
+};
 
 /** The card's paper frame: kicker, `<h2>` title, then the body. */
-function CardFrame({
+const CardFrame = ({
   kicker,
   title,
   children,
@@ -148,7 +154,7 @@ function CardFrame({
   kicker: ReactNode;
   title: ReactNode;
   children: ReactNode;
-}) {
+}) => {
   const headingId = useId();
   return (
     <section
@@ -167,9 +173,9 @@ function CardFrame({
       {children}
     </section>
   );
-}
+};
 
-function kickerFor(matches: YouthTeamMatch[], sectioned: boolean): string {
+const kickerFor = (matches: YouthTeamMatch[], sectioned: boolean): string => {
   const first = matches[0];
   if (first.kind === "age" && first.age != null)
     return sectioned
@@ -184,9 +190,9 @@ function kickerFor(matches: YouthTeamMatch[], sectioned: boolean): string {
       ? `Geboren in ${first.birthYear} = ${code(first.requestedCategory)}`
       : `Geboren in ${first.birthYear}`;
   return "Jouw ploeg";
-}
+};
 
-export function TeamCard({ result, nodes }: TeamCardProps) {
+export const TeamCard = ({ result, nodes }: TeamCardProps) => {
   const matches = result.bands.flatMap((b) => b.matches);
   const first = matches[0];
   const last = matches.at(-1);
@@ -265,7 +271,7 @@ export function TeamCard({ result, nodes }: TeamCardProps) {
       )}
     </CardFrame>
   );
-}
+};
 
 export interface TeamGuessCardProps {
   /** The card the pick would open — `aiTeamResult()` for the AI's age. */
@@ -277,7 +283,7 @@ export interface TeamGuessCardProps {
  * The AI fallback asks first (#3559): "Bedoel je deze ploeg?" with the pick's
  * band title. "Ja" opens `<TeamCard>` for it; "Nee" removes it.
  */
-export function TeamGuessCard({ result, onAnswer }: TeamGuessCardProps) {
+export const TeamGuessCard = ({ result, onAnswer }: TeamGuessCardProps) => {
   const first = result.bands[0]?.matches[0];
   if (!first) return null;
   return (
@@ -303,4 +309,4 @@ export function TeamGuessCard({ result, onAnswer }: TeamGuessCardProps) {
       </p>
     </CardFrame>
   );
-}
+};

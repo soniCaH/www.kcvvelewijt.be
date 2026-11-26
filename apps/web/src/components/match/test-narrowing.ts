@@ -10,14 +10,14 @@
  *  `message` otherwise. The one generic assertion behind every
  *  per-member wrapper below (and usable directly for a member — e.g.
  *  `"reservation"` — that has no named wrapper). */
-export function asRowKind<T extends { kind: string }, K extends T["kind"]>(
+export const asRowKind = <T extends { kind: string }, K extends T["kind"]>(
   row: T | undefined,
   kind: K,
   message = `expected a "${kind}" row`,
-): Extract<T, { kind: K }> {
+): Extract<T, { kind: K }> => {
   if (!row || row.kind !== kind) throw new Error(message);
   return row as Extract<T, { kind: K }>;
-}
+};
 
 /**
  * Narrows to `kind: "match"` specifically, not to "not a reservation" — a
@@ -28,18 +28,18 @@ export function asRowKind<T extends { kind: string }, K extends T["kind"]>(
  * name is kept (rather than renamed to `asMatch`) so every existing call
  * site in the test suite keeps working unchanged.
  */
-export function asNonPlaceholder<T extends { kind: string }>(
+export const asNonPlaceholder = <T extends { kind: string }>(
   row: T | undefined,
   message = "expected a non-placeholder row",
-): Extract<T, { kind: "match" }> {
+): Extract<T, { kind: "match" }> => {
   return asRowKind<T, T["kind"] & "match">(row, "match", message);
-}
+};
 
 /** Narrows to `kind: "reduced"` — the tournament-fixture-with-no-result-yet
  *  member (#2696/#2802). See `asNonPlaceholder` above for the sibling. */
-export function asReduced<T extends { kind: string }>(
+export const asReduced = <T extends { kind: string }>(
   row: T | undefined,
   message = "expected a reduced row",
-): Extract<T, { kind: "reduced" }> {
+): Extract<T, { kind: "reduced" }> => {
   return asRowKind<T, T["kind"] & "reduced">(row, "reduced", message);
-}
+};

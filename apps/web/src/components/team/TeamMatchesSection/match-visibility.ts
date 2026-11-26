@@ -19,20 +19,20 @@ import { kickoffMs } from "@/lib/utils/dates";
 
 const RECENT_COUNT = 3;
 
-export function findNextMatch(
+export const findNextMatch = (
   matches: readonly ScheduleRow[],
   now: Date,
-): ScheduleRow | undefined {
+): ScheduleRow | undefined => {
   return matches
     .filter((m) => m.status === "scheduled" && kickoffMs(m) >= now.getTime())
     .sort((a, b) => a.date.getTime() - b.date.getTime())[0];
-}
+};
 
-export function recentResults(
+export const recentResults = (
   matches: readonly ScheduleRow[],
   excludeId: number | undefined,
   now: Date,
-): ScheduleRow[] {
+): ScheduleRow[] => {
   return matches
     .filter(
       (m) =>
@@ -42,7 +42,7 @@ export function recentResults(
     )
     .sort((a, b) => b.date.getTime() - a.date.getTime())
     .slice(0, RECENT_COUNT);
-}
+};
 
 /**
  * Whether `<TeamMatchesSection>` would render anything for this match list —
@@ -73,13 +73,13 @@ export function recentResults(
  * definition, so the two can never disagree without also duplicating the
  * derivation, at zero extra cost, PROVIDED both sides read the same `now`.
  */
-export function hasVisibleMatches(
+export const hasVisibleMatches = (
   matches: readonly ScheduleRow[],
   now: Date = new Date(),
-): boolean {
+): boolean => {
   return matches.some(
     (m) =>
       (m.status === "scheduled" && kickoffMs(m) >= now.getTime()) ||
       (m.status === "finished" && kickoffMs(m) < now.getTime()),
   );
-}
+};

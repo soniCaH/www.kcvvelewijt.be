@@ -26,7 +26,7 @@ import {
 } from "@/components/design-system";
 import { PageHeroSkeleton } from "@/components/layout/PageHero";
 
-export function BoardPageLoading({ label }: { label: string }) {
+export const BoardPageLoading = ({ label }: { label: string }) => {
   return (
     <div className="min-h-screen space-y-12">
       <LoadingAnnouncement label={label} />
@@ -85,4 +85,4 @@ export function BoardPageLoading({ label }: { label: string }) {
       </section>
     </div>
   );
-}
+};

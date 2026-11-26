@@ -25,11 +25,11 @@ export interface FieldHintProps {
   children: ReactNode;
 }
 
-export function FieldHint({ id, children }: FieldHintProps) {
+export const FieldHint = ({ id, children }: FieldHintProps) => {
   return (
     <p id={id} className="font-body text-ink/60 mt-2 text-sm italic">
       <BracketAffordance glyph="help" className="mr-1.5" />
       {children}
     </p>
   );
-}
+};

@@ -87,7 +87,7 @@ const DEFAULT_NEWS_SIZES =
  * normal-type headline) so a grid row stays even regardless of
  * article-title length.
  */
-export function EditorialHubCard({
+export const EditorialHubCard = ({
   href,
   tag,
   title,
@@ -98,7 +98,7 @@ export function EditorialHubCard({
   sizes,
   articleIdHashed,
   external = false,
-}: EditorialHubCardProps) {
+}: EditorialHubCardProps) => {
   const isNav = variant === "nav";
   // One element, two tags: `next/link` for a route, a plain anchor for a
   // document (see `external`). Everything below — classes, analytics markers,
@@ -210,4 +210,4 @@ export function EditorialHubCard({
       {card}
     </TravelScope>
   );
-}
+};

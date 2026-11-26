@@ -21,7 +21,9 @@ export interface StructureIndex {
  * counts once), departments = distinct populated departments. Vacancies are not
  * foregrounded (7o1).
  */
-export function deriveStructureIndex(members: OrgChartNode[]): StructureIndex {
+export const deriveStructureIndex = (
+  members: OrgChartNode[],
+): StructureIndex => {
   const peopleIds = new Set<string>();
   const departments = new Set<string>();
 
@@ -37,4 +39,4 @@ export function deriveStructureIndex(members: OrgChartNode[]): StructureIndex {
     mensen: peopleIds.size,
     afdelingen: departments.size,
   };
-}
+};

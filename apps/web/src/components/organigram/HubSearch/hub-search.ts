@@ -63,11 +63,11 @@ const scoredFields = (
  * Rank organigram nodes against a query across name (highest), title, roleCode,
  * email, and department. Returns the top `maxResults` by descending score.
  */
-export function searchMembers(
+export const searchMembers = (
   query: string,
   members: OrgChartNode[],
   maxResults: number,
-): HubMemberResult[] {
+): HubMemberResult[] => {
   if (!query.trim()) return [];
 
   const lowerQuery = query.toLowerCase();
@@ -102,7 +102,7 @@ export function searchMembers(
   return dedupeMembersByPerson(results)
     .sort((a, b) => b.score - a.score)
     .slice(0, maxResults);
-}
+};
 
 /**
  * Collapse multiple position-rows for the same person into a single result,
@@ -111,9 +111,9 @@ export function searchMembers(
  * role / department hits with no primary holder) have no person to key on and
  * pass through untouched.
  */
-export function dedupeMembersByPerson(
+export const dedupeMembersByPerson = (
   results: HubMemberResult[],
-): HubMemberResult[] {
+): HubMemberResult[] => {
   const byPerson = new Map<string, HubMemberResult>();
   const passthrough: HubMemberResult[] = [];
 
@@ -140,18 +140,18 @@ export function dedupeMembersByPerson(
   }
 
   return [...byPerson.values(), ...passthrough];
-}
+};
 
 /**
  * Rank responsibility paths against a query across question (highest), title,
  * summary and keywords, plus a per-word pass (words < 3 chars skipped). Returns
  * the top `maxResults` by descending score.
  */
-export function searchResponsibilities(
+export const searchResponsibilities = (
   query: string,
   paths: ResponsibilityPath[],
   maxResults: number,
-): HubResponsibilityResult[] {
+): HubResponsibilityResult[] => {
   if (!query.trim()) return [];
 
   const lowerQuery = query.toLowerCase();
@@ -193,27 +193,27 @@ export function searchResponsibilities(
   });
 
   return results.sort((a, b) => b.score - a.score).slice(0, maxResults);
-}
+};
 
 /** A literal hit at or above this score is a STRONG one (see below). */
 const STRONG_LITERAL_MIN = 10;
 const MIN_LITERAL_LENGTH = 3;
 
 /** NFC + lowercase, so a pasted decomposed "ë" still matches a typed one. */
-function fold(text: string): string {
+const fold = (text: string): string => {
   return text.normalize("NFC").toLowerCase();
-}
+};
 
 /**
  * `fold`ed, every run of non-letters collapsed to one space, padded with a
  * space either side — so `includes(" ziek ")` matches whole words only. (`\b`
  * is ASCII-only in JS and would split "allergieën".)
  */
-function asWords(text: string): string {
+const asWords = (text: string): string => {
   return ` ${fold(text)
     .replace(/[^\p{L}\p{M}\p{N}]+/gu, " ")
     .trim()} `;
-}
+};
 
 /**
  * Answers the query names LITERALLY (#3092). The semantic lane ranks by
@@ -231,11 +231,11 @@ function asWords(text: string): string {
  * and the summary are sentences: "hoe", "wil" or "mijn kind" sit in nearly
  * every one of them, and matching there would flood the lane.
  */
-export function findLiteralAnswers(
+export const findLiteralAnswers = (
   query: string,
   paths: ResponsibilityPath[],
   maxResults: number,
-): HubResponsibilityResult[] {
+): HubResponsibilityResult[] => {
   const needle = fold(query.trim());
   if (needle.length < MIN_LITERAL_LENGTH) return [];
   const queryWords = asWords(needle);
@@ -273,7 +273,7 @@ export function findLiteralAnswers(
   }
   // `sort` is stable, so equal scores keep the paths' own order.
   return results.sort((a, b) => b.score - a.score).slice(0, maxResults);
-}
+};
 
 /**
  * One answer lane from the literal and the semantic hits (#3092):
@@ -288,11 +288,11 @@ export function findLiteralAnswers(
  * Each path appears once, as its literal hit when it has one. At the cap, the
  * last plain semantic hits give way, so a literal hit is never cut.
  */
-export function mergeAnswers(
+export const mergeAnswers = (
   literal: HubResponsibilityResult[],
   semantic: HubResponsibilityResult[],
   maxResults: number,
-): HubResponsibilityResult[] {
+): HubResponsibilityResult[] => {
   const semanticScore = new Map(semantic.map((r) => [r.path.id, r.score]));
   const literalById = new Map(literal.map((r) => [r.path.id, r]));
 
@@ -319,7 +319,7 @@ export function mergeAnswers(
   );
   const dropped = new Set(excess === 0 ? [] : droppable.slice(-excess));
   return lane.filter((_, i) => !dropped.has(i)).slice(0, maxResults);
-}
+};
 
 /**
  * Map semantic-search hits (slug + cosine score) back to full
@@ -328,10 +328,10 @@ export function mergeAnswers(
  * path isn't in the supplied set. Score is the cosine similarity (0–1) — unlike
  * the additive keyword scores — so callers must not compare the two scales.
  */
-export function mapSemanticResults(
+export const mapSemanticResults = (
   results: ReadonlyArray<{ id: string; slug: string; score: number }>,
   pathById: Map<string, ResponsibilityPath>,
-): HubResponsibilityResult[] {
+): HubResponsibilityResult[] => {
   return results.flatMap((result): HubResponsibilityResult[] => {
     const path = pathById.get(result.slug) ?? pathById.get(result.id);
     return path
@@ -345,16 +345,16 @@ export function mapSemanticResults(
         ]
       : [];
   });
-}
+};
 
 /**
  * Interleave people and answers (person, answer, person, answer …) so both
  * intents surface together in a single dropdown.
  */
-export function interleaveResults(
+export const interleaveResults = (
   memberResults: HubMemberResult[],
   responsibilityResults: HubResponsibilityResult[],
-): HubSearchResult[] {
+): HubSearchResult[] => {
   const maxLength = Math.max(
     memberResults.length,
     responsibilityResults.length,
@@ -366,4 +366,4 @@ export function interleaveResults(
   ]).flatMap((pair) =>
     pair.filter((r): r is HubSearchResult => r !== undefined),
   );
-}
+};

@@ -69,7 +69,12 @@ const TONE_CLASS: Record<UpLinkTone, string> = {
  * value once. The value now lives here, the one place a route can't drift
  * it.
  */
-export function UpLink({ href, label, tone = "ink", className }: UpLinkProps) {
+export const UpLink = ({
+  href,
+  label,
+  tone = "ink",
+  className,
+}: UpLinkProps) => {
   const pathname = usePathname();
 
   return (
@@ -98,4 +103,4 @@ export function UpLink({ href, label, tone = "ink", className }: UpLinkProps) {
       />
     </Link>
   );
-}
+};

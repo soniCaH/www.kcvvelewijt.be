@@ -9,7 +9,7 @@ export interface MockBackdropProps {
   label?: string;
 }
 
-export function MockBackdrop({ label }: MockBackdropProps) {
+export const MockBackdrop = ({ label }: MockBackdropProps) => {
   return (
     <div
       aria-hidden="true"
@@ -26,4 +26,4 @@ export function MockBackdrop({ label }: MockBackdropProps) {
       )}
     </div>
   );
-}
+};

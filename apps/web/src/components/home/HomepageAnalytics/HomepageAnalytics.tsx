@@ -25,7 +25,7 @@ export interface HomepageAnalyticsProps {
  *
  * No PII — a banner's `href` is a club-authored campaign URL.
  */
-export function HomepageAnalytics({ children }: HomepageAnalyticsProps) {
+export const HomepageAnalytics = ({ children }: HomepageAnalyticsProps) => {
   const ref = useRef<HTMLDivElement>(null);
 
   useDelegatedClick(ref, {
@@ -49,4 +49,4 @@ export function HomepageAnalytics({ children }: HomepageAnalyticsProps) {
   });
 
   return <div ref={ref}>{children}</div>;
-}
+};

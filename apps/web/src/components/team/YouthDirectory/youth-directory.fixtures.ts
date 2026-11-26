@@ -11,11 +11,11 @@ import { teamDisplayName } from "@/lib/utils/team-display-name";
  * `<JerseyShirt>` no-photo fallback. Shared by `<YouthDirectory>`'s stories
  * and unit tests so the fixture shape stays in one place.
  */
-export function youthTeam(
+export const youthTeam = (
   age: string,
   teamImageUrl: string | null = null,
   overrides: Partial<TeamLandingItem> = {},
-): TeamLandingItem {
+): TeamLandingItem => {
   const team = {
     _id: `t-${age}`,
     name: `KCVV Elewijt ${age}`,
@@ -36,7 +36,7 @@ export function youthTeam(
   // with it. Assigning an override straight through would let a fixture render
   // a caption the real mapper can never produce.
   return { ...team, displayName: teamDisplayName(team) };
-}
+};
 
 /**
  * The reserves — age "A" rather than an age code, so its slug resolves to the

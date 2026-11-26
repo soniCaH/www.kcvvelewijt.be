@@ -71,7 +71,7 @@ const FOCUSABLE_SELECTOR =
  * auto-close rather than guess — a wrong guess would close the drawer the
  * instant it opens on every phone, which is worse than never auto-closing.
  */
-function readBreakpointLgPx(): number | null {
+const readBreakpointLgPx = (): number | null => {
   const raw = window
     .getComputedStyle(document.documentElement)
     .getPropertyValue("--breakpoint-lg")
@@ -79,7 +79,7 @@ function readBreakpointLgPx(): number | null {
   if (!raw.endsWith("px")) return null;
   const parsed = parseFloat(raw);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
-}
+};
 
 /**
  * Re-derives "is the viewport currently at/above `lg`" fresh, rather than
@@ -88,13 +88,13 @@ function readBreakpointLgPx(): number | null {
  * (Escape, the ✕, a nav tap, or the breakpoint effect itself), not only the
  * one path this file controls.
  */
-function isDesktopViewport(): boolean {
+const isDesktopViewport = (): boolean => {
   const breakpointLgPx = readBreakpointLgPx();
   if (breakpointLgPx === null) return false;
   return (
     window.matchMedia?.(`(min-width: ${breakpointLgPx}px)`)?.matches ?? false
   );
-}
+};
 
 export const NavTakeover = ({
   open,

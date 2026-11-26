@@ -60,7 +60,7 @@ const components: PortableTextComponents = {
   },
 };
 
-export function BioBlock({ bio, playerName, className }: BioBlockProps) {
+export const BioBlock = ({ bio, playerName, className }: BioBlockProps) => {
   if (!bio || bio.length === 0) return null;
   if (!hasRenderableBioContent(bio)) return null;
 
@@ -102,4 +102,4 @@ export function BioBlock({ bio, playerName, className }: BioBlockProps) {
       </div>
     </section>
   );
-}
+};

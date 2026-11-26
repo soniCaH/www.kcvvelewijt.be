@@ -75,9 +75,9 @@ export interface SeniorTeamCandidate {
  * and the teams query stopped dropping it upstream. `groupTeamsForLanding`
  * keeps it out of `/ploegen`'s A/B slots the same way, on the name suffix.
  */
-export function selectSeniorTeams<T extends SeniorTeamCandidate>(
+export const selectSeniorTeams = <T extends SeniorTeamCandidate>(
   teams: readonly T[],
-): T[] {
+): T[] => {
   return teams
     .filter(
       (t) =>
@@ -86,7 +86,7 @@ export function selectSeniorTeams<T extends SeniorTeamCandidate>(
         !(t.age ?? "").toUpperCase().startsWith("U"),
     )
     .sort((a, b) => a.slug.localeCompare(b.slug));
-}
+};
 
 /**
  * How far ahead of kickoff a settled match may be dated and still headline as
@@ -130,7 +130,7 @@ export const SETTLED_LOOKAHEAD_MS = 72 * 60 * 60 * 1000;
  * match from a chrome block is a better failure than a 500 on the homepage.
  * The `never` assignment keeps the compile-time guarantee either way.
  */
-function matchSlot(match: Match, now: Date): "result" | "fixture" | null {
+const matchSlot = (match: Match, now: Date): "result" | "fixture" | null => {
   // A reservation carries no result vocabulary at all (#2606) — it must
   // never headline the result slot, on any status or any date. Without this
   // guard a past-dated (but still `scheduled`) reservation fell through to
@@ -183,7 +183,7 @@ function matchSlot(match: Match, now: Date): "result" | "fixture" | null {
       return null;
     }
   }
-}
+};
 
 /**
  * Most recent result. A settled match qualifies once its kickoff has passed, or
@@ -198,10 +198,10 @@ function matchSlot(match: Match, now: Date): "result" | "fixture" | null {
  * then decides between them, and a result published since kickoff outranks it
  * as soon as it lands.
  */
-export function pickLastResult(
+export const pickLastResult = (
   matches: readonly Match[],
   now: Date,
-): Match | undefined {
+): Match | undefined => {
   return matches
     .filter((m) => {
       if (matchSlot(m, now) !== "result") return false;
@@ -210,31 +210,31 @@ export function pickLastResult(
       return untilKickoff <= SETTLED_LOOKAHEAD_MS && hasScore(m);
     })
     .sort((a, b) => b.date.getTime() - a.date.getTime())[0];
-}
+};
 
 /**
  * Earliest upcoming fixture. No date test of its own: `matchSlot` only returns
  * `"fixture"` for a match whose kickoff is still ahead, so re-checking here
  * would be a second, drift-prone copy of that rule.
  */
-export function pickNextFixture(
+export const pickNextFixture = (
   matches: readonly Match[],
   now: Date,
-): Match | undefined {
+): Match | undefined => {
   return matches
     .filter((m) => matchSlot(m, now) === "fixture")
     .sort((a, b) => a.date.getTime() - b.date.getTime())[0];
-}
+};
 
 /**
  * Build the view-model for one senior team. Always returns the team identity;
  * `result` / `fixture` are present only when a match exists for that side.
  */
-export function deriveFirstTeamVM(
+export const deriveFirstTeamVM = (
   team: FirstTeamInput,
   matches: readonly Match[],
   now: Date,
-): FirstTeamVM {
+): FirstTeamVM => {
   const result = pickLastResult(matches, now);
   const fixture = pickNextFixture(matches, now);
   return {
@@ -242,4 +242,4 @@ export function deriveFirstTeamVM(
     ...(result ? { result: transformMatchToSchedule(result) } : {}),
     ...(fixture ? { fixture: transformMatchToSchedule(fixture) } : {}),
   };
-}
+};

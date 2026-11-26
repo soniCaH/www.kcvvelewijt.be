@@ -116,9 +116,9 @@ export interface YouthTeamCardData {
 }
 
 /** A light contact label for the answer-forward card (no resolveContact dep). */
-function forwardContact(
+const forwardContact = (
   path: ResponsibilityPath,
-): { name: string; sub?: string; imageUrl?: string } | null {
+): { name: string; sub?: string; imageUrl?: string } | null => {
   const contact = path.primaryContact;
   if (contact.contactType === "position") {
     const member = contact.members?.[0];
@@ -139,7 +139,7 @@ function forwardContact(
     return { name: contact.role };
   }
   return null;
-}
+};
 
 // Result rows are flush, hover-filled list rows inside a scrolling popup — the
 // List Row Fill Rule's case — so the focus ring is inset (an outset one would
@@ -161,13 +161,13 @@ interface RowProps<T extends HubSearchResult> {
 }
 
 /** Person result row — keeps `select` out of the parent's render path. */
-function MemberRow({
+const MemberRow = ({
   result,
   optionId,
   selected,
   onSelect,
   onHover,
-}: RowProps<HubMemberResult>) {
+}: RowProps<HubMemberResult>) => {
   const person = result.member.members[0];
   const name = person?.name ?? result.member.title;
   return (
@@ -218,17 +218,17 @@ function MemberRow({
       </span>
     </button>
   );
-}
+};
 
 /** Answer (responsibility) result row. */
-function AnswerRow({
+const AnswerRow = ({
   result,
   optionId,
   selected,
   onSelect,
   onHover,
   stale,
-}: RowProps<HubResponsibilityResult>) {
+}: RowProps<HubResponsibilityResult>) => {
   return (
     <button
       type="button"
@@ -255,9 +255,9 @@ function AnswerRow({
       </span>
     </button>
   );
-}
+};
 
-export function HubSearch({
+export const HubSearch = ({
   members,
   responsibilityPaths,
   variant = "hero",
@@ -265,7 +265,7 @@ export function HubSearch({
   maxResults = 5,
   className = "",
   youthTeamCard,
-}: HubSearchProps) {
+}: HubSearchProps) => {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [debouncedValue, setDebouncedValue] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
@@ -1008,4 +1008,4 @@ export function HubSearch({
       )}
     </div>
   );
-}
+};

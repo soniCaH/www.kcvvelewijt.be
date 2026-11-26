@@ -46,7 +46,7 @@ const TEAM_ROLE_LABELS: Record<TeamRoleContact["teamRole"], string> = {
   afgevaardigde: "Afgevaardigde van jouw ploeg",
 };
 
-export function resolveContact(contact: Contact): ResolvedContact {
+export const resolveContact = (contact: Contact): ResolvedContact => {
   switch (contact.contactType) {
     case "manual":
       return {
@@ -85,4 +85,4 @@ export function resolveContact(contact: Contact): ResolvedContact {
       return { name: label, role: label, organigramHref: "/ploegen" };
     }
   }
-}
+};

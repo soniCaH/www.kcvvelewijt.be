@@ -34,7 +34,7 @@ export interface SectionStackProps {
   className?: string;
 }
 
-export function SectionStack({ sections, className }: SectionStackProps) {
+export const SectionStack = ({ sections, className }: SectionStackProps) => {
   const filtered = sections.filter(Boolean) as SectionConfig[];
 
   return (
@@ -115,4 +115,4 @@ export function SectionStack({ sections, className }: SectionStackProps) {
       })}
     </div>
   );
-}
+};

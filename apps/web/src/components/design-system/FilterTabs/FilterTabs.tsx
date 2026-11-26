@@ -203,7 +203,7 @@ const CHIP_BASE_CLASSES = [
   "hover:translate-x-1 hover:translate-y-1 hover:shadow-none",
 ] as const;
 
-export function FilterTabs({
+export const FilterTabs = ({
   tabs,
   activeTab,
   onChange,
@@ -213,7 +213,7 @@ export function FilterTabs({
   renderAsLinks = false,
   surface = "paper",
   pendingTab,
-}: FilterTabsProps) {
+}: FilterTabsProps) => {
   const showPending = usePendingDelay(pendingTab !== undefined, pendingTab);
   const renderTab = (tab: FilterTab) => {
     const isActive = activeTab === tab.value;
@@ -315,4 +315,4 @@ export function FilterTabs({
       {tabs.map(renderTab)}
     </ScrollRail>
   );
-}
+};

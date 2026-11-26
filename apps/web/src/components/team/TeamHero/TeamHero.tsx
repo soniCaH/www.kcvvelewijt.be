@@ -37,7 +37,7 @@ export interface TeamHeroProps {
   className?: string;
 }
 
-export function TeamHero({
+export const TeamHero = ({
   displayName,
   teamType,
   ageGroup,
@@ -47,7 +47,7 @@ export function TeamHero({
   teamImageUrl,
   photoViewer,
   className,
-}: TeamHeroProps) {
+}: TeamHeroProps) => {
   const kicker = teamType === "youth" ? "KCVV Elewijt · Jeugd" : "KCVV Elewijt";
 
   // Meta pill: senior = division; youth = "U12 · Middenbouw" (#3556). The
@@ -159,4 +159,4 @@ export function TeamHero({
       </div>
     </section>
   );
-}
+};

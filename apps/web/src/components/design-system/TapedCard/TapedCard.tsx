@@ -46,10 +46,10 @@ const ROTATION_CSS: Record<Exclude<TapedCardRotation, number>, string> = {
   none: "0deg",
 };
 
-function rotationToCss(r: TapedCardRotation): string {
+const rotationToCss = (r: TapedCardRotation): string => {
   if (typeof r === "number") return `${r}deg`;
   return ROTATION_CSS[r];
-}
+};
 
 const SHADOW_CLASS: Record<TapedCardShadow, string> = {
   sm: "shadow-paper-sm",
@@ -77,7 +77,7 @@ const PADDING_CLASS: Record<TapedCardPadding, string> = {
 
 type StyleWithVars = CSSProperties & Record<`--${string}`, string | number>;
 
-export function TapedCard({
+export const TapedCard = ({
   rotation = "none",
   tape,
   shadow = "md",
@@ -88,7 +88,7 @@ export function TapedCard({
   className,
   dataAttrs,
   children,
-}: TapedCardProps) {
+}: TapedCardProps) => {
   const restRotation = rotationToCss(rotation);
   // Normalise `interactive: true` to the historical "tilt" idiom so the
   // boolean form keeps its existing meaning for current consumers.
@@ -150,4 +150,4 @@ export function TapedCard({
       {children}
     </Tag>
   );
-}
+};

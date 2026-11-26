@@ -73,14 +73,14 @@ export interface MatchLineupProps {
  * @param className - Additional CSS class names to apply to the root container
  * @returns The rendered lineup UI (team panels or loading skeletons)
  */
-export function MatchLineup({
+export const MatchLineup = ({
   homeTeamName,
   awayTeamName,
   homeLineup,
   awayLineup,
   isLoading = false,
   className,
-}: MatchLineupProps) {
+}: MatchLineupProps) => {
   // Loading skeleton
   if (isLoading) {
     return (
@@ -111,7 +111,7 @@ export function MatchLineup({
       <TeamLineup teamName={awayTeamName} players={awayLineup} />
     </div>
   );
-}
+};
 
 /**
  * Render a team's lineup card grouped into starters and substitutes with side-specific styling.
@@ -121,13 +121,13 @@ export function MatchLineup({
  * @param side - Either `"home"` or `"away"`, which controls visual styling for the card and badges
  * @returns The JSX element containing the team's lineup sections and players
  */
-function TeamLineup({
+const TeamLineup = ({
   teamName,
   players,
 }: {
   teamName: string;
   players: LineupPlayer[];
-}) {
+}) => {
   // Group players by status
   // Starters section: players who started (including those who were subbed out)
   const starters = players.filter(
@@ -189,7 +189,7 @@ function TeamLineup({
       )}
     </div>
   );
-}
+};
 
 /**
  * Whether a lineup player's shirt number is actually known.
@@ -197,9 +197,9 @@ function TeamLineup({
  * PSD sends `0` on some rows to mean "unknown number" rather than a real
  * shirt number nobody wears, so `0` counts as unknown alongside `undefined`.
  */
-function hasKnownShirtNumber(number: number | undefined): boolean {
+const hasKnownShirtNumber = (number: number | undefined): boolean => {
   return number !== undefined && number !== 0;
-}
+};
 
 /**
  * Format a lineup player's shirt number for display, honestly.
@@ -210,9 +210,9 @@ function hasKnownShirtNumber(number: number | undefined): boolean {
  * @param number - The player's jersey number, if known
  * @returns The number as a string, or "—" when absent or `0`
  */
-function formatShirtNumber(number: number | undefined): string {
+const formatShirtNumber = (number: number | undefined): string => {
   return hasKnownShirtNumber(number) ? String(number) : "—";
-}
+};
 
 /**
  * Renders a single lineup player row with substitution icon, jersey number badge, player name (with captain indicator), and minutes played when applicable.
@@ -221,7 +221,7 @@ function formatShirtNumber(number: number | undefined): string {
  * @param side - "home" or "away"; controls color styling for the jersey number badge and row accents.
  * @returns A JSX element representing the formatted player row for a lineup.
  */
-function PlayerRow({ player }: { player: LineupPlayer }) {
+const PlayerRow = ({ player }: { player: LineupPlayer }) => {
   // Keeper distinction: warm yellow number badge instead of the ink default.
   // `isKeeper` is set caller-side (Sanity `player.keeper` for KCVV; jersey
   // number = 1 heuristic for opponents).
@@ -307,12 +307,12 @@ function PlayerRow({ player }: { player: LineupPlayer }) {
       )}
     </div>
   );
-}
+};
 
 /**
  * Loading skeleton for lineup
  */
-function LineupSkeleton() {
+const LineupSkeleton = () => {
   return (
     <div>
       <div className="border-ink bg-cream-soft mb-3 h-6 w-32 border-t motion-safe:animate-pulse" />
@@ -326,4 +326,4 @@ function LineupSkeleton() {
       </div>
     </div>
   );
-}
+};

@@ -36,14 +36,14 @@ const OVERLAP: Record<"row" | "attribution", string> = {
   attribution: "-ml-5",
 };
 
-export function SubjectAvatarCluster({
+export const SubjectAvatarCluster = ({
   members,
   scale = "row",
   // ponytail: 3 discs covers duo/trio; 4+ collapse to "+N". Raise if a
   // panel format ever needs every face shown.
   max = 3,
   className,
-}: SubjectAvatarClusterProps) {
+}: SubjectAvatarClusterProps) => {
   if (members.length === 0) return null;
   const visible = members.slice(0, max);
   const overflow = members.length - visible.length;
@@ -74,4 +74,4 @@ export function SubjectAvatarCluster({
       </span>
     </div>
   );
-}
+};

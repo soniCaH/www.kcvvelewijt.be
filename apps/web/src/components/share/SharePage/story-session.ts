@@ -97,17 +97,17 @@ const isObject = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
 
 /** `v` when it is one of `allowed`, else `fallback`. */
-function oneOf<T extends string>(
+const oneOf = <T extends string>(
   v: unknown,
   allowed: readonly T[],
   fallback: T,
-): T {
+): T => {
   return allowed.find((a) => a === v) ?? fallback;
-}
+};
 const text = (v: unknown) => (typeof v === "string" ? v : "");
 
 /** A stored layout, keeping only blocks with numeric offsets (in order). */
-function layoutOf(v: unknown): BlockLayout {
+const layoutOf = (v: unknown): BlockLayout => {
   if (!isObject(v)) return {};
   const layout: BlockLayout = {};
   for (const [id, b] of Object.entries(v)) {
@@ -120,10 +120,10 @@ function layoutOf(v: unknown): BlockLayout {
     }
   }
   return layout;
-}
+};
 
 /** A stored story, every field checked: whatever is off falls back to the default. */
-function storyOf(s: Record<string, unknown>): StoryInProgress {
+const storyOf = (s: Record<string, unknown>): StoryInProgress => {
   const m = isObject(s.match) ? s.match : {};
   const f = isObject(s.fields) ? s.fields : null;
   return {
@@ -161,14 +161,14 @@ function storyOf(s: Record<string, unknown>): StoryInProgress {
       square: layoutOf(isObject(s.blocks) ? s.blocks.square : null),
     },
   };
-}
+};
 
 /**
  * Today's session: yesterday's story dropped, the per-phone parts kept. The
  * day is checked here, at read: a tab left open across midnight keeps
  * yesterday's story until it reloads.
  */
-export function readSession(): StorySession {
+export const readSession = (): StorySession => {
   try {
     const raw: unknown = JSON.parse(
       window.localStorage.getItem(STORY_SESSION_KEY) ?? "null",
@@ -191,12 +191,12 @@ export function readSession(): StorySession {
   } catch {
     return FRESH_SESSION;
   }
-}
+};
 
-export function writeSession(session: StorySession): void {
+export const writeSession = (session: StorySession): void => {
   try {
     window.localStorage.setItem(STORY_SESSION_KEY, JSON.stringify(session));
   } catch {
     // A full or blocked store only costs the reload restore.
   }
-}
+};

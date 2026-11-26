@@ -26,14 +26,14 @@ export interface DisciplinaryCardProps {
  * a giant ghost G/R letter, register A. Brick accent for our cards, jersey
  * accent for the opponent's. Yellow → warm graphic, red → brick graphic.
  */
-export function DisciplinaryCard({
+export const DisciplinaryCard = ({
   kind,
   side,
   matchName,
   minute,
   playerName,
   shirtNumber,
-}: DisciplinaryCardProps & { kind: CardKind; side: CardSide }) {
+}: DisciplinaryCardProps & { kind: CardKind; side: CardSide }) => {
   const isKcvv = side === "kcvv";
   const cardColor = kind === "yellow" ? TOKENS.warm : TOKENS.brick;
   const letter = kind === "yellow" ? "G" : "R";
@@ -91,4 +91,4 @@ export function DisciplinaryCard({
       <ShareFoot left={footLeft} align="center" />
     </ShareFrame>
   );
-}
+};

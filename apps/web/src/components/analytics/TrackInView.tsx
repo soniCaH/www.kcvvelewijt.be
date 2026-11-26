@@ -47,12 +47,12 @@ const thresholdSteps = (threshold: number): number[] =>
     .filter((step) => step < threshold)
     .concat(threshold);
 
-export function TrackInView({
+export const TrackInView = ({
   eventName,
   params,
   threshold = 0.4,
   children,
-}: TrackInViewProps) {
+}: TrackInViewProps) => {
   const ref = useRef<HTMLDivElement | null>(null);
   const firedRef = useRef(false);
   // `useRef(initial)` only reads `initial` on the first render — subsequent
@@ -103,4 +103,4 @@ export function TrackInView({
       {children}
     </div>
   );
-}
+};

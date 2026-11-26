@@ -22,14 +22,14 @@ import { PINNED_Z } from "./block-layout";
  * A · Kaart — photo up top, a card laid over its bottom edge. Donker is a
  * dark-green card on the cream ground (#3509); the corner brackets stay ink.
  */
-export function KaartLook({
+export const KaartLook = ({
   content,
   format,
   theme,
   coverMode,
   blocks,
   fallbackIndex,
-}: LookProps) {
+}: LookProps) => {
   const dark = theme === "donker";
   const sq = format === "square";
   const surface = dark ? TOKENS.jerseyDeepDark : "#ffffff";
@@ -161,4 +161,4 @@ export function KaartLook({
       </div>
     </Canvas>
   );
-}
+};

@@ -36,7 +36,7 @@ import { usePathname } from "next/navigation";
  * win. Hash navigations are left to the browser / Next so in-page anchors keep
  * working.
  */
-export function ScrollToTop() {
+export const ScrollToTop = () => {
   const pathname = usePathname();
   /**
    * The pathname this effect last ran for. Comparing against it — rather than
@@ -92,4 +92,4 @@ export function ScrollToTop() {
   }, [pathname]);
 
   return null;
-}
+};

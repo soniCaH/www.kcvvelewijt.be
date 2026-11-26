@@ -48,14 +48,14 @@ interface CategoryFiltersProps {
  * @param pendingCategory - Slug (or `"all"`) of the chip whose fetch is pending; it shows the compact dots
  * @returns A React element containing the category filter tabs
  */
-export function CategoryFilters({
+export const CategoryFilters = ({
   categories,
   activeCategory,
   showCounts = false,
   renderAsLinks = true,
   onChange,
   pendingCategory,
-}: CategoryFiltersProps) {
+}: CategoryFiltersProps) => {
   // Convert categories to FilterTab format with hrefs for Next.js routing
   const tabs: FilterTab[] = useMemo(() => {
     const allTab: FilterTab = {
@@ -84,4 +84,4 @@ export function CategoryFilters({
       ariaLabel="Filter news by category"
     />
   );
-}
+};

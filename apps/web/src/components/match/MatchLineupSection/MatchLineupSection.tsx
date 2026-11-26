@@ -20,13 +20,13 @@ export interface MatchLineupSectionProps {
  * matches). The caller mounts this unconditionally; this component owns the
  * "render or not" decision.
  */
-export function MatchLineupSection({
+export const MatchLineupSection = ({
   homeTeamName,
   awayTeamName,
   homeLineup,
   awayLineup,
   className,
-}: MatchLineupSectionProps) {
+}: MatchLineupSectionProps) => {
   if (homeLineup.length === 0 && awayLineup.length === 0) return null;
 
   return (
@@ -48,4 +48,4 @@ export function MatchLineupSection({
       />
     </PageContainer>
   );
-}
+};

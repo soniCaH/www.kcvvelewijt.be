@@ -86,7 +86,7 @@ export type SectionHeaderProps = SectionHeaderBase &
   ({ linkText?: never; linkHref?: never } | SectionHeaderCta) &
   SectionHeaderRuled;
 
-function headingLevelFor(as: SectionHeaderProps["as"]): 1 | 2 | 3 {
+const headingLevelFor = (as: SectionHeaderProps["as"]): 1 | 2 | 3 => {
   switch (as) {
     case "h1":
       return 1;
@@ -103,7 +103,7 @@ function headingLevelFor(as: SectionHeaderProps["as"]): 1 | 2 | 3 {
       throw new Error(`headingLevelFor: unhandled value ${_exhaustive}`);
     }
   }
-}
+};
 
 /**
  * Section header reworked in Phase 1 to compose <EditorialHeading> +

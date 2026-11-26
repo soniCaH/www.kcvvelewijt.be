@@ -30,7 +30,7 @@ export interface SponsorsPageProps {
   sponsors: Sponsor[];
 }
 
-export function SponsorsPage({ sponsors }: SponsorsPageProps) {
+export const SponsorsPage = ({ sponsors }: SponsorsPageProps) => {
   const featured = selectFeaturedSponsor(sponsors);
   const hasSponsors = sponsors.length > 0;
 
@@ -69,4 +69,4 @@ export function SponsorsPage({ sponsors }: SponsorsPageProps) {
       <SponsorCtaBand />
     </SponsorsAnalytics>
   );
-}
+};

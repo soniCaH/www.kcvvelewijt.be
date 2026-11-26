@@ -34,14 +34,14 @@ export interface KickoffTemplateProps {
  * Register A cream sheet with a club-crest matchup hero, or a full-canvas
  * newsprint backdrop with the text centred when an image is given.
  */
-export function KickoffTemplate({
+export const KickoffTemplate = ({
   matchName,
   competition,
   dateTime,
   homeLogo,
   awayLogo,
   imageUrl,
-}: KickoffTemplateProps) {
+}: KickoffTemplateProps) => {
   const { home, away } = splitMatchName(matchName);
   const hasImage = Boolean(imageUrl);
   const crests = resolveCrests(matchName, homeLogo, awayLogo);
@@ -117,4 +117,4 @@ export function KickoffTemplate({
       <ShareFoot align="center" />
     </ShareFrame>
   );
-}
+};

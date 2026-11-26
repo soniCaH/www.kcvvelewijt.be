@@ -241,6 +241,8 @@ const kcvvPlugin = {
     "no-off-ramp-tracking": builtinRules.get("no-restricted-syntax"),
     "no-per-component-focus-ring": builtinRules.get("no-restricted-syntax"),
     "no-let": builtinRules.get("no-restricted-syntax"),
+    // `func-style` skips `export default function`, so that shape gets its own selector.
+    "no-default-function": builtinRules.get("no-restricted-syntax"),
     // A real rule, not a selector: "component or type" needs the export's name and kind.
     "use-client-exports": useClientExports,
   },
@@ -485,6 +487,34 @@ const eslintConfig = [
           selector: 'VariableDeclaration[kind="let"]',
           message:
             "No `let` — use `const` (a `let` + `try/catch` becomes a helper that returns; a counter becomes `reduce`/`map`). Rule: #3717.",
+        },
+      ],
+    },
+  },
+  {
+    // Arrow functions only in components (#3868, rule: #3865): a `function` declaration
+    // becomes `const name = () => …`. Own rule IDs, own block, like `kcvv/no-let` above.
+    // The rest of `src` joins in a later slice.
+    files: ["src/components/**/*.{ts,tsx,js,jsx,mjs,cjs,mts,cts}"],
+    ignores: [
+      "**/*.test.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
+      "**/*.spec.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
+      "**/*.stories.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
+      "**/__tests__/**",
+      "**/test/**",
+      "**/tests/**",
+      "**/e2e/**",
+      "**/.storybook/**",
+    ],
+    plugins: { kcvv: kcvvPlugin },
+    rules: {
+      "func-style": ["error", "expression"],
+      "kcvv/no-default-function": [
+        "error",
+        {
+          selector: "ExportDefaultDeclaration > FunctionDeclaration",
+          message:
+            "No `export default function` — write `const Name = () => …;` then `export default Name;`. Rule: #3865.",
         },
       ],
     },

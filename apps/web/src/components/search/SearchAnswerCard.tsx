@@ -42,15 +42,18 @@ const DISCLAIMER =
  *  widths. Backend answers are already 2–4 sentences; this is a safety net. */
 const MAX_ANSWER_CHARS = 320;
 
-function clampAnswer(answer: string): string {
+const clampAnswer = (answer: string): string => {
   const trimmed = answer.trim();
   if (trimmed.length <= MAX_ANSWER_CHARS) return trimmed;
   const cut = trimmed.slice(0, MAX_ANSWER_CHARS);
   const lastSpace = cut.lastIndexOf(" ");
   return `${(lastSpace > 0 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`;
-}
+};
 
-export function SearchAnswerCard({ answer, sources }: SearchAnswerCardProps) {
+export const SearchAnswerCard = ({
+  answer,
+  sources,
+}: SearchAnswerCardProps) => {
   return (
     <TapedCard
       as="section"
@@ -115,4 +118,4 @@ export function SearchAnswerCard({ answer, sources }: SearchAnswerCardProps) {
       </p>
     </TapedCard>
   );
-}
+};

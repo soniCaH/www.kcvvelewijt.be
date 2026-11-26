@@ -58,12 +58,12 @@ export interface LinkPendingDotsProps {
   className?: string;
 }
 
-export function LinkPendingDots({
+export const LinkPendingDots = ({
   placement = "inline",
   tone = "default",
   spaced = true,
   className,
-}: LinkPendingDotsProps) {
+}: LinkPendingDotsProps) => {
   const { pending } = useLinkStatus();
   // Unmounted until the delay has passed — see `usePendingDelay`.
   const showDots = usePendingDelay(pending);
@@ -87,4 +87,4 @@ export function LinkPendingDots({
       )}
     />
   );
-}
+};

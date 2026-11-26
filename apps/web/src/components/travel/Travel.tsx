@@ -47,7 +47,7 @@ const TravelContext = createContext<{
   travel: Travel;
 } | null>(null);
 
-export function TravelScope({
+export const TravelScope = ({
   kind,
   href,
   children,
@@ -57,25 +57,25 @@ export function TravelScope({
   /** Where the source goes. Absent: a card without a link. */
   href: string | undefined;
   children: ReactNode;
-}) {
+}) => {
   const travel = useTravel(kind, href);
   return <TravelContext value={{ href, travel }}>{children}</TravelContext>;
-}
+};
 
-export function TravelTarget({ children }: { children: ReactNode }) {
+export const TravelTarget = ({ children }: { children: ReactNode }) => {
   const scope = useContext(TravelContext);
   return (
     <ViewTransition {...(scope?.travel.transition ?? { default: "none" })}>
       {children}
     </ViewTransition>
   );
-}
+};
 
-export function TravelLink({
+export const TravelLink = ({
   onClick,
   transitionTypes,
   ...props
-}: Omit<ComponentProps<typeof Link>, "href">) {
+}: Omit<ComponentProps<typeof Link>, "href">) => {
   const scope = useContext(TravelContext);
   if (scope?.href === undefined) {
     throw new Error("<TravelLink> needs a <TravelScope> with an href");
@@ -106,4 +106,4 @@ export function TravelLink({
       }}
     />
   );
-}
+};

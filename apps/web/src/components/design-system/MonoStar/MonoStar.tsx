@@ -20,7 +20,7 @@
  * not against caps text). See `endmark-locked.md` and the
  * `EndMark/AlignmentProof` story.
  */
-export function MonoStar() {
+export const MonoStar = () => {
   return (
     <span
       aria-hidden="true"
@@ -29,4 +29,4 @@ export function MonoStar() {
       ★
     </span>
   );
-}
+};

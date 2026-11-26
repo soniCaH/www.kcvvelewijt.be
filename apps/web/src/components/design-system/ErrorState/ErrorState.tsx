@@ -76,12 +76,12 @@ export interface ErrorStateProps {
 const CODE_LINE_CLASS =
   "text-ink-muted font-mono text-label font-semibold uppercase";
 
-function lastWord(value: string): string {
+const lastWord = (value: string): string => {
   const words = value.trim().split(/\s+/);
   return words[words.length - 1] ?? value;
-}
+};
 
-function ActionRow({ actions }: { actions: readonly ErrorStateAction[] }) {
+const ActionRow = ({ actions }: { actions: readonly ErrorStateAction[] }) => {
   return (
     <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
       {actions.map((action) => {
@@ -109,16 +109,16 @@ function ActionRow({ actions }: { actions: readonly ErrorStateAction[] }) {
       })}
     </div>
   );
-}
+};
 
-export function ErrorState({
+export const ErrorState = ({
   code,
   codeLine,
   pun,
   punAccent,
   body,
   actions,
-}: ErrorStateProps) {
+}: ErrorStateProps) => {
   const accent = punAccent ?? lastWord(pun);
 
   return (
@@ -157,4 +157,4 @@ export function ErrorState({
       </div>
     </div>
   );
-}
+};

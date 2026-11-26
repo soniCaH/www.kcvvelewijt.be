@@ -45,9 +45,9 @@ const TICK_TONE_CLASS = {
  * this exact call the same way any senior team does: no Reserven-specific
  * branch.
  */
-function toneFor(age: string): YouthDivisionTone {
+const toneFor = (age: string): YouthDivisionTone => {
   return getYouthDivisionTone(getYouthDivision(age));
-}
+};
 
 export interface YouthDirectoryProps {
   /**
@@ -75,11 +75,11 @@ const CARD_ROTATIONS = ["a", "c", "b", "d", "b"] as const;
 
 /** The groups `<YouthDirectory>` draws — none means it renders nothing, so a
  *  page's section-nav chip for it must check the same thing (#3435). */
-export function groupsWithTeams(
+export const groupsWithTeams = (
   divisions: readonly YouthDivisionGroup[],
-): YouthDivisionGroup[] {
+): YouthDivisionGroup[] => {
   return divisions.filter((d) => d.teams.length > 0);
-}
+};
 
 /**
  * Team directory (`/jeugd` + `/ploegen`). Grouped Reserven / Onderbouw /
@@ -91,12 +91,12 @@ export function groupsWithTeams(
  * `range` renders its heading bare (#2414). Empty groups are omitted; the whole
  * block hides when no group has teams.
  */
-export function YouthDirectory({
+export const YouthDirectory = ({
   heading,
   divisions,
   id,
   className,
-}: YouthDirectoryProps) {
+}: YouthDirectoryProps) => {
   const groups = groupsWithTeams(divisions);
   if (groups.length === 0) return null;
 
@@ -274,4 +274,4 @@ export function YouthDirectory({
       ))}
     </section>
   );
-}
+};

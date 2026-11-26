@@ -30,9 +30,9 @@ export interface HubSearchQueryProviderProps {
   children: ReactNode;
 }
 
-export function HubSearchQueryProvider({
+export const HubSearchQueryProvider = ({
   children,
-}: HubSearchQueryProviderProps) {
+}: HubSearchQueryProviderProps) => {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [topInset, setTopInset] = useState(0);
@@ -47,4 +47,4 @@ export function HubSearchQueryProvider({
       {children}
     </HubSearchQueryContext.Provider>
   );
-}
+};

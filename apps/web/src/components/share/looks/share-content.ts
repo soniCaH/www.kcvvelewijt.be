@@ -198,25 +198,25 @@ const CLASS_COLOUR: Record<string, string> = {
 };
 
 /** The literal for `"bg-warm text-ink"`'s `bg` or `text` colour, if listed above. */
-export function eventColour(
+export const eventColour = (
   fillClass: string,
   prefix: "bg" | "text",
-): string | undefined {
+): string | undefined => {
   const name = fillClass.match(new RegExp(`\\b${prefix}-(\\S+)`))?.[1];
   return name ? CLASS_COLOUR[name] : undefined;
-}
+};
 
 /**
  * `"bg-warm text-ink"` → `{ fill, onFill }`, so the site's event colours have
  * one source. A re-tint to a colour missing above draws ink on cream; a test
  * asserts every `EVENT_TYPE_FILL` value resolves.
  */
-function eventFill(fillClass: string): { fill: string; onFill: string } {
+const eventFill = (fillClass: string): { fill: string; onFill: string } => {
   return {
     fill: eventColour(fillClass, "bg") ?? TOKENS.ink,
     onFill: eventColour(fillClass, "text") ?? TOKENS.cream,
   };
-}
+};
 
 /** Label per event type; fill from `EVENT_TYPE_FILL`; every event gets the date block. */
 const EVENT_STYLE = {
@@ -243,23 +243,23 @@ const EVENT_STYLE = {
 } satisfies Record<EventType, TypeStyle>;
 
 /** A type colour on its own background vanishes: flip it to cream on ink text. */
-export function unclash<T extends { fill: string; onFill: string }>(
+export const unclash = <T extends { fill: string; onFill: string }>(
   style: T,
   behind: string,
-): T {
+): T => {
   return style.fill === behind
     ? { ...style, fill: TOKENS.cream, onFill: TOKENS.ink }
     : style;
-}
+};
 
 export const EVENT_FALLBACK_IMAGE = "/images/event-fallback.jpg";
 
-function build(
+const build = (
   item: ShareItem,
   fields: ShareFields,
   style: TypeStyle,
   noCover: SharePhoto | null,
-): ShareContent {
+): ShareContent => {
   // An untouched title keeps its accent runs; an edited one is plain text.
   const title =
     fields.title === item.title && item.spans.length > 0
@@ -282,21 +282,21 @@ function build(
         }
       : noCover,
   };
-}
+};
 
-export function buildArticleContent(
+export const buildArticleContent = (
   item: ShareItem,
   fields: ShareFields,
-): ShareContent {
+): ShareContent => {
   const style: TypeStyle =
     ARTICLE_STYLE[item.type as ArticleType] ?? ARTICLE_STYLE.announcement;
   return build(item, fields, style, null);
-}
+};
 
-export function buildEventContent(
+export const buildEventContent = (
   item: ShareItem,
   fields: ShareFields,
-): ShareContent {
+): ShareContent => {
   const style: TypeStyle =
     EVENT_STYLE[item.type as EventType] ?? EVENT_STYLE[DEFAULT_EVENT_TYPE];
   return build(item, fields, style, {
@@ -304,7 +304,7 @@ export function buildEventContent(
     source: "fallback",
     focal: { x: 0.5, y: 0.5 },
   });
-}
+};
 
 type Maybe<T> = { [K in keyof T]: T[K] | null } | null;
 
@@ -313,12 +313,12 @@ type Maybe<T> = { [K in keyof T]: T[K] | null } | null;
  * `rect=` (in source pixels), and the hotspot moved into the cropped frame so
  * a look can position the picture on it. No URL → no cover.
  */
-export function shareCover(row: {
+export const shareCover = (row: {
   coverUrl: string | null;
   hotspot: Maybe<{ x: number; y: number }>;
   crop: Maybe<{ top: number; bottom: number; left: number; right: number }>;
   dimensions: Maybe<{ width: number; height: number }>;
-}): ShareItem["cover"] {
+}): ShareItem["cover"] => {
   if (!row.coverUrl) return null;
   const x = row.hotspot?.x ?? 0.5;
   const y = row.hotspot?.y ?? 0.5;
@@ -342,7 +342,7 @@ export function shareCover(row: {
     url: `${row.coverUrl}?rect=${rect}`,
     hotspot: { x: clamp((x - left) / fw), y: clamp((y - top) / fh) },
   };
-}
+};
 
 /** What a match story is made of: the form's fields, already resolved. */
 export interface MatchMomentInput {
@@ -433,7 +433,7 @@ const MOMENT_OF: Record<
 
 const isKcvv = (name: string) => /kcvv/i.test(name);
 
-export function buildMatchContent(m: MatchMomentInput): ShareContent {
+export const buildMatchContent = (m: MatchMomentInput): ShareContent => {
   const moment = MOMENT_OF[m.template](m.mood);
   const style: TypeStyle = MOMENT_STYLE[moment];
   const kickoff = moment === "kickoff";
@@ -499,4 +499,4 @@ export function buildMatchContent(m: MatchMomentInput): ShareContent {
       ? { src: m.photo, source: "own", focal: { x: 0.5, y: 0.5 } }
       : null,
   };
-}
+};

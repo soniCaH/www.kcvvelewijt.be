@@ -53,9 +53,9 @@ export interface MatchStatusBadgeProps {
   className?: string;
 }
 
-function isBadgeStatus(status: string): status is BadgeStatus {
+const isBadgeStatus = (status: string): status is BadgeStatus => {
   return Object.hasOwn(BADGE_SPECS, status);
-}
+};
 
 /**
  * The wording for a status, without the badge chrome. Lets tighter surfaces
@@ -65,15 +65,18 @@ function isBadgeStatus(status: string): status is BadgeStatus {
  *
  * Returns `null` for a status with nothing to say (`scheduled`).
  */
-export function matchStatusWording(
+export const matchStatusWording = (
   status: MatchStatus | (string & {}),
-): { abbreviation: string; longForm: string } | null {
+): { abbreviation: string; longForm: string } | null => {
   if (!isBadgeStatus(status)) return null;
   const { abbreviation, longForm } = BADGE_SPECS[status];
   return { abbreviation, longForm };
-}
+};
 
-export function MatchStatusBadge({ status, className }: MatchStatusBadgeProps) {
+export const MatchStatusBadge = ({
+  status,
+  className,
+}: MatchStatusBadgeProps) => {
   if (!isBadgeStatus(status)) return null;
 
   const spec = BADGE_SPECS[status];
@@ -87,4 +90,4 @@ export function MatchStatusBadge({ status, className }: MatchStatusBadgeProps) {
       {spec.abbreviation}
     </span>
   );
-}
+};

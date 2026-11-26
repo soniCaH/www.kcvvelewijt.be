@@ -12,10 +12,10 @@ export interface HighlighterStrokeProps {
   children: React.ReactNode;
 }
 
-export function HighlighterStroke({
+export const HighlighterStroke = ({
   color = "jersey",
   children,
-}: HighlighterStrokeProps) {
+}: HighlighterStrokeProps) => {
   const dataUrl = buildStrokeDataUrl(color);
   return (
     <span
@@ -37,4 +37,4 @@ export function HighlighterStroke({
       {children}
     </span>
   );
-}
+};

@@ -22,7 +22,7 @@ export interface SkeletonBarsProps {
  * the fifth skeleton to adopt the rule has a primitive to reach for instead
  * of a block to copy-paste.
  */
-export function SkeletonBars({ className }: SkeletonBarsProps) {
+export const SkeletonBars = ({ className }: SkeletonBarsProps) => {
   return (
     <div className={cn("flex flex-col gap-4", className)}>
       <Skeleton className="h-4 w-full" />
@@ -31,4 +31,4 @@ export function SkeletonBars({ className }: SkeletonBarsProps) {
       <Skeleton className="h-4 w-1/2" />
     </div>
   );
-}
+};

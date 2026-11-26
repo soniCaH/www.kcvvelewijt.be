@@ -23,7 +23,7 @@ export interface LeaderDotRowProps {
  * unfolding rows (`<summary>`: title, leader, names, "+") reuse it. Hidden from
  * assistive tech — read aloud, a run of dots is noise.
  */
-export function LeaderFill() {
+export const LeaderFill = () => {
   return (
     <span
       aria-hidden="true"
@@ -31,7 +31,7 @@ export function LeaderFill() {
       className="border-ink-muted mx-1.5 mb-1 h-0 min-w-3 flex-1 border-b border-dotted"
     />
   );
-}
+};
 
 /**
  * `label · · · · · value` — the printed contents-page row (#2622, decision D11
@@ -58,12 +58,12 @@ export function LeaderFill() {
  * (the Typekit faces have no `tnum`, so a numeric column goes mono or it does
  * not line up).
  */
-export function LeaderDotRow({
+export const LeaderDotRow = ({
   label,
   value,
   href,
   className,
-}: LeaderDotRowProps) {
+}: LeaderDotRowProps) => {
   const contents = (
     <>
       <span className="min-w-0 truncate">{label}</span>
@@ -110,4 +110,4 @@ export function LeaderDotRow({
       <LinkPendingDots spaced={false} />
     </Link>
   );
-}
+};

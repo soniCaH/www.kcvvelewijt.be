@@ -22,8 +22,8 @@
  * instead of one dependent on the runner's real frame focus. Storybook-only
  * — a real visitor's `focus:` behaviour is untouched.
  */
-export function forceFieldFocusRing(root: ParentNode): void {
+export const forceFieldFocusRing = (root: ParentNode): void => {
   root
     .querySelectorAll<HTMLElement>("input, textarea, select")
     .forEach((el) => el.setAttribute("data-vr-force-ring", "true"));
-}
+};

@@ -66,12 +66,12 @@ const PILL_PADDING_CLASS: Record<MonoLabelSize, string> = {
   md: "px-2.5 py-1.5",
 };
 
-export function MonoLabel({
+export const MonoLabel = ({
   variant = "plain",
   size = "sm",
   tone = "ink",
   children,
-}: MonoLabelProps) {
+}: MonoLabelProps) => {
   const isPill = variant !== "plain";
   const toneClass = isPill ? "" : PLAIN_TONE_CLASS[tone];
   return (
@@ -86,4 +86,4 @@ export function MonoLabel({
       {children}
     </span>
   );
-}
+};

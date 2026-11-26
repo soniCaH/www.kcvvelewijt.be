@@ -45,9 +45,9 @@ export interface ResolvedPullQuoteSpeaker {
  * carries no name — the caller falls through to the external-attribution
  * path, exactly like `resolveSubject`.
  */
-export function resolvePullQuoteSpeaker(
+export const resolvePullQuoteSpeaker = (
   speaker: PullQuoteSpeakerRef | null | undefined,
-): ResolvedPullQuoteSpeaker | null {
+): ResolvedPullQuoteSpeaker | null => {
   if (!speaker?._type) return null;
 
   const firstName = speaker.firstName?.trim() ?? "";
@@ -80,4 +80,4 @@ export function resolvePullQuoteSpeaker(
 
   // Unknown discriminator (legacy data, failed migration) — do not guess.
   return null;
-}
+};

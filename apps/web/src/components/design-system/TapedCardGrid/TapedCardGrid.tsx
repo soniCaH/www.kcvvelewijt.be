@@ -77,14 +77,14 @@ type StyleWithVars = CSSProperties & Record<`--${string}`, string | number>;
  * Every variable falls back to a flat, centred default, so a card outside a
  * grid renders exactly as it did before.
  */
-export function TapedCardGrid({
+export const TapedCardGrid = ({
   columns = 3,
   gap = "md",
   as: Tag = "div",
   emptyState,
   className,
   children,
-}: TapedCardGridProps) {
+}: TapedCardGridProps) => {
   const items = Children.toArray(children);
 
   if (items.length === 0) {
@@ -132,4 +132,4 @@ export function TapedCardGrid({
       })}
     </Tag>
   );
-}
+};

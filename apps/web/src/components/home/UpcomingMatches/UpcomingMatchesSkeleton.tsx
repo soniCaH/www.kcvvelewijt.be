@@ -11,7 +11,7 @@ import {
  * card (`<TapedCard padding="lg" shadow="md">`, minus the tape) and the
  * label + heading row, so the swap does not reflow or change colour.
  */
-export function UpcomingMatchesSkeleton() {
+export const UpcomingMatchesSkeleton = () => {
   return (
     <section aria-hidden="true" className="bg-cream-soft py-16 md:py-20">
       <PageContainer width="index">
@@ -47,4 +47,4 @@ export function UpcomingMatchesSkeleton() {
       </PageContainer>
     </section>
   );
-}
+};

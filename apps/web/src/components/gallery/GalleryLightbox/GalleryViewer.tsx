@@ -37,13 +37,13 @@ export interface GalleryViewerProps {
  * `gallery_image_view`. Chrome is themed to the redesign: sharp corners, ink
  * backdrop.
  */
-export default function GalleryViewer({
+const GalleryViewer = ({
   gallerySlug,
   slides,
   open,
   index,
   close,
-}: GalleryViewerProps) {
+}: GalleryViewerProps) => {
   return (
     <Lightbox
       open={open}
@@ -67,4 +67,6 @@ export default function GalleryViewer({
       }}
     />
   );
-}
+};
+
+export default GalleryViewer;

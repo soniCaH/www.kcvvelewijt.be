@@ -12,7 +12,7 @@ interface JsonLdProps {
   data: JsonLdData;
 }
 
-export function JsonLd({ data }: JsonLdProps) {
+export const JsonLd = ({ data }: JsonLdProps) => {
   const json = JSON.stringify(data).replace(/</g, "\\u003c");
   return (
     <script
@@ -20,4 +20,4 @@ export function JsonLd({ data }: JsonLdProps) {
       dangerouslySetInnerHTML={{ __html: json }}
     />
   );
-}
+};

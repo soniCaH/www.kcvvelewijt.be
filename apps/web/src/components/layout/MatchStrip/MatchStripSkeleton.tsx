@@ -10,7 +10,7 @@
  * render while the strip's read is in flight — `getFirstTeamStripData()` is
  * per-request `cache()` only, no TTL. An ISR-served page arrives complete.
  */
-export function MatchStripSkeleton() {
+export const MatchStripSkeleton = () => {
   return (
     <div
       aria-hidden="true"
@@ -22,4 +22,4 @@ export function MatchStripSkeleton() {
       </div>
     </div>
   );
-}
+};

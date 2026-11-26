@@ -29,7 +29,7 @@ export interface ExternalMarkProps {
  * at all (rule 1) — delete the mark there rather than reaching for this
  * component.
  */
-export function ExternalMark({ className }: ExternalMarkProps) {
+export const ExternalMark = ({ className }: ExternalMarkProps) => {
   return (
     <>
       <ArrowSquareOut
@@ -43,4 +43,4 @@ export function ExternalMark({ className }: ExternalMarkProps) {
       <span className="sr-only"> (opent in een nieuw tabblad)</span>
     </>
   );
-}
+};

@@ -26,14 +26,14 @@ import { PINNED_Z } from "./block-layout";
  * moves along the ticket's 1.2° tilted axes. Lifting the blocks out would
  * move every E baseline.
  */
-export function TicketLook({
+export const TicketLook = ({
   content,
   format,
   theme,
   coverMode,
   blocks,
   fallbackIndex,
-}: LookProps) {
+}: LookProps) => {
   const dark = theme === "donker";
   const sq = format === "square";
   const ground = dark ? TOKENS.cream : TOKENS.jerseyDeepDark;
@@ -205,4 +205,4 @@ export function TicketLook({
       </div>
     </Canvas>
   );
-}
+};

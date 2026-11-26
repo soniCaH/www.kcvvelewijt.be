@@ -138,7 +138,7 @@ const CROSS_LINK =
   "group border-ink bg-cream-soft hover:bg-cream-deep relative flex items-center justify-between gap-3 border p-3 transition-colors";
 
 /** A boxed cross-link row in the Clubgegevens card (hulpvinder, organigram). */
-function CrossLink({
+const CrossLink = ({
   href,
   title,
   sub,
@@ -146,7 +146,7 @@ function CrossLink({
   href: string;
   title: string;
   sub: string;
-}) {
+}) => {
   return (
     <Link href={href} className={CROSS_LINK}>
       <span>
@@ -161,11 +161,11 @@ function CrossLink({
       <LinkPendingDots placement="corner" />
     </Link>
   );
-}
+};
 
 // ---------------------------------------------------------------------------
 
-export function ContactPage({ keyContacts }: ContactPageProps = {}) {
+export const ContactPage = ({ keyContacts }: ContactPageProps = {}) => {
   const keyContactCards: ContactGridCard[] = (keyContacts ?? []).map(
     (contact, index) => ({
       key: `kc-${contact.email}-${index}`,
@@ -420,4 +420,4 @@ export function ContactPage({ keyContacts }: ContactPageProps = {}) {
       </PageContainer>
     </div>
   );
-}
+};

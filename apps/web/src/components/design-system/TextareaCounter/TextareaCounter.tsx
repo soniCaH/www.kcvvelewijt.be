@@ -23,11 +23,11 @@ export interface TextareaCounterProps {
   className?: string;
 }
 
-export function TextareaCounter({
+export const TextareaCounter = ({
   current,
   max,
   className,
-}: TextareaCounterProps) {
+}: TextareaCounterProps) => {
   const over = current > max;
   return (
     <span
@@ -45,6 +45,6 @@ export function TextareaCounter({
       {current}/{max}
     </span>
   );
-}
+};
 
 TextareaCounter.displayName = "TextareaCounter";

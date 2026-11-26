@@ -20,7 +20,10 @@ export interface MatchTravelLinkProps extends Omit<
   matchId: number | string;
 }
 
-export function MatchTravelLink({ matchId, ...props }: MatchTravelLinkProps) {
+export const MatchTravelLink = ({
+  matchId,
+  ...props
+}: MatchTravelLinkProps) => {
   return (
     <TravelScope kind="match" href={`/wedstrijd/${matchId}`}>
       <TravelTarget>
@@ -28,4 +31,4 @@ export function MatchTravelLink({ matchId, ...props }: MatchTravelLinkProps) {
       </TravelTarget>
     </TravelScope>
   );
-}
+};

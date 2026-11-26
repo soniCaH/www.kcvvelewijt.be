@@ -30,9 +30,9 @@ export type AgendaSurface = "home" | "kalender";
  * dimension shared with `empty_state_undo` and `search_filter_changed`, which
  * both send slugs (#2719).
  */
-export function trackAgendaFilter(filter: string, count: number): void {
+export const trackAgendaFilter = (filter: string, count: number): void => {
   trackEvent("match_agenda_filter", { filter_type: slugify(filter), count });
-}
+};
 
 /**
  * Fire when the agenda is expanded or collapsed. `count` is the size of the
@@ -43,13 +43,13 @@ export function trackAgendaFilter(filter: string, count: number): void {
  * action", and overloading it would label agenda interactions as errors in
  * every report. Two names under the existing `match_` prefix cost nothing.
  */
-export function trackAgendaExpand(count: number): void {
+export const trackAgendaExpand = (count: number): void => {
   trackEvent("match_agenda_expand", { count });
-}
+};
 
-export function trackAgendaCollapse(count: number): void {
+export const trackAgendaCollapse = (count: number): void => {
   trackEvent("match_agenda_collapse", { count });
-}
+};
 
 /**
  * Fire when an agenda row is clicked through to its match detail. Reuses the
@@ -61,12 +61,12 @@ export function trackAgendaCollapse(count: number): void {
  * `<FirstTeamsBlock>` sends, and pushing a label into a slug dimension would
  * poison it for both surfaces.
  */
-export function trackAgendaRowClick(
+export const trackAgendaRowClick = (
   matchId: number,
   surface: AgendaSurface,
-): void {
+): void => {
   trackEvent("match_card_click", {
     match_id: matchId,
     source: `${surface}_agenda`,
   });
-}
+};

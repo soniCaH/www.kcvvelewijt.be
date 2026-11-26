@@ -84,7 +84,7 @@ export interface ShareFrameProps {
  * Rendered at exact pixel dimensions so `html-to-image` captures at full
  * resolution. Colours are concrete literals (capture-safe — see `constants.ts`).
  */
-export function ShareFrame({
+export const ShareFrame = ({
   width,
   height,
   register,
@@ -95,7 +95,7 @@ export function ShareFrame({
   decor,
   padding = "64px 80px 56px",
   children,
-}: ShareFrameProps) {
+}: ShareFrameProps) => {
   const palette = resolvePalette(register, sentiment);
   const surface = register === "dark" ? TOKENS.jerseyDeepDark : TOKENS.cream;
 
@@ -217,10 +217,10 @@ export function ShareFrame({
       </SharePhotoContext.Provider>
     </SharePaletteContext.Provider>
   );
-}
+};
 
 /** Round club crest (KCVV logo) used in the top bar. */
-function Crest({ size = 96 }: { size?: number }) {
+const Crest = ({ size = 96 }: { size?: number }) => {
   return (
     <img
       src={KCVV_LOGO}
@@ -233,7 +233,7 @@ function Crest({ size = 96 }: { size?: number }) {
       }}
     />
   );
-}
+};
 
 /**
  * Top bar: club crest, and — when the enclosing {@link ShareBadgeContext}
@@ -243,7 +243,7 @@ function Crest({ size = 96 }: { size?: number }) {
  * renders identically to the pre-badge single-child row, so an absent badge
  * changes nothing for the 11 templates that never supply one.
  */
-export function ShareTop({ crestSize }: { crestSize?: number }) {
+export const ShareTop = ({ crestSize }: { crestSize?: number }) => {
   const palette = useSharePalette();
   const badge = useContext(ShareBadgeContext);
   return (
@@ -279,7 +279,7 @@ export function ShareTop({ crestSize }: { crestSize?: number }) {
       )}
     </div>
   );
-}
+};
 
 /**
  * One block id per element the middle zone renders, from its JSX slot: a
@@ -287,7 +287,7 @@ export function ShareTop({ crestSize }: { crestSize?: number }) {
  * drops the crest matchup does not shift the ids after it. A fragment's
  * children get `w<slot>.<index>`.
  */
-function slotIds(children: React.ReactNode, prefix = "w"): string[] {
+const slotIds = (children: React.ReactNode, prefix = "w"): string[] => {
   const ids: string[] = [];
   Children.forEach(children, (child, i) => {
     if (!isValidElement(child)) return; // null, false, text: no element of its own
@@ -299,10 +299,10 @@ function slotIds(children: React.ReactNode, prefix = "w"): string[] {
     }
   });
   return ids;
-}
+};
 
 /** Flexible middle zone (the per-event content area). */
-export function ShareMid({
+export const ShareMid = ({
   center = false,
   children,
   style,
@@ -310,7 +310,7 @@ export function ShareMid({
   center?: boolean;
   children: React.ReactNode;
   style?: React.CSSProperties;
-}) {
+}) => {
   const photoLayout = useContext(SharePhotoContext);
   const blocks = useContext(ShareBlocksContext);
   const ref = useRef<HTMLDivElement>(null);
@@ -373,7 +373,7 @@ export function ShareMid({
       {children}
     </div>
   );
-}
+};
 
 /**
  * Footer: the kcvvelewijt.be wordmark plus an optional `left` label (the
@@ -381,13 +381,13 @@ export function ShareMid({
  * - `"split"` (default) — label left, wordmark right (for left-aligned cards).
  * - `"center"` — both centred and stacked (for centre-aligned cards).
  */
-export function ShareFoot({
+export const ShareFoot = ({
   left,
   align = "split",
 }: {
   left?: React.ReactNode;
   align?: "split" | "center";
-}) {
+}) => {
   const palette = useSharePalette();
   const base: React.CSSProperties = {
     fontFamily: MONO_FONT,
@@ -465,4 +465,4 @@ export function ShareFoot({
       <span style={{ ...base, alignSelf: "flex-end" }}>KCVVELEWIJT.BE</span>
     </div>
   );
-}
+};

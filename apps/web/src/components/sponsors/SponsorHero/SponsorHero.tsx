@@ -20,7 +20,7 @@ export interface SponsorHeroProps {
  * single `<FeaturedSponsorCard>` marquee. When `featured` is `null` the left
  * column spans the full width and no card renders.
  */
-export function SponsorHero({ featured }: SponsorHeroProps) {
+export const SponsorHero = ({ featured }: SponsorHeroProps) => {
   return (
     <header
       className={cn(
@@ -49,4 +49,4 @@ export function SponsorHero({ featured }: SponsorHeroProps) {
       {featured && <FeaturedSponsorCard sponsor={featured} />}
     </header>
   );
-}
+};

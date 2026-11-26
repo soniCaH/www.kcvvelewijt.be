@@ -25,7 +25,7 @@ export interface TeamFlagshipProps {
   className?: string;
 }
 
-export function TeamFlagship({
+export const TeamFlagship = ({
   variant,
   kicker,
   category,
@@ -33,7 +33,7 @@ export function TeamFlagship({
   teamImageUrl,
   href,
   className,
-}: TeamFlagshipProps) {
+}: TeamFlagshipProps) => {
   const isA = variant === "a";
   const hasPhoto =
     teamImageUrl !== undefined && teamImageUrl !== null && teamImageUrl !== "";
@@ -162,4 +162,4 @@ export function TeamFlagship({
       <LinkPendingDots tone={isA ? "light" : "default"} placement="corner" />
     </Link>
   );
-}
+};

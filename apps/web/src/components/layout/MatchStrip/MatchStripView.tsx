@@ -90,11 +90,11 @@ export interface MatchStripViewProps {
  * only on mobile, where the row shows the opponent alone — on desktop both
  * teams appear in order, so a venue glyph would restate the layout.
  */
-export function MatchStripView({
+export const MatchStripView = ({
   data,
   matchDay = false,
   dates,
-}: MatchStripViewProps) {
+}: MatchStripViewProps) => {
   const { result, fixture } = data;
 
   return (
@@ -141,7 +141,7 @@ export function MatchStripView({
       />
     </aside>
   );
-}
+};
 
 /* ── shared derivations ──────────────────────────────────────────────────── */
 
@@ -150,15 +150,15 @@ export function MatchStripView({
  * fall back to the club id rather than letting `undefined` take the falsy
  * branch and render KCVV as its own opponent.
  */
-function isKcvvHome(match: ScheduleMatch): boolean {
+const isKcvvHome = (match: ScheduleMatch): boolean => {
   return match.isHome ?? match.homeTeam.id === KCVV_CLUB_ID;
-}
+};
 
-function opponentOf(match: ScheduleMatch): ScheduleTeam {
+const opponentOf = (match: ScheduleMatch): ScheduleTeam => {
   return isKcvvHome(match) ? match.awayTeam : match.homeTeam;
-}
+};
 
-function outcomeOf(match: ScheduleMatch): "win" | "draw" | "loss" | null {
+const outcomeOf = (match: ScheduleMatch): "win" | "draw" | "loss" | null => {
   const { homeScore, awayScore } = match;
   if (homeScore === undefined || awayScore === undefined) return null;
   const home = isKcvvHome(match);
@@ -167,13 +167,13 @@ function outcomeOf(match: ScheduleMatch): "win" | "draw" | "loss" | null {
   if (kcvv > other) return "win";
   if (kcvv < other) return "loss";
   return "draw";
-}
+};
 
-function scoreboardScore(match: ScheduleMatch): string | null {
+const scoreboardScore = (match: ScheduleMatch): string | null => {
   const { homeScore, awayScore } = match;
   if (homeScore === undefined || awayScore === undefined) return null;
   return `${homeScore}–${awayScore}`;
-}
+};
 
 /**
  * Whether this row/slide is showing the match-day fixture (#2616) — the one
@@ -188,21 +188,24 @@ function scoreboardScore(match: ScheduleMatch): string | null {
  * would be the same re-derivation the "one owner for the rule" convention
  * forbids.
  */
-function isTodayFixture(matchDay: boolean, kind: MatchRowKind): boolean {
+const isTodayFixture = (matchDay: boolean, kind: MatchRowKind): boolean => {
   return matchDay && kind === "fixture";
-}
+};
 
 /**
  * `isResultPending` (#2587), plus the strip's own guard that a scoreline the
  * feed did send is never hidden behind the waiting glyph.
  */
-function isAwaitingResult(match: ScheduleMatch, kind: MatchRowKind): boolean {
+const isAwaitingResult = (
+  match: ScheduleMatch,
+  kind: MatchRowKind,
+): boolean => {
   return isResultPending(kind, match.status) && scoreboardScore(match) === null;
-}
+};
 
 /* ── atoms ───────────────────────────────────────────────────────────────── */
 
-function Crest({
+const Crest = ({
   team,
   big = false,
   dark = false,
@@ -211,7 +214,7 @@ function Crest({
   big?: boolean;
   /** The match-day ground (#2616) — recolours the initial-fallback badge only; a real logo image needs no change. */
   dark?: boolean;
-}) {
+}) => {
   const size = big ? "h-9 w-9" : "h-7 w-7";
   const sizePx = big ? 36 : 28;
   // The upstream does not always carry a logo for KCVV's own side; fall back to
@@ -252,14 +255,20 @@ function Crest({
       {initial}
     </span>
   );
-}
+};
 
 /**
  * Reuses `<TeamAgendaRow>`'s venue glyph — one home/away vocabulary, not two.
  * The wording now comes from `HOME_AWAY_A11Y_NAME` rather than a copy, so that
  * claim is enforced instead of aspirational (#2398).
  */
-function VenueGlyph({ home, dark = false }: { home: boolean; dark?: boolean }) {
+const VenueGlyph = ({
+  home,
+  dark = false,
+}: {
+  home: boolean;
+  dark?: boolean;
+}) => {
   const Icon = home ? House : Bus;
   return (
     <Icon
@@ -270,7 +279,7 @@ function VenueGlyph({ home, dark = false }: { home: boolean; dark?: boolean }) {
       )}
     />
   );
-}
+};
 
 /**
  * The canonical outcome marker: a highlighter sweep behind the score, one
@@ -293,7 +302,7 @@ function VenueGlyph({ home, dark = false }: { home: boolean; dark?: boolean }) {
  * time; it never stands in for the waiting state, where it would read
  * future-tense for a match already played.
  */
-function Score({
+const Score = ({
   match,
   className,
   dark = false,
@@ -305,7 +314,7 @@ function Score({
   dark?: boolean;
   /** See `isAwaitingResult` — the caller knows the slot, `Score` does not. */
   awaitingResult?: boolean;
-}) {
+}) => {
   const score = scoreboardScore(match);
   const colorClass = dark ? "text-cream" : "text-ink";
   if (awaitingResult) {
@@ -335,7 +344,7 @@ function Score({
       {score}
     </span>
   );
-}
+};
 
 /**
  * Unboxed on purpose: a bordered date stub next to the bordered crest reads as
@@ -349,7 +358,7 @@ function Score({
  * `w-14`, the widest word being "Volgende") and one 9px line of height, which
  * is the trade #2388's own note proposed.
  */
-function StripDate({
+const StripDate = ({
   day,
   month,
   kind,
@@ -384,7 +393,7 @@ function StripDate({
    * `dark` keeps reading the plain `MATCH_KIND_WORD[kind]` it always did.
    */
   outcomeWord?: string | null;
-}) {
+}) => {
   // One span carrying the box classes and the ground colour, with only the
   // CHILDREN branching on `today` — `today` and `dark` are independent props,
   // and an earlier version's `today` branch hardcoded `text-cream`, ignoring
@@ -434,11 +443,11 @@ function StripDate({
       )}
     </span>
   );
-}
+};
 
 /* ── mobile ──────────────────────────────────────────────────────────────── */
 
-function LedgerLinkRow({
+const LedgerLinkRow = ({
   match,
   kind,
   last = false,
@@ -451,7 +460,7 @@ function LedgerLinkRow({
   /** The strip's match-day ground (#2616) — see `<MatchStripView>`'s own docblock. */
   matchDay?: boolean;
   dates: StripDates;
-}) {
+}) => {
   // Enumerated positively (#2802 review) — a negated
   // `kind !== "match"` catch-all would silently route any future fourth
   // `kind` into the reduced row too, with no compile error.
@@ -594,7 +603,7 @@ function LedgerLinkRow({
       />
     </MatchTravelLink>
   );
-}
+};
 
 /**
  * The mobile ledger's reduced row for a pitch-reservation placeholder
@@ -608,7 +617,7 @@ function LedgerLinkRow({
  * is still nothing worth clicking through to from a widget that has no room
  * to explain what a reservation is.
  */
-function ReservationLedgerRow({
+const ReservationLedgerRow = ({
   match,
   kind,
   last = false,
@@ -618,7 +627,7 @@ function ReservationLedgerRow({
   kind: MatchRowKind;
   last?: boolean;
   dates: StripDates;
-}) {
+}) => {
   const otherClub = match.kind === "reduced" ? match.team : undefined;
   const { subject, statusWording } = reservationView(match, otherClub);
   const label = reservationRowLabel({
@@ -658,7 +667,7 @@ function ReservationLedgerRow({
       </div>
     </article>
   );
-}
+};
 
 /* ── desktop ─────────────────────────────────────────────────────────────── */
 
@@ -667,7 +676,7 @@ function ReservationLedgerRow({
  * leaf, `<MatchStripSlider>`, which only owns the result/fixture switch
  * (#3480).
  */
-function DesktopSlider({
+const DesktopSlider = ({
   result,
   fixture,
   matchDay = false,
@@ -678,7 +687,7 @@ function DesktopSlider({
   /** The strip's match-day ground (#2616) — see `<MatchStripView>`'s own docblock. */
   matchDay?: boolean;
   dates: { result: StripDates; fixture: StripDates };
-}) {
+}) => {
   return (
     <MatchStripSlider
       result={
@@ -690,14 +699,14 @@ function DesktopSlider({
       matchDay={matchDay}
     />
   );
-}
+};
 
-function buildSlide(
+const buildSlide = (
   showing: ScheduleRow,
   kind: MatchRowKind,
   matchDay: boolean,
   dates: StripDates,
-): MatchStripSlide {
+): MatchStripSlide => {
   const isResultSlide = kind === "result";
   const today = isTodayFixture(matchDay, kind);
 
@@ -823,7 +832,7 @@ function buildSlide(
       </Link>
     ),
   };
-}
+};
 
 /**
  * The desktop slide's reduced content for a pitch-reservation placeholder or
@@ -836,13 +845,13 @@ function buildSlide(
  * prints `match.team.name` as its own text node directly below the crest.
  * Folding the club into "competition · club" too would print it twice.
  */
-function ReservationDesktopSlide({
+const ReservationDesktopSlide = ({
   match,
   dateLabel,
 }: {
   match: ScheduleReservation | ScheduleReducedMatch;
   dateLabel: string;
-}) {
+}) => {
   const { subject, statusWording } = reservationView(match);
   return (
     <>
@@ -861,16 +870,16 @@ function ReservationDesktopSlide({
       </div>
     </>
   );
-}
+};
 
-function DesktopTeamName({
+const DesktopTeamName = ({
   team,
   dark = false,
 }: {
   team: ScheduleTeam;
   /** The match-day ground (#2616). */
   dark?: boolean;
-}) {
+}) => {
   return (
     <span
       className={cn(
@@ -881,4 +890,4 @@ function DesktopTeamName({
       {team.id === KCVV_CLUB_ID ? "KCVV" : team.name}
     </span>
   );
-}
+};

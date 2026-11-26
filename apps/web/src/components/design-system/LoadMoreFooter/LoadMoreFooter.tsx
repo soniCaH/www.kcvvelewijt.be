@@ -44,13 +44,13 @@ export interface LoadMoreFooterProps {
  * until #2815 gave the notice member an optional `action`. `onLoadMore`
  * doubles as the retry handler, the same wiring the bespoke button used.
  */
-export function LoadMoreFooter({
+export const LoadMoreFooter = ({
   label,
   hasMore,
   isLoading,
   error,
   onLoadMore,
-}: LoadMoreFooterProps) {
+}: LoadMoreFooterProps) => {
   if (error) {
     return (
       <EmptyState
@@ -90,4 +90,4 @@ export function LoadMoreFooter({
       </Button>
     </div>
   );
-}
+};

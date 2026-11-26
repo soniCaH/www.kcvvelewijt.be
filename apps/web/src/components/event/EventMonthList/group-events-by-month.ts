@@ -24,9 +24,9 @@ export interface EventMonthGroup<T> {
  * dropped. Month labels are the capitalised Dutch month name, gaining a year
  * suffix only when the list crosses into another calendar year.
  */
-export function groupEventsByMonth<T extends { dateStart: string }>(
+export const groupEventsByMonth = <T extends { dateStart: string }>(
   events: T[],
-): EventMonthGroup<T>[] {
+): EventMonthGroup<T>[] => {
   const dated = events
     .map((event) => ({
       event,
@@ -59,4 +59,4 @@ export function groupEventsByMonth<T extends { dateStart: string }>(
   }
 
   return groups;
-}
+};

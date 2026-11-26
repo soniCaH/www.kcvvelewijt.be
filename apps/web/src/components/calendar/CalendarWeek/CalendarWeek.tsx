@@ -51,11 +51,11 @@ const SHORT_DAYS = ["Ma", "Di", "Wo", "Do", "Vr", "Za", "Zo"];
  * way a placeholder does (#2693): neither state in this card knows which
  * side, if either, was "home".
  */
-function ReservationWeekCard({
+const ReservationWeekCard = ({
   match,
 }: {
   match: CalendarReservation | CalendarReducedMatch;
-}) {
+}) => {
   const otherClub = match.kind === "reduced" ? match.club : undefined;
   const { subject, statusWording } = reservationView(match, otherClub);
   return (
@@ -95,9 +95,9 @@ function ReservationWeekCard({
       </div>
     </div>
   );
-}
+};
 
-function WeekMatchCard({ match }: { match: CalendarMatch }) {
+const WeekMatchCard = ({ match }: { match: CalendarMatch }) => {
   // Enumerated positively (#2802 review) — see the identical
   // note on `CalendarAgenda`'s `AgendaMatchRow`.
   if (match.kind === "reservation" || match.kind === "reduced") {
@@ -165,13 +165,13 @@ function WeekMatchCard({ match }: { match: CalendarMatch }) {
       <LinkPendingDots placement="corner" className="top-0.5 right-0.5" />
     </Link>
   );
-}
+};
 
-export function CalendarWeek({
+export const CalendarWeek = ({
   matches,
   events,
   weekStart,
-}: CalendarWeekProps) {
+}: CalendarWeekProps) => {
   const days = useMemo(() => getDaysInWeek(weekStart), [weekStart]);
   const byDay = useMemo(
     () => groupFeedByDay(matches, events),
@@ -253,4 +253,4 @@ export function CalendarWeek({
       })}
     </div>
   );
-}
+};

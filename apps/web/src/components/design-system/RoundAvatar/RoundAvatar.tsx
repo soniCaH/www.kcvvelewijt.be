@@ -63,15 +63,15 @@ const SANITY_CDN = "https://cdn.sanity.io/";
  * instead: the cap lives here so every caller benefits. A smaller `w=` is kept,
  * and a URL that is not Sanity's is none of this component's business.
  */
-function thumbnailSrc(src: string, size: RoundAvatarSize): string {
+const thumbnailSrc = (src: string, size: RoundAvatarSize): string => {
   if (!src.startsWith(SANITY_CDN)) return src;
   const url = new URL(src);
   const w = Number(url.searchParams.get("w")) || Infinity;
   url.searchParams.set("w", String(Math.min(w, size * 2)));
   return url.toString();
-}
+};
 
-export function RoundAvatar({
+export const RoundAvatar = ({
   size,
   name,
   photoUrl,
@@ -79,7 +79,7 @@ export function RoundAvatar({
   dashed = false,
   plainPhoto = false,
   className,
-}: RoundAvatarProps) {
+}: RoundAvatarProps) => {
   const step = STEP[size];
   const src = glyph === undefined ? (photoUrl?.trim() ?? "") : "";
   const hasPhoto = src !== "";
@@ -134,4 +134,4 @@ export function RoundAvatar({
       )}
     </span>
   );
-}
+};

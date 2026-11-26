@@ -82,9 +82,9 @@ export interface UseScrollHintReturn<T extends HTMLElement = HTMLElement> {
   scrollRight: () => void;
 }
 
-export function useScrollHint<T extends HTMLElement = HTMLElement>(
+export const useScrollHint = <T extends HTMLElement = HTMLElement>(
   options: UseScrollHintOptions<T> = {},
-): UseScrollHintReturn<T> {
+): UseScrollHintReturn<T> => {
   const {
     scrollAmount = SCROLL_AMOUNT,
     remeasureOn = [],
@@ -309,4 +309,4 @@ export function useScrollHint<T extends HTMLElement = HTMLElement>(
     scrollLeft: scrollLeftFn,
     scrollRight: scrollRightFn,
   };
-}
+};

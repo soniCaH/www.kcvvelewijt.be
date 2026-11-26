@@ -42,12 +42,12 @@ export interface StandingsSectionProps {
  * block-level verdict applied to both would render the unplayed poule as a
  * full table of position-0 zeroes (#2636 finding 4 / finding 9).
  */
-export function StandingsSection({
+export const StandingsSection = ({
   tables,
   divisionFull,
   highlightClubId,
   className,
-}: StandingsSectionProps) {
+}: StandingsSectionProps) => {
   if (classifyStandingsTables(tables) === "no-table") {
     return (
       <div data-testid="standings-section" className={cn("flex", className)}>
@@ -75,4 +75,4 @@ export function StandingsSection({
         ))}
     </div>
   );
-}
+};

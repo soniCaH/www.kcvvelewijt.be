@@ -103,7 +103,7 @@ const ASPECT_VALUE: Record<Exclude<TapedFigureAspect, "auto">, string> = {
   "portrait-3-4": "3 / 4",
 };
 
-export function TapedFigure({
+export const TapedFigure = ({
   children,
   aspect = "landscape-16-9",
   caption,
@@ -115,7 +115,7 @@ export function TapedFigure({
   print = "none",
   padding = "sm",
   className,
-}: TapedFigureProps) {
+}: TapedFigureProps) => {
   const aspectStyle: CSSProperties =
     aspect === "auto" ? {} : { aspectRatio: ASPECT_VALUE[aspect] };
 
@@ -160,4 +160,4 @@ export function TapedFigure({
       )}
     </TapedCard>
   );
-}
+};

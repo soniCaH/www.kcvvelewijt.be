@@ -20,7 +20,7 @@ export interface EndMarkProps {
   label?: string;
 }
 
-export function EndMark({ label = "EINDE GESPREK" }: EndMarkProps) {
+export const EndMark = ({ label = "EINDE GESPREK" }: EndMarkProps) => {
   return (
     <aside className="mx-auto mt-12 mb-8 flex w-full max-w-[560px] items-center leading-none">
       <span
@@ -55,4 +55,4 @@ export function EndMark({ label = "EINDE GESPREK" }: EndMarkProps) {
       />
     </aside>
   );
-}
+};

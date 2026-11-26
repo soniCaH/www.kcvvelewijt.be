@@ -23,7 +23,7 @@ const LEAD_MAX_CHARS = 280;
  * derive the lead from `firstParagraphOf(body)` rather than the
  * editor-supplied `article.lead` field.
  */
-export function truncateLead(input: string): string {
+export const truncateLead = (input: string): string => {
   if (input.length <= LEAD_MAX_CHARS) return input;
   const slice = input.slice(0, LEAD_MAX_CHARS - 1);
   const lastSpace = slice.lastIndexOf(" ");
@@ -32,16 +32,16 @@ export function truncateLead(input: string): string {
   const cut =
     lastSpace > LEAD_MAX_CHARS - 40 ? slice.slice(0, lastSpace) : slice;
   return `${cut.trimEnd()}…`;
-}
+};
 
 export interface EditorialLeadProps {
   children: string;
 }
 
-export function EditorialLead({ children }: EditorialLeadProps) {
+export const EditorialLead = ({ children }: EditorialLeadProps) => {
   return (
     <p className="text-ink font-display max-w-[var(--container-prose)] text-xl leading-snug italic">
       {children}
     </p>
   );
-}
+};

@@ -135,12 +135,12 @@ const SNAP_EPSILON = 0.4;
  * `hashMemberId` (a different, unrelated hash with a different purpose:
  * masking ids before they reach analytics, not seeding a PRNG).
  */
-export function djb2Seed(input: string): number {
+export const djb2Seed = (input: string): number => {
   const hash = Array.from({ length: input.length }, (_, i) =>
     input.charCodeAt(i),
   ).reduce((acc, code) => (acc * 33) ^ code, 5381);
   return hash >>> 0;
-}
+};
 
 /**
  * Canonical seed input for a player's figure — the player's own stable
@@ -160,12 +160,12 @@ export interface PlayerFigureIdentity {
   id: string;
 }
 
-export function playerFigureSeed(player: PlayerFigureIdentity): string {
+export const playerFigureSeed = (player: PlayerFigureIdentity): string => {
   return player.id;
-}
+};
 
 /** A stable xorshift32 stream — the same seed always yields the same draws in the same order. */
-function createPrngStream(seed: number): () => number {
+const createPrngStream = (seed: number): (() => number) => {
   const stream = { state: seed || 1 };
   return () => {
     stream.state ^= stream.state << 13;
@@ -175,20 +175,20 @@ function createPrngStream(seed: number): () => number {
     stream.state >>>= 0;
     return stream.state / 4_294_967_296;
   };
-}
+};
 
-function span(random: () => number, lo: number, hi: number): number {
+const span = (random: () => number, lo: number, hi: number): number => {
   return lo + random() * (hi - lo);
-}
+};
 
 /**
  * The seeded levers, before the containment guard runs. Draw order matches
  * the design drill exactly, including the discarded first `scale` draw —
  * changing the order changes which seed maps to which look.
  */
-export function generateRawPlayerFigureVariant(
+export const generateRawPlayerFigureVariant = (
   seed: number,
-): PlayerFigureVariant {
+): PlayerFigureVariant => {
   const random = createPrngStream(seed);
 
   // Superseded by the wider `scale` draw at the end of this function — the
@@ -237,7 +237,7 @@ export function generateRawPlayerFigureVariant(
     pattern,
     stripeCount,
   };
-}
+};
 
 interface Matrix2D {
   a: number;
@@ -307,9 +307,9 @@ const applyMatrix = (m: Matrix2D, x: number, y: number): [number, number] => [
  * re-encoding the same translate/rotate/skewX/scale chain as a template
  * string — one encoding, so the two can never drift apart.
  */
-export function buildBaseTransformMatrix(
+export const buildBaseTransformMatrix = (
   variant: PlayerFigureVariant,
-): Matrix2D {
+): Matrix2D => {
   return [
     translateMatrix(
       110 + variant.offsetX,
@@ -320,7 +320,7 @@ export function buildBaseTransformMatrix(
     scaleMatrix(variant.flip * variant.scale, variant.scale),
     translateMatrix(-110, -150),
   ].reduce(multiplyMatrix);
-}
+};
 
 /**
  * The figure's axis-aligned bounding box, computed analytically from the
@@ -338,9 +338,9 @@ export function buildBaseTransformMatrix(
  * the union of both — bounding only the underprint would let the guard
  * certify a box the overprint's registration draw can still poke outside.
  */
-export function computeFigureBoundingBox(
+export const computeFigureBoundingBox = (
   variant: PlayerFigureVariant,
-): FigureBoundingBox {
+): FigureBoundingBox => {
   const base = buildBaseTransformMatrix(variant);
   const halfWidth =
     Math.max(
@@ -379,7 +379,7 @@ export function computeFigureBoundingBox(
     minY: Math.min(underprint.minY, underprint.minY + variant.registrationY),
     maxY: Math.max(underprint.maxY, underprint.maxY + variant.registrationY),
   };
-}
+};
 
 /**
  * The top/side guard (#2542's addendum): shift before shrinking, at most 8
@@ -389,9 +389,9 @@ export function computeFigureBoundingBox(
  * deliberately left free — a torso running past it is the crop lever
  * working, not a fault.
  */
-export function applyContainmentGuard(
+export const applyContainmentGuard = (
   variant: PlayerFigureVariant,
-): PlayerFigureVariant {
+): PlayerFigureVariant => {
   const maxWidth = FIGURE_VIEWBOX_WIDTH - 2 * CONTAINMENT_MARGIN;
 
   // One recursion step per pass, capped at MAX_CONTAINMENT_PASSES.
@@ -427,7 +427,7 @@ export function applyContainmentGuard(
   };
 
   return pass(variant, 0);
-}
+};
 
 /** How far to shift right (negative: left) so no shoulder crosses the margin. */
 const horizontalShift = (box: { minX: number; maxX: number }): number => {
@@ -445,9 +445,9 @@ const horizontalShift = (box: { minX: number; maxX: number }): number => {
  * re-triggers the top guard — it runs once, un-looped. A torso already
  * bleeding past the bottom is left untouched.
  */
-export function applyBottomClamp(
+export const applyBottomClamp = (
   variant: PlayerFigureVariant,
-): PlayerFigureVariant {
+): PlayerFigureVariant => {
   const box = computeFigureBoundingBox(variant);
   if (box.maxY < FIGURE_VIEWBOX_HEIGHT) {
     return {
@@ -456,14 +456,16 @@ export function applyBottomClamp(
     };
   }
   return variant;
-}
+};
 
 /**
  * The full pipeline: seed (see `playerFigureSeed`), draw the levers, then
  * guard and clamp. This is what `<JerseyIllustration>` calls — it never
  * needs the intermediate steps.
  */
-export function computePlayerFigureVariant(seed: string): PlayerFigureVariant {
+export const computePlayerFigureVariant = (
+  seed: string,
+): PlayerFigureVariant => {
   const raw = generateRawPlayerFigureVariant(djb2Seed(seed));
   return applyBottomClamp(applyContainmentGuard(raw));
-}
+};

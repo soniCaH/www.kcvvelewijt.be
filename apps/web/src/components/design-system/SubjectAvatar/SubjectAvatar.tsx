@@ -52,16 +52,16 @@ export const SUBJECT_AVATAR_SIZE: Record<SubjectAvatarScale, RoundAvatarSize> =
  * Willem", "Mohamed Amine") is still ONE first name: one letter. Only the byline
  * carries a full author name, and that one gets the helper's two.
  */
-function monogramName(name: string, scale: SubjectAvatarScale): string {
+const monogramName = (name: string, scale: SubjectAvatarScale): string => {
   return scale === "byline" ? name : (name.trim().split(/\s+/)[0] ?? "");
-}
+};
 
-export function SubjectAvatar({
+export const SubjectAvatar = ({
   firstName,
   photoUrl,
   scale,
   className,
-}: SubjectAvatarProps) {
+}: SubjectAvatarProps) => {
   return (
     <RoundAvatar
       size={SUBJECT_AVATAR_SIZE[scale]}
@@ -70,4 +70,4 @@ export function SubjectAvatar({
       className={className}
     />
   );
-}
+};

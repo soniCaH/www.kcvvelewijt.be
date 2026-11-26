@@ -75,7 +75,7 @@ export type MatchStandingsSectionProps =
  *   double-heading reason on this specific route).
  * - **Rows present** — the table, as before.
  */
-export function MatchStandingsSection(props: MatchStandingsSectionProps) {
+export const MatchStandingsSection = (props: MatchStandingsSectionProps) => {
   const { homeClubId, awayClubId, highlightClubId, className } = props;
 
   // `.filter` returns a fresh array, so the in-place `.sort` never mutates the
@@ -113,4 +113,4 @@ export function MatchStandingsSection(props: MatchStandingsSectionProps) {
       )}
     </PageContainer>
   );
-}
+};

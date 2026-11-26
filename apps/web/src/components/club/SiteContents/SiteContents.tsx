@@ -55,7 +55,7 @@ const CHAPTER_GROUP_ID: ContentsGroup["id"] = "nieuws";
  * colour boundary top and bottom, matching the padding value `bg-cream-soft`
  * bands use everywhere else (#2571).
  */
-export function SiteContents({ groups }: SiteContentsProps) {
+export const SiteContents = ({ groups }: SiteContentsProps) => {
   if (groups.length === 0) return null;
 
   return (
@@ -115,4 +115,4 @@ export function SiteContents({ groups }: SiteContentsProps) {
       })}
     </div>
   );
-}
+};

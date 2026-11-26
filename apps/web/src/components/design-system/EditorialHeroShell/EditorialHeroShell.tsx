@@ -30,12 +30,12 @@ export interface EditorialHeroShellProps {
   width?: "wide" | "index";
 }
 
-export function EditorialHeroShell({
+export const EditorialHeroShell = ({
   editorial,
   cover,
   coverFirstOnMobile = false,
   width = "wide",
-}: EditorialHeroShellProps) {
+}: EditorialHeroShellProps) => {
   return (
     <section
       className={cn(
@@ -77,4 +77,4 @@ export function EditorialHeroShell({
       ) : null}
     </section>
   );
-}
+};

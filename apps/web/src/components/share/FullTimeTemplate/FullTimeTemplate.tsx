@@ -39,7 +39,7 @@ export interface FullTimeTemplateProps {
  * hero. Win → loud register B; draw → calm cream; loss → sober cream/brick.
  * Register A/B by default, or a fullscreen newsprint photo when supplied.
  */
-export function FullTimeTemplate({
+export const FullTimeTemplate = ({
   matchName,
   score,
   mood,
@@ -47,7 +47,7 @@ export function FullTimeTemplate({
   homeLogo,
   awayLogo,
   imageUrl,
-}: FullTimeTemplateProps) {
+}: FullTimeTemplateProps) => {
   const m = resolveResultMood(mood);
   const hasImage = Boolean(imageUrl);
   const crests = resolveCrests(matchName, homeLogo, awayLogo);
@@ -124,4 +124,4 @@ export function FullTimeTemplate({
       <ShareFoot left={matchName} align="center" />
     </ShareFrame>
   );
-}
+};

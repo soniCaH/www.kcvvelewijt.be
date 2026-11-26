@@ -157,12 +157,12 @@ const DEFAULT_TAPE_COLORS: readonly [TapeStripColor, TapeStripColor] = [
  * (`oppositeTapeRotation`). Pure function so render/hydration produce
  * identical output.
  */
-function deriveTapeRotations(
+const deriveTapeRotations = (
   seed: string,
-): readonly [TapeStripRotation, TapeStripRotation] {
+): readonly [TapeStripRotation, TapeStripRotation] => {
   const left = tapeRotationFor(seed);
   return [left, oppositeTapeRotation(left)];
-}
+};
 
 // aspect-ratio CSS-class mapping, mirrors `<TapedFigure>`'s Tailwind
 // arbitrary syntax. Inline `style.aspectRatio` was rejected at review

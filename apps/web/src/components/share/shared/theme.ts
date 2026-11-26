@@ -17,10 +17,10 @@ const OPTIMIZER_HOSTS = new Set([
  * non-allowlisted hosts pass through unchanged (the optimizer would 400 on a
  * host that isn't in `remotePatterns`).
  */
-export function toSameOriginImage(
+export const toSameOriginImage = (
   url: string | undefined,
   width: number,
-): string | undefined {
+): string | undefined => {
   if (!url) return url;
   // Every return path runs the user value through a recognized sanitizer
   // (encodeURIComponent in the optimizer param, encodeURI otherwise) so this is
@@ -38,7 +38,7 @@ export function toSameOriginImage(
   // blob:/data:/relative are already same-origin; encodeURI is a no-op on these
   // but keeps the sanitizer on every path.
   return encodeURI(url);
-}
+};
 
 /**
  * Voice register for a share card (locked design `sh4`):
@@ -114,10 +114,10 @@ const LOUD_PALETTE: SharePalette = {
  * Resolve the foreground palette for a register + sentiment combination,
  * mirroring the `.vA / .vB / .fs` colour cascade in the locked `sh4` mockup.
  */
-export function resolvePalette(
+export const resolvePalette = (
   register: ShareRegister,
   sentiment: ShareSentiment = "neutral",
-): SharePalette {
+): SharePalette => {
   if (register === "dark" || register === "image") {
     return LOUD_PALETTE;
   }
@@ -155,31 +155,33 @@ export function resolvePalette(
     badgeBg: TOKENS.ink,
     badgeText: TOKENS.cream,
   };
-}
+};
 
 /** Gradient overlay applied over a fullscreen newsprint photo. */
-export function overlayGradient(overlay: ShareOverlay): string {
+export const overlayGradient = (overlay: ShareOverlay): string => {
   return overlay === "shout"
     ? "linear-gradient(180deg, rgba(10,30,20,0.55) 0%, rgba(19,61,40,0.30) 42%, rgba(8,26,18,0.92) 100%)"
     : "linear-gradient(180deg, rgba(10,30,20,0.40) 0%, rgba(19,61,40,0.20) 38%, rgba(8,26,18,0.86) 100%)";
-}
+};
 
 /** Split a "Home — Away" match name into its two club names. */
-export function splitMatchName(matchName: string): {
+export const splitMatchName = (
+  matchName: string,
+): {
   home: string;
   away: string;
-} {
+} => {
   const parts = matchName.split(/—|\s-\s/).map((s) => s.trim());
   return { home: parts[0] ?? matchName, away: parts[1] ?? "" };
-}
+};
 
 /** Best-effort opponent name: the side that is not KCVV. */
-export function opponentName(matchName: string): string {
+export const opponentName = (matchName: string): string => {
   const { home, away } = splitMatchName(matchName);
   if (/kcvv/i.test(home) && !/kcvv/i.test(away)) return away;
   if (/kcvv/i.test(away) && !/kcvv/i.test(home)) return home;
   return away || home;
-}
+};
 
 export type ResultMood = "win" | "draw" | "loss";
 
@@ -198,7 +200,7 @@ export interface ResolvedResultMood {
  * draw → calm cream; loss → sober brick. Shared by the Eindstand (9:16) and
  * Square result templates.
  */
-export function resolveResultMood(mood: ResultMood): ResolvedResultMood {
+export const resolveResultMood = (mood: ResultMood): ResolvedResultMood => {
   switch (mood) {
     case "win":
       return {
@@ -225,12 +227,12 @@ export function resolveResultMood(mood: ResultMood): ResolvedResultMood {
         overlay: "calm",
       };
   }
-}
+};
 
 /** Normalize a "2 - 0" score to a tight en-dash "2–0" for display. */
-export function formatScore(score: string): string {
+export const formatScore = (score: string): string => {
   return score.replace(/\s*-\s*/g, "–");
-}
+};
 
 /**
  * Convert a BFF squad label (`Match.kcvv_team_label`, e.g. `"A-Ploeg"`,
@@ -241,7 +243,9 @@ export function formatScore(score: string): string {
  * passes through unchanged. Empty, whitespace-only or absent input means no
  * badge.
  */
-export function shortSquadLabel(label: string | undefined): string | undefined {
+export const shortSquadLabel = (
+  label: string | undefined,
+): string | undefined => {
   const trimmed = label?.trim();
   if (!trimmed) return undefined;
   // Case-insensitive match: the BFF label is always "A-Ploeg"/"B-Ploeg", but
@@ -251,7 +255,7 @@ export function shortSquadLabel(label: string | undefined): string | undefined {
   if (normalized === "a-ploeg") return "A";
   if (normalized === "b-ploeg") return "B";
   return trimmed;
-}
+};
 
 export interface CrestEntry {
   logo: string;
@@ -264,11 +268,11 @@ export interface CrestEntry {
  * local crest; the opponent uses the crest supplied from the match data (absent
  * on free-typed matches, so that tile is simply omitted).
  */
-export function resolveCrests(
+export const resolveCrests = (
   matchName: string,
   homeLogo?: string,
   awayLogo?: string,
-): CrestEntry[] {
+): CrestEntry[] => {
   const { home, away } = splitMatchName(matchName);
   const homeCrest = /kcvv/i.test(home) ? KCVV_LOGO : homeLogo;
   const awayCrest = /kcvv/i.test(away) ? KCVV_LOGO : awayLogo;
@@ -277,4 +281,4 @@ export function resolveCrests(
     away && awayCrest ? { logo: awayCrest, alt: away, rotate: 3 } : null,
   ];
   return entries.filter((c): c is CrestEntry => Boolean(c));
-}
+};

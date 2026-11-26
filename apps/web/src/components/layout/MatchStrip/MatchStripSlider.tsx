@@ -20,7 +20,7 @@ export interface MatchStripSlide {
  * crests and the scoreboard all stay on the server; this holds the one
  * `showResult` toggle and the grid around it.
  */
-export function MatchStripSlider({
+export const MatchStripSlider = ({
   result,
   fixture,
   matchDay = false,
@@ -29,7 +29,7 @@ export function MatchStripSlider({
   fixture: MatchStripSlide | null;
   /** The strip's match-day ground (#2616) — see `<MatchStripView>`'s own docblock. */
   matchDay?: boolean;
-}) {
+}) => {
   // Default to the result when there is one; otherwise the fixture is the
   // only slide there is. On match day, default to the fixture instead — it
   // is the reason the strip is dark in the first place, and a desktop
@@ -122,4 +122,4 @@ export function MatchStripSlider({
       <div className="flex items-center justify-end px-6">{parts.cta}</div>
     </div>
   );
-}
+};

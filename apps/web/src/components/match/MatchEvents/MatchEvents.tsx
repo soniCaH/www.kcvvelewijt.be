@@ -17,9 +17,9 @@ import { Swap } from "@/lib/icons.redesign";
 import { EmptyState } from "@/components/design-system";
 import { CardGlyph } from "../CardGlyph";
 
-function assertNever(value: never): never {
+const assertNever = (value: never): never => {
   throw new Error(`Unhandled MatchEvent type: ${String(value)}`);
-}
+};
 
 /**
  * Free-standing football SVG used as the goal glyph. Cream rind with ink
@@ -27,7 +27,7 @@ function assertNever(value: never): never {
  * via <CardGlyph>, arrows for subs) which all sit unframed in their 22px
  * grid cell. Locked at 6.B.d3 round 2 alongside the card SVGs.
  */
-function FootballGlyph() {
+const FootballGlyph = () => {
   return (
     <svg
       viewBox="0 0 16 16"
@@ -58,7 +58,7 @@ function FootballGlyph() {
       <polygon points="9.5,12 11,11 12,12.5 10,13" fill="var(--color-ink)" />
     </svg>
   );
-}
+};
 
 /**
  * 20px team-logo chip rendered at the right edge of each event row. Mirrors
@@ -70,13 +70,13 @@ function FootballGlyph() {
  * named in the row either way. `data-team` carries the name for tests and
  * styling — it is inert to assistive tech, which is the point.
  */
-function TeamLogoChip({
+const TeamLogoChip = ({
   name,
   logo,
 }: {
   name: string;
   logo: string | undefined;
-}) {
+}) => {
   if (logo) {
     return (
       <Image
@@ -100,7 +100,7 @@ function TeamLogoChip({
       {initial}
     </span>
   );
-}
+};
 
 export interface MatchEvent {
   /** Unique event ID */
@@ -164,12 +164,12 @@ export interface MatchEventsProps {
 /**
  * Format the minute display
  */
-function formatMinute(minute: number, additionalTime?: number): string {
+const formatMinute = (minute: number, additionalTime?: number): string => {
   if (additionalTime) {
     return `${minute}+${additionalTime}'`;
   }
   return `${minute}'`;
-}
+};
 
 const matchesFilter = (
   e: MatchEvent,
@@ -200,7 +200,7 @@ const matchesFilter = (
  * No background containers — every glyph stands on the paper directly,
  * matching the editorial print register of the surrounding kicker + heading.
  */
-function EventGlyph({ type }: { type: MatchEvent["type"] }) {
+const EventGlyph = ({ type }: { type: MatchEvent["type"] }) => {
   switch (type) {
     case "goal":
       return (
@@ -221,7 +221,7 @@ function EventGlyph({ type }: { type: MatchEvent["type"] }) {
     default:
       return assertNever(type);
   }
-}
+};
 
 /**
  * Render match events timeline showing goals, cards, and substitutions.
@@ -236,7 +236,7 @@ function EventGlyph({ type }: { type: MatchEvent["type"] }) {
  * @param className - Additional CSS classes
  * @returns The rendered events timeline
  */
-export function MatchEvents({
+export const MatchEvents = ({
   homeTeamName,
   awayTeamName,
   homeTeamLogo,
@@ -248,7 +248,7 @@ export function MatchEvents({
   groupBy = "chronological",
   isLoading = false,
   className,
-}: MatchEventsProps) {
+}: MatchEventsProps) => {
   // Loading skeleton
   if (isLoading) {
     return (
@@ -351,7 +351,7 @@ export function MatchEvents({
       ))}
     </ol>
   );
-}
+};
 
 /**
  * Per-team event list — used when callers opt into `groupBy="team"`. Each
@@ -361,7 +361,7 @@ export function MatchEvents({
  *   │  minute  │  glyph   │  player  │
  *   └──────────┴──────────┴──────────┘
  */
-function EventList({
+const EventList = ({
   events,
   showIcons,
   highlightTeam,
@@ -369,7 +369,7 @@ function EventList({
   events: readonly MatchEvent[];
   showIcons: boolean;
   highlightTeam?: "home" | "away";
-}) {
+}) => {
   if (events.length === 0) {
     // Tier "slot" (#2427 / #2562): one team's column is empty while the
     // other side of the grouped view is full. Fills the rest of the
@@ -395,14 +395,14 @@ function EventList({
       ))}
     </ol>
   );
-}
+};
 
 /**
  * Chronological-timeline event row — Option F (locked 6.B.d3 round 2).
  * Six columns; the team-specific name + glyph columns render on the event's
  * own side, the opposite side stays empty.
  */
-function EventRow({
+const EventRow = ({
   event,
   showIcon,
   highlighted,
@@ -415,7 +415,7 @@ function EventRow({
   highlighted: boolean;
   teamName: string;
   teamLogo: string | undefined;
-}) {
+}) => {
   const isHome = event.team === "home";
   const nameTint = highlighted ? "text-jersey-deep" : "text-ink";
   return (
@@ -484,13 +484,13 @@ function EventRow({
       <TeamLogoChip name={teamName} logo={teamLogo} />
     </div>
   );
-}
+};
 
 /**
  * Simpler single-side row used by `groupBy="team"`. Each column is already
  * team-specific so the Option F split doesn't apply.
  */
-function SingleSideEventRow({
+const SingleSideEventRow = ({
   event,
   showIcon,
   highlighted,
@@ -499,7 +499,7 @@ function SingleSideEventRow({
   showIcon: boolean;
   /** When true, the player name renders in `jersey-deep` (KCVV highlight). */
   highlighted: boolean;
-}) {
+}) => {
   return (
     <div className="grid grid-cols-[56px_22px_1fr] items-center gap-3 py-3 md:gap-4">
       {/* Minute — a TAG beside a scorer (#2516 rule 1); mono, same as the
@@ -523,7 +523,7 @@ function SingleSideEventRow({
       </span>
     </div>
   );
-}
+};
 
 /**
  * Plain-text mirror of `<EventDescription>`, for the row's `title` — the
@@ -538,7 +538,7 @@ function SingleSideEventRow({
  * row (two separate text nodes carry the meaning), so putting it back into
  * `title` would re-expose content the row deliberately hides.
  */
-function eventDescriptionText(event: MatchEvent): string {
+const eventDescriptionText = (event: MatchEvent): string => {
   switch (event.type) {
     case "goal": {
       const parts = [
@@ -560,7 +560,7 @@ function eventDescriptionText(event: MatchEvent): string {
     default:
       return assertNever(event.type);
   }
-}
+};
 
 /**
  * Event description text. Variant-aware:
@@ -568,7 +568,7 @@ function eventDescriptionText(event: MatchEvent): string {
  *  - card: player only
  *  - substitution: `in ⇆ out` form per lock doc
  */
-function EventDescription({ event }: { event: MatchEvent }) {
+const EventDescription = ({ event }: { event: MatchEvent }) => {
   switch (event.type) {
     case "goal":
       return (
@@ -609,4 +609,4 @@ function EventDescription({ event }: { event: MatchEvent }) {
     default:
       return assertNever(event.type);
   }
-}
+};

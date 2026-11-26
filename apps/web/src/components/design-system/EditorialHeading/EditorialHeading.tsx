@@ -89,19 +89,19 @@ const TONE_CLASS: Record<EditorialHeadingTone, string> = {
   cream: "text-cream",
 };
 
-function ensureTrailingPeriod(text: string): string {
+const ensureTrailingPeriod = (text: string): string => {
   // A heading already terminated by sentence punctuation keeps it — appending a
   // period to a question ("…langs de lijn?") or exclamation would be wrong.
   return /[.?!]$/.test(text.trimEnd()) ? text : `${text}.`;
-}
+};
 
-function renderPortableTextTitle(
+const renderPortableTextTitle = (
   blocks: PortableTextBlock[],
   accentTone: EditorialHeadingAccentTone,
 ): {
   body: ReactNode;
   endsWithPeriod: boolean;
-} {
+} => {
   const block = blocks[0];
   if (!block || !Array.isArray((block as { children?: unknown }).children)) {
     return { body: null, endsWithPeriod: false };
@@ -130,7 +130,7 @@ function renderPortableTextTitle(
     </>
   );
   return { body, endsWithPeriod };
-}
+};
 
 const renderBody = (
   children: EditorialHeadingProps["children"],
@@ -175,7 +175,7 @@ const renderBody = (
   );
 };
 
-export function EditorialHeading({
+export const EditorialHeading = ({
   level,
   children,
   size = "display-lg",
@@ -184,7 +184,7 @@ export function EditorialHeading({
   accentTone = "jersey-deep",
   className,
   id,
-}: EditorialHeadingProps) {
+}: EditorialHeadingProps) => {
   const body = renderBody(children, emphasis, accentTone);
 
   return createElement(
@@ -197,4 +197,4 @@ export function EditorialHeading({
     },
     body,
   );
-}
+};

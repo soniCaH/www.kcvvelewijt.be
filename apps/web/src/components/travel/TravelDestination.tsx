@@ -11,7 +11,7 @@ import { TRAVEL_CLASS, travelName, type TravelKind } from "@/lib/utils/travel";
  * A server component: the detail pages are, and the name is the record's, not
  * the visitor's tap.
  */
-export function TravelDestination({
+export const TravelDestination = ({
   kind,
   id,
   children,
@@ -19,7 +19,7 @@ export function TravelDestination({
   kind: TravelKind;
   id: number | string | undefined;
   children: ReactNode;
-}) {
+}) => {
   if (id === undefined) return <>{children}</>;
   return (
     <ViewTransition
@@ -30,4 +30,4 @@ export function TravelDestination({
       {children}
     </ViewTransition>
   );
-}
+};

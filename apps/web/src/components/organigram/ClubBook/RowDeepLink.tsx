@@ -8,10 +8,10 @@ import { openStructureRow } from "./open-row";
  * Renders nothing. The rows are server-rendered, so they are in the DOM by the
  * time this effect runs. An id that matches no row does nothing.
  */
-export function RowDeepLink() {
+export const RowDeepLink = () => {
   useEffect(() => {
     const nodeId = new URLSearchParams(window.location.search).get("member");
     if (nodeId) openStructureRow(nodeId);
   }, []);
   return null;
-}
+};
