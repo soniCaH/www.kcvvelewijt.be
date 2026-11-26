@@ -60,10 +60,10 @@ const article = (over: Partial<Article> & { _id: string }): Article => ({
   ...over,
 });
 
-async function runQuery(query: string, dataset: readonly unknown[]) {
+const runQuery = async (query: string, dataset: readonly unknown[]) => {
   const result = await evaluate(parse(query), { dataset });
   return (await result.get()) as Record<string, unknown>[];
-}
+};
 
 const projectOne = async (doc: Article) => {
   const [row] = await runQuery(

@@ -11,12 +11,12 @@ import { SanityProjection } from "../sanity/projection";
 
 global.fetch = vi.fn();
 
-function makeEnvLayer() {
+const makeEnvLayer = () => {
   return makeTestEnvLayer({
     SANITY_PROJECT_ID: "test-project",
     SANITY_WEBHOOK_SECRET: "",
   });
-}
+};
 
 const cacheMock: KvCacheInterface = {
   get: () => Effect.succeed(null),
@@ -41,7 +41,7 @@ beforeEach(() => {
   global.fetch = vi.fn();
 });
 
-function runGetTeamMatches(teamId: number) {
+const runGetTeamMatches = (teamId: number) => {
   const program = Effect.gen(function* () {
     const service = yield* PsdService;
     return yield* service.getTeamMatches(teamId);
@@ -57,7 +57,7 @@ function runGetTeamMatches(teamId: number) {
       ),
     ),
   );
-}
+};
 
 describe("fetchJson typed error classification", () => {
   it("produces UpstreamUnavailableError on HTTP 429", async () => {

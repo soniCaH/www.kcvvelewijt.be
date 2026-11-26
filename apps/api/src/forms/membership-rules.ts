@@ -10,10 +10,10 @@ import {
  * Cross-field business rules that depend on the submit date (the Effect Schema
  * only covers shape). Returns a `{ field: message }` map — empty means valid.
  */
-export function validateMembershipRules(
+export const validateMembershipRules = (
   payload: MembershipRequest,
   now: Date,
-): Record<string, string> {
+): Record<string, string> => {
   const errors: Record<string, string> = {};
   const plausible = isPlausibleBirthDate(payload.birthDate, now);
 
@@ -40,4 +40,4 @@ export function validateMembershipRules(
   }
 
   return errors;
-}
+};

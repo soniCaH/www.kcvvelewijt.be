@@ -7,14 +7,14 @@ import { buildMembershipEmails } from "./membership-emails";
 
 const payload = decodeMembership(validMembershipRaw);
 
-function build(remark?: string) {
+const build = (remark?: string) => {
   const [applicant, admin] = buildMembershipEmails({
     payload: decodeMembership({ ...validMembershipRaw, remark }),
     isMinor: false,
     adminRecipient: "bestuur@example.com",
   });
   return { applicant: applicant!.html, admin: admin!.html };
-}
+};
 
 describe("buildMembershipEmails — remark", () => {
   it("shows the remark, HTML-escaped, in the club mail", () => {

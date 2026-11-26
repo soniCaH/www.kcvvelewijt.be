@@ -35,9 +35,9 @@ export type JobOutcome =
  * causes. Only `"ok"` (nothing to prune, or a prune that landed) is
  * healthy.
  */
-export function pruneJobOutcome(
+export const pruneJobOutcome = (
   phase: PrunePhaseOutcome | undefined,
-): JobOutcome | null {
+): JobOutcome | null => {
   if (phase === undefined || phase.kind === "not-run") return null;
   if (phase.kind === "ok") return { ok: true };
   if (phase.kind === "refused") {
@@ -55,4 +55,4 @@ export function pruneJobOutcome(
       `search-index-prune: ran but confirmed 0/${phase.requestedCount} deletes — Vectorize rejected every delete`,
     ),
   };
-}
+};

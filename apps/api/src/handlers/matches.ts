@@ -175,13 +175,13 @@ const isResultPending = (m: Match, now: number): boolean => {
  * already changed (postponed/cancelled/stopped) need no faster refresh — the
  * list is correct for them.
  */
-export function teamMatchesTtl(
+export const teamMatchesTtl = (
   matches: readonly Match[],
   now: number = Date.now(),
-): number {
+): number => {
   const resultPending = matches.some((m) => isResultPending(m, now));
   return resultPending ? TTL.MATCH_DETAIL_MATCHDAY : TTL.MATCHES_TEAM;
-}
+};
 
 /**
  * Soft cache TTL (seconds) for the club-wide next-matches list (#3628).
@@ -204,14 +204,14 @@ export function teamMatchesTtl(
  * kickoff (a new cup match, a match moved earlier) stays hidden until the next
  * refresh, up to 12 h.
  */
-export function nextMatchesTtl(
+export const nextMatchesTtl = (
   matches: readonly Match[],
   now: number = Date.now(),
-): number {
+): number => {
   const kickoffs = validKickoffs(matches);
   if (kickoffs.some((k) => k < now)) return TTL.MATCH_DETAIL_MATCHDAY;
   return proximityListTtl(kickoffs, now);
-}
+};
 
 /**
  * Soft cache TTL (seconds) for the matches-window list (#3629): the same
@@ -251,16 +251,20 @@ const proximityListTtl = (kickoffs: readonly number[], now: number): number =>
     : TTL.NEXT_MATCHES;
 
 /** True when the detail already carries report data (a non-empty lineup or events). */
-function hasMatchReportData(detail: MatchDetail): boolean {
+const hasMatchReportData = (detail: MatchDetail): boolean => {
   const lineup = detail.lineup;
   const hasLineup =
     lineup !== undefined && (lineup.home.length > 0 || lineup.away.length > 0);
   const hasEvents = detail.events !== undefined && detail.events.length > 0;
   return hasLineup || hasEvents;
-}
+};
 
 /** Base TTL tier from kickoff proximity (before the report-pending override). */
-function proximityTtl(kickoff: number, finished: boolean, now: number): number {
+const proximityTtl = (
+  kickoff: number,
+  finished: boolean,
+  now: number,
+): number => {
   if (finished && now - kickoff >= 48 * HOUR_MS) return TTL.MATCH_DETAIL_PAST;
 
   // In play (#3669): a refetch shows nothing new. The extra 15 min covers an
@@ -276,7 +280,7 @@ function proximityTtl(kickoff: number, finished: boolean, now: number): number {
   if (distanceMs < 24 * HOUR_MS) return TTL.MATCH_DETAIL_MATCHDAY;
   if (distanceMs < 7 * 24 * HOUR_MS) return TTL.MATCH_DETAIL_WEEK;
   return TTL.MATCH_DETAIL_DEFAULT;
-}
+};
 
 /** Report state of a match detail, feeding the report-pending TTL override. */
 interface MatchReportState {
@@ -310,12 +314,12 @@ interface MatchReportState {
  * `report` defaults to "settled with report" so a caller that only cares about
  * proximity gets the base ladder.
  */
-export function matchDetailTtl(
+export const matchDetailTtl = (
   date: Date,
   status: string,
   report: MatchReportState = { hasReportData: true, hasReport: false },
   now: number = Date.now(),
-): number {
+): number => {
   const kickoff = kickoffMs(date);
   const natural = proximityTtl(kickoff, isSettledMatchStatus(status), now);
 
@@ -325,7 +329,7 @@ export function matchDetailTtl(
     (report.hasReport || now - kickoff < 48 * HOUR_MS);
 
   return reportPending ? Math.min(natural, TTL.MATCH_DETAIL_MATCHDAY) : natural;
-}
+};
 
 /**
  * Kickoff + 2 h or more past (`IN_PLAY_MS`) and still "scheduled" (no result
@@ -334,16 +338,16 @@ export function matchDetailTtl(
  * result to fetch. Postponed / stopped / cancelled never settle, so they never
  * wait.
  */
-export function needsInlineRefresh(
+export const needsInlineRefresh = (
   detail: Pick<MatchDetail, "date" | "status">,
   now: number = Date.now(),
-): boolean {
+): boolean => {
   return (
     detail.status === "scheduled" &&
     hasValidKickoff(detail) &&
     isPastInPlay(kickoffMs(detail.date), now)
   );
-}
+};
 
 export const getMatchDetailHandler = (
   matchId: number,

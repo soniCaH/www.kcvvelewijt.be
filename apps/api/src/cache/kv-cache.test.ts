@@ -25,7 +25,7 @@ import { reportScheduledJobOutcome } from "../psd/job-alert";
  * the caller asks for — real KV pages this way too, and the port's `list`
  * doesn't (and shouldn't) forward a `limit`, so a pagination test has to
  * force a small page from the mock's own side instead. */
-function makeMockKv(options: { pageSize?: number } = {}) {
+const makeMockKv = (options: { pageSize?: number } = {}) => {
   const pageSize = options.pageSize ?? Infinity;
   const store = new Map<string, string>();
   return {
@@ -61,40 +61,40 @@ function makeMockKv(options: { pageSize?: number } = {}) {
     ),
     store,
   };
-}
+};
 
-function makeEnvLayer(
+const makeEnvLayer = (
   mockKv: ReturnType<typeof makeMockKv>,
   overrides: Partial<TestEnv> = {},
-) {
+) => {
   return makeTestEnvLayer({
     PSD_CACHE: mockKv as unknown as KVNamespace,
     SANITY_PROJECT_ID: "test-project",
     SANITY_WEBHOOK_SECRET: "",
     ...overrides,
   });
-}
+};
 
 const TestSchema = S.Struct({ name: S.String, value: S.Number });
 
 /** Helper to create a cached wrapper entry */
-function makeWrapper(value: unknown, ageMs: number) {
+const makeWrapper = (value: unknown, ageMs: number) => {
   return JSON.stringify({ value, fetchedAt: Date.now() - ageMs });
-}
+};
 
 /**
  * A BackgroundRunnerService whose `fork` runs the refresh eagerly on the test
  * layers and records the promise, so a test can `await settle()` to observe
  * the background effect's outcome deterministically.
  */
-function withRunner(
+const withRunner = (
   mockKv: ReturnType<typeof makeMockKv>,
   gateLayer: Layer.Layer<PsdGateService>,
   /** Extra layers for the DETACHED work. The runner runs it on its own runtime,
    * so layers provided around `getOrFetch` never reach it — a log capture has
    * to come in through here. */
   extra: Layer.Layer<never> = Layer.empty,
-) {
+) => {
   const pending: Promise<void>[] = [];
   const layer = Layer.mergeAll(KvCacheLive, gateLayer, extra).pipe(
     Layer.provideMerge(makeEnvLayer(mockKv)),
@@ -112,7 +112,7 @@ function withRunner(
       }),
   });
   return { runnerLayer, settle: () => Promise.all(pending) };
-}
+};
 
 /** Fresh gate with its OWN incident tracker so state can't leak between tests. */
 const isolatedGate = () =>
@@ -125,25 +125,28 @@ const isolatedGate = () =>
  * was (or, critically, was NOT) made, which "incidentOpen ended up false"
  * can't distinguish from "never reported". Wrapping `isolatedGate` keeps
  * single-flight behaviour honest and survives `PsdGate` gaining methods. */
-function spyGate() {
+const spyGate = () => {
   const reportOutcome = vi.fn(() => Effect.succeed({ incidentOpen: false }));
   const layer = Layer.effect(
     PsdGateService,
     Effect.map(PsdGateService, (real) => ({ ...real, reportOutcome })),
   ).pipe(Layer.provide(isolatedGate()));
   return { layer, reportOutcome };
-}
+};
 
 const dayMs = 24 * 60 * 60 * 1000;
 
 /** Plant the `stale-since:{key}` marker as if the first unfixed stale read
  * happened `ageMs` ago (#3566) — drift is measured from it, not the soft TTL. */
-function seedStaleSince(mockKv: ReturnType<typeof makeMockKv>, ageMs: number) {
+const seedStaleSince = (
+  mockKv: ReturnType<typeof makeMockKv>,
+  ageMs: number,
+) => {
   mockKv.store.set("stale-since:test-key", String(Date.now() - ageMs));
-}
+};
 
 /** Collect every log entry emitted while the returned layer is provided. */
-function captureLogs() {
+const captureLogs = () => {
   const entries: { level: string; message: string }[] = [];
   const layer = Logger.replace(
     Logger.defaultLogger,
@@ -152,7 +155,7 @@ function captureLogs() {
     }),
   );
   return { entries, layer };
-}
+};
 
 describe("TTL constants", () => {
   it("NEXT_MATCHES is 4 hours", () => {

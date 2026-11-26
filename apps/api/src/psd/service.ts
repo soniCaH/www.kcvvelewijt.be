@@ -108,11 +108,11 @@ const unavailableOnConfigError = <A>(
     ),
   );
 
-function classifyHttpError(
+const classifyHttpError = (
   url: string,
   status: number,
   statusText: string,
-): BffError {
+): BffError => {
   if (status === 404) {
     return new ResourceNotFoundError({
       message: `HTTP 404: ${statusText}`,
@@ -131,7 +131,7 @@ function classifyHttpError(
     status,
     url,
   });
-}
+};
 
 // Reused by both fetchJson branches below so the two error messages stay
 // identical whichever path produced the raw JSON value.
@@ -167,12 +167,12 @@ const PSD_FETCH_TIMEOUT_MS = 8_000;
 // The match-detail team label is optional: past this, the detail ships without it.
 const TEAMS_LABEL_TIMEOUT_MS = 3_000;
 
-function fetchJson<A, I>(
+const fetchJson = <A, I>(
   url: string,
   schema: S.Schema<A, I>,
   headers: Record<string, string>,
   options?: { readonly emptyBodyIsNotFound: EmptyBodyNotFoundOptions },
-): Effect.Effect<A, BffError> {
+): Effect.Effect<A, BffError> => {
   return Effect.gen(function* () {
     // One signal for the request AND its body read: the timeout also aborts a
     // body that stalls mid-stream, which must surface as a transient upstream
@@ -240,7 +240,7 @@ function fetchJson<A, I>(
 
     return yield* decodeAgainstSchema(json, schema);
   });
-}
+};
 
 // Identifies the single `ResourceNotFoundError` raised by `getCurrentSeason`
 // below when PSD's `/seasons` holds no season spanning today (a gap between

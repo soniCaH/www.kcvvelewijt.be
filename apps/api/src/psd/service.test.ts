@@ -37,13 +37,13 @@ const kvGetFrom =
   (key) =>
     Effect.succeed(seed[key] ?? null);
 
-function makeEnvLayer(overrides: Partial<TestEnv> = {}) {
+const makeEnvLayer = (overrides: Partial<TestEnv> = {}) => {
   return makeTestEnvLayer({
     SANITY_PROJECT_ID: "test-project",
     SANITY_WEBHOOK_SECRET: "",
     ...overrides,
   });
-}
+};
 
 const cacheMock: KvCacheInterface = {
   // Seed empty maps so getCompetitionLabels(), getTeamAges() and the
@@ -62,13 +62,13 @@ const cacheMock: KvCacheInterface = {
   durable: noopDurableKv,
 };
 
-function makeSanityMock(
+const makeSanityMock = (
   visiblePsdIds: string[] = ["1"],
-): SanityProjectionInterface {
+): SanityProjectionInterface => {
   return makeSanityProjectionStub({
     getVisibleTeamPsdIds: () => Effect.succeed(visiblePsdIds),
   });
-}
+};
 
 const seasons = [
   {
@@ -147,14 +147,14 @@ const rawDetailResponse = {
   },
 };
 
-function runService<A>(
+const runService = <A>(
   fn: (svc: (typeof PsdService)["Service"]) => Effect.Effect<A, BffError>,
   options: {
     sanityMock?: SanityProjectionInterface;
     kvMock?: KvCacheInterface;
     envOverrides?: Partial<TestEnv>;
   } = {},
-) {
+) => {
   const sanity = options.sanityMock ?? makeSanityMock();
   const kv = options.kvMock ?? cacheMock;
   const program = Effect.gen(function* () {
@@ -172,7 +172,7 @@ function runService<A>(
       ),
     ),
   );
-}
+};
 
 // The fan-outs read team name and age from the cached team map (#3631).
 // Their tests mock `/teams` over fetch, so they start from a cold map.
@@ -1249,14 +1249,14 @@ describe("PsdService.getMatchesWindow", () => {
   });
 });
 
-function rawRankingEntry(
+const rawRankingEntry = (
   id: number,
   rank: number,
   teamId: number,
   clubId: number,
   clubName: string,
   points: number,
-) {
+) => {
   return {
     id,
     rank,
@@ -1272,7 +1272,7 @@ function rawRankingEntry(
       club: { id: clubId, localName: clubName, name: clubName },
     },
   };
-}
+};
 
 // Shaped after the live `/teams/{id}/ranking` payload (re-measured 2026-08-16):
 // entries are grouped CUP -> FRIENDLY -> OFFICIAL and every name carries the

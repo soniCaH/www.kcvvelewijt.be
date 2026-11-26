@@ -168,16 +168,16 @@ const typeDescriptors: Record<AllowedType, TypeDescriptor> = {
   },
 };
 
-function buildDocumentIndex(
+const buildDocumentIndex = (
   _type: AllowedType,
   doc: Record<string, unknown>,
-): { indexText: string; metadata: Record<string, string> } {
+): { indexText: string; metadata: Record<string, string> } => {
   return typeDescriptors[_type].buildIndex(doc);
-}
+};
 
-function queryForType(type: AllowedType): string {
+const queryForType = (type: AllowedType): string => {
   return typeDescriptors[type].query;
-}
+};
 
 export const errorMessage = (err: unknown) =>
   err instanceof Error ? err.message : String(err);
@@ -412,11 +412,11 @@ const webhookEffect = (request: Request) =>
 
 export type WebhookLayer = Layer.Layer<EmbeddingService | VectorizeService>;
 
-export async function handleIndexWebhook(
+export const handleIndexWebhook = async (
   request: Request,
   env: WorkerEnv,
   layer?: WebhookLayer,
-): Promise<Response> {
+): Promise<Response> => {
   const envLayer = WorkerEnvLive(env);
   const serviceLayer =
     layer ?? Layer.mergeAll(EmbeddingServiceLive, VectorizeServiceLive);
@@ -448,4 +448,4 @@ export async function handleIndexWebhook(
       ),
     ),
   );
-}
+};

@@ -1,14 +1,14 @@
 import { describe, it, expect } from "vitest";
 import { resolveVenue, CLUB_VENUE, type VenueFixtureContext } from "./venue";
 
-function makeFixture(
+const makeFixture = (
   overrides: Partial<VenueFixtureContext> = {},
-): VenueFixtureContext {
+): VenueFixtureContext => {
   return {
     status: "scheduled",
     ...overrides,
   };
-}
+};
 
 describe("resolveVenue", () => {
   it("returns the club's ground for a home fixture", () => {

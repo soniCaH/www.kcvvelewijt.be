@@ -11,7 +11,7 @@ import { GateLogic } from "./gate-logic";
  * cooldown chained behind it, hiding the difference between "granted now" and
  * "granted one cooldown from now".
  */
-function fakeScheduler() {
+const fakeScheduler = () => {
   const state = { clock: 0 };
   return {
     now: () => state.clock,
@@ -23,7 +23,7 @@ function fakeScheduler() {
       return state.clock;
     },
   };
-}
+};
 
 /** A clock the test moves by hand — `now` is what a GateLogic reads. */
 const fakeClock = (start = 0) => {
@@ -40,18 +40,18 @@ const fakeClock = (start = 0) => {
 };
 
 /** Clock reading at the moment each of `n` sequential grants completes. */
-async function grantTimes(
+const grantTimes = async (
   gate: GateLogic,
   clock: () => number,
   n: number,
-): Promise<number[]> {
+): Promise<number[]> => {
   // Sequential: each grant waits for the previous one before it asks.
   return Array.from({ length: n }).reduce<Promise<number[]>>(async (acc) => {
     const at = await acc;
     await gate.acquireToken();
     return [...at, clock()];
   }, Promise.resolve([]));
-}
+};
 
 /** 20 grants paced at 5/s: the full index fan-out, first at 0ms, last at 3800ms. */
 const PACED_20 = Array.from({ length: 20 }, (_, i) => i * 200);

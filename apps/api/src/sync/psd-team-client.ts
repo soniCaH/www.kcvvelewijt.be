@@ -58,11 +58,11 @@ export class PsdTeamClient extends Context.Tag("PsdTeamClient")<
   PsdTeamClientInterface
 >() {}
 
-function fetchJson<A, I>(
+const fetchJson = <A, I>(
   url: string,
   schema: S.Schema<A, I>,
   headers: Record<string, string>,
-) {
+) => {
   return Effect.gen(function* () {
     const response = yield* Effect.tryPromise({
       try: () => fetch(url, { headers }),
@@ -92,7 +92,7 @@ function fetchJson<A, I>(
       ),
     );
   });
-}
+};
 
 export const PsdTeamClientLive = Layer.effect(
   PsdTeamClient,

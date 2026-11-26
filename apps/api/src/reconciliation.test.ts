@@ -9,7 +9,7 @@ const HINT = 'see apps/api/CLAUDE.md ("Some Section") for the release lever.';
 const baseConfig: ReconcileOrphansConfig = { releaseLeverHint: HINT };
 
 /** Runs an Effect while capturing every log line's level and message. */
-async function runCapturingLogs<A>(effect: Effect.Effect<A>) {
+const runCapturingLogs = async <A>(effect: Effect.Effect<A>) => {
   const messages: { level: string; message: string }[] = [];
   const TestLogger = Logger.make(({ logLevel, message }) => {
     messages.push({ level: logLevel.label, message: String(message) });
@@ -20,7 +20,7 @@ async function runCapturingLogs<A>(effect: Effect.Effect<A>) {
     ),
   );
   return { result, messages };
-}
+};
 
 describe("reconcileOrphans", () => {
   it("removes orphans when the count is under the cap", async () => {

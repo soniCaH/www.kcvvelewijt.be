@@ -31,7 +31,7 @@ const FAKE_VECTOR = Array(1024).fill(0.1);
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-async function makeSignedRequest(
+const makeSignedRequest = async (
   body: string,
   options: {
     operation?: string;
@@ -39,7 +39,7 @@ async function makeSignedRequest(
     oldTimestamp?: boolean;
     missingHeaders?: boolean;
   } = {},
-): Promise<Request> {
+): Promise<Request> => {
   const timestamp = options.oldTimestamp
     ? Date.now() - 5 * 60 * 1000 - 1000
     : Date.now();
@@ -64,9 +64,9 @@ async function makeSignedRequest(
     headers,
     body,
   });
-}
+};
 
-function makeEnv(overrides: Partial<TestEnv> = {}): TestEnv {
+const makeEnv = (overrides: Partial<TestEnv> = {}): TestEnv => {
   return makeTestEnv({
     PSD_API_BASE_URL: "",
     PSD_IMAGE_BASE_URL: "",
@@ -82,7 +82,7 @@ function makeEnv(overrides: Partial<TestEnv> = {}): TestEnv {
     SANITY_WEBHOOK_SECRET: TEST_SECRET,
     ...overrides,
   });
-}
+};
 
 // ─── Test layer factories ──────────────────────────────────────────────────
 
@@ -90,7 +90,7 @@ const upsertSpy = vi.fn<(vectors: unknown[]) => void>();
 const deleteByIdsSpy = vi.fn<(ids: string[]) => void>();
 const embedSpy = vi.fn<(text: string) => void>();
 
-function makeTestLayer(): WebhookLayer {
+const makeTestLayer = (): WebhookLayer => {
   return Layer.mergeAll(
     Layer.succeed(EmbeddingService, {
       embed: (text) =>
@@ -112,7 +112,7 @@ function makeTestLayer(): WebhookLayer {
       getByIds: () => Effect.succeed([]),
     }),
   );
-}
+};
 
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
@@ -308,9 +308,9 @@ describe("handleIndexWebhook", () => {
     // through `defaultLayer`'s mocked VectorizeService above, so these
     // tests provide the real VectorizeServiceLive (backed by a fake raw
     // VectorizeIndex) to exercise it end-to-end through the webhook.
-    function makeVectorizeIndexMock(
+    const makeVectorizeIndexMock = (
       overrides: Partial<VectorizeIndex> = {},
-    ): VectorizeIndex {
+    ): VectorizeIndex => {
       return {
         upsert: async () => ({ mutationId: "mut", count: 1 }),
         deleteByIds: async () => ({ mutationId: "mut-del", count: 0, ids: [] }),
@@ -318,11 +318,11 @@ describe("handleIndexWebhook", () => {
         getByIds: async () => [],
         ...overrides,
       } as unknown as VectorizeIndex;
-    }
+    };
 
-    function makeKvNamespaceMock(): KVNamespace & {
+    const makeKvNamespaceMock = (): KVNamespace & {
       readonly store: Map<string, string>;
-    } {
+    } => {
       const store = new Map<string, string>();
       const mock = {
         store,
@@ -350,14 +350,14 @@ describe("handleIndexWebhook", () => {
       return mock as unknown as KVNamespace & {
         readonly store: Map<string, string>;
       };
-    }
+    };
 
     // Self-contained (WorkerEnvTag provided in) so the result satisfies
     // WebhookLayer's R = never — `handleIndexWebhook`'s own default branch
     // gets away with an open requirement only because it isn't explicitly
     // annotated as WebhookLayer; a value passed as the `layer` parameter
     // must actually be self-contained.
-    function liveLayer(env: TestEnv): WebhookLayer {
+    const liveLayer = (env: TestEnv): WebhookLayer => {
       // `env` here is already a fully-populated TestEnv (built by
       // makeEnv), so passing it as makeTestEnvLayer's overrides yields
       // exactly `env` back, wrapped as a Layer<WorkerEnvTag>.
@@ -373,7 +373,7 @@ describe("handleIndexWebhook", () => {
         Layer.provide(KvCacheLive),
         Layer.provide(makeTestEnvLayer(env)),
       );
-    }
+    };
 
     it("records a successful upsert's id as a pending manifest marker", async () => {
       const kv = makeKvNamespaceMock();

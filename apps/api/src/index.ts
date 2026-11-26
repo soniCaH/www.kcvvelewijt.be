@@ -79,7 +79,7 @@ const WorkerPlatformLayer = Layer.mergeAll(
  * @param env - The Worker environment (bindings such as KV namespaces and secrets) to supply to the runtime
  * @returns A Layer supplying the PsdApi implementation composed with live services (matches, ranking, search, embedding, vectorization, HTTP client, KV cache) and required platform services
  */
-function buildAppLayer(env: WorkerEnv, ctx: ExecutionContext) {
+const buildAppLayer = (env: WorkerEnv, ctx: ExecutionContext) => {
   return HttpApiBuilder.api(PsdApi).pipe(
     Layer.provide(MatchesApiLive),
     Layer.provide(OpponentApiLive),
@@ -104,7 +104,7 @@ function buildAppLayer(env: WorkerEnv, ctx: ExecutionContext) {
     Layer.provide(WorkerEnvLive(env)),
     Layer.provideMerge(WorkerPlatformLayer),
   );
-}
+};
 
 export default {
   async fetch(

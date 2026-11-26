@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { IncidentTracker, HEALTH_WINDOW_MS } from "./incident";
 
 /** Mutable clock so we can place reports on a timeline deterministically. */
-function clock(start = 1_000_000) {
+const clock = (start = 1_000_000) => {
   const state = { t: start };
   return {
     now: () => state.t,
@@ -11,7 +11,7 @@ function clock(start = 1_000_000) {
       return ms;
     },
   };
-}
+};
 
 describe("IncidentTracker", () => {
   it("opens an incident on the first failure and returns outage-start once", () => {

@@ -9,9 +9,9 @@ import { listPendingIds } from "./index-manifest";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
 import { KvCacheLive, makeDurableKv } from "../cache/kv-cache";
 
-function makeVectorizeMock(
+const makeVectorizeMock = (
   overrides: Partial<VectorizeIndex> = {},
-): VectorizeIndex {
+): VectorizeIndex => {
   return {
     upsert: async () => ({ mutationId: "mut-123", count: 1 }),
     query: async () => ({
@@ -30,7 +30,7 @@ function makeVectorizeMock(
     }),
     ...overrides,
   } as unknown as VectorizeIndex;
-}
+};
 
 /**
  * Stateful in-memory KVNamespace so a test can observe the pending-marker
@@ -40,9 +40,9 @@ function makeVectorizeMock(
  * `listPendingIds` (index-manifest.ts) uses — single page, `list_complete:
  * true`, which is all a test-scale marker count ever needs.
  */
-function makeKvNamespaceMock(): KVNamespace & {
+const makeKvNamespaceMock = (): KVNamespace & {
   readonly store: Map<string, string>;
-} {
+} => {
   const store = new Map<string, string>();
   const mock = {
     store,
@@ -69,7 +69,7 @@ function makeKvNamespaceMock(): KVNamespace & {
   return mock as unknown as KVNamespace & {
     readonly store: Map<string, string>;
   };
-}
+};
 
 /**
  * Like `makeKvNamespaceMock`, but `put` throws on the first `failCount`
@@ -78,9 +78,9 @@ function makeKvNamespaceMock(): KVNamespace & {
  * exercised via `VectorizeServiceLive.upsert` rather than a webhook call
  * site.
  */
-function makeFlakyKvNamespaceMock(
+const makeFlakyKvNamespaceMock = (
   failCount: number,
-): KVNamespace & { readonly store: Map<string, string> } {
+): KVNamespace & { readonly store: Map<string, string> } => {
   const store = new Map<string, string>();
   const attempts = { count: 0 };
   const mock = {
@@ -112,12 +112,12 @@ function makeFlakyKvNamespaceMock(
   return mock as unknown as KVNamespace & {
     readonly store: Map<string, string>;
   };
-}
+};
 
-function makeEnvLayer(
+const makeEnvLayer = (
   index: VectorizeIndex,
   overrides: { kv?: KVNamespace; dataset?: string } = {},
-) {
+) => {
   const envLayer = makeTestEnvLayer({
     SEARCH_INDEX: index,
     PSD_API_BASE_URL: "",
@@ -136,7 +136,7 @@ function makeEnvLayer(
   // marker recording) — merged in here (not just provided) so it also
   // satisfies KvCacheLive's own WorkerEnvTag requirement below.
   return Layer.mergeAll(KvCacheLive, envLayer).pipe(Layer.provide(envLayer));
-}
+};
 
 describe("VectorizeService", () => {
   it("upserts vectors without error", async () => {

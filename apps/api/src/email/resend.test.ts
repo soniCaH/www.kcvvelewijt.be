@@ -16,7 +16,7 @@ const message: EmailMessage = {
   replyTo: "info@kcvvelewijt.be",
 };
 
-function dispatch(env: Partial<TestEnv>, msg: EmailMessage = message) {
+const dispatch = (env: Partial<TestEnv>, msg: EmailMessage = message) => {
   const logs: { level: string; message: string }[] = [];
   const logger = Logger.replace(
     Logger.defaultLogger,
@@ -32,15 +32,15 @@ function dispatch(env: Partial<TestEnv>, msg: EmailMessage = message) {
     ),
   );
   return { exit, logs };
-}
+};
 
 const withKey = { RESEND_API_KEY: "re_test" };
 
-function failure(exit: Awaited<ReturnType<typeof dispatch>["exit"]>) {
+const failure = (exit: Awaited<ReturnType<typeof dispatch>["exit"]>) => {
   expect(exit._tag).toBe("Failure");
   const error = exit._tag === "Failure" ? Cause.squash(exit.cause) : null;
   return `${(error as { _tag?: string })._tag}: ${(error as Error).message}`;
-}
+};
 
 describe("EmailTransportLive.dispatchEmail (#3464)", () => {
   afterEach(() => vi.unstubAllGlobals());

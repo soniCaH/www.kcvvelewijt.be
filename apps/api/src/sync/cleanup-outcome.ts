@@ -27,9 +27,9 @@ const describeSkip = (skip: CleanupSkip): string => {
  * prior skip released, so reporting `ok: true` there would fire a false
  * recovery ping.
  */
-export function cleanupJobOutcome(
+export const cleanupJobOutcome = (
   phase: CleanupOutcome | undefined,
-): JobOutcome | null {
+): JobOutcome | null => {
   if (phase === undefined || phase.kind === "not-run") return null;
   if (phase.kind === "ok") return { ok: true };
   const capRefusals = phase.skips.filter((s) => s.kind === "orphan-cap");
@@ -43,4 +43,4 @@ export function cleanupJobOutcome(
       `psd-sanity-sync-cleanup: ${phase.skips.map(describeSkip).join("; ")}${lever}`,
     ),
   };
-}
+};

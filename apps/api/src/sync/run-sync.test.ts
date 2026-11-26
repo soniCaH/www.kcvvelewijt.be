@@ -47,7 +47,7 @@ const ONE_PLAYER: PsdMember = {
 
 // ─── Mock factories ──────────────────────────────────────────────────────────
 
-function makeSanityMocks() {
+const makeSanityMocks = () => {
   // Write methods (SanityMutation)
   const upsertPlayer = vi.fn(() => Effect.succeed(undefined as void));
   const upsertTeam = vi.fn(() => Effect.succeed(undefined as void));
@@ -140,14 +140,14 @@ function makeSanityMocks() {
     writerMock,
     readerMock,
   };
-}
+};
 
-function makePsdTeamClientMock(
+const makePsdTeamClientMock = (
   teams: readonly PsdTeam[],
   members: readonly PsdMember[],
   staff: readonly PsdMember[] = [],
   clubStaff: readonly PsdClubStaffMember[] = [],
-) {
+) => {
   const mock: PsdTeamClientInterface = {
     getRawTeams: () => Effect.succeed(teams),
     getRawMembers: () => Effect.succeed(members),
@@ -155,7 +155,7 @@ function makePsdTeamClientMock(
     getRawClubStaff: () => Effect.succeed(clubStaff),
   };
   return mock;
-}
+};
 
 /**
  * A `KvCacheService` test double, not a hand-rolled `KVNamespace` (#2873 AC:
@@ -179,7 +179,7 @@ function makePsdTeamClientMock(
  * existing `toHaveBeenCalledWith("sync:team-cursor", "0")`-style
  * assertions, rather than passing either way.
  */
-function makeKvStub() {
+const makeKvStub = () => {
   const store = new Map<string, string>();
   const get = vi.fn((key: string) => Promise.resolve(store.get(key) ?? null));
   const put = vi.fn(
@@ -229,13 +229,13 @@ function makeKvStub() {
     },
   };
   return { get, put, delete: del, store, cache };
-}
+};
 
-function makeEnvLayer() {
+const makeEnvLayer = () => {
   return makeTestEnvLayer({
     SANITY_WEBHOOK_SECRET: "",
   });
-}
+};
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
@@ -326,12 +326,12 @@ const UNKNOWN_STATUS_MEMBER: PsdMember = {
 
 // ─── Helper ──────────────────────────────────────────────────────────────────
 
-function buildTestLayer(
+const buildTestLayer = (
   kvStub: ReturnType<typeof makeKvStub>,
   writerMock: SanityMutationInterface,
   readerMock: SanityProjectionInterface,
   psdMock: PsdTeamClientInterface,
-) {
+) => {
   return Layer.mergeAll(
     Layer.succeed(SanityMutation, writerMock),
     Layer.succeed(SanityProjection, readerMock),
@@ -339,7 +339,7 @@ function buildTestLayer(
     Layer.succeed(KvCacheService, kvStub.cache),
     makeEnvLayer(),
   );
-}
+};
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
 
@@ -1932,26 +1932,26 @@ describe("runSync", () => {
     const staffer = (id: number): PsdMember => ({ ...ONE_STAFF, id });
 
     /** PSD double whose roster depends on the team asked for. */
-    function perTeamPsd(
+    const perTeamPsd = (
       teams: readonly PsdTeam[],
       players: Record<number, readonly PsdMember[]>,
       staff: Record<number, readonly PsdMember[]> = {},
-    ): PsdTeamClientInterface {
+    ): PsdTeamClientInterface => {
       return {
         getRawTeams: () => Effect.succeed(teams),
         getRawMembers: (id: number) => Effect.succeed(players[id] ?? []),
         getRawStaff: (id: number) => Effect.succeed(staff[id] ?? []),
         getRawClubStaff: () => Effect.succeed([]),
       };
-    }
+    };
 
     /** One `runSync` with captured logs; resolves to the Either so failures are assertable. */
-    async function once(
+    const once = async (
       kvStub: ReturnType<typeof makeKvStub>,
       mocks: ReturnType<typeof makeSanityMocks>,
       psdMock: PsdTeamClientInterface,
       env: Partial<TestEnv> = {},
-    ) {
+    ) => {
       const logs: Array<{ level: string; text: string }> = [];
       const capture = Logger.replace(
         Logger.defaultLogger,
@@ -1977,7 +1977,7 @@ describe("runSync", () => {
         ),
       );
       return { result, logs };
-    }
+    };
 
     const idsIn = async (kvStub: ReturnType<typeof makeKvStub>, key: string) =>
       JSON.parse((await kvStub.get(key)) ?? "[]") as string[];

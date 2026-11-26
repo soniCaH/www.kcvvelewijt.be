@@ -9,11 +9,11 @@ import { KvCacheLive } from "../cache/kv-cache";
 import { utcDay } from "../cache/daily-ceiling";
 import { makeTestEnvLayer } from "../test-helpers/env-layer";
 
-function setup(
+const setup = (
   cap: string | undefined,
   answersToday?: number,
   reply = "Een antwoord.",
-) {
+) => {
   const store = new Map<string, string>();
   if (answersToday !== undefined)
     store.set(`ai:answers:${utcDay()}`, String(answersToday));
@@ -57,7 +57,7 @@ function setup(
       ).pipe(Effect.provide(layer), Effect.provide(logger)),
     );
   return { answer, guess, run, store, errors };
-}
+};
 
 describe("AiAnswerServiceLive (#3468)", () => {
   it("passes max_tokens: 256 to the model", async () => {

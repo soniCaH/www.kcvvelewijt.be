@@ -33,10 +33,10 @@ const HOUR_MS = 60 * 60 * 1000;
  * one every 15 min for a week, yet a page nobody opened for two days still
  * catches its result.
  */
-export function opponentHistoryTtl(
+export const opponentHistoryTtl = (
   history: OpponentHistory,
   now: number = Date.now(),
-): number {
+): number => {
   const pendingFor = history.matches
     .filter((m) => m.status === "scheduled" && hasValidKickoff(m))
     .map((m) => kickoffMs(m.date))
@@ -49,7 +49,7 @@ export function opponentHistoryTtl(
     return TTL.MATCHES_TEAM;
   }
   return TTL.OPPONENT_HISTORY;
-}
+};
 
 export const getOpponentHistoryHandler = (
   teamId: number,

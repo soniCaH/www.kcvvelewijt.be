@@ -24,10 +24,10 @@ import { wallClockToInstantMs } from "./wall-clock";
 
 // ─── Competition label helpers ────────────────────────────────────────────────
 
-export function mapCompetitionLabel(
+export const mapCompetitionLabel = (
   type: string,
   name?: string | null,
-): string {
+): string => {
   if (name?.trim()) return name.trim();
   switch (type.toUpperCase()) {
     case "LEAGUE":
@@ -44,37 +44,37 @@ export function mapCompetitionLabel(
     default:
       return type;
   }
-}
+};
 
 /** Map of PSD competition id → specific Dutch label (e.g. 9 → "Beker van Brabant"). */
 export type CompetitionLabelMap = Record<number, string>;
 
 /** Pick the Dutch (or Flemish) label value from a competition's translations. */
-function pickDutchLabel(
+const pickDutchLabel = (
   translations: PsdCompetition["labelTranslations"],
-): string | undefined {
+): string | undefined => {
   if (!translations) return undefined;
   const nl = translations.find((t) => t.language === "nl");
   const vls = translations.find((t) => t.language === "vls");
   const value = (nl ?? vls)?.value?.trim();
   return value || undefined;
-}
+};
 
 /**
  * Build a competition-id → Dutch-label map from the /competitions response.
  * The specific name lives in `labelTranslations` (the top-level `name` is null
  * for cups); fall back to `name` when no translation is present.
  */
-export function buildCompetitionLabelMap(
+export const buildCompetitionLabelMap = (
   competitions: readonly PsdCompetition[],
-): CompetitionLabelMap {
+): CompetitionLabelMap => {
   const map: CompetitionLabelMap = {};
   for (const c of competitions) {
     const label = pickDutchLabel(c.labelTranslations) ?? c.name?.trim();
     if (label) map[c.id] = label;
   }
   return map;
-}
+};
 
 /**
  * Resolve a PSD competitionType field (object, plain string, or null/undefined)
@@ -90,16 +90,16 @@ export function buildCompetitionLabelMap(
  * Note: `typeof null === "object"` in JavaScript, so a null check must come
  * before the typeof guard.
  */
-function resolveCompetitionLabel(
+const resolveCompetitionLabel = (
   ct: PsdCompetitionType | string | null | undefined,
   competitionLabels?: CompetitionLabelMap,
-): string | undefined {
+): string | undefined => {
   if (ct == null) return undefined;
   if (typeof ct === "string") return mapCompetitionLabel(ct, undefined);
   const specific = competitionLabels?.[ct.id];
   if (specific) return specific;
   return mapCompetitionLabel(ct.type ?? "UNKNOWN", ct.name);
-}
+};
 
 /**
  * Resolve a PSD competitionType field to the normalized
@@ -118,9 +118,9 @@ function resolveCompetitionLabel(
  * `"tournament"`; any other code (e.g. `"INTERNATIONAL"`) has no member of
  * its own and falls through to `"other"`.
  */
-export function resolveCompetitionType(
+export const resolveCompetitionType = (
   ct: PsdCompetitionType | string | null | undefined,
-): CompetitionType {
+): CompetitionType => {
   if (ct == null || typeof ct === "string") return "other";
   switch (ct.type.toUpperCase()) {
     case "OFFICIAL":
@@ -135,7 +135,7 @@ export function resolveCompetitionType(
     default:
       return "other";
   }
-}
+};
 
 /**
  * Derive the display team designation for a match side from PSD's per-game
@@ -144,14 +144,14 @@ export function resolveCompetitionType(
  * ("1", "2", "21"), which has no display value. Returns undefined for empty or
  * purely-numeric codes so only meaningful opponent labels surface.
  */
-export function deriveMatchTeamLabel(
+export const deriveMatchTeamLabel = (
   code: string | null | undefined,
-): string | undefined {
+): string | undefined => {
   if (code == null) return undefined;
   const trimmed = code.trim();
   if (trimmed === "" || /^\d+$/.test(trimmed)) return undefined;
   return trimmed;
-}
+};
 
 // ─── Team label helpers ───────────────────────────────────────────────────────
 
@@ -160,7 +160,7 @@ export function deriveMatchTeamLabel(
  * "groen" → "Groen"); an age-code token ("U9P", "U15") and short
  * abbreviations ("FC") are left untouched — neither is letters-only-3+.
  */
-function titleCaseWords(value: string): string {
+const titleCaseWords = (value: string): string => {
   return value
     .split(" ")
     .map((word) =>
@@ -169,7 +169,7 @@ function titleCaseWords(value: string): string {
         : word,
     )
     .join(" ");
-}
+};
 
 /**
  * Derive a human-readable team label from a PSD team's name and age.
@@ -184,7 +184,7 @@ function titleCaseWords(value: string): string {
  * senior-suffixed on `age` alone: Reserven shares PSD's "A"
  * age bracket with the two first teams but carries no " A"/" B" suffix.
  */
-export function derivePsdTeamLabel(name: string, age: string): string {
+export const derivePsdTeamLabel = (name: string, age: string): string => {
   const normalized = name.replace(/\s+/g, " ").trim();
   if (age === "A") {
     if (normalized.endsWith(" A")) return "A-Ploeg";
@@ -192,7 +192,7 @@ export function derivePsdTeamLabel(name: string, age: string): string {
   }
   const stripped = normalized.replace(/^KCVVE\s*/i, "");
   return titleCaseWords(stripped || age);
-}
+};
 
 // ─── Club name casing ────────────────────────────────────────────────────────
 
@@ -251,7 +251,7 @@ const SPACED_KCVV = /\bk\s+c\s+v\s+v\b/gi;
  * field, for no extra coverage. Idempotent, so an already-correct `localName`
  * passes through untouched.
  */
-export function normaliseClubName(name: string): string {
+export const normaliseClubName = (name: string): string => {
   return name
     .replace(SPACED_KCVV, "KCVV")
     .split(" ")
@@ -267,18 +267,18 @@ export function normaliseClubName(name: string): string {
       return token;
     })
     .join(" ");
-}
+};
 
 /**
  * Build a match-side team from a PSD club. Every club name that reaches a match
  * payload passes through here, so casing is normalised **by construction** — a
  * new match transform cannot forget to call `normaliseClubName` (#2336).
  */
-function toMatchTeam(
+const toMatchTeam = (
   club: FootbalistoClub,
   score: number | null | undefined,
   teamLabel?: string,
-): Match["home_team"] {
+): Match["home_team"] => {
   return {
     id: club.id,
     name: normaliseClubName(club.name),
@@ -286,7 +286,7 @@ function toMatchTeam(
     score: score ?? undefined,
     team_label: teamLabel,
   };
-}
+};
 
 // ─── Game status mapping ──────────────────────────────────────────────────────
 
@@ -306,12 +306,12 @@ function toMatchTeam(
  * This is a pure function — callers that need to detect unknown codes for logging
  * can use {@link isUnknownGameStatus}.
  */
-export function mapGameStatus(
+export const mapGameStatus = (
   status: number,
   goalsHome: number | null,
   goalsAway: number | null,
   cancelled?: boolean | null,
-): Match["status"] {
+): Match["status"] => {
   if (cancelled) return "cancelled";
   if (status === 1) return "forfeited";
   if (status === 2) return "postponed";
@@ -320,24 +320,24 @@ export function mapGameStatus(
     return goalsHome !== null && goalsAway !== null ? "finished" : "scheduled";
   }
   return "scheduled";
-}
+};
 
 /** Returns true when the PSD status code is not one of the known values (0–3). */
-export function isUnknownGameStatus(status: number): boolean {
+export const isUnknownGameStatus = (status: number): boolean => {
   return status !== 0 && status !== 1 && status !== 2 && status !== 3;
-}
+};
 
 /**
  * A settled result — the match has a final outcome (played to completion or
  * forfeited), as opposed to scheduled / postponed / stopped / cancelled.
  */
-export function isSettledMatchStatus(status: string): boolean {
+export const isSettledMatchStatus = (status: string): boolean => {
   return status === "finished" || status === "forfeited";
-}
+};
 
 // ─── Date parsing ─────────────────────────────────────────────────────────────
 
-function parseDateString(dateStr: string): { date: Date; time: string } {
+const parseDateString = (dateStr: string): { date: Date; time: string } => {
   const [datePart, timePart = "00:00"] = dateStr.split(" ");
   const [year, month, day] = datePart!.split("-").map(Number);
   const [hour = 0, minute = 0] = timePart.split(":").map(Number);
@@ -369,19 +369,19 @@ function parseDateString(dateStr: string): { date: Date; time: string } {
     throw new Error(`Invalid date string: "${dateStr}"`);
   }
   return { date, time: timePart };
-}
+};
 
 /**
  * A PsdGame's real kickoff instant in epoch ms — comparable with `Date.now()`
  * and sortable (#3491; the wire date stays wall-clock-as-UTC, see `wall-clock.ts`).
  */
-export function psdGameToMs(m: PsdGame): number {
+export const psdGameToMs = (m: PsdGame): number => {
   const datePart = m.date.split(" ")[0]!;
   const timeStr = m.time ?? m.date.split(" ")[1] ?? "00:00";
   return wallClockToInstantMs(
     parseDateString(`${datePart} ${timeStr}`).date.getTime(),
   );
-}
+};
 
 /**
  * Derive the club ID that owns the queried team from a set of games.
@@ -392,7 +392,7 @@ export function psdGameToMs(m: PsdGame): number {
  *
  * Returns undefined when fewer than 2 games are available (can't distinguish).
  */
-export function deriveOwnClubId(games: PsdGame[]): number | undefined {
+export const deriveOwnClubId = (games: PsdGame[]): number | undefined => {
   if (games.length < 2) return undefined;
   const first = games[0]!;
   const second = games[1]!;
@@ -403,7 +403,7 @@ export function deriveOwnClubId(games: PsdGame[]): number | undefined {
   }
   // Otherwise the away club of the first game must be the own club
   return first.awayClub.id;
-}
+};
 
 /**
  * Whether a fixture is a pitch-reservation placeholder — both sides are the
@@ -412,12 +412,12 @@ export function deriveOwnClubId(games: PsdGame[]): number | undefined {
  * documented once, on `is_placeholder` in
  * `packages/api-contract/src/schemas/match.ts`.
  */
-export function isSelfMatch(
+export const isSelfMatch = (
   homeClubId: number | null | undefined,
   awayClubId: number | null | undefined,
-): boolean {
+): boolean => {
   return homeClubId != null && awayClubId != null && homeClubId === awayClubId;
-}
+};
 
 // ─── Youth score gate (#3428) ─────────────────────────────────────────────────
 
@@ -433,21 +433,21 @@ const HIDDEN_SCORE_BANDS = { min: 6, max: 13 } as const;
  * squad plays in the U17 band (`kcvve-u16` carries `age: "U17"`). The
  * federation rule follows the competition, so the band is the right input.
  */
-export function hidesScores(age: string | null | undefined): boolean {
+export const hidesScores = (age: string | null | undefined): boolean => {
   const band = /^U(\d+)$/i.exec(age?.trim() ?? "")?.[1];
   if (band === undefined) return false;
   const n = Number(band);
   return n >= HIDDEN_SCORE_BANDS.min && n <= HIDDEN_SCORE_BANDS.max;
-}
+};
 
 /** Goal events dropped; none left → `undefined`, the transform's own "no
  *  events" (see `transformFootbalistoMatchDetail`). */
-function withoutGoals(
+const withoutGoals = (
   events: NonNullable<MatchDetail["events"]>,
-): MatchDetail["events"] {
+): MatchDetail["events"] => {
   const kept = events.filter((e) => e.type !== "goal");
   return kept.length > 0 ? kept : undefined;
-}
+};
 
 /**
  * A match with no score: both `score` keys removed (absent, not `undefined`,
@@ -455,11 +455,13 @@ function withoutGoals(
  * too — a goal list reveals the score. Status is untouched: a finished U10
  * match is still `finished`.
  */
-export function withoutScores<
+export const withoutScores = <
   M extends Pick<Match, "home_team" | "away_team"> & {
     readonly events?: MatchDetail["events"];
   },
->(match: M): M {
+>(
+  match: M,
+): M => {
   const { score: _home, ...home_team } = match.home_team;
   const { score: _away, ...away_team } = match.away_team;
   return {
@@ -468,7 +470,7 @@ export function withoutScores<
     away_team,
     ...(match.events ? { events: withoutGoals(match.events) } : {}),
   };
-}
+};
 
 /**
  * `withoutScores` for a match detail. A report that was only goals has nothing
@@ -476,12 +478,12 @@ export function withoutScores<
  * `matchDetailTtl`'s report-pending override re-fetches the match every 5
  * minutes for good.
  */
-export function withoutDetailScores(detail: MatchDetail): MatchDetail {
+export const withoutDetailScores = (detail: MatchDetail): MatchDetail => {
   const hidden = withoutScores(detail);
   const hasLineup =
     (hidden.lineup?.home.length ?? 0) + (hidden.lineup?.away.length ?? 0) > 0;
   return hidden.events || hasLineup ? hidden : { ...hidden, hasReport: false };
-}
+};
 
 // ─── PSD Game → Match ─────────────────────────────────────────────────────────
 
@@ -501,7 +503,7 @@ export const resolveIsHome = (
   return undefined;
 };
 
-export function transformPsdGame(
+export const transformPsdGame = (
   game: PsdGame,
   options?: {
     ownClubId?: number;
@@ -509,7 +511,7 @@ export function transformPsdGame(
     /** Drop the score — the KCVV team is in a hidden band (`hidesScores`). */
     hideScores?: boolean;
   },
-): Match {
+): Match => {
   const datePart = game.date.split(" ")[0]!;
   const timeStr = game.time ?? game.date.split(" ")[1] ?? "00:00";
   const { date: matchDate, time: timePart } = parseDateString(
@@ -582,24 +584,24 @@ export function transformPsdGame(
   };
   // After `venue` and `status`: both still read the real score.
   return options?.hideScores ? withoutScores(match) : match;
-}
+};
 
 // ─── Lineup transforms ───────────────────────────────────────────────────────
 
-function transformLineupStatus(
+const transformLineupStatus = (
   status?: string,
   changed?: boolean,
-): "starter" | "substitute" | "substituted" | "subbed_in" | "unknown" {
+): "starter" | "substitute" | "substituted" | "subbed_in" | "unknown" => {
   if (status === "basis") return changed ? "substituted" : "starter";
   if (status === "invaller" || status === "bank")
     return changed ? "subbed_in" : "substitute";
   if (status === "wissel") return "substituted";
   return "unknown";
-}
+};
 
-function transformLineupPlayer(
+const transformLineupPlayer = (
   player: FootbalistoLineupPlayer,
-): MatchLineupPlayer {
+): MatchLineupPlayer => {
   return {
     id: player.playerId ?? undefined,
     name: player.playerName,
@@ -612,11 +614,11 @@ function transformLineupPlayer(
     isCaptain: player.captain ?? false,
     status: transformLineupStatus(player.status, player.changed),
   };
-}
+};
 
 // ─── Card parsing ─────────────────────────────────────────────────────────────
 
-function parseCardType(event: FootbalistoMatchEvent): CardType | undefined {
+const parseCardType = (event: FootbalistoMatchEvent): CardType | undefined => {
   const type = event.action.type.toUpperCase();
   const subtype = event.action.subtype?.toLowerCase();
   if (type !== "CARD") return undefined;
@@ -635,7 +637,7 @@ function parseCardType(event: FootbalistoMatchEvent): CardType | undefined {
     default:
       return undefined;
   }
-}
+};
 
 const cardEventType: Record<CardType, MatchEvent["type"]> = {
   yellow: "yellow_card",
@@ -643,9 +645,9 @@ const cardEventType: Record<CardType, MatchEvent["type"]> = {
   double_yellow: "second_yellow",
 };
 
-function buildPlayerCardMap(
+const buildPlayerCardMap = (
   events: readonly FootbalistoMatchEvent[],
-): Map<number, CardType> {
+): Map<number, CardType> => {
   const cardMap = new Map<number, CardType>();
   for (const event of events) {
     const cardType = parseCardType(event);
@@ -662,16 +664,16 @@ function buildPlayerCardMap(
     }
   }
   return cardMap;
-}
+};
 
 // ─── Match event transforms ──────────────────────────────────────────────────
 
-function transformMatchEvent(
+const transformMatchEvent = (
   event: FootbalistoMatchEvent,
   index: number,
   homeClubId: number,
   awayClubId: number,
-): MatchEvent | null {
+): MatchEvent | null => {
   const actionType = event.action.type.toUpperCase();
   const subtype = event.action.subtype?.toLowerCase() ?? null;
   const minute = event.minute;
@@ -725,24 +727,24 @@ function transformMatchEvent(
   }
 
   return null;
-}
+};
 
 // ─── Match detail transforms ─────────────────────────────────────────────────
 
-function transformPlayerWithCard(
+const transformPlayerWithCard = (
   player: FootbalistoLineupPlayer,
   cardMap: Map<number, CardType> | null,
-): MatchLineupPlayer {
+): MatchLineupPlayer => {
   const base = transformLineupPlayer(player);
   const card = cardMap && base.id != null ? cardMap.get(base.id) : undefined;
   return card ? { ...base, card } : base;
-}
+};
 
 /** Decode items individually, filtering out any that fail schema validation. */
-function decodeItemsSync<A, I>(
+const decodeItemsSync = <A, I>(
   schema: S.Schema<A, I>,
   items: readonly unknown[],
-): A[] {
+): A[] => {
   const decode = S.decodeUnknownSync(schema);
   const valid: A[] = [];
   for (const item of items) {
@@ -753,11 +755,11 @@ function decodeItemsSync<A, I>(
     }
   }
   return valid;
-}
+};
 
-export function transformFootbalistoMatchDetail(
+export const transformFootbalistoMatchDetail = (
   response: RawDetailResponse,
-): MatchDetail {
+): MatchDetail => {
   const general = response.general;
   const { date: matchDate, time: timePart } = parseDateString(general.date);
 
@@ -825,7 +827,7 @@ export function transformFootbalistoMatchDetail(
     is_placeholder:
       isSelfMatch(general.homeClub.id, general.awayClub.id) || undefined,
   };
-}
+};
 
 // ─── Ranking transforms ──────────────────────────────────────────────────────
 
@@ -837,17 +839,17 @@ export function transformFootbalistoMatchDetail(
  * federation string with no contract behind it, so the helper never blanks a
  * name it does not recognise and never invents one.
  */
-export function stripPsdName(name: string): string {
+export const stripPsdName = (name: string): string => {
   const stripped = name
     .replace(/^Voetbal\s*:\s*[^-]*-\s*/, "")
     .replace(/\s*-\s*(?:Hommes|Femmes)$/, "");
   return stripped.length > 0 ? stripped : name;
-}
+};
 
-export function transformFootbalistoRankingEntry(
+export const transformFootbalistoRankingEntry = (
   entry: FootbalistoRankingEntry,
   logoCdnUrl: string,
-): RankingEntry {
+): RankingEntry => {
   const cdn = logoCdnUrl.replace(/\/+$/, "");
   // Normalise the RESOLVED value — `localName` is usually already correct, but
   // the `name` fallback carries PSD's flattened casing.
@@ -870,27 +872,27 @@ export function transformFootbalistoRankingEntry(
     points: entry.points,
     form: undefined,
   };
-}
+};
 
 // ─── Utility helpers ─────────────────────────────────────────────────────────
 
 /** Safely extract an `id` field from an unknown item for logging. */
-export function extractId(item: unknown): string | number {
+export const extractId = (item: unknown): string | number => {
   if (typeof item === "object" && item !== null && "id" in item) {
     const id = (item as Record<string, unknown>).id;
     if (typeof id === "number" || typeof id === "string") return id;
   }
   return "unknown";
-}
+};
 
 /**
  * Compute W/D/L summary for a list of matches.
  * Only finished matches (with goals set) contribute to the summary.
  * `is_home` determines which side's score is "ours".
  */
-export function computeOpponentSummary(
+export const computeOpponentSummary = (
   matches: readonly Match[],
-): OpponentHistory["summary"] {
+): OpponentHistory["summary"] => {
   return matches.reduce<OpponentHistory["summary"]>(
     (acc, m) => {
       if (m.status !== "finished") return acc; // only count truly finished matches
@@ -912,4 +914,4 @@ export function computeOpponentSummary(
     },
     { wins: 0, draws: 0, losses: 0, goalsFor: 0, goalsAgainst: 0 },
   );
-}
+};

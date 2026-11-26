@@ -11,9 +11,9 @@ import {
 import { testEnvLayer } from "../test-helpers/env-layer";
 import { PsdGateService, PsdGateTest } from "../psd/gate";
 
-function makeCacheMock(
+const makeCacheMock = (
   overrides: Partial<KvCacheInterface> = {},
-): KvCacheInterface {
+): KvCacheInterface => {
   return {
     get: () => Effect.succeed(null),
     set: () => Effect.succeed(undefined),
@@ -21,11 +21,11 @@ function makeCacheMock(
     durable: noopDurableKv,
     ...overrides,
   };
-}
+};
 
-function makeVectorizeMock(
+const makeVectorizeMock = (
   overrides: Partial<VectorizeServiceInterface> = {},
-): VectorizeServiceInterface {
+): VectorizeServiceInterface => {
   return {
     upsert: () => Effect.succeed(undefined),
     query: () => Effect.succeed([]),
@@ -33,15 +33,15 @@ function makeVectorizeMock(
     deleteByIds: () => Effect.succeed(undefined as void),
     ...overrides,
   };
-}
+};
 
-function runWithProviders(
+const runWithProviders = (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   effect: Effect.Effect<any, any, any>,
   cacheMock: KvCacheInterface = makeCacheMock(),
   vectorizeMock: VectorizeServiceInterface = makeVectorizeMock(),
   gateLayer: Layer.Layer<PsdGateService> = PsdGateTest,
-) {
+) => {
   return Effect.runPromise(
     effect.pipe(
       Effect.provide(Layer.succeed(KvCacheService, cacheMock)),
@@ -51,7 +51,7 @@ function runWithProviders(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) as Effect.Effect<any, never, never>,
   );
-}
+};
 
 describe("getRelatedHandler", () => {
   it("returns cached result on cache hit without calling Vectorize", async () => {

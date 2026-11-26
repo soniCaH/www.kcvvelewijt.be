@@ -12,7 +12,7 @@ import type { IncidentAlert } from "./incident";
 import type { StaffGaps } from "../sanity/projection";
 
 /** Human duration, coarse: "3d 4h", "5h 12m", "45m", "30s". */
-export function formatDuration(ms: number): string {
+export const formatDuration = (ms: number): string => {
   const s = Math.max(0, Math.round(ms / 1000));
   const d = Math.floor(s / 86400);
   const h = Math.floor((s % 86400) / 3600);
@@ -21,7 +21,7 @@ export function formatDuration(ms: number): string {
   if (h > 0) return `${h}h ${m}m`;
   if (m > 0) return `${m}m`;
   return `${s}s`;
-}
+};
 
 export interface IncidentContext {
   /** Cache key / endpoint that triggered the transition. */
@@ -35,10 +35,10 @@ export interface IncidentContext {
 }
 
 /** Message for an incident state change (outage start / recovery). */
-export function buildIncidentMessage(
+export const buildIncidentMessage = (
   alert: IncidentAlert,
   ctx: IncidentContext,
-): string {
+): string => {
   if (alert.kind === "recovery") {
     return `:large_green_circle: *PSD recovered* — \`${ctx.key}\` after ${formatDuration(
       alert.durationMs,
@@ -51,7 +51,7 @@ export function buildIncidentMessage(
       ? ` Serving stale (${formatDuration(ctx.staleAgeMs)} old) until it recovers.`
       : " Serving stale until it recovers.";
   return `:red_circle: *PSD outage started* — \`${ctx.key}\`${status} is failing${detail}.${stale}`;
-}
+};
 
 export interface DriftContext {
   /** Cache key / endpoint serving stale. */
@@ -69,7 +69,7 @@ export interface DriftContext {
 }
 
 /** Message for the slow-drift nudge: stale data creeping toward the hard cliff. */
-export function buildDriftMessage(ctx: DriftContext): string {
+export const buildDriftMessage = (ctx: DriftContext): string => {
   const timeToCliff = Math.max(0, ctx.hardTtlMs - ctx.staleAgeMs);
   const status = ctx.status ? ` (last refresh: HTTP ${ctx.status})` : "";
   const what = ctx.psdBacked ? "PSD data" : "Cached data";
@@ -78,16 +78,16 @@ export function buildDriftMessage(ctx: DriftContext): string {
   )} old${status}, not refreshed for ${formatDuration(
     ctx.failingForMs,
   )} of reads; ${formatDuration(timeToCliff)} until it drops off the hard-expiry cliff.`;
-}
+};
 
 /** Message for the PSD on-demand daily budget being reached (#3468). */
-export function buildPsdBudgetMessage(ctx: {
+export const buildPsdBudgetMessage = (ctx: {
   readonly day: string;
   readonly spent: number;
   readonly budget: number;
-}): string {
+}): string => {
   return `:no_entry: *PSD on-demand budget reached* — ${ctx.spent}/${ctx.budget} PSD calls on ${ctx.day} (UTC). Cold cache misses fail until midnight UTC; cached pages keep serving, the nightly sync still runs.`;
-}
+};
 
 export interface JobAlertContext {
   /** Name of the scheduled job (e.g. "psd-sanity-sync", "sanity-index-sync"). */
@@ -109,17 +109,17 @@ export type JobAlert =
   { readonly kind: "job-failure" } | { readonly kind: "job-recovery" };
 
 /** Message for a scheduled-job failure/recovery transition. */
-export function buildJobAlertMessage(
+export const buildJobAlertMessage = (
   alert: JobAlert,
   ctx: JobAlertContext,
-): string {
+): string => {
   const runs = ctx.consecutiveFailures === 1 ? "run" : "runs";
   if (alert.kind === "job-recovery") {
     return `:large_green_circle: *Scheduled job recovered* — \`${ctx.job}\` succeeded after ${ctx.consecutiveFailures} failed ${runs}.`;
   }
   const detail = ctx.error ? `: ${ctx.error}` : "";
   return `:red_circle: *Scheduled job failing* — \`${ctx.job}\` has now failed ${ctx.consecutiveFailures} consecutive ${runs}${detail}.`;
-}
+};
 
 const STUDIO_EDIT_URL = "https://kcvvelewijt.sanity.studio/intent/edit";
 
@@ -135,7 +135,7 @@ const studioLink = (id: string, type: string): string =>
  * with its count and a Studio link per item. `null` when there is nothing
  * to report — the caller then posts nothing.
  */
-export function buildStaffGapsMessage(gaps: StaffGaps): string | null {
+export const buildStaffGapsMessage = (gaps: StaffGaps): string | null => {
   const name = (value: string | null, fallback: string) =>
     escapeSlack(value ?? fallback);
   const sections: Array<[string, string[]]> = [
@@ -183,7 +183,7 @@ export function buildStaffGapsMessage(gaps: StaffGaps): string | null {
       ([title, lines]) => `\n*${title}* (${lines.length})\n${lines.join("\n")}`,
     ),
   ].join("\n");
-}
+};
 
 /** Slack must answer within this or the ping is dropped (resolves `false`). */
 const SLACK_TIMEOUT_MS = 3000;
@@ -199,10 +199,10 @@ const SLACK_TIMEOUT_MS = 3000;
  * look identical from the outside (#2870 review: a dropped webhook POST
  * used to debounce a whole outage into never being announced at all).
  */
-export async function postSlack(
+export const postSlack = async (
   webhookUrl: Redacted.Redacted<string> | undefined,
   text: string,
-): Promise<boolean> {
+): Promise<boolean> => {
   if (!webhookUrl) return false;
   try {
     const response = await fetch(Redacted.value(webhookUrl), {
@@ -228,4 +228,4 @@ export async function postSlack(
     console.error("[slack-alert] postSlack: fetch failed:", String(e));
     return false;
   }
-}
+};

@@ -59,7 +59,7 @@ const callsTo = (fragment: string) =>
 
 const sanity = makeSanityProjectionStub();
 
-function makeKv() {
+const makeKv = () => {
   const store = new Map<string, string>();
   return {
     get: async (key: string) => store.get(key) ?? null,
@@ -71,7 +71,7 @@ function makeKv() {
     },
     list: async () => ({ keys: [], list_complete: true, cacheStatus: null }),
   } as unknown as KVNamespace;
-}
+};
 
 // A fresh KV per test: beforeEach swaps `current.kv`.
 const current = { kv: makeKv() };

@@ -71,25 +71,25 @@ const isLeap = (y: number): boolean =>
   (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
 
 /** Monday through Sunday of the week containing `iso`, as "YYYY-MM-DD". */
-export function weekOf(iso: string): string[] {
+export const weekOf = (iso: string): string[] => {
   const day = toUtc(iso).getUTCDay(); // 0 = Sunday
   const monday = toUtc(iso).getTime() - ((day + 6) % 7) * 86_400_000;
   return Array.from({ length: 7 }, (_, i) =>
     new Date(monday + i * 86_400_000).toISOString().slice(0, 10),
   );
-}
+};
 
 /** The month-day ("MM-DD") a person celebrates in `year`. Born 29 February: celebrates on 28 February in a non-leap year. */
-function celebrationMonthDay(birthDate: string, year: number): string {
+const celebrationMonthDay = (birthDate: string, year: number): string => {
   const monthDay = birthDate.slice(5, 10);
   return monthDay === "02-29" && !isLeap(year) ? "02-28" : monthDay;
-}
+};
 
 /** Everyone whose birthday falls on `iso`; people born that very day or later are skipped. */
-export function birthdaysOn(
+export const birthdaysOn = (
   people: readonly BirthdayPerson[],
   iso: string,
-): Birthday[] {
+): Birthday[] => {
   const year = Number(iso.slice(0, 4));
   return people
     .filter((p) => /^\d{4}-\d{2}-\d{2}$/.test(p.birthDate))
@@ -101,7 +101,7 @@ export function birthdaysOn(
     }))
     .filter((b) => b.age > 0)
     .sort((a, b) => a.person.name.localeCompare(b.person.name, "nl"));
-}
+};
 
 const line = ({ person, age }: Birthday): string =>
   `• ${escapeSlack(person.name)}${
@@ -114,10 +114,10 @@ const dayLabel = (iso: string): string => {
 };
 
 /** The messages for the day `iso`: today's birthdays, plus the week's on a Monday. Empty days post nothing. */
-export function buildBirthdayMessages(
+export const buildBirthdayMessages = (
   people: readonly BirthdayPerson[],
   iso: string,
-): string[] {
+): string[] => {
   const messages: string[] = [];
   const today = birthdaysOn(people, iso);
   if (today.length > 0) {
@@ -137,7 +137,7 @@ export function buildBirthdayMessages(
     }
   }
   return messages;
-}
+};
 
 export const runBirthdayPost = (now: Date) =>
   Effect.gen(function* () {

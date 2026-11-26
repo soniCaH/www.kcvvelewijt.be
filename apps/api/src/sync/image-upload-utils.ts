@@ -9,16 +9,16 @@
  * @param baseUrl - Base URL to prepend (e.g. "https://kcvv.prosoccerdata.com")
  * @returns Absolute stable URL, or null if profilePictureURL is falsy
  */
-export function extractStableImageUrl(
+export const extractStableImageUrl = (
   profilePictureURL: string | null,
   baseUrl: string,
-): string | null {
+): string | null => {
   if (!profilePictureURL) return null;
 
   const path = profilePictureURL.split("?")[0];
   const v = new URLSearchParams(profilePictureURL.split("?")[1] ?? "").get("v");
   return v !== null ? `${baseUrl}${path}?v=${v}` : `${baseUrl}${path}`;
-}
+};
 
 /**
  * Determine whether a player image needs to be uploaded to Sanity.
@@ -30,10 +30,10 @@ export function extractStableImageUrl(
  * @param stableUrl - Stable image URL from PSD (output of extractStableImageUrl), or null if no profile picture
  * @param existingPsdImageUrl - Currently stored psdImageUrl in Sanity, or null/undefined if none
  */
-export function needsUpload(
+export const needsUpload = (
   stableUrl: string | null,
   existingPsdImageUrl: string | null | undefined,
-): boolean {
+): boolean => {
   if (!stableUrl) return false;
   return !existingPsdImageUrl || existingPsdImageUrl !== stableUrl;
-}
+};

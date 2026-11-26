@@ -20,7 +20,7 @@ const mockCreate = vi.fn().mockResolvedValue(undefined);
 
 // The transaction object needs to support chaining: tx.createIfNotExists().patch().commit()
 // AND reassignment: tx = tx.patch(...) in a loop, then tx.commit()
-function makeTxObject(): Record<string, unknown> {
+const makeTxObject = (): Record<string, unknown> => {
   const tx: Record<string, unknown> = {};
   tx.createIfNotExists = mockCreateIfNotExists.mockImplementation(() => tx);
   tx.patch = vi.fn(
@@ -37,7 +37,7 @@ function makeTxObject(): Record<string, unknown> {
   );
   tx.commit = mockCommit;
   return tx;
-}
+};
 
 const mockTransaction = vi.fn(() => makeTxObject());
 
@@ -68,7 +68,7 @@ vi.mock("@sanity/client", () => ({
 
 // ─── Test layer ──────────────────────────────────────────────────────────────
 
-function makeTestLayer(gate: Layer.Layer<PsdGateService> = PsdGateTest) {
+const makeTestLayer = (gate: Layer.Layer<PsdGateService> = PsdGateTest) => {
   const envLayer = makeTestEnvLayer({
     PSD_CACHE: {
       get: vi.fn().mockResolvedValue(null),
@@ -82,11 +82,13 @@ function makeTestLayer(gate: Layer.Layer<PsdGateService> = PsdGateTest) {
     Layer.provide(KvCacheLive),
     Layer.provide(envLayer),
   );
-}
+};
 
-function run<A>(effect: Effect.Effect<A, SanityMutationError, SanityMutation>) {
+const run = <A>(
+  effect: Effect.Effect<A, SanityMutationError, SanityMutation>,
+) => {
   return Effect.runPromise(Effect.provide(effect, makeTestLayer()));
-}
+};
 
 beforeEach(() => {
   vi.clearAllMocks();

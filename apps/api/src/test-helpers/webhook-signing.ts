@@ -12,10 +12,10 @@ import { encodeSignatureHeader } from "@sanity/webhook";
 export const TEST_SECRET = "test-webhook-secret-1234567890ab"; // gitguardian:ignore
 
 /** A `sanity-webhook-signature` header value; `timestamp` is in milliseconds. */
-export function signPayload(
+export const signPayload = (
   body: string,
   timestamp: number = Date.now(),
   secret: string = TEST_SECRET,
-): Promise<string> {
+): Promise<string> => {
   return encodeSignatureHeader(body, timestamp, secret);
-}
+};

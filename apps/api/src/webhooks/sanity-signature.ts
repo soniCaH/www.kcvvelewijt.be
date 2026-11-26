@@ -31,11 +31,11 @@ const base64UrlToBytes = (value: string) => {
  * the package's own `isValidSignature` compares with `!==`.
  * Rejects a timestamp older than 5 minutes (replay protection).
  */
-export async function verifySanitySignature(
+export const verifySanitySignature = async (
   headers: Headers,
   rawBody: string,
   secret: string,
-): Promise<boolean> {
+): Promise<boolean> => {
   if (!secret || !rawBody) return false;
   const parsed = parseHeader(headers.get(SIGNATURE_HEADER_NAME) ?? "");
   if (!parsed || Math.abs(Date.now() - parsed.timestamp) > MAX_AGE_MS) {
@@ -58,4 +58,4 @@ export async function verifySanitySignature(
     signature,
     encoder.encode(`${parsed.timestamp}.${rawBody}`),
   );
-}
+};

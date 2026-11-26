@@ -34,9 +34,9 @@ const rankingTables: readonly RankingTable[] = [
   },
 ];
 
-function makeServiceMock(
+const makeServiceMock = (
   overrides: Partial<PsdServiceInterface> = {},
-): PsdServiceInterface {
+): PsdServiceInterface => {
   return {
     getTeamMatches: () => Effect.fail(new Error("not needed") as never),
     getNextMatches: () => Effect.fail(new Error("not needed") as never),
@@ -48,7 +48,7 @@ function makeServiceMock(
     getCurrentSeasonId: () => Effect.succeed(123),
     ...overrides,
   };
-}
+};
 
 const cacheMock: KvCacheInterface = {
   get: () => Effect.succeed(null),
@@ -58,14 +58,16 @@ const cacheMock: KvCacheInterface = {
 };
 
 /** Map-backed KV, so a second read can hit what the first one stored. */
-function makeMemoryCache(store = new Map<string, string>()): KvCacheInterface {
+const makeMemoryCache = (
+  store = new Map<string, string>(),
+): KvCacheInterface => {
   return {
     get: (key) => Effect.succeed(store.get(key) ?? null),
     set: (key, value) => Effect.sync(() => void store.set(key, value)),
     delete: (key) => Effect.sync(() => void store.delete(key)),
     durable: noopDurableKv,
   };
-}
+};
 
 describe("getRankingHandler", () => {
   afterEach(() => {
