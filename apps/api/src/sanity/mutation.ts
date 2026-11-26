@@ -1,7 +1,8 @@
 import { createClient } from "@sanity/client";
-import { Context, Effect, Layer } from "effect";
+import { Context, Effect, Either, Layer, Schema as S } from "effect";
 import { WorkerEnvTag } from "../env";
 import { PsdGateService } from "../psd/gate";
+import { parseErrorPaths } from "../parse-error-paths";
 import { sanityClientConfig } from "./config";
 
 /**
@@ -56,6 +57,11 @@ function mergePreservingOrder(
   const keptSet = new Set(kept);
   return [...kept, ...psdIds.filter((id) => !keptSet.has(id))];
 }
+
+/** Sanity's answer to an asset upload: only the new asset's id is read. */
+const UploadResponse = S.Struct({
+  document: S.Struct({ _id: S.NonEmptyString }),
+});
 
 /**
  * Deep equality as Sanity stores data: a field written as `null` comes back
@@ -519,10 +525,15 @@ export const SanityMutationLive = Layer.effect(
                   `Sanity upload failed: ${uploadRes.status} ${text}`,
                 );
               }
-              const { document } = (await uploadRes.json()) as {
-                document: { _id: string };
-              };
-              return document;
+              const decoded = S.decodeUnknownEither(UploadResponse)(
+                await uploadRes.json(),
+              );
+              if (Either.isLeft(decoded)) {
+                throw new Error(
+                  `Sanity upload response invalid at: ${parseErrorPaths(decoded.left)}`,
+                );
+              }
+              return decoded.right.document;
             },
             catch: (cause) =>
               new SanityMutationError(

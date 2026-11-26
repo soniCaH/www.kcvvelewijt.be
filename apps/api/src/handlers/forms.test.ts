@@ -61,6 +61,8 @@ function run(
     write?: SanityMutationInterface["writeMembershipApplication"];
     dispatch?: EmailTransportInterface["dispatchEmail"];
     routing?: FormRoutingConfig;
+    /** The KV copy of the routing config, as a raw string. */
+    cached?: string;
     env?: Partial<WorkerEnv>;
     errors?: string[];
   } = {},
@@ -74,7 +76,10 @@ function run(
       ...projectionMock,
       getFormRoutingConfig: () => Effect.succeed(opts.routing ?? null),
     }),
-    Layer.succeed(KvCacheService, cacheMock),
+    Layer.succeed(KvCacheService, {
+      ...cacheMock,
+      get: () => Effect.succeed(opts.cached ?? null),
+    }),
     Layer.succeed(EmailTransport, emailMock),
     // no TURNSTILE_SECRET → verification skipped by the dev flag
     makeTestEnvLayer({ ALLOW_MISSING_FORM_SECRETS: "true", ...opts.env }),
@@ -241,6 +246,44 @@ describe("handleMembership", () => {
         fields: { birthDate: "Vul een geldige geboortedatum in." },
       });
     }
+  });
+
+  describe("cached routing config (#3876)", () => {
+    const adminTo = async (cached: string) => {
+      const dispatch = vi.fn<EmailTransportInterface["dispatchEmail"]>(() =>
+        Effect.succeed(undefined),
+      );
+      const exit = await run(validPayload, {
+        dispatch,
+        cached,
+        routing: {
+          speler: null,
+          jeugdspeler: null,
+          vrijwilliger: "vrijwilligers@example.com",
+          trainer: null,
+          scheidsrechter: null,
+        },
+      });
+      expect(Exit.isSuccess(exit)).toBe(true);
+      return dispatch.mock.calls.at(-1)![0].to;
+    };
+
+    it.each([
+      [
+        "a role that is not a string",
+        JSON.stringify({
+          speler: null,
+          jeugdspeler: null,
+          vrijwilliger: 5,
+          trainer: null,
+          scheidsrechter: null,
+        }),
+      ],
+      ["a value that is not JSON", "not json"],
+      ["a value that is not an object", "42"],
+    ])("refetches when the cached value has %s", async (_label, cached) => {
+      expect(await adminTo(cached)).toBe("vrijwilligers@example.com");
+    });
   });
 
   describe("admin recipient", () => {

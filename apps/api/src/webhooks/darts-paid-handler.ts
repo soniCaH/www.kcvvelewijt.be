@@ -1,9 +1,11 @@
 import { createClient } from "@sanity/client";
-import { Effect, Layer, Schema as S } from "effect";
+import { Either, Effect, Layer, Schema as S } from "effect";
+import { EmailAddress } from "@kcvv/api-contract";
 import type { WorkerEnv } from "../env";
 import { WorkerEnvTag } from "../env";
 import { EmailTransport, EmailTransportLive } from "../email/resend";
 import { buildDartsPaidEmail } from "../forms/darts-emails";
+import { parseErrorPaths } from "../parse-error-paths";
 import { sanityClientConfig } from "../sanity/config";
 import {
   WebhookAuthError,
@@ -32,15 +34,15 @@ import { verifySanitySignature } from "./sanity-signature";
  * very hook on every clear and loop for as long as Resend is down.
  */
 
-interface DartsSignupDoc {
-  readonly _id: string;
-  readonly teamName: string;
-  readonly captainName: string;
-  readonly captainEmail: string;
-  readonly paid?: boolean | null;
-  readonly waitlist?: boolean | null;
-  readonly paidMailSentAt?: string | null;
-}
+const DartsSignupDoc = S.Struct({
+  _id: S.String,
+  teamName: S.String,
+  captainName: S.String,
+  captainEmail: EmailAddress,
+  paid: S.optional(S.NullOr(S.Boolean)),
+  waitlist: S.optional(S.NullOr(S.Boolean)),
+  paidMailSentAt: S.optional(S.NullOr(S.String)),
+});
 
 /** Resend's answer to a repeated `Idempotency-Key` carrying a different payload. */
 const IDEMPOTENCY_CONFLICT = "invalid_idempotent_request";
@@ -90,11 +92,22 @@ const webhookEffect = (request: Request, env: WorkerEnv) =>
     }
 
     const client = createClient({ ...sanityClientConfig(env), useCdn: false });
-    const doc = yield* Effect.tryPromise({
-      try: () => client.fetch<DartsSignupDoc | null>(QUERY, { id: _id }),
+    const raw = yield* Effect.tryPromise({
+      try: () => client.fetch<unknown>(QUERY, { id: _id }),
       catch: (err) =>
         new WebhookServiceError("sanity_fetch_failed", errorMessage(err)),
     });
+
+    // A document written past Studio validation must not reach Resend.
+    const decoded = S.decodeUnknownEither(S.NullOr(DartsSignupDoc))(raw);
+    if (Either.isLeft(decoded)) {
+      // A retry cannot fix a bad document: answer 200 so Sanity stops.
+      console.error(
+        `[webhook:darts-paid] invalid_doc: ${_id}: ${parseErrorPaths(decoded.left)}`,
+      );
+      return Response.json({ ok: true, action: "skipped_invalid_doc" });
+    }
+    const doc = decoded.right;
 
     // A draft id reads as null from the published perspective: nothing to do.
     if (!doc) return Response.json({ ok: true, action: "skipped_not_found" });
