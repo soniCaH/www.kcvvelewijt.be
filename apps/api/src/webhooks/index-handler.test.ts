@@ -1,5 +1,5 @@
 import { beforeEach, describe, it, expect, vi } from "vitest";
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Schema as S } from "effect";
 import { handleIndexWebhook, type WebhookLayer } from "./index-handler";
 import {
   makeTestEnv,
@@ -892,7 +892,9 @@ describe("handleIndexWebhook", () => {
     // 409, not 500: this is a deploy-time misconfiguration, identical on
     // every retry, not a transient failure Sanity should keep retrying.
     expect(response.status).toBe(409);
-    const json = (await response.json()) as { ok: boolean };
+    const json = S.decodeUnknownSync(S.Struct({ ok: S.Boolean }))(
+      await response.json(),
+    );
     expect(json.ok).toBe(false);
     expect(upsertSpy).not.toHaveBeenCalled();
     expect(deleteByIdsSpy).not.toHaveBeenCalled();

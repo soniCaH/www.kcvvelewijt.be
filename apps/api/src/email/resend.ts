@@ -1,4 +1,4 @@
-import { Context, Effect, Layer, Redacted } from "effect";
+import { Context, Effect, Layer, Option, Redacted, Schema as S } from "effect";
 import {
   allowMissingFormSecrets,
   resendApiKey,
@@ -30,15 +30,15 @@ export class EmailDeliveryError extends Error {
   }
 }
 
+const decodeErrorBody = S.decodeUnknownOption(
+  S.parseJson(S.Struct({ name: S.String })),
+);
+
 /** Resend's error `name` (e.g. `invalid_idempotent_request`) out of an error body. */
-const errorName = (body: string): string | undefined => {
-  try {
-    const name = (JSON.parse(body) as { name?: unknown }).name;
-    return typeof name === "string" ? name : undefined;
-  } catch {
-    return undefined;
-  }
-};
+const errorName = (body: string): string | undefined =>
+  Option.getOrUndefined(
+    Option.map(decodeErrorBody(body), (error) => error.name),
+  );
 
 export interface EmailMessage {
   readonly to: string | string[];

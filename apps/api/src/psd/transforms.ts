@@ -46,8 +46,14 @@ export const mapCompetitionLabel = (
   }
 };
 
-/** Map of PSD competition id → specific Dutch label (e.g. 9 → "Beker van Brabant"). */
-export type CompetitionLabelMap = Record<number, string>;
+/**
+ * Map of PSD competition id → specific Dutch label (e.g. 9 → "Beker van
+ * Brabant"). JSON keys are strings, so the schema keys on `string`.
+ */
+export const CompetitionLabelMapSchema = S.mutable(
+  S.Record({ key: S.String, value: S.String }),
+);
+export type CompetitionLabelMap = typeof CompetitionLabelMapSchema.Type;
 
 /** Pick the Dutch (or Flemish) label value from a competition's translations. */
 const pickDutchLabel = (

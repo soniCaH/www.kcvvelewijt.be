@@ -8,8 +8,36 @@ const kcvvPlugin = {
     "no-let": builtinRules.get("no-restricted-syntax"),
     // `func-style` skips `export default function`, so that shape gets its own selector.
     "no-default-function": builtinRules.get("no-restricted-syntax"),
+    "no-json-cast": builtinRules.get("no-restricted-syntax"),
   },
 };
+
+// A cast on parsed JSON asserts a shape nobody checked: `JSON.parse(x) as T`,
+// `<T>JSON.parse(x)`, `(await r.json()) as T`, `await r.json<T>()`. A bare
+// `as unknown` is honest and stays allowed, but `as unknown as T` is not (#3877).
+const NOT_UNKNOWN = '[typeAnnotation.type!="TSUnknownKeyword"]';
+const UNKNOWN = '[typeAnnotation.type="TSUnknownKeyword"]';
+const JSON_CAST_MESSAGE =
+  "No cast or type argument on parsed JSON: decode it with `S.decodeUnknown*(S.parseJson(schema))`, or `S.decodeUnknown*(schema)` on the result of `.json()`. A bare `as unknown` is fine. Rule: #3877.";
+const OUTER_CASTS = [
+  `TSAsExpression${NOT_UNKNOWN}`,
+  `TSTypeAssertion${NOT_UNKNOWN}`,
+];
+// What the cast wraps: directly, or behind a bare `as unknown`.
+const THROUGH = ["", `TSAsExpression${UNKNOWN} > `];
+const JSON_SOURCES = [
+  'CallExpression[callee.object.name="JSON"][callee.property.name="parse"]',
+  'AwaitExpression > CallExpression[callee.property.name="json"]',
+  'AwaitExpression > CallExpression[callee.property.name="catch"][callee.object.callee.property.name="json"]',
+];
+const JSON_CAST_SELECTORS = [
+  ...OUTER_CASTS.flatMap((outer) =>
+    THROUGH.flatMap((through) =>
+      JSON_SOURCES.map((source) => `${outer} > ${through}${source}`),
+    ),
+  ),
+  'CallExpression[callee.property.name="json"][typeArguments.params.length>0]',
+].map((selector) => ({ selector, message: JSON_CAST_MESSAGE }));
 
 export default tseslint.config(
   ...tseslint.configs.recommended,
@@ -49,6 +77,12 @@ export default tseslint.config(
             "No `export default function` — write `const Name = () => …;` then `export default Name;`. Rule: #3865.",
         },
       ],
+    },
+  },
+  {
+    plugins: { kcvv: kcvvPlugin },
+    rules: {
+      "kcvv/no-json-cast": ["error", ...JSON_CAST_SELECTORS],
     },
   },
   {

@@ -8,6 +8,7 @@ import { CACHE_VERSION } from "./matches";
 import { PsdService, markPartial } from "../psd/service";
 import type { PsdServiceInterface } from "../psd/service";
 import { KvCacheService, type KvCacheInterface } from "../cache/kv-cache";
+import { decodeCachedPartial } from "../test-helpers/cached-partial";
 import { noopDurableKv } from "../test-helpers/kv-cache-mock";
 import { PsdGateTest } from "../psd/gate";
 import { testEnvLayer } from "../test-helpers/env-layer";
@@ -44,7 +45,7 @@ const storedFor = async (result: OpponentHistory) => {
     ),
   );
   const raw = store.get(`opponent:team:${CACHE_VERSION}:1:club:456`);
-  return raw ? (JSON.parse(raw) as { partial?: boolean }) : undefined;
+  return raw ? decodeCachedPartial(raw) : undefined;
 };
 
 describe("getOpponentHistoryHandler — partial history (#3489)", () => {

@@ -21,13 +21,14 @@ import {
   ResourceNotFoundError,
   type BffError,
 } from "./errors";
-import type {
-  Match,
-  MatchDetail,
+import {
   CompetitionType,
-  RankingTable,
-  OpponentHistory,
-  PlayerSeasonStats,
+  MatchStatus,
+  type Match,
+  type MatchDetail,
+  type RankingTable,
+  type OpponentHistory,
+  type PlayerSeasonStats,
 } from "@kcvv/api-contract";
 import {
   PsdSeason,
@@ -49,6 +50,7 @@ import {
   hidesScores,
   withoutDetailScores,
   buildCompetitionLabelMap,
+  CompetitionLabelMapSchema,
   type CompetitionLabelMap,
   resolveCompetitionType,
   mapGameStatus,
@@ -62,6 +64,56 @@ import {
 } from "./transforms";
 import { resolveVenue } from "./venue";
 import { kickoffMs, startOfBrusselsDayMs } from "./wall-clock";
+
+// The club's PSD teams by id: name and competition band (`age`). Cached as one
+// KV entry (`psd:teams-by-id`), so a value of the wrong shape is a miss.
+const TeamsByIdSchema = S.Record({
+  key: S.String,
+  value: S.Struct({ name: S.String, age: S.String }),
+});
+type TeamsById = typeof TeamsByIdSchema.Type;
+const decodeTeamsById = S.decodeUnknownOption(S.parseJson(TeamsByIdSchema));
+
+const MatchTeamIndexEntrySchema = S.Struct({
+  teamId: S.Number,
+  competitionType: CompetitionType,
+  // Season-list-derived status + score. The list reflects the final result
+  // before the `/info` match report catches up, so `getMatchDetail` can
+  // backfill a settled result while `/info` is still preview-shaped.
+  status: MatchStatus,
+  homeScore: S.optional(S.Number),
+  awayScore: S.optional(S.Number),
+  // Whether the queried team played at home for this fixture (#2491) —
+  // `transformPsdGame`'s own `homeTeamId === teamId`, falling back to a
+  // derived `ownClubId`, against `game.teamId` normalised to the queried
+  // team exactly like every list path normalises it before calling
+  // `transformPsdGame` (`game.teamId ?? teamId`/`team.id` in
+  // `getTeamMatches`/`getNextMatches`/`getMatchesWindow`) — the same
+  // fixture must not read home on `/kalender` and away (or unresolved)
+  // on `/wedstrijd/{id}`. The match-detail endpoint has no club context
+  // of its own to compute this, so `getMatchDetail` reads it from here.
+  // Feeds `resolveVenue` only — deliberately NOT copied onto the
+  // `MatchDetail` this index enriches; see the `is_home` comment above
+  // `getMatchDetail`'s `Effect.flatMap`.
+  isHome: S.optional(S.Boolean),
+  // The team's band withholds scores (#3428). Stored with the team id, so
+  // the detail gate can never see a team without its band.
+  hideScores: S.Boolean,
+});
+const MatchTeamIndexSchema = S.mutable(
+  S.Record({ key: S.String, value: MatchTeamIndexEntrySchema }),
+);
+type MatchTeamIndex = typeof MatchTeamIndexSchema.Type;
+const decodeMatchTeamIndex = S.decodeUnknownOption(
+  S.parseJson(MatchTeamIndexSchema),
+);
+
+// One decoder per cached schema, built once at module load (#3877).
+const decodeSeasons = S.decodeUnknownOption(S.parseJson(PsdSeasonsSchema));
+const decodeSeason = S.decodeUnknownOption(S.parseJson(PsdSeason));
+const decodeCompetitionLabels = S.decodeUnknownOption(
+  S.parseJson(CompetitionLabelMapSchema),
+);
 
 // ─── Service definition ────────────────────────────────────────────────────────
 
@@ -301,12 +353,13 @@ export const PsdServiceLive = Layer.effect(
         ),
       );
 
-    // A KV value decoded against `schema`; None when absent or undecodable.
-    const readCached = <A, I>(key: string, schema: S.Schema<A, I>) =>
+    // A KV value run through `decode`; None when absent or undecodable.
+    const readCached = <A>(
+      key: string,
+      decode: (raw: string) => Option.Option<A>,
+    ) =>
       Effect.map(cache.get(key), (raw) =>
-        raw === null
-          ? Option.none()
-          : S.decodeUnknownOption(S.parseJson(schema))(raw),
+        raw === null ? Option.none<A>() : decode(raw),
       );
 
     // Every season PSD knows. Cached for a day (#3468): every opponent
@@ -314,7 +367,7 @@ export const PsdServiceLive = Layer.effect(
     const SEASONS_CACHE_KEY = "psd:seasons";
     const getAllSeasons = (): Effect.Effect<readonly PsdSeason[], BffError> =>
       Effect.gen(function* () {
-        const cached = yield* readCached(SEASONS_CACHE_KEY, PsdSeasonsSchema);
+        const cached = yield* readCached(SEASONS_CACHE_KEY, decodeSeasons);
         if (Option.isSome(cached)) return cached.value;
         const seasons = yield* countedFetch("/seasons", PsdSeasonsSchema);
         yield* cache.set(
@@ -328,7 +381,7 @@ export const PsdServiceLive = Layer.effect(
     const getCurrentSeason = (): Effect.Effect<PsdSeason, BffError> =>
       Effect.gen(function* () {
         const cacheKey = "psd:current-season-id";
-        const cached = yield* readCached(cacheKey, PsdSeason);
+        const cached = yield* readCached(cacheKey, decodeSeason);
         if (Option.isSome(cached)) return cached.value;
 
         const seasons = yield* getAllSeasons();
@@ -360,20 +413,11 @@ export const PsdServiceLive = Layer.effect(
       never
     > =>
       Effect.gen(function* () {
-        const cached = yield* cache.get(COMPETITION_LABELS_CACHE_KEY);
-        if (cached) {
-          const parsed = yield* Effect.try({
-            try: () => JSON.parse(cached) as CompetitionLabelMap,
-            catch: () => null,
-          }).pipe(Effect.option);
-          if (
-            Option.isSome(parsed) &&
-            parsed.value !== null &&
-            typeof parsed.value === "object"
-          ) {
-            return parsed.value;
-          }
-        }
+        const cached = yield* readCached(
+          COMPETITION_LABELS_CACHE_KEY,
+          decodeCompetitionLabels,
+        );
+        if (Option.isSome(cached)) return cached.value;
         const map = yield* countedFetch(
           "/competitions",
           PsdCompetitionsSchema,
@@ -382,7 +426,7 @@ export const PsdServiceLive = Layer.effect(
           Effect.catchAll((e) =>
             Effect.log(
               `getCompetitionLabels: /competitions unavailable, using generic labels: ${String(e)}`,
-            ).pipe(Effect.as({} as CompetitionLabelMap)),
+            ).pipe(Effect.as<CompetitionLabelMap>({})),
           ),
         );
         if (Object.keys(map).length > 0) {
@@ -409,26 +453,16 @@ export const PsdServiceLive = Layer.effect(
     const TEAMS_BY_ID_CACHE_KEY = "psd:teams-by-id";
     const TEAMS_BY_ID_TTL = 60 * 60 * 24; // 1 day
 
-    type TeamsById = Record<string, { name: string; age: string }>;
     const teamLabelOf = (team: TeamsById[string] | undefined) =>
       team ? derivePsdTeamLabel(team.name, team.age) : undefined;
 
     const getTeamsById = (): Effect.Effect<TeamsById, BffError> =>
       Effect.gen(function* () {
-        const cached = yield* cache.get(TEAMS_BY_ID_CACHE_KEY);
-        if (cached) {
-          const parsed = yield* Effect.try({
-            try: () => JSON.parse(cached) as TeamsById,
-            catch: () => null,
-          }).pipe(Effect.option);
-          if (
-            Option.isSome(parsed) &&
-            parsed.value !== null &&
-            typeof parsed.value === "object"
-          ) {
-            return parsed.value;
-          }
-        }
+        const cached = yield* readCached(
+          TEAMS_BY_ID_CACHE_KEY,
+          decodeTeamsById,
+        );
+        if (Option.isSome(cached)) return cached.value;
         const teams = yield* countedFetch("/teams", PsdTeamsSchema);
         const byId: TeamsById = Object.fromEntries(
           teams.map((t) => [String(t.id), { name: t.name, age: t.age }]),
@@ -536,34 +570,6 @@ export const PsdServiceLive = Layer.effect(
     // was built and holds no matches.
     const MATCH_TEAM_INDEX_UNKNOWN = "null";
 
-    interface MatchTeamIndexEntry {
-      teamId: number;
-      competitionType: CompetitionType;
-      // Season-list-derived status + score. The list reflects the final result
-      // before the `/info` match report catches up, so `getMatchDetail` can
-      // backfill a settled result while `/info` is still preview-shaped.
-      status: Match["status"];
-      homeScore?: number;
-      awayScore?: number;
-      // Whether the queried team played at home for this fixture (#2491) —
-      // `transformPsdGame`'s own `homeTeamId === teamId`, falling back to a
-      // derived `ownClubId`, against `game.teamId` normalised to the queried
-      // team exactly like every list path normalises it before calling
-      // `transformPsdGame` (`game.teamId ?? teamId`/`team.id` in
-      // `getTeamMatches`/`getNextMatches`/`getMatchesWindow`) — the same
-      // fixture must not read home on `/kalender` and away (or unresolved)
-      // on `/wedstrijd/{id}`. The match-detail endpoint has no club context
-      // of its own to compute this, so `getMatchDetail` reads it from here.
-      // Feeds `resolveVenue` only — deliberately NOT copied onto the
-      // `MatchDetail` this index enriches; see the `is_home` comment above
-      // `getMatchDetail`'s `Effect.flatMap`.
-      isHome?: boolean;
-      // The team's band withholds scores (#3428). Stored with the team id, so
-      // the detail gate can never see a team without its band.
-      hideScores: boolean;
-    }
-    type MatchTeamIndex = Record<string, MatchTeamIndexEntry>;
-
     const buildMatchTeamIndex = (): Effect.Effect<MatchTeamIndex, BffError> =>
       Effect.gen(function* () {
         const teams = yield* countedFetch("/teams", PsdTeamsSchema);
@@ -640,15 +646,7 @@ export const PsdServiceLive = Layer.effect(
         const cached = yield* cache.get(MATCH_TEAM_INDEX_CACHE_KEY);
         if (cached === MATCH_TEAM_INDEX_UNKNOWN) return Option.some(undefined);
         if (!cached) return Option.none();
-        const parsed = yield* Effect.try({
-          try: () => JSON.parse(cached) as MatchTeamIndex,
-          catch: () => null,
-        }).pipe(Effect.option);
-        return Option.isSome(parsed) &&
-          parsed.value !== null &&
-          typeof parsed.value === "object"
-          ? Option.some<MatchTeamIndex | undefined>(parsed.value)
-          : Option.none();
+        return decodeMatchTeamIndex(cached);
       });
 
     // Any build failure (typed error OR defect) yields "unknown", never an
