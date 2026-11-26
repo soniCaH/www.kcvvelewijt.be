@@ -497,20 +497,10 @@ const eslintConfig = [
     },
   },
   {
-    // Arrow functions only in all of `src` (#3868 components, #3869 the rest; rule: #3865):
-    // a `function` declaration becomes `const name = () => …`. Own rule IDs, own block, like
-    // `kcvv/no-let` above. Tests and stories are not checked.
-    files: ["src/**/*.{ts,tsx,js,jsx,mjs,cjs,mts,cts}"],
-    ignores: [
-      "**/*.test.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
-      "**/*.spec.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
-      "**/*.stories.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
-      "**/__tests__/**",
-      "**/test/**",
-      "**/tests/**",
-      "**/e2e/**",
-      "**/.storybook/**",
-    ],
+    // Arrow functions only in every linted file (#3868 components, #3869 the rest of `src`,
+    // #3870 tests, stories, `test/` and `.storybook/`; rule: #3865): a `function` declaration
+    // becomes `const name = () => …`. Own rule IDs, own block, like `kcvv/no-let` above.
+    files: ["**/*.{ts,tsx,js,jsx,mjs,cjs,mts,cts}"],
     plugins: { kcvv: kcvvPlugin },
     rules: {
       "func-style": ["error", "expression"],
