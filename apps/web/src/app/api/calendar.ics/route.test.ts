@@ -477,6 +477,14 @@ describe("GET /api/calendar.ics hidden teams (#3898)", () => {
     expect(fannedOutIds()).toEqual([HIDDEN]);
   });
 
+  it("reads a hidden team's Sanity psdId as strictly as a request id", async () => {
+    mockFindHiddenPsdIds.mockReturnValue(Effect.succeed(["0x17", " 23 "]));
+
+    await GET(makeRequest(`teamIds=${HIDDEN}`));
+
+    expect(fannedOutIds()).toEqual([1, 1235]);
+  });
+
   it("gives ?teamIds=23,23,023 and ?teamIds=23 one cache key", async () => {
     const key = await keyFor(`teamIds=${HIDDEN},${HIDDEN},0${HIDDEN}`);
 

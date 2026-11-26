@@ -237,8 +237,8 @@ describe("/kalender — ?abonneer= (#3788)", () => {
   });
 });
 
-// #3898: a hidden team's calendar is reachable only by typing its id into the
-// feed URL. The page offers the widget the shown teams only, so the dropdown
+// #3898: `/kalender` never offers a hidden team's calendar; only a feed URL
+// that names its id serves it. The page offers the widget the shown teams only, so the dropdown
 // never lists a hidden team and `?abonneer=<hidden id>` matches no team (the
 // widget ignores an id that is not in `teams`).
 describe("/kalender — hidden teams (#3898)", () => {

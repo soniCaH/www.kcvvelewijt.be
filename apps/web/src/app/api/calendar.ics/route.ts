@@ -38,11 +38,11 @@ function parseSide(raw: string | null): MatchSide {
   return "all";
 }
 
+/** Sanity `psdId`s → numbers by the same strict rule as a request's `teamIds` (#3486). */
 const toPsdIds = (psdIds: readonly (string | null)[]): number[] =>
   psdIds
-    .filter((psdId) => psdId != null)
-    .map(Number)
-    .filter((id) => !isNaN(id) && id > 0);
+    .map((psdId) => (psdId == null ? null : parsePsdId(psdId)))
+    .filter((id) => id !== null);
 
 /** Every shown team's `psdId`, in Sanity order — the all-teams feed. */
 const knownTeamIds = Effect.gen(function* () {
@@ -51,35 +51,35 @@ const knownTeamIds = Effect.gen(function* () {
   return toPsdIds(teams.map((t) => t.psdId));
 });
 
+interface SelectableTeamIds {
+  readonly shown: readonly number[];
+  readonly hidden: readonly number[];
+}
+
 /**
  * The ids `teamIds` may select: every shown team's, plus every hidden team's
  * (`showInNavigation: false`). Only `shown` ever makes the all-teams feed, so
  * a hidden team is served only when its id is named (#3898).
  */
-interface KnownTeamIds {
-  readonly shown: readonly number[];
-  readonly hidden: readonly number[];
-}
-
-const knownAndHiddenTeamIds = Effect.gen(function* () {
+const selectableTeamIds = Effect.gen(function* () {
   const repo = yield* TeamRepository;
   const [shown, hidden] = yield* Effect.all(
     [knownTeamIds, repo.findHiddenPsdIds()],
     { concurrency: "unbounded" },
   );
-  return { shown, hidden: toPsdIds(hidden) } satisfies KnownTeamIds;
+  return { shown, hidden: toPsdIds(hidden) };
 });
 
 /**
- * `knownAndHiddenTeamIds`, or `null` when a Sanity read fails. A failed read
+ * `selectableTeamIds`, or `null` when a Sanity read fails. A failed read
  * must not take down a feed whose matches are already cached: the caller then
  * keys on the strict ids alone, and the all-teams feed reads the shown list
  * only on a miss — so a failed read never adds a hidden team to it.
  */
-async function fetchKnownTeamIds(): Promise<KnownTeamIds | null> {
+const fetchSelectableTeamIds = async (): Promise<SelectableTeamIds | null> => {
   try {
     // Section read: the feed still works without the known-team filter.
-    return await runPromise(knownAndHiddenTeamIds.pipe(Effect.orDie));
+    return await runPromise(selectableTeamIds.pipe(Effect.orDie));
   } catch (error) {
     unstable_rethrow(error);
     console.warn(
@@ -88,7 +88,7 @@ async function fetchKnownTeamIds(): Promise<KnownTeamIds | null> {
     );
     return null;
   }
-}
+};
 
 /**
  * `teamIds` → the one list both the cache key and the fan-out use (#3486):
@@ -220,8 +220,8 @@ export async function GET(request: NextRequest) {
     // Outside the matches cache on purpose (#3486): the key is built from
     // this list, so it must be resolved before the cache is looked up.
     // Both team reads are revalidating Sanity fetches, not fresh reads, and a
-    // failure only drops the known-team filter (see `fetchKnownTeamIds`).
-    const known = await fetchKnownTeamIds();
+    // failure only drops the known-team filter (see `fetchSelectableTeamIds`).
+    const known = await fetchSelectableTeamIds();
     const selected = selectTeamIds(
       rawTeamIds,
       known && [...known.shown, ...known.hidden],
