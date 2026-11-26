@@ -1,10 +1,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  act,
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react";
 import { useEffect } from "react";
 import { DartsSignup, DartsSignupForm } from "./DartsSignup";
 import { trackEvent } from "@/lib/analytics/track-event";
 
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
+
+const tokenGiven = vi.hoisted(() => vi.fn());
 
 vi.mock("@/components/club/MembershipForm/TurnstileWidget", () => ({
   // A token on mount, and a fresh single-use one each time `resetKey` changes.
@@ -16,6 +24,7 @@ vi.mock("@/components/club/MembershipForm/TurnstileWidget", () => ({
     resetKey: number;
   }) => {
     useEffect(() => {
+      tokenGiven(`token-${resetKey}`);
       onToken(`token-${resetKey}`);
     }, [onToken, resetKey]);
     return <span data-testid="turnstile" data-reset-key={resetKey} />;
@@ -64,6 +73,7 @@ const submit = () =>
 describe("DartsSignupForm", () => {
   beforeEach(() => {
     vi.mocked(trackEvent).mockClear();
+    tokenGiven.mockClear();
   });
   afterEach(() => {
     vi.unstubAllGlobals();
@@ -288,6 +298,9 @@ describe("DartsSignupForm", () => {
         "1",
       ),
     );
+    // The reset key renders before the widget hands its new token to the form.
+    await waitFor(() => expect(tokenGiven).toHaveBeenLastCalledWith("token-1"));
+    await act(async () => {});
     submit();
     await waitFor(() =>
       expect(
