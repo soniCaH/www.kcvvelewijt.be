@@ -72,6 +72,7 @@ const TeamsByIdSchema = S.Record({
   value: S.Struct({ name: S.String, age: S.String }),
 });
 type TeamsById = typeof TeamsByIdSchema.Type;
+const decodeTeamsById = S.decodeUnknownOption(S.parseJson(TeamsByIdSchema));
 
 const MatchTeamIndexEntrySchema = S.Struct({
   teamId: S.Number,
@@ -105,6 +106,13 @@ const MatchTeamIndexSchema = S.mutable(
 type MatchTeamIndex = typeof MatchTeamIndexSchema.Type;
 const decodeMatchTeamIndex = S.decodeUnknownOption(
   S.parseJson(MatchTeamIndexSchema),
+);
+
+// One decoder per cached schema, built once at module load (#3877).
+const decodeSeasons = S.decodeUnknownOption(S.parseJson(PsdSeasonsSchema));
+const decodeSeason = S.decodeUnknownOption(S.parseJson(PsdSeason));
+const decodeCompetitionLabels = S.decodeUnknownOption(
+  S.parseJson(CompetitionLabelMapSchema),
 );
 
 // ─── Service definition ────────────────────────────────────────────────────────
@@ -345,12 +353,13 @@ export const PsdServiceLive = Layer.effect(
         ),
       );
 
-    // A KV value decoded against `schema`; None when absent or undecodable.
-    const readCached = <A, I>(key: string, schema: S.Schema<A, I>) =>
+    // A KV value run through `decode`; None when absent or undecodable.
+    const readCached = <A>(
+      key: string,
+      decode: (raw: string) => Option.Option<A>,
+    ) =>
       Effect.map(cache.get(key), (raw) =>
-        raw === null
-          ? Option.none()
-          : S.decodeUnknownOption(S.parseJson(schema))(raw),
+        raw === null ? Option.none<A>() : decode(raw),
       );
 
     // Every season PSD knows. Cached for a day (#3468): every opponent
@@ -358,7 +367,7 @@ export const PsdServiceLive = Layer.effect(
     const SEASONS_CACHE_KEY = "psd:seasons";
     const getAllSeasons = (): Effect.Effect<readonly PsdSeason[], BffError> =>
       Effect.gen(function* () {
-        const cached = yield* readCached(SEASONS_CACHE_KEY, PsdSeasonsSchema);
+        const cached = yield* readCached(SEASONS_CACHE_KEY, decodeSeasons);
         if (Option.isSome(cached)) return cached.value;
         const seasons = yield* countedFetch("/seasons", PsdSeasonsSchema);
         yield* cache.set(
@@ -372,7 +381,7 @@ export const PsdServiceLive = Layer.effect(
     const getCurrentSeason = (): Effect.Effect<PsdSeason, BffError> =>
       Effect.gen(function* () {
         const cacheKey = "psd:current-season-id";
-        const cached = yield* readCached(cacheKey, PsdSeason);
+        const cached = yield* readCached(cacheKey, decodeSeason);
         if (Option.isSome(cached)) return cached.value;
 
         const seasons = yield* getAllSeasons();
@@ -406,7 +415,7 @@ export const PsdServiceLive = Layer.effect(
       Effect.gen(function* () {
         const cached = yield* readCached(
           COMPETITION_LABELS_CACHE_KEY,
-          CompetitionLabelMapSchema,
+          decodeCompetitionLabels,
         );
         if (Option.isSome(cached)) return cached.value;
         const map = yield* countedFetch(
@@ -451,7 +460,7 @@ export const PsdServiceLive = Layer.effect(
       Effect.gen(function* () {
         const cached = yield* readCached(
           TEAMS_BY_ID_CACHE_KEY,
-          TeamsByIdSchema,
+          decodeTeamsById,
         );
         if (Option.isSome(cached)) return cached.value;
         const teams = yield* countedFetch("/teams", PsdTeamsSchema);
