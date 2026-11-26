@@ -399,6 +399,51 @@ describe("<EventDetailBlock>", () => {
     expect(wrappers?.length).toBe(3);
   });
 
+  it("shows day + month on each session row and the weekday once (#3891)", () => {
+    // 1 Feb and 1 Mar 2027 are both Mondays: same weekday, same day number.
+    const { container } = render(
+      <EventDetailBlock
+        value={eventFact({
+          endDate: undefined,
+          sessions: [
+            {
+              _key: "a",
+              date: "2027-02-01",
+              startTime: "18:30",
+              endTime: "22:30",
+            },
+            {
+              _key: "b",
+              date: "2027-03-01",
+              startTime: "18:30",
+              endTime: "22:30",
+            },
+          ],
+        })}
+        isPast={false}
+      />,
+    );
+    const rows = [
+      ...container.querySelectorAll(
+        '[data-event-detail-sessions="true"] > div',
+      ),
+    ].map((row) => [...row.children].map((cell) => cell.textContent));
+    // The abbreviation is hidden from screen readers, which hear the full weekday.
+    expect(rows).toEqual([
+      ["MAmaandag", "1 februari", "18:30 - 22:30"],
+      ["MAmaandag", "1 maart", "18:30 - 22:30"],
+    ]);
+    const firstWeekday = container.querySelector(
+      '[data-event-detail-sessions="true"] dt',
+    );
+    expect(
+      firstWeekday?.querySelector('[aria-hidden="true"]')?.textContent,
+    ).toBe("MA");
+    expect(firstWeekday?.querySelector(".sr-only")?.textContent).toBe(
+      "maandag",
+    );
+  });
+
   it("omits the sessions schedule for a single-day event", () => {
     const { container } = render(
       <EventDetailBlock value={singleDay()} isPast={false} />,
