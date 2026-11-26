@@ -11,6 +11,14 @@
   "main": "src/test-helpers/workerd-entry.ts",
   "compatibility_date": "2024-09-23",
   "compatibility_flags": ["nodejs_compat"],
+  // One var and one secret for config.workerd.test.ts: both reach the Worker as
+  // plain string bindings, which is what `config.ts` reads.
+  "vars": {
+    "PSD_API_BASE_URL": "https://clubapi.example.test",
+    "PSD_API_KEY": "workerd-test-key",
+    "PSD_API_CLUB": "workerd-test-club",
+    "PSD_API_AUTH": "workerd-test-auth"
+  },
   "kv_namespaces": [{ "binding": "PSD_CACHE", "id": "test-kv-namespace" }],
   "durable_objects": {
     "bindings": [{ "name": "PSD_GATE", "class_name": "PsdGate" }]

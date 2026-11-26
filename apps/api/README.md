@@ -94,7 +94,8 @@ real:
 `wrangler.workerd-test.jsonc` is a **test-only** Worker config, read only by
 `vitest.workers.config.ts` — never by `wrangler dev`/`deploy`, which still use
 `wrangler.toml`. It's deliberately narrower than the real config: just the
-`PSD_CACHE` KV binding and the `PSD_GATE` Durable Object (pointed at
+`PSD_CACHE` KV binding, the `PSD_GATE` Durable Object and the `PSD_API_*` vars
+that `config.workerd.test.ts` reads through `Config` (pointed at
 `src/test-helpers/workerd-entry.ts`, a minimal entry that exports only
 `PsdGate` — never the real `src/index.ts`). The real `wrangler.toml` also
 declares Vectorize and Workers AI bindings that have no local emulation;
