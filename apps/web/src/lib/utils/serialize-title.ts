@@ -9,7 +9,7 @@ interface TitleSpan {
 
 export type TitleValue = string | PortableTextBlock[];
 
-export function serializeTitle(value: TitleValue): string {
+export const serializeTitle = (value: TitleValue): string => {
   if (typeof value === "string") return value;
   const block = value[0];
   if (!block || !Array.isArray((block as { children?: unknown }).children)) {
@@ -17,4 +17,4 @@ export function serializeTitle(value: TitleValue): string {
   }
   const children = (block as PortableTextBlock).children as TitleSpan[];
   return children.map((c) => c.text ?? "").join("");
-}
+};

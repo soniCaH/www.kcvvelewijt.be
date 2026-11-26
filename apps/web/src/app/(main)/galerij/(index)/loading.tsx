@@ -26,7 +26,7 @@ import { GALERIJ_KICKER, GALERIJ_HEADLINE } from "./copy";
  *  `--taped-card-rotation` slot var a `<TapedCardGrid>` sets, read the same
  *  way here as it will be by the real `<GalleryCard>` on arrival, so the
  *  card doesn't visibly snap from flat to tilted on swap. */
-function GalleryCardSkeleton() {
+const GalleryCardSkeleton = () => {
   return (
     <div
       className="border-ink bg-cream-soft shadow-paper-sm overflow-hidden border-2"
@@ -43,9 +43,9 @@ function GalleryCardSkeleton() {
       </div>
     </div>
   );
-}
+};
 
-export default function GalerijLoading() {
+const GalerijLoading = () => {
   return (
     <div className="bg-cream flex min-h-screen flex-col">
       <LoadingAnnouncement label="Fotogalerij laden…" />
@@ -65,4 +65,6 @@ export default function GalerijLoading() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default GalerijLoading;

@@ -21,7 +21,7 @@ import type { PortableTextBlock } from "@portabletext/react";
  * Returns an empty array when the input is null/undefined so call-sites
  * can fall back to a plain-string title without an extra guard.
  */
-export function toPortableTextBlocks(
+export const toPortableTextBlocks = (
   input:
     | ReadonlyArray<{
         _type: string;
@@ -34,11 +34,11 @@ export function toPortableTextBlocks(
       }>
     | null
     | undefined,
-): PortableTextBlock[] {
+): PortableTextBlock[] => {
   if (!input || input.length === 0) return [];
   return input.map((block) => ({
     ...block,
     children: (block.children ?? []) as PortableTextBlock["children"],
     markDefs: (block.markDefs ?? []) as PortableTextBlock["markDefs"],
   })) as PortableTextBlock[];
-}
+};

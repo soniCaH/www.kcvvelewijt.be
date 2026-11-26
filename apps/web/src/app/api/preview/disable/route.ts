@@ -7,7 +7,7 @@ import { toSameOriginUrl } from "@/lib/sanity/preview-path";
  * Turns preview mode off (#3619). No secret: leaving preview mode must always
  * work. Redirects to the same-site path it was given, else the homepage.
  */
-export async function GET(request: Request) {
+export const GET = async (request: Request) => {
   const url = new URL(request.url);
   const target = toSameOriginUrl(
     url.searchParams.get(urlSearchParamPreviewPathname),
@@ -16,4 +16,4 @@ export async function GET(request: Request) {
 
   (await draftMode()).disable();
   return NextResponse.redirect(target ?? new URL("/", url), 307);
-}
+};

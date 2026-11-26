@@ -8,6 +8,6 @@
  * One shared definition (#2802 review) — eight identical copies existed
  * across the codebase before this one.
  */
-export function assertNever(value: never): never {
+export const assertNever = (value: never): never => {
   throw new Error(`Unhandled variant: ${String(value)}`);
-}
+};

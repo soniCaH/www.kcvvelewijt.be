@@ -22,7 +22,7 @@ import {
 import { UltrasHero } from "./UltrasHero";
 
 /** An editorial section footprint: kicker + heading + paragraph bars. */
-function SectionSkeleton({ withImage = false }: { withImage?: boolean }) {
+const SectionSkeleton = ({ withImage = false }: { withImage?: boolean }) => {
   return (
     <section className="mt-14 first:mt-0">
       {/* <SectionHeader>'s own wrapper spacing (#2572). */}
@@ -42,9 +42,9 @@ function SectionSkeleton({ withImage = false }: { withImage?: boolean }) {
       ) : null}
     </section>
   );
-}
+};
 
-export default function UltrasLoading() {
+const UltrasLoading = () => {
   return (
     <div className="min-h-screen">
       <LoadingAnnouncement label="Ultras laden…" />
@@ -59,4 +59,6 @@ export default function UltrasLoading() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default UltrasLoading;

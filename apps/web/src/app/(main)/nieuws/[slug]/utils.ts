@@ -24,13 +24,13 @@ import { extractMatchTime } from "@/lib/utils/match-time";
  * the BFF as a guaranteed-miss round-trip. Returns `null` when there is
  * nothing worth fetching.
  */
-export function parsePsdMatchId(
+export const parsePsdMatchId = (
   linkedMatch: string | null | undefined,
-): number | null {
+): number | null => {
   if (!linkedMatch) return null;
   const matchId = Number(linkedMatch);
   return Number.isSafeInteger(matchId) && matchId > 0 ? matchId : null;
-}
+};
 
 /**
  * Map the BFF `MatchDetail` onto the score-forward hero's `HeroMatchData`
@@ -51,7 +51,7 @@ export function parsePsdMatchId(
  * match reaches the same path), so both reduced states reuse that existing,
  * correct fallback instead of a bespoke reduced hero.
  */
-export function toHeroMatchData(match: MatchDetail): HeroMatchData | null {
+export const toHeroMatchData = (match: MatchDetail): HeroMatchData | null => {
   if (matchRowKind(match) !== "match") {
     return null;
   }
@@ -71,7 +71,7 @@ export function toHeroMatchData(match: MatchDetail): HeroMatchData | null {
     competition: match.competition,
     matchDate: formatMatchWidgetDate(match.date),
   };
-}
+};
 
 /**
  * What the article page renders for `article.body`, derived once from one
@@ -86,10 +86,10 @@ export function toHeroMatchData(match: MatchDetail): HeroMatchData | null {
  *   (`pb-8`) sits directly above whatever follows and owns the 32px gap. When
  *   false, the next block has to carry the gap itself.
  */
-export function splitArticleBody(
+export const splitArticleBody = (
   body: PortableTextBlock[] | null,
   hoistedEventKey: string | undefined,
-) {
+) => {
   const { inFlow, tailBlocks }: QaBlocksToTailSectionResult = body
     ? qaBlocksToTailSection(body)
     : { inFlow: [], tailBlocks: [] };
@@ -105,4 +105,4 @@ export function splitArticleBody(
     hasTail,
     endGapOwnedAbove: rendersArticleBody || hasTail,
   };
-}
+};

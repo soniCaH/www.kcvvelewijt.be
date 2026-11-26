@@ -13,10 +13,10 @@ import type { DateTime } from "luxon";
  *
  * `start`/`end` are pre-zoned via `parseEventDateTime` (Europe/Brussels).
  */
-export function buildEventHeroKicker(
+export const buildEventHeroKicker = (
   start: DateTime,
   end: DateTime | null,
-): string {
+): string => {
   if (!start.isValid) return "";
 
   // Only a genuine multi-day span (end on a later day) shows a range; a
@@ -38,7 +38,7 @@ export function buildEventHeroKicker(
   const base = start.toFormat("cccc d LLLL");
   const time = start.toFormat("HH:mm");
   return time !== "00:00" ? `${base} · ${time}` : base;
-}
+};
 
 /**
  * The final whitespace-delimited word of an event title, used to drive the
@@ -51,7 +51,7 @@ export function buildEventHeroKicker(
  * title whose last word repeats earlier (e.g. "Quiz over de Quiz") accents the
  * first occurrence. Acceptable for real event titles; no per-index API exists.
  */
-export function accentLastWord(title: string): string | undefined {
+export const accentLastWord = (title: string): string | undefined => {
   const last = title.trim().split(/\s+/).at(-1);
   return last ? last : undefined;
-}
+};

@@ -26,19 +26,19 @@ export type ArticleBodySegment =
   | { kind: "transfer-facts"; key: string; facts: TransferFactValue[] }
   | { kind: "blockquote-group"; key: string; blocks: PortableTextBlock[] };
 
-function isBlockquoteStyleBlock(block: PortableTextBlock): boolean {
+const isBlockquoteStyleBlock = (block: PortableTextBlock): boolean => {
   return (
     block._type === "block" &&
     (block as PortableTextBlockLike).style === "blockquote"
   );
-}
+};
 
 type Classified =
   | { kind: "pt"; item: PortableTextBlock }
   | { kind: "transfer-facts"; item: TransferFactValue }
   | { kind: "blockquote-group"; item: PortableTextBlock };
 
-function classify(block: PortableTextBlock): Classified | null {
+const classify = (block: PortableTextBlock): Classified | null => {
   if (block._type === "transferFact") {
     const fact = block as TransferFactValue;
     // Undropped playerName-less transferFact blocks are legitimately
@@ -51,16 +51,16 @@ function classify(block: PortableTextBlock): Classified | null {
     return { kind: "blockquote-group", item: block };
   }
   return { kind: "pt", item: block };
-}
+};
 
 /**
  * Consecutive blocks of one kind form one segment, so a kind change closes
  * the current run and starts a fresh one. Adding a fourth segment kind means
  * adding one `classify` branch, not touching every existing branch.
  */
-export function segmentArticleBody(
+export const segmentArticleBody = (
   blocks: PortableTextBlock[],
-): ArticleBodySegment[] {
+): ArticleBodySegment[] => {
   const runs = blocks
     .map(classify)
     .filter((item): item is Classified => item !== null)
@@ -95,4 +95,4 @@ export function segmentArticleBody(
       blocks: items as PortableTextBlock[],
     };
   });
-}
+};

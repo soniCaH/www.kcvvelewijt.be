@@ -57,9 +57,9 @@ export interface ArticleForSeo {
  * profile page. Unknown kinds return undefined rather than falling
  * through to the last branch.
  */
-export function buildAboutFromSubject(
+export const buildAboutFromSubject = (
   article: ArticleForSeo,
-): PersonAboutInput | undefined {
+): PersonAboutInput | undefined => {
   if (article.articleType !== "interview") return undefined;
   const subjects = Array.isArray(article.subjects) ? article.subjects : [];
   const subject = subjects[0] ?? null;
@@ -97,7 +97,7 @@ export function buildAboutFromSubject(
     };
   }
   return undefined;
-}
+};
 
 /**
  * Combine a Brussels wall-clock date with an optional `HH:mm` time into an
@@ -105,14 +105,14 @@ export function buildAboutFromSubject(
  * `articleFactToIso` in `event.repository.ts`. No time — or a malformed one —
  * keeps the date-only value, so a typo never drops the date.
  */
-function withTime(date: string, time?: string | null): string {
+const withTime = (date: string, time?: string | null): string => {
   const cleanTime = typeof time === "string" ? time.trim() : "";
   if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(cleanTime)) return date;
   return (
     DateTime.fromISO(`${date}T${cleanTime}`, { zone: CLUB_TIMEZONE }).toISO() ??
     date
   );
-}
+};
 
 type EventFactBlock = PortableTextBlock & {
   _type: "eventFact";
@@ -139,10 +139,10 @@ const isEventFactBlock = (
  * synthesising a bare-date endDate alongside a timed startDate makes
  * Google render events as "ends before it starts".
  */
-export function buildEventJsonLdInput(
+export const buildEventJsonLdInput = (
   article: ArticleForSeo,
   shareUrl: string,
-): EventJsonLdInput | undefined {
+): EventJsonLdInput | undefined => {
   if (article.articleType !== "event") return undefined;
   const body = article.body as Array<
     PortableTextBlock & { _type?: string }
@@ -165,4 +165,4 @@ export function buildEventJsonLdInput(
     url: shareUrl,
     image: article.coverImageUrl ?? undefined,
   };
-}
+};

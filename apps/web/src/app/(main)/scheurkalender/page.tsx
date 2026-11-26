@@ -39,14 +39,14 @@ interface ScheurkalenderData {
 }
 
 /** "B" for the squad whose name ends in " B", "A" for the first team. */
-function squadLabel(name: string): "A" | "B" {
+const squadLabel = (name: string): "A" | "B" => {
   return name.trim().endsWith(" B") ? "B" : "A";
-}
+};
 
-function toScheurkalenderMatch(
+const toScheurkalenderMatch = (
   match: Match,
   label: "A" | "B",
-): ScheurkalenderMatch {
+): ScheurkalenderMatch => {
   // getMatchesByTeam sets `is_home`; fall back to an exact club-id check on the
   // rare null (home_team.id is the club id; KCVV is 1235).
   const kcvvIsHome = match.is_home ?? match.home_team.id === KCVV_CLUB_ID;
@@ -62,7 +62,7 @@ function toScheurkalenderMatch(
     kcvvLabel: label,
     kcvvIsHome,
   };
-}
+};
 
 /**
  * The senior-team list is this sheet's subject — without it there is no way
@@ -72,7 +72,7 @@ function toScheurkalenderMatch(
  * section and stays caught: one team's fixtures failing must not blank the
  * whole sheet.
  */
-async function fetchScheurkalenderData(): Promise<ScheurkalenderData> {
+const fetchScheurkalenderData = async (): Promise<ScheurkalenderData> => {
   return runPromise(
     Effect.gen(function* () {
       const bff = yield* BffService;
@@ -141,12 +141,14 @@ async function fetchScheurkalenderData(): Promise<ScheurkalenderData> {
       return { matches, season };
     }).pipe(Effect.orDie),
   );
-}
+};
 
-export default async function ScheurkalenderPageRoute() {
+const ScheurkalenderPageRoute = async () => {
   const { matches, season } = await fetchScheurkalenderData();
   return <ScheurkalenderPage matches={matches} season={season} />;
-}
+};
+
+export default ScheurkalenderPageRoute;
 
 // 15 min ISR — renders live PSD fixtures, so its cache is aligned to the BFF
 // freshness window. Never generateStaticParams (PSD rate limits); ISR keeps

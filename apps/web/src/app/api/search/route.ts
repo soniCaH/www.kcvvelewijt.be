@@ -243,11 +243,11 @@ const searchTeams = (query: string) =>
  * back to the client. Using a server-side proxy avoids CORS and keeps the BFF
  * URL out of the client bundle.
  */
-export async function POST(request: NextRequest) {
+export const POST = async (request: NextRequest) => {
   return proxyPostToBff(request, "/search");
-}
+};
 
-export async function GET(request: NextRequest) {
+export const GET = async (request: NextRequest) => {
   const searchParams = request.nextUrl.searchParams;
   const rawQuery = searchParams.get("q");
   const rawType = searchParams.get("type"); // Filter by content type
@@ -376,4 +376,4 @@ export async function GET(request: NextRequest) {
       { status: 500 },
     );
   }
-}
+};

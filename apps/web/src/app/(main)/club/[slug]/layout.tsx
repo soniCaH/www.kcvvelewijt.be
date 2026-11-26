@@ -22,12 +22,11 @@ interface ClubPageLayoutProps {
  * client-side navigation. The file is kept, not deleted: same total work,
  * moved earlier, for a real 404.
  */
-export default async function ClubPageLayout({
-  children,
-  params,
-}: ClubPageLayoutProps) {
+const ClubPageLayout = async ({ children, params }: ClubPageLayoutProps) => {
   const { slug } = await params;
   const page = await fetchPage(slug);
   if (!page) notFound();
   return children;
-}
+};
+
+export default ClubPageLayout;

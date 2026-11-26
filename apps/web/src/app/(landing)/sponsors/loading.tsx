@@ -14,7 +14,7 @@ import {
 } from "@/components/design-system";
 import { SPONSOR_TILE_GRID_CLASS } from "@/components/sponsors/SponsorTile";
 
-export default function SponsorsLoading() {
+const SponsorsLoading = () => {
   return (
     <PageContainer width="index" className="pt-12 pb-10 sm:pt-16 sm:pb-14">
       <LoadingAnnouncement label="Sponsors laden…" />
@@ -37,4 +37,6 @@ export default function SponsorsLoading() {
       </ul>
     </PageContainer>
   );
-}
+};
+
+export default SponsorsLoading;

@@ -9,6 +9,8 @@
 
 import { BoardPageLoading } from "@/components/club/BestuurPage/BoardPageLoading";
 
-export default function AngelsLoading() {
+const AngelsLoading = () => {
   return <BoardPageLoading label="Angels laden…" />;
-}
+};
+
+export default AngelsLoading;

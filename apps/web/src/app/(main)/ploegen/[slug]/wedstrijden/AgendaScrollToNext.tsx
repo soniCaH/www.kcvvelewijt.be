@@ -12,7 +12,9 @@ interface AgendaScrollToNextProps {
  * Invisible client component that auto-scrolls to the next match on mount.
  * Runs only when nextMatchId is non-null. Respects prefers-reduced-motion.
  */
-export function AgendaScrollToNext({ nextMatchId }: AgendaScrollToNextProps) {
+export const AgendaScrollToNext = ({
+  nextMatchId,
+}: AgendaScrollToNextProps) => {
   useEffect(() => {
     if (nextMatchId === null) return;
     const anchor = document.querySelector(`[data-match-id="${nextMatchId}"]`);
@@ -21,4 +23,4 @@ export function AgendaScrollToNext({ nextMatchId }: AgendaScrollToNextProps) {
   }, [nextMatchId]);
 
   return null;
-}
+};

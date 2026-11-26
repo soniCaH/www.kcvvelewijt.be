@@ -80,11 +80,11 @@ const DECLARED_ERROR_SCHEMAS: ReadonlyMap<
  * itself — malformed JSON is just another decode failure that schema
  * reports, not a separate step this function has to `try`/`catch` around.
  */
-function decodesAsDeclaredError(status: number, text: string): boolean {
+const decodesAsDeclaredError = (status: number, text: string): boolean => {
   const schema = DECLARED_ERROR_SCHEMAS.get(status);
   if (!schema) return false;
   return Either.isRight(S.decodeUnknownEither(S.parseJson(schema))(text));
-}
+};
 
 /**
  * `HttpApiClient.make`'s `transformClient` hook (see `BffService.ts`).
@@ -128,9 +128,9 @@ function decodesAsDeclaredError(status: number, text: string): boolean {
  *   this is not a new failure mode, only a wider gate for one that already
  *   exists.
  */
-export function guardDeclaredErrorBody(
+export const guardDeclaredErrorBody = (
   client: HttpClient.HttpClient,
-): HttpClient.HttpClient {
+): HttpClient.HttpClient => {
   return client.pipe(
     HttpClient.transformResponse((effect) =>
       effect.pipe(
@@ -164,4 +164,4 @@ export function guardDeclaredErrorBody(
       ),
     ),
   );
-}
+};

@@ -30,7 +30,7 @@ import { NEWS_KICKER, NEWS_HEADLINE } from "./copy";
  *  style exactly — the `--taped-card-rotation` slot var a `<TapedCardGrid>`
  *  sets, read the same way here as it will be by the real `<NewsCard>` on
  *  arrival, so the card doesn't visibly snap from flat to tilted on swap. */
-function NewsCardSkeleton() {
+const NewsCardSkeleton = () => {
   return (
     <div
       className="border-ink bg-cream-soft shadow-paper-sm overflow-hidden border-2"
@@ -47,9 +47,9 @@ function NewsCardSkeleton() {
       </div>
     </div>
   );
-}
+};
 
-export default function NewsLoading() {
+const NewsLoading = () => {
   return (
     <div className="w-full">
       <LoadingAnnouncement label="Nieuws laden…" />
@@ -95,4 +95,6 @@ export default function NewsLoading() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default NewsLoading;

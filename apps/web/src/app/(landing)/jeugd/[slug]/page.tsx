@@ -39,9 +39,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function LegacyYouthRedirect({
-  params,
-}: LegacyYouthProps) {
+const LegacyYouthRedirect = async ({ params }: LegacyYouthProps) => {
   const { slug } = await params;
   // Subject read: this route exists only to resolve the redirect target, so a
   // failed read takes the page down with it (#2864).
@@ -49,4 +47,6 @@ export default async function LegacyYouthRedirect({
   const target = resolveYouthSlug(slug, rows);
   if (!target) notFound();
   permanentRedirect(`/ploegen/${target}`);
-}
+};
+
+export default LegacyYouthRedirect;

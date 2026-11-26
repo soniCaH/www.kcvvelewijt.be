@@ -94,7 +94,7 @@ export interface HomepageBannersVM {
 
 type RawSlot = NonNullable<HOMEPAGE_QUERY_RESULT>["bannerSlotA"];
 
-function toBannerSlotVM(slot: RawSlot): BannerSlotVM | null {
+const toBannerSlotVM = (slot: RawSlot): BannerSlotVM | null => {
   // Dimensions are as load-bearing as the URL now: without them the `<img>`
   // has no intrinsic size, and a slot with no fixed ratio would reflow the
   // page when the bytes land. A banner missing them is dropped rather than
@@ -117,9 +117,9 @@ function toBannerSlotVM(slot: RawSlot): BannerSlotVM | null {
     alt: slot.alt,
     href: slot.href ?? undefined,
   };
-}
+};
 
-function toBannersVM(data: HOMEPAGE_QUERY_RESULT): HomepageBannersVM {
+const toBannersVM = (data: HOMEPAGE_QUERY_RESULT): HomepageBannersVM => {
   if (!data) {
     return { bannerSlotA: null, bannerSlotB: null, bannerSlotC: null };
   }
@@ -128,7 +128,7 @@ function toBannersVM(data: HOMEPAGE_QUERY_RESULT): HomepageBannersVM {
     bannerSlotB: toBannerSlotVM(data.bannerSlotB),
     bannerSlotC: toBannerSlotVM(data.bannerSlotC),
   };
-}
+};
 
 export interface MatchesSliderPlaceholderVM {
   nextSeasonKickoff?: Date;
@@ -141,9 +141,9 @@ export interface MatchesSliderPlaceholderVM {
   };
 }
 
-export function toPlaceholderVM(
+export const toPlaceholderVM = (
   data: HOMEPAGE_QUERY_RESULT,
-): MatchesSliderPlaceholderVM | null {
+): MatchesSliderPlaceholderVM | null => {
   const placeholder = data?.matchesSliderPlaceholder;
   if (!placeholder) return null;
 
@@ -164,7 +164,7 @@ export function toPlaceholderVM(
         }
       : undefined,
   };
-}
+};
 
 /** The jeugd-band stat line's two CMS-owned numbers (#2401 item 4). */
 export interface YouthStatsVM {
@@ -184,14 +184,14 @@ export interface YouthStatsVM {
  * and `" "` is truthy. Untrimmed, it would hand `<YouthSection>` a stat line
  * reading " spelers ·  ploegen" — the blank-claim this guard exists to stop.
  */
-export function toYouthStatsVM(
+export const toYouthStatsVM = (
   data: HOMEPAGE_QUERY_RESULT,
-): YouthStatsVM | null {
+): YouthStatsVM | null => {
   const playerCount = data?.youthPlayerCount?.trim();
   const teamCount = data?.youthTeamCount?.trim();
   if (!playerCount || !teamCount) return null;
   return { playerCount, teamCount };
-}
+};
 
 export interface HomepageVM {
   banners: HomepageBannersVM;

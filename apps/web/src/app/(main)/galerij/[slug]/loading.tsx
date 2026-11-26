@@ -17,7 +17,7 @@ import {
 } from "@/components/design-system";
 import { PageHeroSkeleton } from "@/components/layout/PageHero";
 
-export default function GalleryDetailLoading() {
+const GalleryDetailLoading = () => {
   return (
     <div className="bg-cream">
       <LoadingAnnouncement label="Fotogalerij laden…" />
@@ -52,4 +52,6 @@ export default function GalleryDetailLoading() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default GalleryDetailLoading;

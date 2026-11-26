@@ -28,7 +28,7 @@ import {
 } from "@/components/design-system";
 import { PageHeroSkeleton } from "@/components/layout/PageHero";
 
-export default function WedstrijdenLoading() {
+const WedstrijdenLoading = () => {
   return (
     <div className="min-h-screen">
       <LoadingAnnouncement label="Wedstrijden laden…" />
@@ -47,4 +47,6 @@ export default function WedstrijdenLoading() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default WedstrijdenLoading;

@@ -10,15 +10,15 @@ import type { FAQEntry } from "@/lib/seo/jsonld";
 /**
  * Check if a contact references the given staff member (through organigramNode members).
  */
-function contactHasMember(
+const contactHasMember = (
   contact: Contact | undefined,
   memberId: string,
-): boolean {
+): boolean => {
   return (
     contact?.contactType === "position" &&
     (contact.members?.some((m) => m.id === memberId) ?? false)
   );
-}
+};
 
 /**
  * Finds responsibility paths for which the given member is the primary contact.
@@ -27,14 +27,14 @@ function contactHasMember(
  * @param paths - The list of responsibility paths to search
  * @returns Responsibility paths where the member is a primary contact member
  */
-export function findMemberResponsibilities(
+export const findMemberResponsibilities = (
   memberId: string,
   paths: ResponsibilityPath[],
-): ResponsibilityPath[] {
+): ResponsibilityPath[] => {
   return paths.filter((path) =>
     contactHasMember(path.primaryContact, memberId),
   );
-}
+};
 
 /**
  * Locate responsibility paths that include the given member as a step contact.
@@ -43,14 +43,14 @@ export function findMemberResponsibilities(
  * @param paths - The list of responsibility paths to search
  * @returns An array of responsibility paths where the member appears in any step contact
  */
-export function findMemberStepResponsibilities(
+export const findMemberStepResponsibilities = (
   memberId: string,
   paths: ResponsibilityPath[],
-): ResponsibilityPath[] {
+): ResponsibilityPath[] => {
   return paths.filter((path) =>
     path.steps?.some((step) => contactHasMember(step.contact, memberId)),
   );
-}
+};
 
 /**
  * Collect member IDs referenced in responsibility paths (through organigramNode members).
@@ -58,9 +58,9 @@ export function findMemberStepResponsibilities(
  * @param paths - Responsibility paths to scan for primary and step contacts
  * @returns An array of member IDs referenced as primary or step contacts in `paths`
  */
-export function getMembersWithResponsibilities(
+export const getMembersWithResponsibilities = (
   paths: ResponsibilityPath[],
-): string[] {
+): string[] => {
   const memberIds = new Set<string>();
 
   paths.forEach((path) => {
@@ -75,7 +75,7 @@ export function getMembersWithResponsibilities(
   });
 
   return Array.from(memberIds);
-}
+};
 
 /**
  * Return the display label for a responsibility category.
@@ -83,9 +83,11 @@ export function getMembersWithResponsibilities(
  * @param category - The responsibility category identifier
  * @returns An object containing `label` for the given category; falls back to "Algemeen" if the category is not recognized
  */
-export function getCategoryInfo(category: ResponsibilityPath["category"]): {
+export const getCategoryInfo = (
+  category: ResponsibilityPath["category"],
+): {
   label: string;
-} {
+} => {
   const categories = {
     medisch: { label: "Medisch" },
     sportief: { label: "Sportief" },
@@ -96,7 +98,7 @@ export function getCategoryInfo(category: ResponsibilityPath["category"]): {
   };
 
   return categories[category] || { label: "Algemeen" };
-}
+};
 
 /**
  * Build URL to responsibility finder with optional filters
@@ -105,13 +107,13 @@ export function getCategoryInfo(category: ResponsibilityPath["category"]): {
  * @param options - Optional filters
  * @returns URL string with query parameters
  */
-export function buildResponsibilityUrl(
+export const buildResponsibilityUrl = (
   basePath: string,
   options?: {
     view?: string;
     responsibilityId?: string;
   },
-): string {
+): string => {
   const params = new URLSearchParams();
 
   if (options?.view) {
@@ -123,7 +125,7 @@ export function buildResponsibilityUrl(
 
   const queryString = params.toString();
   return queryString ? `${basePath}?${queryString}` : basePath;
-}
+};
 
 /**
  * Flatten responsibility paths into Schema.org FAQ entries for the `/hulp`
@@ -137,9 +139,9 @@ export function buildResponsibilityUrl(
  * straight to `buildFAQPageJsonLd`, and the contract is compiler-enforced: a
  * future field on `FAQEntry` becomes a type error here, not silent drift.
  */
-export function responsibilityPathsToFaqEntries(
+export const responsibilityPathsToFaqEntries = (
   paths: ReadonlyArray<ResponsibilityPath>,
-): FAQEntry[] {
+): FAQEntry[] => {
   return paths
     .map((path) => ({
       question: path.question.trim(),
@@ -149,4 +151,4 @@ export function responsibilityPathsToFaqEntries(
         .join(" "),
     }))
     .filter((entry) => entry.question !== "" && entry.answer !== "");
-}
+};

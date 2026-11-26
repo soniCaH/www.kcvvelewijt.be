@@ -363,7 +363,9 @@ export interface HomepageArticle {
 
 // ─── Transforms ──────────────────────────────────────────────────────────────
 
-function filterUnpublishedRefs(row: ARTICLE_BY_SLUG_DETAIL): ArticleDetailVM {
+const filterUnpublishedRefs = (
+  row: ARTICLE_BY_SLUG_DETAIL,
+): ArticleDetailVM => {
   const now = new Date().toISOString();
   // Mirrors the ARTICLE_BY_SLUG_QUERY publish gate: a related ref without a
   // `publishedAt` is treated as unpublished (it would not appear on the news
@@ -389,7 +391,7 @@ function filterUnpublishedRefs(row: ARTICLE_BY_SLUG_DETAIL): ArticleDetailVM {
       isPublished,
     ),
   };
-}
+};
 
 /**
  * A `callToAction.reference` pointing at an article inherits that article's
@@ -399,31 +401,31 @@ function filterUnpublishedRefs(row: ARTICLE_BY_SLUG_DETAIL): ArticleDetailVM {
  * reference nor an href" incomplete-object check renders nothing, the same
  * path a never-filled-in field takes.
  */
-function dropUnpublishedArticleReference(
+const dropUnpublishedArticleReference = (
   cta: ARTICLE_BY_SLUG_DETAIL["callToAction"],
   isPublished: (a: {
     publishedAt: string | null;
     unpublishAt: string | null;
   }) => boolean,
-): ArticleDetailVM["callToAction"] {
+): ArticleDetailVM["callToAction"] => {
   if (!cta) return null;
   const ref = cta.reference;
   if (ref && ref._type === "article" && !isPublished(ref)) {
     return { ...cta, reference: null };
   }
   return cta;
-}
+};
 
 // `findPaginated` and `findRelated` use narrower GROQ projections that omit
 // the Phase 4.5 per-articleType fields (`articleType`, `subjects`,
 // `firstTransferFact`, `firstEventFact`). Widening them to `ArticleVM` keeps
 // the locked repository interface single-typed; consumers that need the new
 // fields call `findAll`.
-function widenToArticleVM(
+const widenToArticleVM = (
   row:
     | ARTICLES_PAGINATED_QUERY_RESULT[number]
     | RELATED_ARTICLES_QUERY_RESULT[number],
-): ArticleVM {
+): ArticleVM => {
   return {
     ...row,
     // The paginated projection carries `articleType` (so /nieuws cards can
@@ -440,7 +442,7 @@ function widenToArticleVM(
     // same as a cover with no LQIP asset.
     coverImageLqip: null,
   };
-}
+};
 
 // Lower-case, apostrophes dropped, whitespace collapsed — so "Wim D’hondt",
 // "WIM  D'hondt" and "wim d'hondt" are one name.
@@ -453,14 +455,14 @@ const normalizeName = (text: string) =>
 
 /** True when `fullName` appears in `text` as a whole phrase — not as a
  *  longer word ("Peetersen") and not as scattered tokens. */
-function namesPhrase(text: string, fullName: string): boolean {
+const namesPhrase = (text: string, fullName: string): boolean => {
   const phrase = normalizeName(fullName).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return new RegExp(`(?<![\\p{L}\\p{N}])${phrase}(?![\\p{L}\\p{N}])`, "u").test(
     normalizeName(text),
   );
-}
+};
 
-export function toHomepageArticle(article: ArticleVM): HomepageArticle {
+export const toHomepageArticle = (article: ArticleVM): HomepageArticle => {
   return {
     href: `/nieuws/${article.slug}`,
     title: article.title,
@@ -471,13 +473,13 @@ export function toHomepageArticle(article: ArticleVM): HomepageArticle {
     tags: article.tags.map((t) => ({ name: t })),
     articleType: article.articleType,
   };
-}
+};
 
-export function toHomepageArticles(
+export const toHomepageArticles = (
   articles: readonly ArticleVM[],
-): HomepageArticle[] {
+): HomepageArticle[] => {
   return articles.map((a) => toHomepageArticle(a));
-}
+};
 
 /**
  * The homepage's 10 articles, from the featured-first `findAll()` list.
@@ -504,13 +506,13 @@ export interface TagCount {
   count: number;
 }
 
-function countTags(tags: ARTICLE_TAGS_QUERY_RESULT): TagCount[] {
+const countTags = (tags: ARTICLE_TAGS_QUERY_RESULT): TagCount[] => {
   const counts = new Map<string, number>();
   for (const tag of tags) {
     if (tag != null) counts.set(tag, (counts.get(tag) ?? 0) + 1);
   }
   return [...counts].map(([name, count]) => ({ name, count }));
-}
+};
 
 // ─── Service ─────────────────────────────────────────────────────────────────
 

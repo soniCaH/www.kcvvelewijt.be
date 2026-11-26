@@ -9,6 +9,8 @@
 
 import { BoardPageLoading } from "@/components/club/BestuurPage/BoardPageLoading";
 
-export default function JeugdbestuurLoading() {
+const JeugdbestuurLoading = () => {
   return <BoardPageLoading label="Jeugdbestuur laden…" />;
-}
+};
+
+export default JeugdbestuurLoading;

@@ -32,7 +32,7 @@ export interface PageMetadataInput {
  *
  * Not for noindex routes — they must omit canonical (see `canonical-urls.test`).
  */
-export function buildPageMetadata({
+export const buildPageMetadata = ({
   title,
   description,
   path,
@@ -40,7 +40,7 @@ export function buildPageMetadata({
   ogDescription,
   ogImage,
   keywords,
-}: PageMetadataInput): Metadata {
+}: PageMetadataInput): Metadata => {
   const canonical = `${SITE_CONFIG.siteUrl}${path}`;
   return {
     title,
@@ -55,4 +55,4 @@ export function buildPageMetadata({
       images: [ogImage ?? DEFAULT_OG_IMAGE],
     },
   };
-}
+};

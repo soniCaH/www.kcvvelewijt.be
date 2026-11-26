@@ -35,7 +35,7 @@ export const metadata = buildPageMetadata({
 // club/* fetching pages' cadence).
 export const revalidate = 3600;
 
-export default async function ContactPageRoute() {
+const ContactPageRoute = async () => {
   // Subject read: the key-contacts list is this page's entire content, so a
   // failed read takes the page down with it rather than rendering an empty
   // contact page (#2864).
@@ -58,4 +58,6 @@ export default async function ContactPageRoute() {
       <ContactPage keyContacts={keyContacts} />
     </>
   );
-}
+};
+
+export default ContactPageRoute;

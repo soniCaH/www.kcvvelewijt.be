@@ -21,12 +21,11 @@ interface GalleryLayoutProps {
  * fires on a prefetched client-side navigation. The file is kept, not
  * deleted: same total work, moved earlier, for a real 404.
  */
-export default async function GalleryLayout({
-  children,
-  params,
-}: GalleryLayoutProps) {
+const GalleryLayout = async ({ children, params }: GalleryLayoutProps) => {
   const { slug } = await params;
   const gallery = await fetchGalleryOrNull(slug);
   if (!gallery) notFound();
   return children;
-}
+};
+
+export default GalleryLayout;

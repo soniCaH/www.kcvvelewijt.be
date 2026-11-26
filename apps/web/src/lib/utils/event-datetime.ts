@@ -14,9 +14,9 @@ import { toDisplayZone } from "./dates";
  * Do **not** reach for this on a BFF `Match` date — that one is Belgian
  * wall-clock already, see `toMatchDisplayZone` in `./dates`.
  */
-export function parseEventDateTime(iso: string): DateTime {
+export const parseEventDateTime = (iso: string): DateTime => {
   return toDisplayZone(iso);
-}
+};
 
 export interface EventDateRange {
   start: DateTime;
@@ -46,10 +46,10 @@ export interface EventDateRange {
  * differs enough between the two surfaces that sharing it would cost more
  * than it saves.
  */
-export function resolveEventDateRange(
+export const resolveEventDateRange = (
   dateStart: string,
   dateEnd?: string | null,
-): EventDateRange {
+): EventDateRange => {
   const start = parseEventDateTime(dateStart);
   const end = dateEnd ? parseEventDateTime(dateEnd) : null;
   const isAllDay =
@@ -63,7 +63,7 @@ export function resolveEventDateRange(
     isAllDay,
     allDayEndExclusive: lastDay.plus({ days: 1 }),
   };
-}
+};
 
 /**
  * A genuine multi-day span: the end falls on a later Brussels day. A missing,
@@ -71,28 +71,31 @@ export function resolveEventDateRange(
  * evening that ends at midnight (an all-day end at midnight is its last day,
  * as in `resolveEventDateRange`).
  */
-export function isMultiDayEvent(
+export const isMultiDayEvent = (
   start: DateTime,
   end: DateTime | null,
-): end is DateTime {
+): end is DateTime => {
   if (!start.isValid || !end?.isValid || end <= start) return false;
   const endsAtMidnight = end.toFormat("HH:mm:ss.SSS") === "00:00:00.000";
   const timedStart = start.toFormat("HH:mm") !== "00:00";
   const last =
     endsAtMidnight && timedStart ? end.minus({ milliseconds: 1 }) : end;
   return !start.hasSame(last, "day");
-}
+};
 
 /**
  * The day line of a `/share` story (#3535): `zaterdag 18 oktober`, or for a
  * multi-day event `zaterdag 12 – zondag 13 oktober` (month named once when
  * both days share it).
  */
-export function formatEventDays(start: DateTime, end: DateTime | null): string {
+export const formatEventDays = (
+  start: DateTime,
+  end: DateTime | null,
+): string => {
   if (!start.isValid) return "";
   if (!isMultiDayEvent(start, end)) return start.toFormat("cccc d MMMM");
   const head = start.toFormat(
     start.hasSame(end, "month") ? "cccc d" : "cccc d MMMM",
   );
   return `${head} – ${end.toFormat("cccc d MMMM")}`;
-}
+};

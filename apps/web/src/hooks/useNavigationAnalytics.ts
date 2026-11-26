@@ -32,7 +32,7 @@ interface FooterClickInput {
  * custom-dimension cap allows, and `event_name = footer_link_click` segments
  * the column values cleanly from `category`'s other producers.
  */
-export function useNavigationAnalytics() {
+export const useNavigationAnalytics = () => {
   const trackNavClick = useCallback(
     ({ destination, source }: NavClickInput) => {
       trackEvent("nav_link_click", { destination, source });
@@ -48,4 +48,4 @@ export function useNavigationAnalytics() {
   );
 
   return { trackNavClick, trackFooterClick };
-}
+};

@@ -50,9 +50,9 @@ interface GalleryPageProps {
 export const revalidate = 900;
 
 /** First gallery image at 1200×630 for the social share card. */
-function ogImageUrl(url: string | null | undefined): string | null {
+const ogImageUrl = (url: string | null | undefined): string | null => {
   return url ? `${url}?w=1200&h=630&fit=crop&auto=format` : null;
-}
+};
 
 /** Minimal serializers for the gallery intro — paragraphs + links only. */
 const descriptionComponents: PortableTextComponents = {
@@ -89,9 +89,9 @@ const descriptionComponents: PortableTextComponents = {
 // killed the whole build. Each slug renders on its first request instead and
 // ISR caches it; a failed first request is a 500 that is never cached.
 // Required all the same: without this export `revalidate` is inert (#2391).
-export async function generateStaticParams() {
+export const generateStaticParams = async () => {
   return [];
-}
+};
 
 // Subject read: the gallery is this page's entire content, so a failed
 // read takes it down with it via `Effect.orDie` (#2864). Wrapped in React
@@ -109,9 +109,9 @@ export const fetchGalleryOrNull = cache(async function fetchGalleryOrNull(
   );
 });
 
-export async function generateMetadata({
+export const generateMetadata = async ({
   params,
-}: GalleryPageProps): Promise<Metadata> {
+}: GalleryPageProps): Promise<Metadata> => {
   const { slug } = await params;
   // Subject read: this route's metadata is entirely about this one gallery,
   // so a failed read takes it down with it — `null` (genuinely no such
@@ -144,9 +144,9 @@ export async function generateMetadata({
         : [DEFAULT_OG_IMAGE],
     },
   };
-}
+};
 
-export default async function GalleryDetailPage({ params }: GalleryPageProps) {
+const GalleryDetailPage = async ({ params }: GalleryPageProps) => {
   const { slug } = await params;
   // Subject read: the gallery is this page's entire content, so a failed
   // read takes it down with it — `null` (genuinely no such gallery) is the
@@ -265,4 +265,6 @@ export default async function GalleryDetailPage({ params }: GalleryPageProps) {
       />
     </div>
   );
-}
+};
+
+export default GalleryDetailPage;

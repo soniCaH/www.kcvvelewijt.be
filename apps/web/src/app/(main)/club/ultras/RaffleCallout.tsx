@@ -7,7 +7,7 @@ import { NumberDisplay } from "@/components/design-system/NumberDisplay";
  * `<TapedCard>` with two `<NumberDisplay>` stats — replaces the inline
  * `<strong>` emphasis in the legacy prose.
  */
-export function RaffleCallout() {
+export const RaffleCallout = () => {
   return (
     <TapedCard
       bg="jersey-deep"
@@ -46,4 +46,4 @@ export function RaffleCallout() {
       </div>
     </TapedCard>
   );
-}
+};

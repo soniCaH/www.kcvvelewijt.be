@@ -23,11 +23,11 @@ interface GalleryListingClientProps {
  * the only listing besides `/nieuws` whose payload grows without a bound — it
  * takes the same 24 + 12 contract rather than growing a second idiom (#2569).
  */
-export function GalleryListingClient({
+export const GalleryListingClient = ({
   initialGalleries,
   hasMore: initialHasMore,
   fetchGalleries,
-}: GalleryListingClientProps) {
+}: GalleryListingClientProps) => {
   const [galleries, setGalleries] = useState(initialGalleries);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [isLoading, setIsLoading] = useState(false);
@@ -80,4 +80,4 @@ export function GalleryListingClient({
       />
     </>
   );
-}
+};

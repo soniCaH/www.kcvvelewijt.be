@@ -21,7 +21,7 @@ import {
   LoadingAnnouncement,
 } from "@/components/design-system";
 
-export default function CalendarLoading() {
+const CalendarLoading = () => {
   return (
     <div className="bg-cream min-h-screen">
       <LoadingAnnouncement label="Kalender laden…" />
@@ -140,4 +140,6 @@ export default function CalendarLoading() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default CalendarLoading;

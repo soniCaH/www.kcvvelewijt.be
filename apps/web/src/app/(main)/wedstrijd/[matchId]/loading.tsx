@@ -37,16 +37,16 @@ import {
 } from "@/components/design-system";
 
 /** Shared kicker + display-heading footprint for the cream body sections. */
-function SectionHeadingSkeleton() {
+const SectionHeadingSkeleton = () => {
   return (
     <>
       <Skeleton className="mb-3 h-3 w-32" />
       <Skeleton className="mb-8 h-8 w-64 md:mb-10" />
     </>
   );
-}
+};
 
-export default function MatchDetailLoading() {
+const MatchDetailLoading = () => {
   return (
     <div className="min-h-screen">
       <LoadingAnnouncement label="Wedstrijd laden…" />
@@ -208,4 +208,6 @@ export default function MatchDetailLoading() {
       </section>
     </div>
   );
-}
+};
+
+export default MatchDetailLoading;

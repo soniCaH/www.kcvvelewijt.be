@@ -36,12 +36,12 @@ const DETAIL_ROUTE = {
  * exactly that kind's detail route (a listing, a query, a sibling route, an
  * absolute URL): only a link to the detail page travels.
  */
-export function travelId(
+export const travelId = (
   kind: TravelKind,
   href: string | undefined,
-): string | undefined {
+): string | undefined => {
   const prefix = DETAIL_ROUTE[kind];
   if (!href?.startsWith(prefix)) return undefined;
   const id = href.slice(prefix.length);
   return /^[^/?#]+$/.test(id) ? id : undefined;
-}
+};

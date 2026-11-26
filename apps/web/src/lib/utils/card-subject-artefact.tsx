@@ -80,9 +80,9 @@ const ARTEFACT_SLOT_SIZE_CLASS = "max-h-32 max-w-32";
  * variants tried and rejected; a missing or wrong crest is upstream PSD
  * data work, not a render-time concern.
  */
-export function getCardSubjectArtefact(
+export const getCardSubjectArtefact = (
   subject: CardArtefactSubject,
-): ReactNode | undefined {
+): ReactNode | undefined => {
   const content = renderSubjectArtefact(subject);
   if (content === undefined) return undefined;
   return (
@@ -90,11 +90,11 @@ export function getCardSubjectArtefact(
       {content}
     </div>
   );
-}
+};
 
-function renderSubjectArtefact(
+const renderSubjectArtefact = (
   subject: CardArtefactSubject,
-): ReactNode | undefined {
+): ReactNode | undefined => {
   switch (subject.kind) {
     case "person":
       return (
@@ -129,4 +129,4 @@ function renderSubjectArtefact(
       return undefined;
     }
   }
-}
+};

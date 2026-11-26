@@ -19,7 +19,7 @@ export const metadata = buildPageMetadata({
   ],
 });
 
-export default function HistoryPage() {
+const HistoryPage = () => {
   return (
     <>
       <JsonLd
@@ -35,4 +35,6 @@ export default function HistoryPage() {
       <HistoryContent />
     </>
   );
-}
+};
+
+export default HistoryPage;

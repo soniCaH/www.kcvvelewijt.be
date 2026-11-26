@@ -53,11 +53,11 @@ export interface UseHistoryFilterParamOptions<T extends string> {
  * for a value nothing renders with was exactly the redundant-work bug
  * #2783's review flagged (finding 5).
  */
-export function useHistoryFilterParam<T extends string>(
+export const useHistoryFilterParam = <T extends string>(
   name: string,
   values: readonly T[],
   options: UseHistoryFilterParamOptions<T>,
-): [T, SetFilterParam<T>] {
+): [T, SetFilterParam<T>] => {
   const { fallback, route, hash, initial } = options;
   const [value, setLocalValue] = useState<T>(() =>
     narrowParam(initial ?? null, values, fallback),
@@ -112,4 +112,4 @@ export function useHistoryFilterParam<T extends string>(
   );
 
   return [value, setValue];
-}
+};

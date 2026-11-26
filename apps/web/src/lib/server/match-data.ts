@@ -55,12 +55,12 @@ export interface MatchStripData {
  * `eerste-elftallen-a` precedes `-b`. Shares `selectSeniorTeams` with the
  * homepage's `<FirstTeamsBlock>` wiring so the two cannot drift.
  */
-export function pickFirstTeamPsdId(
+export const pickFirstTeamPsdId = (
   teams: readonly SeniorTeamCandidate[],
-): number | null {
+): number | null => {
   const first = selectSeniorTeams(teams)[0];
   return first?.psdId ? Number(first.psdId) : null;
-}
+};
 
 /**
  * A team's full season feed, deduplicated per render.

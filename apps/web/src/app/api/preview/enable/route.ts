@@ -17,7 +17,7 @@ import { toSameOriginUrl } from "@/lib/sanity/preview-path";
  * configured, 401 for a missing/wrong/expired secret. 400 for a target that
  * is not a path on this site, so the endpoint is never an open redirect.
  */
-export async function GET(request: Request) {
+export const GET = async (request: Request) => {
   const { projectId, token } = sanityClient.config();
   if (!projectId || !token) {
     return NextResponse.json(
@@ -48,4 +48,4 @@ export async function GET(request: Request) {
 
   (await draftMode()).enable();
   return NextResponse.redirect(target, 307);
-}
+};

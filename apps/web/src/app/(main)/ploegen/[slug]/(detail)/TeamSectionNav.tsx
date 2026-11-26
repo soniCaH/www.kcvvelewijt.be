@@ -100,12 +100,12 @@ export interface TeamSectionNavProps {
  * clears the arrow rather than landing half under it, and the document's
  * own scroll position is never touched.
  */
-export function TeamSectionNav({ items, width }: TeamSectionNavProps) {
+export const TeamSectionNav = ({ items, width }: TeamSectionNavProps) => {
   if (items.length <= 1) return null;
   return <TeamSectionNavBar items={items} width={width} />;
-}
+};
 
-function TeamSectionNavBar({ items, width }: TeamSectionNavProps) {
+const TeamSectionNavBar = ({ items, width }: TeamSectionNavProps) => {
   const ids = items.map((item) => item.id);
   const { navRef, activeId } = useSectionNav(ids);
 
@@ -184,4 +184,4 @@ function TeamSectionNavBar({ items, width }: TeamSectionNavProps) {
       </PageContainer>
     </nav>
   );
-}
+};

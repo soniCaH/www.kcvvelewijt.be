@@ -28,7 +28,7 @@ import {
   LoadingAnnouncement,
 } from "@/components/design-system";
 
-export default function ClubPageLoading() {
+const ClubPageLoading = () => {
   return (
     <div className="bg-cream min-h-screen">
       <LoadingAnnouncement label="Pagina laden…" />
@@ -62,4 +62,6 @@ export default function ClubPageLoading() {
       </div>
     </div>
   );
-}
+};
+
+export default ClubPageLoading;

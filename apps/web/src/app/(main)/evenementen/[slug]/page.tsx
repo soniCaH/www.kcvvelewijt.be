@@ -52,9 +52,9 @@ export const revalidate = 3600;
 // killed the whole build. Each slug renders on its first request instead and
 // ISR caches it; a failed first request is a 500 that is never cached.
 // Required all the same: without this export `revalidate` is inert (#2391).
-export async function generateStaticParams() {
+export const generateStaticParams = async () => {
   return [];
-}
+};
 
 // Subject read: the event is this page's entire content, so a failed read
 // takes it down with it via `Effect.orDie` (#2864). Wrapped in React
@@ -85,13 +85,13 @@ export const fetchEventOrNull = cache(async function fetchEventOrNull(
  * function so a future tightening of the condition can't drift between the
  * two the way two independent `!event || !event.dateStart` copies could.
  */
-export function isEventNotFound(event: EventDetailVM | null): event is null {
+export const isEventNotFound = (event: EventDetailVM | null): event is null => {
   return !event || !event.dateStart;
-}
+};
 
-export async function generateMetadata({
+export const generateMetadata = async ({
   params,
-}: EventPageProps): Promise<Metadata> {
+}: EventPageProps): Promise<Metadata> => {
   const { slug } = await params;
   // Subject read: this route's metadata is entirely about this one event, so
   // a failed read takes it down with it — `null` (genuinely no such event)
@@ -126,9 +126,9 @@ export async function generateMetadata({
         : [DEFAULT_OG_IMAGE],
     },
   };
-}
+};
 
-export default async function EventDetailPage({ params }: EventPageProps) {
+const EventDetailPage = async ({ params }: EventPageProps) => {
   const { slug } = await params;
   // The event is the page's subject — a failed `findBySlug` takes the page
   // down with it via `Effect.orDie` in `fetchEventOrNull`. The same-segment
@@ -243,4 +243,6 @@ export default async function EventDetailPage({ params }: EventPageProps) {
       <RelatedRow items={relatedRowItems} pageType="event" pageSlug={slug} />
     </div>
   );
-}
+};
+
+export default EventDetailPage;

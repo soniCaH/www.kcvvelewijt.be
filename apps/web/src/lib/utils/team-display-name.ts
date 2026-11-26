@@ -31,9 +31,9 @@ interface TeamNameSource {
 }
 
 /** Title-case one lowercase slug segment (`wit` → `Wit`, `groen` → `Groen`). */
-function capitalizeSegment(segment: string): string {
+const capitalizeSegment = (segment: string): string => {
   return segment.charAt(0).toUpperCase() + segment.slice(1).toLowerCase();
-}
+};
 
 /**
  * Label derived from the slug — which is also what drops the `kcvve-`
@@ -80,7 +80,7 @@ function capitalizeSegment(segment: string): string {
  * same way `"U8 Wit"` does, and it can no longer be confused with the
  * senior team because the age token renders ahead of the letter.
  */
-function slugLabel(slug: string, name: string): string {
+const slugLabel = (slug: string, name: string): string => {
   const segments = slug.split("-");
   const tail = segments.at(-1) ?? "";
   const ageIndex = segments.findIndex((s) => /^u\d{1,2}[a-z]?$/i.test(s));
@@ -96,7 +96,7 @@ function slugLabel(slug: string, name: string): string {
   }
   if (/^[a-z]$/i.test(tail)) return `${tail.toUpperCase()}-ploeg`;
   return name;
-}
+};
 
 /**
  * What this team is called, on every surface a human reads it from: the `<h1>`,
@@ -107,7 +107,7 @@ function slugLabel(slug: string, name: string): string {
  * two U10 sides by colour, say — not a data-entry task: it is empty on all
  * eighteen teams and every heading comes from the fallback.
  */
-export function teamDisplayName(team: TeamNameSource): string {
+export const teamDisplayName = (team: TeamNameSource): string => {
   const editorial = team.displayName?.trim() ?? "";
   return editorial === "" ? slugLabel(team.slug, team.name) : editorial;
-}
+};

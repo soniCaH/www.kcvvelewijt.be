@@ -99,13 +99,13 @@ interface TeamPageProps {
 
 // No static prerendering — the body fetches PSD data via the rate-limited BFF.
 // Pages are built on-demand and ISR-cached (revalidate below).
-export async function generateStaticParams() {
+export const generateStaticParams = async () => {
   return [];
-}
+};
 
-export async function generateMetadata({
+export const generateMetadata = async ({
   params,
-}: TeamPageProps): Promise<Metadata> {
+}: TeamPageProps): Promise<Metadata> => {
   const { slug } = await params;
   // Subject read: this route's metadata is entirely about this one team, so
   // a failed read takes it down with it — `null` (genuinely no such team) is
@@ -148,7 +148,7 @@ export async function generateMetadata({
         : [DEFAULT_OG_IMAGE],
     },
   };
-}
+};
 
 interface BffData {
   matches: readonly Match[];
@@ -252,9 +252,9 @@ interface BffData {
  * judgement, not a default — read that route's comment before copying this
  * list's shape onto a new call site.
  */
-async function fetchBffData(
+const fetchBffData = async (
   psdTeamId: number,
-): Promise<BffData | "unavailable"> {
+): Promise<BffData | "unavailable"> => {
   const [matchesResult, standingsResult] = await Promise.allSettled([
     // Via `getTeamMatches` because this route's layout mounts
     // `<MatchStripSlot />` above the page, and on `/ploegen/eerste-elftallen-a`
@@ -316,9 +316,9 @@ async function fetchBffData(
     standings: standingsResult.value,
     teamId: psdTeamId,
   };
-}
+};
 
-export default async function TeamPage({ params }: TeamPageProps) {
+const TeamPage = async ({ params }: TeamPageProps) => {
   const { slug } = await params;
 
   // Subject read: the team is this page's entire content, so a failed read
@@ -828,7 +828,9 @@ export default async function TeamPage({ params }: TeamPageProps) {
       <RelatedRow items={relatedRowItems} pageType="team" pageSlug={slug} />
     </>
   );
-}
+};
+
+export default TeamPage;
 
 // 15 min ISR — the page renders live PSD match data (fixtures + standings), so
 // its cache is aligned to the BFF freshness window. Editor publishes still

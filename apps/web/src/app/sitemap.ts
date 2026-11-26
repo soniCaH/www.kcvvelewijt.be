@@ -109,11 +109,11 @@ const TEAM_SITEMAP_QUERY = `*[_type == "team" && archived != true && showInNavig
   psdId
 }`;
 
-async function fetchFromSanity<T>(
+const fetchFromSanity = async <T>(
   query: string,
   label: string,
   params?: Record<string, unknown>,
-): Promise<T[]> {
+): Promise<T[]> => {
   try {
     const { sanityClient } = await import("@/lib/sanity/client");
     return await sanityClient.fetch<T[]>(query, params ?? {});
@@ -121,7 +121,7 @@ async function fetchFromSanity<T>(
     console.error(`[sitemap] ${label} failed:`, error);
     return [];
   }
-}
+};
 
 type TeamMatch = Pick<Match, "id" | "date" | "status">;
 
@@ -145,7 +145,9 @@ type TeamMatches = { teamPsdId: string; matches: TeamMatch[] };
 // One entry per Team, in `teamPsdIds` order, carrying every Match the BFF
 // returned for it. The window and past filters and the cross-Team dedupe
 // belong to the caller: they need the Team <-> Match link.
-async function fetchTeamMatches(teamPsdIds: string[]): Promise<TeamMatches[]> {
+const fetchTeamMatches = async (
+  teamPsdIds: string[],
+): Promise<TeamMatches[]> => {
   // Intentional try/catch around runPromise: sitemap generation must degrade
   // gracefully rather than fail entirely. Inner Effect.catchTag("HttpNotFound")
   // silently handles missing teams; the inner Effect.catchAll logs unexpected
@@ -203,9 +205,9 @@ async function fetchTeamMatches(teamPsdIds: string[]): Promise<TeamMatches[]> {
     console.error("[sitemap] fetchTeamMatches failed:", error);
     return [];
   }
-}
+};
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+const sitemap = async (): Promise<MetadataRoute.Sitemap> => {
   // No lastmod on static routes: a hand-listed route has no real change date,
   // and "today" would be a false claim (#3623).
   const staticEntries = staticRoutes.map(
@@ -385,7 +387,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         ...(entry.images ? { images: entry.images.map(xmlEscape) } : {}),
       }))
   );
-}
+};
+
+export default sitemap;
 
 const xmlEscape = (text: string) =>
   text.replaceAll("&", "&amp;").replaceAll("<", "&lt;");

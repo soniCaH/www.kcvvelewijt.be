@@ -8,15 +8,13 @@ import { MatchStripSlot } from "@/components/layout/MatchStrip";
  * `wedstrijden` sibling stays strip-less; the existence check stays one level
  * up, where it covers both.
  */
-export default function TeamDetailLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+const TeamDetailLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <MatchStripSlot />
       {children}
     </>
   );
-}
+};
+
+export default TeamDetailLayout;

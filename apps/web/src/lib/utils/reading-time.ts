@@ -51,7 +51,7 @@ interface AnyBlockItem {
  * show. Chasing exact parity would mean duplicating the renderer's subject
  * resolution here, which costs more than the minute it could shift.
  */
-function extractBodyText(body: AnyBlockItem[] | null | undefined): string {
+const extractBodyText = (body: AnyBlockItem[] | null | undefined): string => {
   if (!Array.isArray(body)) return "";
   return body
     .map((item) => {
@@ -77,7 +77,7 @@ function extractBodyText(body: AnyBlockItem[] | null | undefined): string {
       return "";
     })
     .join(" ");
-}
+};
 
 /**
  * Estimate reading time from a Sanity article body, rendered as Dutch copy
@@ -88,12 +88,12 @@ function extractBodyText(body: AnyBlockItem[] | null | undefined): string {
  * Uses a fixed {@link WORDS_PER_MINUTE} of 200, a common reading-speed
  * baseline that matches most editorial sites.
  */
-export function computeReadingTime(
+export const computeReadingTime = (
   body: AnyBlockItem[] | null | undefined,
-): string | undefined {
+): string | undefined => {
   const text = extractBodyText(body);
   const words = text.split(/\s+/).filter(Boolean).length;
   if (words < MIN_WORDS_TO_ESTIMATE) return undefined;
   const minutes = Math.max(1, Math.round(words / WORDS_PER_MINUTE));
   return `${minutes} min lezen`;
-}
+};

@@ -43,7 +43,7 @@ import {
 } from "@/components/home/FeaturedUitgelichtRow";
 
 /** A flush-image card footprint — image atop a border-2 ink body. */
-function CardSkeleton() {
+const CardSkeleton = () => {
   return (
     <div className="border-ink bg-cream-soft shadow-paper-sm overflow-hidden border-2">
       <div className="border-ink aspect-[16/9] border-b-2">
@@ -56,9 +56,9 @@ function CardSkeleton() {
       </div>
     </div>
   );
-}
+};
 
-export default function HomeLoading() {
+const HomeLoading = () => {
   return (
     <div className="bg-cream min-h-screen">
       <LoadingAnnouncement label="Startpagina laden…" />
@@ -164,4 +164,6 @@ export default function HomeLoading() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default HomeLoading;

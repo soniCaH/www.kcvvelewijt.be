@@ -64,7 +64,7 @@ const ADULT_AGE_THRESHOLD = 18;
  * trade-off is one fewer JSON-LD record for the rare adult-with-no-DOB
  * Sanity doc.
  */
-function isAdult(birthDate: string | undefined, now: Date): boolean {
+const isAdult = (birthDate: string | undefined, now: Date): boolean => {
   if (birthDate === undefined || birthDate === "") return false;
   const parsed = new Date(birthDate);
   if (Number.isNaN(parsed.getTime())) return false;
@@ -75,14 +75,14 @@ function isAdult(birthDate: string | undefined, now: Date): boolean {
   const ageYears =
     now.getUTCFullYear() - parsed.getUTCFullYear() - (birthdayPending ? 1 : 0);
   return ageYears >= ADULT_AGE_THRESHOLD;
-}
+};
 
 // No static prerendering — the page body fetches PSD-synced Sanity data
 // which we don't want to hammer at build time. Pages are built on-demand
 // and ISR-cached (see `revalidate` at the bottom of this file).
-export async function generateStaticParams() {
+export const generateStaticParams = async () => {
   return [];
-}
+};
 
 // Subject read: the player is this page's entire content, so a failed read
 // takes it down with it via `Effect.orDie` (#2864). Wrapped in React
@@ -103,9 +103,9 @@ export const fetchPlayerOrNull = cache(async function fetchPlayerOrNull(
   );
 });
 
-export async function generateMetadata({
+export const generateMetadata = async ({
   params,
-}: PlayerPageProps): Promise<Metadata> {
+}: PlayerPageProps): Promise<Metadata> => {
   const { slug } = await params;
   try {
     const player = await fetchPlayerOrNull(slug);
@@ -153,9 +153,9 @@ export async function generateMetadata({
       // carries it.
     };
   }
-}
+};
 
-export default async function PlayerPage({ params }: PlayerPageProps) {
+const PlayerPage = async ({ params }: PlayerPageProps) => {
   const { slug } = await params;
 
   // Subject read: the player is this page's entire content, so a failed
@@ -309,7 +309,9 @@ export default async function PlayerPage({ params }: PlayerPageProps) {
       <RelatedRow items={relatedRowItems} pageType="player" pageSlug={slug} />
     </>
   );
-}
+};
+
+export default PlayerPage;
 
 // 15m ISR — player data is PSD-synced + editor-published and on-demand
 // revalidation keeps it fresh via /api/revalidate (revalidateTag 'players'),

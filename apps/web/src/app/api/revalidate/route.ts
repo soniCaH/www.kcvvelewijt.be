@@ -75,11 +75,11 @@ const HULP = "/hulp";
  * holds every slug to bust a detail page for (current + previous, so renames
  * and deletes clear the stale URL too).
  */
-function targets(
+const targets = (
   type: string,
   slugs: string[],
   psdId: string | undefined,
-): { paths: string[]; tags: string[] } | null {
+): { paths: string[]; tags: string[] } | null => {
   const detail = (prefix: string) => slugs.map((s) => `${prefix}/${s}`);
   switch (type) {
     // `articleType: "event"` articles also list on /evenementen (#1968), and
@@ -152,7 +152,7 @@ function targets(
     default:
       return null;
   }
-}
+};
 
 /** `undefined` when the body is not valid JSON or not a JSON object (#3861). */
 const parseJsonObject = (rawBody: string): unknown => {
@@ -177,7 +177,7 @@ const decodeError = (error: ParseResult.ParseError): string => {
 
 const decodeWebhookBody = S.decodeUnknownEither(WebhookBody);
 
-export async function POST(request: Request) {
+export const POST = async (request: Request) => {
   const secret = readOptionalServerEnv().SANITY_REVALIDATE_SECRET;
   if (!secret) {
     return NextResponse.json(
@@ -250,4 +250,4 @@ export async function POST(request: Request) {
     paths: target.paths,
     tags: target.tags,
   });
-}
+};

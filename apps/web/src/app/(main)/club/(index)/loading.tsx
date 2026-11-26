@@ -24,7 +24,7 @@ import {
 } from "@/components/design-system";
 import { PageHeroSkeleton } from "@/components/layout/PageHero";
 
-export default function ClubLoading() {
+const ClubLoading = () => {
   return (
     <div className="bg-cream min-h-screen">
       <LoadingAnnouncement label="Club laden…" />
@@ -71,4 +71,6 @@ export default function ClubLoading() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default ClubLoading;

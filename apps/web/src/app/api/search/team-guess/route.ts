@@ -10,6 +10,6 @@ import { proxyPostToBff } from "@/lib/server/bff-proxy";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export async function POST(request: NextRequest) {
+export const POST = async (request: NextRequest) => {
   return proxyPostToBff(request, "/search/team-guess");
-}
+};

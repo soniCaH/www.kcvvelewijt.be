@@ -49,7 +49,7 @@ const FALLBACK: ShareCardProps = { nameTop: "KCVV", nameBottom: "Elewijt" };
  * @param params - A promise resolving to the member's PSD id as `slug`
  * @returns A 1200×630 PNG with the club crest, the member's name and their role
  */
-export default async function Image({ params }: ImageProps) {
+const Image = async ({ params }: ImageProps) => {
   const { slug } = await params;
 
   // An OG route has no error boundary to bubble into — a throw here serves a
@@ -77,4 +77,6 @@ export default async function Image({ params }: ImageProps) {
   );
 
   return renderShareCard(card);
-}
+};
+
+export default Image;

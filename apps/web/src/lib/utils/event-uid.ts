@@ -25,6 +25,6 @@
  * mirrors `event-datetime.ts`'s `resolveEventDateRange`, the other function
  * shared by both `.ics` surfaces.
  */
-export function buildEventUid(id: string): string {
+export const buildEventUid = (id: string): string => {
   return `kcvv-event-${id}@kcvvelewijt.be`;
-}
+};

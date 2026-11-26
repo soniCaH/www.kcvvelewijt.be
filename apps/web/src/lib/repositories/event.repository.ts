@@ -165,10 +165,10 @@ export interface EventListItemVM {
  * how event-doc `00:00` starts are handled. Returns `null` for an absent or
  * unparseable date so the caller can drop the row.
  */
-function articleFactToIso(
+const articleFactToIso = (
   date: string | null | undefined,
   time?: string | null,
-): string | null {
+): string | null => {
   if (!date) return null;
   // Strict HH:mm (00–23 : 00–59). A malformed or absent time falls back to
   // local midnight (all-day) rather than poisoning `DateTime.fromISO` into an
@@ -180,7 +180,7 @@ function articleFactToIso(
       : "00:00";
   const dt = DateTime.fromISO(`${date}T${hhmm}`, { zone: CLUB_TIMEZONE });
   return dt.isValid ? dt.toISO() : null;
-}
+};
 
 /**
  * Merge the two upcoming-only sources into one chronological feed. Event docs
@@ -191,10 +191,10 @@ function articleFactToIso(
  * dropped (an `articleType:event` should always carry an `eventFact` date, but
  * the projection types it optional).
  */
-export function mergeEventFeed(
+export const mergeEventFeed = (
   eventRows: EVENTS_QUERY_RESULT,
   articleRows: EVENT_ARTICLES_QUERY_RESULT,
-): EventListItemVM[] {
+): EventListItemVM[] => {
   const fromEvents: EventListItemVM[] = eventRows.map((row) => ({
     id: row.id,
     title: row.title,
@@ -237,7 +237,7 @@ export function mergeEventFeed(
   return [...fromEvents, ...fromArticles].sort(
     (a, b) => sortKey(a.dateStart) - sortKey(b.dateStart),
   );
-}
+};
 
 // ─── Service ─────────────────────────────────────────────────────────────────
 

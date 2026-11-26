@@ -12,14 +12,14 @@
 const SANITY_CDN_BASE =
   "https://cdn.sanity.io/images/vhb33jaz/production" as const;
 
-function sanityImageUrl(
+const sanityImageUrl = (
   hash: string,
   dimensions: string,
   ext: string,
   width: number,
-): string {
+): string => {
   return `${SANITY_CDN_BASE}/${hash}-${dimensions}.${ext}?w=${width}&q=80&fm=webp&fit=max`;
-}
+};
 
 // Timeline images: displayed at max 1024px via fill + sizes="(min-width: 1024px) 1024px, 100vw"
 export const HISTORY_52_53 = sanityImageUrl(

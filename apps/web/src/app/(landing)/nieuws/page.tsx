@@ -43,7 +43,7 @@ export const metadata: Metadata = buildPageMetadata({
   path: "/nieuws",
 });
 
-export default async function NewsPage({ searchParams }: NewsPageProps) {
+const NewsPage = async ({ searchParams }: NewsPageProps) => {
   const params = await searchParams;
   const categorySlug = firstParam(params.categorie);
 
@@ -112,4 +112,6 @@ export default async function NewsPage({ searchParams }: NewsPageProps) {
       />
     </>
   );
-}
+};
+
+export default NewsPage;

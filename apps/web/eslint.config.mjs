@@ -497,10 +497,10 @@ const eslintConfig = [
     },
   },
   {
-    // Arrow functions only in components (#3868, rule: #3865): a `function` declaration
-    // becomes `const name = () => …`. Own rule IDs, own block, like `kcvv/no-let` above.
-    // The rest of `src` joins in a later slice.
-    files: ["src/components/**/*.{ts,tsx,js,jsx,mjs,cjs,mts,cts}"],
+    // Arrow functions only in all of `src` (#3868 components, #3869 the rest; rule: #3865):
+    // a `function` declaration becomes `const name = () => …`. Own rule IDs, own block, like
+    // `kcvv/no-let` above. Tests and stories are not checked.
+    files: ["src/**/*.{ts,tsx,js,jsx,mjs,cjs,mts,cts}"],
     ignores: [
       "**/*.test.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",
       "**/*.spec.{ts,tsx,js,jsx,mjs,cjs,mts,cts}",

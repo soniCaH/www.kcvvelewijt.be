@@ -4,7 +4,7 @@ import { hashMemberId } from "@/hooks/useOrganigramAnalytics";
 
 const DWELL_THRESHOLDS = [5, 15, 30];
 
-export function useResponsibilityAnalytics() {
+export const useResponsibilityAnalytics = () => {
   const hadContactInteractionRef = useRef(false);
   const lastRoleRef = useRef<string | null>(null);
   const lastQueryLengthRef = useRef(0);
@@ -147,4 +147,4 @@ export function useResponsibilityAnalytics() {
     stopDwell,
     resetSession,
   };
-}
+};

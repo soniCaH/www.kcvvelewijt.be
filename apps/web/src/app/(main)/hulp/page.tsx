@@ -51,7 +51,7 @@ import { HulpFinder } from "@/components/hulp/HulpFinder";
 
 export const revalidate = 3600;
 
-export async function generateMetadata(): Promise<Metadata> {
+export const generateMetadata = async (): Promise<Metadata> => {
   const canonical = `${SITE_CONFIG.siteUrl}/hulp`;
   return {
     title: "Hulp & wie-is-wie",
@@ -76,9 +76,9 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [DEFAULT_OG_IMAGE],
     },
   };
-}
+};
 
-export default async function HulpHubPage() {
+const HulpHubPage = async () => {
   // Subject read: both the org structure and the FAQ are this page's entire
   // content, so a failed read takes the page down with it (#2864).
   const [members, responsibilityPaths] = await runPromise(
@@ -246,4 +246,6 @@ export default async function HulpHubPage() {
       />
     </HubSearchQueryProvider>
   );
-}
+};
+
+export default HulpHubPage;

@@ -86,11 +86,11 @@ const loadTeamNav = async (): Promise<TeamNavVM[]> => {
  * @param children - Page content to render between the header and footer
  * @returns The root JSX element containing the HTML, head, and body for the application
  */
-export default async function RootLayout({
+const RootLayout = async ({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
+}>) => {
   // Section read (nav team list): degrades to an empty nav, see `loadTeamNav`.
   const allTeams = await loadTeamNav();
 
@@ -134,4 +134,6 @@ export default async function RootLayout({
       <CookieConsentBanner />
     </RootDocument>
   );
-}
+};
+
+export default RootLayout;

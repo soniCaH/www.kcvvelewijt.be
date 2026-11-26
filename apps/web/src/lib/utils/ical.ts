@@ -96,14 +96,14 @@ const FEED_VARIANT_META: Record<FeedVariant, FeedVariantMeta> = {
 };
 
 /** The single place `NAME`/`X-WR-CALDESC`/the download filename read from. */
-export function getFeedVariantMeta(variant: FeedVariant): FeedVariantMeta {
+export const getFeedVariantMeta = (variant: FeedVariant): FeedVariantMeta => {
   return FEED_VARIANT_META[variant];
-}
+};
 
 /** The one place the `events=1` query flag becomes a `FeedVariant`. */
-export function resolveFeedVariant(includeEvents: boolean): FeedVariant {
+export const resolveFeedVariant = (includeEvents: boolean): FeedVariant => {
   return includeEvents ? "matches-and-events" : "matches";
-}
+};
 
 /**
  * Whether `match` belongs on the "home" side of the ICS feed (`?side=home`
@@ -118,10 +118,10 @@ export function resolveFeedVariant(includeEvents: boolean): FeedVariant {
  * against `ical.test.ts`'s "is treated as a home fixture" case rather than
  * assumed.
  */
-function isHomeSide(match: Match): boolean {
+const isHomeSide = (match: Match): boolean => {
   if (match.is_placeholder) return true;
   return match.is_home === true;
-}
+};
 
 /**
  * The VEVENT title. A pitch-reservation placeholder (#2606) or a hidden-result
@@ -138,11 +138,11 @@ function isHomeSide(match: Match): boolean {
  * after the prefix. The old "— Uitgesteld" suffix on reduced rows is gone —
  * one form for both.
  */
-function buildSummary(match: Match): string {
+const buildSummary = (match: Match): string => {
   const prefix = feedStatusPrefix(match.status);
   const title = buildTitle(match);
   return prefix ? `${prefix}: ${title}` : title;
-}
+};
 
 const buildTitle = (match: Match): string => {
   if (matchRowKind(match) !== "match") return reservationTitle(match);
@@ -167,9 +167,9 @@ const buildTitle = (match: Match): string => {
  * either: a reservation or an unconfirmed tournament fixture may be nowhere
  * near the club's own pitch.
  */
-function buildLocation(match: Match): string | undefined {
+const buildLocation = (match: Match): string | undefined => {
   return match.venue;
-}
+};
 
 /**
  * The fixture's kickoff as a Brussels wall-clock DateTime, which is what a
@@ -190,7 +190,7 @@ function buildLocation(match: Match): string | undefined {
  * `eventToEntry` checks its own parse, instead of the throw escaping and
  * 500ing the whole feed for every subscriber over one malformed fixture.
  */
-function buildStartDateTime(match: Match): DateTime {
+const buildStartDateTime = (match: Match): DateTime => {
   // Minute precision, as the pre-#2601 `fromObject` call implicitly had: PSD
   // never sends seconds, and a stray one would land in a DTSTART line.
   const start = toMatchDisplayZone(match.date).startOf("minute");
@@ -200,7 +200,7 @@ function buildStartDateTime(match: Match): DateTime {
     return DateTime.invalid("malformed match.time");
   }
   return start.set({ hour: hours, minute: minutes });
-}
+};
 
 /**
  * The match-fixture cache key: `teamIds`/`side` only. `events` (#2704) is
@@ -214,15 +214,15 @@ function buildStartDateTime(match: Match): DateTime {
  * Takes the route's parsed team-id list, never the raw query string (#3486):
  * a raw-string key gave `?teamIds=1,1`, `01` and `1,x1` each a fresh entry.
  */
-export function normalizeCacheKey(
+export const normalizeCacheKey = (
   teamIds: readonly number[] | null,
   side: string,
-): string {
+): string => {
   const sortedIds = teamIds
     ? [...teamIds].sort((a, b) => a - b).join(",")
     : "all";
   return `ical:${sortedIds}:${side}`;
-}
+};
 
 /**
  * A `Match` → `IcalEntry`, applied per item before `generateIcal` ever runs.
@@ -231,7 +231,7 @@ export function normalizeCacheKey(
  * is known-messy, and one malformed fixture must not take down the feed for
  * every subscriber.
  */
-function matchToEntry(match: Match): TimedIcalEntry | undefined {
+const matchToEntry = (match: Match): TimedIcalEntry | undefined => {
   const start = buildStartDateTime(match);
   if (!start.isValid) return undefined;
   // "[U8] KCVV Elewijt - X": names which KCVV team plays (#3705).
@@ -254,7 +254,7 @@ function matchToEntry(match: Match): TimedIcalEntry | undefined {
     sequence: feedStatusPrefix(match.status) ? 1 : 0,
     cancelled: match.status === "cancelled",
   };
-}
+};
 
 /**
  * The pre-mapping stage for matches (#2717): dedupe by id, filter by `side`,
@@ -264,10 +264,10 @@ function matchToEntry(match: Match): TimedIcalEntry | undefined {
  * Drops any entry `matchToEntry` couldn't parse, the same way
  * `eventsToEntries` drops an unparseable event.
  */
-function matchesToEntries(
+const matchesToEntries = (
   matches: readonly Match[],
   side: MatchSide = "all",
-): TimedIcalEntry[] {
+): TimedIcalEntry[] => {
   const seen = new Set<number>();
   const unique = matches.filter((m) => {
     if (seen.has(m.id)) return false;
@@ -287,7 +287,7 @@ function matchesToEntries(
   return sorted
     .map(matchToEntry)
     .filter((entry): entry is TimedIcalEntry => entry !== undefined);
-}
+};
 
 /**
  * An `EventListItemVM` → `IcalEntry`. Returns `undefined` for an unparseable
@@ -302,7 +302,7 @@ function matchesToEntries(
  * and `buildEventIcs`. A timed item with no `dateEnd` omits `end` entirely
  * rather than fabricating a duration the way a match's fixed 2h block does.
  */
-function eventToEntry(item: EventListItemVM): IcalEntry | undefined {
+const eventToEntry = (item: EventListItemVM): IcalEntry | undefined => {
   const { isAllDay, start, end, allDayEndExclusive } = resolveEventDateRange(
     item.dateStart,
     item.dateEnd,
@@ -336,7 +336,7 @@ function eventToEntry(item: EventListItemVM): IcalEntry | undefined {
     url,
     location,
   };
-}
+};
 
 /**
  * The pre-mapping stage for club activities (#2704, #2717).
@@ -345,14 +345,14 @@ function eventToEntry(item: EventListItemVM): IcalEntry | undefined {
  * `mergeEventFeed`'s sort), so no re-filter/re-sort happens here — only the
  * per-item map, dropping any entry `eventToEntry` couldn't parse.
  */
-function eventsToEntries(events: readonly EventListItemVM[]): IcalEntry[] {
+const eventsToEntries = (events: readonly EventListItemVM[]): IcalEntry[] => {
   return events
     .map(eventToEntry)
     .filter((entry): entry is IcalEntry => entry !== undefined);
-}
+};
 
 /** Emits one `VEVENT` for a normalised entry — the whole of `generateIcal`'s per-item knowledge. */
-function emitEntry(cal: ReturnType<typeof ical>, entry: IcalEntry): void {
+const emitEntry = (cal: ReturnType<typeof ical>, entry: IcalEntry): void => {
   if (entry.allDay) {
     cal.createEvent({
       id: entry.id,
@@ -380,7 +380,7 @@ function emitEntry(cal: ReturnType<typeof ical>, entry: IcalEntry): void {
       : {}),
     ...(entry.location ? { location: entry.location } : {}),
   });
-}
+};
 
 /**
  * Emission-only (#2717): turns a normalised `IcalEntry[]` into a `.ics`
@@ -391,10 +391,10 @@ function emitEntry(cal: ReturnType<typeof ical>, entry: IcalEntry): void {
  * (`resolveFeedVariant`), threaded through once for `NAME`/`X-WR-CALDESC`
  * rather than re-derived here.
  */
-function generateIcal(
+const generateIcal = (
   items: readonly IcalEntry[],
   variant: FeedVariant = "matches",
-): string {
+): string => {
   const meta = getFeedVariantMeta(variant);
 
   const cal = ical({
@@ -415,7 +415,7 @@ function generateIcal(
   }
 
   return cal.toString();
-}
+};
 
 /**
  * The thin composition layer (#2717) between the route's raw `Match[]`/
@@ -433,14 +433,14 @@ function generateIcal(
  * `events` for any future caller (e.g. #2705's `buildWebcalUrl` toggle) that
  * computes `variant` and `events` from different places.
  */
-export function buildIcalFeed(
+export const buildIcalFeed = (
   matches: readonly Match[],
   events: readonly EventListItemVM[],
   variant: FeedVariant,
   side: MatchSide = "all",
-): string {
+): string => {
   const matchEntries = matchesToEntries(matches, side);
   const eventEntries = eventsToEntries(events);
 
   return generateIcal([...matchEntries, ...eventEntries], variant);
-}
+};

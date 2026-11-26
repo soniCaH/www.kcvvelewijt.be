@@ -19,6 +19,8 @@ export const contentType = OG_CONTENT_TYPE;
  *
  * @returns A 1200×630 PNG carrying the club crest and wordmark
  */
-export default function Image() {
+const Image = () => {
   return renderShareCard({ nameTop: "KCVV", nameBottom: "Elewijt" });
-}
+};
+
+export default Image;

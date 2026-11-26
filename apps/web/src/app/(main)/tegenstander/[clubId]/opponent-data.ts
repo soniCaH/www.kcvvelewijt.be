@@ -71,11 +71,11 @@ export interface OpponentPageData {
   squadOrder: string[];
 }
 
-function sortMatchesDescending(matches: readonly Match[]): Match[] {
+const sortMatchesDescending = (matches: readonly Match[]): Match[] => {
   return [...matches].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
-}
+};
 
 /**
  * Reduce every senior squad's raw BFF read into the page's per-squad section
@@ -84,10 +84,10 @@ function sortMatchesDescending(matches: readonly Match[]): Match[] {
  * whose read 404'd (`history: null`) or came back with zero matches
  * contributes no section at all, never an empty one (#2463 rule).
  */
-export function buildOpponentPageData(
+export const buildOpponentPageData = (
   clubId: number,
   results: readonly SquadHistoryResult[],
-): OpponentPageData | null {
+): OpponentPageData | null => {
   const sections: SquadOpponentSection[] = results
     .filter(
       (r): r is SquadHistoryResult & { history: OpponentHistory } =>
@@ -134,9 +134,9 @@ export function buildOpponentPageData(
       )
       .map((r) => r.team.squadLabel),
   };
-}
+};
 
 /** `"N wedstrijden"`, singular at one — per squad, never a page-wide total. */
-export function matchCountLabel(matchCount: number): string {
+export const matchCountLabel = (matchCount: number): string => {
   return `${matchCount} ${matchCount === 1 ? "wedstrijd" : "wedstrijden"}`;
-}
+};

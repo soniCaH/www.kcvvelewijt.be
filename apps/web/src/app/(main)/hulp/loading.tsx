@@ -15,7 +15,7 @@ import {
   SECTION_NAV_CHIP_SHADOW_CLASS,
 } from "@/components/design-system";
 
-export default function HulpLoading() {
+const HulpLoading = () => {
   return (
     <div className="bg-cream min-h-screen">
       <LoadingAnnouncement label="Hulppagina laden…" />
@@ -107,4 +107,6 @@ export default function HulpLoading() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default HulpLoading;

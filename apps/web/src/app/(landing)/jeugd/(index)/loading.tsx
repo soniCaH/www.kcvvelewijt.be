@@ -29,7 +29,7 @@ import {
 import { PageHero } from "@/components/layout/PageHero";
 import { YOUTH_PHOTO, JEUGD_KICKER, JEUGD_HEADLINE, JEUGD_LEAD } from "./copy";
 
-export default function JeugdLoading() {
+const JeugdLoading = () => {
   return (
     <>
       {/* The real dark-band header must stay `firstElementChild` — the
@@ -98,4 +98,6 @@ export default function JeugdLoading() {
       </div>
     </>
   );
-}
+};
+
+export default JeugdLoading;

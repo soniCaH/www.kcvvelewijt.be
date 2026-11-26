@@ -16,13 +16,13 @@ export { CLUB_TIMEZONE };
  *
  * **Not for PSD match dates** — see `toMatchDisplayZone`.
  */
-export function toDisplayZone(date: Date | string): DateTime {
+export const toDisplayZone = (date: Date | string): DateTime => {
   const dt =
     typeof date === "string"
       ? DateTime.fromISO(date, { zone: "utc" })
       : DateTime.fromJSDate(date);
   return dt.setZone(CLUB_TIMEZONE).setLocale("nl");
-}
+};
 
 /**
  * The parse for a PSD match date, which is **not** a true instant. The BFF
@@ -59,13 +59,13 @@ export function toDisplayZone(date: Date | string): DateTime {
  * `src/app/__tests__/cross-page-consistency.test.ts`, which fails any parse
  * that names no zone at all.
  */
-export function toMatchDisplayZone(date: Date | string): DateTime {
+export const toMatchDisplayZone = (date: Date | string): DateTime => {
   const dt =
     typeof date === "string"
       ? DateTime.fromISO(date, { zone: "utc" })
       : DateTime.fromJSDate(date, { zone: "utc" });
   return dt.setZone(CLUB_TIMEZONE, { keepLocalTime: true }).setLocale("nl");
-}
+};
 
 /**
  * Real kickoff instant of a BFF match. Its date is Brussels wall-clock in UTC
@@ -75,9 +75,9 @@ export const kickoffMs = (m: { date: Date | string }): number =>
   toMatchDisplayZone(m.date).toMillis();
 
 /** Today's calendar date in the club's zone — `YYYY-MM-DD`. */
-export function clubToday(): string {
+export const clubToday = (): string => {
   return DateTime.now().setZone(CLUB_TIMEZONE).toISODate()!;
-}
+};
 
 /**
  * Brussels midnight of today as a UTC ISO instant (`$dayStart` in the agenda
@@ -86,14 +86,14 @@ export function clubToday(): string {
  * starts at local midnight. `daysBack` counts club days (not 24 h blocks),
  * so a DST change in between keeps it at midnight.
  */
-export function clubDayStart(daysBack = 0): string {
+export const clubDayStart = (daysBack = 0): string => {
   return DateTime.now()
     .setZone(CLUB_TIMEZONE)
     .startOf("day")
     .minus({ days: daysBack })
     .toUTC()
     .toISO()!;
-}
+};
 
 /**
  * Whether a BFF match date falls on the given reference calendar day —
@@ -121,12 +121,12 @@ export function clubDayStart(daysBack = 0): string {
  * `toMatchDisplayZone(...).toISODate()` is `null` for one, which can never
  * equal a real `referenceDay` string.
  */
-export function isMatchDay(
+export const isMatchDay = (
   matchDate: Date | string,
   referenceDay: string,
-): boolean {
+): boolean => {
   return toMatchDisplayZone(matchDate).toISODate() === referenceDay;
-}
+};
 
 /**
  * Format date for article display in Belgian Dutch format (e.g., "15 januari 2024")

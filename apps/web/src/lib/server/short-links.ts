@@ -34,11 +34,11 @@ export const getShortLinks = unstable_cache(
  * `redirects()` entries it replaces were (`/Stage` on a printed flyer works):
  * names are stored lowercase.
  */
-export async function findShortLink(segment: string) {
+export const findShortLink = async (segment: string) => {
   const name = segment.toLowerCase();
   const link = (await getShortLinks()).find((link) => link.name === name);
   return link && isSafeRedirectTarget(link.target) ? link : null;
-}
+};
 
 /**
  * The Studio validates `target`, but a write through the API skips it, and
@@ -46,7 +46,7 @@ export async function findShortLink(segment: string) {
  * a single-slash own-site path, with no whitespace or control character, is
  * ever redirected to; anything else is a 404.
  */
-export function isSafeRedirectTarget(target: string): boolean {
+export const isSafeRedirectTarget = (target: string): boolean => {
   return (
     /^(https:\/\/[^/]|\/(?![/\\]))/.test(target) &&
     ![...target].some((ch) => {
@@ -54,4 +54,4 @@ export function isSafeRedirectTarget(target: string): boolean {
       return code <= 32 || code === 127 || /\s/.test(ch);
     })
   );
-}
+};

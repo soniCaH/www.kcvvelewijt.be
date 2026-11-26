@@ -71,7 +71,7 @@ type ContactRow = Omit<PrimaryContactRow, "members"> & {
   > | null;
 };
 
-function toContact(c: ContactRow): Contact {
+const toContact = (c: ContactRow): Contact => {
   // Default to "manual" for a null `contactType` (legacy docs or incomplete
   // data) — and, same as the `teamRole` guard below, for any value outside
   // the known set (a Content-API write can hold `contactType: "bestuur"`
@@ -143,9 +143,9 @@ function toContact(c: ContactRow): Contact {
         ...(c.department ? { department: c.department } : {}),
       };
   }
-}
+};
 
-function toResponsibilityPath(p: PathRow): ResponsibilityPath {
+const toResponsibilityPath = (p: PathRow): ResponsibilityPath => {
   const relatedPaths = ((p.relatedPaths ?? []) as (string | null)[]).filter(
     (s): s is string => s != null,
   );
@@ -169,7 +169,7 @@ function toResponsibilityPath(p: PathRow): ResponsibilityPath {
     })),
     ...(relatedPaths.length > 0 ? { relatedPaths } : {}),
   };
-}
+};
 
 export interface ResponsibilityRepositoryInterface {
   readonly findAll: () => Effect.Effect<ResponsibilityPath[], SanityReadError>;

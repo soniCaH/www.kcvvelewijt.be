@@ -6,9 +6,9 @@ import type { MatchDetail } from "@/lib/effect/schemas/match.schema";
  * so both `/wedstrijd/[matchId]` suites build the same base fixture instead of
  * two hand-copies of the same literal shape.
  */
-export function createMatchDetail(
+export const createMatchDetail = (
   overrides: Partial<MatchDetail> = {},
-): MatchDetail {
+): MatchDetail => {
   return {
     id: 12345,
     date: new Date("2025-12-07T15:00:00"),
@@ -18,4 +18,4 @@ export function createMatchDetail(
     hasReport: false,
     ...overrides,
   } as MatchDetail;
-}
+};

@@ -63,11 +63,11 @@ const PERMANENT_TAGS: ReadonlySet<BffError["_tag"]> = new Set(
  * three-step unwrap is exactly the peer-drift root `CLAUDE.md` warns about —
  * the next person to touch one would silently not touch the other.
  */
-export function squashFiberFailure(error: unknown): unknown {
+export const squashFiberFailure = (error: unknown): unknown => {
   return Runtime.isFiberFailure(error)
     ? Cause.squash(error[Runtime.FiberFailureCauseId])
     : undefined;
-}
+};
 
 /**
  * True when a value caught from a rejected `Effect.runPromise` carries one of
@@ -80,9 +80,9 @@ export function squashFiberFailure(error: unknown): unknown {
  *
  * @see https://github.com/soniCaH/www.kcvvelewijt.be/issues/2636 — finding 3
  */
-export function isPermanentBffFailure(error: unknown): boolean {
+export const isPermanentBffFailure = (error: unknown): boolean => {
   const squashed = squashFiberFailure(error);
   if (squashed === undefined) return false;
   const tag = (squashed as { _tag?: unknown })?._tag;
   return typeof tag === "string" && PERMANENT_TAGS.has(tag as BffError["_tag"]);
-}
+};

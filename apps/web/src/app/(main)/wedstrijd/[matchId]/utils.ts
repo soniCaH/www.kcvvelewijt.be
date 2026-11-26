@@ -27,28 +27,28 @@ import {
  * @param match - The match detail containing the home team data
  * @returns The home team's `MatchHeroTeam` with `id`, `name`, `logo`, and `score`
  */
-export function transformHomeTeam(match: MatchDetail): MatchHeroTeam {
+export const transformHomeTeam = (match: MatchDetail): MatchHeroTeam => {
   return {
     id: match.home_team.id,
     name: match.home_team.name,
     logo: match.home_team.logo,
     score: match.home_team.score,
   };
-}
+};
 
 /**
  * Converts the match's away team data into props for the MatchHero component.
  *
  * @returns An object containing the away team's id, name, logo, and score.
  */
-export function transformAwayTeam(match: MatchDetail): MatchHeroTeam {
+export const transformAwayTeam = (match: MatchDetail): MatchHeroTeam => {
   return {
     id: match.away_team.id,
     name: match.away_team.name,
     logo: match.away_team.logo,
     score: match.away_team.score,
   };
-}
+};
 
 /**
  * The fourth adapter (#2699 decision 1 named `CalendarMatch`, `MatchHeroProps`
@@ -59,7 +59,7 @@ export function transformAwayTeam(match: MatchDetail): MatchHeroTeam {
  * adapters — `<MatchHero>` itself narrows and renders, it never asks
  * `matchRowKind`/`otherClubSide` again.
  */
-export function matchDetailToHeroRow(match: MatchDetail): MatchHeroRow {
+export const matchDetailToHeroRow = (match: MatchDetail): MatchHeroRow => {
   const common = {
     date: match.date,
     time: extractMatchTime(match),
@@ -94,7 +94,7 @@ export function matchDetailToHeroRow(match: MatchDetail): MatchHeroRow {
     default:
       return assertNever(kind);
   }
-}
+};
 
 /**
  * Converts a MatchLineupPlayer into a LineupPlayer used by the MatchLineup component.
@@ -102,7 +102,9 @@ export function matchDetailToHeroRow(match: MatchDetail): MatchHeroRow {
  * @param player - The source player data to convert
  * @returns A LineupPlayer containing `id`, `name`, `number`, `minutesPlayed`, `isCaptain`, `status`, and `card` from `player`
  */
-export function transformLineupPlayer(player: MatchLineupPlayer): LineupPlayer {
+export const transformLineupPlayer = (
+  player: MatchLineupPlayer,
+): LineupPlayer => {
   return {
     id: player.id,
     name: player.name,
@@ -112,7 +114,7 @@ export function transformLineupPlayer(player: MatchLineupPlayer): LineupPlayer {
     status: player.status,
     card: player.card,
   };
-}
+};
 
 /**
  * Enrich a transformed `LineupPlayer` with `isKeeper`. The source depends on
@@ -137,19 +139,19 @@ export function transformLineupPlayer(player: MatchLineupPlayer): LineupPlayer {
  *      explicit `undefined` lets us route both sides through the
  *      heuristic on outage.
  */
-export function enrichLineupWithKeeperFlag(
+export const enrichLineupWithKeeperFlag = (
   player: LineupPlayer,
   side: "home" | "away",
   kcvvSide: "home" | "away" | undefined,
   keeperPsdIds: ReadonlySet<string> | undefined,
-): LineupPlayer {
+): LineupPlayer => {
   const isKcvvSide = kcvvSide === side;
   const useSanityLookup = isKcvvSide && keeperPsdIds !== undefined;
   const isKeeper = useSanityLookup
     ? player.id !== undefined && keeperPsdIds.has(String(player.id))
     : player.number === 1;
   return { ...player, isKeeper };
-}
+};
 
 // `extractMatchTime` now lives in `@/lib/utils/match-time` so the
 // matchPreview/matchRecap article hero can derive kickoff identically
@@ -178,7 +180,7 @@ export { extractMatchTime } from "@/lib/utils/match-time";
  *
  * @returns `HomeTeam X - Y AwayTeam` if the match status is finished and both scores are present, otherwise `HomeTeam vs AwayTeam`
  */
-export function formatMatchTitle(match: MatchDetail): string {
+export const formatMatchTitle = (match: MatchDetail): string => {
   if (matchRowKind(match) !== "match") {
     return reservationTitle(match);
   }
@@ -196,7 +198,7 @@ export function formatMatchTitle(match: MatchDetail): string {
   }
 
   return `${homeTeam} vs ${awayTeam}`;
-}
+};
 
 /**
  * Build an SEO-friendly description for a match by combining its title,
@@ -209,13 +211,13 @@ export function formatMatchTitle(match: MatchDetail): string {
  * @param match - The match details used to generate the description
  * @returns A string in the form "<title> - <competition> op <date>"
  */
-export function formatMatchDescription(match: MatchDetail): string {
+export const formatMatchDescription = (match: MatchDetail): string => {
   const title = formatMatchTitle(match);
   const competition = match.competition || "Wedstrijd";
   const dateStr = toMatchDisplayZone(match.date).toFormat("cccc d MMMM yyyy");
 
   return `${title} - ${competition} op ${dateStr}`;
-}
+};
 
 /**
  * Whether a match links to `/tegenstander/[clubId]`: a league fixture played
@@ -224,16 +226,16 @@ export function formatMatchDescription(match: MatchDetail): string {
  * from drifting — a local `age === "A"` test let Reserven (Sanity `age` "A")
  * through to a page that 404s or shows only the A/B record (#3289).
  */
-export function hasOpponentPage(
+export const hasOpponentPage = (
   competitionType: MatchDetail["competitionType"],
   kcvvTeam: SeniorTeamCandidate | undefined,
-): boolean {
+): boolean => {
   return (
     competitionType === "league" &&
     !!kcvvTeam &&
     selectSeniorTeams([kcvvTeam]).length > 0
   );
-}
+};
 
 export type MatchBodySectionKey = "lineup" | "events" | "standings";
 
@@ -255,7 +257,7 @@ export interface MatchBodyPlan {
  * pads `pt-10 sm:pt-14` / `pb-10 sm:pb-14`; every other side keeps the
  * section's own `py-12 sm:py-16` (`undefined` = no override).
  */
-export function planMatchBody({
+export const planMatchBody = ({
   hasLineup,
   hasEvents,
   hasStandings,
@@ -265,7 +267,7 @@ export function planMatchBody({
   hasEvents: boolean;
   hasStandings: boolean;
   hasRelated: boolean;
-}): MatchBodyPlan {
+}): MatchBodyPlan => {
   const present: MatchBodySectionKey[] = [];
   if (hasLineup) present.push("lineup");
   if (hasEvents) present.push("events");
@@ -279,14 +281,14 @@ export function planMatchBody({
     seamUnderHero: present.length > 0 || hasRelated,
     seamBeforeRelated: present.length > 0 && hasRelated,
   };
-}
+};
 
-function bodySectionSpacing(
+const bodySectionSpacing = (
   seamAbove: boolean,
   seamBelow: boolean,
-): string | undefined {
+): string | undefined => {
   if (seamAbove && seamBelow) return "py-10 sm:py-14";
   if (seamAbove) return "pt-10 pb-12 sm:pt-14 sm:pb-16";
   if (seamBelow) return "pt-12 pb-10 sm:pt-16 sm:pb-14";
   return undefined;
-}
+};

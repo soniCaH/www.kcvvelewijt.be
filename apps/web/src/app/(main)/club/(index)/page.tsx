@@ -30,7 +30,7 @@ export const metadata = buildPageMetadata({
  * feature is gone (#2154, closing out #1701) — and drops the banned legacy
  * club motto.
  */
-export default function ClubPage() {
+const ClubPage = () => {
   return (
     <div className="bg-cream min-h-screen">
       <JsonLd
@@ -102,4 +102,6 @@ export default function ClubPage() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default ClubPage;

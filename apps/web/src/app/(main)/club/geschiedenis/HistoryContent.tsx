@@ -22,7 +22,7 @@ import {
 
 const PHOTO_SIZES = "(min-width: 768px) 640px, 100vw";
 
-function TimelineContent() {
+const TimelineContent = () => {
   return (
     <PageContainer className="py-12 sm:py-16">
       {/* 1909 - 1941 */}
@@ -550,9 +550,9 @@ function TimelineContent() {
       </div>
     </PageContainer>
   );
-}
+};
 
-export function HistoryContent() {
+export const HistoryContent = () => {
   return (
     <>
       <PageViewTracker eventName="geschiedenis_view" />
@@ -566,4 +566,4 @@ export function HistoryContent() {
       </TimelineReveal>
     </>
   );
-}
+};

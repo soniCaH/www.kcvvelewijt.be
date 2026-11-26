@@ -94,21 +94,21 @@ export interface SiteContentsInput {
  * one Sanity-instant parse, so the rendered day never depends on where the code
  * runs. An unparseable or missing date is `null`, i.e. visibly absent.
  */
-function contentsDate(value: string | null): string | null {
+const contentsDate = (value: string | null): string | null => {
   if (!value) return null;
   const dt = toDisplayZone(value);
   return dt.isValid ? dt.toFormat("dd·MM·yy") : null;
-}
+};
 
 /**
  * A blank editorial string is an absent value, not a value that happens to be
  * empty — so `value: string | null` means what it says all the way through and
  * not only once the row has rendered it.
  */
-function present(value: string | null | undefined): string | null {
+const present = (value: string | null | undefined): string | null => {
   const trimmed = value?.trim() ?? "";
   return trimmed === "" ? null : trimmed;
-}
+};
 
 /**
  * The one group whose repository order is not its printed order.
@@ -120,9 +120,12 @@ function present(value: string | null | undefined): string | null {
  * groups already arrive in the order they should print (articles newest first,
  * events by start date, pages by title).
  */
-function byDisplayName(a: ContentsTeamSource, b: ContentsTeamSource): number {
+const byDisplayName = (
+  a: ContentsTeamSource,
+  b: ContentsTeamSource,
+): number => {
   return a.displayName.localeCompare(b.displayName, "nl", { numeric: true });
-}
+};
 
 /**
  * A row with no slug has no destination, so it is not a contents entry.
@@ -135,9 +138,9 @@ function byDisplayName(a: ContentsTeamSource, b: ContentsTeamSource): number {
  * cut the players section — 0 of 294 carry a slug, so there was nothing to
  * link to — applied to every group rather than argued once.
  */
-function linkable<T extends { slug: string }>(row: T): boolean {
+const linkable = <T extends { slug: string }>(row: T): boolean => {
   return row.slug.trim() !== "";
-}
+};
 
 /**
  * Assemble the whole contents page from four repository reads.
@@ -146,12 +149,12 @@ function linkable<T extends { slug: string }>(row: T): boolean {
  * and no authored entry anywhere in this function, and a group with nothing
  * behind it does not appear.
  */
-export function buildSiteContents({
+export const buildSiteContents = ({
   teams,
   articles,
   events,
   pages,
-}: SiteContentsInput): ContentsGroup[] {
+}: SiteContentsInput): ContentsGroup[] => {
   const groups: ContentsGroup[] = [
     {
       id: "ploegen",
@@ -213,4 +216,4 @@ export function buildSiteContents({
   ];
 
   return groups.filter((group) => group.entries.length > 0);
-}
+};

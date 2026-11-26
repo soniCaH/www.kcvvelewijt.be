@@ -22,12 +22,12 @@ import { ServerErrorState } from "./server-error-state";
  * No `metadata` export in a Client Component, so the tab title is a React
  * `<title>` element.
  */
-export default function GlobalError({
+const GlobalError = ({
   retry,
 }: {
   error: Error & { digest?: string };
   retry: () => void;
-}) {
+}) => {
   return (
     <RootDocument head={<title>Technische panne | KCVV Elewijt</title>}>
       <main className="flex flex-1 flex-col">
@@ -35,4 +35,6 @@ export default function GlobalError({
       </main>
     </RootDocument>
   );
-}
+};
+
+export default GlobalError;

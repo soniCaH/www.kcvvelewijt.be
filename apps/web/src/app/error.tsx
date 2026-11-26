@@ -12,11 +12,13 @@ import { ServerErrorState } from "./server-error-state";
  * Components — but the response carries the non-indexable 500 status, so a
  * crawler never indexes it.
  */
-export default function ErrorPage({
+const ErrorPage = ({
   retry,
 }: {
   error: Error & { digest?: string };
   retry: () => void;
-}) {
+}) => {
   return <ServerErrorState retry={retry} />;
-}
+};
+
+export default ErrorPage;

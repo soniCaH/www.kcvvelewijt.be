@@ -23,10 +23,13 @@ export interface Paginated<T> {
  * and every comparison against it is false, so `Math.max`/`Math.min` would pass
  * it straight through to the query.
  */
-export function clampListingWindow(params: { offset: number; limit: number }): {
+export const clampListingWindow = (params: {
   offset: number;
   limit: number;
-} {
+}): {
+  offset: number;
+  limit: number;
+} => {
   return {
     offset: Math.max(0, toIndex(params.offset, 0)),
     limit: Math.min(
@@ -34,36 +37,36 @@ export function clampListingWindow(params: { offset: number; limit: number }): {
       LISTING_INITIAL_TOTAL,
     ),
   };
-}
+};
 
 /** A whole number, or `fallback` when the input is NaN or ±Infinity. */
-function toIndex(value: number, fallback: number): number {
+const toIndex = (value: number, fallback: number): number => {
   return Number.isFinite(value) ? Math.trunc(value) : fallback;
-}
+};
 
 /**
  * Splits an over-fetched batch into the page and its `hasMore` flag. Callers
  * query `limit + 1` rows, so the extra row answers "is there more?" without a
  * second count query.
  */
-export function paginateResults<T>(rows: T[], limit: number): Paginated<T> {
+export const paginateResults = <T>(rows: T[], limit: number): Paginated<T> => {
   const hasMore = rows.length > limit;
   return { items: hasMore ? rows.slice(0, limit) : rows, hasMore };
-}
+};
 
 /**
  * Drops rows already on screen, and rows repeated inside the batch itself. A
  * document published or unpublished between two clicks shifts the window, so an
  * appended batch can overlap what is already rendered.
  */
-export function deduplicateById<T extends { id: string }>(
+export const deduplicateById = <T extends { id: string }>(
   rows: T[],
   existingIds: ReadonlySet<string>,
-): T[] {
+): T[] => {
   const seen = new Set(existingIds);
   return rows.filter((row) => {
     if (seen.has(row.id)) return false;
     seen.add(row.id);
     return true;
   });
-}
+};

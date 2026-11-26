@@ -22,18 +22,18 @@ export { hashMemberId };
  * A plain function (the hook below returns this same one) so the clubboek's
  * `openStructureRow()`, which runs outside React, fires the identical event.
  */
-export function trackMemberClicked(
+export const trackMemberClicked = (
   node: Pick<OrgChartNode, "members">,
   view: ViewType,
-) {
+) => {
   const staffMemberId = node.members[0]?.id;
   trackEvent("organigram_member_clicked", {
     ...(staffMemberId ? { member_id: hashMemberId(staffMemberId) } : {}),
     view,
   });
-}
+};
 
-export function useOrganigramAnalytics() {
+export const useOrganigramAnalytics = () => {
   const trackViewChanged = useCallback((view: ViewType, source: ViewSource) => {
     trackEvent("organigram_view_changed", { view, source });
   }, []);
@@ -52,4 +52,4 @@ export function useOrganigramAnalytics() {
     trackDepartmentFiltered,
     trackExportPng,
   };
-}
+};

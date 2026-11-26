@@ -13,7 +13,7 @@ import {
   LoadingAnnouncement,
 } from "@/components/design-system";
 
-export default function SearchLoading() {
+const SearchLoading = () => {
   return (
     <div className="bg-cream min-h-screen">
       <LoadingAnnouncement label="Zoekpagina laden…" />
@@ -50,4 +50,6 @@ export default function SearchLoading() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default SearchLoading;

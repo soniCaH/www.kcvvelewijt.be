@@ -21,7 +21,7 @@ import { PageHero } from "@/components/layout/PageHero";
  * The chronicle's opening. A text page you read top to bottom, so it takes the
  * shared opening's quiet register (#2426) rather than a hero band of its own.
  */
-export function HeritageHero() {
+export const HeritageHero = () => {
   return (
     // Top air is the up-link chip's own now (#2877) — this container
     // supplies none.
@@ -39,14 +39,14 @@ export function HeritageHero() {
       />
     </PageContainer>
   );
-}
+};
 
 /**
  * A vertical run of timeline items. Renders the decorative dashed-ink centre
  * line (replaces the legacy `kcvv-green-bright` rule); the cards carry the
  * semantic order, so the line is `aria-hidden`.
  */
-export function TimelineSection({ children }: { children: ReactNode }) {
+export const TimelineSection = ({ children }: { children: ReactNode }) => {
   return (
     <div className="relative py-4">
       <div
@@ -56,14 +56,14 @@ export function TimelineSection({ children }: { children: ReactNode }) {
       {children}
     </div>
   );
-}
+};
 
 /**
  * A single dated card on one side of the centre line, with a `jersey-deep`
  * node marker (border-2 ink) punched through the line. Mobile collapses to a
  * single full-width column (preserves the legacy behaviour).
  */
-export function TimelineItem({
+export const TimelineItem = ({
   date,
   children,
   side = "left",
@@ -71,7 +71,7 @@ export function TimelineItem({
   date?: string;
   children: ReactNode;
   side?: "left" | "right";
-}) {
+}) => {
   // The card lives on one side; the opposite column renders as an invisible
   // md spacer so the alternating two-sided layout stays balanced. Defining the
   // card once keeps the two columns from drifting apart.
@@ -111,20 +111,20 @@ export function TimelineItem({
       </div>
     </div>
   );
-}
+};
 
 /**
  * The paper card itself — `<TapedCard>` (cream-soft, border-2 ink, paper
  * shadow). The date / era label renders as a `<MonoLabel>` ink chip (era names
  * and years both render as chips, per the data).
  */
-function TimelineCard({
+const TimelineCard = ({
   date,
   children,
 }: {
   date?: string;
   children: ReactNode;
-}) {
+}) => {
   return (
     <TapedCard bg="cream-soft" shadow="md" padding="md">
       {date && (
@@ -137,7 +137,7 @@ function TimelineCard({
       <div className="text-body-sm leading-relaxed">{children}</div>
     </TapedCard>
   );
-}
+};
 
 /**
  * A full-width historical photograph — `<TapedFigure>` (newsprint tint, warm
@@ -150,7 +150,7 @@ function TimelineCard({
  * lines). So the figure is wrapped in an outer `<figure>` that owns the
  * `<figcaption>`, keeping the caption programmatically tied to the image.
  */
-export function TimelineImage({
+export const TimelineImage = ({
   children,
   caption,
   rotation = "a",
@@ -158,7 +158,7 @@ export function TimelineImage({
   children: ReactNode;
   caption: ReactNode;
   rotation?: "a" | "b" | "none";
-}) {
+}) => {
   return (
     <figure data-timeline-item className="mx-auto my-12 max-w-2xl">
       <TapedFigure
@@ -175,4 +175,4 @@ export function TimelineImage({
       </figcaption>
     </figure>
   );
-}
+};

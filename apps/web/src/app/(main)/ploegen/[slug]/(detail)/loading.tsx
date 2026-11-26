@@ -52,7 +52,7 @@ import {
 } from "@/components/design-system";
 import { cn } from "@/lib/utils/cn";
 
-export default function TeamDetailLoading() {
+const TeamDetailLoading = () => {
   return (
     <div className="min-h-screen">
       <LoadingAnnouncement label="Ploeg laden…" />
@@ -113,4 +113,6 @@ export default function TeamDetailLoading() {
       </PageContainer>
     </div>
   );
-}
+};
+
+export default TeamDetailLoading;

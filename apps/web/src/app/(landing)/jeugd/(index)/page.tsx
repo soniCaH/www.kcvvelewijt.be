@@ -56,7 +56,7 @@ export const metadata = buildPageMetadata({
  * failure to provide the effect's own context (same mechanism as
  * `app/layout.tsx`'s nav-teams read).
  */
-async function fetchTeams(): Promise<TeamLandingItem[]> {
+const fetchTeams = async (): Promise<TeamLandingItem[]> => {
   try {
     return await runPromise(
       degradeSection(
@@ -72,7 +72,7 @@ async function fetchTeams(): Promise<TeamLandingItem[]> {
     console.error("[jeugd] failed to fetch youth teams:", error);
     return [];
   }
-}
+};
 
 /**
  * The Jeugd articles feed is a section of the nav hub, not the page's
@@ -82,7 +82,7 @@ async function fetchTeams(): Promise<TeamLandingItem[]> {
  * Same outer try/catch as `fetchTeams` above, for the same reason: it covers
  * `AppLayer` construction failing, not the read itself.
  */
-async function fetchJeugdArticles(): Promise<ArticleVM[]> {
+const fetchJeugdArticles = async (): Promise<ArticleVM[]> => {
   try {
     return await runPromise(
       degradeSection(
@@ -102,7 +102,7 @@ async function fetchJeugdArticles(): Promise<ArticleVM[]> {
     console.error("[jeugd] failed to fetch jeugd articles:", error);
     return [];
   }
-}
+};
 
 /**
  * The nav hub is a section, not the page's subject (#2433 rule 3): a failed
@@ -112,7 +112,9 @@ async function fetchJeugdArticles(): Promise<ArticleVM[]> {
  * Same outer try/catch as `fetchTeams` above, for the same reason: it covers
  * `AppLayer` construction failing, not the read itself.
  */
-async function fetchEditorialConfig(): Promise<EditorialCardConfig[] | null> {
+const fetchEditorialConfig = async (): Promise<
+  EditorialCardConfig[] | null
+> => {
   try {
     return await runPromise(
       degradeSection(
@@ -128,7 +130,7 @@ async function fetchEditorialConfig(): Promise<EditorialCardConfig[] | null> {
     console.error("[jeugd] editorial-cards lookup failed:", error);
     return null;
   }
-}
+};
 
 /**
  * `/jeugd` — Phase 7 redesign (PRD redesign-phase-7-jeugd). The route opens on
@@ -142,7 +144,7 @@ async function fetchEditorialConfig(): Promise<EditorialCardConfig[] | null> {
  * pinned nav cards. Fires `jeugd_view` (page view) + `jeugd_card_click` (nav-hub
  * card clicks, via `<EditorialHubAnalytics>` delegation).
  */
-export default async function JeugdPage() {
+const JeugdPage = async () => {
   const [teams, articles, editorialConfig] = await Promise.all([
     fetchTeams(),
     fetchJeugdArticles(),
@@ -210,7 +212,9 @@ export default async function JeugdPage() {
       <JeugdCtaBand />
     </>
   );
-}
+};
+
+export default JeugdPage;
 
 // 15m ISR — capped by #2433 rule 5, not by content freshness: the `(landing)`
 // layout mounts `<MatchStripSlot>`, whose BFF read degrades to no strip and is

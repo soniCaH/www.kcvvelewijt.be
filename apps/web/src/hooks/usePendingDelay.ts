@@ -16,7 +16,10 @@ export const PENDING_DELAY_MS = 150;
  * `resetOn` restarts the delay while `pending` stays true (e.g. the pending
  * chip changes from one to another).
  */
-export function usePendingDelay(pending: boolean, resetOn?: unknown): boolean {
+export const usePendingDelay = (
+  pending: boolean,
+  resetOn?: unknown,
+): boolean => {
   const [elapsed, setElapsed] = useState(false);
 
   useEffect(() => {
@@ -29,4 +32,4 @@ export function usePendingDelay(pending: boolean, resetOn?: unknown): boolean {
   }, [pending, resetOn]);
 
   return pending && elapsed;
-}
+};

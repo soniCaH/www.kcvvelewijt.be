@@ -10,7 +10,7 @@ import { ErrorAnalytics } from "@/components/analytics";
  * re-renders, where `reset()` only re-renders the payload that already failed
  * (#3298).
  */
-export function serverErrorProps(retry: () => void) {
+export const serverErrorProps = (retry: () => void) => {
   return {
     code: "500",
     codeLine: "Fout 500 · er ging iets mis",
@@ -31,14 +31,14 @@ export function serverErrorProps(retry: () => void) {
       },
     ],
   } satisfies ErrorStateProps;
-}
+};
 
 // No "use client": both importers are Client Components, and the directive
 // would make Next flag the non-serializable `retry` prop.
-export function ServerErrorState({ retry }: { retry: () => void }) {
+export const ServerErrorState = ({ retry }: { retry: () => void }) => {
   return (
     <ErrorAnalytics code="500">
       <ErrorState {...serverErrorProps(retry)} />
     </ErrorAnalytics>
   );
-}
+};
