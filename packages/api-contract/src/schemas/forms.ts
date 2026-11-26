@@ -22,7 +22,7 @@ export const MEDICAL_CERT_ROLES: ReadonlyArray<MembershipRole> = [
  * UTC getters only: the browser and the BFF must agree on the day, whatever
  * the visitor's timezone is. Shared so there is one copy of the arithmetic.
  */
-export function ageOn(birthDate: string, on: Date): number {
+export const ageOn = (birthDate: string, on: Date): number => {
   const parts = birthDate.split("-");
   const year = Number(parts[0]);
   const month = Number(parts[1]);
@@ -31,11 +31,11 @@ export function ageOn(birthDate: string, on: Date): number {
   const birthdayPending =
     monthDiff < 0 || (monthDiff === 0 && on.getUTCDate() < day);
   return on.getUTCFullYear() - year - (birthdayPending ? 1 : 0);
-}
+};
 
-export function isMinorOn(birthDate: string, on: Date): boolean {
+export const isMinorOn = (birthDate: string, on: Date): boolean => {
   return ageOn(birthDate, on) < 18;
-}
+};
 
 /** Oldest plausible applicant, in whole years. */
 const MAX_APPLICANT_AGE = 100;
@@ -47,7 +47,7 @@ export const INVALID_BIRTH_DATE_MESSAGE = "Vul een geldige geboortedatum in.";
  * A real calendar date, not in the future, at most 100 years old. Catches a
  * mistyped year (`0010-05-01` would otherwise read as an adult).
  */
-export function isPlausibleBirthDate(birthDate: string, now: Date): boolean {
+export const isPlausibleBirthDate = (birthDate: string, now: Date): boolean => {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)) return false;
   const [y = NaN, m = NaN, d = NaN] = birthDate.split("-").map(Number);
   // Not `Date.UTC(y, …)`: it maps years 0-99 to 1900-1999.
@@ -62,7 +62,7 @@ export function isPlausibleBirthDate(birthDate: string, now: Date): boolean {
   }
   const age = ageOn(birthDate, now);
   return age >= 0 && age <= MAX_APPLICANT_AGE;
-}
+};
 
 export const MembershipGender = S.Literal("m", "f", "x");
 export type MembershipGender = S.Schema.Type<typeof MembershipGender>;
