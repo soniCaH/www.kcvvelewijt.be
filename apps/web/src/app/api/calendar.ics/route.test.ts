@@ -6,10 +6,11 @@
  * invoke the club-activity cache's callback directly to assert it rejects
  * rather than swallowing a failure), `BffService` (the PSD match fan-out),
  * `EventRepository` (the club activities feed) and `TeamRepository` (the
- * known teams whose `psdId`s are the only ids the feed accepts, #3486). The
+ * shown and hidden teams whose `psdId`s are the only ids the feed accepts,
+ * #3486/#3898). The
  * rest of `AppLayer`'s repositories stay real but unused.
  */
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 import { Effect, Layer } from "effect";
 import type { Match } from "@kcvv/api-contract";
@@ -26,12 +27,14 @@ const {
   mockGetMatches,
   mockFindUpcomingForList,
   mockFindAllTeams,
+  mockFindHiddenPsdIds,
   unstableCacheCalls,
   draftModeMock,
 } = vi.hoisted(() => ({
   mockGetMatches: vi.fn(),
   mockFindUpcomingForList: vi.fn(),
   mockFindAllTeams: vi.fn(),
+  mockFindHiddenPsdIds: vi.fn(),
   unstableCacheCalls: [] as UnstableCacheCall[],
   draftModeMock: vi.fn(),
 }));
@@ -91,6 +94,7 @@ vi.mock("@/lib/repositories/team.repository", async (importOriginal) => {
     ...actual,
     TeamRepositoryLive: Layer.succeed(actual.TeamRepository, {
       findAll: mockFindAllTeams,
+      findHiddenPsdIds: mockFindHiddenPsdIds,
       findBySlug: () => Effect.die("not used by this route"),
       findAllForLanding: () => Effect.die("not used by this route"),
       findByMemberId: () => Effect.die("not used by this route"),
@@ -179,6 +183,7 @@ describe("GET /api/calendar.ics", () => {
     mockFindAllTeams
       .mockReset()
       .mockReturnValue(Effect.succeed([1, 1235, 9999].map(makeTeam)));
+    mockFindHiddenPsdIds.mockReset().mockReturnValue(Effect.succeed([]));
   });
 
   it("without the events flag, returns exactly today's matches-only feed — a pinned test proves an existing subscription is unaffected", async () => {
@@ -320,6 +325,7 @@ describe("GET /api/calendar.ics team-id parsing (#3486)", () => {
     mockFindAllTeams
       .mockReset()
       .mockReturnValue(Effect.succeed([1, 2, 1235, null].map(makeTeam)));
+    mockFindHiddenPsdIds.mockReset().mockReturnValue(Effect.succeed([]));
   });
 
   async function keyFor(query: string): Promise<string[]> {
@@ -391,5 +397,150 @@ describe("GET /api/calendar.ics team-id parsing (#3486)", () => {
     // Pass-through cache = always cold, so the miss still needs the list.
     expect(await keyFor("teamIds=")).toEqual(["ical:all:all"]);
     expect(mockGetMatches).not.toHaveBeenCalled();
+  });
+});
+
+/**
+ * #3898: a hidden team (`showInNavigation: false`) is served only when its
+ * PSD id is named in `teamIds`. The all-teams feed never holds it, and a failed
+ * team read never adds it to a feed that did not name it.
+ */
+describe("GET /api/calendar.ics hidden teams (#3898)", () => {
+  const HIDDEN = 23;
+
+  beforeEach(() => {
+    unstableCacheCalls.length = 0;
+    // One match per team, with the team's id in the UID, so a body shows
+    // which teams it holds.
+    mockGetMatches.mockReset().mockImplementation((id: number) =>
+      Effect.succeed([
+        makeMatch({
+          id: id * 1000,
+          home_team: { id, name: `Team ${id}`, score: undefined },
+        }),
+      ]),
+    );
+    mockFindUpcomingForList.mockReset().mockReturnValue(Effect.succeed([]));
+    mockFindAllTeams
+      .mockReset()
+      .mockReturnValue(Effect.succeed([1, 1235].map(makeTeam)));
+    mockFindHiddenPsdIds
+      .mockReset()
+      .mockReturnValue(Effect.succeed([String(HIDDEN)]));
+  });
+
+  const fannedOutIds = (): number[] =>
+    mockGetMatches.mock.calls.map(([id]) => id as number);
+
+  const keyFor = async (query: string): Promise<string[]> => {
+    unstableCacheCalls.length = 0;
+    await GET(makeRequest(query));
+    return unstableCacheCalls[0]!.keyParts;
+  };
+
+  const uid = (teamId: number) => `kcvv-match-${teamId * 1000}@kcvvelewijt.be`;
+
+  it("?teamIds=23 returns only the hidden team's matches", async () => {
+    const body = await (await GET(makeRequest(`teamIds=${HIDDEN}`))).text();
+
+    expect(fannedOutIds()).toEqual([HIDDEN]);
+    expect(body).toContain(uid(HIDDEN));
+    expect(body).not.toContain(uid(1235));
+  });
+
+  it("?teamIds=1235,23 returns both teams' matches", async () => {
+    const body = await (
+      await GET(makeRequest(`teamIds=1235,${HIDDEN}`))
+    ).text();
+
+    expect(fannedOutIds()).toEqual([HIDDEN, 1235]);
+    expect(body).toContain(uid(HIDDEN));
+    expect(body).toContain(uid(1235));
+  });
+
+  it.each([
+    ["no teamIds", ""],
+    ["an empty teamIds", "teamIds="],
+    ["nothing valid left", "teamIds=x1,424242"],
+  ])(
+    "%s gives the all-teams feed, without the hidden team",
+    async (_label, query) => {
+      const key = await keyFor(query);
+
+      expect(key).toEqual(["ical:all:all"]);
+      expect(fannedOutIds()).toEqual([1, 1235]);
+    },
+  );
+
+  it("never fetches an id that is no team, next to a named hidden one", async () => {
+    await GET(makeRequest(`teamIds=424242,${HIDDEN}`));
+    expect(fannedOutIds()).toEqual([HIDDEN]);
+  });
+
+  it("reads a hidden team's Sanity psdId as strictly as a request id", async () => {
+    mockFindHiddenPsdIds.mockReturnValue(Effect.succeed(["0x17", " 23 "]));
+
+    await GET(makeRequest(`teamIds=${HIDDEN}`));
+
+    expect(fannedOutIds()).toEqual([1, 1235]);
+  });
+
+  it("gives ?teamIds=23,23,023 and ?teamIds=23 one cache key", async () => {
+    const key = await keyFor(`teamIds=${HIDDEN},${HIDDEN},0${HIDDEN}`);
+
+    expect(key).toEqual(await keyFor(`teamIds=${HIDDEN}`));
+    expect(key).toEqual([`ical:${HIDDEN}:all`]);
+  });
+
+  it("counts hidden ids toward MAX_TEAM_IDS (20) like any other", async () => {
+    const shown = Array.from({ length: 10 }, (_, i) => i + 1);
+    const hidden = Array.from({ length: 15 }, (_, i) => i + 11);
+    mockFindAllTeams.mockReturnValue(Effect.succeed(shown.map(makeTeam)));
+    mockFindHiddenPsdIds.mockReturnValue(Effect.succeed(hidden.map(String)));
+
+    await GET(makeRequest(`teamIds=${[...shown, ...hidden].join(",")}`));
+
+    expect(fannedOutIds()).toEqual([...shown, ...hidden].slice(0, 20));
+  });
+
+  describe("when the hidden-team read fails", () => {
+    beforeEach(() => {
+      mockFindHiddenPsdIds.mockReturnValue(
+        Effect.die(new Error("Sanity down")),
+      );
+      vi.spyOn(console, "warn").mockImplementation(() => {});
+    });
+    afterEach(() => {
+      vi.mocked(console.warn).mockRestore();
+    });
+
+    it("keeps the hidden team out of the all-teams feed", async () => {
+      expect(await keyFor("teamIds=")).toEqual(["ical:all:all"]);
+      expect(fannedOutIds()).toEqual([1, 1235]);
+    });
+
+    // Strict ids, no known-team filter: the same rule a failed read already
+    // applies to a shown team's id (#3486).
+    it("still serves a named hidden id, under the key a healthy read uses", async () => {
+      expect(await keyFor(`teamIds=${HIDDEN}`)).toEqual([`ical:${HIDDEN}:all`]);
+      expect(fannedOutIds()).toEqual([HIDDEN]);
+    });
+  });
+
+  // Pinned: the hidden-team read never changes a shown-team subscription.
+  it("serves a shown-team subscription byte for byte as it was", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-11-26T12:00:00Z"));
+    try {
+      mockFindHiddenPsdIds.mockReturnValue(Effect.succeed([]));
+      const before = await (await GET(makeRequest("teamIds=1235"))).text();
+      mockFindHiddenPsdIds.mockReturnValue(Effect.succeed([String(HIDDEN)]));
+      const after = await (await GET(makeRequest("teamIds=1235"))).text();
+
+      expect(after).toBe(before);
+      expect(after).toContain(uid(1235));
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

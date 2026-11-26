@@ -8,6 +8,7 @@ import {
 import { SANITY_LIST_REVALIDATE, SANITY_TAGS } from "../sanity/cache-tags";
 import type {
   TEAMS_QUERY_RESULT,
+  HIDDEN_TEAM_PSD_IDS_QUERY_RESULT,
   TEAM_BY_SLUG_QUERY_RESULT,
   TEAMS_LANDING_QUERY_RESULT,
   TEAMS_BY_MEMBER_QUERY_RESULT,
@@ -23,6 +24,12 @@ export const TEAMS_QUERY =
   _id, psdId, name, displayName, "slug": slug.current, age, division, divisionFull,
   "teamImageUrl": teamImage.asset->url + "?w=1200&h=800&q=80&fm=webp&fit=crop&crop=focalpoint&fp-x=" + string(coalesce(teamImage.hotspot.x, 0.5)) + "&fp-y=" + string(coalesce(teamImage.hotspot.y, 0.5))
 }`);
+
+// The complement of `TEAMS_QUERY`'s `showInNavigation != false`: a hidden team,
+// which the match calendar serves only when `teamIds` names it (#3898).
+export const HIDDEN_TEAM_PSD_IDS_QUERY = defineQuery(
+  `*[_type == "team" && archived != true && showInNavigation == false && defined(psdId)].psdId`,
+);
 
 export const TEAM_BY_SLUG_QUERY =
   defineQuery(`*[_type == "team" && slug.current == $slug && archived != true][0] {
@@ -326,6 +333,11 @@ function toTeamLandingItem(
 export interface TeamRepositoryInterface {
   readonly findAll: () => Effect.Effect<TeamNavVM[], SanityReadError>;
   /**
+   * The `psdId` of every non-archived hidden team (`showInNavigation: false`).
+   * Only the match calendar reads it, for a `teamIds` that names one (#3898).
+   */
+  readonly findHiddenPsdIds: () => Effect.Effect<string[], SanityReadError>;
+  /**
    * `options` forwards Data Cache directives to the read. Only the board pages
    * pass any (#3483); `/ploegen/<slug>` reads stay untagged.
    */
@@ -358,6 +370,12 @@ export const TeamRepositoryLive = Layer.succeed(TeamRepository, {
       revalidate: SANITY_LIST_REVALIDATE,
       tags: [SANITY_TAGS.teams],
     }).pipe(Effect.map((rows) => rows.map(toTeamNavVM))),
+  findHiddenPsdIds: () =>
+    fetchGroq<HIDDEN_TEAM_PSD_IDS_QUERY_RESULT>(
+      HIDDEN_TEAM_PSD_IDS_QUERY,
+      undefined,
+      { revalidate: SANITY_LIST_REVALIDATE, tags: [SANITY_TAGS.teams] },
+    ),
   findBySlug: (slug, options) =>
     fetchGroq<TEAM_BY_SLUG_QUERY_RESULT>(
       TEAM_BY_SLUG_QUERY,

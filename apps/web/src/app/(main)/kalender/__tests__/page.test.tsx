@@ -17,16 +17,19 @@ vi.mock("@/components/calendar/CalendarWidget", () => ({
     initialIsPhone,
     initialAbonneer,
     initialType,
+    teams,
   }: {
     initialIsPhone?: boolean;
     initialAbonneer?: string;
     initialType?: string;
+    teams: { psdId: number }[];
   }) => (
     <div
       data-testid="calendar-widget"
       data-initial-type={initialType}
       data-initial-is-phone={String(initialIsPhone)}
       data-initial-abonneer={initialAbonneer}
+      data-team-psd-ids={teams.map((t) => t.psdId).join(",")}
     />
   ),
 }));
@@ -38,8 +41,9 @@ vi.mock("next/headers", () => ({
   headers: async () => new Headers(mockRequestHeaders() as HeadersInit),
 }));
 
-const { mockGetNextMatches } = vi.hoisted(() => ({
+const { mockGetNextMatches, mockFindAllTeams } = vi.hoisted(() => ({
   mockGetNextMatches: vi.fn(),
+  mockFindAllTeams: vi.fn(),
 }));
 
 vi.mock("@/lib/effect/services/BffService", async (importOriginal) => {
@@ -66,7 +70,9 @@ vi.mock("@/lib/repositories/team.repository", async (importOriginal) => {
   return {
     ...mod,
     TeamRepositoryLive: Layer.succeed(mod.TeamRepository, {
-      findAll: () => Effect.succeed([]),
+      findAll: mockFindAllTeams,
+      // The page must never read the hidden teams (#3898): this read dies.
+      findHiddenPsdIds: () => Effect.die("not used by this suite"),
       findBySlug: () => Effect.die("not used by this suite"),
       findAllForLanding: () => Effect.die("not used by this suite"),
       findByMemberId: () => Effect.die("not used by this suite"),
@@ -92,6 +98,10 @@ vi.mock("@/lib/repositories/event.repository", async (importOriginal) => {
 });
 
 const { default: CalendarPage } = await import("../page");
+
+beforeEach(() => {
+  mockFindAllTeams.mockReturnValue(Effect.succeed([]));
+});
 
 const renderPage = async (
   searchParams: {
@@ -224,6 +234,39 @@ describe("/kalender — ?abonneer= (#3788)", () => {
         .getByTestId("calendar-widget")
         .getAttribute("data-initial-abonneer"),
     ).toBe(expected);
+  });
+});
+
+// #3898: `/kalender` never offers a hidden team's calendar; only a feed URL
+// that names its id serves it. The page offers the widget the shown teams only, so the dropdown
+// never lists a hidden team and `?abonneer=<hidden id>` matches no team (the
+// widget ignores an id that is not in `teams`).
+describe("/kalender — hidden teams (#3898)", () => {
+  beforeEach(() => {
+    mockRequestHeaders.mockReturnValue({});
+    mockGetNextMatches.mockReturnValue(Effect.succeed([]));
+    mockFindAllTeams.mockReturnValue(
+      Effect.succeed([
+        {
+          id: "team-1235",
+          name: "A-ploeg",
+          displayName: "A-ploeg",
+          slug: "a-ploeg",
+          age: "A",
+          psdId: "1235",
+          division: null,
+          divisionFull: null,
+          teamImageUrl: null,
+        },
+      ]),
+    );
+  });
+
+  it("offers the widget the shown teams only, so ?abonneer=23 matches none", async () => {
+    await renderPage({ abonneer: "23" });
+    const widget = screen.getByTestId("calendar-widget");
+    expect(widget.getAttribute("data-team-psd-ids")).toBe("1235");
+    expect(widget.getAttribute("data-initial-abonneer")).toBe("23");
   });
 });
 

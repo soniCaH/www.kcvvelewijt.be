@@ -93,6 +93,7 @@ vi.mock("@/lib/repositories/team.repository", async (importOriginal) => {
     ...actual,
     TeamRepositoryLive: Layer.succeed(actual.TeamRepository, {
       findAll: () => Effect.succeed([]), // only for the interface shape; the page reads none of it
+      findHiddenPsdIds: () => Effect.die("not used by this suite"),
       findBySlug: mockFindBySlug,
       findAllForLanding: () => Effect.succeed([]),
       findByMemberId: () => Effect.succeed([]),

@@ -33,6 +33,7 @@ vi.mock("@/lib/repositories/team.repository", async (importOriginal) => {
     ...mod,
     TeamRepositoryLive: Layer.succeed(mod.TeamRepository, {
       findAll: () => Effect.die(new Error("Sanity is unreachable")),
+      findHiddenPsdIds: () => Effect.die("not used by this suite"),
       findBySlug: () => Effect.die(new Error("Sanity is unreachable")),
       findAllForLanding: () => Effect.die(new Error("Sanity is unreachable")),
       findByMemberId: () => Effect.die(new Error("Sanity is unreachable")),
