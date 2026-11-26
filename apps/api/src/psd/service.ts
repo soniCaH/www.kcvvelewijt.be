@@ -1,5 +1,16 @@
-import { Context, Effect, Layer, Option, Schema as S } from "effect";
-import { WorkerEnvTag } from "../env";
+import {
+  Context,
+  Effect,
+  Layer,
+  Option,
+  Schema as S,
+  type ConfigError,
+} from "effect";
+import {
+  footbalistoLogoCdnUrl,
+  logConfigError,
+  psdApiRequest,
+} from "../config";
 import { KvCacheService, TTL } from "../cache/kv-cache";
 import { PsdGateService, withFlight } from "./gate";
 import { SanityProjection } from "../sanity/projection";
@@ -80,6 +91,22 @@ export class PsdService extends Context.Tag("PsdService")<
   PsdService,
   PsdServiceInterface
 >() {}
+
+// A PSD var that cannot be read is an upstream failure the cache can ride out
+// by serving stale, not a defect that skips the stale path (#3880). The log
+// names the var.
+const unavailableOnConfigError = <A>(
+  read: Effect.Effect<A, ConfigError.ConfigError>,
+): Effect.Effect<A, UpstreamUnavailableError> =>
+  read.pipe(
+    Effect.tapError(logConfigError),
+    Effect.mapError(
+      (error) =>
+        new UpstreamUnavailableError({
+          message: `PSD is not configured: ${error}`,
+        }),
+    ),
+  );
 
 function classifyHttpError(
   url: string,
@@ -249,30 +276,29 @@ export const markPartial = <T extends object>(
 export const PsdServiceLive = Layer.effect(
   PsdService,
   Effect.gen(function* () {
-    const env = yield* WorkerEnvTag;
     const cache = yield* KvCacheService;
     const gate = yield* PsdGateService;
     const projection = yield* SanityProjection;
-    const base = env.PSD_API_BASE_URL;
-
-    const psdHeaders = {
-      "x-api-key": env.PSD_API_KEY,
-      "x-api-club": env.PSD_API_CLUB,
-      Authorization: env.PSD_API_AUTH,
-      "Accept-Language": "nl-BE",
-      "Content-Type": "application/json",
-    };
 
     // Every PSD call passes the global gate first: `acquireToken` blocks until a
     // ≤5/s worldwide token is free (best-effort — proceeds if the gate is down),
     // capping the fan-out below PSD's rate limit. The grant also counts the call (#3490).
+    // `path` is relative to PSD_API_BASE_URL. The credentials are read here, per
+    // call, ahead of the token: a missing one is a transient upstream failure
+    // naming the var, so the SWR cache serves stale instead of dying (#3880).
     const countedFetch = <A, I>(
-      url: string,
+      path: string,
       schema: S.Schema<A, I>,
       options?: { readonly emptyBodyIsNotFound: EmptyBodyNotFoundOptions },
     ) =>
-      gate.acquireToken.pipe(
-        Effect.zipRight(fetchJson(url, schema, psdHeaders, options)),
+      unavailableOnConfigError(psdApiRequest).pipe(
+        Effect.flatMap(({ baseUrl, headers }) =>
+          gate.acquireToken.pipe(
+            Effect.zipRight(
+              fetchJson(`${baseUrl}${path}`, schema, headers, options),
+            ),
+          ),
+        ),
       );
 
     // A KV value decoded against `schema`; None when absent or undecodable.
@@ -290,10 +316,7 @@ export const PsdServiceLive = Layer.effect(
       Effect.gen(function* () {
         const cached = yield* readCached(SEASONS_CACHE_KEY, PsdSeasonsSchema);
         if (Option.isSome(cached)) return cached.value;
-        const seasons = yield* countedFetch(
-          `${base}/seasons`,
-          PsdSeasonsSchema,
-        );
+        const seasons = yield* countedFetch("/seasons", PsdSeasonsSchema);
         yield* cache.set(
           SEASONS_CACHE_KEY,
           JSON.stringify(seasons),
@@ -352,7 +375,7 @@ export const PsdServiceLive = Layer.effect(
           }
         }
         const map = yield* countedFetch(
-          `${base}/competitions`,
+          "/competitions",
           PsdCompetitionsSchema,
         ).pipe(
           Effect.map(buildCompetitionLabelMap),
@@ -406,7 +429,7 @@ export const PsdServiceLive = Layer.effect(
             return parsed.value;
           }
         }
-        const teams = yield* countedFetch(`${base}/teams`, PsdTeamsSchema);
+        const teams = yield* countedFetch("/teams", PsdTeamsSchema);
         const byId: TeamsById = Object.fromEntries(
           teams.map((t) => [String(t.id), { name: t.name, age: t.age }]),
         );
@@ -475,13 +498,9 @@ export const PsdServiceLive = Layer.effect(
       });
 
     const fetchRawMatchDetail = (matchId: number) =>
-      countedFetch(
-        `${base}/games/${matchId}/info`,
-        FootbalistoMatchDetailResponse,
-        {
-          emptyBodyIsNotFound: { resourceType: "match", resourceId: matchId },
-        },
-      );
+      countedFetch(`/games/${matchId}/info`, FootbalistoMatchDetailResponse, {
+        emptyBodyIsNotFound: { resourceType: "match", resourceId: matchId },
+      });
 
     // ─── Match → team/competition index ───────────────────────────────────────
     // The match-detail endpoint (`/games/{id}/info`, queried by match id) carries
@@ -547,14 +566,14 @@ export const PsdServiceLive = Layer.effect(
 
     const buildMatchTeamIndex = (): Effect.Effect<MatchTeamIndex, BffError> =>
       Effect.gen(function* () {
-        const teams = yield* countedFetch(`${base}/teams`, PsdTeamsSchema);
+        const teams = yield* countedFetch("/teams", PsdTeamsSchema);
         const season = yield* getCurrentSeason();
 
         const perTeam = yield* Effect.all(
           teams.map(
             (team) =>
               countedFetch(
-                `${base}/games/team/${team.id}/seasons/${season.id}`,
+                `/games/team/${team.id}/seasons/${season.id}`,
                 PsdMatchListSchema,
               ).pipe(Effect.map((data) => ({ team, content: data.content }))),
             // No per-team fallback: one failed team fails the build. A partial
@@ -705,7 +724,7 @@ export const PsdServiceLive = Layer.effect(
           if (season === null) return [];
 
           const data = yield* countedFetch(
-            `${base}/games/team/${teamId}/seasons/${season.id}`,
+            `/games/team/${teamId}/seasons/${season.id}`,
             PsdMatchListSchema,
           );
 
@@ -754,7 +773,7 @@ export const PsdServiceLive = Layer.effect(
           const teamNextMatches = yield* Effect.all(
             visibleTeams.map((team) =>
               countedFetch(
-                `${base}/games/team/${team.id}/seasons/${season.id}`,
+                `/games/team/${team.id}/seasons/${season.id}`,
                 PsdMatchListSchema,
               ).pipe(
                 Effect.flatMap((data) =>
@@ -855,7 +874,7 @@ export const PsdServiceLive = Layer.effect(
           const teamWindowMatches = yield* Effect.all(
             visibleTeams.map((team) =>
               countedFetch(
-                `${base}/games/team/${team.id}/seasons/${season.id}`,
+                `/games/team/${team.id}/seasons/${season.id}`,
                 PsdMatchListSchema,
               ).pipe(
                 Effect.flatMap((data) =>
@@ -1087,8 +1106,13 @@ export const PsdServiceLive = Layer.effect(
 
       getRanking: (teamId: number) =>
         Effect.gen(function* () {
+          // Read before the PSD call, so a missing value cannot spend the
+          // daily call budget on every request.
+          const logoCdnUrl = yield* unavailableOnConfigError(
+            footbalistoLogoCdnUrl,
+          );
           const competitions = yield* countedFetch(
-            `${base}/teams/${teamId}/ranking`,
+            `/teams/${teamId}/ranking`,
             FootbalistoRankingArray,
           );
 
@@ -1132,10 +1156,7 @@ export const PsdServiceLive = Layer.effect(
               competition_id: competition.id,
               competition_name: stripPsdName(competition.name),
               entries: entries.map((e) =>
-                transformFootbalistoRankingEntry(
-                  e,
-                  env.FOOTBALISTO_LOGO_CDN_URL,
-                ),
+                transformFootbalistoRankingEntry(e, logoCdnUrl),
               ),
             });
           }
@@ -1160,7 +1181,7 @@ export const PsdServiceLive = Layer.effect(
           const seasonResults = yield* Effect.all(
             allSeasons.map((season) =>
               countedFetch(
-                `${base}/games/team/${teamId}/seasons/${season.id}`,
+                `/games/team/${teamId}/seasons/${season.id}`,
                 PsdMatchListSchema,
               ).pipe(
                 Effect.flatMap((data) =>
@@ -1307,7 +1328,7 @@ export const PsdServiceLive = Layer.effect(
           const dateTo = formatDate(season.end);
 
           const response = yield* countedFetch(
-            `${base}/statistics/player/${memberId}/from/${dateFrom}/to/${dateTo}`,
+            `/statistics/player/${memberId}/from/${dateFrom}/to/${dateTo}`,
             PsdPlayerGameStatisticsResponse,
             // An unknown member id must end cached, not refetched (#3468).
             {

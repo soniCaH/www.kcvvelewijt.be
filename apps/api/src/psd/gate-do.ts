@@ -9,8 +9,10 @@
  * imported by the worker entry (index.ts), never by code the Node tests load.
  */
 import { DurableObject } from "cloudflare:workers";
+import { Effect } from "effect";
+import { slackAlertWebhookUrl, workerConfigProvider } from "../config";
 import type { WorkerEnv } from "../env";
-// Type-only — erases at build, so the DO bundle never pulls in Effect via gate.ts.
+// Type-only — erases at build, so gate.ts's services never come into the DO.
 import type { PsdOutcome } from "./gate";
 import { GateLogic, type DailyCount } from "./gate-logic";
 import { IncidentTracker } from "./incident";
@@ -44,6 +46,17 @@ export class PsdGate extends DurableObject<WorkerEnv> {
     });
   }
 
+  /** The Slack webhook secret, read from this Durable Object's own `env` — it
+   * is a different isolate from the Worker's, so the Worker's provider does not
+   * reach it. */
+  private slackWebhookUrl() {
+    return Effect.runPromise(
+      slackAlertWebhookUrl.pipe(
+        Effect.withConfigProvider(workerConfigProvider(this.env)),
+      ),
+    );
+  }
+
   acquireToken(): Promise<void> {
     return this.logic.acquireToken();
   }
@@ -62,7 +75,7 @@ export class PsdGate extends DurableObject<WorkerEnv> {
     const alert = this.incident.report(input.ok);
     if (alert) {
       await postSlack(
-        this.env.SLACK_ALERT_WEBHOOK_URL,
+        await this.slackWebhookUrl(),
         buildIncidentMessage(alert, input),
       );
     }

@@ -6,8 +6,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { BFF_KEY_HEADER, CLIENT_IP_HEADER } from "@kcvv/api-contract";
-import type { WorkerEnv } from "./env";
-import { makeTestEnv } from "./test-helpers/env-layer";
+import { makeTestEnv, type TestEnv } from "./test-helpers/env-layer";
 import { TEST_SECRET, signPayload } from "./test-helpers/webhook-signing";
 
 // gate-do.ts imports `cloudflare:workers`, which only workerd can load.
@@ -60,7 +59,7 @@ const ctx = {
   passThroughOnException: () => {},
 } as unknown as ExecutionContext;
 
-const env = (overrides: Partial<WorkerEnv> = {}) =>
+const env = (overrides: Partial<TestEnv> = {}) =>
   makeTestEnv({
     BFF_SHARED_SECRET: SECRET,
     SANITY_WEBHOOK_SECRET: TEST_SECRET,
@@ -220,6 +219,53 @@ describe("worker fetch — /webhooks/darts-paid is exempt and keeps its HMAC (#3
       action: "skipped_not_applicable",
     });
     expect(handlerSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe("worker fetch — a missing required var", () => {
+  it("fails the PSD request with an upstream-unavailable answer, and logs the ConfigError naming the var", async () => {
+    // Effect's default logger writes every level through `console.log`.
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const res = await worker.fetch(
+      get("/matches/next", { [BFF_KEY_HEADER]: SECRET }),
+      env({ PSD_API_KEY: undefined }),
+      ctx,
+    );
+    expect(res.status).toBe(503);
+    expect(logSpy.mock.calls.flat().join(" ")).toContain("PSD_API_KEY");
+  });
+
+  it("reads the Sanity vars when Sanity is touched, never while the app layer builds", async () => {
+    // Every request builds the whole app layer, so a Sanity var read there would
+    // 500 PSD-only routes too. An empty token reads anonymously, as before.
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("", { status: 503 })),
+    );
+    const status = async (overrides: Partial<TestEnv>) =>
+      (
+        await worker.fetch(
+          get("/matches/next", { [BFF_KEY_HEADER]: SECRET }),
+          env(overrides),
+          ctx,
+        )
+      ).status;
+
+    const baseline = await status({});
+    expect(baseline).not.toBe(500);
+    expect(await status({ SANITY_API_TOKEN: "" })).toBe(baseline);
+    expect(await status({ SANITY_API_TOKEN: undefined })).toBe(baseline);
+    expect(await status({ SANITY_PROJECT_ID: undefined })).toBe(baseline);
+    vi.unstubAllGlobals();
+  });
+
+  it("leaves a route that never reads it alone", async () => {
+    const res = await worker.fetch(
+      get("/no-such-route", { [BFF_KEY_HEADER]: SECRET }),
+      env({ PSD_API_KEY: undefined }),
+      ctx,
+    );
+    expect(res.status).toBe(404);
   });
 });
 

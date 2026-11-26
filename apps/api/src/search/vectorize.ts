@@ -1,4 +1,5 @@
 import { Context, Effect, Layer } from "effect";
+import { sanityDataset, dieOnConfigError } from "../config";
 import { WorkerEnvTag } from "../env";
 import { KvCacheService } from "../cache/kv-cache";
 import { addToManifest } from "./index-manifest";
@@ -53,7 +54,6 @@ export const VectorizeServiceLive = Layer.effect(
   Effect.gen(function* () {
     const env = yield* WorkerEnvTag;
     const cache = yield* KvCacheService;
-    const manifestKv = cache.durable.forDataset(env.SANITY_DATASET);
 
     /**
      * The manifest ADD side of #2855: this is the only place `upsert`'s
@@ -85,10 +85,16 @@ export const VectorizeServiceLive = Layer.effect(
      * anything broken — see apps/api/CLAUDE.md.
      */
     const recordUpsertedIds = (ids: readonly string[]): Effect.Effect<void> =>
-      Effect.forEach(ids, (id) => addToManifest(manifestKv, id), {
-        concurrency: 5,
-        discard: true,
-      });
+      sanityDataset.pipe(
+        dieOnConfigError,
+        Effect.flatMap((dataset) => {
+          const manifestKv = cache.durable.forDataset(dataset);
+          return Effect.forEach(ids, (id) => addToManifest(manifestKv, id), {
+            concurrency: 5,
+            discard: true,
+          });
+        }),
+      );
 
     return {
       upsert: (vectors) =>

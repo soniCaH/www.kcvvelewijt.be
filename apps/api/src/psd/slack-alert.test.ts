@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
+import { Redacted } from "effect";
 import {
   buildIncidentMessage,
   buildDriftMessage,
@@ -138,7 +139,7 @@ describe("postSlack", () => {
     const fetchMock = vi.fn(async () => new Response("ok"));
     vi.stubGlobal("fetch", fetchMock);
     await expect(
-      postSlack("https://hooks.slack.test/abc", "hello"),
+      postSlack(Redacted.make("https://hooks.slack.test/abc"), "hello"),
     ).resolves.toBe(true);
     expect(fetchMock).toHaveBeenCalledWith(
       "https://hooks.slack.test/abc",
@@ -154,7 +155,7 @@ describe("postSlack", () => {
       async (_url: string, _init?: RequestInit) => new Response("ok"),
     );
     vi.stubGlobal("fetch", fetchMock);
-    await postSlack("https://hooks.slack.test/abc", "hello");
+    await postSlack(Redacted.make("https://hooks.slack.test/abc"), "hello");
     const signal = fetchMock.mock.calls[0]?.[1]?.signal;
     expect(signal).toBeInstanceOf(AbortSignal);
     expect(signal?.aborted).toBe(false);
@@ -166,9 +167,9 @@ describe("postSlack", () => {
       "fetch",
       vi.fn(async () => new Response("nope", { status: 500 })),
     );
-    await expect(postSlack("https://hooks.slack.test/abc", "x")).resolves.toBe(
-      false,
-    );
+    await expect(
+      postSlack(Redacted.make("https://hooks.slack.test/abc"), "x"),
+    ).resolves.toBe(false);
     expect(errorSpy).toHaveBeenCalled();
     errorSpy.mockRestore();
   });
@@ -181,9 +182,9 @@ describe("postSlack", () => {
         throw new Error("network down");
       }),
     );
-    await expect(postSlack("https://hooks.slack.test/abc", "x")).resolves.toBe(
-      false,
-    );
+    await expect(
+      postSlack(Redacted.make("https://hooks.slack.test/abc"), "x"),
+    ).resolves.toBe(false);
     expect(errorSpy).toHaveBeenCalled();
     errorSpy.mockRestore();
   });

@@ -6,7 +6,7 @@
  * inside the `0 2 * * *` sync, which has a 15-minute ceiling.
  */
 import { Effect } from "effect";
-import { WorkerEnvTag } from "../env";
+import { slackAlertWebhookUrl, dieOnConfigError } from "../config";
 import { SanityProjection } from "../sanity/projection";
 import { buildStaffGapsMessage, postSlack } from "../psd/slack-alert";
 
@@ -24,7 +24,7 @@ export class StaffGapsSlackError extends Error {
 }
 
 export const runStaffGapsCheck = Effect.gen(function* () {
-  const webhook = (yield* WorkerEnvTag).SLACK_ALERT_WEBHOOK_URL;
+  const webhook = yield* slackAlertWebhookUrl.pipe(dieOnConfigError);
   // No webhook (staging, local) → nothing could be delivered, so skip the read too.
   if (!webhook) return;
   const gaps = yield* (yield* SanityProjection).getStaffGaps();

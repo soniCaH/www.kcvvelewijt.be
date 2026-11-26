@@ -109,6 +109,48 @@ describe("scheduled() — weekly staff-gaps check", () => {
   });
 });
 
+describe("scheduled() — a missing required var", () => {
+  const settled = (name: string, env: ReturnType<typeof makeTestEnv>) => {
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    return {
+      run: (cron: string) =>
+        worker.scheduled({ cron } as ScheduledEvent, env, ctx),
+      logged: () =>
+        [...log.mock.calls, ...error.mock.calls]
+          .flat()
+          .join(" ")
+          .includes(name),
+    };
+  };
+
+  it("fails the nightly PSD sync with the ConfigError naming PSD_API_KEY", async () => {
+    sanityFetch.mockResolvedValue([]);
+    const job = settled(
+      "PSD_API_KEY",
+      makeTestEnv({ PSD_CACHE: kv, PSD_API_KEY: undefined }),
+    );
+
+    await expect(job.run("0 2 * * *")).rejects.toThrow(/PSD_API_KEY/);
+    expect(job.logged()).toBe(true);
+  });
+
+  it("fails the weekly staff-gaps check, and logs SANITY_PROJECT_ID, when it is missing", async () => {
+    const job = settled(
+      "SANITY_PROJECT_ID",
+      makeTestEnv({
+        PSD_CACHE: kv,
+        SANITY_PROJECT_ID: undefined,
+        SLACK_ALERT_WEBHOOK_URL: WEBHOOK,
+      }),
+    );
+
+    await expect(job.run(STAFF_GAPS_CRON)).rejects.toThrow();
+    expect(job.logged()).toBe(true);
+    expect(sanityFetch).not.toHaveBeenCalled();
+  });
+});
+
 describe("scheduled() — daily birthday post (#3570)", () => {
   const daily = {
     cron: BIRTHDAY_CRON,

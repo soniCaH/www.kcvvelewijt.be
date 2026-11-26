@@ -1,12 +1,8 @@
 import { Context, Effect, Layer } from "effect";
+import { aiAnswerDailyCap, dieOnConfigError } from "../config";
 import { WorkerEnvTag } from "../env";
 import { KvCacheService } from "../cache/kv-cache";
-import {
-  oncePerDay,
-  parseCeiling,
-  parseCount,
-  utcDay,
-} from "../cache/daily-ceiling";
+import { oncePerDay, parseCount, utcDay } from "../cache/daily-ceiling";
 
 export class AiAnswerError extends Error {
   readonly _tag = "AiAnswerError" as const;
@@ -84,7 +80,6 @@ export const AiAnswerServiceLive = Layer.effect(
   Effect.gen(function* () {
     const env = yield* WorkerEnvTag;
     const cache = yield* KvCacheService;
-    const cap = parseCeiling(env.AI_ANSWER_DAILY_CAP);
 
     // Daily cap (#3468): Workers AI has no hard spending cap. Approximate —
     // KV is not atomic — which is fine for a ceiling.
@@ -136,6 +131,7 @@ export const AiAnswerServiceLive = Layer.effect(
     /** One model call under the daily cap; counted only when it replied. */
     const metered = (call: Effect.Effect<string | undefined>) =>
       Effect.gen(function* () {
+        const cap = yield* aiAnswerDailyCap.pipe(dieOnConfigError);
         const day = utcDay();
         const count = parseCount(yield* cache.get(answersKey(day)));
         if (cap !== undefined && count >= cap) {

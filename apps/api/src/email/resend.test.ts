@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Cause, Effect, Exit, Logger, Option } from "effect";
-import { makeTestEnvLayer } from "../test-helpers/env-layer";
-import type { WorkerEnv } from "../env";
+import { makeTestEnvLayer, type TestEnv } from "../test-helpers/env-layer";
 import {
   EmailTransport,
   EmailTransportLive,
@@ -17,7 +16,7 @@ const message: EmailMessage = {
   replyTo: "info@kcvvelewijt.be",
 };
 
-function dispatch(env: Partial<WorkerEnv>, msg: EmailMessage = message) {
+function dispatch(env: Partial<TestEnv>, msg: EmailMessage = message) {
   const logs: { level: string; message: string }[] = [];
   const logger = Logger.replace(
     Logger.defaultLogger,

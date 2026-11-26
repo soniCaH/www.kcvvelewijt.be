@@ -1,14 +1,12 @@
-import { createClient } from "@sanity/client";
 import { Context, Effect, Layer, Schema as S } from "effect";
 import {
   TVJO_ROLE_CODE,
   YOUTH_COORDINATOR_ROLE_CODES,
 } from "@kcvv/api-contract";
-import { WorkerEnvTag } from "../env";
 import { derivePsdTeamLabel } from "../psd/transforms";
 import type { PlayerImageState, StaffImageState } from "./types";
 import { parseErrorPaths } from "../parse-error-paths";
-import { sanityClientConfig } from "./config";
+import { makeSanityClient } from "./config";
 
 // ─── Error ────────────────────────────────────────────────────────────────────
 
@@ -238,17 +236,13 @@ export class SanityProjection extends Context.Tag("SanityProjection")<
 export const SanityProjectionLive = Layer.effect(
   SanityProjection,
   Effect.gen(function* () {
-    const env = yield* WorkerEnvTag;
-    const client = createClient({
-      ...sanityClientConfig(env),
-      useCdn: false,
-    });
+    const sanityClient = yield* makeSanityClient;
 
     return {
       getVisibleTeamPsdIds: () =>
         Effect.tryPromise({
           try: async () => {
-            const rows = await client.fetch<Array<string | null>>(
+            const rows = await sanityClient().fetch<Array<string | null>>(
               `*[_type == "team" && showInNavigation != false].psdId`,
             );
             return rows.filter(
@@ -262,7 +256,7 @@ export const SanityProjectionLive = Layer.effect(
       getPlayersImageState: () =>
         Effect.tryPromise({
           try: async () => {
-            const rows = await client.fetch<
+            const rows = await sanityClient().fetch<
               Array<{
                 psdId: string;
                 psdImageUrl: string | null;
@@ -285,7 +279,7 @@ export const SanityProjectionLive = Layer.effect(
       getStaffImageState: () =>
         Effect.tryPromise({
           try: async () => {
-            const rows = await client.fetch<
+            const rows = await sanityClient().fetch<
               Array<{
                 psdId: string;
                 psdImageUrl: string | null;
@@ -308,7 +302,7 @@ export const SanityProjectionLive = Layer.effect(
       getActivePlayerPsdIds: () =>
         Effect.tryPromise({
           try: async () => {
-            const rows = await client.fetch<Array<{ psdId: string }>>(
+            const rows = await sanityClient().fetch<Array<{ psdId: string }>>(
               `*[_type == "player" && archived != true && defined(psdId) && psdId != ""] { psdId }`,
             );
             return rows.map((r) => r.psdId);
@@ -323,7 +317,7 @@ export const SanityProjectionLive = Layer.effect(
       getActiveStaffPsdIds: () =>
         Effect.tryPromise({
           try: async () => {
-            const rows = await client.fetch<Array<{ psdId: string }>>(
+            const rows = await sanityClient().fetch<Array<{ psdId: string }>>(
               `*[_type == "staffMember" && archived != true && defined(psdId) && psdId != ""] { psdId }`,
             );
             return rows.map((r) => r.psdId);
@@ -335,7 +329,9 @@ export const SanityProjectionLive = Layer.effect(
       getTeamPlayerPsdIds: (teamPsdId) =>
         Effect.tryPromise({
           try: async () => {
-            const rows = await client.fetch<Array<string | null> | null>(
+            const rows = await sanityClient().fetch<Array<
+              string | null
+            > | null>(
               `*[_type == "team" && psdId == $teamPsdId][0].players[]->psdId`,
               { teamPsdId },
             );
@@ -353,7 +349,7 @@ export const SanityProjectionLive = Layer.effect(
       getActiveTeamPsdIds: () =>
         Effect.tryPromise({
           try: async () => {
-            const rows = await client.fetch<Array<{ psdId: string }>>(
+            const rows = await sanityClient().fetch<Array<{ psdId: string }>>(
               `*[_type == "team" && archived != true && defined(psdId) && psdId != ""] { psdId }`,
             );
             return rows.map((r) => r.psdId);
@@ -365,7 +361,7 @@ export const SanityProjectionLive = Layer.effect(
       getProtectedStaffPsdIds: () =>
         Effect.tryPromise({
           try: async () => {
-            const rows = await client.fetch<Array<string | null>>(
+            const rows = await sanityClient().fetch<Array<string | null>>(
               `*[_type == "staffMember" && defined(psdId) && psdId != "" && (
                 _id in *[_type == "organigramNode" && active == true].members[]._ref
                 ||
@@ -389,7 +385,7 @@ export const SanityProjectionLive = Layer.effect(
         Effect.tryPromise({
           try: async (): Promise<StaffGaps> => {
             type Name = { firstName: string | null; lastName: string | null };
-            const rows = await client.fetch<{
+            const rows = await sanityClient().fetch<{
               emptyRoles: Array<{
                 teamId: string;
                 teamName: string | null;
@@ -422,7 +418,7 @@ export const SanityProjectionLive = Layer.effect(
       getBirthdayPeople: () =>
         Effect.tryPromise({
           try: async () => {
-            const rows = await client.fetch<
+            const rows = await sanityClient().fetch<
               Array<{
                 firstName: string | null;
                 lastName: string | null;
@@ -453,7 +449,7 @@ export const SanityProjectionLive = Layer.effect(
 
       getFormRoutingConfig: () =>
         Effect.tryPromise({
-          try: () => client.fetch<unknown>(FORM_ROUTING_QUERY),
+          try: () => sanityClient().fetch<unknown>(FORM_ROUTING_QUERY),
           catch: (cause) =>
             new SanityQueryError("Failed to fetch form routing config", cause),
         }).pipe(
@@ -470,7 +466,7 @@ export const SanityProjectionLive = Layer.effect(
       getDartsCounts: () =>
         Effect.tryPromise({
           try: () =>
-            client.fetch<{ teams: number; waitlist: number }>(
+            sanityClient().fetch<{ teams: number; waitlist: number }>(
               `{
                 "teams": count(*[_type == "dartsSignup" && waitlist != true]),
                 "waitlist": count(*[_type == "dartsSignup" && waitlist == true])
@@ -485,7 +481,7 @@ export const SanityProjectionLive = Layer.effect(
           try: async () => {
             const normalize = (value: string) =>
               value.trim().replace(/\s+/g, " ").toLowerCase();
-            const rows = await client.fetch<
+            const rows = await sanityClient().fetch<
               Array<{
                 teamName: string | null;
                 waitlist: boolean | null;
@@ -503,7 +499,7 @@ export const SanityProjectionLive = Layer.effect(
             // Rank among the signups in the same list; one without a
             // `submittedAt` (made by hand in the Studio) counts as first.
             const number = match.submittedAt
-              ? await client.fetch<number>(
+              ? await sanityClient().fetch<number>(
                   `count(*[_type == "dartsSignup" && (waitlist == true) == $waitlist && submittedAt <= $at])`,
                   { waitlist, at: match.submittedAt },
                 )

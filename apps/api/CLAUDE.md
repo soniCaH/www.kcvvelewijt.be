@@ -8,13 +8,14 @@ implementing `PsdApi` from `@kcvv/api-contract`.
 ```text
 src/
 ├── index.ts                  ← Worker entry point (HttpApiBuilder.toWebHandler)
-├── env.ts                    ← WorkerEnv type + WorkerEnvTag (Effect Context)
+├── env.ts                    ← WorkerEnv (the bindings only) + WorkerEnvTag (Effect Context) + WorkerEnvLive (the bindings and the config provider, as one layer)
+├── config.ts                 ← every string var and secret, decoded with Effect Config (`Schema.Config`, `Redacted` for secrets) + workerConfigProvider(env) + dieOnConfigError (#3880)
 ├── auth/
 │   └── bff-key.ts            ← refuseUnlessBffKey — shared-secret front door (#3485)
 ├── parse-error-paths.ts      ← parseErrorPaths — a decode failure's paths without its values, for logs and error messages
 ├── reconciliation.ts         ← reconcileOrphans — shared orphan-reconciliation guard (#2854), used by sync/psd-sanity-sync.ts and search/sanity-index-sync.ts
 ├── cache/
-│   ├── daily-ceiling.ts      ← utcDay, parseCeiling, parseCount, oncePerDay — daily counters + ceilings shared by kv-cache and search/ai-answer (#3468)
+│   ├── daily-ceiling.ts      ← utcDay, parseCount, oncePerDay — daily counters shared by kv-cache and search/ai-answer (#3468); the ceilings are read in `config.ts`
 │   └── kv-cache.ts           ← KvCacheService + TypedKvCache (SWR read path, TTLs, drift alerting) + `durable` ops (TTL-less write, list, dataset scoping) for non-SWR callers (#2873)
 ├── psd/
 │   ├── errors.ts             ← BffError discriminated union (typed API errors)
@@ -255,6 +256,7 @@ pnpm --filter @kcvv/api cache:clear:staging:key "ranking:team:23"
 - **No `let`** — lint rule `kcvv/no-let` (`eslint.config.mjs`, #3717), tests included. A `let` + `try/catch` becomes a helper that returns (`Effect.try`); a counter becomes `reduce`/`map`; state shared across Effects is a `Ref`; in a test, a flag is a `vi.fn()` and shared state is a `const` holder object
 - **No nested ternary** — lint rule `no-nested-ternary` (`eslint.config.mjs`, #3855), tests included. A multi-way choice becomes a small arrow helper whose `switch`/`if` chain returns, or a lookup object when every branch is a plain value; a single ternary inside a branch may stay.
 - Secrets via `wrangler secret put`, never in `wrangler.toml`
+- **A string var or secret is read through `src/config.ts`, never off `env`** (#3880). `WorkerEnv` holds the bindings (KV, Ai, Vectorize, Durable Objects, rate limiters) and nothing else. A new var is a `Schema.Config` (a required one) or a default-carrying `Config` (an optional one) in `config.ts`, with its test in `config.test.ts`; a secret is `Redacted`. The entry points install the provider (`WorkerEnvLive(env)` in `env.ts`, or `Effect.withConfigProvider(workerConfigProvider(env))`), and a read that cannot be decoded dies with the `ConfigError` naming the var (`dieOnConfigError` logs it first). Read lazily, inside the effect that needs the value: a missing PSD credential then fails the request that calls PSD, not every request. A PSD credential that cannot be read is an `UpstreamUnavailable` (the cache serves stale), and the Sanity services build their client on first use (`makeSanityClient`), because every request builds every layer. A detached runner (`psd/background-live.ts`) and a Durable Object (`psd/gate-do.ts`) own their env, so they install their own provider.
 - `Effect.orDie` in HttpApiGroup handlers — errors become 500s; keep errors typed at handler level
 - After changing `@kcvv/api-contract`, run `pnpm turbo build --filter=@kcvv/api-contract` first
 - **Every PSD call takes a gate token — the scheduled paths too, not just the request path.** Both PSD clients (`psd/service.ts` for reads, `sync/psd-team-client.ts` for the nightly sync) open `countedFetch` with `gate.acquireToken`, and every layer that provides either one must also provide `PsdGateLive`. The sync shipped without it (#2867): its fan-out runs members+staff at concurrency 2 over pages at concurrency 3, so ~6 calls sat outside the ≤5/s worldwide budget. This is now enforced by the type system — dropping `PsdGateLive` from a layer that builds `PsdTeamClientLive` fails `type-check` — so a new PSD client only needs the same `acquireToken` opening to inherit the guarantee.

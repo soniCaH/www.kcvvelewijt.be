@@ -80,6 +80,32 @@ beforeEach(() => {
 });
 
 describe("handleDartsPaidWebhook", () => {
+  it.each([undefined, ""])(
+    "answers 401 and logs the var by name when SANITY_WEBHOOK_SECRET is %j, before any read or mail",
+    async (secret) => {
+      const log = vi.spyOn(console, "log").mockImplementation(() => {});
+      const body = JSON.stringify({ _id: "abc123", _type: "dartsSignup" });
+
+      const res = await handleDartsPaidWebhook(
+        new Request("https://kcvv-api.workers.dev/webhooks/darts-paid", {
+          method: "POST",
+          headers: { "sanity-webhook-signature": await signPayload(body) },
+          body,
+        }),
+        makeTestEnv({ SANITY_WEBHOOK_SECRET: secret }),
+        layer,
+      );
+
+      expect(res.status).toBe(401);
+      expect(log.mock.calls.flat().join(" ")).toContain(
+        "SANITY_WEBHOOK_SECRET",
+      );
+      expect(mockFetch).not.toHaveBeenCalled();
+      expect(dispatch).not.toHaveBeenCalled();
+      log.mockRestore();
+    },
+  );
+
   it("sends mail 2 to the captain when Betaald is on and no mail went out yet", async () => {
     const res = await call();
 

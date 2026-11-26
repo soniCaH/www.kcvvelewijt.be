@@ -1,8 +1,11 @@
 import { beforeEach, describe, it, expect, vi } from "vitest";
 import { Effect, Layer } from "effect";
 import { handleIndexWebhook, type WebhookLayer } from "./index-handler";
-import type { WorkerEnv } from "../env";
-import { makeTestEnv, makeTestEnvLayer } from "../test-helpers/env-layer";
+import {
+  makeTestEnv,
+  makeTestEnvLayer,
+  type TestEnv,
+} from "../test-helpers/env-layer";
 import { TEST_SECRET, signPayload } from "../test-helpers/webhook-signing";
 import { EmbeddingService } from "../search/embedding";
 import { VectorizeService, VectorizeServiceLive } from "../search/vectorize";
@@ -63,7 +66,7 @@ async function makeSignedRequest(
   });
 }
 
-function makeEnv(overrides: Partial<WorkerEnv> = {}): WorkerEnv {
+function makeEnv(overrides: Partial<TestEnv> = {}): TestEnv {
   return makeTestEnv({
     PSD_API_BASE_URL: "",
     PSD_IMAGE_BASE_URL: "",
@@ -139,6 +142,28 @@ describe("handleIndexWebhook", () => {
     const response = await handleIndexWebhook(request, makeEnv(), defaultLayer);
     expect(response.status).toBe(401);
   });
+
+  it.each([undefined, ""])(
+    "returns 401 and logs the var by name when SANITY_WEBHOOK_SECRET is %j",
+    async (secret) => {
+      const log = vi.spyOn(console, "log").mockImplementation(() => {});
+      const body = JSON.stringify({ _id: "doc-1", _type: "responsibility" });
+      const request = await makeSignedRequest(body);
+
+      const response = await handleIndexWebhook(
+        request,
+        makeEnv({ SANITY_WEBHOOK_SECRET: secret }),
+        defaultLayer,
+      );
+
+      expect(response.status).toBe(401);
+      expect(log.mock.calls.flat().join(" ")).toContain(
+        "SANITY_WEBHOOK_SECRET",
+      );
+      expect(upsertSpy).not.toHaveBeenCalled();
+      log.mockRestore();
+    },
+  );
 
   it("returns 401 for replayed requests (timestamp > 5 min old)", async () => {
     const body = JSON.stringify({ _id: "doc-1", _type: "responsibility" });
@@ -332,8 +357,8 @@ describe("handleIndexWebhook", () => {
     // gets away with an open requirement only because it isn't explicitly
     // annotated as WebhookLayer; a value passed as the `layer` parameter
     // must actually be self-contained.
-    function liveLayer(env: WorkerEnv): WebhookLayer {
-      // `env` here is already a fully-populated WorkerEnv (built by
+    function liveLayer(env: TestEnv): WebhookLayer {
+      // `env` here is already a fully-populated TestEnv (built by
       // makeEnv), so passing it as makeTestEnvLayer's overrides yields
       // exactly `env` back, wrapped as a Layer<WorkerEnvTag>.
       return Layer.mergeAll(
@@ -937,6 +962,28 @@ describe("handleIndexWebhook", () => {
 
     expect(response.status).toBe(409);
     expect(upsertSpy).not.toHaveBeenCalled();
+  });
+
+  it("refuses with the same 409, and logs the var, when SANITY_DATASET cannot be read (#3880)", async () => {
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    const body = JSON.stringify({ _id: "resp-123", _type: "responsibility" });
+    const request = await makeSignedRequest(body);
+
+    const response = await handleIndexWebhook(
+      request,
+      makeEnv({ SANITY_DATASET: undefined }),
+      defaultLayer,
+    );
+
+    expect(response.status).toBe(409);
+    expect(await response.json()).toMatchObject({ code: "dataset_mismatch" });
+    expect([...log.mock.calls, ...error.mock.calls].flat().join(" ")).toContain(
+      "SANITY_DATASET",
+    );
+    expect(upsertSpy).not.toHaveBeenCalled();
+    log.mockRestore();
+    error.mockRestore();
   });
 
   it("returns 400 for malformed JSON body", async () => {

@@ -6,7 +6,7 @@
  * The matching is pure so it is unit-tested without a clock, Slack or Sanity.
  */
 import { Effect } from "effect";
-import { WorkerEnvTag } from "../env";
+import { slackBirthdayWebhookUrl, dieOnConfigError } from "../config";
 import { SanityProjection, type BirthdayPerson } from "../sanity/projection";
 import { escapeSlack, postSlack } from "../psd/slack-alert";
 
@@ -141,7 +141,7 @@ export function buildBirthdayMessages(
 
 export const runBirthdayPost = (now: Date) =>
   Effect.gen(function* () {
-    const webhook = (yield* WorkerEnvTag).SLACK_BIRTHDAY_WEBHOOK_URL;
+    const webhook = yield* slackBirthdayWebhookUrl.pipe(dieOnConfigError);
     // No webhook (staging, local) → nothing could be delivered, so skip the read too.
     if (!webhook) return;
     const people = yield* (yield* SanityProjection).getBirthdayPeople();

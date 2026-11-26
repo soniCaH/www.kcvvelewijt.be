@@ -1,12 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Effect, Logger } from "effect";
-import { makeTestEnvLayer } from "../test-helpers/env-layer";
-import type { WorkerEnv } from "../env";
+import { makeTestEnvLayer, type TestEnv } from "../test-helpers/env-layer";
 import { verifyTurnstile } from "./turnstile";
 
 type Level = "Error" | "Warning";
 
-function run(env: Partial<WorkerEnv>) {
+function run(env: Partial<TestEnv>) {
   const logs: { level: string; message: string }[] = [];
   const logger = Logger.replace(
     Logger.defaultLogger,

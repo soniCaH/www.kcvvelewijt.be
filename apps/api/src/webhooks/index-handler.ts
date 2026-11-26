@@ -1,7 +1,11 @@
 import { createClient } from "@sanity/client";
-import { Effect, Layer, Schema as S } from "effect";
-import type { WorkerEnv } from "../env";
-import { WorkerEnvTag } from "../env";
+import { Effect, Layer, Redacted, Schema as S } from "effect";
+import { WorkerEnvLive, type WorkerEnv } from "../env";
+import {
+  dieOnConfigError,
+  logConfigError,
+  sanityWebhookSecret,
+} from "../config";
 import { KvCacheLive } from "../cache/kv-cache";
 import { sanityClientConfig } from "../sanity/config";
 import { datasetIndexMismatch } from "../search/dataset-index-guard";
@@ -213,9 +217,8 @@ export const toErrorResponse = (
 
 // ─── Effect pipeline ───────────────────────────────────────────────────────
 
-const webhookEffect = (request: Request, webhookSecret: string) =>
+const webhookEffect = (request: Request) =>
   Effect.gen(function* () {
-    const env = yield* WorkerEnvTag;
     const embedding = yield* EmbeddingService;
     const vectorize = yield* VectorizeService;
 
@@ -225,9 +228,19 @@ const webhookEffect = (request: Request, webhookSecret: string) =>
       catch: () => new WebhookParseError("invalid_json", "failed to read body"),
     });
 
-    // 2. Verify Sanity signature
+    // 2. Verify Sanity signature. A secret that is not configured refuses the
+    // request, as an unset one always has; the log names the var.
+    const webhookSecret = yield* sanityWebhookSecret.pipe(
+      Effect.tapError((error) => Effect.logError(`[webhook] ${error}`)),
+      Effect.mapError(() => new WebhookAuthError()),
+    );
     const valid = yield* Effect.tryPromise({
-      try: () => verifySanitySignature(request.headers, rawBody, webhookSecret),
+      try: () =>
+        verifySanitySignature(
+          request.headers,
+          rawBody,
+          Redacted.value(webhookSecret),
+        ),
       catch: () => new WebhookAuthError(),
     });
     if (!valid) return yield* Effect.fail(new WebhookAuthError());
@@ -238,7 +251,18 @@ const webhookEffect = (request: Request, webhookSecret: string) =>
     // upsert and the delete paths: a delete from a mismatched worker could
     // just as easily remove a production vector that happens to share an id
     // with a staging document.
-    const mismatch = datasetIndexMismatch(env);
+    // An unreadable dataset is that same refusal, as it was before Config
+    // (#3880); the log names the var.
+    const mismatch = yield* datasetIndexMismatch.pipe(
+      Effect.tapError(logConfigError),
+      Effect.mapError(
+        (error) =>
+          new WebhookServiceError(
+            "dataset_mismatch",
+            `SANITY_DATASET cannot be read: ${error}`,
+          ),
+      ),
+    );
     if (mismatch) {
       return yield* Effect.fail(
         new WebhookServiceError("dataset_mismatch", mismatch),
@@ -269,7 +293,7 @@ const webhookEffect = (request: Request, webhookSecret: string) =>
 
     // Built ahead of the delete path, which needs it before the type gate.
     const sanityClient = createClient({
-      ...sanityClientConfig(env),
+      ...(yield* sanityClientConfig.pipe(dieOnConfigError)),
       useCdn: false,
     });
 
@@ -393,12 +417,12 @@ export async function handleIndexWebhook(
   env: WorkerEnv,
   layer?: WebhookLayer,
 ): Promise<Response> {
-  const envLayer = Layer.succeed(WorkerEnvTag, env);
+  const envLayer = WorkerEnvLive(env);
   const serviceLayer =
     layer ?? Layer.mergeAll(EmbeddingServiceLive, VectorizeServiceLive);
 
   return await Effect.runPromise(
-    webhookEffect(request, env.SANITY_WEBHOOK_SECRET).pipe(
+    webhookEffect(request).pipe(
       Effect.provide(serviceLayer),
       // KvCacheLive is here only for VectorizeServiceLive's manifest-marker
       // write (#2873) — webhookEffect itself never asks for KvCacheService,

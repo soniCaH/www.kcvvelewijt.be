@@ -7,9 +7,8 @@ import type { SanityProjectionInterface } from "../sanity/projection";
 import { SanityProjection } from "../sanity/projection";
 import type { PsdTeamClientInterface } from "./psd-team-client";
 import { PsdTeamClient, PsdTeamClientError } from "./psd-team-client";
-import { makeTestEnvLayer } from "../test-helpers/env-layer";
+import { makeTestEnvLayer, type TestEnv } from "../test-helpers/env-layer";
 import { makeSanityProjectionStub } from "../test-helpers/sanity-projection-stub";
-import type { WorkerEnv } from "../env";
 import {
   KvCacheService,
   KvError,
@@ -1951,7 +1950,7 @@ describe("runSync", () => {
       kvStub: ReturnType<typeof makeKvStub>,
       mocks: ReturnType<typeof makeSanityMocks>,
       psdMock: PsdTeamClientInterface,
-      env: Partial<WorkerEnv> = {},
+      env: Partial<TestEnv> = {},
     ) {
       const logs: Array<{ level: string; text: string }> = [];
       const capture = Logger.replace(

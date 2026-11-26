@@ -12,7 +12,7 @@ import type {
 import { SanityMutation, type SanityMutationError } from "../sanity/mutation";
 import { SanityProjection } from "../sanity/projection";
 import { PsdTeamClient } from "./psd-team-client";
-import { WorkerEnvTag } from "../env";
+import { psdImageBaseUrl, syncManualRun, dieOnConfigError } from "../config";
 import { KvCacheService, KvError } from "../cache/kv-cache";
 import { extractStableImageUrl, needsUpload } from "./image-upload-utils";
 import { reconcileOrphans } from "../reconciliation";
@@ -541,11 +541,10 @@ export const runSync = Effect.gen(function* () {
   const psd = yield* PsdTeamClient;
   const sanityWriter = yield* SanityMutation;
   const sanityReader = yield* SanityProjection;
-  const env = yield* WorkerEnvTag;
   const cache = yield* KvCacheService;
   // PSD serves images from the club subdomain (PSD_IMAGE_BASE_URL), not the
   // API domain (PSD_API_BASE_URL). profilePictureURL is a relative path.
-  const imageBaseUrl = env.PSD_IMAGE_BASE_URL;
+  const imageBaseUrl = yield* psdImageBaseUrl.pipe(dieOnConfigError);
 
   yield* Effect.log("sync started");
 
@@ -586,7 +585,7 @@ export const runSync = Effect.gen(function* () {
   // THIS order.
   const teams = [...liveTeams].sort((a, b) => a.id - b.id);
   // Hand-run (`scripts/trigger-psd-sync.sh`): never touch cycle-end state.
-  const manualRun = env.SYNC_MANUAL_RUN === "1";
+  const manualRun = yield* syncManualRun.pipe(dieOnConfigError);
 
   if (teams.length === 0) {
     yield* Effect.log("no teams found — skipping sync");

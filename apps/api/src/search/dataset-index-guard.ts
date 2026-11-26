@@ -1,4 +1,5 @@
-import type { WorkerEnv } from "../env";
+import { Effect } from "effect";
+import { sanityDataset, searchIndexName } from "../config";
 
 /**
  * The single hardcoded source of truth for which Vectorize index each
@@ -36,13 +37,15 @@ export const EXPECTED_INDEX_BY_DATASET: Record<string, string> = {
  * covers the sync's *trigger* (crons are `[]` on staging), not what happens
  * the day something does trigger it.
  */
-export function datasetIndexMismatch(env: WorkerEnv): string | null {
-  const expected = EXPECTED_INDEX_BY_DATASET[env.SANITY_DATASET];
+export const datasetIndexMismatch = Effect.gen(function* () {
+  const dataset = yield* sanityDataset;
+  const indexName = yield* searchIndexName;
+  const expected = EXPECTED_INDEX_BY_DATASET[dataset];
   if (!expected) {
-    return `no known Vectorize index is registered for SANITY_DATASET "${env.SANITY_DATASET}"`;
+    return `no known Vectorize index is registered for SANITY_DATASET "${dataset}"`;
   }
-  if (env.SEARCH_INDEX_NAME !== expected) {
-    return `SANITY_DATASET "${env.SANITY_DATASET}" must write to index "${expected}", but SEARCH_INDEX_NAME is "${env.SEARCH_INDEX_NAME ?? "unset"}"`;
+  if (indexName !== expected) {
+    return `SANITY_DATASET "${dataset}" must write to index "${expected}", but SEARCH_INDEX_NAME is "${indexName ?? "unset"}"`;
   }
   return null;
-}
+});

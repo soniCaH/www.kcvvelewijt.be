@@ -7,6 +7,7 @@
  * absent (same pattern as RESEND_API_KEY) — a down Slack must never break the
  * read path.
  */
+import { Redacted } from "effect";
 import type { IncidentAlert } from "./incident";
 import type { StaffGaps } from "../sanity/projection";
 
@@ -199,12 +200,12 @@ const SLACK_TIMEOUT_MS = 3000;
  * used to debounce a whole outage into never being announced at all).
  */
 export async function postSlack(
-  webhookUrl: string | undefined,
+  webhookUrl: Redacted.Redacted<string> | undefined,
   text: string,
 ): Promise<boolean> {
   if (!webhookUrl) return false;
   try {
-    const response = await fetch(webhookUrl, {
+    const response = await fetch(Redacted.value(webhookUrl), {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ text }),

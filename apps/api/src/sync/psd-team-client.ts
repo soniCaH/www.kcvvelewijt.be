@@ -1,5 +1,5 @@
 import { Context, Effect, Layer, Schema as S } from "effect";
-import { WorkerEnvTag } from "../env";
+import { logConfigError, psdApiRequest } from "../config";
 import { PsdGateService } from "../psd/gate";
 import {
   PsdClubStaffMember,
@@ -97,17 +97,7 @@ function fetchJson<A, I>(
 export const PsdTeamClientLive = Layer.effect(
   PsdTeamClient,
   Effect.gen(function* () {
-    const env = yield* WorkerEnvTag;
     const gate = yield* PsdGateService;
-    const base = env.PSD_API_BASE_URL;
-
-    const psdHeaders = {
-      "x-api-key": env.PSD_API_KEY,
-      "x-api-club": env.PSD_API_CLUB,
-      Authorization: env.PSD_API_AUTH,
-      "Accept-Language": "nl-BE",
-      "Content-Type": "application/json",
-    };
 
     // Every PSD call passes the global gate first, exactly as the read path
     // does (`psd/service.ts`). The nightly sync fans out across two concurrency
@@ -124,9 +114,21 @@ export const PsdTeamClientLive = Layer.effect(
     // now ping Slack: `index.ts`'s `scheduled()` reports the outcome to the
     // separate, debounced job-failure signal (#2870), which never touches
     // `IncidentTracker` and cannot escalate the read path's serve-stale logs.
-    const countedFetch = <A, I>(url: string, schema: S.Schema<A, I>) =>
-      gate.acquireToken.pipe(
-        Effect.zipRight(fetchJson(url, schema, psdHeaders)),
+    //
+    // `path` is relative to PSD_API_BASE_URL. The credentials are read per call,
+    // ahead of the token: a missing one fails the job with a typed error naming
+    // the var (#3880).
+    const countedFetch = <A, I>(path: string, schema: S.Schema<A, I>) =>
+      psdApiRequest.pipe(
+        Effect.tapError(logConfigError),
+        Effect.mapError(
+          (error) => new PsdTeamClientError(`PSD is not configured: ${error}`),
+        ),
+        Effect.flatMap(({ baseUrl, headers }) =>
+          gate.acquireToken.pipe(
+            Effect.zipRight(fetchJson(`${baseUrl}${path}`, schema, headers)),
+          ),
+        ),
       );
 
     // Fetch every page of a Spring-pageable endpoint: read page 0 to learn
@@ -155,18 +157,18 @@ export const PsdTeamClientLive = Layer.effect(
       });
 
     return {
-      getRawTeams: () => countedFetch(`${base}/teams`, PsdTeamsSchema),
+      getRawTeams: () => countedFetch("/teams", PsdTeamsSchema),
       getRawMembers: (teamId: number) =>
         paginateAll((page) =>
           countedFetch(
-            `${base}/teams/${teamId}/members?page=${page}`,
+            `/teams/${teamId}/members?page=${page}`,
             PsdMembersPageSchema,
           ),
         ),
       getRawStaff: (teamId: number) =>
         paginateAll((page) =>
           countedFetch(
-            `${base}/teams/${teamId}/staff?page=${page}`,
+            `/teams/${teamId}/staff?page=${page}`,
             PsdMembersPageSchema,
           ),
         ),
@@ -175,7 +177,7 @@ export const PsdTeamClientLive = Layer.effect(
       getRawClubStaff: () =>
         paginateAll((page) =>
           countedFetch(
-            `${base}/members/quicksearch/status/staff?page=${page}&size=100`,
+            `/members/quicksearch/status/staff?page=${page}&size=100`,
             PsdQuicksearchStaffPageSchema,
           ).pipe(Effect.map((r) => r.playerList)),
         ),

@@ -13,8 +13,7 @@ import {
   type VectorizeServiceInterface,
   type VectorRecord,
 } from "./vectorize";
-import type { WorkerEnv } from "../env";
-import { makeTestEnvLayer } from "../test-helpers/env-layer";
+import { makeTestEnvLayer, type TestEnv } from "../test-helpers/env-layer";
 import { KvCacheLive, makeDurableKv } from "../cache/kv-cache";
 import {
   addToManifest,
@@ -66,7 +65,7 @@ const mockGallery = {
   imageUrl: null as string | null,
 };
 
-function makeEnvLayer(overrides: Partial<WorkerEnv> = {}) {
+function makeEnvLayer(overrides: Partial<TestEnv> = {}) {
   const envLayer = makeTestEnvLayer({
     PSD_API_BASE_URL: "",
     PSD_IMAGE_BASE_URL: "",
@@ -74,12 +73,10 @@ function makeEnvLayer(overrides: Partial<WorkerEnv> = {}) {
     PSD_API_KEY: "",
     PSD_API_CLUB: "",
     PSD_API_AUTH: "",
-    SANITY_PROJECT_ID: "",
     // Correctly-paired by default so every pre-existing test in this file
     // (not exercising the dataset/index guard) passes through it unaffected.
     SANITY_DATASET: "production",
     SEARCH_INDEX_NAME: "kcvv-search",
-    SANITY_API_TOKEN: "",
     SANITY_WEBHOOK_SECRET: "",
     ...overrides,
   });
@@ -177,7 +174,7 @@ function noopFetch<T>(data: T[]) {
 function sweep(
   options: Parameters<typeof runSanityIndexSync>[0],
   vectorize: VectorizeServiceInterface,
-  envOverrides: Partial<WorkerEnv> = {},
+  envOverrides: Partial<TestEnv> = {},
 ) {
   return runSanityIndexSync({
     fetchResponsibility: noopFetch([]),
@@ -615,6 +612,19 @@ describe("runSanityIndexSync", () => {
     );
 
     expect(Exit.isFailure(exit)).toBe(true);
+    expect(upsertCalls).toHaveLength(0);
+  });
+
+  it("refuses to sync, naming SANITY_DATASET, when the dataset cannot be read (#3880)", async () => {
+    const { upsertCalls, mock } = makeVectorizeCapture();
+
+    const failure = await Effect.runPromise(
+      sweep({ fetchResponsibility: noopFetch([mockDoc]) }, mock, {
+        SANITY_DATASET: undefined,
+      }).pipe(Effect.flip),
+    );
+
+    expect(String(failure)).toMatch(/refusing to sync.*SANITY_DATASET/s);
     expect(upsertCalls).toHaveLength(0);
   });
 
