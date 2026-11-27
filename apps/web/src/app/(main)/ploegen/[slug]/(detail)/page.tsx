@@ -79,6 +79,14 @@ import { TeamEnrolmentCta } from "@/components/team/TeamEnrolmentCta";
 import { TeamStaff } from "@/components/team/TeamStaff";
 import { TeamEditorial } from "@/components/team/TeamEditorial";
 import { TeamSponsorLine } from "@/components/team/TeamSponsorLine";
+import { Suspense } from "react";
+import { PrototypeSwitcher } from "@/components/prototype/PrototypeSwitcher";
+import {
+  LogoCard,
+  LogoRow,
+  LogoTiles,
+  STUB_TEAM_SPONSORS,
+} from "@/components/prototype/SponsorLogoVariants";
 import { SponsorsSection } from "@/components/home/SponsorsSection";
 import { RelatedRow } from "@/components/related/RelatedRow";
 import { mergeRelatedRow } from "@/components/related/mergeRelatedRow";
@@ -95,7 +103,17 @@ import { fetchTeamOrNull } from "../team-data";
 
 interface TeamPageProps {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ variant?: string }>; // PROTOTYPE (#3656)
 }
+
+// PROTOTYPE (#3656): logo looks for the team's own Sponsors.
+const TEAM_VARIANTS = [
+  { key: "A", name: "Logo-rij" },
+  { key: "B", name: "Tegels" },
+  { key: "C", name: "Kaart" },
+  { key: "D", name: "Boven de clubmuur" },
+  { key: "E", name: "Nu: tekstregel" },
+];
 
 // No static prerendering — the body fetches PSD data via the rate-limited BFF.
 // Pages are built on-demand and ISR-cached (revalidate below).
@@ -318,8 +336,9 @@ const fetchBffData = async (
   };
 };
 
-const TeamPage = async ({ params }: TeamPageProps) => {
+const TeamPage = async ({ params, searchParams }: TeamPageProps) => {
   const { slug } = await params;
+  const { variant = "A" } = (await searchParams) ?? {}; // PROTOTYPE (#3656)
 
   // Subject read: the team is this page's entire content, so a failed read
   // takes it down with it — `null` (genuinely no such team) is the only case
@@ -773,11 +792,32 @@ const TeamPage = async ({ params }: TeamPageProps) => {
             the editorial block, inside this section, so it never sits between
             a visitor and the fixtures, results or squad. Renders nothing for
             a team no active Sponsor names. */}
-        <TeamSponsorLine
-          sponsors={team.sponsors}
-          teamSlug={slug}
-          className="mt-12"
-        />
+        {variant === "A" && (
+          <div className="mt-12">
+            <LogoRow sponsors={STUB_TEAM_SPONSORS} />
+          </div>
+        )}
+        {variant === "B" && (
+          <div className="mt-12">
+            <LogoTiles sponsors={STUB_TEAM_SPONSORS} />
+          </div>
+        )}
+        {variant === "C" && (
+          <div className="mt-12 max-w-[var(--container-prose)]">
+            <LogoCard sponsors={STUB_TEAM_SPONSORS} />
+          </div>
+        )}
+        {variant === "E" && (
+          <TeamSponsorLine
+            sponsors={STUB_TEAM_SPONSORS.map(({ id, name, url }) => ({
+              id,
+              name,
+              url,
+            }))}
+            teamSlug={slug}
+            className="mt-12"
+          />
+        )}
       </PageContainer>
 
       {/* Youth-only "Word lid" enrolment CTA (#1949), moved here from between
@@ -821,7 +861,18 @@ const TeamPage = async ({ params }: TeamPageProps) => {
       {/* Sponsor logo wall now renders BEFORE the onward-navigation row
           (#2443 resolution) — the page's last word is a "keep going"
           slot, not a sponsor band. */}
+      {variant === "D" && (
+        <PageContainer className="pt-12 pb-10">
+          <LogoRow
+            sponsors={STUB_TEAM_SPONSORS}
+            label={`${displayName} wordt gesteund door`}
+          />
+        </PageContainer>
+      )}
       <SponsorsSection source="team" />
+      <Suspense>
+        <PrototypeSwitcher variants={TEAM_VARIANTS} />
+      </Suspense>
 
       {/* Full-bleed cream "Blijf nog even hangen." slider — auto-hides when
           empty (#2443/#2581). Last section on the page. */}

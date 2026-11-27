@@ -87,7 +87,13 @@ import {
 } from "@/lib/utils/article-related-items";
 import { PageViewTracker, TrackInView } from "@/components/analytics";
 import { Suspense } from "react";
-import { TeamSponsorLine } from "@/components/team/TeamSponsorLine";
+import {
+  LogoCard,
+  LogoRow,
+  MatchdayStrip,
+  STUB_MATCHDAY_SPONSOR,
+  STUB_TEAM_SPONSORS,
+} from "@/components/prototype/SponsorLogoVariants";
 import { PrototypeSwitcher } from "@/components/prototype/PrototypeSwitcher";
 import {
   matchDetailToHeroRow,
@@ -104,30 +110,12 @@ interface MatchPageProps {
   searchParams?: Promise<{ variant?: string }>; // PROTOTYPE (#3656)
 }
 
-// PROTOTYPE (#3656): placement variants for the "Gesteund door" line.
+// PROTOTYPE (#3656 / #3913): where the Team's logos and the matchday sponsor go.
 const SPONSOR_VARIANTS = [
-  { key: "A", name: "Onder de wedstrijdkop" },
-  { key: "B", name: "Naast de terug-link" },
-  { key: "C", name: "Voor de onward-rij" },
-  { key: "D", name: "Onderaan de pagina" },
-];
-// PROTOTYPE (#3656): no staging Sponsor names a Team yet, so real Sponsor names stand in.
-const STUB_SPONSORS = [
-  {
-    id: "FpgS21bgw2I3VNplbIG4ZY",
-    name: "Bakelants Technics",
-    url: "https://www.facebook.com/BakelantsTechnics/",
-  },
-  {
-    id: "FpgS21bgw2I3VNplbIG4dm",
-    name: "Bar-a-Vis",
-    url: "https://www.facebook.com/p/Bar-a-vis-100090407893884/",
-  },
-  {
-    id: "FpgS21bgw2I3VNplbIG4i0",
-    name: "CNC",
-    url: "https://www.cncmetal.be/en",
-  },
+  { key: "A", name: "Matchbal onder de kop, ploeg voor de rij" },
+  { key: "B", name: "Eén sponsorblok voor de rij" },
+  { key: "C", name: "Matchbal naast praktisch, ploeg onderaan" },
+  { key: "D", name: "Alles onderaan" },
 ];
 
 // No static prerendering — the body fetches live PSD match data via the
@@ -622,15 +610,14 @@ const MatchPage = async ({ params, searchParams }: MatchPageProps) => {
     status: match.status,
   };
 
-  // PROTOTYPE (#3656): one line, placed per variant below.
-  const sponsorLine = (className: string) =>
-    kcvvTeam ? (
-      <TeamSponsorLine
-        sponsors={STUB_SPONSORS}
-        teamSlug={kcvvTeam.slug}
-        className={className}
-      />
-    ) : null;
+  // PROTOTYPE (#3656 / #3913): the two sponsor pieces, placed per variant below.
+  const teamLogos = kcvvTeam ? (
+    <LogoRow
+      sponsors={STUB_TEAM_SPONSORS}
+      label={`${kcvvTeam.displayName} wordt gesteund door`}
+    />
+  ) : null;
+  const matchday = <MatchdayStrip sponsor={STUB_MATCHDAY_SPONSOR} />;
 
   return (
     <>
@@ -674,28 +661,54 @@ const MatchPage = async ({ params, searchParams }: MatchPageProps) => {
       )}
 
       <PageContainer className="pb-12 lg:pb-16">
-        {variant === "B" ? (
-          <div className="mb-6 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-            <UpLink href="/kalender" label="Kalender" />
-            {sponsorLine("mx-0 w-auto max-w-none sm:text-right")}
-          </div>
-        ) : (
-          <UpLink href="/kalender" label="Kalender" className="mb-6" />
-        )}
+        <UpLink href="/kalender" label="Kalender" className="mb-6" />
         <MatchHero match={heroRow} />
         {/* A venue means a real home Match (#3634): the BFF decides, not the web app. */}
-        {match.venue && (
-          <MatchPracticalAnalytics
-            matchId={numericId}
-            status={match.status}
-            className="mt-6"
-          >
-            <EditorialLink href="/club/contact" data-match-practical>
-              Parking · inkom · kantine
-            </EditorialLink>
-          </MatchPracticalAnalytics>
+        {variant === "C" ? (
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+            {match.venue ? (
+              <MatchPracticalAnalytics
+                matchId={numericId}
+                status={match.status}
+              >
+                <EditorialLink href="/club/contact" data-match-practical>
+                  Parking · inkom · kantine
+                </EditorialLink>
+              </MatchPracticalAnalytics>
+            ) : (
+              <span />
+            )}
+            <a
+              href={STUB_MATCHDAY_SPONSOR.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border-ink bg-cream-soft flex items-center gap-3 border-2 px-3 py-2"
+            >
+              <span className="text-ink-muted text-label-sm font-mono font-semibold uppercase">
+                Matchbal
+              </span>
+              {/* eslint-disable-next-line @next/next/no-img-element -- prototype */}
+              <img
+                src={STUB_MATCHDAY_SPONSOR.logo}
+                alt={STUB_MATCHDAY_SPONSOR.name}
+                className="h-8 w-auto"
+              />
+            </a>
+          </div>
+        ) : (
+          match.venue && (
+            <MatchPracticalAnalytics
+              matchId={numericId}
+              status={match.status}
+              className="mt-6"
+            >
+              <EditorialLink href="/club/contact" data-match-practical>
+                Parking · inkom · kantine
+              </EditorialLink>
+            </MatchPracticalAnalytics>
+          )
         )}
-        {variant === "A" && sponsorLine("mx-0 mt-6 max-w-none")}
+        {variant === "A" && <div className="mt-8">{matchday}</div>}
       </PageContainer>
 
       {body.seamUnderHero && <StripedSeam colorPair="ink-cream" height="md" />}
@@ -766,9 +779,24 @@ const MatchPage = async ({ params, searchParams }: MatchPageProps) => {
 
       {/* Seam before the row when a body section preceded it, so it isn't
           flush against the lineup/events/standings block. */}
-      {variant === "C" && (
-        <PageContainer className="py-8">
-          {sponsorLine("text-center")}
+      {variant === "A" && teamLogos && (
+        <PageContainer className="py-10">{teamLogos}</PageContainer>
+      )}
+      {variant === "B" && (
+        <PageContainer className="py-10">
+          <div className="grid gap-8 md:grid-cols-2 md:items-center">
+            <LogoCard
+              sponsors={[STUB_MATCHDAY_SPONSOR]}
+              tab="Matchbal aangeboden door"
+            />
+            {kcvvTeam && (
+              <LogoRow
+                stacked
+                sponsors={STUB_TEAM_SPONSORS}
+                label={`${kcvvTeam.displayName} wordt gesteund door`}
+              />
+            )}
+          </div>
         </PageContainer>
       )}
 
@@ -782,9 +810,13 @@ const MatchPage = async ({ params, searchParams }: MatchPageProps) => {
           galleries. Auto-hides on empty. */}
       <RelatedRow items={relatedRowItems} pageType="match" pageSlug={matchId} />
 
+      {variant === "C" && teamLogos && (
+        <PageContainer className="pb-12">{teamLogos}</PageContainer>
+      )}
       {variant === "D" && (
-        <PageContainer className="pb-12">
-          {sponsorLine("border-t border-ink/10 pt-6 text-center")}
+        <PageContainer className="space-y-8 pb-12">
+          {matchday}
+          {teamLogos}
         </PageContainer>
       )}
     </>
