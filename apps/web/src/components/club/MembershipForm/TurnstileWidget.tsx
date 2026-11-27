@@ -13,6 +13,7 @@ interface TurnstileApi {
       callback: (token: string) => void;
       "expired-callback"?: () => void;
       "error-callback"?: () => void;
+      "unsupported-callback"?: () => void;
     },
   ) => string;
   remove: (id: string) => void;
@@ -62,12 +63,17 @@ export const TurnstileWidget = ({
   const ref = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
   const lastResetKey = useRef(resetKey);
+  // Set only after the script failed (blocked, or Cloudflare down): a reset
+  // then has no widget to reset, so it loads the script again instead.
+  const retryRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     if (resetKey === lastResetKey.current) return;
     lastResetKey.current = resetKey;
     if (widgetIdRef.current && window.turnstile) {
       window.turnstile.reset(widgetIdRef.current);
+    } else {
+      retryRef.current?.();
     }
   }, [resetKey]);
 
@@ -78,11 +84,10 @@ export const TurnstileWidget = ({
     }
 
     const controller = new AbortController();
+    const { signal } = controller;
 
     const render = () => {
-      if (controller.signal.aborted || !ref.current || !window.turnstile) {
-        return;
-      }
+      if (signal.aborted || !ref.current || !window.turnstile) return;
       widgetIdRef.current = window.turnstile.render(ref.current, {
         sitekey: siteKey,
         callback: (token) => onToken(token),
@@ -91,24 +96,33 @@ export const TurnstileWidget = ({
           onToken("");
           onError?.();
         },
+        "unsupported-callback": () => onError?.(),
       });
     };
-    const failed = () => onError?.();
 
-    const scriptEl = window.turnstile ? null : getTurnstileScript();
-    if (scriptEl) {
-      scriptEl.addEventListener("load", render);
-      scriptEl.addEventListener("error", failed);
-    } else render();
+    const load = () => {
+      retryRef.current = null;
+      if (window.turnstile) return render();
+      const scriptEl = getTurnstileScript();
+      scriptEl.addEventListener("load", render, { signal });
+      scriptEl.addEventListener(
+        "error",
+        () => {
+          // A tag fires `error` once: drop it, so a retry loads a fresh one.
+          scriptEl.remove();
+          retryRef.current = load;
+          onError?.();
+        },
+        { signal },
+      );
+    };
+    load();
 
     return () => {
       controller.abort();
+      retryRef.current = null;
       const widgetId = widgetIdRef.current;
       widgetIdRef.current = null;
-      if (scriptEl) {
-        scriptEl.removeEventListener("load", render);
-        scriptEl.removeEventListener("error", failed);
-      }
       if (widgetId && window.turnstile) window.turnstile.remove(widgetId);
     };
   }, [siteKey, onToken, onError]);

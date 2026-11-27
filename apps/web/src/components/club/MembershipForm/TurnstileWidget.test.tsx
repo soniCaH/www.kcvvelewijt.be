@@ -107,6 +107,18 @@ describe("TurnstileWidget", () => {
       expect(onError).toHaveBeenCalledOnce();
     });
 
+    it("reports an unsupported browser as an error", () => {
+      const turnstile = installFakeTurnstile();
+      const onError = vi.fn();
+      render(
+        <TurnstileWidget onToken={vi.fn()} onError={onError} resetKey={0} />,
+      );
+
+      renderedOpts(turnstile)["unsupported-callback"]!();
+
+      expect(onError).toHaveBeenCalledOnce();
+    });
+
     it("removes the widget on unmount", () => {
       const turnstile = installFakeTurnstile();
       const { unmount } = render(
@@ -222,6 +234,21 @@ describe("TurnstileWidget", () => {
       scriptTags()[0]!.dispatchEvent(new Event("error"));
 
       expect(onError).toHaveBeenCalledOnce();
+    });
+
+    it("loads the script again on a reset after it failed, so the form recovers once Turnstile is back", () => {
+      const { rerender } = render(
+        <TurnstileWidget onToken={vi.fn()} resetKey={0} />,
+      );
+      const failed = scriptTags()[0]!;
+      failed.dispatchEvent(new Event("error"));
+      // A tag fires `error` once: left in place, a later mount would wait on it.
+      expect(scriptTags()).toHaveLength(0);
+
+      rerender(<TurnstileWidget onToken={vi.fn()} resetKey={1} />);
+
+      expect(scriptTags()).toHaveLength(1);
+      expect(scriptTags()[0]).not.toBe(failed);
     });
 
     it("does not render a widget when the script loads after unmount", () => {

@@ -919,6 +919,16 @@ describe("MembershipForm", () => {
         "data-reset-key",
         "1",
       );
+
+      // The re-run is under way: a second tap waits, it does not restart it.
+      submitForm();
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "De verificatie loopt nog. Probeer het zo meteen opnieuw.",
+      );
+      expect(screen.getByTestId("turnstile")).toHaveAttribute(
+        "data-reset-key",
+        "1",
+      );
     });
 
     it("posts the token once it arrives, and drops the line", async () => {

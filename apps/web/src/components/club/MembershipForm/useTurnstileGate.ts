@@ -14,7 +14,7 @@ const FAILED_MESSAGE = "De verificatie laadt niet. Probeer het later opnieuw.";
  */
 export const useTurnstileGate = () => {
   const [token, setToken] = useState("");
-  // Cleared only by a fresh token: a reset cannot bring back a blocked script.
+  // Set by the widget; cleared by a token or by the re-run below.
   const [failed, setFailed] = useState(false);
   const [resetKey, setResetKey] = useState(0);
 
@@ -35,7 +35,9 @@ export const useTurnstileGate = () => {
   const blocked = (): string | null => {
     if (token || !readPublicEnv().NEXT_PUBLIC_TURNSTILE_SITE_KEY) return null;
     if (!failed) return PENDING_MESSAGE;
-    // Re-run the widget, so the form recovers once Turnstile is back.
+    // Re-run the widget once, so the form recovers when Turnstile is back. A
+    // tap while that runs waits; a new failure sets `failed` again.
+    setFailed(false);
     reset();
     return FAILED_MESSAGE;
   };
