@@ -7,9 +7,13 @@ import { HttpBadRequest } from "@kcvv/api-contract";
  * is its `error` alone); the Next proxy (`lib/server/form-proxy.ts`) forwards it, and
  * answers `{ ok: false, error }` itself when the BFF is unreachable. Built from the
  * contract's own fields so a change there reaches the forms. `_tag` is the BFF's
- * wire discriminator, not something a form reads.
+ * wire discriminator, not something a form reads. `error` is optional here: a 400
+ * with `fields` alone still shows its field messages, under the form's generic copy.
  */
-const FormRefusal = S.Struct(HttpBadRequest.fields).pipe(S.omit("_tag"));
+const FormRefusal = S.Struct({
+  ...HttpBadRequest.fields,
+  error: S.optional(S.String),
+}).pipe(S.omit("_tag"));
 
 const decodeRefusal = S.decodeUnknownEither(FormRefusal);
 

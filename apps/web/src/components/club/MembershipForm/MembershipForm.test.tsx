@@ -440,6 +440,30 @@ describe("MembershipForm", () => {
     expect(screen.queryByText(/Bedankt voor je interesse/i)).toBeNull();
   });
 
+  it("shows the field errors of a 400 that carries no error copy (#3878)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() =>
+        Promise.resolve({
+          ok: false,
+          status: 400,
+          json: () =>
+            Promise.resolve({
+              fields: { email: "Dit e-mailadres klopt niet." },
+            }),
+        }),
+      ),
+    );
+
+    render(<MembershipForm defaultRole="vrijwilliger" />);
+    fillRequiredFields();
+    submitForm();
+
+    expect(
+      await screen.findByText("Dit e-mailadres klopt niet."),
+    ).toBeInTheDocument();
+  });
+
   it("posts to /api/membership and shows a success message", async () => {
     const fetchMock = vi.fn(() =>
       Promise.resolve({
