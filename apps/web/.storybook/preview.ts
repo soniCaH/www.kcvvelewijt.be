@@ -1,12 +1,13 @@
 import type { Preview } from "@storybook/nextjs-vite";
 import { MINIMAL_VIEWPORTS } from "storybook/viewport";
-import { sb } from "storybook/test";
+import { mocked, sb } from "storybook/test";
 import "../src/app/globals.css";
+import { readPublicEnv } from "../src/lib/env/client";
 
 // The public env vars are fixed at build, so a story that needs one (the
 // Turnstile site key, #3902) sets it with `mocked(readPublicEnv)`. A spy keeps
 // the real values everywhere else. Storybook's own restore only clears an
-// `sb.mock` spy, so that story must `mockReset()` it in its cleanup.
+// `sb.mock` spy's return value, so `beforeEach` below resets it per story.
 sb.mock(import("../src/lib/env/client.ts"), { spy: true });
 
 // Storybook's preview iframe template ships hardcoded `<html lang="en">`
@@ -20,6 +21,9 @@ sb.mock(import("../src/lib/env/client.ts"), { spy: true });
 document.documentElement.lang = "nl";
 
 const preview: Preview = {
+  beforeEach: () => {
+    mocked(readPublicEnv).mockReset();
+  },
   initialGlobals: {
     viewport: { value: "responsive" },
   },

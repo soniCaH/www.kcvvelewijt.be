@@ -36,12 +36,10 @@ const scriptTags = () => {
 
 describe("TurnstileWidget", () => {
   beforeEach(() => {
-    vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "test-site-key");
     delete window.turnstile;
   });
 
   afterEach(() => {
-    vi.unstubAllEnvs();
     delete window.turnstile;
     // The injected <script> outlives an unmount (the Cloudflare script is
     // global), so drop it between tests.
@@ -53,7 +51,11 @@ describe("TurnstileWidget", () => {
       const turnstile = installFakeTurnstile();
 
       const { container } = render(
-        <TurnstileWidget onToken={vi.fn()} resetKey={0} />,
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={vi.fn()}
+          resetKey={0}
+        />,
       );
 
       expect(turnstile.render).toHaveBeenCalledTimes(1);
@@ -64,7 +66,13 @@ describe("TurnstileWidget", () => {
     it("passes the token from the success callback", () => {
       const turnstile = installFakeTurnstile();
       const onToken = vi.fn();
-      render(<TurnstileWidget onToken={onToken} resetKey={0} />);
+      render(
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={onToken}
+          resetKey={0}
+        />,
+      );
 
       renderedOpts(turnstile).callback("fresh-token");
 
@@ -74,7 +82,13 @@ describe("TurnstileWidget", () => {
     it("clears the token when it expires, so the form cannot submit a dead token", () => {
       const turnstile = installFakeTurnstile();
       const onToken = vi.fn();
-      render(<TurnstileWidget onToken={onToken} resetKey={0} />);
+      render(
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={onToken}
+          resetKey={0}
+        />,
+      );
       renderedOpts(turnstile).callback("fresh-token");
 
       renderedOpts(turnstile)["expired-callback"]!();
@@ -85,7 +99,13 @@ describe("TurnstileWidget", () => {
     it("clears the token on a widget error", () => {
       const turnstile = installFakeTurnstile();
       const onToken = vi.fn();
-      render(<TurnstileWidget onToken={onToken} resetKey={0} />);
+      render(
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={onToken}
+          resetKey={0}
+        />,
+      );
       renderedOpts(turnstile).callback("fresh-token");
 
       renderedOpts(turnstile)["error-callback"]!();
@@ -97,7 +117,12 @@ describe("TurnstileWidget", () => {
       const turnstile = installFakeTurnstile();
       const onError = vi.fn();
       render(
-        <TurnstileWidget onToken={vi.fn()} onError={onError} resetKey={0} />,
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={vi.fn()}
+          onError={onError}
+          resetKey={0}
+        />,
       );
 
       renderedOpts(turnstile)["expired-callback"]!();
@@ -111,7 +136,12 @@ describe("TurnstileWidget", () => {
       const turnstile = installFakeTurnstile();
       const onError = vi.fn();
       render(
-        <TurnstileWidget onToken={vi.fn()} onError={onError} resetKey={0} />,
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={vi.fn()}
+          onError={onError}
+          resetKey={0}
+        />,
       );
 
       renderedOpts(turnstile)["unsupported-callback"]!();
@@ -122,7 +152,11 @@ describe("TurnstileWidget", () => {
     it("removes the widget on unmount", () => {
       const turnstile = installFakeTurnstile();
       const { unmount } = render(
-        <TurnstileWidget onToken={vi.fn()} resetKey={0} />,
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={vi.fn()}
+          resetKey={0}
+        />,
       );
       expect(turnstile.remove).not.toHaveBeenCalled();
 
@@ -135,11 +169,21 @@ describe("TurnstileWidget", () => {
       const turnstile = installFakeTurnstile();
       const onToken = vi.fn();
       const { rerender } = render(
-        <TurnstileWidget onToken={onToken} resetKey={0} />,
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={onToken}
+          resetKey={0}
+        />,
       );
       expect(turnstile.reset).not.toHaveBeenCalled();
 
-      rerender(<TurnstileWidget onToken={onToken} resetKey={1} />);
+      rerender(
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={onToken}
+          resetKey={1}
+        />,
+      );
 
       expect(turnstile.reset).toHaveBeenCalledExactlyOnceWith("widget-1");
       expect(turnstile.render).toHaveBeenCalledTimes(1);
@@ -149,10 +193,20 @@ describe("TurnstileWidget", () => {
       const turnstile = installFakeTurnstile();
       const onToken = vi.fn();
       const { rerender } = render(
-        <TurnstileWidget onToken={onToken} resetKey={1} />,
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={onToken}
+          resetKey={1}
+        />,
       );
 
-      rerender(<TurnstileWidget onToken={onToken} resetKey={1} />);
+      rerender(
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={onToken}
+          resetKey={1}
+        />,
+      );
 
       expect(turnstile.reset).not.toHaveBeenCalled();
     });
@@ -160,7 +214,13 @@ describe("TurnstileWidget", () => {
     it("does not inject the Cloudflare script", () => {
       installFakeTurnstile();
 
-      render(<TurnstileWidget onToken={vi.fn()} resetKey={0} />);
+      render(
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={vi.fn()}
+          resetKey={0}
+        />,
+      );
 
       expect(scriptTags()).toHaveLength(0);
     });
@@ -183,7 +243,13 @@ describe("TurnstileWidget", () => {
     });
 
     it("injects the script once, async and deferred", () => {
-      render(<TurnstileWidget onToken={vi.fn()} resetKey={0} />);
+      render(
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={vi.fn()}
+          resetKey={0}
+        />,
+      );
 
       const tags = scriptTags();
       expect(tags).toHaveLength(1);
@@ -192,19 +258,49 @@ describe("TurnstileWidget", () => {
     });
 
     it("does not inject a second script tag on a second mount", () => {
-      const first = render(<TurnstileWidget onToken={vi.fn()} resetKey={0} />);
-      render(<TurnstileWidget onToken={vi.fn()} resetKey={0} />);
+      const first = render(
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={vi.fn()}
+          resetKey={0}
+        />,
+      );
+      render(
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={vi.fn()}
+          resetKey={0}
+        />,
+      );
       expect(scriptTags()).toHaveLength(1);
 
       // Also holds when the first mount is gone — the tag outlives it.
       first.unmount();
-      render(<TurnstileWidget onToken={vi.fn()} resetKey={0} />);
+      render(
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={vi.fn()}
+          resetKey={0}
+        />,
+      );
       expect(scriptTags()).toHaveLength(1);
     });
 
     it("hooks a second mount onto the already-injected script, so it renders once that loads", () => {
-      render(<TurnstileWidget onToken={vi.fn()} resetKey={0} />);
-      render(<TurnstileWidget onToken={vi.fn()} resetKey={0} />);
+      render(
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={vi.fn()}
+          resetKey={0}
+        />,
+      );
+      render(
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={vi.fn()}
+          resetKey={0}
+        />,
+      );
       const turnstile = installFakeTurnstile();
 
       scriptTags()[0]!.dispatchEvent(new Event("load"));
@@ -214,7 +310,13 @@ describe("TurnstileWidget", () => {
 
     it("renders the widget once the script has loaded", () => {
       const onToken = vi.fn();
-      render(<TurnstileWidget onToken={onToken} resetKey={0} />);
+      render(
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={onToken}
+          resetKey={0}
+        />,
+      );
       const turnstile = installFakeTurnstile();
       expect(turnstile.render).not.toHaveBeenCalled();
 
@@ -228,7 +330,12 @@ describe("TurnstileWidget", () => {
     it("reports an error when the script fails to load (an ad blocker), so the form never waits forever", () => {
       const onError = vi.fn();
       render(
-        <TurnstileWidget onToken={vi.fn()} onError={onError} resetKey={0} />,
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={vi.fn()}
+          onError={onError}
+          resetKey={0}
+        />,
       );
 
       scriptTags()[0]!.dispatchEvent(new Event("error"));
@@ -238,14 +345,24 @@ describe("TurnstileWidget", () => {
 
     it("loads the script again on a reset after it failed, so the form recovers once Turnstile is back", () => {
       const { rerender } = render(
-        <TurnstileWidget onToken={vi.fn()} resetKey={0} />,
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={vi.fn()}
+          resetKey={0}
+        />,
       );
       const failed = scriptTags()[0]!;
       failed.dispatchEvent(new Event("error"));
       // A tag fires `error` once: left in place, a later mount would wait on it.
       expect(scriptTags()).toHaveLength(0);
 
-      rerender(<TurnstileWidget onToken={vi.fn()} resetKey={1} />);
+      rerender(
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={vi.fn()}
+          resetKey={1}
+        />,
+      );
 
       expect(scriptTags()).toHaveLength(1);
       expect(scriptTags()[0]).not.toBe(failed);
@@ -253,7 +370,11 @@ describe("TurnstileWidget", () => {
 
     it("does not render a widget when the script loads after unmount", () => {
       const { unmount } = render(
-        <TurnstileWidget onToken={vi.fn()} resetKey={0} />,
+        <TurnstileWidget
+          siteKey="test-site-key"
+          onToken={vi.fn()}
+          resetKey={0}
+        />,
       );
       const script = scriptTags()[0]!;
       const turnstile = installFakeTurnstile();

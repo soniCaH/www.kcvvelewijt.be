@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { readPublicEnv } from "@/lib/env/client";
 
 const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js";
 
@@ -50,16 +49,17 @@ const getTurnstileScript = (): HTMLScriptElement => {
  * ponytail: global `window.turnstile` lock; the widget is the only consumer.
  */
 export const TurnstileWidget = ({
+  siteKey,
   onToken,
   onError,
   resetKey,
 }: {
+  /** `undefined` = no Turnstile (local dev, Storybook, tests). */
+  siteKey: string | undefined;
   onToken: (token: string) => void;
   onError?: () => void;
   resetKey: number;
 }) => {
-  // Read per render, not at import, so a story can switch it on (`sb.mock`).
-  const siteKey = readPublicEnv().NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const ref = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
   const lastResetKey = useRef(resetKey);

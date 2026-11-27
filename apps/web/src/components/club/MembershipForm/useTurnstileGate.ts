@@ -13,6 +13,8 @@ const FAILED_MESSAGE = "De verificatie laadt niet. Probeer het later opnieuw.";
  * on purpose and the BFF decides (`ALLOW_MISSING_FORM_SECRETS`).
  */
 export const useTurnstileGate = () => {
+  // The one read of the key: the widget gets it from here, so both agree.
+  const siteKey = readPublicEnv().NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const [token, setToken] = useState("");
   // Set by the widget; cleared by a token or by the re-run below.
   const [failed, setFailed] = useState(false);
@@ -33,7 +35,7 @@ export const useTurnstileGate = () => {
 
   /** The line to show instead of posting, or `null` when the form may post. */
   const blocked = (): string | null => {
-    if (token || !readPublicEnv().NEXT_PUBLIC_TURNSTILE_SITE_KEY) return null;
+    if (token || !siteKey) return null;
     if (!failed) return PENDING_MESSAGE;
     // Re-run the widget once, so the form recovers when Turnstile is back. A
     // tap while that runs waits; a new failure sets `failed` again.
@@ -42,5 +44,10 @@ export const useTurnstileGate = () => {
     return FAILED_MESSAGE;
   };
 
-  return { token, reset, blocked, widget: { onToken, onError, resetKey } };
+  return {
+    token,
+    reset,
+    blocked,
+    widget: { siteKey, onToken, onError, resetKey },
+  };
 };

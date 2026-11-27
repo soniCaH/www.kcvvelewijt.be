@@ -6,7 +6,8 @@ import { readPublicEnv } from "@/lib/env/client";
  * blocker, or Cloudflare down. It sets a site key (the gate is off without
  * one) and fakes `window.turnstile` so the widget errors at once and never
  * loads Cloudflare's script, which VR could not keep deterministic. Needs the
- * `sb.mock` of `@/lib/env/client` in `.storybook/preview.ts`.
+ * `sb.mock` of `@/lib/env/client` in `.storybook/preview.ts`, which also
+ * resets it before the next story.
  */
 export const failingTurnstile = () => {
   mocked(readPublicEnv).mockReturnValue({
@@ -23,7 +24,5 @@ export const failingTurnstile = () => {
   };
   return () => {
     delete window.turnstile;
-    // Storybook's own restore leaves an `sb.mock` spy's return value in place.
-    mocked(readPublicEnv).mockReset();
   };
 };
