@@ -86,6 +86,9 @@ import {
   mapGalleriesToRelatedRow,
 } from "@/lib/utils/article-related-items";
 import { PageViewTracker, TrackInView } from "@/components/analytics";
+import { Suspense } from "react";
+import { TeamSponsorLine } from "@/components/team/TeamSponsorLine";
+import { PrototypeSwitcher } from "@/components/prototype/PrototypeSwitcher";
 import {
   matchDetailToHeroRow,
   transformLineupPlayer,
@@ -98,7 +101,34 @@ import {
 
 interface MatchPageProps {
   params: Promise<{ matchId: string }>;
+  searchParams?: Promise<{ variant?: string }>; // PROTOTYPE (#3656)
 }
+
+// PROTOTYPE (#3656): placement variants for the "Gesteund door" line.
+const SPONSOR_VARIANTS = [
+  { key: "A", name: "Onder de wedstrijdkop" },
+  { key: "B", name: "Naast de terug-link" },
+  { key: "C", name: "Voor de onward-rij" },
+  { key: "D", name: "Onderaan de pagina" },
+];
+// PROTOTYPE (#3656): no staging Sponsor names a Team yet, so real Sponsor names stand in.
+const STUB_SPONSORS = [
+  {
+    id: "FpgS21bgw2I3VNplbIG4ZY",
+    name: "Bakelants Technics",
+    url: "https://www.facebook.com/BakelantsTechnics/",
+  },
+  {
+    id: "FpgS21bgw2I3VNplbIG4dm",
+    name: "Bar-a-Vis",
+    url: "https://www.facebook.com/p/Bar-a-vis-100090407893884/",
+  },
+  {
+    id: "FpgS21bgw2I3VNplbIG4i0",
+    name: "CNC",
+    url: "https://www.cncmetal.be/en",
+  },
+];
 
 // No static prerendering — the body fetches live PSD match data via the
 // rate-limited BFF. Empty, but required: without this export the segment never
@@ -354,8 +384,9 @@ const warnAndDegradeRankingRead = (
   return Effect.succeed(null);
 };
 
-const MatchPage = async ({ params }: MatchPageProps) => {
+const MatchPage = async ({ params, searchParams }: MatchPageProps) => {
   const { matchId } = await params;
+  const { variant = "A" } = (await searchParams) ?? {}; // PROTOTYPE (#3656)
   const numericId = parsePsdId(matchId);
 
   if (numericId === null) {
@@ -591,8 +622,21 @@ const MatchPage = async ({ params }: MatchPageProps) => {
     status: match.status,
   };
 
+  // PROTOTYPE (#3656): one line, placed per variant below.
+  const sponsorLine = (className: string) =>
+    kcvvTeam ? (
+      <TeamSponsorLine
+        sponsors={STUB_SPONSORS}
+        teamSlug={kcvvTeam.slug}
+        className={className}
+      />
+    ) : null;
+
   return (
     <>
+      <Suspense>
+        <PrototypeSwitcher variants={SPONSOR_VARIANTS} />
+      </Suspense>
       <PageViewTracker eventName="match_detail_view" params={analyticsParams} />
       <JsonLd
         data={buildBreadcrumbJsonLd([
@@ -630,7 +674,14 @@ const MatchPage = async ({ params }: MatchPageProps) => {
       )}
 
       <PageContainer className="pb-12 lg:pb-16">
-        <UpLink href="/kalender" label="Kalender" className="mb-6" />
+        {variant === "B" ? (
+          <div className="mb-6 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+            <UpLink href="/kalender" label="Kalender" />
+            {sponsorLine("mx-0 w-auto max-w-none sm:text-right")}
+          </div>
+        ) : (
+          <UpLink href="/kalender" label="Kalender" className="mb-6" />
+        )}
         <MatchHero match={heroRow} />
         {/* A venue means a real home Match (#3634): the BFF decides, not the web app. */}
         {match.venue && (
@@ -644,6 +695,7 @@ const MatchPage = async ({ params }: MatchPageProps) => {
             </EditorialLink>
           </MatchPracticalAnalytics>
         )}
+        {variant === "A" && sponsorLine("mx-0 mt-6 max-w-none")}
       </PageContainer>
 
       {body.seamUnderHero && <StripedSeam colorPair="ink-cream" height="md" />}
@@ -714,6 +766,12 @@ const MatchPage = async ({ params }: MatchPageProps) => {
 
       {/* Seam before the row when a body section preceded it, so it isn't
           flush against the lineup/events/standings block. */}
+      {variant === "C" && (
+        <PageContainer className="py-8">
+          {sponsorLine("text-center")}
+        </PageContainer>
+      )}
+
       {body.seamBeforeRelated && (
         <StripedSeam colorPair="ink-cream" height="md" />
       )}
@@ -723,6 +781,12 @@ const MatchPage = async ({ params }: MatchPageProps) => {
           the linked article(s), the KCVV team, the opponent, and any linked
           galleries. Auto-hides on empty. */}
       <RelatedRow items={relatedRowItems} pageType="match" pageSlug={matchId} />
+
+      {variant === "D" && (
+        <PageContainer className="pb-12">
+          {sponsorLine("border-t border-ink/10 pt-6 text-center")}
+        </PageContainer>
+      )}
     </>
   );
 };
