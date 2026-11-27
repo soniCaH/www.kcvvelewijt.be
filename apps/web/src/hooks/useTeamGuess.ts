@@ -1,8 +1,4 @@
-import { Option, Schema as S } from "effect";
-import { TeamGuessResponse } from "@kcvv/api-contract";
 import { useEffect, useState } from "react";
-
-const decodeTeamGuess = S.decodeUnknownOption(TeamGuessResponse);
 
 export interface TeamGuess {
   /** The query the BFF answered — compare it with the current one before use. */
@@ -28,16 +24,22 @@ export const useTeamGuess = (
   useEffect(() => {
     if (!query || !agesKey) return;
     const controller = new AbortController();
-    fetch("/api/search/team-guess", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query, ages: agesKey.split(",") }),
-      signal: controller.signal,
-    })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        const age = Option.getOrNull(decodeTeamGuess(data))?.age;
-        if (age) setGuess({ query, age });
+    // The decoder chunk (effect + schemas) loads next to the request, not
+    // after it; a failed load lands in the catch below.
+    Promise.all([
+      fetch("/api/search/team-guess", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query, ages: agesKey.split(",") }),
+        signal: controller.signal,
+      }),
+      import("@/lib/search/search-decoders"),
+    ])
+      .then(async ([res, { decodeTeamGuess }]) =>
+        res.ok ? decodeTeamGuess(await res.json()) : null,
+      )
+      .then((guess) => {
+        if (guess?.age) setGuess({ query, age: guess.age });
       })
       .catch((err: unknown) => {
         if ((err as Error).name !== "AbortError")

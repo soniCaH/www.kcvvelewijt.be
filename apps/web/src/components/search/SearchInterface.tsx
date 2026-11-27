@@ -6,7 +6,6 @@
  */
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { Either, Schema as S } from "effect";
 import { useSearchParams, useRouter } from "next/navigation";
 import { SearchForm } from "./SearchForm";
 import { SearchMasthead } from "./SearchMasthead";
@@ -28,15 +27,13 @@ import { useSearchAnalytics } from "@/hooks/useSearchAnalytics";
 import { usePendingDelay } from "@/hooks/usePendingDelay";
 import { filterByActiveType } from "./search-filter-utils";
 import { cn } from "@/lib/utils/cn";
-import {
+import type {
   LexicalSearchResponse,
-  type SearchResultType,
-  type SearchResult,
+  SearchResultType,
+  SearchResult,
 } from "@/types/search";
 
 export type { SearchResultType, SearchResult, LexicalSearchResponse };
-
-const decodeSearchResponse = S.decodeUnknownEither(LexicalSearchResponse);
 
 export interface SearchInterfaceProps {
   /**
@@ -172,18 +169,23 @@ export const SearchInterface = ({
       // Client-side filtering will be done in SearchResults
       const params = new URLSearchParams({ q: searchQuery.trim() });
 
-      const response = await fetch(`/api/search?${params.toString()}`, {
-        signal: controller.signal,
-      });
+      // The decoder chunk (effect + schemas) loads next to the request, not
+      // after it; a failed load lands in the catch below.
+      const [response, { decodeLexicalSearchResponse }] = await Promise.all([
+        fetch(`/api/search?${params.toString()}`, {
+          signal: controller.signal,
+        }),
+        import("@/lib/search/search-decoders"),
+      ]);
 
       if (!response.ok) {
         throw new Error("Search failed");
       }
 
-      const decoded = decodeSearchResponse(await response.json());
+      const decoded = decodeLexicalSearchResponse(await response.json());
       // A 200 that is not the route's response lands in the same error state
       // as a non-2xx.
-      if (Either.isLeft(decoded)) {
+      if (!decoded) {
         if (!controller.signal.aborted) {
           setError(true);
           setResults([]);
@@ -194,8 +196,8 @@ export const SearchInterface = ({
 
       // Only update state if this request wasn't aborted
       if (!controller.signal.aborted) {
-        setResults(decoded.right.results);
-        setTotalCount(decoded.right.count);
+        setResults(decoded.results);
+        setTotalCount(decoded.count);
         setLastSettledQuery(searchQuery.trim());
       }
     } catch (error) {

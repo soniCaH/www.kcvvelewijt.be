@@ -1,8 +1,4 @@
-import { Either, Schema as S } from "effect";
-import { SearchResponse } from "@kcvv/api-contract";
 import { useState, useCallback, useRef, useEffect } from "react";
-
-const decodeSearchResponse = S.decodeUnknownEither(SearchResponse);
 
 export interface SemanticSearchResult {
   id: string;
@@ -107,21 +103,28 @@ export const useSemanticSearch = (
         };
 
         try {
-          const res = await fetch("/api/search", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ query, type, limit }),
-            signal: controller.signal,
-          });
+          // The decoder chunk (effect + schemas) loads next to the request,
+          // not after it; a failed load lands in the catch below.
+          const [res, { decodeSemanticSearchResponse }] = await Promise.all([
+            fetch("/api/search", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ query, type, limit }),
+              signal: controller.signal,
+            }),
+            import("@/lib/search/search-decoders"),
+          ]);
 
           if (!res.ok) throw new Error(`Search failed: ${res.status}`);
-          const decoded = decodeSearchResponse(await res.json());
+          const decoded = decodeSemanticSearchResponse(await res.json());
           // A 200 that is not the contract's lands in the same error state as
           // a non-2xx.
-          if (Either.isLeft(decoded)) return settleFailed(decoded.left);
+          if (!decoded) {
+            return settleFailed("the response does not match the contract");
+          }
           if (abortRef.current === controller) {
-            setResults([...decoded.right.results]);
-            setAnswer(decoded.right.answer);
+            setResults([...decoded.results]);
+            setAnswer(decoded.answer);
             setExecutedQuery(query);
           }
         } catch (err) {

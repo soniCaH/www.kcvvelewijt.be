@@ -1,4 +1,12 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeAll,
+  beforeEach,
+  afterEach,
+} from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useTeamGuess } from "./useTeamGuess";
 
@@ -13,6 +21,10 @@ const guessCalls = () =>
     .mock.calls.filter(([url]) => url === "/api/search/team-guess");
 
 describe("useTeamGuess", () => {
+  // The hook loads its decoder chunk with a dynamic `import()`; fake timers cannot
+  // wait for a first load, so warm the module before any test runs.
+  beforeAll(() => import("@/lib/search/search-decoders"));
+
   beforeEach(() => {
     vi.useFakeTimers();
     vi.stubGlobal(
