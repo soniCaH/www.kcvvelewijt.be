@@ -406,7 +406,7 @@ describe("EditorialHero — event variant", () => {
     const strip = screen.getByTestId("hero-compressed-event-strip");
     // The rules belong to the bar itself, which spans the viewport.
     expect(strip).toHaveClass("border-y");
-    expect(strip).not.toHaveClass("max-w-[var(--container-index)]");
+    expect(strip.className).not.toMatch(/max-w-/);
     // The text sits in the same column as the hero title and "Lees verder".
     const column = screen.getByText("Sportpark Elewijt").closest("div");
     expect(column).not.toBe(strip);
@@ -429,12 +429,20 @@ describe("EditorialHero — event variant", () => {
       />,
     );
     const strip = screen.getByTestId("hero-compressed-event-strip");
-    const segment = (idx: number) =>
-      strip.querySelector(`[data-segment-index="${idx}"]`);
-    expect(segment(0)).toHaveClass("max-sm:basis-full");
-    // The dot that would open line 2 hides on a phone; later dots stay.
-    expect(segment(1)?.firstElementChild).toHaveClass("max-sm:hidden");
-    expect(segment(2)?.firstElementChild).not.toHaveClass("max-sm:hidden");
+    const location = screen.getByText("Sportpark Elewijt");
+    const dots = [...strip.querySelectorAll("span")].filter(
+      (el) => el.textContent === "·",
+    );
+    // Phone: the location takes a full line and the dot that would open
+    // line 2 hides; the dot between date and time stays.
+    expect(location).toHaveClass("max-sm:basis-full");
+    expect(dots[0]).toHaveClass("max-sm:hidden");
+    expect(dots[1]).not.toHaveClass("max-sm:hidden");
+    // Date · time is one block that never breaks, and from `sm` up the row
+    // never wraps (a long location breaks inside its own box instead), so
+    // no line can start with a dot at any width.
+    expect(dots[0].parentElement).toHaveClass("whitespace-nowrap");
+    expect(location.parentElement).toHaveClass("sm:flex-nowrap");
   });
 
   it("keeps date and time on one phone line when there is no location (#3908)", () => {
@@ -445,6 +453,26 @@ describe("EditorialHero — event variant", () => {
         placement="homepage"
         slug="zomertornooi-2026"
         feature={{ startTime: "09:00", endTime: "17:00", title: "Tornooi" }}
+      />,
+    );
+    const strip = screen.getByTestId("hero-compressed-event-strip");
+    expect(strip.querySelector(".max-sm\\:basis-full")).toBeNull();
+    expect(strip.querySelector(".max-sm\\:hidden")).toBeNull();
+  });
+
+  it("treats a whitespace-only location as absent, so a phone shows no empty line (#3908)", () => {
+    render(
+      <EditorialHero
+        variant="event"
+        {...SHARED}
+        placement="homepage"
+        slug="zomertornooi-2026"
+        feature={{
+          location: "   ",
+          startTime: "09:00",
+          endTime: "17:00",
+          title: "Tornooi",
+        }}
       />,
     );
     const strip = screen.getByTestId("hero-compressed-event-strip");

@@ -114,8 +114,9 @@ Interview variant. Never as the hero focal point.
   click target.** Pattern: `▸ ${venue} · ${Dutch date} · ${time}–${endTime}`.
   Single horizontal row from `sm` up, mono-uppercase, top + bottom 1px ink
   rule. The rules span the viewport; the text sits in the page column,
-  flush with the title. On a phone the venue takes its own line and
-  `${date} · ${time}` the next, so no line starts with a dot (#3908).
+  flush with the title. `${date} · ${time}` is one block that never breaks;
+  from `sm` up a long venue breaks inside its own box, and on a phone the
+  venue takes its own line. No line ever starts with a dot (#3908).
 - Uses the article's first `eventFact` (`feature` per `EventHero` pattern).
 
 ### Transfer (R1.5c · TR.1')

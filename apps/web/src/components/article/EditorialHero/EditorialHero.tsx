@@ -675,10 +675,10 @@ export const EditorialHero = (props: EditorialHeroProps) => {
           className={cn("group relative block", PRESS_DOWN_CLASSES)}
         >
           {body}
-          {/* The shell renders an `mx-auto max-w-[var(--container-wide)]` <section> with
-            a bottom divider line; pin "Lees verder" inside the same inner
-            container so it aligns flush with the divider's right edge
-            rather than the outer link's wrapper-padded edge. */}
+          {/* On the homepage the shell renders at `--container-index`; pin
+            "Lees verder" inside the same column so it aligns with the title,
+            the event strip's text and the cover, rather than the outer
+            link's edge. */}
           <PageContainer width="index" className="mt-2 flex justify-end">
             {/* `reveal-on-hover` (globals.css) hides the cue at rest only where
               hovering exists — on touch it stays on, so the hero's one

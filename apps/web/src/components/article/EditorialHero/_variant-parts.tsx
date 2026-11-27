@@ -22,6 +22,7 @@
  * Source-of-record: docs/design/mockups/phase-4-homepage/hero-flourishes-locked.md (R1.5),
  * docs/design/mockups/phase-5-article-detail/match-locked.md (match, 5.d-mat).
  */
+import { Fragment } from "react";
 import { SanityImage } from "@/lib/image/sanity-image";
 import type { MatchStatus } from "@kcvv/api-contract";
 import { cn } from "@/lib/utils/cn";
@@ -111,9 +112,11 @@ export interface HeroCompressedEventStripProps {
  * Compressed event strip rendered below the hero card (inside the
  * click target, per the lock). Mono-uppercase text between 1 px
  * full-bleed ink rules top + bottom, in the homepage column:
- * `▸ ${location} · ${date} · ${start}–${end}`. One row from `sm` up; on a
- * phone the location gets its own line and `${date} · ${time}` the next.
- * Each segment is graceful-omit so a partial event still reads.
+ * `▸ ${location} · ${date} · ${start}–${end}`. Date · time is one block
+ * that never breaks. From `sm` up the row never wraps (a long location
+ * breaks inside its own box); on a phone the location takes its own line.
+ * So no line ever starts with a dot. Each part is graceful-omit so a
+ * partial event still reads.
  */
 export const HeroCompressedEventStrip = ({
   location,
@@ -126,13 +129,12 @@ export const HeroCompressedEventStrip = ({
       ? `${startTime}–${endTime}`
       : (startTime ?? endTime ?? null);
 
-  const segments = [location, date, timeRange].filter(
-    (segment): segment is string =>
-      typeof segment === "string" && segment.length > 0,
-  );
+  const nonEmpty = (part: string | null | undefined): part is string =>
+    typeof part === "string" && part.trim().length > 0;
+  const place = nonEmpty(location) ? location.trim() : null;
+  const when = [date, timeRange].filter(nonEmpty);
 
-  if (segments.length === 0) return null;
-  const hasLocation = Boolean(location);
+  if (!place && when.length === 0) return null;
 
   return (
     <div
@@ -147,30 +149,28 @@ export const HeroCompressedEventStrip = ({
         <span aria-hidden="true" className="text-jersey-deep">
           ▸
         </span>
-        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          {segments.map((segment, idx) => (
-            <span
-              key={segment}
-              className={cn(
-                "flex items-center gap-2",
-                hasLocation && idx === 0 && "max-sm:basis-full",
-              )}
-              data-segment-index={idx}
-            >
-              {idx > 0 ? (
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    "text-ink-muted",
-                    hasLocation && idx === 1 && "max-sm:hidden",
+        <span className="flex flex-wrap items-baseline gap-x-2 gap-y-1 sm:flex-nowrap">
+          {place && <span className="min-w-0 max-sm:basis-full">{place}</span>}
+          {when.length > 0 && (
+            <span className="flex shrink-0 items-center gap-2 whitespace-nowrap">
+              {when.map((part, idx) => (
+                <Fragment key={idx}>
+                  {(idx > 0 || place) && (
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        "text-ink-muted",
+                        idx === 0 && "max-sm:hidden",
+                      )}
+                    >
+                      ·
+                    </span>
                   )}
-                >
-                  ·
-                </span>
-              ) : null}
-              {segment}
+                  {part}
+                </Fragment>
+              ))}
             </span>
-          ))}
+          )}
         </span>
       </PageContainer>
     </div>
