@@ -35,9 +35,16 @@ export const useTeamGuess = (
       }),
       import("@/lib/search/search-decoders"),
     ])
-      .then(async ([res, { decodeTeamGuess }]) =>
-        res.ok ? decodeTeamGuess(await res.json()) : null,
-      )
+      .then(async ([res, { decodeTeamGuess }]) => {
+        if (!res.ok) return null;
+        const decoded = decodeTeamGuess(await res.json());
+        if (!decoded) {
+          console.warn(
+            "[useTeamGuess] team guess response does not match the contract",
+          );
+        }
+        return decoded;
+      })
       .then((guess) => {
         if (guess?.age) setGuess({ query, age: guess.age });
       })

@@ -10,6 +10,19 @@ import {
 import { renderHook, act } from "@testing-library/react";
 import { useTeamGuess } from "./useTeamGuess";
 
+// A switch that makes `import("@/lib/search/search-decoders")` reject: reading
+// the module's `then` (which `await import()` does) throws while it is on.
+const decoderChunk = vi.hoisted(() => ({ failing: false }));
+vi.mock("@/lib/search/search-decoders", async (importOriginal) => {
+  const actual = await importOriginal<object>();
+  return new Proxy(actual, {
+    get: (target, key) => {
+      if (decoderChunk.failing) throw new Error("decoder chunk failed to load");
+      return Reflect.get(target, key);
+    },
+  });
+});
+
 const AGES = ["U8", "U9", "U10"];
 
 /** Let the fetch promise chain settle. */
@@ -35,6 +48,7 @@ describe("useTeamGuess", () => {
 
   // Global config has no restoreMocks/clearMocks (apps/web/vitest.config.ts).
   afterEach(() => {
+    decoderChunk.failing = false;
     vi.useRealTimers();
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
@@ -66,12 +80,29 @@ describe("useTeamGuess", () => {
   });
 
   it("leaves no guess for a 200 whose body is not the contract's (#3878)", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     vi.mocked(fetch).mockResolvedValueOnce(Response.json({ age: "nonsense" }));
     const { result } = renderHook(() => useTeamGuess("mijn zoon", AGES));
 
     await settle();
     expect(guessCalls()).toHaveLength(1);
     expect(result.current).toBeNull();
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("does not match the contract"),
+    );
+  });
+
+  it("leaves no guess when the decoder chunk fails to load (#3878)", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    decoderChunk.failing = true;
+    const { result } = renderHook(() => useTeamGuess("mijn zoon", AGES));
+
+    await settle();
+    expect(result.current).toBeNull();
+    expect(warn).toHaveBeenCalledWith(
+      expect.stringContaining("team guess failed"),
+      expect.any(Error),
+    );
   });
 
   it("aborts the request in flight when the query changes", async () => {

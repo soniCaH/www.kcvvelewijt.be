@@ -22,6 +22,19 @@ import { trackEvent } from "@/lib/analytics/track-event";
 import { useSemanticAugment, type SemanticAugment } from "./useSemanticAugment";
 
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
+
+// A switch that makes `import("@/lib/search/search-decoders")` reject: reading
+// the module's `then` (which `await import()` does) throws while it is on.
+const decoderChunk = vi.hoisted(() => ({ failing: false }));
+vi.mock("@/lib/search/search-decoders", async (importOriginal) => {
+  const actual = await importOriginal<object>();
+  return new Proxy(actual, {
+    get: (target, key) => {
+      if (decoderChunk.failing) throw new Error("decoder chunk failed to load");
+      return Reflect.get(target, key);
+    },
+  });
+});
 const mockTrackEvent = vi.mocked(trackEvent);
 
 // Mock Next.js navigation hooks — reactive: `push` feeds back into what
@@ -134,6 +147,7 @@ describe("SearchInterface", () => {
   });
 
   afterEach(() => {
+    decoderChunk.failing = false;
     vi.useRealTimers();
     vi.clearAllMocks();
     vi.unstubAllGlobals();
@@ -391,6 +405,7 @@ describe("SearchInterface", () => {
 
     it("should display error when a 200 body is not the route's response (#3878)", async () => {
       const user = setupUser();
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
       // No `results`/`count`: a cast stored `undefined` and crashed the render.
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -408,6 +423,33 @@ describe("SearchInterface", () => {
       await waitFor(() => {
         expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
       });
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining("does not match the schema"),
+      );
+      warn.mockRestore();
+    });
+
+    it("should display error when the decoder chunk fails to load (#3878)", async () => {
+      const user = setupUser();
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      decoderChunk.failing = true;
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => createMockSearchResponse("test"),
+      });
+
+      render(<SearchInterface />);
+
+      const input = screen.getByRole("textbox");
+      await user.type(input, "test");
+
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
+      });
+      warn.mockRestore();
     });
 
     it("should display results after successful fetch", async () => {

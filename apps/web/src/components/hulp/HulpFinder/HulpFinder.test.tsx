@@ -6,7 +6,6 @@ import {
   beforeEach,
   afterEach,
   type MockInstance,
-  beforeAll,
 } from "vitest";
 import { act, render, screen, fireEvent, within } from "@testing-library/react";
 import { HulpFinder } from "./HulpFinder";
@@ -80,10 +79,6 @@ const q = (re: RegExp) => screen.getByRole("button", { name: re });
 const answerOf = (re: RegExp) =>
   within(document.getElementById(q(re).getAttribute("aria-controls")!)!);
 const qMaybe = (re: RegExp) => screen.queryByRole("button", { name: re });
-
-// The code under test loads its decoder chunk with a dynamic `import()`; the
-// first load of `effect` can outlast a `waitFor`, so load it before any test.
-beforeAll(() => import("@/lib/search/search-decoders"));
 
 describe("HulpFinder", () => {
   it('caps the "Alles" preview to the top 3 per category with an "Alle N →" affordance', () => {

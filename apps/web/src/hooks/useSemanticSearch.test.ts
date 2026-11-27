@@ -10,6 +10,19 @@ import {
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useSemanticSearch } from "./useSemanticSearch";
 
+// A switch that makes `import("@/lib/search/search-decoders")` reject: reading
+// the module's `then` (which `await import()` does) throws while it is on.
+const decoderChunk = vi.hoisted(() => ({ failing: false }));
+vi.mock("@/lib/search/search-decoders", async (importOriginal) => {
+  const actual = await importOriginal<object>();
+  return new Proxy(actual, {
+    get: (target, key) => {
+      if (decoderChunk.failing) throw new Error("decoder chunk failed to load");
+      return Reflect.get(target, key);
+    },
+  });
+});
+
 // The code under test loads its decoder chunk with a dynamic `import()`; the
 // first load of `effect` can outlast a `waitFor`, so load it before any test.
 beforeAll(() => import("@/lib/search/search-decoders"));
@@ -23,6 +36,7 @@ describe("useSemanticSearch", () => {
   // so a console spy left un-restored on a failed assertion would otherwise
   // leak into every later test in this file, not just this one.
   afterEach(() => {
+    decoderChunk.failing = false;
     vi.restoreAllMocks();
   });
 
@@ -133,6 +147,26 @@ describe("useSemanticSearch", () => {
     expect(result.current.results).toEqual([]);
     expect(result.current.answer).toBeUndefined();
     expect(result.current.executedQuery).toBe("kantine");
+  });
+
+  it("settles a decoder chunk that fails to load into its error state (#3878)", async () => {
+    const consoleWarn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    decoderChunk.failing = true;
+    vi.mocked(fetch).mockResolvedValueOnce(Response.json({ results: [] }));
+
+    const { result } = renderHook(() =>
+      useSemanticSearch({ type: "responsibility", debounceMs: 0 }),
+    );
+
+    act(() => result.current.search("kantine"));
+
+    await waitFor(() => expect(result.current.error).toBe(true));
+    expect(result.current.results).toEqual([]);
+    expect(result.current.executedQuery).toBe("kantine");
+    expect(consoleWarn).toHaveBeenCalledWith(
+      expect.stringContaining("semantic search failed"),
+      expect.any(Error),
+    );
   });
 
   it("exposes answer from response", async () => {

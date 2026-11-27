@@ -187,6 +187,9 @@ export const SearchInterface = ({
       // as a non-2xx.
       if (!decoded) {
         if (!controller.signal.aborted) {
+          console.warn(
+            "[SearchInterface] search response does not match the schema",
+          );
           setError(true);
           setResults([]);
           setTotalCount(0);

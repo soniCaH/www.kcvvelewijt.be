@@ -6,6 +6,7 @@
 import { Schema as S } from "effect";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
+import { LexicalSearchResponse } from "@/types/search";
 import { ARTICLES_QUERY } from "@/lib/repositories/article.repository";
 import { PLAYERS_QUERY } from "@/lib/repositories/player.repository";
 import { TEAMS_QUERY } from "@/lib/repositories/team.repository";
@@ -630,14 +631,10 @@ describe("GET /api/search", () => {
     const search = async (url: string) => {
       const response = await GET(createRequest(url));
       expect(response.status).toBe(200);
-      return S.decodeUnknownSync(
-        S.Struct({
-          count: S.Number,
-          results: S.Array(
-            S.Struct({ type: S.String, title: S.String, url: S.String }),
-          ),
-        }),
-      )(await response.json());
+      // The schema `SearchInterface` decodes with: route and client share it.
+      return S.decodeUnknownSync(S.parseJson(LexicalSearchResponse))(
+        await response.text(),
+      );
     };
 
     const article = (
