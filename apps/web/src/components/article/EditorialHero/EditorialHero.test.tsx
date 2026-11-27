@@ -1,5 +1,5 @@
 import type { ComponentProps } from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { EditorialHero } from "./EditorialHero";
 
@@ -391,6 +391,47 @@ describe("EditorialHero — event variant", () => {
     const strip = screen.getByTestId("hero-compressed-event-strip");
     expect(strip).toHaveTextContent("Sportpark Elewijt");
     expect(strip).toHaveTextContent("09:00–17:00");
+  });
+
+  it("treats a whitespace-only start time as absent, so the strip shows no half range (#3908)", () => {
+    render(
+      <EditorialHero
+        variant="event"
+        {...SHARED}
+        placement="homepage"
+        slug="zomertornooi-2026"
+        feature={{
+          location: "Sportpark Elewijt",
+          startTime: " ",
+          endTime: "17:00",
+          title: "Tornooi",
+        }}
+      />,
+    );
+    const strip = screen.getByTestId("hero-compressed-event-strip");
+    expect(strip).toHaveTextContent("17:00");
+    expect(strip).not.toHaveTextContent("–17:00");
+  });
+
+  it("treats a whitespace-only location as absent (#3908)", () => {
+    render(
+      <EditorialHero
+        variant="event"
+        {...SHARED}
+        placement="homepage"
+        slug="zomertornooi-2026"
+        feature={{
+          location: "   ",
+          startTime: "09:00",
+          endTime: "17:00",
+          title: "Tornooi",
+        }}
+      />,
+    );
+    // Only the dot between date and time: no empty venue part before it.
+    // Layout per viewport lives in EditorialHero.stories.tsx (`EventStrip*`).
+    const strip = screen.getByTestId("hero-compressed-event-strip");
+    expect(within(strip).getAllByText("·")).toHaveLength(1);
   });
 
   it("derives the homepage strip date + time from the session schedule when top-level times are absent", () => {

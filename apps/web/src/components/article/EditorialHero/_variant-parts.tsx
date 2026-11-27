@@ -9,8 +9,9 @@
  *   Interview credit row below the H1.
  * - `<HeroDayBlockOverlay>` — mono day stamp pinned to the lower-left
  *   of the Event cover photo (signature visual hook from R1.5b).
- * - `<HeroCompressedEventStrip>` — single-row strip below the Event
- *   hero card: `▸ ${location} · ${date} · ${start}–${end}`.
+ * - `<HeroCompressedEventStrip>` — ruled strip below the Event hero card:
+ *   `▸ ${location} · ${date} · ${start}–${end}` (the location takes its own
+ *   line on a phone).
  * - `<HeroMatchScoreBar>` — `crest · score · crest` pill straddling the
  *   match cover's lower edge (5.d-mat H3): recap shows score + FT badge,
  *   preview shows kickoff time. Reuses `<Crest>` + `<MatchStatusBadge>`.
@@ -22,10 +23,11 @@
  * Source-of-record: docs/design/mockups/phase-4-homepage/hero-flourishes-locked.md (R1.5),
  * docs/design/mockups/phase-5-article-detail/match-locked.md (match, 5.d-mat).
  */
+import { Fragment } from "react";
 import { SanityImage } from "@/lib/image/sanity-image";
 import type { MatchStatus } from "@kcvv/api-contract";
 import { cn } from "@/lib/utils/cn";
-import { Crest } from "@/components/design-system";
+import { Crest, PageContainer } from "@/components/design-system";
 import { RoundAvatar } from "@/components/design-system/RoundAvatar";
 import { MatchStatusBadge } from "@/components/match/MatchStatusBadge";
 import type { ResolvedSubject } from "@/components/article/SubjectAttribution";
@@ -109,9 +111,13 @@ export interface HeroCompressedEventStripProps {
 
 /**
  * Compressed event strip rendered below the hero card (inside the
- * click target, per the lock). Single mono-uppercase row with 1 px
- * ink rules top + bottom: `▸ ${location} · ${date} · ${start}–${end}`.
- * Each segment is graceful-omit so a partial event still reads.
+ * click target, per the lock). Mono-uppercase text between 1 px
+ * full-bleed ink rules top + bottom, in the homepage column:
+ * `▸ ${location} · ${date} · ${start}–${end}`. Date · time is one block
+ * that never breaks. From `sm` up the row never wraps (a long location
+ * breaks inside its own box); on a phone the location takes its own line.
+ * So no line ever starts with a dot. Each part is graceful-omit so a
+ * partial event still reads.
  */
 export const HeroCompressedEventStrip = ({
   location,
@@ -119,46 +125,54 @@ export const HeroCompressedEventStrip = ({
   startTime,
   endTime,
 }: HeroCompressedEventStripProps) => {
-  const timeRange =
-    startTime && endTime
-      ? `${startTime}–${endTime}`
-      : (startTime ?? endTime ?? null);
+  const nonEmpty = (part: string | null | undefined): part is string =>
+    typeof part === "string" && part.trim().length > 0;
+  const start = nonEmpty(startTime) ? startTime.trim() : null;
+  const end = nonEmpty(endTime) ? endTime.trim() : null;
+  const timeRange = start && end ? `${start}–${end}` : (start ?? end);
+  const place = nonEmpty(location) ? location.trim() : null;
+  const when = [date, timeRange].filter(nonEmpty);
 
-  const segments = [location, date, timeRange].filter(
-    (segment): segment is string =>
-      typeof segment === "string" && segment.length > 0,
-  );
-
-  if (segments.length === 0) return null;
+  if (!place && when.length === 0) return null;
 
   return (
     <div
       data-testid="hero-compressed-event-strip"
-      // `border-y` so the strip owns both its top and bottom edges. The
-      // shell no longer paints a bottom rule (#1866 fix-1) so the strip
-      // can no longer borrow it as a top edge.
-      className={cn(
-        "border-ink flex items-center gap-2 border-y py-2",
-        "text-label text-ink font-mono uppercase",
-      )}
+      // `border-y` so the strip owns both its top and bottom edges (the
+      // shell paints no bottom rule, #1866 fix-1). The rules span the
+      // viewport; the text sits in the homepage column, flush with the hero
+      // title, like every other ruled band (#3908). `leading-label-wrap`
+      // because a long venue wraps by design (#2667).
+      className="border-ink text-label leading-label-wrap text-ink border-y py-2 font-mono uppercase"
     >
-      <span aria-hidden="true" className="text-jersey-deep">
-        ▸
-      </span>
-      {segments.map((segment, idx) => (
-        <span
-          key={segment}
-          className="flex items-center gap-2"
-          data-segment-index={idx}
-        >
-          {idx > 0 ? (
-            <span aria-hidden="true" className="text-ink-muted">
-              ·
-            </span>
-          ) : null}
-          {segment}
+      <PageContainer width="index" className="flex items-baseline gap-2">
+        <span aria-hidden="true" className="text-jersey-deep">
+          ▸
         </span>
-      ))}
+        <span className="flex flex-wrap items-baseline gap-x-2 gap-y-1 sm:flex-nowrap">
+          {place && <span className="min-w-0 max-sm:basis-full">{place}</span>}
+          {when.length > 0 && (
+            <span className="flex shrink-0 items-center gap-2 whitespace-nowrap">
+              {when.map((part, idx) => (
+                <Fragment key={idx}>
+                  {(idx > 0 || place) && (
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        "text-ink-muted",
+                        idx === 0 && "max-sm:hidden",
+                      )}
+                    >
+                      ·
+                    </span>
+                  )}
+                  {part}
+                </Fragment>
+              ))}
+            </span>
+          )}
+        </span>
+      </PageContainer>
     </div>
   );
 };
