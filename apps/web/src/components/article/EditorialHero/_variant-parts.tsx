@@ -9,8 +9,8 @@
  *   Interview credit row below the H1.
  * - `<HeroDayBlockOverlay>` — mono day stamp pinned to the lower-left
  *   of the Event cover photo (signature visual hook from R1.5b).
- * - `<HeroCompressedEventStrip>` — single-row strip below the Event
- *   hero card: `▸ ${location} · ${date} · ${start}–${end}`.
+ * - `<HeroCompressedEventStrip>` — ruled strip below the Event hero card:
+ *   `▸ ${location} · ${date} · ${start}–${end}` (two lines on a phone).
  * - `<HeroMatchScoreBar>` — `crest · score · crest` pill straddling the
  *   match cover's lower edge (5.d-mat H3): recap shows score + FT badge,
  *   preview shows kickoff time. Reuses `<Crest>` + `<MatchStatusBadge>`.
@@ -109,9 +109,10 @@ export interface HeroCompressedEventStripProps {
 
 /**
  * Compressed event strip rendered below the hero card (inside the
- * click target, per the lock). Single mono-uppercase row with 1 px
- * full-bleed ink rules top + bottom and its text in the homepage column:
- * `▸ ${location} · ${date} · ${start}–${end}`.
+ * click target, per the lock). Mono-uppercase text between 1 px
+ * full-bleed ink rules top + bottom, in the homepage column:
+ * `▸ ${location} · ${date} · ${start}–${end}`. One row from `sm` up; on a
+ * phone the location gets its own line and `${date} · ${time}` the next.
  * Each segment is graceful-omit so a partial event still reads.
  */
 export const HeroCompressedEventStrip = ({
@@ -131,6 +132,8 @@ export const HeroCompressedEventStrip = ({
   );
 
   if (segments.length === 0) return null;
+  // The location, when present, is always `segments[0]`.
+  const hasLocation = segments[0] === location;
 
   return (
     <div
@@ -141,29 +144,37 @@ export const HeroCompressedEventStrip = ({
       // title, like every other ruled band (#3908).
       className="border-ink text-label text-ink border-y py-2 font-mono uppercase"
     >
-      <PageContainer
-        width="index"
-        // `flex-wrap`: on a narrow column a whole segment drops to the next
-        // line instead of each segment squeezing into a stack of words.
-        className="flex flex-wrap items-center gap-x-2 gap-y-1"
-      >
+      <PageContainer width="index" className="flex items-baseline gap-2">
         <span aria-hidden="true" className="text-jersey-deep">
           ▸
         </span>
-        {segments.map((segment, idx) => (
-          <span
-            key={segment}
-            className="flex items-center gap-2"
-            data-segment-index={idx}
-          >
-            {idx > 0 ? (
-              <span aria-hidden="true" className="text-ink-muted">
-                ·
-              </span>
-            ) : null}
-            {segment}
-          </span>
-        ))}
+        {/* On a phone the location takes its own line and date · time the
+            next, so no line ever starts with a dot (#3908). */}
+        <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          {segments.map((segment, idx) => (
+            <span
+              key={segment}
+              className={cn(
+                "flex items-center gap-2",
+                hasLocation && idx === 0 && "max-sm:basis-full",
+              )}
+              data-segment-index={idx}
+            >
+              {idx > 0 ? (
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "text-ink-muted",
+                    hasLocation && idx === 1 && "max-sm:hidden",
+                  )}
+                >
+                  ·
+                </span>
+              ) : null}
+              {segment}
+            </span>
+          ))}
+        </span>
       </PageContainer>
     </div>
   );

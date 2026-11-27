@@ -413,6 +413,45 @@ describe("EditorialHero — event variant", () => {
     expect(column).toHaveClass("max-w-[var(--container-index)]");
   });
 
+  it("puts the location on its own phone line, so no line starts with a dot (#3908)", () => {
+    render(
+      <EditorialHero
+        variant="event"
+        {...SHARED}
+        placement="homepage"
+        slug="zomertornooi-2026"
+        feature={{
+          location: "Sportpark Elewijt",
+          startTime: "09:00",
+          endTime: "17:00",
+          title: "Tornooi",
+        }}
+      />,
+    );
+    const strip = screen.getByTestId("hero-compressed-event-strip");
+    const segment = (idx: number) =>
+      strip.querySelector(`[data-segment-index="${idx}"]`);
+    expect(segment(0)).toHaveClass("max-sm:basis-full");
+    // The dot that would open line 2 hides on a phone; later dots stay.
+    expect(segment(1)?.firstElementChild).toHaveClass("max-sm:hidden");
+    expect(segment(2)?.firstElementChild).not.toHaveClass("max-sm:hidden");
+  });
+
+  it("keeps date and time on one phone line when there is no location (#3908)", () => {
+    render(
+      <EditorialHero
+        variant="event"
+        {...SHARED}
+        placement="homepage"
+        slug="zomertornooi-2026"
+        feature={{ startTime: "09:00", endTime: "17:00", title: "Tornooi" }}
+      />,
+    );
+    const strip = screen.getByTestId("hero-compressed-event-strip");
+    expect(strip.querySelector(".max-sm\\:basis-full")).toBeNull();
+    expect(strip.querySelector(".max-sm\\:hidden")).toBeNull();
+  });
+
   it("derives the homepage strip date + time from the session schedule when top-level times are absent", () => {
     render(
       <EditorialHero

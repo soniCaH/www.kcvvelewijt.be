@@ -112,7 +112,10 @@ Interview variant. Never as the hero focal point.
 - Day-block overlay on photo lower-left (signature visual hook, kept from R1.5b).
 - **Compressed `<EventStrip>` rendered BELOW the hero photo, inside the
   click target.** Pattern: `▸ ${venue} · ${Dutch date} · ${time}–${endTime}`.
-  Single horizontal row, mono-uppercase, top + bottom 1px ink rule.
+  Single horizontal row from `sm` up, mono-uppercase, top + bottom 1px ink
+  rule. The rules span the viewport; the text sits in the page column,
+  flush with the title. On a phone the venue takes its own line and
+  `${date} · ${time}` the next, so no line starts with a dot (#3908).
 - Uses the article's first `eventFact` (`feature` per `EventHero` pattern).
 
 ### Transfer (R1.5c · TR.1')
