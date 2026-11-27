@@ -12,24 +12,30 @@ import { trackEvent } from "@/lib/analytics/track-event";
 
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
-// The widget's latest `onToken`, so a test decides when a retry token arrives.
+// The widget's latest callbacks, so a test decides when a token arrives or the
+// widget fails. `mountToken` is the token on mount; "" = none yet.
 const widget = vi.hoisted(() => ({
   onToken: (_token: string) => {},
+  onError: () => {},
+  mountToken: "token-0",
 }));
 
 vi.mock("@/components/club/MembershipForm/TurnstileWidget", () => ({
   // A token on mount. After a reset the test hands over the fresh one itself.
   TurnstileWidget: ({
     onToken,
+    onError,
     resetKey,
   }: {
     onToken: (token: string) => void;
+    onError?: () => void;
     resetKey: number;
   }) => {
     useEffect(() => {
       widget.onToken = onToken;
-      if (resetKey === 0) onToken("token-0");
-    }, [onToken, resetKey]);
+      widget.onError = onError ?? (() => {});
+      if (resetKey === 0 && widget.mountToken) onToken(widget.mountToken);
+    }, [onToken, onError, resetKey]);
     return <span data-testid="turnstile" data-reset-key={resetKey} />;
   },
 }));
@@ -76,9 +82,11 @@ const submit = () =>
 describe("DartsSignupForm", () => {
   beforeEach(() => {
     vi.mocked(trackEvent).mockClear();
+    widget.mountToken = "token-0";
   });
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
     vi.useRealTimers();
   });
 
@@ -361,6 +369,78 @@ describe("DartsSignupForm", () => {
       ).toHaveLength(2),
     );
     expect(postedBody(fetchMock).turnstileToken).toBe("token-1");
+  });
+
+  describe("without a Turnstile token (#3902)", () => {
+    const signupPosts = (fetchMock: ReturnType<typeof stubBackend>) =>
+      fetchMock.mock.calls.filter(([url]) => url === "/api/darts");
+
+    beforeEach(() => {
+      vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "test-site-key");
+      widget.mountToken = "";
+    });
+
+    it("does not post while the check is still running, and says so with the button still enabled", () => {
+      const fetchMock = stubBackend({});
+      render(<DartsSignupForm />);
+      fillRequired();
+
+      submit();
+
+      expect(signupPosts(fetchMock)).toHaveLength(0);
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "De verificatie loopt nog. Probeer het zo meteen opnieuw.",
+      );
+      expect(
+        screen.getByRole("button", { name: /Schrijf onze ploeg in/ }),
+      ).toBeEnabled();
+      expect(screen.getByLabelText(/Ploegnaam/)).toHaveValue("De Pijlenjagers");
+    });
+
+    it("does not post when the widget failed, says so and re-runs the widget", () => {
+      const fetchMock = stubBackend({});
+      render(<DartsSignupForm />);
+      fillRequired();
+      act(() => widget.onError());
+
+      submit();
+
+      expect(signupPosts(fetchMock)).toHaveLength(0);
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "De verificatie laadt niet. Probeer het later opnieuw.",
+      );
+      expect(screen.getByTestId("turnstile")).toHaveAttribute(
+        "data-reset-key",
+        "1",
+      );
+
+      // The re-run is under way: a second tap waits, it does not restart it.
+      submit();
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "De verificatie loopt nog. Probeer het zo meteen opnieuw.",
+      );
+      expect(screen.getByTestId("turnstile")).toHaveAttribute(
+        "data-reset-key",
+        "1",
+      );
+    });
+
+    it("posts the token once it arrives, and drops the line", async () => {
+      const fetchMock = stubBackend({});
+      render(<DartsSignupForm />);
+      fillRequired();
+      act(() => widget.onError());
+      submit();
+
+      act(() => widget.onToken("late-token"));
+      submit();
+
+      await waitFor(() => expect(signupPosts(fetchMock)).toHaveLength(1));
+      expect(postedBody(fetchMock).turnstileToken).toBe("late-token");
+      expect(
+        screen.queryByText(/De verificatie laadt niet/),
+      ).not.toBeInTheDocument();
+    });
   });
 
   it("submits the remark and the honeypot value as typed", async () => {

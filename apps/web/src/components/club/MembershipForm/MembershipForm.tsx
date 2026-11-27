@@ -44,6 +44,7 @@ import {
   type MembershipDraft,
 } from "./membership-draft";
 import { TurnstileWidget } from "./TurnstileWidget";
+import { useTurnstileGate } from "./useTurnstileGate";
 
 const ROLE_OPTIONS: { value: MembershipRole; label: string }[] = [
   { value: "speler", label: "Speler" },
@@ -203,14 +204,7 @@ const MembershipFormFields = ({
   };
 
   const [honeypot, setHoneypot] = useState("");
-  const [turnstileToken, setTurnstileToken] = useState("");
-  // A Turnstile token is single-use: after a submit the server did not accept,
-  // drop it and bump this so the widget fetches a fresh one for the retry.
-  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
-  const resetTurnstile = () => {
-    setTurnstileToken("");
-    setTurnstileResetKey((key) => key + 1);
-  };
+  const turnstile = useTurnstileGate();
 
   const [state, setState] = useState<SubmitState>("idle");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -343,6 +337,14 @@ const MembershipFormFields = ({
       return;
     }
 
+    const unverified = turnstile.blocked();
+    if (unverified) {
+      setFieldErrors({});
+      setGeneralError(unverified);
+      setState("invalid");
+      return;
+    }
+
     setState("submitting");
     setFieldErrors({});
     setGeneralError("");
@@ -367,7 +369,7 @@ const MembershipFormFields = ({
             ? medicalCertAcknowledged
             : undefined,
           privacyAccepted,
-          turnstileToken,
+          turnstileToken: turnstile.token,
           company: honeypot,
         }),
       });
@@ -405,7 +407,7 @@ const MembershipFormFields = ({
         refusal?.error ??
           "Er ging iets mis. Controleer je gegevens en probeer opnieuw.",
       );
-      resetTurnstile();
+      turnstile.reset();
       setState("invalid");
     } catch (err) {
       // The caught error goes to the console only — the visitor sees the
@@ -413,7 +415,7 @@ const MembershipFormFields = ({
       // (#2580 rule 6). The submit button survives this failure (it's still
       // on screen, re-enabled), so no retry action is added (#2580 rule 4).
       console.error("[MembershipForm] Failed to submit:", err);
-      resetTurnstile();
+      turnstile.reset();
       setState("transport-error");
     }
   };
@@ -694,10 +696,7 @@ const MembershipFormFields = ({
           </CheckboxField>
         </div>
 
-        <TurnstileWidget
-          onToken={setTurnstileToken}
-          resetKey={turnstileResetKey}
-        />
+        <TurnstileWidget {...turnstile.widget} />
 
         {/* The wait is announced from here: a button's children are
             presentational, so the spinner inside it is never spoken. Always
