@@ -79,7 +79,7 @@ export const EVENT_ARTICLES_QUERY =
   "id": _id,
   "title": coalesce(pt::text(title), title, ""),
   "slug": coalesce(slug.current, ""),
-  "fact": body[_type == "eventFact"][0]{ date, endDate, startTime, location, eventType }
+  "fact": body[_type == "eventFact"][0]{ date, endDate, startTime, location, eventType, sessions[]{ date, startTime, endTime } }
 }`);
 
 /**
@@ -153,7 +153,17 @@ export interface EventListItemVM {
   eventType: EventType | null;
   location: string | null;
   source: EventListSource;
+  /**
+   * One entry per day of an article's per-day schedule (`eventFact.sessions`),
+   * soonest first. Present only when the schedule has a valid day; the
+   * calendar feed then emits these instead of the `dateStart`→`dateEnd` span
+   * (#3906).
+   */
+  sessions?: readonly { dateStart: string; dateEnd: string | null }[];
 }
+
+/** Strict `HH:mm` (00–23 : 00–59). */
+const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 /**
  * Build an event ISO from an `eventFact`'s calendar `date` + optional `time`
@@ -174,10 +184,7 @@ const articleFactToIso = (
   // local midnight (all-day) rather than poisoning `DateTime.fromISO` into an
   // invalid value — a time typo must not silently drop an otherwise-valid event
   // from the feed. Only an unparseable `date` (guarded below) drops the row.
-  const hhmm =
-    typeof time === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(time)
-      ? time
-      : "00:00";
+  const hhmm = typeof time === "string" && HHMM.test(time) ? time : "00:00";
   const dt = DateTime.fromISO(`${date}T${hhmm}`, { zone: CLUB_TIMEZONE });
   return dt.isValid ? dt.toISO() : null;
 };
@@ -210,6 +217,20 @@ export const mergeEventFeed = (
     const fact = row.fact;
     const dateStart = articleFactToIso(fact?.date, fact?.startTime);
     if (!dateStart) return [];
+    // A session's end only counts with a real time: a bad one must not read as
+    // midnight, which would end the session before it starts.
+    const sessions = (fact?.sessions ?? [])
+      .flatMap((s) => {
+        const start = articleFactToIso(s.date, s.startTime);
+        if (!start) return [];
+        const end =
+          s.endTime && HHMM.test(s.endTime)
+            ? articleFactToIso(s.date, s.endTime)
+            : null;
+        return [{ dateStart: start, dateEnd: end }];
+      })
+      // Brussels wall-clock ISOs: the text order is the time order.
+      .sort((a, b) => a.dateStart.localeCompare(b.dateStart));
     return [
       {
         id: row.id,
@@ -220,6 +241,7 @@ export const mergeEventFeed = (
         eventType: fact?.eventType ?? null,
         location: fact?.location ?? null,
         source: "article",
+        ...(sessions.length > 0 ? { sessions } : {}),
       },
     ];
   });

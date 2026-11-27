@@ -302,7 +302,10 @@ const matchesToEntries = (
  * and `buildEventIcs`. A timed item with no `dateEnd` omits `end` entirely
  * rather than fabricating a duration the way a match's fixed 2h block does.
  */
-const eventToEntry = (item: EventListItemVM): IcalEntry | undefined => {
+const eventToEntry = (
+  item: EventListItemVM,
+  id = buildEventUid(item.id),
+): IcalEntry | undefined => {
   const { isAllDay, start, end, allDayEndExclusive } = resolveEventDateRange(
     item.dateStart,
     item.dateEnd,
@@ -312,7 +315,6 @@ const eventToEntry = (item: EventListItemVM): IcalEntry | undefined => {
 
   const location = item.location ?? undefined;
   const url = `${SITE_CONFIG.siteUrl}${item.href}`;
-  const id = buildEventUid(item.id);
   const summary = item.title;
 
   if (isAllDay) {
@@ -344,10 +346,26 @@ const eventToEntry = (item: EventListItemVM): IcalEntry | undefined => {
  * chronologically sorted by construction (its own GROQ filters +
  * `mergeEventFeed`'s sort), so no re-filter/re-sort happens here — only the
  * per-item map, dropping any entry `eventToEntry` couldn't parse.
+ *
+ * An article with a per-day schedule becomes one VEVENT per session, never
+ * one span from its first to its last day (#3906). Each session gets its own
+ * UID, keyed by its Brussels start (`yyyyMMddHHmm`), or a calendar app would
+ * keep only one of them.
  */
 const eventsToEntries = (events: readonly EventListItemVM[]): IcalEntry[] => {
   return events
-    .map(eventToEntry)
+    .flatMap((item) =>
+      item.sessions
+        ? item.sessions.map((s) =>
+            eventToEntry(
+              { ...item, ...s },
+              buildEventUid(
+                `${item.id}-${s.dateStart.slice(0, 16).replace(/\D/g, "")}`,
+              ),
+            ),
+          )
+        : [eventToEntry(item)],
+    )
     .filter((entry): entry is IcalEntry => entry !== undefined);
 };
 
