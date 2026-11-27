@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect } from "storybook/test";
 import { EditorialHero, type EditorialHeroProps } from "./EditorialHero";
 import { fixtureImage } from "@test-fixtures/images";
 
@@ -234,24 +235,160 @@ export const EventDetail: EventStory = {
   },
 };
 
-export const EventHomepage: EventStory = {
+const EVENT_HOMEPAGE_FEATURE = {
+  title: "Spelerstornooi U13",
+  date: "2026-06-15",
+  startTime: "09:00",
+  endTime: "17:00",
+  location: "Sportpark Elewijt",
+  ageGroup: "U13",
+};
+
+const EVENT_HOMEPAGE_ARGS = {
+  variant: "event",
+  placement: "homepage",
+  slug: "spelerstornooi-u13",
+  title: "Spelerstornooi U13 — zaterdag 15 juni",
+  lead: "Acht ploegen, één toernooi. Inschrijven kan tot 1 juni.",
+  author: "Jeugdwerking",
+  date: "15 juni 2026",
+  coverImage: COVER_EVENT,
+  feature: EVENT_HOMEPAGE_FEATURE,
+} satisfies EventStory["args"];
+
+export const EventHomepage: EventStory = { args: EVENT_HOMEPAGE_ARGS };
+
+// ── Event strip geometry (#3908) ────────────────────────────────────────────
+// The homepage strip's layout facts, asserted in named viewports
+// (`globals.viewport`, honoured by `pnpm test:storybook`); happy-dom has no
+// layout. Everywhere: the strip text starts at the title's left edge, the
+// rules reach past it, and no line starts with a dot. `!vr`: assertion-only;
+// `EventHomepage`'s baselines already show the look.
+
+const LONG_VENUE = "Sportcomplex Den Dries, Driesstraat 1, 1982 Elewijt";
+
+const rect = (el: Element) => el.getBoundingClientRect();
+
+const stripGeometry = async (canvasElement: HTMLElement, venue?: string) => {
+  await document.fonts.ready;
+  const strip = canvasElement.querySelector(
+    '[data-testid="hero-compressed-event-strip"]',
+  );
+  const heading = canvasElement.querySelector("h1, h2");
+  const spans = Array.from(strip?.querySelectorAll("span") ?? []);
+  const arrow = spans.find((el) => el.textContent === "▸");
+  const list = arrow?.nextElementSibling;
+  const dateBlock = list?.lastElementChild;
+  if (!strip || !heading || !arrow || !list || !dateBlock) {
+    throw new Error("event strip or hero heading did not render");
+  }
+  const location = venue
+    ? spans.find((el) => el.textContent === venue)
+    : undefined;
+  const visibleDots = spans.filter(
+    (el) => el.textContent === "·" && rect(el).width > 0,
+  );
+
+  expect(Math.abs(rect(arrow).left - rect(heading).left)).toBeLessThanOrEqual(
+    1,
+  );
+  expect(rect(strip).left).toBeLessThan(rect(arrow).left);
+  // Every line of the list starts at its left edge; a dot there would open
+  // a line.
+  visibleDots.forEach((dot) => {
+    expect(rect(dot).left).toBeGreaterThan(rect(list).left + 1);
+  });
+  // Venue and date on one line need the dot between them.
+  if (
+    location &&
+    Math.abs(rect(dateBlock).top - rect(location).top) < rect(dateBlock).height
+  ) {
+    const between = dateBlock.firstElementChild;
+    expect(between?.textContent).toBe("·");
+    expect(between ? rect(between).width : 0).toBeGreaterThan(0);
+  }
+  return { location, dateBlock };
+};
+
+interface PlayContext {
+  canvasElement: HTMLElement;
+}
+
+const playPhoneVenueOwnLine =
+  (venue: string) =>
+  async ({ canvasElement }: PlayContext) => {
+    const { location, dateBlock } = await stripGeometry(canvasElement, venue);
+    if (!location) throw new Error(`venue "${venue}" did not render`);
+    expect(rect(dateBlock).top).toBeGreaterThanOrEqual(
+      rect(location).bottom - 1,
+    );
+  };
+
+export const EventStripPhone: EventStory = {
+  args: EVENT_HOMEPAGE_ARGS,
+  globals: { viewport: { value: "kcvvMobile" } },
+  tags: ["!vr"],
+  play: playPhoneVenueOwnLine(EVENT_HOMEPAGE_FEATURE.location),
+};
+
+// Short venue, date only: both would fit on one phone line, yet the venue
+// still takes its own line, because the dot before the date is hidden there.
+export const EventStripPhoneShortVenue: EventStory = {
   args: {
-    variant: "event",
-    placement: "homepage",
-    slug: "spelerstornooi-u13",
-    title: "Spelerstornooi U13 — zaterdag 15 juni",
-    lead: "Acht ploegen, één toernooi. Inschrijven kan tot 1 juni.",
-    author: "Jeugdwerking",
-    date: "15 juni 2026",
-    coverImage: COVER_EVENT,
+    ...EVENT_HOMEPAGE_ARGS,
     feature: {
-      title: "Spelerstornooi U13",
-      date: "2026-06-15",
-      startTime: "09:00",
-      endTime: "17:00",
-      location: "Sportpark Elewijt",
-      ageGroup: "U13",
+      ...EVENT_HOMEPAGE_FEATURE,
+      location: "Kantine",
+      startTime: undefined,
+      endTime: undefined,
     },
+  },
+  globals: { viewport: { value: "kcvvMobile" } },
+  tags: ["!vr"],
+  play: playPhoneVenueOwnLine("Kantine"),
+};
+
+export const EventStripPhoneLongVenue: EventStory = {
+  args: {
+    ...EVENT_HOMEPAGE_ARGS,
+    feature: { ...EVENT_HOMEPAGE_FEATURE, location: LONG_VENUE },
+  },
+  globals: { viewport: { value: "kcvvMobile" } },
+  tags: ["!vr"],
+  play: playPhoneVenueOwnLine(LONG_VENUE),
+};
+
+export const EventStripPhoneNoVenue: EventStory = {
+  args: {
+    ...EVENT_HOMEPAGE_ARGS,
+    feature: { ...EVENT_HOMEPAGE_FEATURE, location: undefined },
+  },
+  globals: { viewport: { value: "kcvvMobile" } },
+  tags: ["!vr"],
+  play: async ({ canvasElement }: PlayContext) => {
+    await stripGeometry(canvasElement);
+  },
+};
+
+// From `sm` up the row never wraps: a long venue breaks inside its own box
+// and date · time stays on the first line beside it.
+export const EventStripSmLongVenue: EventStory = {
+  args: {
+    ...EVENT_HOMEPAGE_ARGS,
+    feature: { ...EVENT_HOMEPAGE_FEATURE, location: LONG_VENUE },
+  },
+  globals: { viewport: { value: "kcvvEventStripSm" } },
+  tags: ["!vr"],
+  play: async ({ canvasElement }: PlayContext) => {
+    const { location, dateBlock } = await stripGeometry(
+      canvasElement,
+      LONG_VENUE,
+    );
+    if (!location) throw new Error("long venue did not render");
+    expect(Math.abs(rect(dateBlock).top - rect(location).top)).toBeLessThan(
+      rect(dateBlock).height,
+    );
+    expect(rect(location).height).toBeGreaterThan(rect(dateBlock).height * 1.5);
   },
 };
 

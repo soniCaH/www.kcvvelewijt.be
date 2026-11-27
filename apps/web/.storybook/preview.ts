@@ -71,6 +71,13 @@ const preview: Preview = {
           name: "KCVV Desktop (1280)",
           styles: { width: "1280px", height: "800px" },
         },
+        // `EditorialHero.stories.tsx`'s event-strip play fixtures (#3908):
+        // a width between `sm` (640) and `md` (768), where the strip's row
+        // stops wrapping but a long venue still has to break inside its box.
+        kcvvEventStripSm: {
+          name: "Event strip sm (700)",
+          styles: { width: "700px", height: "900px" },
+        },
       },
     },
     options: {

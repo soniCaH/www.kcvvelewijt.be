@@ -1,5 +1,5 @@
 import type { ComponentProps } from "react";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { EditorialHero } from "./EditorialHero";
 
@@ -393,73 +393,6 @@ describe("EditorialHero — event variant", () => {
     expect(strip).toHaveTextContent("09:00–17:00");
   });
 
-  it("keeps the homepage strip's rules full-bleed but its text in the page column (#3908)", () => {
-    render(
-      <EditorialHero
-        variant="event"
-        {...SHARED}
-        placement="homepage"
-        slug="zomertornooi-2026"
-        feature={{ location: "Sportpark Elewijt", title: "Tornooi" }}
-      />,
-    );
-    const strip = screen.getByTestId("hero-compressed-event-strip");
-    // The rules belong to the bar itself, which spans the viewport.
-    expect(strip).toHaveClass("border-y");
-    expect(strip.className).not.toMatch(/max-w-/);
-    // The text sits in the same column as the hero title and "Lees verder".
-    const column = screen.getByText("Sportpark Elewijt").closest("div");
-    expect(column).not.toBe(strip);
-    expect(column).toHaveClass("max-w-[var(--container-index)]");
-  });
-
-  it("puts the location on its own phone line, so no line starts with a dot (#3908)", () => {
-    render(
-      <EditorialHero
-        variant="event"
-        {...SHARED}
-        placement="homepage"
-        slug="zomertornooi-2026"
-        feature={{
-          location: "Sportpark Elewijt",
-          startTime: "09:00",
-          endTime: "17:00",
-          title: "Tornooi",
-        }}
-      />,
-    );
-    const strip = screen.getByTestId("hero-compressed-event-strip");
-    const location = screen.getByText("Sportpark Elewijt");
-    const dots = [...strip.querySelectorAll("span")].filter(
-      (el) => el.textContent === "·",
-    );
-    // Phone: the location takes a full line and the dot that would open
-    // line 2 hides; the dot between date and time stays.
-    expect(location).toHaveClass("max-sm:basis-full");
-    expect(dots[0]).toHaveClass("max-sm:hidden");
-    expect(dots[1]).not.toHaveClass("max-sm:hidden");
-    // Date · time is one block that never breaks, and from `sm` up the row
-    // never wraps (a long location breaks inside its own box instead), so
-    // no line can start with a dot at any width.
-    expect(dots[0].parentElement).toHaveClass("whitespace-nowrap");
-    expect(location.parentElement).toHaveClass("sm:flex-nowrap");
-  });
-
-  it("keeps date and time on one phone line when there is no location (#3908)", () => {
-    render(
-      <EditorialHero
-        variant="event"
-        {...SHARED}
-        placement="homepage"
-        slug="zomertornooi-2026"
-        feature={{ startTime: "09:00", endTime: "17:00", title: "Tornooi" }}
-      />,
-    );
-    const strip = screen.getByTestId("hero-compressed-event-strip");
-    expect(strip.querySelector(".max-sm\\:basis-full")).toBeNull();
-    expect(strip.querySelector(".max-sm\\:hidden")).toBeNull();
-  });
-
   it("treats a whitespace-only start time as absent, so the strip shows no half range (#3908)", () => {
     render(
       <EditorialHero
@@ -480,7 +413,7 @@ describe("EditorialHero — event variant", () => {
     expect(strip).not.toHaveTextContent("–17:00");
   });
 
-  it("treats a whitespace-only location as absent, so a phone shows no empty line (#3908)", () => {
+  it("treats a whitespace-only location as absent (#3908)", () => {
     render(
       <EditorialHero
         variant="event"
@@ -495,9 +428,10 @@ describe("EditorialHero — event variant", () => {
         }}
       />,
     );
+    // Only the dot between date and time: no empty venue part before it.
+    // Layout per viewport lives in EditorialHero.stories.tsx (`EventStrip*`).
     const strip = screen.getByTestId("hero-compressed-event-strip");
-    expect(strip.querySelector(".max-sm\\:basis-full")).toBeNull();
-    expect(strip.querySelector(".max-sm\\:hidden")).toBeNull();
+    expect(within(strip).getAllByText("·")).toHaveLength(1);
   });
 
   it("derives the homepage strip date + time from the session schedule when top-level times are absent", () => {
