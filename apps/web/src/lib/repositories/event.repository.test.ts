@@ -604,7 +604,13 @@ describe("an event article with a per-day schedule, in the calendar feed (#3906)
     "2027-05-03",
     "2027-05-10",
   ];
-  const feed = (sessions: NonNullable<ArticleFact["sessions"]>) =>
+  type Session = NonNullable<ArticleFact["sessions"]>[number];
+  const session = (
+    date: string,
+    startTime: string | null = null,
+    endTime: string | null = null,
+  ): Session => ({ _key: `k-${date}-${startTime}`, date, startTime, endTime });
+  const feed = (sessions: Session[]) =>
     buildIcalFeed(
       [],
       mergeEventFeed(
@@ -624,9 +630,7 @@ describe("an event article with a per-day schedule, in the calendar feed (#3906)
     ).replace(/\r\n /g, "");
 
   it("emits one timed VEVENT per session, never one all-day span", () => {
-    const ics = feed(
-      mondays.map((date) => ({ date, startTime: "18:30", endTime: "22:30" })),
-    );
+    const ics = feed(mondays.map((date) => session(date, "18:30", "22:30")));
 
     expect(ics.match(/BEGIN:VEVENT/g)).toHaveLength(13);
     expect(ics).not.toContain("VALUE=DATE");
@@ -636,17 +640,46 @@ describe("an event article with a per-day schedule, in the calendar feed (#3906)
     expect(new Set(ics.match(/^UID:.*$/gm))).toHaveProperty("size", 13);
   });
 
+  it("gives two sessions on the same day and hour two UIDs", () => {
+    const ics = feed([
+      { ...session("2027-01-25"), _key: "a" },
+      { ...session("2027-01-25"), _key: "b" },
+    ]);
+
+    expect(new Set(ics.match(/^UID:.*$/gm))).toHaveProperty("size", 2);
+  });
+
   it("makes a session without hours an all-day entry on that one day", () => {
-    const ics = feed(
-      ["2027-01-25", "2027-02-01"].map((date) => ({
-        date,
-        startTime: null,
-        endTime: null,
-      })),
-    );
+    const ics = feed([session("2027-01-25"), session("2027-02-01")]);
 
     expect(ics).toContain("DTSTART;VALUE=DATE:20270125");
     expect(ics).toContain("DTEND;VALUE=DATE:20270126");
     expect(ics).not.toContain("DTEND;VALUE=DATE:20270511");
+  });
+
+  it("makes a session with an end but no valid start all-day, never a block from midnight", () => {
+    const ics = feed([
+      session("2027-02-01", "18u30", "22:30"),
+      session("2027-02-08", null, "22:30"),
+    ]);
+
+    expect(ics).toContain("DTSTART;VALUE=DATE:20270201");
+    expect(ics).toContain("DTSTART;VALUE=DATE:20270208");
+    expect(ics).not.toContain("T000000");
+  });
+
+  it("ends a session that runs past midnight on the next day", () => {
+    const ics = feed([session("2027-03-06", "20:00", "01:00")]);
+
+    expect(ics).toContain("DTSTART;TZID=Europe/Brussels:20270306T200000");
+    expect(ics).toContain("DTEND;TZID=Europe/Brussels:20270307T010000");
+  });
+});
+
+describe("EVENT_ARTICLES_QUERY keeps a per-day schedule while a session is ahead (#3906)", () => {
+  it("also matches an article whose later sessions are today or after", () => {
+    expect(EVENT_ARTICLES_QUERY).toContain(
+      'count(body[_type == "eventFact"][0].sessions[date >= $today]) > 0',
+    );
   });
 });

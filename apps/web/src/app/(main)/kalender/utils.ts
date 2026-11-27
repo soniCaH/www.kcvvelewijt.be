@@ -23,6 +23,7 @@ import {
 } from "@/lib/utils/match-display";
 import { assertNever } from "@/lib/utils/assert-never";
 import { capitalize } from "@/lib/utils/capitalize";
+import { expandSessions } from "@/lib/utils/event-sessions";
 import {
   CLUB_TIMEZONE,
   toDisplayZone,
@@ -295,6 +296,8 @@ const clubMonthStart = (year: number, month: number): DateTime => {
  * their `eventType` (a missing type → `"Andere"` via `DEFAULT_EVENT_TYPE`, the
  * same fallback `/evenementen` applies). Match ids are source-prefixed
  * (`match-<id>`) so a numeric PSD id can never collide with a Sanity `_id`.
+ * An article with a per-day schedule becomes one item per session, never one
+ * span over every day between its first and last session (#3906).
  */
 export const buildCalendarFeed = (
   matches: CalendarMatch[],
@@ -308,7 +311,7 @@ export const buildCalendarFeed = (
     match,
   }));
 
-  const eventItems = events.map((event): CalendarFeedItem => ({
+  const eventItems = expandSessions(events).map((event): CalendarFeedItem => ({
     source: event.source,
     id: event.id,
     dateStart: event.dateStart,

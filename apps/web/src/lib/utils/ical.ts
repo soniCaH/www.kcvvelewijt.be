@@ -3,6 +3,7 @@ import { getVtimezoneComponent } from "@touch4it/ical-timezones";
 import { DateTime } from "luxon";
 import type { Match } from "@kcvv/api-contract";
 import type { EventListItemVM } from "@/lib/repositories/event.repository";
+import { expandSessions } from "./event-sessions";
 import { SITE_CONFIG } from "@/lib/constants";
 // Doubles as the calendar's `TZID` — an iCal protocol value, not only a display
 // pin — so it is read from the one home rather than restated.
@@ -302,10 +303,7 @@ const matchesToEntries = (
  * and `buildEventIcs`. A timed item with no `dateEnd` omits `end` entirely
  * rather than fabricating a duration the way a match's fixed 2h block does.
  */
-const eventToEntry = (
-  item: EventListItemVM,
-  id = buildEventUid(item.id),
-): IcalEntry | undefined => {
+const eventToEntry = (item: EventListItemVM): IcalEntry | undefined => {
   const { isAllDay, start, end, allDayEndExclusive } = resolveEventDateRange(
     item.dateStart,
     item.dateEnd,
@@ -315,6 +313,7 @@ const eventToEntry = (
 
   const location = item.location ?? undefined;
   const url = `${SITE_CONFIG.siteUrl}${item.href}`;
+  const id = buildEventUid(item.id);
   const summary = item.title;
 
   if (isAllDay) {
@@ -342,30 +341,18 @@ const eventToEntry = (
 
 /**
  * The pre-mapping stage for club activities (#2704, #2717).
- * `EventRepository.findUpcomingForList()` is already upcoming-only and
- * chronologically sorted by construction (its own GROQ filters +
- * `mergeEventFeed`'s sort), so no re-filter/re-sort happens here — only the
+ * `EventRepository.findUpcomingForList()` is already upcoming-only by
+ * construction (its own GROQ filters), so no re-filter happens here — only the
  * per-item map, dropping any entry `eventToEntry` couldn't parse.
  *
- * An article with a per-day schedule becomes one VEVENT per session, never
- * one span from its first to its last day (#3906). Each session gets its own
- * UID, keyed by its Brussels start (`yyyyMMddHHmm`), or a calendar app would
- * keep only one of them.
+ * An article with a per-day schedule becomes one VEVENT per session, never one
+ * span from its first to its last day (#3906): `expandSessions` gives each
+ * session its own id, so each gets its own UID. VEVENT order carries no
+ * meaning, so the expanded sessions are not re-sorted.
  */
 const eventsToEntries = (events: readonly EventListItemVM[]): IcalEntry[] => {
-  return events
-    .flatMap((item) =>
-      item.sessions
-        ? item.sessions.map((s) =>
-            eventToEntry(
-              { ...item, ...s },
-              buildEventUid(
-                `${item.id}-${s.dateStart.slice(0, 16).replace(/\D/g, "")}`,
-              ),
-            ),
-          )
-        : [eventToEntry(item)],
-    )
+  return expandSessions(events)
+    .map(eventToEntry)
     .filter((entry): entry is IcalEntry => entry !== undefined);
 };
 

@@ -71,15 +71,17 @@ const EVENT_BY_SLUG_QUERY =
  * `$today` (a Brussels-local `yyyy-MM-dd`). `$today`, not `now()`, keeps a
  * same-day all-day event in the list: the fact `date` is a date-only string,
  * which would lose lexicographically to a full `now()` datetime on its own day.
+ * An article with a per-day schedule also stays while any session is today or
+ * later: editors leave `endDate` empty when `sessions` is filled (#3906).
  * Only published articles surface (mirrors `ARTICLES_QUERY`'s publish window).
  * The merged ordering is applied in `mergeEventFeed`, so no `order()` here.
  */
 export const EVENT_ARTICLES_QUERY =
-  defineQuery(`*[_type == "article" && articleType == "event" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && coalesce(body[_type == "eventFact"][0].endDate, body[_type == "eventFact"][0].date) >= $today] {
+  defineQuery(`*[_type == "article" && articleType == "event" && publishedAt <= now() && (!defined(unpublishAt) || unpublishAt > now()) && (coalesce(body[_type == "eventFact"][0].endDate, body[_type == "eventFact"][0].date) >= $today || count(body[_type == "eventFact"][0].sessions[date >= $today]) > 0)] {
   "id": _id,
   "title": coalesce(pt::text(title), title, ""),
   "slug": coalesce(slug.current, ""),
-  "fact": body[_type == "eventFact"][0]{ date, endDate, startTime, location, eventType, sessions[]{ date, startTime, endTime } }
+  "fact": body[_type == "eventFact"][0]{ date, endDate, startTime, location, eventType, sessions[]{ _key, date, startTime, endTime } }
 }`);
 
 /**
@@ -155,11 +157,18 @@ export interface EventListItemVM {
   source: EventListSource;
   /**
    * One entry per day of an article's per-day schedule (`eventFact.sessions`),
-   * soonest first. Present only when the schedule has a valid day; the
-   * calendar feed then emits these instead of the `dateStart`→`dateEnd` span
-   * (#3906).
+   * soonest first. Present only when the schedule has a valid day. The two
+   * calendars show these through `expandSessions` (`lib/utils/event-sessions.ts`), never the
+   * `dateStart`→`dateEnd` span (#3906).
    */
-  sessions?: readonly { dateStart: string; dateEnd: string | null }[];
+  sessions?: readonly EventSessionVM[];
+}
+
+export interface EventSessionVM {
+  /** The session's Sanity `_key`: stable when its date or hours change. */
+  key: string;
+  dateStart: string;
+  dateEnd: string | null;
 }
 
 /** Strict `HH:mm` (00–23 : 00–59). */
@@ -217,17 +226,28 @@ export const mergeEventFeed = (
     const fact = row.fact;
     const dateStart = articleFactToIso(fact?.date, fact?.startTime);
     if (!dateStart) return [];
-    // A session's end only counts with a real time: a bad one must not read as
-    // midnight, which would end the session before it starts.
     const sessions = (fact?.sessions ?? [])
-      .flatMap((s) => {
+      .flatMap((s): EventSessionVM[] => {
         const start = articleFactToIso(s.date, s.startTime);
         if (!start) return [];
-        const end =
-          s.endTime && HHMM.test(s.endTime)
-            ? articleFactToIso(s.date, s.endTime)
-            : null;
-        return [{ dateStart: start, dateEnd: end }];
+        // An end counts only next to a valid start: a lone end would make a
+        // timed block from midnight. No valid start = an all-day session.
+        const timed =
+          !!s.startTime &&
+          HHMM.test(s.startTime) &&
+          !!s.endTime &&
+          HHMM.test(s.endTime);
+        const end = timed
+          ? DateTime.fromISO(`${s.date}T${s.endTime}`, { zone: CLUB_TIMEZONE })
+          : null;
+        // An end at or before the start runs past midnight: it ends next day.
+        const endIso = end?.isValid
+          ? (end <= DateTime.fromISO(start, { zone: CLUB_TIMEZONE })
+              ? end.plus({ days: 1 })
+              : end
+            ).toISO()
+          : null;
+        return [{ key: s._key, dateStart: start, dateEnd: endIso }];
       })
       // Brussels wall-clock ISOs: the text order is the time order.
       .sort((a, b) => a.dateStart.localeCompare(b.dateStart));
