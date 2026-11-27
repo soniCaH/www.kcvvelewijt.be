@@ -105,6 +105,24 @@ describe("useSemanticSearch", () => {
     expect(result.current.executedQuery).toBe("kantine");
   });
 
+  it("settles a 200 whose body is not the contract's into its error state, never undefined results (#3878)", async () => {
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.mocked(fetch).mockResolvedValueOnce(
+      Response.json({ hits: [], answer: "x" }),
+    );
+
+    const { result } = renderHook(() =>
+      useSemanticSearch({ type: "responsibility", debounceMs: 0 }),
+    );
+
+    act(() => result.current.search("kantine"));
+
+    await waitFor(() => expect(result.current.error).toBe(true));
+    expect(result.current.results).toEqual([]);
+    expect(result.current.answer).toBeUndefined();
+    expect(result.current.executedQuery).toBe("kantine");
+  });
+
   it("exposes answer from response", async () => {
     vi.mocked(fetch).mockResolvedValueOnce({
       ok: true,

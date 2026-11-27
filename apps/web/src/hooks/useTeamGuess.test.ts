@@ -53,6 +53,15 @@ describe("useTeamGuess", () => {
     expect(result.current).toEqual({ query: "mijn zoon", age: "U9" });
   });
 
+  it("leaves no guess for a 200 whose body is not the contract's (#3878)", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(Response.json({ age: "nonsense" }));
+    const { result } = renderHook(() => useTeamGuess("mijn zoon", AGES));
+
+    await settle();
+    expect(guessCalls()).toHaveLength(1);
+    expect(result.current).toBeNull();
+  });
+
   it("aborts the request in flight when the query changes", async () => {
     const first: { signal?: AbortSignal } = {};
     vi.mocked(fetch).mockImplementationOnce(

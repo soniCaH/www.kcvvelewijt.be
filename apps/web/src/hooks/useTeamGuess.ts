@@ -1,4 +1,8 @@
+import { Option, Schema as S } from "effect";
+import { TeamGuessResponse } from "@kcvv/api-contract";
 import { useEffect, useState } from "react";
+
+const decodeTeamGuess = S.decodeUnknownOption(TeamGuessResponse);
 
 export interface TeamGuess {
   /** The query the BFF answered — compare it with the current one before use. */
@@ -31,8 +35,9 @@ export const useTeamGuess = (
       signal: controller.signal,
     })
       .then((res) => (res.ok ? res.json() : null))
-      .then((data: { age?: string | null } | null) => {
-        if (data?.age) setGuess({ query, age: data.age });
+      .then((data) => {
+        const age = Option.getOrNull(decodeTeamGuess(data))?.age;
+        if (age) setGuess({ query, age });
       })
       .catch((err: unknown) => {
         if ((err as Error).name !== "AbortError")

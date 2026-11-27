@@ -1,4 +1,8 @@
+import { Either, Schema as S } from "effect";
+import { SearchResponse } from "@kcvv/api-contract";
 import { useState, useCallback, useRef, useEffect } from "react";
+
+const decodeSearchResponse = S.decodeUnknownEither(SearchResponse);
 
 export interface SemanticSearchResult {
   id: string;
@@ -100,13 +104,15 @@ export const useSemanticSearch = (
           });
 
           if (!res.ok) throw new Error(`Search failed: ${res.status}`);
-          const data = (await res.json()) as {
-            results: SemanticSearchResult[];
-            answer?: string;
-          };
+          const decoded = decodeSearchResponse(await res.json());
+          // Inside the `try`: a 200 that is not the contract's lands in the
+          // same error state as a non-2xx.
+          if (Either.isLeft(decoded)) {
+            throw new Error("Search response does not match the contract");
+          }
           if (abortRef.current === controller) {
-            setResults(data.results);
-            setAnswer(data.answer);
+            setResults([...decoded.right.results]);
+            setAnswer(decoded.right.answer);
             setExecutedQuery(query);
           }
         } catch (err) {
