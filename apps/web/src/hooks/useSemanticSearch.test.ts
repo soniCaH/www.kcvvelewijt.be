@@ -10,8 +10,8 @@ import {
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useSemanticSearch } from "./useSemanticSearch";
 
-// A switch that makes `import("@/lib/search/search-decoders")` reject: reading
-// the module's `then` (which `await import()` does) throws while it is on.
+// A switch that makes the decoder chunk fail to load: reading an export off
+// `@/lib/search/search-decoders` throws while it is on.
 const decoderChunk = vi.hoisted(() => ({ failing: false }));
 vi.mock("@/lib/search/search-decoders", async (importOriginal) => {
   const actual = await importOriginal<object>();

@@ -204,8 +204,13 @@ export const SearchInterface = ({
         setLastSettledQuery(searchQuery.trim());
       }
     } catch (error) {
-      // Don't update state if request was aborted
-      if (error instanceof Error && error.name === "AbortError") {
+      // Don't update state if request was aborted — whatever its error: a
+      // decoder chunk that fails after the query was cleared is not a failed
+      // search.
+      if (
+        controller.signal.aborted ||
+        (error instanceof Error && error.name === "AbortError")
+      ) {
         return;
       }
 

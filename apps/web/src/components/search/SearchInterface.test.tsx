@@ -23,8 +23,8 @@ import { useSemanticAugment, type SemanticAugment } from "./useSemanticAugment";
 
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
-// A switch that makes `import("@/lib/search/search-decoders")` reject: reading
-// the module's `then` (which `await import()` does) throws while it is on.
+// A switch that makes the decoder chunk fail to load: reading an export off
+// `@/lib/search/search-decoders` throws while it is on.
 const decoderChunk = vi.hoisted(() => ({ failing: false }));
 vi.mock("@/lib/search/search-decoders", async (importOriginal) => {
   const actual = await importOriginal<object>();
@@ -449,6 +449,43 @@ describe("SearchInterface", () => {
       await waitFor(() => {
         expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
       });
+      warn.mockRestore();
+    });
+
+    it("should not count a search failure that lands after the query was cleared (#3878)", async () => {
+      const user = setupUser();
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const gate = Promise.withResolvers<void>();
+      fetchMock.mockReturnValueOnce(
+        gate.promise.then(() => ({
+          ok: true,
+          json: async () => createMockSearchResponse("test"),
+        })),
+      );
+
+      render(<SearchInterface />);
+
+      const input = screen.getByRole("textbox");
+      await user.type(input, "test");
+      await user.click(screen.getByRole("button", { name: /^zoeken$/i }));
+      await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+
+      await user.click(
+        screen.getByRole("button", { name: /wis zoekopdracht/i }),
+      );
+      // Let the clear settle (it aborts the request and resets the state), and
+      // only then let the request finish with the decoder chunk failing to load.
+      await act(() => vi.advanceTimersByTimeAsync(350));
+      mockTrackEvent.mockClear();
+      decoderChunk.failing = true;
+      gate.resolve();
+      await act(() => vi.advanceTimersByTimeAsync(350));
+
+      // The failure state of a request nobody waits for must not be counted.
+      expect(screen.queryByText(/er ging iets mis/i)).not.toBeInTheDocument();
+      expect(
+        mockTrackEvent.mock.calls.filter(([name]) => name === "search_failed"),
+      ).toHaveLength(0);
       warn.mockRestore();
     });
 

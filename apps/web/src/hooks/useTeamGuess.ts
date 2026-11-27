@@ -49,7 +49,7 @@ export const useTeamGuess = (
         if (guess?.age) setGuess({ query, age: guess.age });
       })
       .catch((err: unknown) => {
-        if ((err as Error).name !== "AbortError")
+        if (!controller.signal.aborted && (err as Error).name !== "AbortError")
           console.warn("[useTeamGuess] team guess failed:", err);
       });
     return () => controller.abort();
