@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import type { TransferFactValue } from "../TransferFact/types";
 import { TransferFactCard } from "./TransferFactCard";
 
-function fact(overrides: Partial<TransferFactValue> = {}): TransferFactValue {
+const fact = (
+  overrides: Partial<TransferFactValue> = {},
+): TransferFactValue => {
   return {
     _key: "f1",
     _type: "transferFact",
@@ -15,7 +17,7 @@ function fact(overrides: Partial<TransferFactValue> = {}): TransferFactValue {
     kcvvContext: "#14",
     ...overrides,
   };
-}
+};
 
 describe("<TransferFactCard>", () => {
   it("renders the player name in italic Freight Display", () => {

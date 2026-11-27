@@ -598,9 +598,9 @@ describe("mapCuratedRelatedContent", () => {
 });
 
 describe("articleVMsToRelatedRowItems", () => {
-  function makeArticle(
+  const makeArticle = (
     overrides: Partial<ArticleVM> & { id: string },
-  ): ArticleVM {
+  ): ArticleVM => {
     return {
       title: `Artikel ${overrides.id}`,
       slug: `artikel-${overrides.id}`,
@@ -614,7 +614,7 @@ describe("articleVMsToRelatedRowItems", () => {
       firstEventFact: null,
       ...overrides,
     };
-  }
+  };
 
   it("maps ArticleVM[] to reference-source article cards (parity with the retired related grid)", () => {
     const items = articleVMsToRelatedRowItems([
@@ -869,7 +869,7 @@ describe("mapRelatedToRelatedRow", () => {
 });
 
 describe("eventVMsToSiblingItems", () => {
-  function makeEvent(overrides: Partial<EventVM> & { id: string }): EventVM {
+  const makeEvent = (overrides: Partial<EventVM> & { id: string }): EventVM => {
     return {
       title: `Event ${overrides.id}`,
       slug: `event-${overrides.id}`,
@@ -882,7 +882,7 @@ describe("eventVMsToSiblingItems", () => {
       coverImageUrl: null,
       ...overrides,
     };
-  }
+  };
 
   it("maps events to domain-source cards", () => {
     const items = eventVMsToSiblingItems([

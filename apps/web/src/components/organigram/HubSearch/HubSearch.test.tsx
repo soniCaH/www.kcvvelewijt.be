@@ -60,16 +60,16 @@ vi.mock("@/hooks/useSemanticSearch", async (importOriginal) => ({
   useSemanticSearch: () => mockSemantic,
 }));
 
-function setSemantic(
+const setSemantic = (
   patch: Partial<Pick<typeof mockSemantic, "results" | "loading" | "error">> & {
     executedQuery?: string;
   },
-) {
+) => {
   Object.assign(mockSemantic, patch);
-}
+};
 
 /** Build a semantic hit for one of the fixture paths (slug == path id). */
-function hit(slug: string, score: number): SemanticSearchResult {
+const hit = (slug: string, score: number): SemanticSearchResult => {
   return {
     id: slug,
     slug,
@@ -78,33 +78,33 @@ function hit(slug: string, score: number): SemanticSearchResult {
     title: "",
     excerpt: "",
   };
-}
+};
 
-function renderSearch(responsibilityPaths = HUB_SEARCH_PATHS) {
+const renderSearch = (responsibilityPaths = HUB_SEARCH_PATHS) => {
   return render(
     <HubSearch
       members={HUB_SEARCH_MEMBERS}
       responsibilityPaths={responsibilityPaths}
     />,
   );
-}
+};
 
-function typeQuery(text: string) {
+const typeQuery = (text: string) => {
   const input = screen.getByLabelText("Zoek een persoon of hulpvraag");
   fireEvent.focus(input);
   fireEvent.change(input, { target: { value: text } });
   return input;
-}
+};
 
 /** Stands in for `<OrganigramSectionNav>`, the real publisher of the
  *  pinned strip's height. */
-function InsetPublisher({ value }: { value: number }) {
+const InsetPublisher = ({ value }: { value: number }) => {
   const publish = useHubSearchTopInsetPublisher();
   useEffect(() => {
     publish(value);
   }, [publish, value]);
   return null;
-}
+};
 
 describe("HubSearch", () => {
   beforeEach(() => {
@@ -738,7 +738,7 @@ describe("HubSearch — the hub handoff (#3043)", () => {
   const HERO_PLACEHOLDER = 'bv. "mijn kind is geblesseerd" of een naam…';
   const NAV_PLACEHOLDER = "Zoek…";
 
-  function renderPair() {
+  const renderPair = () => {
     render(
       <HubSearchQueryProvider>
         <HubSearch
@@ -763,28 +763,28 @@ describe("HubSearch — the hub handoff (#3043)", () => {
       heroRoot: hero.closest("[data-hub-search]") as HTMLElement,
       navRoot: nav.closest("[data-hub-search]") as HTMLElement,
     };
-  }
+  };
 
   /** The LIVE observer watching one instance's own wrapper, if it has one —
    *  the last constructed, since the effect rebuilds when the section nav
    *  publishes its measured inset and the earlier one is disconnected. */
-  function observersFor(root: HTMLElement) {
+  const observersFor = (root: HTMLElement) => {
     return FakeIntersectionObserver.instances.filter((instance) =>
       instance.observed.includes(root),
     );
-  }
+  };
 
-  function observerFor(root: HTMLElement) {
+  const observerFor = (root: HTMLElement) => {
     return observersFor(root).at(-1);
-  }
+  };
 
-  function scrollBehindChrome(root: HTMLElement) {
+  const scrollBehindChrome = (root: HTMLElement) => {
     const observer = observerFor(root);
     if (!observer) throw new Error("no IntersectionObserver for that wrapper");
     act(() => {
       observer.trigger([{ isIntersecting: false }]);
     });
-  }
+  };
 
   it("shares one query, so what is typed in the hero shows in the nav copy", () => {
     const { hero, nav } = renderPair();
@@ -943,7 +943,7 @@ describe("HubSearch — the youth team card (#3558)", () => {
     });
   });
 
-  function renderWithTeams(nodes = TEAM_CARD_NODES) {
+  const renderWithTeams = (nodes = TEAM_CARD_NODES) => {
     return render(
       <HubSearch
         members={[...HUB_SEARCH_MEMBERS, ...nodes]}
@@ -955,7 +955,7 @@ describe("HubSearch — the youth team card (#3558)", () => {
         }}
       />,
     );
-  }
+  };
 
   it('shows the U12 card with the Middenbouw coordinator and the TVJO for "U12"', async () => {
     renderWithTeams();
@@ -1120,7 +1120,7 @@ describe('HubSearch — the AI "Bedoel je …?" fallback (#3559)', () => {
     vi.unstubAllGlobals();
   });
 
-  function renderWithTeams() {
+  const renderWithTeams = () => {
     return render(
       <HubSearch
         members={[...HUB_SEARCH_MEMBERS, ...TEAM_CARD_NODES]}
@@ -1132,7 +1132,7 @@ describe('HubSearch — the AI "Bedoel je …?" fallback (#3559)', () => {
         }}
       />,
     );
-  }
+  };
 
   const settle = () => act(() => new Promise((r) => setTimeout(r, 250)));
 

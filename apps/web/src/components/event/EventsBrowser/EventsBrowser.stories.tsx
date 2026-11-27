@@ -4,9 +4,9 @@ import { blurActive } from "@test-storybook/blurActive";
 import type { EventListItemVM } from "@/lib/repositories/event.repository";
 import { EventsBrowser } from "./EventsBrowser";
 
-function ev(
+const ev = (
   overrides: Partial<EventListItemVM> & { id: string },
-): EventListItemVM {
+): EventListItemVM => {
   return {
     title: "Evenement",
     href: `/evenementen/${overrides.id}`,
@@ -17,7 +17,7 @@ function ev(
     source: "event",
     ...overrides,
   };
-}
+};
 
 const EVENTS: EventListItemVM[] = [
   ev({

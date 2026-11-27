@@ -63,7 +63,7 @@ const _reducedHasNoHomeTeam: CalendarReducedMatch = {
 /** This suite's own defaults for the shared raw-`Match` factory (#2826) — kept
  *  identical to the pre-migration local `createMatch` so no assertion below
  *  had to change. */
-function createTestMatch(overrides: Partial<Match> = {}): Match {
+const createTestMatch = (overrides: Partial<Match> = {}): Match => {
   return createRawMatch({
     id: 100,
     date: new Date("2026-03-28T14:00:00Z"),
@@ -75,7 +75,7 @@ function createTestMatch(overrides: Partial<Match> = {}): Match {
     kcvv_team_label: "A-Ploeg",
     ...overrides,
   });
-}
+};
 
 describe("transformMatchToCalendar", () => {
   it("maps all fields correctly", () => {
@@ -238,9 +238,9 @@ describe("transformMatchToCalendar", () => {
 
 // ── eventListItemToCalendarEvent ──────────────────────────────────────────
 
-function makeEventListItem(
+const makeEventListItem = (
   overrides: Partial<EventListItemVM> = {},
-): EventListItemVM {
+): EventListItemVM => {
   return {
     id: "event-1",
     title: "Spaghetti-avond",
@@ -252,7 +252,7 @@ function makeEventListItem(
     source: "event",
     ...overrides,
   };
-}
+};
 
 describe("eventListItemToCalendarEvent", () => {
   it("maps an event-doc row to a calendar event keeping its /evenementen/[slug] href", () => {
@@ -321,9 +321,9 @@ describe("eventListItemToCalendarEvent", () => {
  * override still carry `homeTeam`/`awayTeam`/`scoreDisplay` from the
  * defaults below, a structurally impossible row no real adapter emits.
  */
-function makeCalendarMatch(
+const makeCalendarMatch = (
   overrides: Partial<CalendarMatchFixture> & { id: number },
-): CalendarMatchFixture {
+): CalendarMatchFixture => {
   return {
     date: "2026-03-15T15:00:00",
     homeTeam: { id: 1, name: "KCVV Elewijt A", logo: "/kcvv.png" },
@@ -334,11 +334,11 @@ function makeCalendarMatch(
     kind: "match",
     ...overrides,
   };
-}
+};
 
-function makeCalendarEvent(
+const makeCalendarEvent = (
   overrides: Partial<CalendarEvent> & { id: string },
-): CalendarEvent {
+): CalendarEvent => {
   return {
     title: "Paastoernooi",
     dateStart: "2026-03-15T10:00:00",
@@ -347,7 +347,7 @@ function makeCalendarEvent(
     source: "event",
     ...overrides,
   };
-}
+};
 
 // ── getDaysInMonth ────────────────────────────────────────────────────────
 

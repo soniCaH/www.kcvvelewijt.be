@@ -16,13 +16,13 @@ type Story = StoryObj<typeof meta>;
 
 // ─── Mock section content helpers ────────────────────────────────────────────
 
-function MockSection({
+const MockSection = ({
   label,
   height = "h-32",
 }: {
   label: string;
   height?: string;
-}) {
+}) => {
   return (
     <div
       className={`mx-auto flex max-w-[var(--container-index)] items-center px-4 md:px-8 ${height}`}
@@ -32,7 +32,7 @@ function MockSection({
       </span>
     </div>
   );
-}
+};
 
 // ─── Shared section configs ───────────────────────────────────────────────────
 

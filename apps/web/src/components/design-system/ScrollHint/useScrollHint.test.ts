@@ -12,7 +12,7 @@ import {
  * Test helper: renders a div with the hook's scrollRef attached,
  * and captures the hook return value via a callback.
  */
-function TestHost({ onHook }: { onHook: (h: UseScrollHintReturn) => void }) {
+const TestHost = ({ onHook }: { onHook: (h: UseScrollHintReturn) => void }) => {
   const hook = useScrollHint();
   useEffect(() => {
     onHook(hook);
@@ -22,7 +22,7 @@ function TestHost({ onHook }: { onHook: (h: UseScrollHintReturn) => void }) {
     "data-testid": "scroll-container",
     style: { overflow: "auto" },
   });
-}
+};
 
 describe("useScrollHint", () => {
   const saved: {
@@ -76,11 +76,11 @@ describe("useScrollHint", () => {
     vi.restoreAllMocks();
   });
 
-  function renderScrollHint(scrollProps: {
+  const renderScrollHint = (scrollProps: {
     scrollWidth: number;
     clientWidth: number;
     scrollLeft: number;
-  }) {
+  }) => {
     const hookRef: { current?: UseScrollHintReturn } = {};
 
     // Mock scrollWidth/clientWidth/scrollLeft on HTMLElement.prototype
@@ -113,7 +113,7 @@ describe("useScrollHint", () => {
     );
 
     return { hookResult: hookRef.current!, ...utils };
-  }
+  };
 
   it("returns canScrollLeft=false and canScrollRight=false when no overflow", () => {
     const { hookResult } = renderScrollHint({
@@ -212,17 +212,17 @@ describe("useScrollHint", () => {
     });
 
     // TestHost doesn't accept options — exercised via a dedicated host.
-    function CustomAmountHost({
+    const CustomAmountHost = ({
       onHook,
     }: {
       onHook: (h: UseScrollHintReturn) => void;
-    }) {
+    }) => {
       const hook = useScrollHint({ scrollAmount: 999 });
       useEffect(() => {
         onHook(hook);
       });
       return createElement("div", { ref: hook.scrollRef });
-    }
+    };
 
     const custom: { current?: UseScrollHintReturn } = {};
     render(
@@ -262,11 +262,11 @@ describe("useScrollHint", () => {
       value: 0,
     });
 
-    function ProportionalHost({
+    const ProportionalHost = ({
       onHook,
     }: {
       onHook: (h: UseScrollHintReturn) => void;
-    }) {
+    }) => {
       const hook = useScrollHint<HTMLDivElement>({
         scrollAmount: (el) => el.clientWidth * 0.8,
       });
@@ -274,7 +274,7 @@ describe("useScrollHint", () => {
         onHook(hook);
       });
       return createElement("div", { ref: hook.scrollRef });
-    }
+    };
 
     const latest: { current?: UseScrollHintReturn } = {};
     render(
@@ -394,7 +394,7 @@ describe("useScrollHint", () => {
         .forEach((restore) => restore());
     });
 
-    function renderVertical(
+    const renderVertical = (
       dims: {
         scrollHeight: number;
         clientHeight: number;
@@ -402,19 +402,19 @@ describe("useScrollHint", () => {
         offsetHeight?: number;
       },
       maxRemainingPx?: number,
-    ) {
+    ) => {
       restores.push(mockLayoutProps(dims));
       const hookRef: { current?: UseScrollHintReturn } = {};
-      function Host() {
+      const Host = () => {
         const hook = useScrollHint({ maxRemainingPx });
         useEffect(() => {
           hookRef.current = hook;
         });
         return createElement("div", { ref: hook.scrollRef });
-      }
+      };
       render(createElement(Host));
       return hookRef.current!;
-    }
+    };
 
     it("is false and 0 when the track fits vertically", () => {
       const hook = renderVertical({
@@ -507,11 +507,11 @@ describe("useScrollHint", () => {
       });
 
       const hookRef: { current?: UseScrollHintReturn } = {};
-      function HostWithChild({
+      const HostWithChild = ({
         onHook,
       }: {
         onHook: (h: UseScrollHintReturn) => void;
-      }) {
+      }) => {
         const hook = useScrollHint();
         useEffect(() => {
           onHook(hook);
@@ -521,7 +521,7 @@ describe("useScrollHint", () => {
           { ref: hook.scrollRef, "data-testid": "scroll-container" },
           createElement("div", { "data-testid": "child" }),
         );
-      }
+      };
 
       render(
         createElement(HostWithChild, {
@@ -624,13 +624,13 @@ describe("useScrollHint", () => {
       });
 
       const hookRef: { current?: UseScrollHintReturn } = {};
-      function GrowingHost({
+      const GrowingHost = ({
         onHook,
         childCount,
       }: {
         onHook: (h: UseScrollHintReturn) => void;
         childCount: number;
-      }) {
+      }) => {
         const hook = useScrollHint();
         useEffect(() => {
           onHook(hook);
@@ -642,7 +642,7 @@ describe("useScrollHint", () => {
             createElement("span", { key: i, "data-testid": `crumb-${i}` }),
           ),
         );
-      }
+      };
 
       const { rerender } = render(
         createElement(GrowingHost, {
@@ -703,11 +703,11 @@ describe("useScrollHint", () => {
       });
 
       const hookRef: { current?: UseScrollHintReturn } = {};
-      function PaddedHost({
+      const PaddedHost = ({
         onHook,
       }: {
         onHook: (h: UseScrollHintReturn) => void;
-      }) {
+      }) => {
         const hook = useScrollHint();
         useEffect(() => {
           onHook(hook);
@@ -717,7 +717,7 @@ describe("useScrollHint", () => {
           "data-testid": "scroll-container",
           style: { paddingLeft: "40px", paddingRight: "40px" },
         });
-      }
+      };
 
       render(
         createElement(PaddedHost, {
@@ -745,11 +745,11 @@ describe("useScrollHint", () => {
       });
 
       const hookRef: { current?: UseScrollHintReturn } = {};
-      function PaddedHost({
+      const PaddedHost = ({
         onHook,
       }: {
         onHook: (h: UseScrollHintReturn) => void;
-      }) {
+      }) => {
         const hook = useScrollHint();
         useEffect(() => {
           onHook(hook);
@@ -759,7 +759,7 @@ describe("useScrollHint", () => {
           "data-testid": "scroll-container",
           style: { paddingLeft: "40px", paddingRight: "40px" },
         });
-      }
+      };
 
       render(
         createElement(PaddedHost, {
@@ -821,11 +821,11 @@ describe("useScrollHint", () => {
             value: content + railPx,
           });
           const hookRef: { current?: UseScrollHintReturn } = {};
-          function Host({
+          const Host = ({
             onHook,
           }: {
             onHook: (h: UseScrollHintReturn) => void;
-          }) {
+          }) => {
             const hook = useScrollHint();
             useEffect(() => {
               onHook(hook);
@@ -837,7 +837,7 @@ describe("useScrollHint", () => {
                 paddingRight: `${railPx / 2}px`,
               },
             });
-          }
+          };
           const { unmount } = render(
             createElement(Host, {
               onHook: (h: UseScrollHintReturn) => {
@@ -873,13 +873,13 @@ describe("useScrollHint", () => {
       });
 
       const hookRef: { current?: UseScrollHintReturn } = {};
-      function ZoomHost({
+      const ZoomHost = ({
         onHook,
         scaleStep,
       }: {
         onHook: (h: UseScrollHintReturn) => void;
         scaleStep: number;
-      }) {
+      }) => {
         const hook = useScrollHint({ remeasureOn: [scaleStep] });
         useEffect(() => {
           onHook(hook);
@@ -888,7 +888,7 @@ describe("useScrollHint", () => {
           ref: hook.scrollRef,
           "data-testid": "scroll-container",
         });
-      }
+      };
 
       const { rerender } = render(
         createElement(ZoomHost, {
@@ -1221,11 +1221,11 @@ describe("useScrollHint", () => {
         value: 300,
       });
 
-      function CappedHost({
+      const CappedHost = ({
         onHook,
       }: {
         onHook: (h: UseScrollHintReturn) => void;
-      }) {
+      }) => {
         const hook = useScrollHint({ maxRemainingPx: 24 });
         useEffect(() => {
           onHook(hook);
@@ -1234,7 +1234,7 @@ describe("useScrollHint", () => {
           ref: hook.scrollRef,
           "data-testid": "scroll-container",
         });
-      }
+      };
 
       const hookRef: { current?: UseScrollHintReturn } = {};
       render(
@@ -1267,11 +1267,11 @@ describe("useScrollHint", () => {
 
       const { flush } = stubAnimationFrame();
 
-      function CappedHost({
+      const CappedHost = ({
         onHook,
       }: {
         onHook: (h: UseScrollHintReturn) => void;
-      }) {
+      }) => {
         const hook = useScrollHint({ maxRemainingPx: 24 });
         useEffect(() => {
           onHook(hook);
@@ -1280,7 +1280,7 @@ describe("useScrollHint", () => {
           ref: hook.scrollRef,
           "data-testid": "scroll-container",
         });
-      }
+      };
 
       const hookRef: { current?: UseScrollHintReturn } = {};
       render(

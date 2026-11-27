@@ -40,11 +40,11 @@ const searchParamsStore = vi.hoisted(() => {
   };
 });
 
-function setMockSearchParams(params: Record<string, string>) {
+const setMockSearchParams = (params: Record<string, string>) => {
   const next = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => next.set(key, value));
   searchParamsStore.set(next);
-}
+};
 
 const mockPush = vi.fn((url: string) => {
   searchParamsStore.set(new URLSearchParams(url.split("?")[1] ?? ""));
@@ -934,7 +934,7 @@ describe("SearchInterface", () => {
         ([eventName]) => eventName === "search_failed",
       );
 
-    async function submitFailingSearch(user: ReturnType<typeof setupUser>) {
+    const submitFailingSearch = async (user: ReturnType<typeof setupUser>) => {
       fetchMock.mockRejectedValueOnce(new Error("Network error"));
       render(<SearchInterface />);
 
@@ -963,19 +963,19 @@ describe("SearchInterface", () => {
       expect(screen.getByRole("status")).toBeInTheDocument();
       expect(screen.queryByText(/er ging iets mis/i)).not.toBeInTheDocument();
       expect(failedSearchCalls()).toHaveLength(0);
-    }
+    };
 
     /** Settle the mocked semantic lane to its final kind and force the
      * re-render that picks it up, without touching `error`/`isLoading`/
      * `query` — re-asserting the same URL query is a legitimate real-world
      * trigger (e.g. the semantic fetch's own `setState` landing on an
      * otherwise-idle component). */
-    function settleAugment(next: SemanticAugment) {
+    const settleAugment = (next: SemanticAugment) => {
       mockUseSemanticAugment.mockReturnValue(next);
       act(() => {
         setMockSearchParams({ q: "test" });
       });
-    }
+    };
 
     it("suppresses the failure notice once the semantic lane settles to a high-confidence answer, and still counts the failure", async () => {
       const user = setupUser();
@@ -1945,7 +1945,7 @@ describe("SearchInterface", () => {
      * Settle a first search for "first", then start a second that never
      * resolves. `beforeReSearch` runs once the first list is on screen.
      */
-    async function startReSearch(beforeReSearch?: () => void) {
+    const startReSearch = async (beforeReSearch?: () => void) => {
       setMockSearchParams({ q: "first" });
       fetchMock.mockResolvedValueOnce({
         ok: true,
@@ -1966,7 +1966,7 @@ describe("SearchInterface", () => {
         expect(fetchMock).toHaveBeenCalledTimes(2);
       });
       return { resolveSecond: second.resolve, ...view };
-    }
+    };
 
     it("shows the centred scarf at once on a first search: there is nothing to keep", async () => {
       setMockSearchParams({ q: "first" });

@@ -26,15 +26,15 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
 
-function runWithRepo<A>(
+const runWithRepo = <A>(
   effect: Effect.Effect<A, SanityReadError, HomepageRepository>,
-) {
+) => {
   return Effect.runPromise(Effect.provide(effect, HomepageRepositoryLive));
-}
+};
 
-function makeHomepageResult(
+const makeHomepageResult = (
   overrides: Partial<NonNullable<HOMEPAGE_QUERY_RESULT>> = {},
-): HOMEPAGE_QUERY_RESULT {
+): HOMEPAGE_QUERY_RESULT => {
   return {
     bannerSlotA: {
       imageUrl: "https://cdn.sanity.io/banner-a.webp",
@@ -59,7 +59,7 @@ function makeHomepageResult(
     youthTeamCount: "16",
     ...overrides,
   };
-}
+};
 
 describe("HOMEPAGE_QUERY", () => {
   it("fits rather than crops every banner slot, and carries the asset's own dimensions (#2928)", () => {

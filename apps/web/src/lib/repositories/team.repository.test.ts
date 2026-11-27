@@ -28,16 +28,16 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
 
-function runWithRepo<A>(
+const runWithRepo = <A>(
   effect: Effect.Effect<A, SanityReadError, TeamRepository>,
-) {
+) => {
   return Effect.runPromise(Effect.provide(effect, TeamRepositoryLive));
-}
+};
 
 // Fixture: a team row as returned by TEAMS_QUERY
-function makeTeamRow(
+const makeTeamRow = (
   overrides: Partial<TEAMS_QUERY_RESULT[number]> = {},
-): TEAMS_QUERY_RESULT[number] {
+): TEAMS_QUERY_RESULT[number] => {
   return {
     _id: "team-1",
     psdId: "100",
@@ -50,7 +50,7 @@ function makeTeamRow(
     teamImageUrl: "https://cdn.sanity.io/team.webp",
     ...overrides,
   };
-}
+};
 
 describe("TeamRepository", () => {
   describe("findAll", () => {
@@ -202,9 +202,9 @@ describe("TeamRepository", () => {
     // The generated type is `{ ... } | null`, so we need the non-null shape
     type TeamDetailRow = Exclude<TEAM_BY_SLUG_QUERY_RESULT, null>;
 
-    function makeDetailRow(
+    const makeDetailRow = (
       overrides: Partial<TeamDetailRow> = {},
-    ): TeamDetailRow {
+    ): TeamDetailRow => {
       return {
         _id: "team-1",
         psdId: "100",
@@ -256,7 +256,7 @@ describe("TeamRepository", () => {
         ],
         ...overrides,
       };
-    }
+    };
 
     it("maps TeamDetailVM fields correctly from GROQ result", async () => {
       mockFetch.mockResolvedValueOnce(makeDetailRow());
@@ -673,9 +673,9 @@ describe("TeamRepository", () => {
   });
 
   describe("findAllForLanding", () => {
-    function makeLandingRow(
+    const makeLandingRow = (
       overrides: Partial<TEAMS_LANDING_QUERY_RESULT[number]> = {},
-    ): TEAMS_LANDING_QUERY_RESULT[number] {
+    ): TEAMS_LANDING_QUERY_RESULT[number] => {
       return {
         _id: "team-1",
         psdId: "1",
@@ -699,7 +699,7 @@ describe("TeamRepository", () => {
         ],
         ...overrides,
       };
-    }
+    };
 
     it("maps landing rows to TeamLandingItem[]", async () => {
       mockFetch.mockResolvedValueOnce([makeLandingRow()]);

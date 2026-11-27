@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { MatchLineupSection } from "./MatchLineupSection";
 import type { LineupPlayer } from "../MatchLineup/MatchLineup";
 
-function makePlayer(overrides: Partial<LineupPlayer> = {}): LineupPlayer {
+const makePlayer = (overrides: Partial<LineupPlayer> = {}): LineupPlayer => {
   return {
     name: "Ben Lievens",
     number: 11,
@@ -11,7 +11,7 @@ function makePlayer(overrides: Partial<LineupPlayer> = {}): LineupPlayer {
     status: "starter",
     ...overrides,
   };
-}
+};
 
 const homeLineup: LineupPlayer[] = [
   makePlayer({ name: "Ben Lievens", number: 1, isKeeper: true }),

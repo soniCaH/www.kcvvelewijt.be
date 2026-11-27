@@ -16,16 +16,16 @@ import { SponsorRepository, SponsorRepositoryLive } from "./sponsor.repository";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
 
-function runWithRepo<A>(
+const runWithRepo = <A>(
   effect: Effect.Effect<A, SanityReadError, SponsorRepository>,
-) {
+) => {
   return Effect.runPromise(Effect.provide(effect, SponsorRepositoryLive));
-}
+};
 
 /** Fixture matches the new GROQ projection shape (field renaming + coalescing done in GROQ) */
-function makeSponsorRow(
+const makeSponsorRow = (
   overrides: Partial<SPONSORS_QUERY_RESULT[number]> = {},
-): SPONSORS_QUERY_RESULT[number] {
+): SPONSORS_QUERY_RESULT[number] => {
   return {
     id: "sponsor-1",
     name: "Acme Corp",
@@ -37,7 +37,7 @@ function makeSponsorRow(
     logoUrl: "https://cdn.sanity.io/logo.webp",
     ...overrides,
   };
-}
+};
 
 describe("SponsorRepository", () => {
   describe("findAll", () => {

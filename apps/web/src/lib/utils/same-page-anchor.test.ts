@@ -3,11 +3,11 @@ import type { MouseEvent } from "react";
 import { handleSamePageAnchorClick, revealHash } from "./same-page-anchor";
 
 /** Minimal stand-in for the fields the handler reads off the click event. */
-function clickEvent(
+const clickEvent = (
   overrides: Partial<MouseEvent<HTMLAnchorElement>> = {},
 ): MouseEvent<HTMLAnchorElement> & {
   preventDefault: ReturnType<typeof vi.fn>;
-} {
+} => {
   const preventDefault = vi.fn();
   return {
     defaultPrevented: false,
@@ -20,20 +20,20 @@ function clickEvent(
   } as unknown as MouseEvent<HTMLAnchorElement> & {
     preventDefault: ReturnType<typeof vi.fn>;
   };
-}
+};
 
-function setUrl(url: string) {
+const setUrl = (url: string) => {
   window.history.replaceState(null, "", url);
-}
+};
 
-function addSection(id: string): HTMLElement {
+const addSection = (id: string): HTMLElement => {
   const el = document.createElement("section");
   el.id = id;
   el.scrollIntoView = vi.fn();
   el.focus = vi.fn();
   document.body.appendChild(el);
   return el;
-}
+};
 
 beforeEach(() => {
   document.body.innerHTML = "";

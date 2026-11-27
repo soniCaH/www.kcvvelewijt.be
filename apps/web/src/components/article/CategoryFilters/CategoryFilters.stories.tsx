@@ -32,9 +32,9 @@ type Story = StoryObj<typeof meta>;
  * @param props - Props forwarded to `CategoryFilters`; `activeCategory` is used as the initial selected category.
  * @returns The `CategoryFilters` element wired for interactive state updates within Storybook.
  */
-function InteractiveCategoryFilters(
+const InteractiveCategoryFilters = (
   props: React.ComponentProps<typeof CategoryFilters>,
-) {
+) => {
   const [activeCategory, setActiveCategory] = useState(
     props.activeCategory || "all",
   );
@@ -47,7 +47,7 @@ function InteractiveCategoryFilters(
       onChange={setActiveCategory}
     />
   );
-}
+};
 
 const mockCategories = [
   {

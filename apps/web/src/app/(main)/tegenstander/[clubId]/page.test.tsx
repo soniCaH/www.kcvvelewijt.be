@@ -110,7 +110,7 @@ const RESERVEN_TEAM: TeamNavVM = {
   psdId: RESERVEN_PSD_ID,
 };
 
-function match(id: number, date: string): Match {
+const match = (id: number, date: string): Match => {
   return {
     id,
     date: new Date(date),
@@ -121,15 +121,15 @@ function match(id: number, date: string): Match {
     competitionType: "league",
     is_home: true,
   } as unknown as Match;
-}
+};
 
-function history(wins: number, matchList: Match[]) {
+const history = (wins: number, matchList: Match[]) => {
   return {
     opponent: { id: CLUB_ID, name: "Opponent FC" },
     summary: { wins, draws: 0, losses: 0, goalsFor: wins * 2, goalsAgainst: 0 },
     matches: matchList,
   };
-}
+};
 
 describe("/tegenstander/[clubId] renders one section per senior squad (#2463)", () => {
   beforeEach(() => {

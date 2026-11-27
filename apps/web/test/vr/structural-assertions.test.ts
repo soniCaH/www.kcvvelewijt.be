@@ -62,11 +62,11 @@ const storyFiles = globSync("**/*.stories.{js,jsx,mjs,ts,tsx}", {
 const COMMENT_OR_STRING =
   /"(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|`(?:\\[\s\S]|[^`\\])*`|\/\/[^\n]*|\/\*[\s\S]*?\*\//g;
 
-function stripComments(code: string): string {
+const stripComments = (code: string): string => {
   return code.replace(COMMENT_OR_STRING, (token) =>
     token.startsWith("/") ? "" : token,
   );
-}
+};
 
 interface TagsArrayMatch {
   /** Offset of the match within the (comment-stripped) source it was found in. */
@@ -77,7 +77,7 @@ interface TagsArrayMatch {
 /** Every `tags: [...]` array literal in `code`, comment-stripped source
  * expected — `\b` keeps this from matching a differently-named field that
  * merely ends in "tags" (e.g. a hypothetical `storyTags:`). */
-function findTagsArrays(code: string): TagsArrayMatch[] {
+const findTagsArrays = (code: string): TagsArrayMatch[] => {
   const arrays: TagsArrayMatch[] = [];
   const re = /\btags\s*:\s*\[([^\]]*)\]/g;
   for (const match of code.matchAll(re)) {
@@ -88,7 +88,7 @@ function findTagsArrays(code: string): TagsArrayMatch[] {
     arrays.push({ index: match.index, tags });
   }
   return arrays;
-}
+};
 
 /**
  * Approximates Storybook's `combineTags(meta.tags, story.tags)` for one
@@ -106,7 +106,7 @@ function findTagsArrays(code: string): TagsArrayMatch[] {
  * the union of the meta region's tags with whichever block contains
  * `tagIndex` — the same union `combineTags` performs at runtime.
  */
-function effectiveTagsAt(code: string, tagIndex: number): Set<string> {
+const effectiveTagsAt = (code: string, tagIndex: number): Set<string> => {
   const firstExportConst = code.search(/^export const /m);
   const metaRegionEnd =
     firstExportConst === -1 ? code.length : firstExportConst;
@@ -136,7 +136,7 @@ function effectiveTagsAt(code: string, tagIndex: number): Set<string> {
   ).flatMap((a) => a.tags);
 
   return new Set([...metaTags, ...ownTags]);
-}
+};
 
 describe("structural VR assertion tags stay wired to a story the VR run actually visits", () => {
   it.each(STRUCTURAL_ASSERTIONS)(

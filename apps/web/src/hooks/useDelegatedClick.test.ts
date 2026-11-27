@@ -7,7 +7,7 @@ import { useDelegatedClick } from "./useDelegatedClick";
  * Build a real container with a marked element (holding a nested child) and an
  * unmarked sibling, append it to the document, and return a stable ref to it.
  */
-function setup() {
+const setup = () => {
   const container = document.createElement("div");
 
   const marked = document.createElement("button");
@@ -24,7 +24,7 @@ function setup() {
 
   const ref: RefObject<HTMLElement | null> = { current: container };
   return { container, marked, inner, outside, ref };
-}
+};
 
 describe("useDelegatedClick", () => {
   afterEach(() => {

@@ -4,7 +4,9 @@ import { render, screen } from "@testing-library/react";
 import type { EventListItemVM } from "@/lib/repositories/event.repository";
 import { EventMonthList } from "./EventMonthList";
 
-function makeEvent(overrides: Partial<EventListItemVM> = {}): EventListItemVM {
+const makeEvent = (
+  overrides: Partial<EventListItemVM> = {},
+): EventListItemVM => {
   return {
     id: "event-1",
     title: "Spaghetti-avond",
@@ -16,7 +18,7 @@ function makeEvent(overrides: Partial<EventListItemVM> = {}): EventListItemVM {
     source: "event",
     ...overrides,
   };
-}
+};
 
 describe("EventMonthList", () => {
   it("renders a month heading per chronological group", () => {

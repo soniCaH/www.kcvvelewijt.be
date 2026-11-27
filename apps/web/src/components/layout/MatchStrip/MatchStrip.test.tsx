@@ -38,11 +38,11 @@ const result: ScheduleMatch = {
 
 /** `MatchStrip()` returns the element itself, not rendered output — read the
  * prop straight off it, the same way the existing tests above read `null`. */
-async function matchDayProp(): Promise<boolean | undefined> {
+const matchDayProp = async (): Promise<boolean | undefined> => {
   const element = await MatchStrip();
   return (element as ReactElement<{ matchDay?: boolean }> | null)?.props
     .matchDay;
-}
+};
 
 describe("MatchStrip (server component)", () => {
   it("returns null when neither a result nor a fixture is available", async () => {

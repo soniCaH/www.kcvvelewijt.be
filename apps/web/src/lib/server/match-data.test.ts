@@ -52,9 +52,9 @@ const TEAMS = [
  * (`first-teams.ts`) crashed on before it grew defensive `?.`s, and an
  * `unknown` seam let every fixture below skip that check silently.
  */
-function mockFetches(teams: unknown, matches: readonly Match[]) {
+const mockFetches = (teams: unknown, matches: readonly Match[]) => {
   runPromiseMock.mockResolvedValueOnce(teams).mockResolvedValueOnce(matches);
-}
+};
 
 beforeEach(() => {
   vi.clearAllMocks();

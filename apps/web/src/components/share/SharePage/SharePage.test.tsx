@@ -70,7 +70,7 @@ const pickMatch = async (user: User, match: MatchOption) => {
 };
 
 /** Swaps `navigator.share` / `canShare` for one test. */
-function stubShare(share?: (data: ShareData) => Promise<void>) {
+const stubShare = (share?: (data: ShareData) => Promise<void>) => {
   const original = { share: navigator.share, canShare: navigator.canShare };
   const define = (key: "share" | "canShare", value: unknown) =>
     Object.defineProperty(navigator, key, {
@@ -84,7 +84,7 @@ function stubShare(share?: (data: ShareData) => Promise<void>) {
     define("share", original.share);
     define("canShare", original.canShare);
   };
-}
+};
 
 const PLAYERS: PlayerForShare[] = [
   {

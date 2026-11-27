@@ -51,7 +51,7 @@ import {
 const KCVV_TEAM_ID = 1235;
 const TEAM_SLUG = "kcvv-elewijt-a";
 
-function rankEntry(
+const rankEntry = (
   position: number,
   team_id: number,
   team_name: string,
@@ -62,7 +62,7 @@ function rankEntry(
   goals_for: number,
   goals_against: number,
   points: number,
-): RankingEntry {
+): RankingEntry => {
   return {
     position,
     team_id,
@@ -78,7 +78,7 @@ function rankEntry(
     goal_difference: goals_for - goals_against,
     points,
   } as RankingEntry;
-}
+};
 
 // The A-team publishes exactly one official table; a youth side ends the
 // season with two (#2631).
@@ -104,14 +104,14 @@ const OPP_A = { id: 42, name: "VK Weerde" };
 const OPP_B = { id: 43, name: "FC Mollem" };
 const OPP_C = { id: 44, name: "SK Relegem" };
 
-function scheduleMatch(
+const scheduleMatch = (
   id: number,
   daysOffset: number,
   status: ScheduleMatch["status"],
   scores?: [number, number],
   isHome = true,
   opp = OPP_A,
-): ScheduleMatch {
+): ScheduleMatch => {
   const date = new Date("2026-09-15T12:00:00.000Z");
   date.setDate(date.getDate() + daysOffset);
   return {
@@ -127,7 +127,7 @@ function scheduleMatch(
     homeScore: scores?.[0],
     awayScore: scores?.[1],
   };
-}
+};
 
 const scheduleMatches: ScheduleMatch[] = [
   scheduleMatch(1, -14, "finished", [1, 1], true, OPP_C),
@@ -136,7 +136,7 @@ const scheduleMatches: ScheduleMatch[] = [
   scheduleMatch(4, 14, "scheduled", undefined, true, OPP_B),
 ];
 
-function fixtureMatch(competitionType: Match["competitionType"]): Match {
+const fixtureMatch = (competitionType: Match["competitionType"]): Match => {
   return {
     id: 900,
     date: new Date("2026-09-05T14:00:00.000Z"),
@@ -145,7 +145,7 @@ function fixtureMatch(competitionType: Match["competitionType"]): Match {
     status: "scheduled",
     competitionType,
   } as Match;
-}
+};
 
 // The #2636 AC 2 gate itself: at least one OFFICIAL (`competitionType ===
 // "league"`) fixture this season. Empty reads as not-in-competition exactly
@@ -178,14 +178,14 @@ const PHOTOS = {
   c: "/player-fixtures/player-vartolomaios.jpg",
 };
 
-function player(
+const player = (
   id: string,
   firstName: string,
   lastName: string,
   position: string,
   number: number,
   imageUrl?: string,
-): PlayerVM {
+): PlayerVM => {
   return {
     id,
     firstName,
@@ -195,7 +195,7 @@ function player(
     imageUrl,
     href: `/spelers/${id}`,
   };
-}
+};
 
 const players: PlayerVM[] = [
   player("1", "Jonas", "Vermeer", "Keeper", 1, PHOTOS.a),
@@ -233,9 +233,9 @@ const staff: TeamStaffMemberData[] = [
   { id: "4", firstName: "Annick", lastName: "De Ploeg", role: "afgevaardigde" },
 ];
 
-function block(
+const block = (
   ...spans: ReadonlyArray<{ text: string; marks?: string[] }>
-): PortableTextBlock {
+): PortableTextBlock => {
   return {
     _type: "block",
     _key: `block-${spans.map((s) => s.text.slice(0, 4)).join("-")}`,
@@ -248,7 +248,7 @@ function block(
     })),
     markDefs: [],
   } as unknown as PortableTextBlock;
-}
+};
 
 const teamBody: PortableTextBlock[] = [
   block(
@@ -320,7 +320,9 @@ interface TeamDetailAssemblyProps {
  * ranking read keeps `#wedstrijden` open but swaps the klassement slot for a
  * failure notice instead.
  */
-function TeamDetailAssembly({ competitive = "live" }: TeamDetailAssemblyProps) {
+const TeamDetailAssembly = ({
+  competitive = "live",
+}: TeamDetailAssemblyProps) => {
   const competitiveState =
     competitive === "fixtures-unavailable"
       ? deriveCompetitiveBlockState("unavailable")
@@ -430,7 +432,7 @@ function TeamDetailAssembly({ competitive = "live" }: TeamDetailAssemblyProps) {
       </PageContainer>
     </>
   );
-}
+};
 
 const meta = {
   title: "Pages/Teams/TeamDetail",

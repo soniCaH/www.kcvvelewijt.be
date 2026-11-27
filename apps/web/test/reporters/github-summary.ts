@@ -43,20 +43,20 @@ export interface RunTally {
   status: FullResult["status"];
 }
 
-function list(entries: TallyEntry[]): string {
+const list = (entries: TallyEntry[]): string => {
   return entries
     .map(
       (entry) =>
         `- \`${entry.location}\` — ${entry.title}${entry.reason ? ` _(${entry.reason})_` : ""}`,
     )
     .join("\n");
-}
+};
 
 /**
  * The summary's markdown. Pure, so the wording and the "did everything
  * actually run" arithmetic are testable without a browser.
  */
-export function summaryMarkdown(tally: RunTally): string {
+export const summaryMarkdown = (tally: RunTally): string => {
   const { passed, failed, flaky, skipped, status } = tally;
   const unverified = flaky.length + skipped.length;
   const total = passed + failed.length + unverified;
@@ -115,18 +115,18 @@ export function summaryMarkdown(tally: RunTally): string {
   }
 
   return lines.join("\n");
-}
+};
 
 /** `section-nav.spec.ts:140` from a Playwright `TestCase`. */
-function locationOf(test: TestCase): string {
+const locationOf = (test: TestCase): string => {
   const file = relative(process.cwd(), test.location.file);
   return `${file.split("/").pop() ?? file}:${test.location.line}`;
-}
+};
 
 /** `titlePath()` is `["", <project>, <file>, …describes, <title>]`. */
-function titleOf(test: TestCase): string {
+const titleOf = (test: TestCase): string => {
   return test.titlePath().slice(3).filter(Boolean).join(" › ");
-}
+};
 
 // Loaded by Playwright via a config file-path string
 // (test/e2e/playwright.config.ts's `reporter: [..., ["../reporters/github-summary.ts"]]`),

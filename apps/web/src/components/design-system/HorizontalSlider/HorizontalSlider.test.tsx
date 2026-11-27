@@ -14,7 +14,7 @@ import userEvent from "@testing-library/user-event";
 import { HorizontalSlider } from "./HorizontalSlider";
 import { stubAnimationFrame } from "@/../tests/helpers/scroll-hint.helpers";
 
-function mockScrollDimensions(scrollWidth = 1000, clientWidth = 500) {
+const mockScrollDimensions = (scrollWidth = 1000, clientWidth = 500) => {
   const originalScrollWidth = Object.getOwnPropertyDescriptor(
     HTMLElement.prototype,
     "scrollWidth",
@@ -58,7 +58,7 @@ function mockScrollDimensions(scrollWidth = 1000, clientWidth = 500) {
 
     vi.restoreAllMocks();
   };
-}
+};
 
 describe("HorizontalSlider", () => {
   describe("Rendering", () => {

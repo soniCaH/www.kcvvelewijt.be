@@ -288,7 +288,9 @@ interface HeroGeometry {
   score: HTMLElement;
 }
 
-async function heroGeometry(canvasElement: HTMLElement): Promise<HeroGeometry> {
+const heroGeometry = async (
+  canvasElement: HTMLElement,
+): Promise<HeroGeometry> => {
   await document.fonts.ready;
   const h1 = canvasElement.querySelector("h1") as HTMLElement;
   const all = (part: string) =>
@@ -299,11 +301,11 @@ async function heroGeometry(canvasElement: HTMLElement): Promise<HeroGeometry> {
     labels: all("label"),
     score: h1.querySelector<HTMLElement>("[data-score-state]") as HTMLElement,
   };
-}
+};
 
 const mid = (r: DOMRect) => r.top + r.height / 2;
 
-function assertStackedHero({ crests, names, labels, score }: HeroGeometry) {
+const assertStackedHero = ({ crests, names, labels, score }: HeroGeometry) => {
   expect(crests).toHaveLength(2);
   expect(names).toHaveLength(2);
   for (const name of names) {
@@ -337,7 +339,7 @@ function assertStackedHero({ crests, names, labels, score }: HeroGeometry) {
   expect(
     Math.abs(mid(score.getBoundingClientRect()) - mid(c0)),
   ).toBeLessThanOrEqual(2);
-}
+};
 
 /** The shared check for the short-name-beside-long-name pair. */
 const playShortBesideLong: Story["play"] = async ({ canvasElement }) => {

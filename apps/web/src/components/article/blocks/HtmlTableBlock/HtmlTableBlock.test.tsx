@@ -13,7 +13,7 @@ const SIMPLE_TABLE_HTML = `
 </table>
 `;
 
-function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
+const mockScrollDimensions = (scrollWidth: number, clientWidth: number) => {
   Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
     configurable: true,
     value: scrollWidth,
@@ -22,7 +22,7 @@ function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
     configurable: true,
     value: clientWidth,
   });
-}
+};
 
 describe("<HtmlTableBlock>", () => {
   afterEach(() => {

@@ -50,7 +50,7 @@ describe("collectTopLevelNames", () => {
     for (const d of dirs.splice(0)) rmSync(d, { recursive: true, force: true });
   });
 
-  function fixture(tree: { app: string[]; public: string[] }) {
+  const fixture = (tree: { app: string[]; public: string[] }) => {
     const root = mkdtempSync(path.join(tmpdir(), "top-level-names-"));
     dirs.push(root);
     for (const [base, entries] of [
@@ -71,7 +71,7 @@ describe("collectTopLevelNames", () => {
       appDir: path.join(root, "app"),
       publicDir: path.join(root, "public"),
     };
-  }
+  };
 
   const names = (found: TopLevelName[]) => found.map((f) => f.name).sort();
 

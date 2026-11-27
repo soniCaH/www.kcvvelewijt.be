@@ -33,7 +33,7 @@ vi.mock("./TurnstileWidget", () => ({
   },
 }));
 
-function fillRequiredFields() {
+const fillRequiredFields = () => {
   fireEvent.change(screen.getByLabelText(/Voornaam/), {
     target: { value: "Jan" },
   });
@@ -47,7 +47,7 @@ function fillRequiredFields() {
     target: { value: "jan@example.com" },
   });
   fireEvent.click(screen.getByLabelText(/privacyverklaring/i));
-}
+};
 
 const submitForm = () =>
   fireEvent.submit(screen.getByText(/Verstuur aanvraag/).closest("form")!);

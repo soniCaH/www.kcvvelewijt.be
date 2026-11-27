@@ -3,7 +3,7 @@ import type { EventVM } from "@/lib/repositories/event.repository";
 import { toFeaturedEventBandEvent } from "./to-featured-event";
 
 /** Only the fields the mapper reads; the rest of the VM is structural. */
-function event(p: Partial<EventVM> = {}): EventVM {
+const event = (p: Partial<EventVM> = {}): EventVM => {
   return {
     id: "event-1",
     title: "Mosselfestijn",
@@ -17,7 +17,7 @@ function event(p: Partial<EventVM> = {}): EventVM {
     featuredOnHome: true,
     ...p,
   } as unknown as EventVM;
-}
+};
 
 describe("toFeaturedEventBandEvent", () => {
   // #2392: the CMS `location` reached the VM but never the band, so an editor's

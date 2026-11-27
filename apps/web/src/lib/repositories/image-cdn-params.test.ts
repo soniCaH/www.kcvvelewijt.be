@@ -23,9 +23,9 @@ const REQUIRED_CDN_PARAMS = ["?w=", "q=80", "fm=webp"];
  * Extracts all `"fieldName": ...asset->url` or `"url": url` projections from a GROQ query,
  * excluding file attachment fields (fileUrl).
  */
-function findImageUrlProjections(
+const findImageUrlProjections = (
   query: string,
-): { field: string; projection: string }[] {
+): { field: string; projection: string }[] => {
   const results: { field: string; projection: string }[] = [];
 
   // Match named image URL projections: "fieldName": something.asset->url...
@@ -45,7 +45,7 @@ function findImageUrlProjections(
   }
 
   return results;
-}
+};
 
 describe("Sanity image CDN optimization", () => {
   const queryCases = [

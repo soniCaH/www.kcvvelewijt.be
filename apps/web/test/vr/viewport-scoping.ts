@@ -41,11 +41,11 @@ export const VR_VIEWPORT_NAMES = ["mobile", "tablet", "desktop"] as const;
 
 export type VrViewportName = (typeof VR_VIEWPORT_NAMES)[number];
 
-export function unscopedViewportOverrideMessage(
+export const unscopedViewportOverrideMessage = (
   storyId: string,
   effectiveViewport: string | undefined,
   hasVrViewportsDeclared: boolean,
-): string | null {
+): string | null => {
   if (!effectiveViewport || hasVrViewportsDeclared) return null;
   return (
     `[VR] Story "${storyId}" sets a Storybook viewport override ` +
@@ -55,4 +55,4 @@ export function unscopedViewportOverrideMessage(
     `runner reads neither and still captures every viewport unless one of ` +
     `those two says otherwise.`
   );
-}
+};

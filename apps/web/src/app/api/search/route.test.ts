@@ -31,17 +31,17 @@ vi.mock("@/lib/sanity/client", () => ({
 vi.mock("next/headers", () => ({ draftMode: () => draftModeMock() }));
 
 // Helper to create NextRequest
-function createRequest(url: string): NextRequest {
+const createRequest = (url: string): NextRequest => {
   return new NextRequest(new URL(url, "http://localhost:3000"));
-}
+};
 
-function makePostRequest(body: unknown): NextRequest {
+const makePostRequest = (body: unknown): NextRequest => {
   return new NextRequest(new URL("/api/search", "http://localhost:3000"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-}
+};
 
 describe("POST /api/search", () => {
   const TEST_BFF_URL = "http://localhost:8787";
@@ -613,27 +613,27 @@ describe("GET /api/search", () => {
      * Routes each repository's GROQ query to its own rows. The repositories and
      * the route stay real; only the Sanity client (the outer boundary) answers.
      */
-    function stubSanity(rows: {
+    const stubSanity = (rows: {
       articles?: ArticleRow[];
       players?: PlayerRow[];
       teams?: TeamRow[];
-    }) {
+    }) => {
       mockSanityFetch.mockImplementation(async (query: string) => {
         if (query === ARTICLES_QUERY) return rows.articles ?? [];
         if (query === PLAYERS_QUERY) return rows.players ?? [];
         if (query === TEAMS_QUERY) return rows.teams ?? [];
         return [];
       });
-    }
+    };
 
-    async function search(url: string) {
+    const search = async (url: string) => {
       const response = await GET(createRequest(url));
       expect(response.status).toBe(200);
       return (await response.json()) as {
         count: number;
         results: Array<{ type: string; title: string; url: string }>;
       };
-    }
+    };
 
     const article = (
       id: string,

@@ -26,9 +26,9 @@ export interface CssAnimationSample {
  * `both` fill) without being on its final one. `fill: none`/`auto` leaves
  * nothing held after the animation ends, so it is never reported.
  */
-export function animationsNotOnFinalFrame(
+export const animationsNotOnFinalFrame = (
   samples: readonly CssAnimationSample[],
-): string[] {
+): string[] => {
   return samples
     .filter(
       (sample) =>
@@ -39,4 +39,4 @@ export function animationsNotOnFinalFrame(
       (sample) =>
         `${sample.name} on ${sample.target} (progress ${sample.progress})`,
     );
-}
+};

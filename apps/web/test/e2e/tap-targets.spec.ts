@@ -21,7 +21,7 @@ interface HitMeasurement {
   overlaps: string[];
 }
 
-async function measureHitArea(control: Locator): Promise<HitMeasurement> {
+const measureHitArea = async (control: Locator): Promise<HitMeasurement> => {
   return control.evaluate((el, interactive) => {
     // Rule 2 (#3196): scroll only when the whole 44 × 44 hit square around
     // the control's centre is not already inside the viewport, and never
@@ -144,15 +144,15 @@ async function measureHitArea(control: Locator): Promise<HitMeasurement> {
       overlaps,
     };
   }, INTERACTIVE);
-}
+};
 
-async function expectTapTarget(control: Locator) {
+const expectTapTarget = async (control: Locator) => {
   const m = await measureHitArea(control);
   expect(m.width, "hit width").toBeGreaterThanOrEqual(44);
   expect(m.height, "hit height").toBeGreaterThanOrEqual(44);
   expect(m.coverage, "44 × 44 square resolves to the control").toBe(100);
   expect(m.overlaps, "hit area reaches another control").toEqual([]);
-}
+};
 
 const VIEWPORTS = [
   { width: 375, height: 800 },
@@ -168,7 +168,7 @@ const VIEWPORTS = [
  * region itself always has its full height inside that clip, so polling it
  * "settled" at once and let the measurement land mid-grow (hit width 1).
  */
-async function waitForHeightSettled(region: Locator): Promise<void> {
+const waitForHeightSettled = async (region: Locator): Promise<void> => {
   const clip = region.locator("xpath=..");
   const last: { height: number | null } = { height: null };
   await expect
@@ -179,10 +179,10 @@ async function waitForHeightSettled(region: Locator): Promise<void> {
       return settled;
     })
     .toBe(true);
-}
+};
 
 /** Opens answers on /hulp until one carries a contact card with actions. */
-async function openAnswerWithContact(page: Page): Promise<Locator | null> {
+const openAnswerWithContact = async (page: Page): Promise<Locator | null> => {
   // Closed answers stay mounted, `inert` and clipped to zero height (#3398), so
   // only the open region's links count.
   const openRegion = page.locator('#hulp [role="region"]:not([inert])');
@@ -209,7 +209,7 @@ async function openAnswerWithContact(page: Page): Promise<Locator | null> {
     await toggle.click();
   }
   return null;
-}
+};
 
 /**
  * Waits until `window.scrollY` reads the same on two consecutive polls.
@@ -224,7 +224,7 @@ async function openAnswerWithContact(page: Page): Promise<Locator | null> {
  * scroll to a defect in `measureHitArea`. Polled with `expect.poll` at its
  * own default timeout — no timeout raised, no fixed sleep.
  */
-async function waitForScrollSettled(page: Page): Promise<void> {
+const waitForScrollSettled = async (page: Page): Promise<void> => {
   const last: { scrollY: number | null } = { scrollY: null };
   await expect
     .poll(async () => {
@@ -234,7 +234,7 @@ async function waitForScrollSettled(page: Page): Promise<void> {
       return settled;
     })
     .toBe(true);
-}
+};
 
 for (const viewport of VIEWPORTS) {
   test.describe(`icon-only controls answer to 44 × 44 at ${viewport.width}px`, () => {

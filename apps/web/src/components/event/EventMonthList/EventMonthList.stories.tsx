@@ -2,9 +2,9 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { EventListItemVM } from "@/lib/repositories/event.repository";
 import { EventMonthList } from "./EventMonthList";
 
-function ev(
+const ev = (
   overrides: Partial<EventListItemVM> & { id: string },
-): EventListItemVM {
+): EventListItemVM => {
   return {
     title: "Evenement",
     href: `/evenementen/${overrides.id}`,
@@ -15,7 +15,7 @@ function ev(
     source: "event",
     ...overrides,
   };
-}
+};
 
 const meta = {
   title: "Features/Events/EventMonthList",

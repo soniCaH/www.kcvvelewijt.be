@@ -29,7 +29,7 @@ const MOMENTS: TemplateId[] = [
   "square-result",
 ];
 
-function MomentTable({
+const MomentTable = ({
   look,
   format,
   theme,
@@ -39,7 +39,7 @@ function MomentTable({
   format: ShareFormat;
   theme: ShareTheme;
   mood: "win" | "draw" | "loss";
-}) {
+}) => {
   const Look = LOOKS.find((l) => l.id === look)!.Component;
   return (
     <div style={{ display: "flex", flexWrap: "wrap", gap: 16, padding: 16 }}>
@@ -83,7 +83,7 @@ function MomentTable({
       ))}
     </div>
   );
-}
+};
 
 const meta = {
   title: "Features/Share/Match moments",

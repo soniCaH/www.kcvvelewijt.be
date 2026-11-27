@@ -48,9 +48,9 @@ vi.mock("next/link", () => ({
 
 // ── Fixtures ───────────────────────────────────────────────────────────────
 
-function makeMatch(
+const makeMatch = (
   overrides: Partial<CalendarMatchFixture> & { id: number },
-): CalendarMatchFixture {
+): CalendarMatchFixture => {
   const merged = {
     date: "2026-03-15T15:00:00",
     homeTeam: { id: 1, name: "KCVV Elewijt A", logo: "/kcvv.png" },
@@ -71,11 +71,11 @@ function makeMatch(
         status: merged.status,
       }),
   };
-}
+};
 
-function makeEvent(
+const makeEvent = (
   overrides: Partial<CalendarEvent> & { id: string },
-): CalendarEvent {
+): CalendarEvent => {
   return {
     title: "Spaghetti-avond",
     dateStart: "2026-03-15T18:00:00",
@@ -84,7 +84,7 @@ function makeEvent(
     source: "event",
     ...overrides,
   };
-}
+};
 
 const baseProps = {
   selectedDate: "2026-03-15",

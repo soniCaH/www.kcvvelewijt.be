@@ -296,7 +296,7 @@ describe("buildBreadcrumbJsonLd", () => {
 
     /** Every `name:` value in a route file's first
      *  `buildBreadcrumbJsonLd([...])` call, in trail order. */
-    function routeBreadcrumbNames(relPath: string): string[] {
+    const routeBreadcrumbNames = (relPath: string): string[] => {
       const source = readFileSync(resolve(appDir, relPath), "utf8");
       const call = /buildBreadcrumbJsonLd\(\s*\[([\s\S]*?)\]\s*\)/.exec(source);
       if (!call) {
@@ -307,7 +307,7 @@ describe("buildBreadcrumbJsonLd", () => {
       return [
         ...call[1]!.matchAll(/\bname:\s*("(?:\\.|[^"\\])*"|[^,}]+)/g),
       ].map((m) => m[1]!.trim());
-    }
+    };
 
     it("/spelers/[slug] names its parent 'Ploegen', not the club name", () => {
       const names = routeBreadcrumbNames("(main)/spelers/[slug]/page.tsx");

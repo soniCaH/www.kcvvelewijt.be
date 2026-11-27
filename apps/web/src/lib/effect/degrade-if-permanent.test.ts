@@ -4,12 +4,14 @@ import { degradeIfPermanent } from "./degrade-if-permanent";
 import { makeTaggedBffError } from "./bff-error.fixtures";
 import type { BffError } from "@/lib/effect/services/BffService";
 
-function failingEffect(tag: BffError["_tag"]): Effect.Effect<never, BffError> {
+const failingEffect = (
+  tag: BffError["_tag"],
+): Effect.Effect<never, BffError> => {
   return Effect.fail(makeTaggedBffError(tag)) as unknown as Effect.Effect<
     never,
     BffError
   >;
-}
+};
 
 describe("degradeIfPermanent", () => {
   beforeEach(() => {

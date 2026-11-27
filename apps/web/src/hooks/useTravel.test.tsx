@@ -10,7 +10,7 @@ vi.mock("next/navigation", () => ({
 
 import { useTravel } from "./useTravel";
 
-function mockReducedMotion(reduce: boolean) {
+const mockReducedMotion = (reduce: boolean) => {
   vi.stubGlobal(
     "matchMedia",
     vi.fn().mockImplementation((query: string) => ({
@@ -20,16 +20,16 @@ function mockReducedMotion(reduce: boolean) {
       removeEventListener: vi.fn(),
     })),
   );
-}
+};
 
 /** Three row instances on one page (a match may sit in the strip and in a list at once). */
-function renderRows() {
+const renderRows = () => {
   return renderHook(() => ({
     strip: useTravel("match", "/wedstrijd/42"),
     list: useTravel("match", "/wedstrijd/42"),
     other: useTravel("match", "/wedstrijd/7"),
   }));
-}
+};
 
 const names = (r: ReturnType<typeof renderRows>["result"]) =>
   Object.values(r.current).map((row) => row.transition.name);

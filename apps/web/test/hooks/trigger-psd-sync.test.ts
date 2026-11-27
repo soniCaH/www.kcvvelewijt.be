@@ -97,7 +97,7 @@ const fixture = {} as { dir: string; stubPath: string };
  * so this is rare. If it bites, have the stub listen on 0 and the script read
  * the port off its `Ready on` line.
  */
-function freePort(): Promise<number> {
+const freePort = (): Promise<number> => {
   return new Promise((resolve, reject) => {
     const s = createServer();
     s.once("error", reject);
@@ -106,7 +106,7 @@ function freePort(): Promise<number> {
       s.close(() => resolve(port));
     });
   });
-}
+};
 
 beforeAll(() => {
   fixture.dir = mkdtempSync(join(tmpdir(), "psd-sync-fixture-"));
@@ -118,7 +118,7 @@ afterAll(() => {
   if (fixture.dir) rmSync(fixture.dir, { recursive: true, force: true });
 });
 
-async function run(args: string[], extraEnv: Record<string, string> = {}) {
+const run = async (args: string[], extraEnv: Record<string, string> = {}) => {
   // Each run gets its own port, hits file and log. Sharing them across cases let
   // a later run append to an earlier run's hits, which would make the
   // exactly-once assertion pass or fail on test ordering rather than on the
@@ -144,11 +144,11 @@ async function run(args: string[], extraEnv: Record<string, string> = {}) {
   // argument exits before the script creates it.
   const log = existsSync(logPath) ? readFileSync(logPath, "utf8") : "";
   return { ...result, hitsFile, log };
-}
+};
 
-function hitsOf(hitsFile: string) {
+const hitsOf = (hitsFile: string) => {
   return readFileSync(hitsFile, "utf8").trim().split("\n").filter(Boolean);
-}
+};
 
 describe("trigger-psd-sync.sh", () => {
   it("requests /__scheduled exactly once — the readiness probe never fires the cron (#2890)", async () => {

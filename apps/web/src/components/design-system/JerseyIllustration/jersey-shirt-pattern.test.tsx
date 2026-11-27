@@ -10,13 +10,13 @@ import { ShirtPatternMarks } from "./jersey-shirt-pattern";
 
 // <path>/<circle> are only valid inside an <svg> — wrap every render so
 // jsdom doesn't silently drop the children.
-function renderMarks(props: React.ComponentProps<typeof ShirtPatternMarks>) {
+const renderMarks = (props: React.ComponentProps<typeof ShirtPatternMarks>) => {
   return render(
     <svg>
       <ShirtPatternMarks {...props} />
     </svg>,
   );
-}
+};
 
 describe("ShirtPatternMarks", () => {
   it("renders nothing for a plain shirt", () => {

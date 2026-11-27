@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import type { PortableTextBlock } from "@portabletext/react";
 import { segmentArticleBody } from "./segmentArticleBody";
 
-function paragraph(
+const paragraph = (
   text: string,
   key = `p-${text.slice(0, 6)}`,
-): PortableTextBlock {
+): PortableTextBlock => {
   return {
     _type: "block",
     _key: key,
@@ -13,9 +13,9 @@ function paragraph(
     children: [{ _type: "span", _key: `${key}-c`, text, marks: [] }],
     markDefs: [],
   } as PortableTextBlock;
-}
+};
 
-function blockquote(text: string, key: string): PortableTextBlock {
+const blockquote = (text: string, key: string): PortableTextBlock => {
   return {
     _type: "block",
     _key: key,
@@ -23,16 +23,16 @@ function blockquote(text: string, key: string): PortableTextBlock {
     children: [{ _type: "span", _key: `${key}-c`, text, marks: [] }],
     markDefs: [],
   } as PortableTextBlock;
-}
+};
 
-function transferFact(playerName: string, key: string): PortableTextBlock {
+const transferFact = (playerName: string, key: string): PortableTextBlock => {
   return {
     _type: "transferFact",
     _key: key,
     playerName,
     direction: "incoming",
   } as unknown as PortableTextBlock;
-}
+};
 
 describe("segmentArticleBody", () => {
   it("returns a single pt segment for a body with no special blocks", () => {

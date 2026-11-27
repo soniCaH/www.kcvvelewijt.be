@@ -83,7 +83,7 @@ import WedstrijdenPage from "./page";
 
 /** A real, resolvable team — the shape a stale/mistyped `psdId` still passes
  *  (a genuine team exists; only its *matches* read 404s). */
-function teamFixture(psdId: string): TeamDetailVM {
+const teamFixture = (psdId: string): TeamDetailVM => {
   return {
     id: "team-u13",
     name: "KCVV Elewijt U13",
@@ -106,7 +106,7 @@ function teamFixture(psdId: string): TeamDetailVM {
     players: [],
     staff: [],
   };
-}
+};
 
 describe("/ploegen/[slug]/wedstrijden — a failed matches read never 404s a resolved team (#3041)", () => {
   beforeEach(() => {
@@ -120,14 +120,14 @@ describe("/ploegen/[slug]/wedstrijden — a failed matches read never 404s a res
   });
 
   /** Rejection shape of one render, or a thrown marker if it resolved. */
-  async function renderAndCatch(slug = "kcvv-elewijt-u13") {
+  const renderAndCatch = async (slug = "kcvv-elewijt-u13") => {
     return WedstrijdenPage({ params: Promise.resolve({ slug }) }).then(
       () => {
         throw new Error("expected WedstrijdenPage to reject");
       },
       (error: unknown) => error,
     );
-  }
+  };
 
   it("sends an HttpNotFound matches read to the error boundary, not to the not-found page", async () => {
     mockFindBySlug.mockReturnValue(Effect.succeed(teamFixture("9401")));

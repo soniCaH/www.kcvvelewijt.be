@@ -3,7 +3,7 @@ import { act, render, screen } from "@testing-library/react";
 import { FakeIntersectionObserver } from "@/../tests/helpers/fake-observers.helpers";
 import { ArticleBodyMotion } from "./ArticleBodyMotion";
 
-function stubMatchMedia(matches: boolean): void {
+const stubMatchMedia = (matches: boolean): void => {
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches,
     media: query,
@@ -14,7 +14,7 @@ function stubMatchMedia(matches: boolean): void {
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
   }));
-}
+};
 
 describe("ArticleBodyMotion", () => {
   beforeEach(() => {

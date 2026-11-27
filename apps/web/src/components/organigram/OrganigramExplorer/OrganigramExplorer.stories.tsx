@@ -57,7 +57,7 @@ const longHolderNodes = explorerFixture.map((node) =>
     : node,
 );
 
-async function expectTitleAndNameRead(canvasElement: HTMLElement) {
+const expectTitleAndNameRead = async (canvasElement: HTMLElement) => {
   const card = await within(canvasElement).findByTestId("spotlight-node-card");
   const title = card.firstElementChild as HTMLElement;
   const holder = card.lastElementChild as HTMLElement;
@@ -73,7 +73,7 @@ async function expectTitleAndNameRead(canvasElement: HTMLElement) {
   const label = holder.getBoundingClientRect();
   await expect(label.bottom).toBeLessThanOrEqual(box.bottom);
   await expect(label.top).toBeGreaterThanOrEqual(box.top);
-}
+};
 
 export const LongTitleAndLongNameAt320: Story = {
   tags: ["!vr"],
@@ -167,13 +167,13 @@ export const ZoomOverflowsTheStage: Story = {
  * sizes only its track lets the wrapper grow to the content's height: the
  * track never overflows and the tree runs off the screen, unreachable.
  */
-function stageBounds(canvasElement: HTMLElement) {
+const stageBounds = (canvasElement: HTMLElement) => {
   const canvas = within(canvasElement);
   const dialog = canvas.getByRole("dialog").getBoundingClientRect();
   const track = canvas.getByLabelText("Organigram-verkenner");
   const stage = (track.parentElement as HTMLElement).getBoundingClientRect();
   return { canvas, dialog, track, stage };
-}
+};
 
 /** 320x568 — the tree is taller than the stage, so the track scrolls to reach every control (fan expanded). `!vr`. */
 export const StageIsBoundedOnAShortPhone: Story = {

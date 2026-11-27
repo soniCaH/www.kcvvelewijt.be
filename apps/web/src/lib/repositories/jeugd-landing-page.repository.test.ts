@@ -20,21 +20,21 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
 
-function runWithRepo<A>(
+const runWithRepo = <A>(
   effect: Effect.Effect<A, SanityReadError, JeugdLandingPageRepository>,
-) {
+) => {
   return Effect.runPromise(
     Effect.provide(effect, JeugdLandingPageRepositoryLive),
   );
-}
+};
 
-function makeCard(
+const makeCard = (
   overrides: Partial<
     NonNullable<
       NonNullable<JEUGD_LANDING_PAGE_QUERY_RESULT>["editorialCards"]
     >[number]
   > = {},
-) {
+) => {
   return {
     tag: "Aansluiten",
     title: "Word lid van KCVV",
@@ -46,7 +46,7 @@ function makeCard(
     cardType: "nav" as const,
     ...overrides,
   };
-}
+};
 
 describe("JeugdLandingPageRepository", () => {
   describe("getEditorialCards", () => {

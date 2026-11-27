@@ -27,12 +27,12 @@ import {
   withClubRoot,
 } from "./spotlight-tree";
 
-function node(
+const node = (
   id: string,
   parentId: string | null,
   members = 1,
   title = id,
-): OrgChartNode {
+): OrgChartNode => {
   return {
     id,
     title,
@@ -42,7 +42,7 @@ function node(
       name: `${id} holder ${i}`,
     })),
   };
-}
+};
 
 const NODES: OrgChartNode[] = [
   { id: "club", title: "KCVV Elewijt", parentId: null, members: [] },
@@ -103,7 +103,7 @@ describe("buildSpotlightTree — parent cycles (#3478)", () => {
   const club = { id: "club", title: "KCVV", parentId: null, members: [] };
 
   /** Walk down from the root: every id reachable through `childrenOf`. */
-  function reachable(tree: ReturnType<typeof buildSpotlightTree>): string[] {
+  const reachable = (tree: ReturnType<typeof buildSpotlightTree>): string[] => {
     const out: string[] = [];
     const queue = [tree.rootId];
     while (queue.length) {
@@ -112,7 +112,7 @@ describe("buildSpotlightTree — parent cycles (#3478)", () => {
       queue.push(...(tree.childrenOf.get(id) ?? []).map((n) => n.id));
     }
     return out.sort();
-  }
+  };
 
   it("attaches exactly one member of a two-node cycle to the root", () => {
     const tree = buildSpotlightTree([club, node("a", "b"), node("b", "a")]);

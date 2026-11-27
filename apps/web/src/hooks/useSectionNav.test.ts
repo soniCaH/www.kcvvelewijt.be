@@ -29,67 +29,67 @@ import {
 // them already sets a real `id`, which is all these tests query by).
 const appendedSectionTargets: Element[] = [];
 
-function appendSectionTarget(id: string): HTMLDivElement {
+const appendSectionTarget = (id: string): HTMLDivElement => {
   const el = document.createElement("div");
   el.id = id;
   document.body.appendChild(el);
   appendedSectionTargets.push(el);
   return el;
-}
+};
 
-function emit(
+const emit = (
   observerIndex: number,
   entries: Partial<IntersectionObserverEntry>[],
-) {
+) => {
   act(() => {
     FakeIntersectionObserver.instances[observerIndex]!.trigger(entries);
   });
-}
+};
 
-function fireResize(observerIndex: number) {
+const fireResize = (observerIndex: number) => {
   act(() => {
     FakeResizeObserver.instances[observerIndex]!.trigger();
   });
-}
+};
 
-function mockHeight(el: Element, height: number) {
+const mockHeight = (el: Element, height: number) => {
   Object.defineProperty(el, "getBoundingClientRect", {
     configurable: true,
     value: () => ({ height }) as DOMRect,
   });
-}
+};
 
 /** The reducer reads a section's `top` LIVE off the element, not off the
  *  entry it was last delivered with (#2988 review) — so a test asserting
  *  ordering between two intersecting sections must mock the element's own
  *  `getBoundingClientRect`, not just the entry passed to `emit()`. */
-function mockTop(el: Element, top: number) {
+const mockTop = (el: Element, top: number) => {
   Object.defineProperty(el, "getBoundingClientRect", {
     configurable: true,
     value: () => ({ top }) as DOMRect,
   });
-}
+};
 
 // `useSectionNav` is contracted to be mounted only from a component that
 // renders its `<nav>` unconditionally whenever mounted at all (the ≤1
 // section check lives one level up, in `<TeamSectionNav>` — see its own
 // docblock) — so this host always renders the bar, matching every real
 // caller.
-function TestHost({
+const TestHost = ({
   ids,
   onHook,
 }: {
   ids: readonly string[];
   onHook: (h: UseSectionNavResult) => void;
-}) {
+}) => {
   const hook = useSectionNav(ids);
   useEffect(() => {
     onHook(hook);
   });
   return createElement("nav", { ref: hook.navRef, "data-testid": "nav" }, null);
-}
+};
 
-function renderHook(ids: readonly string[]) {
+const renderHook = (ids: readonly string[]) => {
   const latest: { result?: UseSectionNavResult } = {};
   const utils = render(
     createElement(TestHost, {
@@ -105,7 +105,7 @@ function renderHook(ids: readonly string[]) {
     },
     ...utils,
   };
-}
+};
 
 describe("useSectionNav", () => {
   beforeEach(() => {

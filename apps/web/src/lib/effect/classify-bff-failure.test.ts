@@ -25,7 +25,7 @@ import type { BffError } from "@/lib/effect/services/BffService";
  * `Fail`-only extractor (e.g. `Cause.failureOption`) that silently broke
  * this classification against production's real `Die`-shaped rejection.
  */
-async function runAndCatch(tag: BffError["_tag"]): Promise<unknown> {
+const runAndCatch = async (tag: BffError["_tag"]): Promise<unknown> => {
   try {
     await Effect.runPromise(
       Effect.fail(makeTaggedBffError(tag)).pipe(Effect.orDie),
@@ -34,7 +34,7 @@ async function runAndCatch(tag: BffError["_tag"]): Promise<unknown> {
     return error;
   }
   throw new Error("expected Effect.runPromise to reject");
-}
+};
 
 describe("isPermanentBffFailure", () => {
   it.each<BffError["_tag"]>([

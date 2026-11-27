@@ -20,13 +20,13 @@ import { render, screen } from "@testing-library/react";
 import type { PlayerVM } from "@/lib/repositories/player.repository";
 import { SquadGrid } from "./SquadGrid";
 
-function player(
+const player = (
   id: string,
   firstName: string,
   position: string | undefined,
   number?: number,
   lastName = "Test",
-): PlayerVM {
+): PlayerVM => {
   return {
     id,
     firstName,
@@ -35,7 +35,7 @@ function player(
     number,
     href: `/spelers/${id}`,
   };
-}
+};
 
 const SQUAD: PlayerVM[] = [
   player("1", "Jonas", "Keeper", 1),
@@ -151,20 +151,20 @@ describe("SquadGrid", () => {
 
   describe("Within-group order (#2894)", () => {
     /** The numbers rendered by the "Doelmannen" region's cards, in DOM order. */
-    function numbersIn(regionName: string): string[] {
+    const numbersIn = (regionName: string): string[] => {
       const region = screen.getByRole("region", { name: regionName });
       return Array.from(
         region.querySelectorAll('[data-testid="player-card-number"]'),
       ).map((el) => el.textContent ?? "");
-    }
+    };
 
     /** The last names rendered by a region's cards, in DOM order. */
-    function lastNamesIn(regionName: string): string[] {
+    const lastNamesIn = (regionName: string): string[] => {
       const region = screen.getByRole("region", { name: regionName });
       return Array.from(region.querySelectorAll("em")).map(
         (el) => el.textContent ?? "",
       );
-    }
+    };
 
     it("orders an all-numbered group by jerseyNumber ascending", () => {
       render(

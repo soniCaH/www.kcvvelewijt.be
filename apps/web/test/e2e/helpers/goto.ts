@@ -33,10 +33,10 @@ const LOAD_TIMEOUT_MS = 10_000;
  * forever", silently reinstating the exact unbounded wait this helper
  * exists to remove. Add a parameter only once a real caller needs one.
  */
-export async function gotoBounded(
+export const gotoBounded = async (
   page: Page,
   path: string,
-): Promise<Response | null> {
+): Promise<Response | null> => {
   // `test.info()` reads the currently-running test's info from Playwright's
   // own async-local context — safe to call here because `gotoBounded` only
   // ever runs inside a test body.
@@ -86,4 +86,4 @@ export async function gotoBounded(
     });
 
   return response;
-}
+};

@@ -11,7 +11,7 @@ import userEvent from "@testing-library/user-event";
 import { ScrollRail } from "./ScrollRail";
 import { stubAnimationFrame } from "@/../tests/helpers/scroll-hint.helpers";
 
-function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
+const mockScrollDimensions = (scrollWidth: number, clientWidth: number) => {
   Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
     configurable: true,
     value: scrollWidth,
@@ -20,7 +20,7 @@ function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
     configurable: true,
     value: clientWidth,
   });
-}
+};
 
 describe("ScrollRail", () => {
   afterEach(() => {

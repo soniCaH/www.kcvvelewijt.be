@@ -21,7 +21,9 @@ const mockRunPromise = vi.mocked(runPromise);
 // module scope".
 const { default: EvenementenPage } = await import("./page");
 
-function makeEvent(overrides: Partial<EventListItemVM> = {}): EventListItemVM {
+const makeEvent = (
+  overrides: Partial<EventListItemVM> = {},
+): EventListItemVM => {
   return {
     id: "event-1",
     title: "Spaghetti-avond",
@@ -33,7 +35,7 @@ function makeEvent(overrides: Partial<EventListItemVM> = {}): EventListItemVM {
     source: "event",
     ...overrides,
   };
-}
+};
 
 describe("/evenementen page", () => {
   beforeEach(() => {

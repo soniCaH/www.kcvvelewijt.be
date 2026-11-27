@@ -12,12 +12,12 @@ import { ScrollToTop } from "./ScrollToTop";
 const TO_TOP = { top: 0, left: 0, behavior: "instant" };
 
 /** A real `popstate`, which is what the component listens for. */
-function popTo(pathname: string) {
+const popTo = (pathname: string) => {
   act(() => {
     window.history.pushState({}, "", pathname);
     window.dispatchEvent(new PopStateEvent("popstate"));
   });
-}
+};
 
 describe("ScrollToTop", () => {
   const ctx = {} as { scrollSpy: ReturnType<typeof vi.spyOn> };

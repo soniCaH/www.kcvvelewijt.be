@@ -9,9 +9,9 @@ import { EventsBrowser } from "./EventsBrowser";
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 const mockTrackEvent = vi.mocked(trackEvent);
 
-function ev(
+const ev = (
   overrides: Partial<EventListItemVM> & { id: string },
-): EventListItemVM {
+): EventListItemVM => {
   return {
     title: "Evenement",
     href: `/evenementen/${overrides.id}`,
@@ -22,7 +22,7 @@ function ev(
     source: "event",
     ...overrides,
   };
-}
+};
 
 const EVENTS: EventListItemVM[] = [
   ev({

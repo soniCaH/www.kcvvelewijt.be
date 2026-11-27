@@ -11,7 +11,7 @@ import { CookieConsentBanner } from "./CookieConsentBanner";
  * paper-stamp buttons, jersey-deep toggles. They mirror the live `#cc-main`
  * CSS and the locked mockup (10ck1) for visual + VR review.
  */
-function stubCookieConsent() {
+const stubCookieConsent = () => {
   if (typeof window !== "undefined") {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).CookieConsent = {
@@ -25,7 +25,7 @@ function stubCookieConsent() {
       }),
     };
   }
-}
+};
 
 const baseBtn: CSSProperties = {
   fontFamily: "var(--font-mono)",
@@ -65,7 +65,7 @@ const heading: CSSProperties = {
   margin: "0 0 8px",
 };
 
-function MockBanner() {
+const MockBanner = () => {
   return (
     <div
       role="dialog"
@@ -136,7 +136,7 @@ function MockBanner() {
       </div>
     </div>
   );
-}
+};
 
 const MOCK_TOGGLE_BACKGROUND = {
   on: "var(--color-jersey-deep)",
@@ -144,7 +144,7 @@ const MOCK_TOGGLE_BACKGROUND = {
   off: "var(--color-cream)",
 } as const;
 
-function MockToggle({ state }: { state: "on" | "off" | "locked" }) {
+const MockToggle = ({ state }: { state: "on" | "off" | "locked" }) => {
   const filled = state === "on" || state === "locked";
   return (
     <span
@@ -170,9 +170,9 @@ function MockToggle({ state }: { state: "on" | "off" | "locked" }) {
       />
     </span>
   );
-}
+};
 
-function MockCategory({
+const MockCategory = ({
   name,
   desc,
   state,
@@ -180,7 +180,7 @@ function MockCategory({
   name: string;
   desc: string;
   state: "on" | "off" | "locked";
-}) {
+}) => {
   return (
     <div
       style={{
@@ -213,9 +213,9 @@ function MockCategory({
       </p>
     </div>
   );
-}
+};
 
-function MockPreferencesModal() {
+const MockPreferencesModal = () => {
   return (
     <div
       style={{
@@ -296,7 +296,7 @@ function MockPreferencesModal() {
       </div>
     </div>
   );
-}
+};
 
 const withBanner: Decorator = function CookieBannerDecorator(Story) {
   stubCookieConsent();

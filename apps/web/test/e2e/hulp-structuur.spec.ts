@@ -11,7 +11,7 @@ const rowFor = (page: Page, nodeId: string): Locator =>
   page.locator(`details[data-node-ids~=${JSON.stringify(nodeId)}]`);
 
 /** Every box id that has a ledger row (key-figure-only boxes have none). */
-async function rowNodeIds(page: Page): Promise<string[]> {
+const rowNodeIds = async (page: Page): Promise<string[]> => {
   return page
     .locator("details[data-node-ids]")
     .evaluateAll((rows) =>
@@ -19,7 +19,7 @@ async function rowNodeIds(page: Page): Promise<string[]> {
         (row) => (row as HTMLElement).dataset.nodeIds?.split(" ") ?? [],
       ),
     );
-}
+};
 
 /**
  * The `expanded` state the browser exposes to assistive tech for the first
@@ -27,7 +27,7 @@ async function rowNodeIds(page: Page): Promise<string[]> {
  * the accessibility tree, so it is what a screen reader is told, not the DOM
  * attribute it is derived from.
  */
-async function announcedExpanded(page: Page): Promise<boolean | undefined> {
+const announcedExpanded = async (page: Page): Promise<boolean | undefined> => {
   const cdp = await page.context().newCDPSession(page);
   try {
     await cdp.send("DOM.enable");
@@ -45,14 +45,14 @@ async function announcedExpanded(page: Page): Promise<boolean | undefined> {
   } finally {
     await cdp.detach();
   }
-}
+};
 
-async function expectRowOpenAndFocused(page: Page, nodeId: string) {
+const expectRowOpenAndFocused = async (page: Page, nodeId: string) => {
   const row = rowFor(page, nodeId);
   await expect(row).toHaveAttribute("open", "");
   await expect(row.locator("summary")).toBeFocused();
   await expect(row).toBeInViewport();
-}
+};
 
 test.describe("/hulp structuur", () => {
   test('"Toon in structuur" from a finder answer opens the matching row', async ({

@@ -19,7 +19,7 @@ vi.mock("next/image", () => ({
 
 const mockFetchGalleries = vi.fn();
 
-function makeGallery(id: string, title: string): GalleryCardVM {
+const makeGallery = (id: string, title: string): GalleryCardVM => {
   return {
     id,
     title,
@@ -29,7 +29,7 @@ function makeGallery(id: string, title: string): GalleryCardVM {
     coverUrl: null,
     coverLqip: null,
   };
-}
+};
 
 const loadMoreButton = () =>
   screen.getByRole("button", { name: /Meer foto's laden/ });

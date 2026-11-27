@@ -155,12 +155,12 @@ describe("summaryMarkdown", () => {
 });
 
 /** The slice of a Playwright `TestCase` the reporter reads. */
-function testCase(
+const testCase = (
   id: string,
   title: string,
   outcome: ReturnType<TestCase["outcome"]>,
   annotations: TestCase["annotations"] = [],
-): TestCase {
+): TestCase => {
   return {
     id,
     outcome: () => outcome,
@@ -168,13 +168,13 @@ function testCase(
     location: { file: join(process.cwd(), "test/e2e/a.spec.ts"), line: 7 },
     annotations,
   } as unknown as TestCase;
-}
+};
 
-function run(tests: TestCase[], status: FullResult["status"]) {
+const run = (tests: TestCase[], status: FullResult["status"]) => {
   const reporter = new GithubSummaryReporter();
   for (const test of tests) reporter.onTestEnd(test);
   reporter.onEnd({ status } as FullResult);
-}
+};
 
 describe("GithubSummaryReporter.onEnd", () => {
   const dir = mkdtempSync(join(tmpdir(), "github-summary-"));

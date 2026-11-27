@@ -38,15 +38,15 @@ beforeEach(() => {
   mockPreviewFetch.mockReset();
 });
 
-function runWithRepo<A>(
+const runWithRepo = <A>(
   effect: Effect.Effect<A, SanityReadError, ArticleRepository>,
-) {
+) => {
   return Effect.runPromise(Effect.provide(effect, ArticleRepositoryLive));
-}
+};
 
-function makeArticleListRow(
+const makeArticleListRow = (
   overrides: Partial<ARTICLES_QUERY_RESULT[number]> = {},
-): ARTICLES_QUERY_RESULT[number] {
+): ARTICLES_QUERY_RESULT[number] => {
   return {
     id: "article-1",
     title: "Test Article",
@@ -63,11 +63,11 @@ function makeArticleListRow(
     firstEventFact: null,
     ...overrides,
   };
-}
+};
 
-function makeArticleDetailRow(
+const makeArticleDetailRow = (
   overrides: Partial<NonNullable<ARTICLE_BY_SLUG_QUERY_RESULT>> = {},
-): NonNullable<ARTICLE_BY_SLUG_QUERY_RESULT> {
+): NonNullable<ARTICLE_BY_SLUG_QUERY_RESULT> => {
   return {
     id: "article-1",
     updatedAt: "2026-03-21T12:00:00Z",
@@ -166,7 +166,7 @@ function makeArticleDetailRow(
     callToAction: null,
     ...overrides,
   };
-}
+};
 
 describe("ArticleRepository", () => {
   describe("findAll", () => {
@@ -1066,10 +1066,10 @@ describe("ArticleRepository", () => {
     // The person query's projection: the related-card fields plus `linked`
     // (the reference edge) and `bodyText` (null for linked rows — GROQ skips
     // flattening what it does not need to confirm).
-    function makePersonRow(
+    const makePersonRow = (
       id: string,
       overrides: { linked?: boolean; bodyText?: string | null } = {},
-    ) {
+    ) => {
       return {
         id,
         title: `Article ${id}`,
@@ -1081,16 +1081,16 @@ describe("ArticleRepository", () => {
         linked: overrides.linked ?? false,
         bodyText: overrides.bodyText ?? null,
       };
-    }
+    };
 
-    function run(p = person) {
+    const run = (p = person) => {
       return runWithRepo(
         Effect.gen(function* () {
           const repo = yield* ArticleRepository;
           return yield* repo.findRelatedByPerson("player-1", p);
         }),
       );
-    }
+    };
 
     it("lists linked articles first, then name-matched ones, each keeping the query's newest-first order", async () => {
       mockFetch.mockResolvedValueOnce([

@@ -19,9 +19,9 @@ import type { PortableTextBlock } from "@portabletext/react";
 import { EXTERNAL_LINKS } from "@/lib/constants";
 import { TeamEditorial } from "./TeamEditorial";
 
-function block(
+const block = (
   ...spans: ReadonlyArray<{ text: string; marks?: string[] }>
-): PortableTextBlock {
+): PortableTextBlock => {
   return {
     _type: "block",
     _key: `block-${spans.map((s) => s.text.slice(0, 3)).join("-")}`,
@@ -34,7 +34,7 @@ function block(
     })),
     markDefs: [],
   } as unknown as PortableTextBlock;
-}
+};
 
 const BODY_WITH_PULLQUOTE: PortableTextBlock[] = [
   block(

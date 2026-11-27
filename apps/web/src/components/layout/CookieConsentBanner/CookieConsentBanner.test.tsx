@@ -81,13 +81,13 @@ describe("CookieConsentBanner", () => {
   // #2675: every other close on the site is the Phosphor Fill `X`; the
   // library draws its own thin stroke X and exposes no option for it, so the
   // house icon is swapped in when the preferences modal is built.
-  function libraryModal() {
+  const libraryModal = () => {
     const modal = document.createElement("div");
     modal.innerHTML =
       '<button class="pm__close-btn" aria-label="Sluiten"><span><svg viewBox="0 0 24 24"><path d="M 19.5 4.5 L 4.5 19.5"/></svg></span></button>';
     document.body.append(modal);
     return modal;
-  }
+  };
 
   it("swaps the preferences close's library X for the house close icon", () => {
     render(<CookieConsentBanner />);

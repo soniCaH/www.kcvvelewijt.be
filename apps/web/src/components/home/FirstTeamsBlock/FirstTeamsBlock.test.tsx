@@ -321,10 +321,10 @@ describe("FirstTeamsBlock", () => {
       // #2505 round-3 review finding S9 — the render call itself carried no
       // assertion, so factoring it out costs nothing every one of these
       // tests was already checking.
-      function renderNoRows(
+      const renderNoRows = (
         placeholder: MatchesSliderPlaceholderVM | null,
         extra?: { unavailable?: boolean },
-      ) {
+      ) => {
         return render(
           <FirstTeamsBlock
             teams={noMatches}
@@ -333,7 +333,7 @@ describe("FirstTeamsBlock", () => {
             {...extra}
           />,
         );
-      }
+      };
 
       it("shows the countdown when the kickoff is in the future", () => {
         renderNoRows({ nextSeasonKickoff: new Date("2026-08-02T00:00:00Z") });

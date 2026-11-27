@@ -27,11 +27,11 @@ vi.mock("next/link", () => ({
  * `global-error.tsx` replaces the root layout, so it renders its own
  * `<html>`/`<body>`. React 19 mounts a whole document into `document`.
  */
-function renderDocument(retry: () => void) {
+const renderDocument = (retry: () => void) => {
   return render(<GlobalError error={new Error("boom")} retry={retry} />, {
     container: document,
   });
-}
+};
 
 describe("global-error boundary", () => {
   const mockRetry = vi.fn();

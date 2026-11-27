@@ -39,16 +39,16 @@ const meta: Meta<typeof MembershipForm> = {
 };
 
 /** Swap `fetch` for `impl`; the returned cleanup puts the original back. */
-function stubFetch(impl: typeof fetch) {
+const stubFetch = (impl: typeof fetch) => {
   const original = globalThis.fetch;
   globalThis.fetch = impl;
   return () => {
     globalThis.fetch = original;
   };
-}
+};
 
 /** Fill every field a visitor can fill (gender and municipality are optional, #3638) and press submit — shared by the submit-state stories. */
-async function fillAndSubmit(canvasElement: HTMLElement) {
+const fillAndSubmit = async (canvasElement: HTMLElement) => {
   const canvas = within(canvasElement);
   await userEvent.type(canvas.getByLabelText(/Voornaam/), "Jan");
   await userEvent.type(canvas.getByLabelText(/Achternaam/), "Peeters");
@@ -58,7 +58,7 @@ async function fillAndSubmit(canvasElement: HTMLElement) {
   await userEvent.type(canvas.getByLabelText(/^E-mail/), "jan@example.com");
   await userEvent.click(canvas.getByLabelText(/privacyverklaring/i));
   await userEvent.click(canvas.getByText(/Verstuur aanvraag/));
-}
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;

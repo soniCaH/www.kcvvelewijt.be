@@ -16,7 +16,7 @@
  *   round trips is enough to drain one coalesced callback plus the React
  *   re-render + effect flush it triggers.
  */
-export async function settle(win: Window = window): Promise<void> {
+export const settle = async (win: Window = window): Promise<void> => {
   await win.document.fonts.ready;
   await new Promise<void>((resolve) =>
     win.requestAnimationFrame(() => resolve()),
@@ -24,4 +24,4 @@ export async function settle(win: Window = window): Promise<void> {
   await new Promise<void>((resolve) =>
     win.requestAnimationFrame(() => resolve()),
   );
-}
+};

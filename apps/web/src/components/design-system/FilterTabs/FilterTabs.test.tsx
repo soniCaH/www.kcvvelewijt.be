@@ -273,11 +273,11 @@ describe("FilterTabs", () => {
     });
 
     it("renders the optional leading glyph before the label", () => {
-      function TestIcon(
+      const TestIcon = (
         _props: import("@/lib/icons.redesign").RedesignIconProps,
-      ) {
+      ) => {
         return <svg data-testid="leading-glyph" />;
-      }
+      };
       const tabsWithIcon: FilterTab[] = [
         { value: "all", label: "Alles", icon: TestIcon },
       ];

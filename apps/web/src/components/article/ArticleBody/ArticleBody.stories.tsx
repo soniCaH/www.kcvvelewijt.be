@@ -36,10 +36,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-function paragraph(
+const paragraph = (
   text: string,
   key = `p-${text.slice(0, 6).replace(/\s/g, "-")}`,
-): PortableTextBlock {
+): PortableTextBlock => {
   return {
     _type: "block",
     _key: key,
@@ -47,12 +47,12 @@ function paragraph(
     children: [{ _type: "span", _key: `${key}-c`, text, marks: [] }],
     markDefs: [],
   } as PortableTextBlock;
-}
+};
 
-function heading(
+const heading = (
   text: string,
   key = `h2-${text.slice(0, 6)}`,
-): PortableTextBlock {
+): PortableTextBlock => {
   return {
     _type: "block",
     _key: key,
@@ -60,13 +60,13 @@ function heading(
     children: [{ _type: "span", _key: `${key}-c`, text, marks: [] }],
     markDefs: [],
   } as PortableTextBlock;
-}
+};
 
-function paragraphWithAccent(
+const paragraphWithAccent = (
   plain: string,
   accented: string,
   trailing = "",
-): PortableTextBlock {
+): PortableTextBlock => {
   const key = `accent-${plain.slice(0, 6).replace(/\s/g, "-")}`;
   return {
     _type: "block",
@@ -79,13 +79,13 @@ function paragraphWithAccent(
     ],
     markDefs: [],
   } as PortableTextBlock;
-}
+};
 
 // transferFact PT block fixture. The double cast through `unknown` is
 // required because the placeholder shape lacks the structural `children`
 // of a real PortableText block; PortableText still accepts the value at
 // runtime because it routes by `_type` before reading any block fields.
-function transferFactBlock(args: {
+const transferFactBlock = (args: {
   _key: string;
   direction?: "incoming" | "outgoing" | "extension";
   playerName: string;
@@ -95,7 +95,7 @@ function transferFactBlock(args: {
   otherClubLogoUrl?: string;
   kcvvContext?: string;
   until?: string;
-}): PortableTextBlock {
+}): PortableTextBlock => {
   return {
     _type: "transferFact",
     _key: args._key,
@@ -108,12 +108,12 @@ function transferFactBlock(args: {
     kcvvContext: args.kcvvContext,
     until: args.until,
   } as unknown as PortableTextBlock;
-}
+};
 
 // `pullQuote.body` is itself constrained Portable Text (one Normal block,
 // no lists, an optional `accent`-marked span) — not a plain string.
 // `accented`, when given, must be a literal substring of `text`.
-function quoteBodyPT(text: string, accented?: string): PortableTextBlock[] {
+const quoteBodyPT = (text: string, accented?: string): PortableTextBlock[] => {
   const key = `pq-body-${text.slice(0, 6).replace(/\s/g, "-")}`;
   if (!accented) {
     return [
@@ -147,7 +147,7 @@ function quoteBodyPT(text: string, accented?: string): PortableTextBlock[] {
       markDefs: [],
     } as PortableTextBlock,
   ];
-}
+};
 
 // Dereferenced `speaker` fixture shape — the article repository GROQ
 // projection resolves this from `pullQuote.speaker` (a reference to a
@@ -166,7 +166,7 @@ interface PullQuoteSpeakerFixture {
 // pullQuote PT block fixture. The renderer consumes `body` plus either a
 // resolved `speaker` (a KCVV player/staffMember) or
 // `externalName`/`externalRole`/`externalSource` (for non-subject quotes).
-function pullQuoteBlock(
+const pullQuoteBlock = (
   body: string,
   extras: {
     speaker?: PullQuoteSpeakerFixture;
@@ -175,7 +175,7 @@ function pullQuoteBlock(
     externalRole?: string;
     externalSource?: string;
   } = {},
-): PortableTextBlock {
+): PortableTextBlock => {
   const { accented, ...rest } = extras;
   return {
     _type: "pullQuote",
@@ -183,7 +183,7 @@ function pullQuoteBlock(
     body: quoteBodyPT(body, accented),
     ...rest,
   } as unknown as PortableTextBlock;
-}
+};
 
 const SHORT_CONTENT: PortableTextBlock[] = [
   paragraph(
@@ -722,7 +722,7 @@ export const BodyComposition: Story = {
 // in-flow/groupAtTail qaBlock story below, this gives Storybook + VR
 // coverage of every body-flow block type the page composition emits.
 
-function articleImageBlock(args: {
+const articleImageBlock = (args: {
   _key: string;
   alt: string;
   width?: "prose" | "wide" | "bleed";
@@ -730,7 +730,7 @@ function articleImageBlock(args: {
   description?: string;
   creditLine?: string;
   dimensions?: { width: number; height: number };
-}): PortableTextBlock {
+}): PortableTextBlock => {
   return {
     _type: "articleImage",
     _key: args._key,
@@ -750,7 +750,7 @@ function articleImageBlock(args: {
         : undefined,
     },
   } as unknown as PortableTextBlock;
-}
+};
 
 // Upload-path video fixture — used by the mixed Phase-5 composition story
 // to keep VR diffs deterministic. External iframe embeds (YouTube/Vimeo)
@@ -759,12 +759,12 @@ function articleImageBlock(args: {
 // stories use (see `VideoBlock.stories.tsx`).
 const SAMPLE_VIDEO_UPLOAD_URL =
   "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
-function videoBlockUpload(args: {
+const videoBlockUpload = (args: {
   _key: string;
   caption?: string;
   posterUrl?: string;
   width?: "prose" | "wide" | "bleed";
-}): PortableTextBlock {
+}): PortableTextBlock => {
   return {
     _type: "videoBlock",
     _key: args._key,
@@ -778,16 +778,16 @@ function videoBlockUpload(args: {
     caption: args.caption,
     width: args.width ?? "prose",
   } as unknown as PortableTextBlock;
-}
+};
 
-function fileAttachmentBlock(args: {
+const fileAttachmentBlock = (args: {
   _key: string;
   label: string;
   fileUrl: string;
   fileMimeType?: string;
   fileSize?: number;
   fileOriginalFilename?: string;
-}): PortableTextBlock {
+}): PortableTextBlock => {
   return {
     _type: "fileAttachment",
     _key: args._key,
@@ -797,20 +797,20 @@ function fileAttachmentBlock(args: {
     fileSize: args.fileSize,
     fileOriginalFilename: args.fileOriginalFilename,
   } as unknown as PortableTextBlock;
-}
+};
 
-function htmlTableBlock(args: {
+const htmlTableBlock = (args: {
   _key: string;
   html: string;
-}): PortableTextBlock {
+}): PortableTextBlock => {
   return {
     _type: "htmlTable",
     _key: args._key,
     html: args.html,
   } as unknown as PortableTextBlock;
-}
+};
 
-function blockquoteParagraph(text: string, key: string): PortableTextBlock {
+const blockquoteParagraph = (text: string, key: string): PortableTextBlock => {
   return {
     _type: "block",
     _key: key,
@@ -818,9 +818,9 @@ function blockquoteParagraph(text: string, key: string): PortableTextBlock {
     children: [{ _type: "span", _key: `${key}-c`, text, marks: [] }],
     markDefs: [],
   } as PortableTextBlock;
-}
+};
 
-function paragraphWithLinkMarks(key: string): PortableTextBlock {
+const paragraphWithLinkMarks = (key: string): PortableTextBlock => {
   return {
     _type: "block",
     _key: key,
@@ -858,12 +858,12 @@ function paragraphWithLinkMarks(key: string): PortableTextBlock {
       },
     ],
   } as unknown as PortableTextBlock;
-}
+};
 
-function qaBlockInline(
+const qaBlockInline = (
   key: string,
   opts?: { groupAtTail?: boolean },
-): PortableTextBlock {
+): PortableTextBlock => {
   return {
     _type: "qaBlock",
     _key: key,
@@ -897,7 +897,7 @@ function qaBlockInline(
     ],
     ...(opts?.groupAtTail ? { groupAtTail: true } : {}),
   } as unknown as PortableTextBlock;
-}
+};
 
 const MIXED_PHASE_5_CONTENT: PortableTextBlock[] = [
   paragraph(

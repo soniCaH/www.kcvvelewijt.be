@@ -53,7 +53,7 @@ vi.mock("react", async (importOriginal) => ({
   ),
 }));
 
-function reducedMotion(reduce: boolean) {
+const reducedMotion = (reduce: boolean) => {
   vi.stubGlobal(
     "matchMedia",
     vi.fn().mockImplementation((query: string) => ({
@@ -61,7 +61,7 @@ function reducedMotion(reduce: boolean) {
       media: query,
     })),
   );
-}
+};
 
 const names = () =>
   screen
@@ -69,7 +69,7 @@ const names = () =>
     .map((el) => el.getAttribute("data-view-transition"));
 
 /** A news card: the link is an overlay NEXT to the photo that travels. */
-function Card({ slug, label }: { slug: string; label: string }) {
+const Card = ({ slug, label }: { slug: string; label: string }) => {
   return (
     <TravelScope kind="article" href={`/nieuws/${slug}`}>
       <TravelTarget>
@@ -78,7 +78,7 @@ function Card({ slug, label }: { slug: string; label: string }) {
       <TravelLink aria-label={label} />
     </TravelScope>
   );
-}
+};
 
 describe("travel source", () => {
   beforeEach(() => {

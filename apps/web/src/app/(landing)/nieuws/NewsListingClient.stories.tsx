@@ -18,10 +18,10 @@ const heroShapes = [
   "article-hero-transfer",
 ] as const;
 
-function makeMockArticle(
+const makeMockArticle = (
   id: number,
   overrides?: Partial<ArticleVM>,
-): ArticleVM {
+): ArticleVM => {
   return {
     id: `article-${id}`,
     title: `Artikeltitel nummer ${id}`,
@@ -39,7 +39,7 @@ function makeMockArticle(
     firstEventFact: null,
     ...overrides,
   };
-}
+};
 
 const mockCategories = [
   {

@@ -25,9 +25,9 @@ vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
 const NOW = new Date("2026-09-15T12:00:00.000Z");
 
-function makeMatch(
+const makeMatch = (
   overrides: Partial<ScheduleMatch> & { id: number },
-): ScheduleMatch {
+): ScheduleMatch => {
   return {
     kind: "match",
     date: new Date("2026-09-20T15:00:00.000Z"),
@@ -39,7 +39,7 @@ function makeMatch(
     isHome: true,
     ...overrides,
   };
-}
+};
 
 describe("TeamMatchesSection", () => {
   beforeEach(() => {

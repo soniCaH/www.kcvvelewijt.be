@@ -47,11 +47,11 @@ interface SchemaLike {
 
 const TYPES = schemaTypes as unknown as SchemaLike[];
 
-function bodyOf(typeName: string): OfMember[] {
+const bodyOf = (typeName: string): OfMember[] => {
   const type = TYPES.find((t) => t.name === typeName);
   const body = type?.fields?.find((f) => f.name === "body");
   return Array.isArray(body?.of) ? body.of : [];
-}
+};
 
 const objectTypes = (of: OfMember[]): string[] =>
   of

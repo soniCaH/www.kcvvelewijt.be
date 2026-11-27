@@ -2,9 +2,9 @@ import { render } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { RoundAvatar } from "./RoundAvatar";
 
-function root(container: HTMLElement) {
+const root = (container: HTMLElement) => {
   return container.firstElementChild as HTMLElement;
-}
+};
 
 describe("<RoundAvatar>", () => {
   describe("photo", () => {

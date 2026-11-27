@@ -16,21 +16,21 @@ import {
   type UseHashLandingCorrectionResult,
 } from "./useHashLandingCorrection";
 
-function TestHost({
+const TestHost = ({
   ids,
   onHook,
 }: {
   ids: readonly string[];
   onHook: (h: UseHashLandingCorrectionResult) => void;
-}) {
+}) => {
   const hook = useHashLandingCorrection(ids);
   useEffect(() => {
     onHook(hook);
   });
   return null;
-}
+};
 
-function renderHook(ids: readonly string[]) {
+const renderHook = (ids: readonly string[]) => {
   const latest: { result?: UseHashLandingCorrectionResult } = {};
   const utils = render(
     createElement(TestHost, {
@@ -46,7 +46,7 @@ function renderHook(ids: readonly string[]) {
     },
     ...utils,
   };
-}
+};
 
 // Target elements are appended straight to `document.body` — tracked here so
 // `afterEach` can remove them by reference, without a bespoke marker
@@ -54,13 +54,13 @@ function renderHook(ids: readonly string[]) {
 // tests query by).
 const appendedTargets: Element[] = [];
 
-function appendTarget(id: string): HTMLDivElement {
+const appendTarget = (id: string): HTMLDivElement => {
   const el = document.createElement("div");
   el.id = id;
   document.body.appendChild(el);
   appendedTargets.push(el);
   return el;
-}
+};
 
 describe("useHashLandingCorrection", () => {
   afterEach(() => {

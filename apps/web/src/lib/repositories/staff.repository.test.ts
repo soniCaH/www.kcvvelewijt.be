@@ -27,15 +27,15 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
 
-function runWithRepo<A>(
+const runWithRepo = <A>(
   effect: Effect.Effect<A, SanityReadError, StaffRepository>,
-) {
+) => {
   return Effect.runPromise(Effect.provide(effect, StaffRepositoryLive));
-}
+};
 
 type NodeRow = ORGANIGRAM_NODES_QUERY_RESULT[number];
 
-function makeNodeRow(overrides: Partial<NodeRow> = {}): NodeRow {
+const makeNodeRow = (overrides: Partial<NodeRow> = {}): NodeRow => {
   return {
     _id: "node-1",
     title: "Voorzitter",
@@ -57,7 +57,7 @@ function makeNodeRow(overrides: Partial<NodeRow> = {}): NodeRow {
     ],
     ...overrides,
   };
-}
+};
 
 describe("toOrgChartNode", () => {
   it("maps all OrgChartNode fields from an organigramNode row", () => {
@@ -361,7 +361,7 @@ describe("StaffRepository", () => {
   describe("findByPsdId", () => {
     type DetailRow = NonNullable<STAFF_MEMBER_BY_PSD_ID_QUERY_RESULT>;
 
-    function makeDetailRow(overrides: Partial<DetailRow> = {}): DetailRow {
+    const makeDetailRow = (overrides: Partial<DetailRow> = {}): DetailRow => {
       return {
         _id: "staff-1",
         psdId: "psd-42",
@@ -376,7 +376,7 @@ describe("StaffRepository", () => {
         responsibilityPaths: [],
         ...overrides,
       };
-    }
+    };
 
     it("maps all StaffDetailVM fields from GROQ result", async () => {
       mockFetch.mockResolvedValueOnce(makeDetailRow());

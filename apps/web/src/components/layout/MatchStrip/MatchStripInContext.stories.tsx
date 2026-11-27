@@ -67,13 +67,13 @@ const awayFixture: ScheduleMatch = {
   isHome: false,
 };
 
-function PageShell({
+const PageShell = ({
   data,
   matchDay = false,
 }: {
   data: MatchStripData | null;
   matchDay?: boolean;
-}) {
+}) => {
   return (
     <div className="bg-cream-soft min-h-screen">
       <SiteHeader seniorTeams={seniorTeams} />
@@ -97,7 +97,7 @@ function PageShell({
       </main>
     </div>
   );
-}
+};
 
 const meta = {
   title: "Features/Matches/MatchStripInContext",

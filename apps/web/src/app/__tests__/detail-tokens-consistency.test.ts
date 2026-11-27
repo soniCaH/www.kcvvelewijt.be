@@ -108,7 +108,7 @@ const productionSources = sourceFiles.filter(
  * block) inside the interpolation is depth-tracked rather than mistaken
  * for the interpolation's own closing brace.
  */
-function classTokens(source: string): Set<string> {
+const classTokens = (source: string): Set<string> => {
   const tokens = new Set<string>();
   const buf: string[] = [];
 
@@ -214,7 +214,7 @@ function classTokens(source: string): Set<string> {
   flush();
 
   return tokens;
-}
+};
 
 /**
  * Extract the source span from `openIndex` (pointing at `open`) to its
@@ -232,12 +232,12 @@ function classTokens(source: string): Set<string> {
  * least one bag `findBagSpans` found for that file — zero orphans, zero
  * silently-uncovered tokens.
  */
-function extractBalanced(
+const extractBalanced = (
   source: string,
   openIndex: number,
   open: string,
   close: string,
-): string | null {
+): string | null => {
   const state = { depth: 0 };
   const cur = { i: openIndex };
   const stack: string[] = [];
@@ -336,7 +336,7 @@ function extractBalanced(
     }
   }
   return null; // unterminated — caller discards
-}
+};
 
 /**
  * The class-list "expressions" `classTokens` scoping needs (#2610 review,
@@ -354,7 +354,7 @@ function extractBalanced(
  * redundancy, not a correctness problem, since a duplicate bag can only
  * ever agree with itself.
  */
-function findBagSpans(source: string): string[] {
+const findBagSpans = (source: string): string[] => {
   const spans: string[] = [];
 
   for (const m of source.matchAll(/className=\{/g)) {
@@ -390,7 +390,7 @@ function findBagSpans(source: string): string[] {
   }
 
   return spans;
-}
+};
 
 /** One bag of tokens per class-list expression found in a file. */
 const bagsByFile = new Map(
@@ -611,9 +611,9 @@ const HOVER_VARIANT_PREFIX =
  *  `border-t`, `border-ink/30`, `border-t-jersey-deep`, `border-[1.5px]`. */
 const BORDER_UTILITY = /^border(?:-(t|r|b|l|x|y))?(?:-(.+))?$/;
 
-function parseBorderUtility(
+const parseBorderUtility = (
   token: string,
-): { side: BorderSide; kind: "width" | "color" } | null {
+): { side: BorderSide; kind: "width" | "color" } | null => {
   const m = token.match(BORDER_UTILITY);
   if (!m) return null;
   const side = (m[1] as BorderSide | undefined) ?? "all";
@@ -626,7 +626,7 @@ function parseBorderUtility(
   // (`border-dashed`), which never by itself reserves a width either.
   const kind = /^(?:\d|\[)/.test(value) ? "width" : "color";
   return { side, kind };
-}
+};
 
 /** Normalise an axis/all side onto the concrete edges it actually covers:
  *  `x` → left + right, `y` → top + bottom, `all` → all four. A single side
@@ -636,7 +636,7 @@ function parseBorderUtility(
  *  expanded, and `border-x` must NOT be credited with covering
  *  `hover:border-t` even though both mention no matching literal side
  *  (#2610 review, round 2). */
-function expandSide(side: BorderSide): ConcreteSide[] {
+const expandSide = (side: BorderSide): ConcreteSide[] => {
   switch (side) {
     case "all":
       return ["t", "r", "b", "l"];
@@ -647,9 +647,9 @@ function expandSide(side: BorderSide): ConcreteSide[] {
     default:
       return [side];
   }
-}
+};
 
-function hoverBorderConcreteSides(bag: Set<string>): Set<ConcreteSide> {
+const hoverBorderConcreteSides = (bag: Set<string>): Set<ConcreteSide> => {
   const sides = new Set<ConcreteSide>();
   for (const token of bag) {
     if (!HOVER_VARIANT_PREFIX.test(token)) continue;
@@ -660,9 +660,11 @@ function hoverBorderConcreteSides(bag: Set<string>): Set<ConcreteSide> {
     }
   }
   return sides;
-}
+};
 
-function restingBorderWidthConcreteSides(bag: Set<string>): Set<ConcreteSide> {
+const restingBorderWidthConcreteSides = (
+  bag: Set<string>,
+): Set<ConcreteSide> => {
   const sides = new Set<ConcreteSide>();
   for (const token of bag) {
     if (HOVER_VARIANT_PREFIX.test(token)) continue;
@@ -672,7 +674,7 @@ function restingBorderWidthConcreteSides(bag: Set<string>): Set<ConcreteSide> {
     }
   }
   return sides;
-}
+};
 
 describe("parseBorderUtility / expandSide (#2610 review — side-aware fixtures)", () => {
   it.each<[string, BorderSide, "width" | "color"]>([

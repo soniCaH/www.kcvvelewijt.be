@@ -26,9 +26,9 @@ const withAsset = (
 // Click the locked `▶ Afspelen` pill so the native `<video>` element
 // mounts. The Phase 5 redesign holds the player behind a click affordance
 // so the browser never loads bytes on first paint.
-function clickPlayPill() {
+const clickPlayPill = () => {
   fireEvent.click(screen.getByTestId("video-block-play-pill"));
-}
+};
 
 describe("VideoBlock — upload path (Phase 5 #1849)", () => {
   it("renders the Afspelen pill on first paint instead of a <video>", () => {

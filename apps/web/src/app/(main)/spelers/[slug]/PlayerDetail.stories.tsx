@@ -19,10 +19,10 @@ import type { PortableTextBlock } from "@portabletext/react";
 import { BioBlock, PlayerHero, QuotesBlock } from "@/components/player";
 import { StripedSeam } from "@/components/design-system";
 
-function block(
+const block = (
   key: string,
   ...spans: ReadonlyArray<{ text: string; marks?: string[] }>
-): PortableTextBlock {
+): PortableTextBlock => {
   return {
     _type: "block",
     _key: `block-${key}`,
@@ -35,7 +35,7 @@ function block(
     })),
     markDefs: [],
   } as unknown as PortableTextBlock;
-}
+};
 
 const BIO_TWO_MARKS: PortableTextBlock[] = [
   block(
@@ -60,7 +60,7 @@ const BIO_TWO_MARKS: PortableTextBlock[] = [
   ),
 ];
 
-function PlayerProfileAssembly({
+const PlayerProfileAssembly = ({
   bio,
   photoUrl,
   birthDate,
@@ -68,7 +68,7 @@ function PlayerProfileAssembly({
   bio: PortableTextBlock[];
   photoUrl?: string;
   birthDate?: string;
-}) {
+}) => {
   return (
     <>
       <section className="mx-auto w-full max-w-[var(--container-wide)] px-4 py-12 lg:px-8 lg:py-16">
@@ -88,7 +88,7 @@ function PlayerProfileAssembly({
       <QuotesBlock bio={bio} playerName="Maxim Breugelmans" />
     </>
   );
-}
+};
 
 const meta = {
   title: "Pages/Players/PlayerProfile",

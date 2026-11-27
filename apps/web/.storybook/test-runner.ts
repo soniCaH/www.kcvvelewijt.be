@@ -27,7 +27,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // deny-and-record path below instead of silently reaching the network.
 const TYPEKIT_CACHE_DIR = join(__dirname, ".typekit-cache");
 type TypekitCacheEntry = { file: string; contentType: string };
-function loadTypekitManifest(): Record<string, TypekitCacheEntry> {
+const loadTypekitManifest = (): Record<string, TypekitCacheEntry> => {
   try {
     return JSON.parse(
       readFileSync(join(TYPEKIT_CACHE_DIR, "manifest.json"), "utf8"),
@@ -35,7 +35,7 @@ function loadTypekitManifest(): Record<string, TypekitCacheEntry> {
   } catch {
     return {};
   }
-}
+};
 const TYPEKIT_MANIFEST = loadTypekitManifest();
 const TYPEKIT_HOSTS = new Set(["use.typekit.net"]);
 
@@ -65,14 +65,14 @@ const viewportState: {
   defaultViewport: { width: number; height: number } | null;
 } = { defaultViewport: null };
 
-function throwIfDenied(storyId: string): void {
+const throwIfDenied = (storyId: string): void => {
   if (deniedUrls.length === 0) return;
   const offending = deniedUrls.splice(0);
   throw new Error(
     `[VR] Story "${storyId}" triggered ${offending.length} denied ` +
       `off-machine request(s), which must not happen: ${offending.join(", ")}`,
   );
-}
+};
 
 /**
  * Runs after the capture flow (the viewport loop and everything feeding
@@ -87,10 +87,10 @@ function throwIfDenied(storyId: string): void {
  * capture with a recorded denial throws on the denial, same as
  * `throwIfDenied` above.
  */
-function reportDeniedAfterCapture(
+const reportDeniedAfterCapture = (
   storyId: string,
   captureError: unknown,
-): void {
+): void => {
   const offending = deniedUrls.splice(0);
   if (offending.length === 0) {
     if (captureError) throw captureError;
@@ -106,7 +106,7 @@ function reportDeniedAfterCapture(
     throw captureError;
   }
   throw new Error(denialMessage);
-}
+};
 
 const VIEWPORTS: Record<VrViewportName, { width: number; height: number }> = {
   mobile: { width: 375, height: 667 },
@@ -181,22 +181,22 @@ const INITIAL_NAVIGATION_TIMEOUT_MS = 90000;
 //     in the same test file.
 // Animations are disabled separately via Playwright's `animations: "disabled"`
 // screenshot option plus a stylesheet injected per story (see postVisit).
-function determinismInitScript({
+const determinismInitScript = ({
   fixedNowMs,
   prngSeed,
 }: {
   fixedNowMs: number;
   prngSeed: number;
-}) {
+}) => {
   const RealDate = Date;
   // `unknown[]`, not `ConstructorParameters<typeof Date>`: that resolves to
   // the last overload (year, monthIndex, ...), so `args.length === 0` — the
   // live `new Date()` branch — read as dead to the type-checker (TS2367).
-  function StubDate(this: unknown, ...args: unknown[]) {
+  const StubDate = function (this: unknown, ...args: unknown[]) {
     if (!(this instanceof StubDate)) return new RealDate(fixedNowMs).toString();
     if (args.length === 0) return new RealDate(fixedNowMs);
     return new (RealDate as new (...a: unknown[]) => Date)(...args);
-  }
+  };
   StubDate.prototype = RealDate.prototype;
   StubDate.now = () => fixedNowMs;
   StubDate.parse = RealDate.parse.bind(RealDate);
@@ -215,7 +215,7 @@ function determinismInitScript({
   (globalThis as { __VR_RESET_PRNG__?: () => void }).__VR_RESET_PRNG__ = () => {
     prng.s = prngSeed >>> 0;
   };
-}
+};
 
 // Stylesheet injected per story before screenshot. CSS keyframes/transitions
 // would otherwise fire when the viewport resizes between mobile/tablet/desktop
@@ -249,7 +249,7 @@ input, textarea {
 // (test/vr/animation-end-frame.ts) decides. CSS animations only: the
 // determinism stylesheet cannot reach WAAPI `element.animate()` ones, and
 // Playwright's `animations: "disabled"` finishes those at screenshot time.
-function collectCssAnimations() {
+const collectCssAnimations = () => {
   return document.getAnimations().flatMap((animation) => {
     const effect = animation.effect;
     if (!(animation instanceof CSSAnimation)) return [];
@@ -268,7 +268,7 @@ function collectCssAnimations() {
       },
     ];
   });
-}
+};
 
 // Runs in the page context. `document.fonts.ready` alone is NOT a reliable
 // "fonts are applied" signal in this repo: Adobe Typekit injects its
@@ -291,7 +291,7 @@ function collectCssAnimations() {
 // the signal this function exists to replace. Both stages are soft-capped,
 // like every other wait in this runner, so a missing or broken face can't
 // hang a story.
-async function waitForFontsSettled(timeoutMs: number) {
+const waitForFontsSettled = async (timeoutMs: number) => {
   const fonts = document.fonts;
   if (!fonts) return;
 
@@ -355,7 +355,7 @@ async function waitForFontsSettled(timeoutMs: number) {
     fonts.ready,
     new Promise((resolve) => setTimeout(resolve, timeoutMs)),
   ]);
-}
+};
 
 // Runs in the page context. Chromium decodes a downscaled image at a size
 // picked from the viewport it is rastered at, and after a resize it sometimes
@@ -366,7 +366,7 @@ async function waitForFontsSettled(timeoutMs: number) {
 // per-viewport query string makes every image a new resource, so it is
 // fetched and decoded fresh at this viewport, whatever came before: one PNG in
 // 24 runs, even after desktop → tablet → mobile.
-function freshImageDecodes(viewport: string) {
+const freshImageDecodes = (viewport: string) => {
   const bust = (url: string) => {
     if (url.startsWith("data:") || url.startsWith("blob:")) return url;
     const next = new URL(url, location.href);
@@ -392,12 +392,12 @@ function freshImageDecodes(viewport: string) {
     const src = img.getAttribute("src");
     if (src) img.src = bust(src);
   }
-}
+};
 
 // Runs in the page context: scroll to the bottom and back, one frame each
 // (capped at `frameTimeoutMs`), so every IntersectionObserver fires — that is
 // what starts a `next/image` lazy load, not the `loading` attribute.
-async function scrollThroughPage(frameTimeoutMs: number) {
+const scrollThroughPage = async (frameTimeoutMs: number) => {
   const nextFrame = () =>
     Promise.race([
       new Promise((r) => requestAnimationFrame(() => r(undefined))),
@@ -407,17 +407,17 @@ async function scrollThroughPage(frameTimeoutMs: number) {
   await nextFrame();
   window.scrollTo(0, 0);
   await nextFrame();
-}
+};
 
 // Runs in the page context: two animation frames, so layout and the
 // re-renders it triggers have painted. Capped at `frameTimeoutMs` — rAF never
 // fires while Chromium is not painting.
-function waitTwoFrames(frameTimeoutMs: number) {
+const waitTwoFrames = (frameTimeoutMs: number) => {
   return new Promise<void>((resolve) => {
     requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
     setTimeout(resolve, frameTimeoutMs);
   });
-}
+};
 
 // Runs in the page context (self-contained, like `waitForFontsSettled`):
 // flips lazy images to eager, then waits for every image to load and decode.
@@ -426,7 +426,7 @@ function waitTwoFrames(frameTimeoutMs: number) {
 // once per capture viewport, then again with the retry budget for whatever
 // `collectImageSamples` finds unpainted — already-decoded images settle
 // instantly, so the second call effectively waits on the pending ones only.
-async function waitForImagesSettled(budgetMs: number) {
+const waitForImagesSettled = async (budgetMs: number) => {
   // Resolves true when `work` finished, false when the cap won.
   const finishedInTime = async (work: Promise<unknown>) => {
     const timer: { id?: ReturnType<typeof setTimeout> } = {};
@@ -502,13 +502,13 @@ async function waitForImagesSettled(budgetMs: number) {
           .join(", "),
     );
   }
-}
+};
 
 // Runs in the page context, so it is self-contained and returns plain data;
 // `unpaintedImages` (test/vr/unpainted-images.ts) decides which of these are
 // visible and not painted. `decoded` is a short probe: a decoded bitmap answers
 // `decode()` at once, anything slower goes to the retry wait.
-function collectImageSamples(decodeProbeMs: number): Promise<ImageSample[]> {
+const collectImageSamples = (decodeProbeMs: number): Promise<ImageSample[]> => {
   return Promise.all(
     Array.from(document.images).map(async (img) => {
       const rect = img.getBoundingClientRect();
@@ -543,7 +543,7 @@ function collectImageSamples(decodeProbeMs: number): Promise<ImageSample[]> {
       };
     }),
   );
-}
+};
 
 // Replaces `@storybook/test-runner`'s vendored `waitForPageReady` (#3137,
 // flake ledger class G — see #3108's root cause): three uncapped
@@ -563,14 +563,14 @@ function collectImageSamples(decodeProbeMs: number): Promise<ImageSample[]> {
 // Playwright timeouts, no manual `Promise.race`/`setTimeout` to leak),
 // `networkidle` soft (`.catch`) for the same HMR-long-poll reason as
 // `NETWORK_IDLE_TIMEOUT_MS` above.
-async function waitForPageReadyCapped(page: Page, timeoutMs: number) {
+const waitForPageReadyCapped = async (page: Page, timeoutMs: number) => {
   await page.waitForLoadState("domcontentloaded", { timeout: timeoutMs });
   await page
     .waitForLoadState("networkidle", { timeout: timeoutMs })
     .catch(() => {
       // Soft signal — see NETWORK_IDLE_TIMEOUT_MS above for why.
     });
-}
+};
 
 const config: TestRunnerConfig = {
   setup() {

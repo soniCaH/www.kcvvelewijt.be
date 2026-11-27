@@ -17,8 +17,8 @@
  * the hash itself, in a `finally`, once its assertions are done (see
  * `OrganigramSectionNav.stories.tsx`'s `ColdLoadHashLandsBelowTheBar`).
  */
-export function armColdLoadHash(hash: string) {
+export const armColdLoadHash = (hash: string) => {
   return async () => {
     window.location.hash = hash;
   };
-}
+};

@@ -142,22 +142,22 @@ import MatchPage from "@/app/(main)/wedstrijd/[matchId]/page";
  * the `getRanking` call in `fetchStandings` at all. Builds on the shared
  * `createMatchDetail` (also used by `utils.test.ts`) rather than a second
  * hand-copy of the same base fixture. */
-function leagueMatchFixture(id: number) {
+const leagueMatchFixture = (id: number) => {
   return createMatchDetail({
     id,
     competitionType: "league",
     kcvv_team_id: 1,
     is_placeholder: false,
   });
-}
+};
 
 /** Unwrap a rejected `Effect.runPromise`'s `FiberFailure` down to the tagged
  * error's own `_tag` — same squash `isPermanentBffFailure` uses. */
-function rejectedBffErrorTag(error: unknown): unknown {
+const rejectedBffErrorTag = (error: unknown): unknown => {
   if (!Runtime.isFiberFailure(error)) return undefined;
   const squashed = Cause.squash(error[Runtime.FiberFailureCauseId]);
   return (squashed as { _tag?: unknown })?._tag;
-}
+};
 
 describe("a failed subject takes the page down (#2563)", () => {
   it("/sponsors — the sponsor wall is the subject, so the page throws", async () => {

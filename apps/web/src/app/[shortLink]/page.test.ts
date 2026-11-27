@@ -18,14 +18,14 @@ import ShortLinkPage, * as pageModule from "./page";
 
 const fetchMock = vi.fn();
 
-async function visit(segment: string) {
+const visit = async (segment: string) => {
   try {
     await ShortLinkPage({ params: Promise.resolve({ shortLink: segment }) });
   } catch (error) {
     return (error as { digest?: string }).digest ?? String(error);
   }
   throw new Error("the page neither redirected nor 404ed");
-}
+};
 
 const runAfter = () => Promise.all(afterCallbacks.map((cb) => cb()));
 

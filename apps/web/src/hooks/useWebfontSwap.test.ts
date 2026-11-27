@@ -15,7 +15,7 @@ import { useWebfontSwap } from "./useWebfontSwap";
 /** Stub `document.fonts` with a controllable `loadingdone` subscription and
  *  an optional `ready` promise, mirroring `useHashLandingCorrection.test.ts`
  *  — happy-dom has no `document.fonts` at all, unlike a real browser. */
-function stubFonts(ready?: Promise<unknown>) {
+const stubFonts = (ready?: Promise<unknown>) => {
   const loadingDone: { handler?: () => void } = {};
   const removeEventListener = vi.fn((event: string) => {
     if (event === "loadingdone") loadingDone.handler = undefined;
@@ -32,21 +32,21 @@ function stubFonts(ready?: Promise<unknown>) {
     removeEventListener,
     fireLoadingDone: () => loadingDone.handler?.(),
   };
-}
+};
 
-function unstubFonts() {
+const unstubFonts = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   delete (document as any).fonts;
-}
+};
 
 /** Flush the microtask queue so a resolved `fonts.ready` promise chain
  *  (and any state updates it triggers) settles before assertions run. */
-async function flushMicrotasks() {
+const flushMicrotasks = async () => {
   await act(async () => {
     await Promise.resolve();
     await Promise.resolve();
   });
-}
+};
 
 describe("useWebfontSwap", () => {
   afterEach(() => {

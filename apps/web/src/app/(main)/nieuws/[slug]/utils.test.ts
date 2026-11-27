@@ -7,14 +7,14 @@ import { parsePsdMatchId, splitArticleBody, toHeroMatchData } from "./utils";
 /** `toHeroMatchData` returns `null` for a reservation (#2802) — every test
  *  below feeds it a genuine two-sided match, so narrow the nullable return
  *  once here rather than an `if (!data) throw` at each call site. */
-function assertHero(data: HeroMatchData | null): HeroMatchData {
+const assertHero = (data: HeroMatchData | null): HeroMatchData => {
   if (!data) throw new Error("expected hero match data");
   return data;
-}
+};
 
 // Plain-object cast mirrors the wedstrijd/[matchId] utils test fixture —
 // toHeroMatchData only reads fields, so a structural object is sufficient.
-function makeMatch(overrides: Partial<MatchDetail> = {}): MatchDetail {
+const makeMatch = (overrides: Partial<MatchDetail> = {}): MatchDetail => {
   return {
     id: 12345,
     date: new Date("2026-09-13T15:00:00Z"),
@@ -32,7 +32,7 @@ function makeMatch(overrides: Partial<MatchDetail> = {}): MatchDetail {
     hasReport: true,
     ...overrides,
   } as MatchDetail;
-}
+};
 
 describe("toHeroMatchData", () => {
   it("maps home/away teams, score, competition and kickoff", () => {

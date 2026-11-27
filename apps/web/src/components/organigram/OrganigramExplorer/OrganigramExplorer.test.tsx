@@ -22,7 +22,9 @@ import {
 import { explorerFixture } from "./organigram-explorer.fixture";
 import { mockLayoutProps } from "@/../tests/helpers/scroll-hint.helpers";
 
-function open(props: Partial<Parameters<typeof OrganigramExplorer>[0]> = {}) {
+const open = (
+  props: Partial<Parameters<typeof OrganigramExplorer>[0]> = {},
+) => {
   return render(
     <OrganigramExplorer
       nodes={explorerFixture}
@@ -31,7 +33,7 @@ function open(props: Partial<Parameters<typeof OrganigramExplorer>[0]> = {}) {
       {...props}
     />,
   );
-}
+};
 
 describe("OrganigramExplorer — gating + a11y shell", () => {
   it("stays mounted but hidden and inert when closed (so it can fade out)", () => {
@@ -226,7 +228,7 @@ describe("OrganigramExplorer — FLIP settle re-measures the stage (#3340)", () 
     vi.restoreAllMocks();
   });
 
-  async function startFlip() {
+  const startFlip = async () => {
     const stage = { fits: false };
     restores.push(
       mockLayoutProps({
@@ -275,7 +277,7 @@ describe("OrganigramExplorer — FLIP settle re-measures the stage (#3340)", () 
       document.querySelector('[data-scroll-fade="bottom"]'),
     ).toBeInTheDocument();
     return settle;
-  }
+  };
 
   it("re-measures when the FLIP animation finishes", async () => {
     const settle = await startFlip();

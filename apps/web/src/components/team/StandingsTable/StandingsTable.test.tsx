@@ -21,7 +21,7 @@ import type { RankingEntry } from "@kcvv/api-contract";
 import { StandingsTable } from "./StandingsTable";
 import { stubAnimationFrame } from "@/../tests/helpers/scroll-hint.helpers";
 
-function entry(overrides: Partial<RankingEntry> = {}): RankingEntry {
+const entry = (overrides: Partial<RankingEntry> = {}): RankingEntry => {
   return {
     position: 1,
     team_id: 1,
@@ -36,7 +36,7 @@ function entry(overrides: Partial<RankingEntry> = {}): RankingEntry {
     points: 20,
     ...overrides,
   } as RankingEntry;
-}
+};
 
 const DIVISION: RankingEntry[] = [
   entry({ position: 1, team_id: 1, team_name: "Leader FC", points: 30 }),
@@ -77,7 +77,7 @@ const NUMBERLESS_DIVISION: RankingEntry[] = [
   }),
 ];
 
-function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
+const mockScrollDimensions = (scrollWidth: number, clientWidth: number) => {
   Object.defineProperty(HTMLElement.prototype, "scrollWidth", {
     configurable: true,
     value: scrollWidth,
@@ -86,7 +86,7 @@ function mockScrollDimensions(scrollWidth: number, clientWidth: number) {
     configurable: true,
     value: clientWidth,
   });
-}
+};
 
 describe("StandingsTable", () => {
   afterEach(() => {

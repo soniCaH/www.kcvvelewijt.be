@@ -146,16 +146,16 @@ const hulpCategoryTabs: FilterTab[] = [
 // over a state-syncing useEffect (see react.dev "you might not need an
 // effect"). Forwarding args.onChange in handleChange keeps the Actions
 // panel populated.
-function InteractiveFilterTabs(args: FilterTabsProps) {
+const InteractiveFilterTabs = (args: FilterTabsProps) => {
   // Stable signature of tab identity — joining `value`s catches edits,
   // reorders, and same-length swaps that `tabs.length` alone would miss.
   const stateKey = `${args.activeTab ?? ""}-${args.tabs
     .map((t) => t.value)
     .join(",")}`;
   return <InteractiveFilterTabsInner key={stateKey} {...args} />;
-}
+};
 
-function InteractiveFilterTabsInner(args: FilterTabsProps) {
+const InteractiveFilterTabsInner = (args: FilterTabsProps) => {
   const [activeTab, setActiveTab] = useState(
     args.activeTab || args.tabs[0].value,
   );
@@ -175,7 +175,7 @@ function InteractiveFilterTabsInner(args: FilterTabsProps) {
       </div>
     </div>
   );
-}
+};
 
 /**
  * Default filter tabs with counts.

@@ -16,9 +16,9 @@ import { render, screen } from "@testing-library/react";
 import type { PortableTextBlock } from "@portabletext/react";
 import { QuotesBlock } from "./QuotesBlock";
 
-function block(
+const block = (
   ...spans: ReadonlyArray<{ text: string; marks?: string[] }>
-): PortableTextBlock {
+): PortableTextBlock => {
   return {
     _type: "block",
     _key: `block-${spans.map((s) => s.text.slice(0, 3)).join("-")}`,
@@ -31,7 +31,7 @@ function block(
     })),
     markDefs: [],
   } as unknown as PortableTextBlock;
-}
+};
 
 const BIO_TWO_MARKS: PortableTextBlock[] = [
   block(

@@ -3,7 +3,7 @@ import { act, render, screen } from "@testing-library/react";
 import { FakeIntersectionObserver } from "@/../tests/helpers/fake-observers.helpers";
 import { TimelineReveal } from "./TimelineReveal";
 
-function stubMatchMedia(matches: boolean): void {
+const stubMatchMedia = (matches: boolean): void => {
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches,
     media: query,
@@ -14,15 +14,15 @@ function stubMatchMedia(matches: boolean): void {
     removeEventListener: vi.fn(),
     dispatchEvent: vi.fn(),
   }));
-}
+};
 
-function intersect(target: Element): void {
+const intersect = (target: Element): void => {
   act(() => {
     FakeIntersectionObserver.latest()!.trigger([
       { isIntersecting: true, target, intersectionRatio: 1 },
     ]);
   });
-}
+};
 
 describe("TimelineReveal", () => {
   beforeEach(() => {

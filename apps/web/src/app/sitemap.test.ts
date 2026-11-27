@@ -257,11 +257,11 @@ describe("sitemap.ts", () => {
     const clubUrl = (slug: string) => `https://www.kcvvelewijt.be/club/${slug}`;
 
     /** Answers the `page` query with the given rows and every other query with []. */
-    function stubPages(...rows: Array<{ slug: string; updatedAt: string }>) {
+    const stubPages = (...rows: Array<{ slug: string; updatedAt: string }>) => {
       mockFetch.mockImplementation(async (query: string) =>
         query.includes('_type == "page"') ? rows : [],
       );
-    }
+    };
 
     it("emits every Sanity page document as /club/<slug>, with its own lastmod", async () => {
       stubPages(
@@ -399,20 +399,20 @@ describe("sitemap.ts", () => {
       }) as Match;
 
     /** Answers the team query with the given psdIds and every other query with []. */
-    function stubTeams(...psdIds: string[]) {
+    const stubTeams = (...psdIds: string[]) => {
       mockFetch.mockImplementation(async (query: string) =>
         query.includes('_type == "team"')
           ? psdIds.map((psdId) => ({ slug: `team-${psdId}`, psdId }))
           : [],
       );
-    }
+    };
 
-    async function matchUrls() {
+    const matchUrls = async () => {
       const result = await sitemap();
       return result
         .map((e) => e.url)
         .filter((url) => url.includes("/wedstrijd/"));
-    }
+    };
 
     beforeEach(() => {
       // Only Date is faked: the Effect runtime and promises keep real timers.

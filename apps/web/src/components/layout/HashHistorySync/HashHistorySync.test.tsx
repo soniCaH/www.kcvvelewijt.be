@@ -3,9 +3,9 @@ import { render } from "@testing-library/react";
 import { HashHistorySync } from "./HashHistorySync";
 
 // happy-dom never fires `hashchange` on its own, so each test dispatches it.
-function fireHashChange(init?: HashChangeEventInit) {
+const fireHashChange = (init?: HashChangeEventInit) => {
   window.dispatchEvent(new HashChangeEvent("hashchange", init));
-}
+};
 
 describe("<HashHistorySync>", () => {
   afterEach(() => {

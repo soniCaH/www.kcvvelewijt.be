@@ -25,9 +25,9 @@ vi.mock("@/hooks/useSemanticSearch", () => ({
 
 const mockHook = vi.mocked(useSemanticSearch);
 
-function result(
+const result = (
   over: Partial<SemanticSearchResult> & { score: number },
-): SemanticSearchResult {
+): SemanticSearchResult => {
   return {
     id: "id-1",
     slug: "slug-1",
@@ -36,9 +36,9 @@ function result(
     excerpt: "Een fragment.",
     ...over,
   };
-}
+};
 
-function setHook(partial: Partial<UseSemanticSearchReturn>) {
+const setHook = (partial: Partial<UseSemanticSearchReturn>) => {
   mockHook.mockReturnValue({
     results: [],
     answer: undefined,
@@ -49,12 +49,12 @@ function setHook(partial: Partial<UseSemanticSearchReturn>) {
     clear: vi.fn(),
     ...partial,
   });
-}
+};
 
-function run(query = "voetbal", exclude: string[] = []): SemanticAugment {
+const run = (query = "voetbal", exclude: string[] = []): SemanticAugment => {
   return renderHook(() => useSemanticAugment(query, new Set(exclude))).result
     .current;
-}
+};
 
 beforeEach(() => {
   mockHook.mockReset();

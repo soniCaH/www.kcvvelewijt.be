@@ -57,17 +57,17 @@ vi.mock("next/navigation", () => ({
 }));
 
 /** Sets the live URL the widget's history hooks read on mount. */
-function setUrl(search = "") {
+const setUrl = (search = "") => {
   window.history.replaceState({}, "", `/kalender${search}`);
-}
+};
 
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
 // ── Fixtures ───────────────────────────────────────────────────────────────
 
-function makeMatch(
+const makeMatch = (
   overrides: Partial<CalendarMatchFixture> & { id: number },
-): CalendarMatchFixture {
+): CalendarMatchFixture => {
   const merged = {
     date: "2026-03-15T15:00:00",
     homeTeam: { id: 1, name: "KCVV Elewijt A", logo: "/kcvv.png" },
@@ -88,11 +88,11 @@ function makeMatch(
         status: merged.status,
       }),
   };
-}
+};
 
-function makeEventVM(
+const makeEventVM = (
   overrides: Partial<EventListItemVM> & { id: string },
-): EventListItemVM {
+): EventListItemVM => {
   return {
     title: "Paastoernooi",
     href: "/evenementen/paastoernooi",
@@ -103,7 +103,7 @@ function makeEventVM(
     source: "event",
     ...overrides,
   };
-}
+};
 
 const teams: CalendarTeamInfo[] = [
   { id: "t1", name: "A-ploeg", psdId: 101, label: "A-ploeg" },

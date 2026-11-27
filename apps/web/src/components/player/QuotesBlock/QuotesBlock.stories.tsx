@@ -13,10 +13,10 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { PortableTextBlock } from "@portabletext/react";
 import { QuotesBlock } from "./QuotesBlock";
 
-function block(
+const block = (
   key: string,
   ...spans: ReadonlyArray<{ text: string; marks?: string[] }>
-): PortableTextBlock {
+): PortableTextBlock => {
   return {
     _type: "block",
     _key: `block-${key}`,
@@ -29,7 +29,7 @@ function block(
     })),
     markDefs: [],
   } as unknown as PortableTextBlock;
-}
+};
 
 const BIO_TWO_MARKS: PortableTextBlock[] = [
   block(

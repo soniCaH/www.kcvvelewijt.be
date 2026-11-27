@@ -16,16 +16,16 @@ import { PageRepository, PageRepositoryLive } from "./page.repository";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mockFetch = sanityClient.fetch as any as ReturnType<typeof vi.fn>;
 
-function runWithRepo<A>(
+const runWithRepo = <A>(
   effect: Effect.Effect<A, SanityReadError, PageRepository>,
-) {
+) => {
   return Effect.runPromise(Effect.provide(effect, PageRepositoryLive));
-}
+};
 
 /** Fixture matches the new GROQ projection shape (field renaming + coalescing done in GROQ) */
-function makePageRow(
+const makePageRow = (
   overrides: Partial<NonNullable<PAGE_BY_SLUG_QUERY_RESULT>> = {},
-): NonNullable<PAGE_BY_SLUG_QUERY_RESULT> {
+): NonNullable<PAGE_BY_SLUG_QUERY_RESULT> => {
   return {
     id: "page-1",
     title: "Praktische Info",
@@ -49,7 +49,7 @@ function makePageRow(
     ],
     ...overrides,
   };
-}
+};
 
 describe("PageRepository", () => {
   describe("findBySlug", () => {
