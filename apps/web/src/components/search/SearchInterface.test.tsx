@@ -4,7 +4,15 @@
  */
 
 import { StrictMode, useSyncExternalStore, type ReactNode } from "react";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  beforeAll,
+} from "vitest";
 import { render, screen, waitFor, within, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SearchInterface } from "./SearchInterface";
@@ -94,6 +102,10 @@ const mockSearchResults = vi.mocked(SearchResults);
 
 const setupUser = () =>
   userEvent.setup({ advanceTimers: vi.advanceTimersByTimeAsync });
+
+// The code under test loads its decoder chunk with a dynamic `import()`; the
+// first load of `effect` can outlast a `waitFor`, so load it before any test.
+beforeAll(() => import("@/lib/search/search-decoders"));
 
 describe("SearchInterface", () => {
   const fetchMock = vi.fn();

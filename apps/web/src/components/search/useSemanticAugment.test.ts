@@ -6,7 +6,7 @@
  * type → URL derivation.
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, beforeAll } from "vitest";
 import { renderHook } from "@testing-library/react";
 import {
   useSemanticAugment,
@@ -59,6 +59,10 @@ const run = (query = "voetbal", exclude: string[] = []): SemanticAugment => {
 beforeEach(() => {
   mockHook.mockReset();
 });
+
+// The code under test loads its decoder chunk with a dynamic `import()`; the
+// first load of `effect` can outlast a `waitFor`, so load it before any test.
+beforeAll(() => import("@/lib/search/search-decoders"));
 
 describe("useSemanticAugment", () => {
   it("returns an 'answer' state for top score ≥ 0.5 with an answer", () => {

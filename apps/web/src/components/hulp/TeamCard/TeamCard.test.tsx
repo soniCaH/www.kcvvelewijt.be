@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { matchYouthTeams } from "@/lib/utils/match-youth-team";
 import { TeamCard } from "./TeamCard";
@@ -12,6 +12,10 @@ import {
 
 const forQuery = (query: string, teams = TEAM_CARD_TEAMS) =>
   matchYouthTeams(query, teams, TEAM_CARD_SEASON_YEAR, TEAM_CARD_CALENDAR_YEAR);
+
+// The code under test loads its decoder chunk with a dynamic `import()`; the
+// first load of `effect` can outlast a `waitFor`, so load it before any test.
+beforeAll(() => import("@/lib/search/search-decoders"));
 
 describe("TeamCard", () => {
   it('heads the TVJO with "Voor alle jeugd" when the card has sections', () => {

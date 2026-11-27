@@ -1,6 +1,18 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  beforeAll,
+} from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useSemanticSearch } from "./useSemanticSearch";
+
+// The code under test loads its decoder chunk with a dynamic `import()`; the
+// first load of `effect` can outlast a `waitFor`, so load it before any test.
+beforeAll(() => import("@/lib/search/search-decoders"));
 
 describe("useSemanticSearch", () => {
   beforeEach(() => {

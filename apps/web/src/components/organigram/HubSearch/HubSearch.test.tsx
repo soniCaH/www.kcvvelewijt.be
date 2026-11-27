@@ -6,6 +6,7 @@ import {
   beforeEach,
   afterEach,
   onTestFinished,
+  beforeAll,
 } from "vitest";
 import {
   render,
@@ -106,6 +107,10 @@ const InsetPublisher = ({ value }: { value: number }) => {
   }, [publish, value]);
   return null;
 };
+
+// The code under test loads its decoder chunk with a dynamic `import()`; the
+// first load of `effect` can outlast a `waitFor`, so load it before any test.
+beforeAll(() => import("@/lib/search/search-decoders"));
 
 describe("HubSearch", () => {
   beforeEach(() => {
