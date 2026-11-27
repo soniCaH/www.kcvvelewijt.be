@@ -16,20 +16,32 @@ import { trackEvent } from "@/lib/analytics/track-event";
 
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
 
+// The widget's latest callbacks, so a test decides when a token arrives or the
+// widget fails. With `autoToken` off, no token comes by itself.
+const widget = vi.hoisted(() => ({
+  onToken: (_token: string) => {},
+  onError: () => {},
+  autoToken: true,
+}));
+
 // Stands in for Cloudflare's widget: a token on mount, and a fresh single-use
 // one each time `resetKey` changes — what `turnstile.reset()` does for real.
 vi.mock("./TurnstileWidget", () => ({
   TurnstileWidget: ({
     onToken,
+    onError,
     resetKey,
   }: {
     onToken: (token: string) => void;
+    onError?: () => void;
     resetKey: number;
   }) => {
     useEffect(() => {
-      onToken(`token-${resetKey}`);
-    }, [onToken, resetKey]);
-    return null;
+      widget.onToken = onToken;
+      widget.onError = onError ?? (() => {});
+      if (widget.autoToken) onToken(`token-${resetKey}`);
+    }, [onToken, onError, resetKey]);
+    return <span data-testid="turnstile" data-reset-key={resetKey} />;
   },
 }));
 
@@ -63,9 +75,11 @@ describe("MembershipForm", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     window.sessionStorage.clear();
+    widget.autoToken = true;
   });
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
   });
 
   describe("membership_form_start (#3636)", () => {
@@ -861,6 +875,75 @@ describe("MembershipForm", () => {
       await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
 
       expect(submittedTokens(fetchMock)).toEqual(["token-0", "token-1"]);
+    });
+  });
+
+  describe("without a Turnstile token (#3902)", () => {
+    beforeEach(() => {
+      vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "test-site-key");
+      widget.autoToken = false;
+    });
+
+    it("does not post while the check is still running, and says so with the button still enabled", () => {
+      const fetchMock = vi.fn();
+      vi.stubGlobal("fetch", fetchMock);
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+
+      submitForm();
+
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "De verificatie loopt nog. Probeer het zo meteen opnieuw.",
+      );
+      expect(
+        screen.getByRole("button", { name: /Verstuur aanvraag/ }),
+      ).toBeEnabled();
+      expect(screen.getByLabelText(/Voornaam/)).toHaveValue("Jan");
+    });
+
+    it("does not post when the widget failed, says so and re-runs the widget", () => {
+      const fetchMock = vi.fn();
+      vi.stubGlobal("fetch", fetchMock);
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      act(() => widget.onError());
+
+      submitForm();
+
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "De verificatie laadt niet. Probeer het later opnieuw.",
+      );
+      expect(screen.getByTestId("turnstile")).toHaveAttribute(
+        "data-reset-key",
+        "1",
+      );
+    });
+
+    it("posts the token once it arrives, and drops the line", async () => {
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({ ok: true }),
+      });
+      vi.stubGlobal("fetch", fetchMock);
+      render(<MembershipForm defaultRole="vrijwilliger" />);
+      fillRequiredFields();
+      act(() => widget.onError());
+      submitForm();
+
+      act(() => widget.onToken("late-token"));
+      submitForm();
+
+      await waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+      expect(
+        JSON.parse((fetchMock.mock.calls[0]![1] as RequestInit).body as string)
+          .turnstileToken,
+      ).toBe("late-token");
+      expect(
+        screen.queryByText(/De verificatie laadt niet/),
+      ).not.toBeInTheDocument();
     });
   });
 

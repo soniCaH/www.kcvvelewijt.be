@@ -28,6 +28,7 @@ import {
 } from "@/components/design-system";
 import { CheckboxField } from "@/components/club/MembershipForm/MembershipForm";
 import { TurnstileWidget } from "@/components/club/MembershipForm/TurnstileWidget";
+import { useTurnstileGate } from "@/components/club/MembershipForm/useTurnstileGate";
 import darts from "@/data/darts.json";
 import { trackEvent } from "@/lib/analytics/track-event";
 import { makeFormBodyDecoder } from "@/lib/forms/decode-form-body";
@@ -137,12 +138,7 @@ export const DartsSignupForm = () => {
   }, []);
 
   const [honeypot, setHoneypot] = useState("");
-  const [turnstileToken, setTurnstileToken] = useState("");
-  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
-  const resetTurnstile = () => {
-    setTurnstileToken("");
-    setTurnstileResetKey((key) => key + 1);
-  };
+  const turnstile = useTurnstileGate();
 
   const [state, setState] = useState<SubmitState>("idle");
   const [waitlisted, setWaitlisted] = useState(false);
@@ -231,6 +227,14 @@ export const DartsSignupForm = () => {
       return;
     }
 
+    const unverified = turnstile.blocked();
+    if (unverified) {
+      setFieldErrors({});
+      setGeneralError(unverified);
+      setState("invalid");
+      return;
+    }
+
     setState("submitting");
     setFieldErrors({});
     setGeneralError("");
@@ -247,7 +251,7 @@ export const DartsSignupForm = () => {
           remark: values.remark || undefined,
           rulesAccepted: values.rulesAccepted,
           paymentAccepted: values.paymentAccepted,
-          turnstileToken,
+          turnstileToken: turnstile.token,
           company: honeypot,
         }),
       });
@@ -278,11 +282,11 @@ export const DartsSignupForm = () => {
         refusal?.error ??
           "Er ging iets mis. Controleer je gegevens en probeer opnieuw.",
       );
-      resetTurnstile();
+      turnstile.reset();
       setState("invalid");
     } catch (err) {
       console.error("[DartsSignup] Failed to submit:", err);
-      resetTurnstile();
+      turnstile.reset();
       setState("transport-error");
     }
   };
@@ -426,10 +430,7 @@ export const DartsSignupForm = () => {
           />
         </div>
 
-        <TurnstileWidget
-          onToken={setTurnstileToken}
-          resetKey={turnstileResetKey}
-        />
+        <TurnstileWidget {...turnstile.widget} />
 
         <span aria-live="polite" className="sr-only">
           {state === "submitting" ? "Versturen…" : ""}

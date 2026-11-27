@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { userEvent, within } from "storybook/test";
 import { blurActive } from "@test-storybook/blurActive";
+import { failingTurnstile } from "@test-storybook/failingTurnstile";
 import { DartsSignupForm } from "@/components/darts/DartsSignup/DartsSignup";
 
 /**
@@ -138,6 +139,23 @@ export const ServerError: Story = {
   play: async ({ canvasElement }) => {
     await fillAndSubmit(canvasElement);
     await within(canvasElement).findByRole("alert");
+    blurActive(canvasElement);
+  },
+};
+
+/** The robot check does not load (an ad blocker, Cloudflare down, #3902) — the form does not post and says so; the button stays enabled. */
+export const TurnstileFailed: Story = {
+  beforeEach: () => {
+    const restoreFetch = stubBackend({ spotsLeft: 9 });
+    const restoreTurnstile = failingTurnstile();
+    return () => {
+      restoreTurnstile();
+      restoreFetch();
+    };
+  },
+  play: async ({ canvasElement }) => {
+    await fillAndSubmit(canvasElement);
+    await within(canvasElement).findByText(/De verificatie laadt niet/);
     blurActive(canvasElement);
   },
 };

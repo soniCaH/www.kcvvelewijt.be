@@ -4,28 +4,11 @@
  * Only the outer boundary is faked: `window.turnstile` (Cloudflare's script)
  * and the env var that supplies the site key. The widget's own effect — token
  * callbacks, script injection, cleanup — runs for real.
- *
- * `SITE_KEY` is read once at module scope, so it is set in `vi.hoisted`, before
- * the component module is imported.
  */
 
-import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
-  afterAll,
-  afterEach,
-} from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render } from "@testing-library/react";
 import type { Window as HappyDomWindow } from "happy-dom";
-
-const previousSiteKey = vi.hoisted(() => {
-  const previous = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY = "test-site-key";
-  return previous;
-});
 
 import { TurnstileWidget } from "./TurnstileWidget";
 
@@ -52,21 +35,13 @@ const scriptTags = () => {
 };
 
 describe("TurnstileWidget", () => {
-  afterAll(() => {
-    // `SITE_KEY` was already read at import, so restoring only keeps the
-    // variable from leaking to anything else in this worker.
-    if (previousSiteKey === undefined) {
-      delete process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-    } else {
-      process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY = previousSiteKey;
-    }
-  });
-
   beforeEach(() => {
+    vi.stubEnv("NEXT_PUBLIC_TURNSTILE_SITE_KEY", "test-site-key");
     delete window.turnstile;
   });
 
   afterEach(() => {
+    vi.unstubAllEnvs();
     delete window.turnstile;
     // The injected <script> outlives an unmount (the Cloudflare script is
     // global), so drop it between tests.
@@ -116,6 +91,20 @@ describe("TurnstileWidget", () => {
       renderedOpts(turnstile)["error-callback"]!();
 
       expect(onToken).toHaveBeenLastCalledWith("");
+    });
+
+    it("reports a widget error apart from an expired token, so the form can tell a failure from a wait", () => {
+      const turnstile = installFakeTurnstile();
+      const onError = vi.fn();
+      render(
+        <TurnstileWidget onToken={vi.fn()} onError={onError} resetKey={0} />,
+      );
+
+      renderedOpts(turnstile)["expired-callback"]!();
+      expect(onError).not.toHaveBeenCalled();
+
+      renderedOpts(turnstile)["error-callback"]!();
+      expect(onError).toHaveBeenCalledOnce();
     });
 
     it("removes the widget on unmount", () => {
@@ -222,6 +211,17 @@ describe("TurnstileWidget", () => {
       expect(turnstile.render).toHaveBeenCalledTimes(1);
       renderedOpts(turnstile).callback("late-token");
       expect(onToken).toHaveBeenCalledWith("late-token");
+    });
+
+    it("reports an error when the script fails to load (an ad blocker), so the form never waits forever", () => {
+      const onError = vi.fn();
+      render(
+        <TurnstileWidget onToken={vi.fn()} onError={onError} resetKey={0} />,
+      );
+
+      scriptTags()[0]!.dispatchEvent(new Event("error"));
+
+      expect(onError).toHaveBeenCalledOnce();
     });
 
     it("does not render a widget when the script loads after unmount", () => {

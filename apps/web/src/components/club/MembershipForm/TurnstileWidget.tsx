@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react";
 import { readPublicEnv } from "@/lib/env/client";
 
-const SITE_KEY = readPublicEnv().NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js";
 
 interface TurnstileApi {
@@ -45,15 +44,21 @@ const getTurnstileScript = (): HTMLScriptElement => {
  * its own dev flag `ALLOW_MISSING_FORM_SECRETS` is on, and otherwise fails
  * closed. A token is single-use: bump `resetKey` after any submit the server
  * did not accept and the widget re-runs the challenge for a fresh one.
+ * `onError` tells a failure (widget error, or the script blocked or down)
+ * apart from "no token yet"; the form's gate is `useTurnstileGate`.
  * ponytail: global `window.turnstile` lock; the widget is the only consumer.
  */
 export const TurnstileWidget = ({
   onToken,
+  onError,
   resetKey,
 }: {
   onToken: (token: string) => void;
+  onError?: () => void;
   resetKey: number;
 }) => {
+  // Read per render, not at import, so a story can switch it on (`sb.mock`).
+  const siteKey = readPublicEnv().NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const ref = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
   const lastResetKey = useRef(resetKey);
@@ -67,7 +72,7 @@ export const TurnstileWidget = ({
   }, [resetKey]);
 
   useEffect(() => {
-    if (!SITE_KEY) {
+    if (!siteKey) {
       onToken("");
       return;
     }
@@ -79,26 +84,35 @@ export const TurnstileWidget = ({
         return;
       }
       widgetIdRef.current = window.turnstile.render(ref.current, {
-        sitekey: SITE_KEY,
+        sitekey: siteKey,
         callback: (token) => onToken(token),
         "expired-callback": () => onToken(""),
-        "error-callback": () => onToken(""),
+        "error-callback": () => {
+          onToken("");
+          onError?.();
+        },
       });
     };
+    const failed = () => onError?.();
 
     const scriptEl = window.turnstile ? null : getTurnstileScript();
-    if (scriptEl) scriptEl.addEventListener("load", render);
-    else render();
+    if (scriptEl) {
+      scriptEl.addEventListener("load", render);
+      scriptEl.addEventListener("error", failed);
+    } else render();
 
     return () => {
       controller.abort();
       const widgetId = widgetIdRef.current;
       widgetIdRef.current = null;
-      if (scriptEl) scriptEl.removeEventListener("load", render);
+      if (scriptEl) {
+        scriptEl.removeEventListener("load", render);
+        scriptEl.removeEventListener("error", failed);
+      }
       if (widgetId && window.turnstile) window.turnstile.remove(widgetId);
     };
-  }, [onToken]);
+  }, [siteKey, onToken, onError]);
 
-  if (!SITE_KEY) return null;
+  if (!siteKey) return null;
   return <div ref={ref} className="mt-2" />;
 };

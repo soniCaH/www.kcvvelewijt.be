@@ -1,6 +1,12 @@
 import type { Preview } from "@storybook/nextjs-vite";
 import { MINIMAL_VIEWPORTS } from "storybook/viewport";
+import { sb } from "storybook/test";
 import "../src/app/globals.css";
+
+// The public env vars are fixed at build, so a story that needs one (the
+// Turnstile site key, #3902) sets it with `mocked(readPublicEnv)`. A spy keeps
+// the real values everywhere else, and Storybook restores it before each story.
+sb.mock(import("../src/lib/env/client.ts"), { spy: true });
 
 // Storybook's preview iframe template ships hardcoded `<html lang="en">`
 // (@storybook/builder-vite/input/iframe.html) — nothing in this directory
