@@ -3,6 +3,7 @@
  * Tests the /api/search endpoint validation and success responses
  */
 
+import { Schema as S } from "effect";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 import { ARTICLES_QUERY } from "@/lib/repositories/article.repository";
@@ -629,10 +630,14 @@ describe("GET /api/search", () => {
     const search = async (url: string) => {
       const response = await GET(createRequest(url));
       expect(response.status).toBe(200);
-      return (await response.json()) as {
-        count: number;
-        results: Array<{ type: string; title: string; url: string }>;
-      };
+      return S.decodeUnknownSync(
+        S.Struct({
+          count: S.Number,
+          results: S.Array(
+            S.Struct({ type: S.String, title: S.String, url: S.String }),
+          ),
+        }),
+      )(await response.json());
     };
 
     const article = (

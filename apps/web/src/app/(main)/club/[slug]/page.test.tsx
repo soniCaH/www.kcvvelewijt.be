@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { Effect, Layer } from "effect";
+import { Effect, Layer, Schema as S } from "effect";
 import {
   PageRepository,
   type PageVM,
@@ -226,9 +226,11 @@ describe("/club/[slug] page", () => {
     const script = container.querySelector(
       'script[type="application/ld+json"]',
     );
-    const data = JSON.parse(script?.innerHTML ?? "{}") as {
-      itemListElement: { name: string }[];
-    };
+    const data = S.decodeUnknownSync(
+      S.parseJson(
+        S.Struct({ itemListElement: S.Array(S.Struct({ name: S.String })) }),
+      ),
+    )(script?.innerHTML ?? "{}");
     expect(data.itemListElement.map((item) => item.name)).toEqual([
       "Home",
       "De club",

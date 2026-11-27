@@ -21,6 +21,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { Schema as S } from "effect";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
@@ -141,9 +142,11 @@ describe("decide", () => {
 describe("the native update script", () => {
   /** `vr:run:update`'s CI gate, run on its own — never the capture behind it. */
   const guard = () => {
-    const { scripts } = JSON.parse(
-      readFileSync(join(dirname(SCRIPT), "..", "package.json"), "utf8"),
-    ) as { scripts: Record<string, string> };
+    const { scripts } = S.decodeUnknownSync(
+      S.parseJson(
+        S.Struct({ scripts: S.Record({ key: S.String, value: S.String }) }),
+      ),
+    )(readFileSync(join(dirname(SCRIPT), "..", "package.json"), "utf8"));
     const [gate] = scripts["vr:run:update"].split(
       "; node scripts/prefetch-typekit.mjs",
     );

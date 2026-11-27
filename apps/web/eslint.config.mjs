@@ -245,6 +245,8 @@ const kcvvPlugin = {
     "no-default-function": builtinRules.get("no-restricted-syntax"),
     // `process.env` is read in the two env modules only (#3879).
     "no-process-env": builtinRules.get("no-restricted-syntax"),
+    // A cast on parsed JSON asserts a shape nobody checked (#3878).
+    "no-json-cast": builtinRules.get("no-restricted-syntax"),
     // A real rule, not a selector: "component or type" needs the export's name and kind.
     "use-client-exports": useClientExports,
   },
@@ -252,6 +254,34 @@ const kcvvPlugin = {
 
 const PROCESS_ENV_MESSAGE =
   "No `process.env` outside `src/lib/env/` — read a server var through `readBffEnv` / `readOptionalServerEnv` (`src/lib/env/server.ts`), a `NEXT_PUBLIC_*` var through `readPublicEnv` (`src/lib/env/client.ts`). `process.env.NODE_ENV` is the one exception. Rule: #3879.";
+
+// A cast on parsed JSON asserts a shape nobody checked: `JSON.parse(x) as T`,
+// `<T>JSON.parse(x)`, `(await r.json()) as T`, `await r.json<T>()`. A bare
+// `as unknown` is honest and stays allowed, but `as unknown as T` is not (#3878,
+// same selectors as `apps/api/eslint.config.mjs`, #3877).
+const NOT_UNKNOWN = '[typeAnnotation.type!="TSUnknownKeyword"]';
+const UNKNOWN = '[typeAnnotation.type="TSUnknownKeyword"]';
+const JSON_CAST_MESSAGE =
+  "No cast or type argument on parsed JSON: decode it with `S.decodeUnknown*(S.parseJson(schema))`, or `S.decodeUnknown*(schema)` on the result of `.json()`. A bare `as unknown` is fine. Rule: #3878.";
+const OUTER_CASTS = [
+  `TSAsExpression${NOT_UNKNOWN}`,
+  `TSTypeAssertion${NOT_UNKNOWN}`,
+];
+// What the cast wraps: directly, or behind a bare `as unknown`.
+const THROUGH = ["", `TSAsExpression${UNKNOWN} > `];
+const JSON_SOURCES = [
+  'CallExpression[callee.object.name="JSON"][callee.property.name="parse"]',
+  'AwaitExpression > CallExpression[callee.property.name="json"]',
+  'AwaitExpression > CallExpression[callee.property.name="catch"][callee.object.callee.property.name="json"]',
+];
+const JSON_CAST_SELECTORS = [
+  ...OUTER_CASTS.flatMap((outer) =>
+    THROUGH.flatMap((through) =>
+      JSON_SOURCES.map((source) => `${outer} > ${through}${source}`),
+    ),
+  ),
+  'CallExpression[callee.property.name="json"][typeArguments.params.length>0]',
+].map((selector) => ({ selector, message: JSON_CAST_MESSAGE }));
 
 const eslintConfig = [
   ...nextCoreWebVitals,
@@ -512,6 +542,15 @@ const eslintConfig = [
             "No `export default function` — write `const Name = () => …;` then `export default Name;`. Rule: #3865.",
         },
       ],
+    },
+  },
+  {
+    // No cast on parsed JSON (#3878) — own rule ID, own block, like `kcvv/no-let` above.
+    // Covers every linted file: source, tests, stories, e2e and test infrastructure.
+    files: ["**/*.{ts,tsx,js,jsx,mjs,cjs,mts,cts}"],
+    plugins: { kcvv: kcvvPlugin },
+    rules: {
+      "kcvv/no-json-cast": ["error", ...JSON_CAST_SELECTORS],
     },
   },
   {
