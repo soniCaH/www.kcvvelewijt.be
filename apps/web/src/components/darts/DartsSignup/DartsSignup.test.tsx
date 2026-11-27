@@ -280,6 +280,21 @@ describe("DartsSignupForm", () => {
     expect(screen.queryByText(/Ingeschreven!/)).toBeNull();
   });
 
+  it("shows the generic error when the response body is not JSON (#3878)", async () => {
+    stubBackend({
+      submit: () => new Response("<html>Bad gateway</html>", { status: 502 }),
+    });
+    render(<DartsSignupForm />);
+    fillRequired();
+    submit();
+
+    expect(
+      await screen.findByText(
+        "Er ging iets mis. Controleer je gegevens en probeer opnieuw.",
+      ),
+    ).toBeInTheDocument();
+  });
+
   it("treats the proxy's bare { ok: true } as a signup without a wachtlijst spot (#3878)", async () => {
     // `proxyFormPost` answers this when the BFF's 2xx body is not JSON: the team
     // is stored, so a second submit would store it twice.
