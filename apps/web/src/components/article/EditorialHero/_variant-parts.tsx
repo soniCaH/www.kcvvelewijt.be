@@ -25,7 +25,7 @@
 import { SanityImage } from "@/lib/image/sanity-image";
 import type { MatchStatus } from "@kcvv/api-contract";
 import { cn } from "@/lib/utils/cn";
-import { Crest } from "@/components/design-system";
+import { Crest, PageContainer } from "@/components/design-system";
 import { RoundAvatar } from "@/components/design-system/RoundAvatar";
 import { MatchStatusBadge } from "@/components/match/MatchStatusBadge";
 import type { ResolvedSubject } from "@/components/article/SubjectAttribution";
@@ -110,7 +110,8 @@ export interface HeroCompressedEventStripProps {
 /**
  * Compressed event strip rendered below the hero card (inside the
  * click target, per the lock). Single mono-uppercase row with 1 px
- * ink rules top + bottom: `▸ ${location} · ${date} · ${start}–${end}`.
+ * full-bleed ink rules top + bottom and its text in the homepage column:
+ * `▸ ${location} · ${date} · ${start}–${end}`.
  * Each segment is graceful-omit so a partial event still reads.
  */
 export const HeroCompressedEventStrip = ({
@@ -134,31 +135,36 @@ export const HeroCompressedEventStrip = ({
   return (
     <div
       data-testid="hero-compressed-event-strip"
-      // `border-y` so the strip owns both its top and bottom edges. The
-      // shell no longer paints a bottom rule (#1866 fix-1) so the strip
-      // can no longer borrow it as a top edge.
-      className={cn(
-        "border-ink flex items-center gap-2 border-y py-2",
-        "text-label text-ink font-mono uppercase",
-      )}
+      // `border-y` so the strip owns both its top and bottom edges (the
+      // shell paints no bottom rule, #1866 fix-1). The rules span the
+      // viewport; the text sits in the homepage column, flush with the hero
+      // title, like every other ruled band (#3908).
+      className="border-ink text-label text-ink border-y py-2 font-mono uppercase"
     >
-      <span aria-hidden="true" className="text-jersey-deep">
-        ▸
-      </span>
-      {segments.map((segment, idx) => (
-        <span
-          key={segment}
-          className="flex items-center gap-2"
-          data-segment-index={idx}
-        >
-          {idx > 0 ? (
-            <span aria-hidden="true" className="text-ink-muted">
-              ·
-            </span>
-          ) : null}
-          {segment}
+      <PageContainer
+        width="index"
+        // `flex-wrap`: on a narrow column a whole segment drops to the next
+        // line instead of each segment squeezing into a stack of words.
+        className="flex flex-wrap items-center gap-x-2 gap-y-1"
+      >
+        <span aria-hidden="true" className="text-jersey-deep">
+          ▸
         </span>
-      ))}
+        {segments.map((segment, idx) => (
+          <span
+            key={segment}
+            className="flex items-center gap-2"
+            data-segment-index={idx}
+          >
+            {idx > 0 ? (
+              <span aria-hidden="true" className="text-ink-muted">
+                ·
+              </span>
+            ) : null}
+            {segment}
+          </span>
+        ))}
+      </PageContainer>
     </div>
   );
 };

@@ -393,6 +393,26 @@ describe("EditorialHero — event variant", () => {
     expect(strip).toHaveTextContent("09:00–17:00");
   });
 
+  it("keeps the homepage strip's rules full-bleed but its text in the page column (#3908)", () => {
+    render(
+      <EditorialHero
+        variant="event"
+        {...SHARED}
+        placement="homepage"
+        slug="zomertornooi-2026"
+        feature={{ location: "Sportpark Elewijt", title: "Tornooi" }}
+      />,
+    );
+    const strip = screen.getByTestId("hero-compressed-event-strip");
+    // The rules belong to the bar itself, which spans the viewport.
+    expect(strip).toHaveClass("border-y");
+    expect(strip).not.toHaveClass("max-w-[var(--container-index)]");
+    // The text sits in the same column as the hero title and "Lees verder".
+    const column = screen.getByText("Sportpark Elewijt").closest("div");
+    expect(column).not.toBe(strip);
+    expect(column).toHaveClass("max-w-[var(--container-index)]");
+  });
+
   it("derives the homepage strip date + time from the session schedule when top-level times are absent", () => {
     render(
       <EditorialHero
