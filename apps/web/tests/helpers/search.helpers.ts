@@ -5,7 +5,7 @@
 
 import type {
   SearchResult,
-  SearchResponse,
+  LexicalSearchResponse,
 } from "@/components/search/SearchInterface";
 
 /**
@@ -81,12 +81,12 @@ export const mockSearchResults: SearchResult[] = [
 ];
 
 /**
- * Create a mock SearchResponse
+ * Create a mock LexicalSearchResponse
  */
 export const createMockSearchResponse = (
   query: string,
   results: SearchResult[] = mockSearchResults,
-): SearchResponse => {
+): LexicalSearchResponse => {
   return {
     query,
     results,

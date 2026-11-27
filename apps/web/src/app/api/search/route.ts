@@ -5,7 +5,7 @@
 
 import { teamHref } from "@/lib/utils/team-href";
 import { NextRequest, NextResponse } from "next/server";
-import { Effect } from "effect";
+import { Effect, Schema as S } from "effect";
 import { unstable_cache } from "next/cache";
 import { draftMode } from "next/headers";
 import { proxyPostToBff } from "@/lib/server/bff-proxy";
@@ -16,8 +16,10 @@ import { StaffRepository } from "@/lib/repositories/staff.repository";
 import { TeamRepository } from "@/lib/repositories/team.repository";
 import type { PlayerVM } from "@/lib/repositories/player.repository";
 import type { OrgChartMember } from "@/types/organigram";
-import type { SearchResult } from "@/types/search";
+import { LexicalSearchResponse, type SearchResult } from "@/types/search";
 import { readOptionalServerEnv } from "@/lib/env/server";
+
+const encodeSearchResponse = S.encodeSync(LexicalSearchResponse);
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -352,11 +354,11 @@ export const GET = async (request: NextRequest) => {
     // the answer must never reach a shared cache (#3619).
     const preview = (await draftMode()).isEnabled;
     return NextResponse.json(
-      {
+      encodeSearchResponse({
         query,
         count: sorted.length,
         results: sorted,
-      },
+      }),
       {
         headers: {
           "Cache-Control": preview

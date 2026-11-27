@@ -377,6 +377,27 @@ describe("SearchInterface", () => {
       });
     });
 
+    it("should display error when a 200 body is not the route's response (#3878)", async () => {
+      const user = setupUser();
+      // No `results`/`count`: a cast stored `undefined` and crashed the render.
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ query: "test" }),
+      });
+
+      render(<SearchInterface />);
+
+      const input = screen.getByRole("textbox");
+      await user.type(input, "test");
+
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
+      });
+    });
+
     it("should display results after successful fetch", async () => {
       const user = setupUser();
       const mockResponse = createMockSearchResponse("test");

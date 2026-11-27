@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { Either, Schema as S } from "effect";
 import { useSearchParams, useRouter } from "next/navigation";
 import { SearchForm } from "./SearchForm";
 import { SearchMasthead } from "./SearchMasthead";
@@ -27,13 +28,15 @@ import { useSearchAnalytics } from "@/hooks/useSearchAnalytics";
 import { usePendingDelay } from "@/hooks/usePendingDelay";
 import { filterByActiveType } from "./search-filter-utils";
 import { cn } from "@/lib/utils/cn";
-import type {
-  SearchResultType,
-  SearchResult,
-  SearchResponse,
+import {
+  LexicalSearchResponse,
+  type SearchResultType,
+  type SearchResult,
 } from "@/types/search";
 
-export type { SearchResultType, SearchResult, SearchResponse };
+export type { SearchResultType, SearchResult, LexicalSearchResponse };
+
+const decodeSearchResponse = S.decodeUnknownEither(LexicalSearchResponse);
 
 export interface SearchInterfaceProps {
   /**
@@ -177,12 +180,17 @@ export const SearchInterface = ({
         throw new Error("Search failed");
       }
 
-      const data: SearchResponse = await response.json();
+      const decoded = decodeSearchResponse(await response.json());
+      // A 200 that is not the route's response lands in the same error state
+      // as a non-2xx.
+      if (Either.isLeft(decoded)) {
+        throw new Error("Search response does not match the route's schema");
+      }
 
       // Only update state if this request wasn't aborted
       if (!controller.signal.aborted) {
-        setResults(data.results);
-        setTotalCount(data.count);
+        setResults(decoded.right.results);
+        setTotalCount(decoded.right.count);
         setLastSettledQuery(searchQuery.trim());
       }
     } catch (error) {
