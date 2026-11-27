@@ -1,6 +1,6 @@
 "use client";
 
-import { Either, Schema as S } from "effect";
+import { Option, Schema as S } from "effect";
 import {
   useEffect,
   useId,
@@ -35,8 +35,15 @@ import { scrollIntoViewMotionSafe } from "@/lib/utils/scroll-into-view";
 
 const SUBMIT_URL = "/api/darts";
 const SPOTS_URL = "/api/darts/spots";
-const decodeBody = makeFormBodyDecoder(DartsSignupResponse);
-const decodeSpots = S.decodeUnknownEither(DartsSpotsResponse);
+// `proxyFormPost` answers `{ ok: true }` alone when the BFF's 2xx body is not JSON:
+// the signup is stored, so it is a success without a wachtlijst spot. A body with a
+// `waitlist` of the wrong type matches neither and takes the error state.
+const ProxiedOk = S.Struct({
+  ok: S.Literal(true),
+  waitlist: S.optional(S.Never),
+});
+const decodeBody = makeFormBodyDecoder(S.Union(DartsSignupResponse, ProxiedOk));
+const decodeSpots = S.decodeUnknownOption(DartsSpotsResponse);
 const REQUIRED_MSG = "Verplicht.";
 
 // "invalid" covers client-side validation and a server rejection alike (one
@@ -122,8 +129,8 @@ export const DartsSignupForm = () => {
     fetch(SPOTS_URL, { cache: "no-store", signal: controller.signal })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        const spots = decodeSpots(data);
-        if (Either.isRight(spots)) setSpotsLeft(spots.right.spotsLeft);
+        const spots = Option.getOrNull(decodeSpots(data));
+        if (spots) setSpotsLeft(spots.spotsLeft);
       })
       .catch(() => {});
     return () => controller.abort();
@@ -250,7 +257,8 @@ export const DartsSignupForm = () => {
       );
 
       if (response.ok && success?.ok) {
-        const onWaitlist = success.waitlist;
+        const onWaitlist =
+          success instanceof DartsSignupResponse && success.waitlist;
         setReport({
           kind: "submit",
           waitlist: onWaitlist,

@@ -266,8 +266,8 @@ describe("DartsSignupForm", () => {
   });
 
   it("shows the generic error, not the success message, for a 200 whose body is not the contract's (#3878)", async () => {
-    // A 200 without `waitlist`: a cast read it as a signup on a spot.
-    stubBackend({ submit: () => json({ ok: true }) });
+    // A real signup body with a wrong-typed field.
+    stubBackend({ submit: () => json({ ok: true, waitlist: "yes" }) });
     render(<DartsSignupForm />);
     fillRequired();
     submit();
@@ -278,6 +278,18 @@ describe("DartsSignupForm", () => {
       ),
     ).toBeInTheDocument();
     expect(screen.queryByText(/Ingeschreven!/)).toBeNull();
+  });
+
+  it("treats the proxy's bare { ok: true } as a signup without a wachtlijst spot (#3878)", async () => {
+    // `proxyFormPost` answers this when the BFF's 2xx body is not JSON: the team
+    // is stored, so a second submit would store it twice.
+    stubBackend({ submit: () => json({ ok: true }) });
+    render(<DartsSignupForm />);
+    fillRequired();
+    submit();
+
+    expect(await screen.findByText(/Ingeschreven!/)).toBeInTheDocument();
+    expect(screen.queryByText(/wachtlijst\. Komt er/)).toBeNull();
   });
 
   it("keeps the neutral intro when the spots body is not the contract's (#3878)", async () => {
