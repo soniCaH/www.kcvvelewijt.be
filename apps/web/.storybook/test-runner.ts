@@ -1,6 +1,7 @@
 import { type TestRunnerConfig, getStoryContext } from "@storybook/test-runner";
 import type { Page } from "@playwright/test";
 import { toMatchImageSnapshot } from "jest-image-snapshot";
+import { Schema as S } from "effect";
 import { appendFileSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -26,12 +27,16 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // never ran, this is `{}` and every Typekit request falls through to the
 // deny-and-record path below instead of silently reaching the network.
 const TYPEKIT_CACHE_DIR = join(__dirname, ".typekit-cache");
-type TypekitCacheEntry = { file: string; contentType: string };
+const TypekitManifest = S.Record({
+  key: S.String,
+  value: S.Struct({ file: S.String, contentType: S.String }),
+});
+type TypekitCacheEntry = S.Schema.Type<typeof TypekitManifest>[string];
 const loadTypekitManifest = (): Record<string, TypekitCacheEntry> => {
   try {
-    return JSON.parse(
+    return S.decodeUnknownSync(S.parseJson(TypekitManifest))(
       readFileSync(join(TYPEKIT_CACHE_DIR, "manifest.json"), "utf8"),
-    ) as Record<string, TypekitCacheEntry>;
+    );
   } catch {
     return {};
   }

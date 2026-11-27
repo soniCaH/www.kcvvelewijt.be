@@ -4,7 +4,15 @@
  */
 
 import { StrictMode, useSyncExternalStore, type ReactNode } from "react";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  beforeAll,
+} from "vitest";
 import { render, screen, waitFor, within, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SearchInterface } from "./SearchInterface";
@@ -14,6 +22,19 @@ import { trackEvent } from "@/lib/analytics/track-event";
 import { useSemanticAugment, type SemanticAugment } from "./useSemanticAugment";
 
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: vi.fn() }));
+
+// A switch that makes the decoder chunk fail to load: reading an export off
+// `@/lib/search/search-decoders` throws while it is on.
+const decoderChunk = vi.hoisted(() => ({ failing: false }));
+vi.mock("@/lib/search/search-decoders", async (importOriginal) => {
+  const actual = await importOriginal<object>();
+  return new Proxy(actual, {
+    get: (target, key) => {
+      if (decoderChunk.failing) throw new Error("decoder chunk failed to load");
+      return Reflect.get(target, key);
+    },
+  });
+});
 const mockTrackEvent = vi.mocked(trackEvent);
 
 // Mock Next.js navigation hooks — reactive: `push` feeds back into what
@@ -95,6 +116,10 @@ const mockSearchResults = vi.mocked(SearchResults);
 const setupUser = () =>
   userEvent.setup({ advanceTimers: vi.advanceTimersByTimeAsync });
 
+// The code under test loads its decoder chunk with a dynamic `import()`; the
+// first load of `effect` can outlast a `waitFor`, so load it before any test.
+beforeAll(() => import("@/lib/search/search-decoders"));
+
 describe("SearchInterface", () => {
   const fetchMock = vi.fn();
 
@@ -122,6 +147,7 @@ describe("SearchInterface", () => {
   });
 
   afterEach(() => {
+    decoderChunk.failing = false;
     vi.useRealTimers();
     vi.clearAllMocks();
     vi.unstubAllGlobals();
@@ -375,6 +401,92 @@ describe("SearchInterface", () => {
       await waitFor(() => {
         expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
       });
+    });
+
+    it("should display error when a 200 body is not the route's response (#3878)", async () => {
+      const user = setupUser();
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      // No `results`/`count`: a cast stored `undefined` and crashed the render.
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ query: "test" }),
+      });
+
+      render(<SearchInterface />);
+
+      const input = screen.getByRole("textbox");
+      await user.type(input, "test");
+
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
+      });
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining("does not match the schema"),
+      );
+      warn.mockRestore();
+    });
+
+    it("should display error when the decoder chunk fails to load (#3878)", async () => {
+      const user = setupUser();
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      decoderChunk.failing = true;
+      fetchMock.mockResolvedValueOnce({
+        ok: true,
+        json: async () => createMockSearchResponse("test"),
+      });
+
+      render(<SearchInterface />);
+
+      const input = screen.getByRole("textbox");
+      await user.type(input, "test");
+
+      const submitButton = screen.getByRole("button", { name: /^zoeken$/i });
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(screen.getByText(/er ging iets mis/i)).toBeInTheDocument();
+      });
+      warn.mockRestore();
+    });
+
+    it("should not count a search failure that lands after the query was cleared (#3878)", async () => {
+      const user = setupUser();
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const gate = Promise.withResolvers<void>();
+      fetchMock.mockReturnValueOnce(
+        gate.promise.then(() => ({
+          ok: true,
+          json: async () => createMockSearchResponse("test"),
+        })),
+      );
+
+      render(<SearchInterface />);
+
+      const input = screen.getByRole("textbox");
+      await user.type(input, "test");
+      await user.click(screen.getByRole("button", { name: /^zoeken$/i }));
+      await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+
+      await user.click(
+        screen.getByRole("button", { name: /wis zoekopdracht/i }),
+      );
+      // Let the clear settle (it aborts the request and resets the state), and
+      // only then let the request finish with the decoder chunk failing to load.
+      await act(() => vi.advanceTimersByTimeAsync(350));
+      mockTrackEvent.mockClear();
+      decoderChunk.failing = true;
+      gate.resolve();
+      await act(() => vi.advanceTimersByTimeAsync(350));
+
+      // The failure state of a request nobody waits for must not be counted.
+      expect(screen.queryByText(/er ging iets mis/i)).not.toBeInTheDocument();
+      expect(
+        mockTrackEvent.mock.calls.filter(([name]) => name === "search_failed"),
+      ).toHaveLength(0);
+      warn.mockRestore();
     });
 
     it("should display results after successful fetch", async () => {

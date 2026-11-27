@@ -91,34 +91,45 @@ export const useSemanticSearch = (
         setLoading(true);
         setError(false);
 
-        try {
-          const res = await fetch("/api/search", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ query, type, limit }),
-            signal: controller.signal,
-          });
-
-          if (!res.ok) throw new Error(`Search failed: ${res.status}`);
-          const data = (await res.json()) as {
-            results: SemanticSearchResult[];
-            answer?: string;
-          };
-          if (abortRef.current === controller) {
-            setResults(data.results);
-            setAnswer(data.answer);
-            setExecutedQuery(query);
-          }
-        } catch (err) {
-          if ((err as Error).name === "AbortError") return;
-          // A superseded request (some engines reject it with a non-abort
-          // error) must not touch the newer request's state.
+        // A superseded request (some engines reject it with a non-abort
+        // error) must not touch the newer request's state.
+        const settleFailed = (err: unknown) => {
           if (abortRef.current !== controller) return;
           console.warn("[useSemanticSearch] semantic search failed:", err);
           setError(true);
           setResults([]);
           setAnswer(undefined);
           setExecutedQuery(query);
+        };
+
+        try {
+          // The decoder chunk (effect + schemas) loads next to the request,
+          // not after it; a failed load lands in the catch below.
+          const [res, { decodeSemanticSearchResponse }] = await Promise.all([
+            fetch("/api/search", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ query, type, limit }),
+              signal: controller.signal,
+            }),
+            import("@/lib/search/search-decoders"),
+          ]);
+
+          if (!res.ok) throw new Error(`Search failed: ${res.status}`);
+          const decoded = decodeSemanticSearchResponse(await res.json());
+          // A 200 that is not the contract's lands in the same error state as
+          // a non-2xx.
+          if (!decoded) {
+            return settleFailed("the response does not match the contract");
+          }
+          if (abortRef.current === controller) {
+            setResults([...decoded.results]);
+            setAnswer(decoded.answer);
+            setExecutedQuery(query);
+          }
+        } catch (err) {
+          if ((err as Error).name === "AbortError") return;
+          settleFailed(err);
         } finally {
           if (abortRef.current === controller) {
             setLoading(false);

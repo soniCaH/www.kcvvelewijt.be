@@ -6,6 +6,7 @@ import {
   beforeEach,
   afterEach,
   onTestFinished,
+  beforeAll,
 } from "vitest";
 import {
   render,
@@ -16,6 +17,7 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useEffect } from "react";
+import { Schema as S } from "effect";
 import { FakeIntersectionObserver } from "@/../tests/helpers/fake-observers.helpers";
 import { HubSearch } from "./HubSearch";
 import { HubSearchQueryProvider } from "./HubSearchQueryProvider";
@@ -105,6 +107,10 @@ const InsetPublisher = ({ value }: { value: number }) => {
   }, [publish, value]);
   return null;
 };
+
+// The code under test loads its decoder chunk with a dynamic `import()`; the
+// first load of `effect` can outlast a `waitFor`, so load it before any test.
+beforeAll(() => import("@/lib/search/search-decoders"));
 
 describe("HubSearch", () => {
   beforeEach(() => {
@@ -1158,10 +1164,9 @@ describe('HubSearch — the AI "Bedoel je …?" fallback (#3559)', () => {
 
     await screen.findByText("Bedoel je deze ploeg?");
     expect(guessCalls()).toHaveLength(1);
-    const body = JSON.parse(String(guessCalls()[0][1]?.body)) as {
-      query: string;
-      ages: string[];
-    };
+    const body = S.decodeUnknownSync(
+      S.parseJson(S.Struct({ query: S.String, ages: S.Array(S.String) })),
+    )(String(guessCalls()[0][1]?.body));
     expect(body.query).toBe("mijn zoon speelt bij de pupillen");
     expect(body.ages).toContain("U9");
     expect(body.ages).not.toContain("A");

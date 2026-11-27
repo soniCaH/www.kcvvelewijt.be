@@ -28,12 +28,12 @@ import { usePendingDelay } from "@/hooks/usePendingDelay";
 import { filterByActiveType } from "./search-filter-utils";
 import { cn } from "@/lib/utils/cn";
 import type {
+  LexicalSearchResponse,
   SearchResultType,
   SearchResult,
-  SearchResponse,
 } from "@/types/search";
 
-export type { SearchResultType, SearchResult, SearchResponse };
+export type { SearchResultType, SearchResult, LexicalSearchResponse };
 
 export interface SearchInterfaceProps {
   /**
@@ -169,25 +169,48 @@ export const SearchInterface = ({
       // Client-side filtering will be done in SearchResults
       const params = new URLSearchParams({ q: searchQuery.trim() });
 
-      const response = await fetch(`/api/search?${params.toString()}`, {
-        signal: controller.signal,
-      });
+      // The decoder chunk (effect + schemas) loads next to the request, not
+      // after it; a failed load lands in the catch below.
+      const [response, { decodeLexicalSearchResponse }] = await Promise.all([
+        fetch(`/api/search?${params.toString()}`, {
+          signal: controller.signal,
+        }),
+        import("@/lib/search/search-decoders"),
+      ]);
 
       if (!response.ok) {
         throw new Error("Search failed");
       }
 
-      const data: SearchResponse = await response.json();
+      const decoded = decodeLexicalSearchResponse(await response.json());
+      // A 200 that is not the route's response lands in the same error state
+      // as a non-2xx.
+      if (!decoded) {
+        if (!controller.signal.aborted) {
+          console.warn(
+            "[SearchInterface] search response does not match the schema",
+          );
+          setError(true);
+          setResults([]);
+          setTotalCount(0);
+        }
+        return;
+      }
 
       // Only update state if this request wasn't aborted
       if (!controller.signal.aborted) {
-        setResults(data.results);
-        setTotalCount(data.count);
+        setResults(decoded.results);
+        setTotalCount(decoded.count);
         setLastSettledQuery(searchQuery.trim());
       }
     } catch (error) {
-      // Don't update state if request was aborted
-      if (error instanceof Error && error.name === "AbortError") {
+      // Don't update state if request was aborted — whatever its error: a
+      // decoder chunk that fails after the query was cleared is not a failed
+      // search.
+      if (
+        controller.signal.aborted ||
+        (error instanceof Error && error.name === "AbortError")
+      ) {
         return;
       }
 

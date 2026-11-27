@@ -24,18 +24,32 @@ export const useTeamGuess = (
   useEffect(() => {
     if (!query || !agesKey) return;
     const controller = new AbortController();
-    fetch("/api/search/team-guess", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query, ages: agesKey.split(",") }),
-      signal: controller.signal,
-    })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data: { age?: string | null } | null) => {
-        if (data?.age) setGuess({ query, age: data.age });
+    // The decoder chunk (effect + schemas) loads next to the request, not
+    // after it; a failed load lands in the catch below.
+    Promise.all([
+      fetch("/api/search/team-guess", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query, ages: agesKey.split(",") }),
+        signal: controller.signal,
+      }),
+      import("@/lib/search/search-decoders"),
+    ])
+      .then(async ([res, { decodeTeamGuess }]) => {
+        if (!res.ok) return null;
+        const decoded = decodeTeamGuess(await res.json());
+        if (!decoded) {
+          console.warn(
+            "[useTeamGuess] team guess response does not match the contract",
+          );
+        }
+        return decoded;
+      })
+      .then((guess) => {
+        if (guess?.age) setGuess({ query, age: guess.age });
       })
       .catch((err: unknown) => {
-        if ((err as Error).name !== "AbortError")
+        if (!controller.signal.aborted && (err as Error).name !== "AbortError")
           console.warn("[useTeamGuess] team guess failed:", err);
       });
     return () => controller.abort();

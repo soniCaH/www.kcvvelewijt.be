@@ -3,8 +3,10 @@
  * Tests the /api/search endpoint validation and success responses
  */
 
+import { Schema as S } from "effect";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
+import { LexicalSearchResponse } from "@/types/search";
 import { ARTICLES_QUERY } from "@/lib/repositories/article.repository";
 import { PLAYERS_QUERY } from "@/lib/repositories/player.repository";
 import { TEAMS_QUERY } from "@/lib/repositories/team.repository";
@@ -629,10 +631,10 @@ describe("GET /api/search", () => {
     const search = async (url: string) => {
       const response = await GET(createRequest(url));
       expect(response.status).toBe(200);
-      return (await response.json()) as {
-        count: number;
-        results: Array<{ type: string; title: string; url: string }>;
-      };
+      // The schema `SearchInterface` decodes with: route and client share it.
+      return S.decodeUnknownSync(S.parseJson(LexicalSearchResponse))(
+        await response.text(),
+      );
     };
 
     const article = (

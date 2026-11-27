@@ -50,6 +50,7 @@ import {
 import { tmpdir } from "node:os";
 import { join, relative } from "node:path";
 
+import { Schema as S } from "effect";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 /** Worktree-safe: resolves the checkout we are running in, not a `../..` walk. */
@@ -194,19 +195,22 @@ describe(".husky/commit-msg", () => {
 });
 
 describe("apps/web ESLint config invoked from the repository root", () => {
-  type Report = {
-    messages: { ruleId: string | null; message: string }[];
-    output?: string;
-  };
+  const Report = S.Struct({
+    messages: S.Array(
+      S.Struct({ ruleId: S.NullOr(S.String), message: S.String }),
+    ),
+    output: S.optional(S.String),
+  });
+  type Report = S.Schema.Type<typeof Report>;
 
-  const parse = (result: SpawnSyncReturns<string>): Report[] => {
+  const parse = (result: SpawnSyncReturns<string>): readonly Report[] => {
     if (result.error || result.status === null) {
       throw new Error(`ESLint could not be spawned: ${result.error?.message}`);
     }
     if (!result.stdout.trim()) {
       throw new Error(`ESLint produced no JSON. stderr: ${result.stderr}`);
     }
-    return JSON.parse(result.stdout) as Report[];
+    return S.decodeUnknownSync(S.parseJson(S.Array(Report)))(result.stdout);
   };
 
   /**
@@ -333,9 +337,16 @@ describe("root package.json's lint-staged wiring for apps/web (#2418)", () => {
    * `"$@"` are still wired through) changes by swapping it in.
    */
   const readLintStagedFontSizeScript = (): string => {
-    const pkg = JSON.parse(
-      readFileSync(join(repoRoot, "package.json"), "utf8"),
-    ) as { "lint-staged": Record<string, string[]> };
+    const pkg = S.decodeUnknownSync(
+      S.parseJson(
+        S.Struct({
+          "lint-staged": S.Record({
+            key: S.String,
+            value: S.Array(S.String),
+          }),
+        }),
+      ),
+    )(readFileSync(join(repoRoot, "package.json"), "utf8"));
     const [command] = pkg["lint-staged"]["apps/web/**/*.{js,jsx,ts,tsx}"] ?? [];
     const match = command?.match(/^sh -c '(.+)' --$/);
     if (!match) {
@@ -373,12 +384,14 @@ describe("root package.json's lint-staged wiring for apps/web (#2418)", () => {
   });
 
   it("passes a real frozen violation, linted the way lint-staged lints it", () => {
-    const suppressions = JSON.parse(
+    const suppressions = S.decodeUnknownSync(
+      S.parseJson(S.Record({ key: S.String, value: S.Unknown })),
+    )(
       readFileSync(
         join(repoRoot, "apps", "web", "eslint-suppressions.json"),
         "utf8",
       ),
-    ) as Record<string, unknown>;
+    );
     const [suppressedRelPath] = Object.keys(suppressions);
     const absolute = join(repoRoot, "apps", "web", suppressedRelPath);
 

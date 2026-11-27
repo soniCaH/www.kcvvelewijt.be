@@ -8,7 +8,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 import { SearchInterface } from "./SearchInterface";
-import type { SearchResponse } from "@/types/search";
+import type { LexicalSearchResponse } from "@/types/search";
 import { fixtureImage } from "@test-fixtures/images";
 import { forceSearchFocusRing } from "./search-form-vr-focus";
 
@@ -55,7 +55,7 @@ const waitForSemantic =
 // Mock data
 // ---------------------------------------------------------------------------
 
-const mockResponse: SearchResponse = {
+const mockResponse: LexicalSearchResponse = {
   results: [
     {
       id: "1",
@@ -108,7 +108,11 @@ const mockResponse: SearchResponse = {
   query: "KCVV",
 };
 
-const mockEmpty: SearchResponse = { results: [], count: 0, query: "xqzptw" };
+const mockEmpty: LexicalSearchResponse = {
+  results: [],
+  count: 0,
+  query: "xqzptw",
+};
 
 // Semantic (POST /api/search) response shape — distinct corpus from lexical
 // (article/page/responsibility only; never players/teams).
@@ -174,7 +178,7 @@ const relatedResponse: SemanticResponse = {
 
 // Method-aware: GET (lexical) -> `lexical`; POST (semantic) -> `semantic`.
 const mockFetch = (
-  lexical: SearchResponse,
+  lexical: LexicalSearchResponse,
   {
     semantic = noSemantic,
     delay = 0,
@@ -221,7 +225,7 @@ const mockFetchPending = () => {
 
 // The first lexical GET resolves; every later one never does — a re-search left
 // in flight, so the dimmed list and its floating scarf hold still.
-const mockFetchFirstThenPending = (lexical: SearchResponse) => {
+const mockFetchFirstThenPending = (lexical: LexicalSearchResponse) => {
   const original = globalThis.fetch;
   const lexicalCalls = { count: 0 };
   globalThis.fetch = async (_url: RequestInfo | URL, init?: RequestInit) => {

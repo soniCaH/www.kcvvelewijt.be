@@ -265,6 +265,59 @@ describe("DartsSignupForm", () => {
     );
   });
 
+  it("shows the generic error, not the success message, for a 200 whose body is not the contract's (#3878)", async () => {
+    // A real signup body with a wrong-typed field.
+    stubBackend({ submit: () => json({ ok: true, waitlist: "yes" }) });
+    render(<DartsSignupForm />);
+    fillRequired();
+    submit();
+
+    expect(
+      await screen.findByText(
+        "Er ging iets mis. Controleer je gegevens en probeer opnieuw.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Ingeschreven!/)).toBeNull();
+  });
+
+  it("shows the generic error when the response body is not JSON (#3878)", async () => {
+    stubBackend({
+      submit: () => new Response("<html>Bad gateway</html>", { status: 502 }),
+    });
+    render(<DartsSignupForm />);
+    fillRequired();
+    submit();
+
+    expect(
+      await screen.findByText(
+        "Er ging iets mis. Controleer je gegevens en probeer opnieuw.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("treats the proxy's bare { ok: true } as a signup without a wachtlijst spot (#3878)", async () => {
+    // `proxyFormPost` answers this when the BFF's 2xx body is not JSON: the team
+    // is stored, so a second submit would store it twice.
+    stubBackend({ submit: () => json({ ok: true }) });
+    render(<DartsSignupForm />);
+    fillRequired();
+    submit();
+
+    expect(await screen.findByText(/Ingeschreven!/)).toBeInTheDocument();
+    expect(screen.queryByText(/wachtlijst\. Komt er/)).toBeNull();
+  });
+
+  it("keeps the neutral intro when the spots body is not the contract's (#3878)", async () => {
+    const fetchMock = stubBackend({ spotsLeft: 1.5 });
+    render(<DartsSignupForm />);
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    // Let the spots response settle before asserting what is absent.
+    await act(async () => {});
+
+    expect(screen.getByText("Schrijf je ploeg in.")).toBeInTheDocument();
+    expect(screen.queryByText(/Nog 1.5/)).toBeNull();
+  });
+
   it("falls back to a generic message when the refusal carries none", async () => {
     stubBackend({ submit: () => json({}, 500) });
     render(<DartsSignupForm />);
