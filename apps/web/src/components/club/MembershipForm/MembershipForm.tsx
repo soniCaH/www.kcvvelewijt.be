@@ -17,6 +17,7 @@ import {
   INVALID_BIRTH_DATE_MESSAGE,
   isPlausibleBirthDate,
   MEDICAL_CERT_ROLES,
+  MembershipResponse,
   type MembershipRole,
 } from "@kcvv/api-contract";
 import {
@@ -30,6 +31,7 @@ import {
   Textarea,
 } from "@/components/design-system";
 import { trackEvent } from "@/lib/analytics/track-event";
+import { makeFormBodyDecoder } from "@/lib/forms/decode-form-body";
 import type { MembershipContacts } from "@/lib/repositories/form-routing.repository";
 import { scrollIntoViewMotionSafe } from "@/lib/utils/scroll-into-view";
 import {
@@ -54,6 +56,7 @@ const ROLE_OPTIONS: { value: MembershipRole; label: string }[] = [
 const REQUIRED_MSG = "Verplicht.";
 
 const SUBMIT_URL = "/api/membership";
+const decodeBody = makeFormBodyDecoder(MembershipResponse);
 
 interface MembershipFormProps {
   /** Storybook/testing: seed the role to render role-specific fields. */
@@ -369,13 +372,11 @@ const MembershipFormFields = ({
         }),
       });
 
-      const data = (await response.json().catch(() => ({}))) as {
-        ok?: boolean;
-        fields?: Record<string, string>;
-        error?: string;
-      };
+      const { success, refusal } = decodeBody(
+        await response.json().catch(() => null),
+      );
 
-      if (response.ok && data.ok) {
+      if (response.ok && success?.ok) {
         setReport({
           kind: "submit",
           role,
@@ -388,20 +389,20 @@ const MembershipFormFields = ({
         return;
       }
 
-      // `data.error` is authored Dutch copy from the BFF/route handler —
+      // `refusal.error` is authored Dutch copy from the BFF/route handler —
       // never a raw caught error — so it must survive; the fallback only
-      // covers a body with no `error` at all.
-      if (response.status === 400 && data.fields) {
-        setFieldErrors(data.fields);
+      // covers a body that is not a refusal.
+      if (response.status === 400 && refusal?.fields) {
+        setFieldErrors(refusal.fields);
         setReport({
           kind: "error",
-          errors: data.fields,
+          errors: refusal.fields,
           source: "server",
           role,
         });
       }
       setGeneralError(
-        data.error ??
+        refusal?.error ??
           "Er ging iets mis. Controleer je gegevens en probeer opnieuw.",
       );
       resetTurnstile();

@@ -1,5 +1,6 @@
 "use client";
 
+import { Either, Schema as S } from "effect";
 import {
   useEffect,
   useId,
@@ -9,6 +10,8 @@ import {
 } from "react";
 import {
   DARTS_TEAM_LIMIT,
+  DartsSignupResponse,
+  DartsSpotsResponse,
   EMAIL_PATTERN,
   dartsPriceAmount,
   isDartsSignupClosed,
@@ -27,10 +30,13 @@ import { CheckboxField } from "@/components/club/MembershipForm/MembershipForm";
 import { TurnstileWidget } from "@/components/club/MembershipForm/TurnstileWidget";
 import darts from "@/data/darts.json";
 import { trackEvent } from "@/lib/analytics/track-event";
+import { makeFormBodyDecoder } from "@/lib/forms/decode-form-body";
 import { scrollIntoViewMotionSafe } from "@/lib/utils/scroll-into-view";
 
 const SUBMIT_URL = "/api/darts";
 const SPOTS_URL = "/api/darts/spots";
+const decodeBody = makeFormBodyDecoder(DartsSignupResponse);
+const decodeSpots = S.decodeUnknownEither(DartsSpotsResponse);
 const REQUIRED_MSG = "Verplicht.";
 
 // "invalid" covers client-side validation and a server rejection alike (one
@@ -115,8 +121,9 @@ export const DartsSignupForm = () => {
     const controller = new AbortController();
     fetch(SPOTS_URL, { cache: "no-store", signal: controller.signal })
       .then((res) => (res.ok ? res.json() : null))
-      .then((data: { spotsLeft?: unknown } | null) => {
-        if (typeof data?.spotsLeft === "number") setSpotsLeft(data.spotsLeft);
+      .then((data) => {
+        const spots = decodeSpots(data);
+        if (Either.isRight(spots)) setSpotsLeft(spots.right.spotsLeft);
       })
       .catch(() => {});
     return () => controller.abort();
@@ -238,15 +245,12 @@ export const DartsSignupForm = () => {
         }),
       });
 
-      const data = (await response.json().catch(() => ({}))) as {
-        ok?: boolean;
-        waitlist?: boolean;
-        fields?: Record<string, string>;
-        error?: string;
-      };
+      const { success, refusal } = decodeBody(
+        await response.json().catch(() => null),
+      );
 
-      if (response.ok && data.ok) {
-        const onWaitlist = data.waitlist === true;
+      if (response.ok && success?.ok) {
+        const onWaitlist = success.waitlist;
         setReport({
           kind: "submit",
           waitlist: onWaitlist,
@@ -257,13 +261,13 @@ export const DartsSignupForm = () => {
         return;
       }
 
-      // `data.error` is authored Dutch copy from the BFF, never a raw error.
-      if (response.status === 400 && data.fields) {
-        setFieldErrors(data.fields);
-        setReport({ kind: "error", errors: data.fields, source: "server" });
+      // `refusal.error` is authored Dutch copy from the BFF, never a raw error.
+      if (response.status === 400 && refusal?.fields) {
+        setFieldErrors(refusal.fields);
+        setReport({ kind: "error", errors: refusal.fields, source: "server" });
       }
       setGeneralError(
-        data.error ??
+        refusal?.error ??
           "Er ging iets mis. Controleer je gegevens en probeer opnieuw.",
       );
       resetTurnstile();

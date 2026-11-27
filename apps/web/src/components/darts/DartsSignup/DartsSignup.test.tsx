@@ -265,6 +265,32 @@ describe("DartsSignupForm", () => {
     );
   });
 
+  it("shows the generic error, not the success message, for a 200 whose body is not the contract's (#3878)", async () => {
+    // A 200 without `waitlist`: a cast read it as a signup on a spot.
+    stubBackend({ submit: () => json({ ok: true }) });
+    render(<DartsSignupForm />);
+    fillRequired();
+    submit();
+
+    expect(
+      await screen.findByText(
+        "Er ging iets mis. Controleer je gegevens en probeer opnieuw.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Ingeschreven!/)).toBeNull();
+  });
+
+  it("keeps the neutral intro when the spots body is not the contract's (#3878)", async () => {
+    const fetchMock = stubBackend({ spotsLeft: 1.5 });
+    render(<DartsSignupForm />);
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    // Let the spots response settle before asserting what is absent.
+    await act(async () => {});
+
+    expect(screen.getByText("Schrijf je ploeg in.")).toBeInTheDocument();
+    expect(screen.queryByText(/Nog 1.5/)).toBeNull();
+  });
+
   it("falls back to a generic message when the refusal carries none", async () => {
     stubBackend({ submit: () => json({}, 500) });
     render(<DartsSignupForm />);

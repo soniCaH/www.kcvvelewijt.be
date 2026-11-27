@@ -415,6 +415,31 @@ describe("MembershipForm", () => {
     });
   });
 
+  it("shows the generic error, not the success message, for a 200 whose body is not the contract's (#3878)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          status: 200,
+          // `ok` is truthy but not a boolean: a cast let this through as success.
+          json: () => Promise.resolve({ ok: "yes" }),
+        }),
+      ),
+    );
+
+    render(<MembershipForm defaultRole="vrijwilliger" />);
+    fillRequiredFields();
+    submitForm();
+
+    expect(
+      await screen.findByText(
+        "Er ging iets mis. Controleer je gegevens en probeer opnieuw.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Bedankt voor je interesse/i)).toBeNull();
+  });
+
   it("posts to /api/membership and shows a success message", async () => {
     const fetchMock = vi.fn(() =>
       Promise.resolve({
