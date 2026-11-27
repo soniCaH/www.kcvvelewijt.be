@@ -10,7 +10,8 @@
  * - `<HeroDayBlockOverlay>` — mono day stamp pinned to the lower-left
  *   of the Event cover photo (signature visual hook from R1.5b).
  * - `<HeroCompressedEventStrip>` — ruled strip below the Event hero card:
- *   `▸ ${location} · ${date} · ${start}–${end}` (two lines on a phone).
+ *   `▸ ${location} · ${date} · ${start}–${end}` (the location takes its own
+ *   line on a phone).
  * - `<HeroMatchScoreBar>` — `crest · score · crest` pill straddling the
  *   match cover's lower edge (5.d-mat H3): recap shows score + FT badge,
  *   preview shows kickoff time. Reuses `<Crest>` + `<MatchStatusBadge>`.
@@ -124,13 +125,11 @@ export const HeroCompressedEventStrip = ({
   startTime,
   endTime,
 }: HeroCompressedEventStripProps) => {
-  const timeRange =
-    startTime && endTime
-      ? `${startTime}–${endTime}`
-      : (startTime ?? endTime ?? null);
-
   const nonEmpty = (part: string | null | undefined): part is string =>
     typeof part === "string" && part.trim().length > 0;
+  const start = nonEmpty(startTime) ? startTime.trim() : null;
+  const end = nonEmpty(endTime) ? endTime.trim() : null;
+  const timeRange = start && end ? `${start}–${end}` : (start ?? end);
   const place = nonEmpty(location) ? location.trim() : null;
   const when = [date, timeRange].filter(nonEmpty);
 
@@ -142,8 +141,9 @@ export const HeroCompressedEventStrip = ({
       // `border-y` so the strip owns both its top and bottom edges (the
       // shell paints no bottom rule, #1866 fix-1). The rules span the
       // viewport; the text sits in the homepage column, flush with the hero
-      // title, like every other ruled band (#3908).
-      className="border-ink text-label text-ink border-y py-2 font-mono uppercase"
+      // title, like every other ruled band (#3908). `leading-label-wrap`
+      // because a long venue wraps by design (#2667).
+      className="border-ink text-label leading-label-wrap text-ink border-y py-2 font-mono uppercase"
     >
       <PageContainer width="index" className="flex items-baseline gap-2">
         <span aria-hidden="true" className="text-jersey-deep">

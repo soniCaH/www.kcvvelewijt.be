@@ -460,6 +460,26 @@ describe("EditorialHero — event variant", () => {
     expect(strip.querySelector(".max-sm\\:hidden")).toBeNull();
   });
 
+  it("treats a whitespace-only start time as absent, so the strip shows no half range (#3908)", () => {
+    render(
+      <EditorialHero
+        variant="event"
+        {...SHARED}
+        placement="homepage"
+        slug="zomertornooi-2026"
+        feature={{
+          location: "Sportpark Elewijt",
+          startTime: " ",
+          endTime: "17:00",
+          title: "Tornooi",
+        }}
+      />,
+    );
+    const strip = screen.getByTestId("hero-compressed-event-strip");
+    expect(strip).toHaveTextContent("17:00");
+    expect(strip).not.toHaveTextContent("–17:00");
+  });
+
   it("treats a whitespace-only location as absent, so a phone shows no empty line (#3908)", () => {
     render(
       <EditorialHero
