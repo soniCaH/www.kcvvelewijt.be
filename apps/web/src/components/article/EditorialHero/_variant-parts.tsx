@@ -132,8 +132,7 @@ export const HeroCompressedEventStrip = ({
   );
 
   if (segments.length === 0) return null;
-  // The location, when present, is always `segments[0]`.
-  const hasLocation = segments[0] === location;
+  const hasLocation = Boolean(location);
 
   return (
     <div
@@ -148,8 +147,6 @@ export const HeroCompressedEventStrip = ({
         <span aria-hidden="true" className="text-jersey-deep">
           ▸
         </span>
-        {/* On a phone the location takes its own line and date · time the
-            next, so no line ever starts with a dot (#3908). */}
         <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
           {segments.map((segment, idx) => (
             <span
