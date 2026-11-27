@@ -95,6 +95,17 @@ export const useSemanticSearch = (
         setLoading(true);
         setError(false);
 
+        // A superseded request (some engines reject it with a non-abort
+        // error) must not touch the newer request's state.
+        const settleFailed = (err: unknown) => {
+          if (abortRef.current !== controller) return;
+          console.warn("[useSemanticSearch] semantic search failed:", err);
+          setError(true);
+          setResults([]);
+          setAnswer(undefined);
+          setExecutedQuery(query);
+        };
+
         try {
           const res = await fetch("/api/search", {
             method: "POST",
@@ -105,11 +116,9 @@ export const useSemanticSearch = (
 
           if (!res.ok) throw new Error(`Search failed: ${res.status}`);
           const decoded = decodeSearchResponse(await res.json());
-          // Inside the `try`: a 200 that is not the contract's lands in the
-          // same error state as a non-2xx.
-          if (Either.isLeft(decoded)) {
-            throw new Error("Search response does not match the contract");
-          }
+          // A 200 that is not the contract's lands in the same error state as
+          // a non-2xx.
+          if (Either.isLeft(decoded)) return settleFailed(decoded.left);
           if (abortRef.current === controller) {
             setResults([...decoded.right.results]);
             setAnswer(decoded.right.answer);
@@ -117,14 +126,7 @@ export const useSemanticSearch = (
           }
         } catch (err) {
           if ((err as Error).name === "AbortError") return;
-          // A superseded request (some engines reject it with a non-abort
-          // error) must not touch the newer request's state.
-          if (abortRef.current !== controller) return;
-          console.warn("[useSemanticSearch] semantic search failed:", err);
-          setError(true);
-          setResults([]);
-          setAnswer(undefined);
-          setExecutedQuery(query);
+          settleFailed(err);
         } finally {
           if (abortRef.current === controller) {
             setLoading(false);

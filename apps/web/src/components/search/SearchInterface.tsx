@@ -184,7 +184,12 @@ export const SearchInterface = ({
       // A 200 that is not the route's response lands in the same error state
       // as a non-2xx.
       if (Either.isLeft(decoded)) {
-        throw new Error("Search response does not match the route's schema");
+        if (!controller.signal.aborted) {
+          setError(true);
+          setResults([]);
+          setTotalCount(0);
+        }
+        return;
       }
 
       // Only update state if this request wasn't aborted

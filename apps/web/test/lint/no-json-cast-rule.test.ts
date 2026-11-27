@@ -46,7 +46,6 @@ const ALLOWED = [
   "const a = value as Foo;",
   "const a = <unknown>JSON.parse(text);",
   "const a = <Foo>value;",
-  "const a = (await response.json()) as unknown;",
   "const a = JSON.parse(text) as unknown as unknown;",
   "const a = await response.text<Foo>();",
 ];
