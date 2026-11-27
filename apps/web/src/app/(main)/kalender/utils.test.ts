@@ -468,6 +468,40 @@ describe("getMatchDotType", () => {
 // ── buildCalendarFeed ─────────────────────────────────────────────────────
 
 describe("buildCalendarFeed", () => {
+  it("puts an article with a per-day schedule on its session days only, never on every day between (#3906)", () => {
+    const feed = buildCalendarFeed(
+      [],
+      [
+        makeEventListItem({
+          id: "uefa",
+          source: "article",
+          href: "/nieuws/uefa",
+          dateStart: "2027-01-25T00:00:00.000+01:00",
+          dateEnd: "2027-05-10T00:00:00.000+02:00",
+          sessions: [
+            {
+              key: "a",
+              dateStart: "2027-01-25T18:30:00.000+01:00",
+              dateEnd: "2027-01-25T22:30:00.000+01:00",
+            },
+            {
+              key: "b",
+              dateStart: "2027-02-01T18:30:00.000+01:00",
+              dateEnd: "2027-02-01T22:30:00.000+01:00",
+            },
+          ],
+        }),
+      ],
+    );
+    const days = groupFeedByDay(
+      [],
+      feed.flatMap((item) => (item.source === "match" ? [] : [item.event])),
+    );
+
+    expect(feed.map((item) => item.id)).toEqual(["uefa-a", "uefa-b"]);
+    expect([...days.keys()].sort()).toEqual(["2027-01-25", "2027-02-01"]);
+  });
+
   it("merges matches and events into one feed sorted chronologically by dateStart", () => {
     const feed = buildCalendarFeed(
       [
