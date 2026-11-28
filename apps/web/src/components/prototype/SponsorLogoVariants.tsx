@@ -113,14 +113,13 @@ export const LogoCard = ({
 
 /** Matchday look D: look A's place and content, in look C's framed card. */
 export const MatchdayFramed = ({ sponsor }: { sponsor: Sponsor }) => (
-  <div className="border-ink bg-cream-soft flex flex-wrap items-center justify-between gap-4 border-2 px-5 py-4">
-    <div>
-      <Label>Matchbal aangeboden door</Label>
-      <p className="font-display text-ink mt-1 text-xl italic">
-        {sponsor.name}
-      </p>
+  <div className="border-ink bg-cream-soft border-2 px-5 py-4">
+    <Label>Matchbal aangeboden door</Label>
+    {/* Name and logo share one row, so their centres line up. */}
+    <div className="mt-1 flex flex-wrap items-center justify-between gap-4">
+      <p className="font-display text-ink m-0 text-xl italic">{sponsor.name}</p>
+      <Logo s={sponsor} h={80} />
     </div>
-    <Logo s={sponsor} h={80} />
   </div>
 );
 
