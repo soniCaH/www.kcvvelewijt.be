@@ -75,6 +75,7 @@ vi.mock("@/lib/effect/services/BffService", async (importOriginal) => {
       getMatches: () => Effect.succeed([]),
       getNextMatches: () => Effect.succeed([]),
       getMatchesWindow: () => Effect.succeed([]),
+      getUpcomingMatches: () => Effect.succeed([]),
       getMatchDetail: mockGetMatchDetail,
       getRanking: mockGetRanking,
       getRelated: () => Effect.succeed([]),

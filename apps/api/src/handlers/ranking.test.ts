@@ -41,6 +41,7 @@ const makeServiceMock = (
     getTeamMatches: () => Effect.fail(new Error("not needed") as never),
     getNextMatches: () => Effect.fail(new Error("not needed") as never),
     getMatchesWindow: () => Effect.fail(new Error("not needed") as never),
+    getUpcomingMatches: () => Effect.fail(new Error("not needed") as never),
     getMatchDetail: () => Effect.fail(new Error("not needed") as never),
     getRanking: () => Effect.succeed(rankingTables),
     getOpponentHistory: () => Effect.die("not needed"),

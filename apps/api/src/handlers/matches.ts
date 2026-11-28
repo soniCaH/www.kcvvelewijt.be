@@ -101,6 +101,17 @@ export const getNextMatchesHandler = (): Effect.Effect<
     );
 };
 
+/**
+ * Serve-time filter (#3629): a list's lower bound (start of the Brussels day)
+ * is fixed at fetch time, and a cached list can outlive its day, so
+ * yesterday's matches would keep showing. Applied on every serve (fresh,
+ * stale or just fetched).
+ */
+const dropBeforeToday = (matches: readonly Match[]): readonly Match[] => {
+  const startOfToday = startOfBrusselsDayMs(Date.now());
+  return matches.filter((m) => kickoffMs(m.date) >= startOfToday);
+};
+
 export const getMatchesWindowHandler = (): Effect.Effect<
   readonly Match[],
   BffError,
@@ -118,16 +129,36 @@ export const getMatchesWindowHandler = (): Effect.Effect<
       isPartial: isPartialFanout,
     })
     .pipe(
-      // Serve-time filter (#3629): the window's lower bound (start of the
-      // Brussels day) is fixed at fetch time, and the 12 h tier lets a list
-      // outlive its day: yesterday's matches would keep showing. Drop them on
-      // every serve (fresh, stale or just fetched). The stored value stays
-      // unfiltered, so `matchesWindowTtl` still sees it.
-      Effect.map((matches) => {
-        const startOfToday = startOfBrusselsDayMs(Date.now());
-        return matches.filter((m) => kickoffMs(m.date) >= startOfToday);
-      }),
+      // Serve-time filter (#3629): the stored value stays unfiltered, so
+      // `matchesWindowTtl` still sees it.
+      Effect.map(dropBeforeToday),
     );
+};
+
+/**
+ * Every coming match of every visible team, to the end of the season (#3920):
+ * the Studio's Matchbal picker. A flat 24 h tier: the picker stores only the
+ * id, so a match added or moved may show up about 3 days late in the Studio:
+ * a stale read serves the old copy while it refreshes, and the web route's CDN
+ * reads about once a day and keeps its own day (docs/agents/api-ops.md).
+ */
+export const getUpcomingMatchesHandler = (): Effect.Effect<
+  readonly Match[],
+  BffError,
+  PsdService | KvCacheService | WorkerEnvTag | PsdGateService
+> => {
+  const cacheKey = `matches:upcoming:${CACHE_VERSION}`;
+  const fetchMatches = Effect.gen(function* () {
+    const service = yield* PsdService;
+    return yield* service.getUpcomingMatches();
+  });
+
+  return matchesCache
+    .getOrFetch(cacheKey, fetchMatches, TTL.UPCOMING_MATCHES, undefined, {
+      shouldServeStale,
+      isPartial: isPartialFanout,
+    })
+    .pipe(Effect.map(dropBeforeToday));
 };
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -416,6 +447,9 @@ export const MatchesApiLive = HttpApiBuilder.group(
       .handle("getNextMatches", () => withErrorMapping(getNextMatchesHandler()))
       .handle("getMatchesWindow", () =>
         withErrorMapping(getMatchesWindowHandler()),
+      )
+      .handle("getUpcomingMatches", () =>
+        withErrorMapping(getUpcomingMatchesHandler()),
       )
       .handle("getMatchDetail", ({ path: { matchId } }) =>
         withErrorMapping(getMatchDetailHandler(matchId)),

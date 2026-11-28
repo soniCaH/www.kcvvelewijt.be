@@ -74,7 +74,7 @@ The pure filter (`filterLauncherTemplates`) lives in its own file separate from 
 ## Custom Inputs
 
 - One input component per file in `src/inputs/`
-- Pair each component with an `apply-<input>.ts` helper that takes `schemaTypes` and returns a copy with the component grafted onto a specific field's `components.input` — non-mutating, a safe no-op when the target type/field is absent. This keeps `@kcvv/sanity-schemas` React-free: the schema declares a plain field, the graft happens in `src/schema-types.ts` where all `apply-*` helpers compose (`applyRespondentPicker(applyArticleTagsInput(baseSchemaTypes, …), …)`).
+- Graft each component onto its field with `applyFieldInput(schemaTypes, Component, {typeName, fieldName})` in `src/schema-types.ts`: non-mutating, and a safe no-op when the target type or field is absent. Older inputs still have their own `apply-<input>.ts` helper.
 - Export both the component and the apply helper from `src/inputs/index.ts`, then re-export from the package barrel
 
 **Person / contact references:** reuse **`RespondentPicker`** instead of a raw `reference` input. It is grafted onto the target field via `applyRespondentPicker` in `schema-types.ts` (see above) — the schema keeps a plain field, so no React leaks into `@kcvv/sanity-schemas` and no per-studio config edit is needed.

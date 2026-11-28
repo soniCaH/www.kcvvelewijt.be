@@ -46,6 +46,7 @@ export const TTL = {
   RELATED: 60 * 60 * 6, // 6 hours — related content changes infrequently
   OPPONENT_HISTORY: 60 * 60 * 24 * 7, // 7 days — historical match data doesn't change
   PLAYER_STATS: 60 * 60 * 6, // 6 hours — player stats update after match days
+  UPCOMING_MATCHES: 60 * 60 * 24, // 24 hours — the Studio's Matchbal picker list (#3920); Kevin: never 1 h or less
   SEASONS: 60 * 60 * 24, // 24 hours — the season list changes once a year
   PARTIAL_FANOUT: 60 * 5, // 5 min — a fan-out with a failed team (#3489): serve the teams that loaded, retry soon
   SEARCH: 60 * 60, // 1 hour — full SearchResponse, answer included (#3468)

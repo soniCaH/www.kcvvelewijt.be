@@ -7,7 +7,7 @@ import {
 } from 'sanity'
 import {schemaTypes as baseSchemaTypes} from '@kcvv/sanity-schemas'
 import {describe, expect, it} from 'vitest'
-import {applyBulkImageUploadInput} from './apply-bulk-image-upload-input'
+import {applyFieldInput} from './apply-field-input'
 
 const StubComponent: ComponentType<ArrayOfObjectsInputProps> = () => null
 
@@ -33,9 +33,9 @@ const makeSchemaTypes = (): SchemaTypeDefinition[] => [
   }),
 ]
 
-describe('applyBulkImageUploadInput', () => {
+describe('applyFieldInput', () => {
   it('sets components.input on the targeted field', () => {
-    const result = applyBulkImageUploadInput(makeSchemaTypes(), StubComponent, TARGET)
+    const result = applyFieldInput(makeSchemaTypes(), StubComponent, TARGET)
     const galleryType = result.find((t) => t.name === 'photoGallery') as unknown as {
       fields: Array<{name: string; components?: {input?: unknown}}>
     }
@@ -45,13 +45,13 @@ describe('applyBulkImageUploadInput', () => {
 
   it('leaves sibling types untouched', () => {
     const original = makeSchemaTypes()
-    const result = applyBulkImageUploadInput(original, StubComponent, TARGET)
+    const result = applyFieldInput(original, StubComponent, TARGET)
     const event = result.find((t) => t.name === 'event')
     expect(event).toEqual(original[1])
   })
 
   it('preserves other photoGallery fields unchanged', () => {
-    const result = applyBulkImageUploadInput(makeSchemaTypes(), StubComponent, TARGET)
+    const result = applyFieldInput(makeSchemaTypes(), StubComponent, TARGET)
     const galleryType = result.find((t) => t.name === 'photoGallery') as unknown as {
       fields: Array<{name: string; type: string}>
     }
@@ -75,7 +75,7 @@ describe('applyBulkImageUploadInput', () => {
         ],
       }),
     ]
-    const result = applyBulkImageUploadInput(input, StubComponent, TARGET)
+    const result = applyFieldInput(input, StubComponent, TARGET)
     const galleryType = result.find((t) => t.name === 'photoGallery') as unknown as {
       fields: Array<{name: string; components?: {input?: unknown; item?: unknown}}>
     }
@@ -87,7 +87,7 @@ describe('applyBulkImageUploadInput', () => {
   it('does not mutate the input schemaTypes array', () => {
     const original = makeSchemaTypes()
     const snapshot = structuredClone(original)
-    applyBulkImageUploadInput(original, StubComponent, TARGET)
+    applyFieldInput(original, StubComponent, TARGET)
     expect(original).toEqual(snapshot)
   })
 
@@ -95,7 +95,7 @@ describe('applyBulkImageUploadInput', () => {
     const input: SchemaTypeDefinition[] = [
       defineType({name: 'player', type: 'document', fields: []}),
     ]
-    const result = applyBulkImageUploadInput(input, StubComponent, TARGET)
+    const result = applyFieldInput(input, StubComponent, TARGET)
     expect(result).toEqual(input)
   })
 
@@ -107,12 +107,12 @@ describe('applyBulkImageUploadInput', () => {
         fields: [defineField({name: 'title', type: 'string'})],
       }),
     ]
-    const result = applyBulkImageUploadInput(input, StubComponent, TARGET)
+    const result = applyFieldInput(input, StubComponent, TARGET)
     expect(result).toEqual(input)
   })
 
   it('targets whatever scope it is given, not a hardcoded field', () => {
-    const result = applyBulkImageUploadInput(makeSchemaTypes(), StubComponent, {
+    const result = applyFieldInput(makeSchemaTypes(), StubComponent, {
       typeName: 'event',
       fieldName: 'title',
     })
@@ -128,7 +128,7 @@ describe('applyBulkImageUploadInput', () => {
   // instead of a stale fixture.
   describe('against the real @kcvv/sanity-schemas schema', () => {
     it('grafts components.input onto the real photoGallery.images', () => {
-      const result = applyBulkImageUploadInput(baseSchemaTypes, StubComponent, TARGET)
+      const result = applyFieldInput(baseSchemaTypes, StubComponent, TARGET)
       const galleryType = result.find((t) => t.name === 'photoGallery') as unknown as {
         fields: Array<{name: string; components?: {input?: unknown}}>
       }

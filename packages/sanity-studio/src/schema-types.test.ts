@@ -9,7 +9,7 @@ import type {
 import {schemaTypes as baseSchemaTypes} from '@kcvv/sanity-schemas'
 import {describe, expect, it} from 'vitest'
 import {applyArticleTagsInput} from './inputs/apply-article-tags-input'
-import {applyBulkImageUploadInput} from './inputs/apply-bulk-image-upload-input'
+import {applyFieldInput} from './inputs/apply-field-input'
 import {applyDecoratorComponents} from './inputs/apply-decorator-components'
 import {applyRespondentPicker} from './inputs/apply-respondent-picker'
 import {collectBlockDecoratorComponents} from './inputs/collect-block-decorator-components'
@@ -50,7 +50,7 @@ const findField = (
 
 const TagsSentinel: ComponentType<ArrayOfPrimitivesInputProps<string>> = () => null
 const RespondentSentinel: ComponentType<StringInputProps> = () => null
-const BulkUploadSentinel: ComponentType<ArrayOfObjectsInputProps> = () => null
+const FieldSentinel: ComponentType<ArrayOfObjectsInputProps> = () => null
 const PullquoteSentinel: ComponentType<BlockDecoratorProps> = () => null
 const AccentSentinel: ComponentType<BlockDecoratorProps> = () => null
 
@@ -79,17 +79,28 @@ describe('schema-types graft targets resolve against the real schema (#2278)', (
     expect(key.components?.input).toBe(RespondentSentinel)
   })
 
-  it('applyBulkImageUploadInput lands on the real photoGallery.images field', () => {
+  it('applyFieldInput lands on the real photoGallery.images field', () => {
     expect(findField(findType(baseSchemaTypes, 'photoGallery'), 'images')).toBeDefined()
 
-    const grafted = applyBulkImageUploadInput(baseSchemaTypes, BulkUploadSentinel, {
+    const grafted = applyFieldInput(baseSchemaTypes, FieldSentinel, {
       typeName: 'photoGallery',
       fieldName: 'images',
     })
     const images = findField(findType(grafted, 'photoGallery'), 'images') as {
       components?: {input?: unknown}
     }
-    expect(images.components?.input).toBe(BulkUploadSentinel)
+    expect(images.components?.input).toBe(FieldSentinel)
+  })
+
+  it('applyFieldInput lands on the real matchbal.matchId field (#3920)', () => {
+    const grafted = applyFieldInput(baseSchemaTypes, FieldSentinel, {
+      typeName: 'matchbal',
+      fieldName: 'matchId',
+    })
+    const matchId = findField(findType(grafted, 'matchbal'), 'matchId') as {
+      components?: {input?: unknown}
+    }
+    expect(matchId.components?.input).toBe(FieldSentinel)
   })
 
   it('applyDecoratorComponents lands on the real pullquote + accent decorators', () => {
