@@ -4,7 +4,10 @@ import { bffKeyHeader } from "@/lib/server/bff-key";
 
 // Rendered per request and cached by the CDN through `s-maxage`, never
 // prerendered: a prerendered route is served frozen at the deploy (#3495),
-// and `force-dynamic` writes nothing to the ISR cache (#3812).
+// and `force-dynamic` writes nothing to the ISR cache (#3812). This is a CDN
+// header, not the in-process data cache that apps/web/CLAUDE.md forbids
+// (`unstable_cache`); Kevin asked for at least a day here (#3920).
+// No stale-while-revalidate: a copy older than a day would list played matches.
 export const dynamic = "force-dynamic";
 
 const ONE_DAY = 86_400;
@@ -40,7 +43,7 @@ export const GET = async () => {
       headers: {
         ...CORS,
         "Content-Type": "application/json",
-        "Cache-Control": `public, s-maxage=${ONE_DAY}, stale-while-revalidate=${ONE_DAY}`,
+        "Cache-Control": `public, s-maxage=${ONE_DAY}`,
       },
     });
   } catch (error) {

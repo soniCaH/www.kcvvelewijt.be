@@ -16,7 +16,7 @@ type ListState =
  * Custom input for `matchbal.matchId` (#3920). Keeps the plain id field (a
  * played match is no longer in the list, and the list may be down) and adds
  * a searchable list of every coming match; a pick stores that match's id.
- * A saved id shows its match line while the match is still in the list.
+ * A saved id shows its match line, or says it is not in the list.
  */
 export const MatchbalMatchInput = (props: StringInputProps): JSX.Element => {
   const {value, onChange, readOnly, elementProps} = props
@@ -46,6 +46,12 @@ export const MatchbalMatchInput = (props: StringInputProps): JSX.Element => {
       {current && (
         <Text size={1} muted>
           {current.line}
+        </Text>
+      )}
+      {value && !current && list.status === 'ready' && (
+        <Text size={1} muted>
+          Wedstrijd {value} staat niet in de lijst van komende wedstrijden: al gespeeld, of een
+          verkeerd id. Controleer het op kcvvelewijt.be/wedstrijd/{value}.
         </Text>
       )}
       {list.status === 'failed' ? (

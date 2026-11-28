@@ -91,6 +91,12 @@ describe('MatchbalMatchInput (#3920)', () => {
     expect(await screen.findByText(LINE)).toBeTruthy()
   })
 
+  it('a saved id that is no longer in the list says so', async () => {
+    render(<MatchbalMatchInput {...makeProps('9999').props} />)
+
+    expect(await screen.findByText(/Wedstrijd 9999 staat niet in de lijst/)).toBeTruthy()
+  })
+
   it('keeps the plain id field, so an id can still be typed by hand', () => {
     render(<MatchbalMatchInput {...makeProps().props} />)
 

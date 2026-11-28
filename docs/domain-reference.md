@@ -420,7 +420,7 @@ The matchday sponsor of one Match: the Sponsor that offered the match ball (#391
 | ---------------------------- | -------- | ----------------------------------------------------------- |
 | `matchbal` (Sanity document) | Matchbal | `matchId` (PSD match id, digits) + a reference to a Sponsor |
 
-**One per Match:** the Studio refuses a second `matchbal` with the same `matchId` (`validateMatchbalMatchId`). Named writer: the sponsor coordinator, by hand in the Studio. The `matchId` field (`MatchbalMatchInput`, #3920) lists every coming match of every visible team from the public `/api/matches/upcoming` (BFF `getUpcomingMatches`, cached 1 day); a pick stores the id. A played match is no longer in that list, so the id can still be typed.
+**One per Match:** the Studio refuses a second `matchbal` with the same `matchId` (`validateMatchbalMatchId`). Named writer: the sponsor coordinator, by hand in the Studio. The `matchId` field (`MatchbalMatchInput`, #3920) lists every coming match of every visible team from the public `/api/matches/upcoming` (BFF `getUpcomingMatches`, cached 1 day there and 1 day on the CDN, so a new or moved match can take up to 2 days to show); a pick stores the id. A played match is no longer in that list, so the id can still be typed.
 
 **Render rule:** the Match page shows `<MatchdaySponsor>` under the score box when a `matchbal` names it and its Sponsor is `active`, before and after kick-off. No `matchbal`, an inactive Sponsor, or a failed read: no card. Should two `matchbal` documents name one Match anyway, the newest wins. The read (`SponsorRepository.findMatchbal`) is tagged `matchbal` and `sponsors`: a `matchbal` save busts only `matchbal`, and a Sponsor edit still reaches the card.
 

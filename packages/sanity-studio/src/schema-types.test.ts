@@ -50,7 +50,7 @@ const findField = (
 
 const TagsSentinel: ComponentType<ArrayOfPrimitivesInputProps<string>> = () => null
 const RespondentSentinel: ComponentType<StringInputProps> = () => null
-const BulkUploadSentinel: ComponentType<ArrayOfObjectsInputProps> = () => null
+const FieldSentinel: ComponentType<ArrayOfObjectsInputProps> = () => null
 const PullquoteSentinel: ComponentType<BlockDecoratorProps> = () => null
 const AccentSentinel: ComponentType<BlockDecoratorProps> = () => null
 
@@ -82,25 +82,25 @@ describe('schema-types graft targets resolve against the real schema (#2278)', (
   it('applyFieldInput lands on the real photoGallery.images field', () => {
     expect(findField(findType(baseSchemaTypes, 'photoGallery'), 'images')).toBeDefined()
 
-    const grafted = applyFieldInput(baseSchemaTypes, BulkUploadSentinel, {
+    const grafted = applyFieldInput(baseSchemaTypes, FieldSentinel, {
       typeName: 'photoGallery',
       fieldName: 'images',
     })
     const images = findField(findType(grafted, 'photoGallery'), 'images') as {
       components?: {input?: unknown}
     }
-    expect(images.components?.input).toBe(BulkUploadSentinel)
+    expect(images.components?.input).toBe(FieldSentinel)
   })
 
   it('applyFieldInput lands on the real matchbal.matchId field (#3920)', () => {
-    const grafted = applyFieldInput(baseSchemaTypes, BulkUploadSentinel, {
+    const grafted = applyFieldInput(baseSchemaTypes, FieldSentinel, {
       typeName: 'matchbal',
       fieldName: 'matchId',
     })
     const matchId = findField(findType(grafted, 'matchbal'), 'matchId') as {
       components?: {input?: unknown}
     }
-    expect(matchId.components?.input).toBe(BulkUploadSentinel)
+    expect(matchId.components?.input).toBe(FieldSentinel)
   })
 
   it('applyDecoratorComponents lands on the real pullquote + accent decorators', () => {

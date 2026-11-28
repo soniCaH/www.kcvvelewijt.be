@@ -133,7 +133,8 @@ export const getMatchesWindowHandler = (): Effect.Effect<
 /**
  * Every coming match of every visible team, to the end of the season (#3920):
  * the Studio's Matchbal picker. A flat 24 h tier: the picker stores only the
- * id, so a match added or moved today may show up a day late.
+ * id, so a match added or moved today may show up a day late here, and up to
+ * two days late in the Studio (the web route's CDN keeps its own day).
  */
 export const getUpcomingMatchesHandler = (): Effect.Effect<
   readonly Match[],
