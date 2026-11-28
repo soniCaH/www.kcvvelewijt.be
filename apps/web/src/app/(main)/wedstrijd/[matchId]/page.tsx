@@ -89,10 +89,8 @@ import { PageViewTracker, TrackInView } from "@/components/analytics";
 import { Suspense } from "react";
 import {
   LogoCard,
-  LogoRow,
   MatchdayStrip,
   STUB_MATCHDAY_SPONSOR,
-  STUB_TEAM_SPONSORS,
 } from "@/components/prototype/SponsorLogoVariants";
 import { PrototypeSwitcher } from "@/components/prototype/PrototypeSwitcher";
 import {
@@ -107,15 +105,14 @@ import {
 
 interface MatchPageProps {
   params: Promise<{ matchId: string }>;
-  searchParams?: Promise<{ variant?: string }>; // PROTOTYPE (#3656)
+  searchParams?: Promise<{ variant?: string }>; // PROTOTYPE (#3913)
 }
 
-// PROTOTYPE (#3656 / #3913): where the Team's logos and the matchday sponsor go.
+// PROTOTYPE (#3913): where the matchday sponsor goes on a Match page.
 const SPONSOR_VARIANTS = [
-  { key: "A", name: "Matchbal onder de kop, ploeg voor de rij" },
-  { key: "B", name: "Eén sponsorblok voor de rij" },
-  { key: "C", name: "Matchbal naast praktisch, ploeg onderaan" },
-  { key: "D", name: "Alles onderaan" },
+  { key: "A", name: "Strook onder de score" },
+  { key: "B", name: "Kaart voor 'Blijf nog even hangen'" },
+  { key: "C", name: "Chip naast praktisch" },
 ];
 
 // No static prerendering — the body fetches live PSD match data via the
@@ -374,7 +371,7 @@ const warnAndDegradeRankingRead = (
 
 const MatchPage = async ({ params, searchParams }: MatchPageProps) => {
   const { matchId } = await params;
-  const { variant = "A" } = (await searchParams) ?? {}; // PROTOTYPE (#3656)
+  const { variant = "A" } = (await searchParams) ?? {}; // PROTOTYPE (#3913)
   const numericId = parsePsdId(matchId);
 
   if (numericId === null) {
@@ -610,13 +607,7 @@ const MatchPage = async ({ params, searchParams }: MatchPageProps) => {
     status: match.status,
   };
 
-  // PROTOTYPE (#3656 / #3913): the two sponsor pieces, placed per variant below.
-  const teamLogos = kcvvTeam ? (
-    <LogoRow
-      sponsors={STUB_TEAM_SPONSORS}
-      label={`${kcvvTeam.displayName} wordt gesteund door`}
-    />
-  ) : null;
+  // PROTOTYPE (#3913): the matchday sponsor, placed per variant below.
   const matchday = <MatchdayStrip sponsor={STUB_MATCHDAY_SPONSOR} />;
 
   return (
@@ -691,7 +682,7 @@ const MatchPage = async ({ params, searchParams }: MatchPageProps) => {
               <img
                 src={STUB_MATCHDAY_SPONSOR.logo}
                 alt={STUB_MATCHDAY_SPONSOR.name}
-                className="h-8 w-auto"
+                className="h-12 w-auto"
               />
             </a>
           </div>
@@ -779,23 +770,13 @@ const MatchPage = async ({ params, searchParams }: MatchPageProps) => {
 
       {/* Seam before the row when a body section preceded it, so it isn't
           flush against the lineup/events/standings block. */}
-      {variant === "A" && teamLogos && (
-        <PageContainer className="py-10">{teamLogos}</PageContainer>
-      )}
       {variant === "B" && (
         <PageContainer className="py-10">
-          <div className="grid gap-8 md:grid-cols-2 md:items-center">
+          <div className="max-w-md">
             <LogoCard
               sponsors={[STUB_MATCHDAY_SPONSOR]}
               tab="Matchbal aangeboden door"
             />
-            {kcvvTeam && (
-              <LogoRow
-                stacked
-                sponsors={STUB_TEAM_SPONSORS}
-                label={`${kcvvTeam.displayName} wordt gesteund door`}
-              />
-            )}
           </div>
         </PageContainer>
       )}
@@ -809,16 +790,6 @@ const MatchPage = async ({ params, searchParams }: MatchPageProps) => {
           the linked article(s), the KCVV team, the opponent, and any linked
           galleries. Auto-hides on empty. */}
       <RelatedRow items={relatedRowItems} pageType="match" pageSlug={matchId} />
-
-      {variant === "C" && teamLogos && (
-        <PageContainer className="pb-12">{teamLogos}</PageContainer>
-      )}
-      {variant === "D" && (
-        <PageContainer className="space-y-8 pb-12">
-          {matchday}
-          {teamLogos}
-        </PageContainer>
-      )}
     </>
   );
 };

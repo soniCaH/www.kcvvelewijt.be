@@ -42,7 +42,7 @@
     "vr:ci:update": "pnpm run vr:run:update",
     "vr:diff": "node scripts/vr-diff.mjs",
     "vr:accept:sub-threshold": "node scripts/vr-accept-sub-threshold.mjs",
-    "dev:prototype": "next dev -p 3656"
+    "dev:prototype": "next dev -p 3913"
   },
   "dependencies": {
     "@effect/platform": "0.97.2",

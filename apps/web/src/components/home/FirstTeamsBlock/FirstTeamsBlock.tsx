@@ -236,7 +236,14 @@ const PlaceholderNotice = ({
   );
 };
 
-const FirstTeamRow = ({ team }: { team: FirstTeamVM }) => {
+// PROTOTYPE (#3913): `extra` renders under the next-match card.
+const FirstTeamRow = ({
+  team,
+  extra,
+}: {
+  team: FirstTeamVM;
+  extra?: React.ReactNode;
+}) => {
   return (
     <div className={`${FIRST_TEAMS_ROW_GRID} xl:items-stretch`}>
       <div className="flex flex-col justify-center">
@@ -259,12 +266,15 @@ const FirstTeamRow = ({ team }: { team: FirstTeamVM }) => {
         <SkipCard>Nog geen uitslag</SkipCard>
       )}
       {team.fixture ? (
-        <FirstTeamAgendaRow
-          match={team.fixture}
-          teamSlug={team.slug}
-          kind="fixture"
-          featured
-        />
+        <div className="flex flex-col gap-2">
+          <FirstTeamAgendaRow
+            match={team.fixture}
+            teamSlug={team.slug}
+            kind="fixture"
+            featured
+          />
+          {extra}
+        </div>
       ) : (
         <SkipCard>Geen geplande wedstrijd</SkipCard>
       )}
@@ -284,7 +294,11 @@ export const FirstTeamsBlock = ({
   unavailable = false,
   placeholder = null,
   now = new Date(),
-}: FirstTeamsBlockProps) => {
+  fixtureExtra,
+}: FirstTeamsBlockProps & {
+  /** PROTOTYPE (#3913): per team slug, shown under its next-match card. */
+  fixtureExtra?: Record<string, React.ReactNode>;
+}) => {
   const rows = teams.filter((t) => t.result || t.fixture);
   const headingId = useId();
 
@@ -314,7 +328,11 @@ export const FirstTeamsBlock = ({
         {rows.length > 0 ? (
           <div className="flex flex-col">
             {rows.map((team) => (
-              <FirstTeamRow key={team.slug} team={team} />
+              <FirstTeamRow
+                key={team.slug}
+                team={team}
+                extra={fixtureExtra?.[team.slug]}
+              />
             ))}
           </div>
         ) : (

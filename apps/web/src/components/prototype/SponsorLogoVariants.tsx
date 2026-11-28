@@ -50,8 +50,8 @@ const Logo = ({ s, h = 40 }: { s: Sponsor; h?: number }) => (
       width={200}
       height={100}
       style={{ maxHeight: h }}
-      className="h-auto w-auto max-w-[160px] object-contain"
-      sizes="160px"
+      className="h-auto w-auto max-w-[240px] object-contain"
+      sizes="240px"
     />
   </a>
 );
@@ -105,7 +105,7 @@ export const LogoCard = ({
     </div>
     <div className="flex flex-wrap items-center justify-around gap-6 px-6 py-6">
       {sponsors.map((s) => (
-        <Logo key={s.id} s={s} h={56} />
+        <Logo key={s.id} s={s} h={96} />
       ))}
     </div>
   </div>
@@ -120,6 +120,6 @@ export const MatchdayStrip = ({ sponsor }: { sponsor: Sponsor }) => (
         {sponsor.name}
       </p>
     </div>
-    <Logo s={sponsor} h={56} />
+    <Logo s={sponsor} h={80} />
   </div>
 );

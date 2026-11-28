@@ -88,6 +88,22 @@ import { DEFAULT_OG_IMAGE, SITE_CONFIG, MOTTO } from "@/lib/constants";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { buildSportsClubJsonLd, buildBreadcrumbJsonLd } from "@/lib/seo/jsonld";
 import type { Metadata } from "next";
+import { Suspense } from "react";
+import { PrototypeSwitcher } from "@/components/prototype/PrototypeSwitcher";
+import { STUB_MATCHDAY_SPONSOR } from "@/components/prototype/SponsorLogoVariants";
+import {
+  MatchballBand,
+  MatchballInline,
+  MatchballTicker,
+  toMatchballFixture,
+} from "@/components/prototype/HomeMatchballVariants";
+
+// PROTOTYPE (#3913): where the matchday sponsor of the next A-team match goes.
+const HOME_VARIANTS = [
+  { key: "A", name: "Band onder Eerste ploegen" },
+  { key: "B", name: "Regel onder de volgende match" },
+  { key: "C", name: "Balk boven Eerste ploegen" },
+];
 
 export const generateMetadata = async (): Promise<Metadata> => {
   const title = MOTTO;
@@ -150,7 +166,12 @@ const toUitgelichtArticle = (article: ArticleVM): UitgelichtArticle => {
   };
 };
 
-const HomePage = async () => {
+const HomePage = async ({
+  searchParams,
+}: {
+  searchParams?: Promise<{ variant?: string }>; // PROTOTYPE (#3913)
+} = {}) => {
+  const { variant = "A" } = (await searchParams) ?? {};
   const [
     articlesResult,
     matchesResult,
@@ -351,16 +372,43 @@ const HomePage = async () => {
   // acknowledges a remote match feed holds its shape and names the reason on
   // a failed read; `<UpcomingMatches>` below follows the same rule
   // (#2505/#2844) — this band is no longer the only one that does.
+  // PROTOTYPE (#3913): stand-in — the first senior team's next match has a Matchbal.
+  const matchballTeam = firstTeamVMs.find((t) => t.fixture?.kind === "match");
+  const matchballFixture = toMatchballFixture(matchballTeam?.fixture);
+
   const firstTeamsSection: SectionConfig = {
     key: "first-teams",
     bg: "transparent",
     content: (
-      <FirstTeamsBlock
-        teams={firstTeamVMs}
-        unavailable={firstTeamsReadFailed}
-        placeholder={placeholder}
-        now={now}
-      />
+      <>
+        {variant === "C" && matchballFixture && (
+          <MatchballTicker
+            sponsor={STUB_MATCHDAY_SPONSOR}
+            fixture={matchballFixture}
+          />
+        )}
+        <FirstTeamsBlock
+          teams={firstTeamVMs}
+          unavailable={firstTeamsReadFailed}
+          placeholder={placeholder}
+          now={now}
+          fixtureExtra={
+            variant === "B" && matchballTeam
+              ? {
+                  [matchballTeam.slug]: (
+                    <MatchballInline sponsor={STUB_MATCHDAY_SPONSOR} />
+                  ),
+                }
+              : undefined
+          }
+        />
+        {variant === "A" && matchballFixture && (
+          <MatchballBand
+            sponsor={STUB_MATCHDAY_SPONSOR}
+            fixture={matchballFixture}
+          />
+        )}
+      </>
     ),
     paddingTop: "pt-0",
     paddingBottom: "pb-0",
@@ -509,6 +557,9 @@ const HomePage = async () => {
           { name: "Home", url: SITE_CONFIG.siteUrl },
         ])}
       />
+      <Suspense>
+        <PrototypeSwitcher variants={HOME_VARIANTS} />
+      </Suspense>
       <HomepageAnalytics>
         <SectionStack
           sections={[
