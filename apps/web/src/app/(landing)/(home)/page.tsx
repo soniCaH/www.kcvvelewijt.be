@@ -169,9 +169,9 @@ const toUitgelichtArticle = (article: ArticleVM): UitgelichtArticle => {
 const HomePage = async ({
   searchParams,
 }: {
-  searchParams?: Promise<{ variant?: string }>; // PROTOTYPE (#3913)
+  searchParams?: Promise<{ variant?: string; team?: string }>; // PROTOTYPE (#3913)
 } = {}) => {
-  const { variant = "A" } = (await searchParams) ?? {};
+  const { variant = "A", team: teamOverride } = (await searchParams) ?? {};
   const [
     articlesResult,
     matchesResult,
@@ -374,7 +374,11 @@ const HomePage = async ({
   // (#2505/#2844) — this band is no longer the only one that does.
   // PROTOTYPE (#3913): stand-in — the first senior team's next match has a Matchbal.
   const matchballTeam = firstTeamVMs.find((t) => t.fixture?.kind === "match");
-  const matchballFixture = toMatchballFixture(matchballTeam?.fixture);
+  // `?team=U21` pretends the Matchbal belongs to another team's match.
+  const matchballFixture = toMatchballFixture(
+    matchballTeam?.fixture,
+    teamOverride ?? matchballTeam?.label ?? "",
+  );
 
   const firstTeamsSection: SectionConfig = {
     key: "first-teams",

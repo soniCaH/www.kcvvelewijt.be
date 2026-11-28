@@ -111,6 +111,34 @@ export const LogoCard = ({
   </div>
 );
 
+/** Matchday look D: look A's place and content, in look C's framed card. */
+export const MatchdayFramed = ({ sponsor }: { sponsor: Sponsor }) => (
+  <div className="border-ink bg-cream-soft flex flex-wrap items-center justify-between gap-4 border-2 px-5 py-4">
+    <div>
+      <Label>Matchbal aangeboden door</Label>
+      <p className="font-display text-ink mt-1 text-xl italic">
+        {sponsor.name}
+      </p>
+    </div>
+    <Logo s={sponsor} h={80} />
+  </div>
+);
+
+/** Matchday look E: look C's small chip, on its own row in look A's place. */
+export const MatchdayChip = ({ sponsor }: { sponsor: Sponsor }) => (
+  <a
+    href={sponsor.url}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="border-ink bg-cream-soft inline-flex items-center gap-3 border-2 px-3 py-2"
+  >
+    <span className="text-ink-muted text-label-sm font-mono font-semibold uppercase">
+      Matchbal aangeboden door
+    </span>
+    <Logo s={sponsor} h={48} />
+  </a>
+);
+
 /** Matchday look: a full-width strip, "Matchbal aangeboden door" + one big logo. */
 export const MatchdayStrip = ({ sponsor }: { sponsor: Sponsor }) => (
   <div className="border-ink flex flex-wrap items-center justify-between gap-4 border-y-2 py-4">

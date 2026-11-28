@@ -4,6 +4,8 @@ import type { Sponsor } from "@/components/sponsors/Sponsors";
 import type { ScheduleRow } from "@/components/match/types";
 
 export interface MatchballFixture {
+  /** Our side, e.g. "A-ploeg" or "U21": any team can have a Matchbal. */
+  team: string;
   teams: string;
   when: string;
 }
@@ -11,6 +13,7 @@ export interface MatchballFixture {
 /** "KCVV Elewijt – Racing Mechelen" and "zo 30 nov · 15:00", or null for a non-match row. */
 export const toMatchballFixture = (
   row: ScheduleRow | undefined,
+  team: string,
 ): MatchballFixture | null => {
   if (!row || row.kind !== "match") return null;
   const day = new Intl.DateTimeFormat("nl-BE", {
@@ -20,6 +23,7 @@ export const toMatchballFixture = (
     timeZone: "Europe/Brussels",
   }).format(row.date);
   return {
+    team,
     teams: `${row.homeTeam.name} – ${row.awayTeam.name}`,
     when: row.time ? `${day} · ${row.time}` : day,
   };
@@ -48,8 +52,13 @@ export const MatchballBand = ({
   <section className="bg-cream-soft border-ink border-b-2">
     <div className="mx-auto flex max-w-[var(--container-index)] flex-wrap items-center justify-between gap-6 px-4 py-8 md:px-8">
       <div>
-        <p className="text-ink-muted text-label font-mono font-semibold uppercase">
-          Matchbal · {fixture.when}
+        <p className="flex flex-wrap items-center gap-3">
+          <span className="bg-jersey-deep text-cream text-label px-[7px] py-[3px] font-mono whitespace-nowrap uppercase">
+            {fixture.team}
+          </span>
+          <span className="text-ink-muted text-label font-mono font-semibold uppercase">
+            Matchbal · {fixture.when}
+          </span>
         </p>
         <p className="font-display text-ink mt-1 text-2xl font-bold">
           {fixture.teams}

@@ -89,6 +89,8 @@ import { PageViewTracker, TrackInView } from "@/components/analytics";
 import { Suspense } from "react";
 import {
   LogoCard,
+  MatchdayChip,
+  MatchdayFramed,
   MatchdayStrip,
   STUB_MATCHDAY_SPONSOR,
 } from "@/components/prototype/SponsorLogoVariants";
@@ -113,6 +115,8 @@ const SPONSOR_VARIANTS = [
   { key: "A", name: "Strook onder de score" },
   { key: "B", name: "Kaart voor 'Blijf nog even hangen'" },
   { key: "C", name: "Chip naast praktisch" },
+  { key: "D", name: "A-plek, C-kader" },
+  { key: "E", name: "A-plek, C-chip" },
 ];
 
 // No static prerendering — the body fetches live PSD match data via the
@@ -700,6 +704,16 @@ const MatchPage = async ({ params, searchParams }: MatchPageProps) => {
           )
         )}
         {variant === "A" && <div className="mt-8">{matchday}</div>}
+        {variant === "D" && (
+          <div className="mt-8">
+            <MatchdayFramed sponsor={STUB_MATCHDAY_SPONSOR} />
+          </div>
+        )}
+        {variant === "E" && (
+          <div className="mt-8">
+            <MatchdayChip sponsor={STUB_MATCHDAY_SPONSOR} />
+          </div>
+        )}
       </PageContainer>
 
       {body.seamUnderHero && <StripedSeam colorPair="ink-cream" height="md" />}
