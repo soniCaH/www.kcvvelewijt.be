@@ -60,11 +60,15 @@ export const SponsorRepositoryLive = Layer.succeed(SponsorRepository, {
       revalidate: SANITY_LIST_REVALIDATE,
       tags: [SANITY_TAGS.sponsors],
     }),
-  // Tagged `sponsors`: a `matchbal` save busts that tag too (revalidate route).
+  // `matchbal`: a Matchbal save refreshes only these reads. `sponsors`: a
+  // renamed or re-logoed Sponsor still reaches the card.
   findMatchbal: (matchId) =>
     fetchGroq<MATCHBAL_BY_MATCH_QUERY_RESULT>(
       MATCHBAL_BY_MATCH_QUERY,
       { matchId },
-      { revalidate: SANITY_LIST_REVALIDATE, tags: [SANITY_TAGS.sponsors] },
+      {
+        revalidate: SANITY_LIST_REVALIDATE,
+        tags: [SANITY_TAGS.matchbal, SANITY_TAGS.sponsors],
+      },
     ),
 });

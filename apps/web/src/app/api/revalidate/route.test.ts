@@ -322,12 +322,12 @@ describe("POST /api/revalidate", () => {
     expect(revalidatePath).not.toHaveBeenCalled();
   });
 
-  it("busts the sponsors tag on a matchbal change, and no path (#3917)", async () => {
-    // The Match page's matchday-sponsor read is tagged `sponsors`.
+  it("busts only the matchbal tag on a matchbal change, and no path (#3917)", async () => {
+    // Only the Match page's matchday-sponsor read carries it.
     const res = await post({ _type: "matchbal" });
     expect(res.status).toBe(200);
     expect(revalidateTag).toHaveBeenCalledTimes(1);
-    expect(revalidateTag).toHaveBeenCalledWith("sponsors", "max");
+    expect(revalidateTag).toHaveBeenCalledWith("matchbal", "max");
     expect(revalidatePath).not.toHaveBeenCalled();
   });
 

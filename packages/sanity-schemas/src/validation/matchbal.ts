@@ -1,16 +1,7 @@
-interface FetchClient {
-  fetch: <T>(query: string, params?: Record<string, unknown>) => Promise<T>
-}
+import { isTakenElsewhere, type UniqueFieldContext } from "./unique-field";
 
-export interface MatchbalMatchIdContext {
-  document?: {_id?: string}
-  getClient?: (options: {apiVersion: string}) => FetchClient
-}
-
-const API_VERSION = '2024-01-01'
-
-/** Another Matchbal (published or draft) already names the match. */
-const DUPLICATE_QUERY = `count(*[_type == "matchbal" && matchId == $matchId && !(_id in [$id, "drafts." + $id])])`
+/** Same shape as the web app's `parsePsdId`: an id it refuses would never show. */
+const PSD_MATCH_ID = /^[1-9]\d{0,8}$/;
 
 /**
  * Validation for `matchbal.matchId` (#3917): a numeric PSD match id, and one
@@ -18,20 +9,15 @@ const DUPLICATE_QUERY = `count(*[_type == "matchbal" && matchId == $matchId && !
  */
 export const validateMatchbalMatchId = async (
   value: unknown,
-  context: MatchbalMatchIdContext,
+  context: UniqueFieldContext,
 ): Promise<true | string> => {
-  if (typeof value !== 'string' || value.length === 0) return true
+  if (typeof value !== "string" || value.length === 0) return true;
 
-  if (!/^[1-9]\d*$/.test(value)) {
-    return 'Gebruik het PSD-wedstrijd-id: enkel cijfers, zoals het in de link /wedstrijd/[matchId] staat (bijv. 3414).'
+  if (!PSD_MATCH_ID.test(value)) {
+    return "Gebruik het PSD-wedstrijd-id: enkel cijfers, zoals het in de link /wedstrijd/[matchId] staat (bijv. 3414).";
   }
-
-  if (context.getClient) {
-    const id = (context.document?._id ?? '').replace(/^drafts\./, '').replace(/^versions\.[^.]+\./, '')
-    const taken = await context
-      .getClient({apiVersion: API_VERSION})
-      .fetch<number>(DUPLICATE_QUERY, {matchId: value, id})
-    if (taken > 0) return `Wedstrijd ${value} heeft al een Matchbal. Elke wedstrijd heeft er maar één.`
+  if (await isTakenElsewhere(context, "matchbal", "matchId", value)) {
+    return `Wedstrijd ${value} heeft al een Matchbal. Elke wedstrijd heeft er maar één.`;
   }
-  return true
-}
+  return true;
+};

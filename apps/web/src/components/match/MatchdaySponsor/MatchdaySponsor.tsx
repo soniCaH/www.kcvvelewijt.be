@@ -19,48 +19,38 @@ export const MatchdaySponsor = ({
   sponsor,
   className,
 }: MatchdaySponsorProps) => {
-  const body = (
-    <>
-      <span className="text-ink-muted text-label block font-mono font-semibold uppercase">
-        Matchbal aangeboden door
-      </span>
-      <span className="mt-1 flex flex-wrap items-center justify-between gap-4">
-        <span className="font-display text-ink text-xl italic">
-          {sponsor.name}
-        </span>
-        {sponsor.logoUrl && (
-          <SanityImage
-            src={sponsor.logoUrl}
-            alt={formatSponsorAlt(sponsor.name)}
-            width={200}
-            height={100}
-            className="h-auto max-h-20 w-auto max-w-[240px] object-contain"
-            sizes="240px"
-          />
-        )}
-      </span>
-    </>
-  );
-  const frame = "border-ink bg-cream-soft block border-2 px-5 py-4";
-
+  const Frame = sponsor.url ? "a" : "div";
   return (
     <div className={className} data-testid="matchday-sponsor">
       <SponsorWallTracker source="match">
-        {sponsor.url ? (
-          <a
-            href={sponsor.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            data-sponsor-id={sponsor.id}
-            className={frame}
-          >
-            {body}
-          </a>
-        ) : (
-          <div data-sponsor-id={sponsor.id} className={frame}>
-            {body}
-          </div>
-        )}
+        <Frame
+          {...(sponsor.url && {
+            href: sponsor.url,
+            target: "_blank",
+            rel: "noopener noreferrer",
+          })}
+          data-sponsor-id={sponsor.id}
+          className="border-ink bg-cream-soft block border-2 px-5 py-4"
+        >
+          <span className="text-ink-muted text-label block font-mono font-semibold uppercase">
+            Matchbal aangeboden door
+          </span>
+          <span className="mt-1 flex flex-wrap items-center justify-between gap-4">
+            <span className="font-display text-ink text-xl italic">
+              {sponsor.name}
+            </span>
+            {sponsor.logoUrl && (
+              <SanityImage
+                src={sponsor.logoUrl}
+                alt={formatSponsorAlt(sponsor.name)}
+                width={200}
+                height={100}
+                className="h-auto max-h-20 w-auto max-w-[240px] object-contain"
+                sizes="240px"
+              />
+            )}
+          </span>
+        </Frame>
       </SponsorWallTracker>
     </div>
   );

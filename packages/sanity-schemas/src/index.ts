@@ -89,7 +89,6 @@ export {
 export type {ShortLinkNameContext} from './validation/short-link'
 export {matchbal} from './matchbal'
 export {validateMatchbalMatchId} from './validation/matchbal'
-export type {MatchbalMatchIdContext} from './validation/matchbal'
 
 import {player} from './player'
 import {team} from './team'

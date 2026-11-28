@@ -115,7 +115,7 @@ describe("SponsorRepository", () => {
         }),
       );
 
-    it("asks for the Match by id, tagged sponsors, and returns the Sponsor", async () => {
+    it("asks for the Match by id, tagged matchbal and sponsors, and returns the Sponsor", async () => {
       const row = {
         id: "sponsor-1",
         name: "Alupoort",
@@ -128,7 +128,7 @@ describe("SponsorRepository", () => {
       expect(mockFetch).toHaveBeenLastCalledWith(
         expect.stringContaining('_type == "matchbal"'),
         { matchId: "3414" },
-        { next: { revalidate: 60 * 60 * 24, tags: ["sponsors"] } },
+        { next: { revalidate: 60 * 60 * 24, tags: ["matchbal", "sponsors"] } },
       );
     });
 

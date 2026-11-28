@@ -5,6 +5,7 @@ import {
   type Ga4Row,
   type ReportInput,
   type SponsorInput,
+  type Surface,
 } from "./build-report";
 import { hashMemberId } from "./hash-member-id";
 
@@ -36,10 +37,8 @@ const build = (overrides: Partial<ReportInput> = {}) =>
     ...overrides,
   });
 
-const surface = (
-  report: ReturnType<typeof build>[number],
-  name: "homepage" | "team" | "sponsors" | "match",
-) => report.surfaces.find((s) => s.surface === name)!;
+const surface = (report: ReturnType<typeof build>[number], name: Surface) =>
+  report.surfaces.find((s) => s.surface === name)!;
 
 describe("buildReport", () => {
   it("groups impressions and clicks by source", () => {

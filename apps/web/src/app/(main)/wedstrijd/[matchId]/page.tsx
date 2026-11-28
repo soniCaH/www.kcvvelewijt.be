@@ -370,113 +370,110 @@ const MatchPage = async ({ params }: MatchPageProps) => {
 
   const match = await fetchMatchOrNotFound(numericId);
 
-  // These six depend only on `match` / `matchId` and never on each other, so
-  // they run as one wave instead of six serialized round-trips — `max()`
+  // The matchday sponsor (Matchbal, #3917), started before the wave below so
+  // it runs in parallel with it. Resilient: a Sanity outage degrades to "no card".
+  const matchbalSponsorPromise = runPromise(
+    Effect.gen(function* () {
+      const repo = yield* SponsorRepository;
+      return yield* repo.findMatchbal(matchId);
+    }).pipe(
+      Effect.catchAllCause((cause) => {
+        console.warn(
+          "[wedstrijd/[matchId]] matchbal lookup failed; rendering without the matchday sponsor.",
+          { cause },
+        );
+        return Effect.succeed<MatchbalSponsorVM | null>(null);
+      }),
+    ),
+  );
+
+  // These five depend only on `match` / `matchId` and never on each other, so
+  // they run as one wave instead of five serialized round-trips — `max()`
   // latency rather than `sum()` (#2441). Each keeps its own fallback: none of
   // them is load-bearing enough to take the page down.
-  const [
-    keeperPsdIds,
-    linkedArticles,
-    galleries,
-    standingsResult,
-    allTeams,
-    matchbalSponsor,
-  ] = await Promise.all([
-    // Keeper PSD ids from Sanity (cached for 24h in the repo's module-scope
-    // memo + Sanity CDN — see PlayerRepository.findKeeperPsdIds). Used to
-    // flag KCVV-side keepers; opponent side falls back to the jersey-#1
-    // heuristic. Returns `undefined` (not an empty Set) on Sanity failure so
-    // `enrichLineupWithKeeperFlag` can detect lookup failure and degrade
-    // BOTH sides to the jersey-#1 heuristic.
-    runPromise(
-      Effect.gen(function* () {
-        const repo = yield* PlayerRepository;
-        return yield* repo.findKeeperPsdIds();
-      }).pipe(
-        Effect.catchAllCause((cause) => {
-          console.warn(
-            "[wedstrijd/[matchId]] Sanity keeper lookup failed, " +
-              "falling back to jersey-#1 heuristic on both sides.",
-            { cause },
-          );
-          return Effect.succeed(undefined);
-        }),
+  const [keeperPsdIds, linkedArticles, galleries, standingsResult, allTeams] =
+    await Promise.all([
+      // Keeper PSD ids from Sanity (cached for 24h in the repo's module-scope
+      // memo + Sanity CDN — see PlayerRepository.findKeeperPsdIds). Used to
+      // flag KCVV-side keepers; opponent side falls back to the jersey-#1
+      // heuristic. Returns `undefined` (not an empty Set) on Sanity failure so
+      // `enrichLineupWithKeeperFlag` can detect lookup failure and degrade
+      // BOTH sides to the jersey-#1 heuristic.
+      runPromise(
+        Effect.gen(function* () {
+          const repo = yield* PlayerRepository;
+          return yield* repo.findKeeperPsdIds();
+        }).pipe(
+          Effect.catchAllCause((cause) => {
+            console.warn(
+              "[wedstrijd/[matchId]] Sanity keeper lookup failed, " +
+                "falling back to jersey-#1 heuristic on both sides.",
+              { cause },
+            );
+            return Effect.succeed(undefined);
+          }),
+        ),
       ),
-    ),
-    // The editorial article(s) linked to this match (#1914). Matches are
-    // BFF/PSD-native, so the link is the article's `linkedMatch` string id —
-    // the route `matchId` itself. Resilient: a Sanity outage degrades to "no
-    // card" rather than 500-ing the whole match page.
-    runPromise(
-      Effect.gen(function* () {
-        const repo = yield* ArticleRepository;
-        return yield* repo.findByLinkedMatch(matchId);
-      }).pipe(
-        Effect.catchAllCause((cause) => {
-          console.warn(
-            "[wedstrijd/[matchId]] linked-article lookup failed; " +
-              "rendering without the article link card.",
-            { cause },
-          );
-          return Effect.succeed<MatchArticleVM[]>([]);
-        }),
+      // The editorial article(s) linked to this match (#1914). Matches are
+      // BFF/PSD-native, so the link is the article's `linkedMatch` string id —
+      // the route `matchId` itself. Resilient: a Sanity outage degrades to "no
+      // card" rather than 500-ing the whole match page.
+      runPromise(
+        Effect.gen(function* () {
+          const repo = yield* ArticleRepository;
+          return yield* repo.findByLinkedMatch(matchId);
+        }).pipe(
+          Effect.catchAllCause((cause) => {
+            console.warn(
+              "[wedstrijd/[matchId]] linked-article lookup failed; " +
+                "rendering without the article link card.",
+              { cause },
+            );
+            return Effect.succeed<MatchArticleVM[]>([]);
+          }),
+        ),
       ),
-    ),
-    // Photo galleries linked to this match (#1471). A match can have several
-    // (warmup / match / viering); the repo returns them chronologically.
-    // Resilient: a Sanity outage degrades to "no galleries".
-    runPromise(
-      Effect.gen(function* () {
-        const repo = yield* PhotoGalleryRepository;
-        return yield* repo.findByLinkedMatch(matchId);
-      }).pipe(
-        Effect.catchAllCause((cause) => {
-          console.warn(
-            "[wedstrijd/[matchId]] gallery lookup failed; rendering without galleries.",
-            { cause },
-          );
-          return Effect.succeed<GalleryCardVM[]>([]);
-        }),
+      // Photo galleries linked to this match (#1471). A match can have several
+      // (warmup / match / viering); the repo returns them chronologically.
+      // Resilient: a Sanity outage degrades to "no galleries".
+      runPromise(
+        Effect.gen(function* () {
+          const repo = yield* PhotoGalleryRepository;
+          return yield* repo.findByLinkedMatch(matchId);
+        }).pipe(
+          Effect.catchAllCause((cause) => {
+            console.warn(
+              "[wedstrijd/[matchId]] gallery lookup failed; rendering without galleries.",
+              { cause },
+            );
+            return Effect.succeed<GalleryCardVM[]>([]);
+          }),
+        ),
       ),
-    ),
-    fetchStandings(match),
-    // Every one of KCVV's own teams (#2443 domain tier) — the established
-    // `findAll()` workaround (`TeamRepository` has no `findByPsdId`,
-    // matching `/tegenstander/[clubId]`'s own precedent) used below to
-    // resolve the team that actually played this match via
-    // `match.kcvv_team_id`. Resilient: a Sanity outage degrades to "no
-    // KCVV team card".
-    runPromise(
-      Effect.gen(function* () {
-        const repo = yield* TeamRepository;
-        return yield* repo.findAll();
-      }).pipe(
-        Effect.catchAllCause((cause) => {
-          console.warn(
-            "[wedstrijd/[matchId]] team lookup failed; rendering without the RelatedRow team card.",
-            { cause },
-          );
-          return Effect.succeed<TeamNavVM[]>([]);
-        }),
+      fetchStandings(match),
+      // Every one of KCVV's own teams (#2443 domain tier) — the established
+      // `findAll()` workaround (`TeamRepository` has no `findByPsdId`,
+      // matching `/tegenstander/[clubId]`'s own precedent) used below to
+      // resolve the team that actually played this match via
+      // `match.kcvv_team_id`. Resilient: a Sanity outage degrades to "no
+      // KCVV team card".
+      runPromise(
+        Effect.gen(function* () {
+          const repo = yield* TeamRepository;
+          return yield* repo.findAll();
+        }).pipe(
+          Effect.catchAllCause((cause) => {
+            console.warn(
+              "[wedstrijd/[matchId]] team lookup failed; rendering without the RelatedRow team card.",
+              { cause },
+            );
+            return Effect.succeed<TeamNavVM[]>([]);
+          }),
+        ),
       ),
-    ),
-    // The matchday sponsor (Matchbal, #3917). Resilient: a Sanity outage
-    // degrades to "no card".
-    runPromise(
-      Effect.gen(function* () {
-        const repo = yield* SponsorRepository;
-        return yield* repo.findMatchbal(matchId);
-      }).pipe(
-        Effect.catchAllCause((cause) => {
-          console.warn(
-            "[wedstrijd/[matchId]] matchbal lookup failed; rendering without the matchday sponsor.",
-            { cause },
-          );
-          return Effect.succeed<MatchbalSponsorVM | null>(null);
-        }),
-      ),
-    ),
-  ]);
+    ]);
+
+  const matchbalSponsor = await matchbalSponsorPromise;
 
   // The fourth adapter's output (#2802 review) — `<MatchHero>` renders this
   // directly, and everything gated below it reads `heroRow.kind` rather
