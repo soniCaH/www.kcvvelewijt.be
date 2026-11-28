@@ -130,6 +130,37 @@ export const getMatchesWindowHandler = (): Effect.Effect<
     );
 };
 
+/**
+ * Every coming match of every visible team, to the end of the season (#3920):
+ * the Studio's Matchbal picker. A flat 24 h tier: the picker stores only the
+ * id, so a match added or moved today may show up a day late.
+ */
+export const getUpcomingMatchesHandler = (): Effect.Effect<
+  readonly Match[],
+  BffError,
+  PsdService | KvCacheService | WorkerEnvTag | PsdGateService
+> => {
+  const cacheKey = `matches:upcoming:${CACHE_VERSION}`;
+  const fetchMatches = Effect.gen(function* () {
+    const service = yield* PsdService;
+    return yield* service.getUpcomingMatches();
+  });
+
+  return matchesCache
+    .getOrFetch(cacheKey, fetchMatches, TTL.UPCOMING_MATCHES, undefined, {
+      shouldServeStale,
+      isPartial: isPartialFanout,
+    })
+    .pipe(
+      // Same serve-time filter as `getMatchesWindowHandler` (#3629): a list
+      // fetched yesterday still holds yesterday's matches.
+      Effect.map((matches) => {
+        const startOfToday = startOfBrusselsDayMs(Date.now());
+        return matches.filter((m) => kickoffMs(m.date) >= startOfToday);
+      }),
+    );
+};
+
 const HOUR_MS = 60 * 60 * 1000;
 
 /**
@@ -416,6 +447,9 @@ export const MatchesApiLive = HttpApiBuilder.group(
       .handle("getNextMatches", () => withErrorMapping(getNextMatchesHandler()))
       .handle("getMatchesWindow", () =>
         withErrorMapping(getMatchesWindowHandler()),
+      )
+      .handle("getUpcomingMatches", () =>
+        withErrorMapping(getUpcomingMatchesHandler()),
       )
       .handle("getMatchDetail", ({ path: { matchId } }) =>
         withErrorMapping(getMatchDetailHandler(matchId)),

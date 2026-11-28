@@ -1046,6 +1046,31 @@ describe("PsdService.getMatchesWindow", () => {
     }
   });
 
+  it("getUpcomingMatches keeps every match from the start of today to the season's end (#3920)", async () => {
+    const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
+    fetchMock.mockImplementation((url: string) => {
+      if (url.includes("/games/team/")) {
+        return Promise.resolve({
+          ok: true,
+          json: async () => windowFixtureList,
+        });
+      }
+      if (url.includes("/seasons")) {
+        return Promise.resolve({ ok: true, json: async () => windowSeasons });
+      }
+      return Promise.resolve({ ok: true, json: async () => [rawTeams[0]] });
+    });
+
+    const result = await runFanout((svc) => svc.getUpcomingMatches());
+
+    expect(result._tag).toBe("Right");
+    if (result._tag === "Right") {
+      // Yesterday (200) is gone; today, this week and +13d all stay.
+      expect(result.right.map((m) => m.id)).toEqual([201, 202, 203]);
+      expect(result.right[0]?.kcvv_team_label).toBe("A-Ploeg");
+    }
+  });
+
   it("getNextMatches drops the already-started match that getMatchesWindow keeps", async () => {
     const fetchMock = global.fetch as ReturnType<typeof vi.fn>;
     fetchMock.mockImplementation((url: string) => {

@@ -123,6 +123,7 @@ export interface PsdServiceInterface {
   ) => Effect.Effect<readonly Match[], BffError>;
   readonly getNextMatches: () => Effect.Effect<readonly Match[], BffError>;
   readonly getMatchesWindow: () => Effect.Effect<readonly Match[], BffError>;
+  readonly getUpcomingMatches: () => Effect.Effect<readonly Match[], BffError>;
   readonly getMatchDetail: (
     matchId: number,
   ) => Effect.Effect<MatchDetail, BffError>;
@@ -531,6 +532,107 @@ export const PsdServiceLive = Layer.effect(
           : teams;
       });
 
+    // Every visible team's current-season matches whose real kickoff instant
+    // passes `keep`, flattened, labelled and sorted by kickoff. A team whose
+    // fetch fails is logged and skipped (the list is marked partial); all
+    // teams failing fails the call. `label` names the caller in the logs.
+    const getSeasonMatchesWhere = (
+      label: string,
+      keep: (kickoffMs: number) => boolean,
+    ) =>
+      Effect.gen(function* () {
+        const visibleTeams = yield* getVisibleTeams();
+        const season = yield* getCurrentSeason();
+        const competitionLabels = yield* getCompetitionLabels();
+
+        const teamMatches = yield* Effect.all(
+          visibleTeams.map((team) =>
+            countedFetch(
+              `/games/team/${team.id}/seasons/${season.id}`,
+              PsdMatchListSchema,
+            ).pipe(
+              Effect.flatMap((data) =>
+                Effect.gen(function* () {
+                  const [errors, games] = yield* Effect.partition(
+                    data.content,
+                    (item) =>
+                      S.decodeUnknown(PsdGame)(item).pipe(
+                        Effect.mapError((parseError) => ({
+                          id: extractId(item),
+                          parseError,
+                        })),
+                      ),
+                  );
+
+                  if (errors.length > 0) {
+                    const ids = errors.map((e) => e.id).join(", ");
+                    yield* Effect.log(
+                      `${label}(${team.id}): filtered ${errors.length} invalid game(s) — IDs: [${ids}]`,
+                    );
+                  }
+
+                  const ownClubId = deriveOwnClubId(games);
+                  return games
+                    .filter((m) => keep(psdGameToMs(m)))
+                    .map((game) =>
+                      transformPsdGame(
+                        { ...game, teamId: team.id },
+                        {
+                          ownClubId,
+                          competitionLabels,
+                          hideScores: hidesScores(team.age),
+                        },
+                      ),
+                    );
+                }),
+              ),
+              Effect.map((matches) => ({ _tag: "ok" as const, matches })),
+              Effect.catchAll((e) =>
+                Effect.log(
+                  `${label}: team ${team.id} failed: ${String(e)}`,
+                ).pipe(
+                  Effect.as({
+                    _tag: "failed" as const,
+                    matches: [] as Match[],
+                  }),
+                ),
+              ),
+            ),
+          ),
+          { concurrency: 5 },
+        );
+
+        const allFailed =
+          visibleTeams.length > 0 &&
+          teamMatches.every((r) => r._tag === "failed");
+
+        if (allFailed) {
+          return yield* Effect.fail(
+            new UpstreamUnavailableError({
+              message: `${label}: all ${visibleTeams.length} team fetches failed`,
+            }),
+          );
+        }
+
+        // Tag each game with its KCVV team label, then sort by kickoff.
+        const matches: Match[] = teamMatches.flatMap((entry, i) => {
+          if (entry._tag !== "ok") return [];
+          const team = visibleTeams[i]!;
+          const teamLabel = derivePsdTeamLabel(team.name, team.age);
+          return entry.matches.map((match) => ({
+            ...match,
+            kcvv_team_label: teamLabel,
+          }));
+        });
+        matches.sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+        );
+        return markPartial(
+          matches,
+          teamMatches.some((r) => r._tag === "failed"),
+        );
+      });
+
     const fetchRawMatchDetail = (matchId: number) =>
       countedFetch(`/games/${matchId}/info`, FootbalistoMatchDetailResponse, {
         emptyBodyIsNotFound: { resourceType: "match", resourceId: matchId },
@@ -853,114 +955,31 @@ export const PsdServiceLive = Layer.effect(
           );
         }),
 
+      // Window: [start of today (Brussels), now + 7 days], both as real
+      // instants — the same space psdGameToMs returns (#3491). A match that
+      // already kicked off earlier today still qualifies — the key
+      // difference from getNextMatches, which drops it once
+      // psdGameToMs(m) < now. The 7-day upper bound covers pre-game posts.
       getMatchesWindow: () =>
-        Effect.gen(function* () {
-          const visibleTeams = yield* getVisibleTeams();
-          const season = yield* getCurrentSeason();
-          const competitionLabels = yield* getCompetitionLabels();
-
-          // Window: [start of today (Brussels), now + 7 days], both as real
-          // instants — the same space psdGameToMs returns (#3491). A match that
-          // already kicked off earlier today still qualifies — the key
-          // difference from getNextMatches, which drops it once
-          // psdGameToMs(m) < now. The 7-day upper bound covers pre-game posts.
+        Effect.suspend(() => {
           const now = Date.now();
           const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
           const startOfTodayMs = startOfBrusselsDayMs(now);
           const windowEndMs = now + SEVEN_DAYS_MS;
-
-          const teamWindowMatches = yield* Effect.all(
-            visibleTeams.map((team) =>
-              countedFetch(
-                `/games/team/${team.id}/seasons/${season.id}`,
-                PsdMatchListSchema,
-              ).pipe(
-                Effect.flatMap((data) =>
-                  Effect.gen(function* () {
-                    const [errors, games] = yield* Effect.partition(
-                      data.content,
-                      (item) =>
-                        S.decodeUnknown(PsdGame)(item).pipe(
-                          Effect.mapError((parseError) => ({
-                            id: extractId(item),
-                            parseError,
-                          })),
-                        ),
-                    );
-
-                    if (errors.length > 0) {
-                      const ids = errors.map((e) => e.id).join(", ");
-                      yield* Effect.log(
-                        `getMatchesWindow(${team.id}): filtered ${errors.length} invalid game(s) — IDs: [${ids}]`,
-                      );
-                    }
-
-                    const ownClubId = deriveOwnClubId(games);
-                    return games
-                      .filter((m) => {
-                        const ms = psdGameToMs(m);
-                        return ms >= startOfTodayMs && ms <= windowEndMs;
-                      })
-                      .map((game) =>
-                        transformPsdGame(
-                          { ...game, teamId: team.id },
-                          {
-                            ownClubId,
-                            competitionLabels,
-                            hideScores: hidesScores(team.age),
-                          },
-                        ),
-                      );
-                  }),
-                ),
-                Effect.map((windowed) => ({
-                  _tag: "ok" as const,
-                  matches: windowed,
-                })),
-                Effect.catchAll((e) =>
-                  Effect.log(
-                    `getMatchesWindow: team ${team.id} failed: ${String(e)}`,
-                  ).pipe(
-                    Effect.as({
-                      _tag: "failed" as const,
-                      matches: [] as Match[],
-                    }),
-                  ),
-                ),
-              ),
-            ),
-            { concurrency: 5 },
+          return getSeasonMatchesWhere(
+            "getMatchesWindow",
+            (ms) => ms >= startOfTodayMs && ms <= windowEndMs,
           );
+        }),
 
-          const allFailed =
-            visibleTeams.length > 0 &&
-            teamWindowMatches.every((r) => r._tag === "failed");
-
-          if (allFailed) {
-            return yield* Effect.fail(
-              new UpstreamUnavailableError({
-                message: `getMatchesWindow: all ${visibleTeams.length} team fetches failed`,
-              }),
-            );
-          }
-
-          // Flatten all in-window games across teams, tagging each with its
-          // KCVV team label, then sort by kickoff ascending.
-          const matches: Match[] = teamWindowMatches.flatMap((entry, i) => {
-            if (entry._tag !== "ok") return [];
-            const team = visibleTeams[i]!;
-            const label = derivePsdTeamLabel(team.name, team.age);
-            return entry.matches.map((match) => ({
-              ...match,
-              kcvv_team_label: label,
-            }));
-          });
-          matches.sort(
-            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-          );
-          return markPartial(
-            matches,
-            teamWindowMatches.some((r) => r._tag === "failed"),
+      // From the start of today (Brussels) to the end of the season: the
+      // season list ends there, so there is no upper bound (#3920).
+      getUpcomingMatches: () =>
+        Effect.suspend(() => {
+          const startOfTodayMs = startOfBrusselsDayMs(Date.now());
+          return getSeasonMatchesWhere(
+            "getUpcomingMatches",
+            (ms) => ms >= startOfTodayMs,
           );
         }),
 

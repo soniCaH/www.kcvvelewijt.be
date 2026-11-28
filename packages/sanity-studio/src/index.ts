@@ -11,7 +11,7 @@ export {
   RespondentPicker,
   applyRespondentPicker,
   BulkImageUploadInput,
-  applyBulkImageUploadInput,
+  applyFieldInput,
 } from './inputs'
 export {schemaTypes} from './schema-types'
 // Migrations are intentionally NOT re-exported from this barrel: they import

@@ -35,6 +35,16 @@ export class MatchesApi extends HttpApiGroup.make("matches")
       .addError(HttpNotFound),
   )
   .add(
+    // Every coming match of every visible team, from the start of today
+    // (Brussels) to the end of the season. Powers the Studio's Matchbal
+    // picker (#3920), through the web's public /api/matches/upcoming.
+    HttpApiEndpoint.get("getUpcomingMatches", "/matches/upcoming")
+      .addSuccess(MatchesArray)
+      .addError(HttpServiceUnavailable)
+      .addError(HttpBadGateway)
+      .addError(HttpNotFound),
+  )
+  .add(
     HttpApiEndpoint.get("getMatchDetail", "/match/:matchId/detail")
       .setPath(S.Struct({ matchId: S.NumberFromString.pipe(S.int()) }))
       .addSuccess(MatchDetail)

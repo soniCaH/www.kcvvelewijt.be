@@ -3,12 +3,13 @@ import {
   AccentDecorator,
   ArticleTagsInput,
   BulkImageUploadInput,
+  MatchbalMatchInput,
   PullquoteDecorator,
   QaPairItem,
   QaPairRespondentItem,
   RespondentPicker,
   applyArticleTagsInput,
-  applyBulkImageUploadInput,
+  applyFieldInput,
   applyDecoratorComponents,
   applyQaBlockInput,
   applyRespondentPicker,
@@ -24,18 +25,25 @@ import {
  * `applyDecoratorComponents` adds the WYSIWYG render to the icon-only
  * `pullquote` / `accent` Portable Text decorators — the React render lives
  * here, the icon stays in `@kcvv/sanity-schemas`.
+ *
+ * `MatchbalMatchInput` lets the sponsor coordinator pick a Matchbal's match
+ * from the coming matches instead of copying its id (#3920).
  */
-export const schemaTypes = applyBulkImageUploadInput(
-  applyDecoratorComponents(
-    applyQaBlockInput(
-      applyRespondentPicker(
-        applyArticleTagsInput(baseSchemaTypes, ArticleTagsInput),
-        RespondentPicker,
+export const schemaTypes = applyFieldInput(
+  applyFieldInput(
+    applyDecoratorComponents(
+      applyQaBlockInput(
+        applyRespondentPicker(
+          applyArticleTagsInput(baseSchemaTypes, ArticleTagsInput),
+          RespondentPicker,
+        ),
+        {QaPairItem, QaPairRespondentItem},
       ),
-      {QaPairItem, QaPairRespondentItem},
+      {pullquote: PullquoteDecorator, accent: AccentDecorator},
     ),
-    {pullquote: PullquoteDecorator, accent: AccentDecorator},
+    BulkImageUploadInput,
+    {typeName: 'photoGallery', fieldName: 'images'},
   ),
-  BulkImageUploadInput,
-  {typeName: 'photoGallery', fieldName: 'images'},
+  MatchbalMatchInput,
+  {typeName: 'matchbal', fieldName: 'matchId'},
 )

@@ -4,6 +4,7 @@ import {
   getMatchesByTeamHandler,
   getNextMatchesHandler,
   getMatchesWindowHandler,
+  getUpcomingMatchesHandler,
   getMatchDetailHandler,
   getPlayerStatsHandler,
   matchDetailTtl,
@@ -65,6 +66,7 @@ const makeServiceMock = (
     getTeamMatches: (_teamId) => Effect.succeed([baseMatch]),
     getNextMatches: () => Effect.succeed([baseMatch]),
     getMatchesWindow: () => Effect.succeed([baseMatch]),
+    getUpcomingMatches: () => Effect.succeed([baseMatch]),
     getMatchDetail: (_matchId) => Effect.succeed(baseDetail),
     getRanking: () => Effect.die("not needed"),
     getOpponentHistory: () => Effect.die("not needed"),
@@ -1126,5 +1128,63 @@ describe("needsInlineRefresh", () => {
     ] as const) {
       expect(needsInlineRefresh({ date: past, status }, now)).toBe(false);
     }
+  });
+});
+
+describe("getUpcomingMatchesHandler (#3920)", () => {
+  const HOUR = 60 * 60 * 1000;
+  const at = (offsetMs: number, id: number): MatchType => ({
+    ...baseMatch,
+    id,
+    status: "scheduled",
+    date: wireDate(Date.now() + offsetMs),
+  });
+
+  const run = (matches: MatchType[], ageMs: number) => {
+    const store = new Map<string, string>([
+      [
+        `matches:upcoming:${CACHE_VERSION}`,
+        JSON.stringify({
+          value: S.encodeSync(MatchesArray)(matches),
+          fetchedAt: Date.now() - ageMs,
+        }),
+      ],
+    ]);
+    const cache: KvCacheInterface = {
+      ...makeCacheMock(),
+      get: (k) => Effect.succeed(store.get(k) ?? null),
+      set: (k, v) => Effect.sync(() => void store.set(k, v)),
+    };
+    const fanout = vi.fn(() => Effect.succeed([baseMatch]));
+    return Effect.runPromise(
+      getUpcomingMatchesHandler().pipe(
+        Effect.provide(
+          Layer.succeed(
+            PsdService,
+            makeServiceMock({ getUpcomingMatches: fanout }),
+          ),
+        ),
+        Effect.provide(Layer.succeed(KvCacheService, cache)),
+        Effect.provide(PsdGateTest),
+        Effect.provide(testEnvLayer),
+      ),
+    ).then((result) => ({ result, fanout }));
+  };
+
+  // Kevin, 2026-11-28: at least 1 day, even with a kickoff an hour away.
+  it("an entry 23 h old is fresh, even with a kickoff 1 h away", async () => {
+    const { result, fanout } = await run([at(HOUR, 31)], 23 * HOUR);
+    expect(result.map((m) => m.id)).toEqual([31]);
+    expect(fanout).not.toHaveBeenCalled();
+  });
+
+  it("an entry 25 h old triggers the fan-out", async () => {
+    const { fanout } = await run([at(HOUR, 32)], 25 * HOUR);
+    expect(fanout).toHaveBeenCalledTimes(1);
+  });
+
+  it("never serves a match from before today (Brussels)", async () => {
+    const { result } = await run([at(-30 * HOUR, 33), at(HOUR, 34)], HOUR);
+    expect(result.map((m) => m.id)).toEqual([34]);
   });
 });

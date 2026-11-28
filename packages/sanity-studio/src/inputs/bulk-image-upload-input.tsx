@@ -12,7 +12,7 @@ import {fanOutSelectedFiles} from './fan-out-selected-files'
  * untouched fast path.
  *
  * Generic against `ArrayOfObjectsInputProps`; scope it to a single-member
- * image array via `applyBulkImageUploadInput`. When the native entry point or
+ * image array via `applyFieldInput`. When the native entry point or
  * an upload-capable asset source is missing, renders only the default input —
  * no dead button.
  */

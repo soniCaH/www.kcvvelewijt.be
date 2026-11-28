@@ -19,7 +19,7 @@ export const matchbal = defineType({
       group: 'matchbal',
       type: 'string',
       description:
-        'PSD-wedstrijd-id. Kopieer het uit de link van de wedstrijdpagina: kcvvelewijt.be/wedstrijd/3414 geeft 3414.',
+        'Kies de wedstrijd in de lijst eronder. Staat ze er niet in (al gespeeld)? Typ dan het PSD-wedstrijd-id: kcvvelewijt.be/wedstrijd/3414 geeft 3414.',
       validation: (r) =>
         r
           .required()

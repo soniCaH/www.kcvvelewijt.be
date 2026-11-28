@@ -1,9 +1,7 @@
 import type {ComponentType} from 'react'
-import type {ArrayOfObjectsInputProps, SchemaTypeDefinition} from 'sanity'
+import type {SchemaTypeDefinition} from 'sanity'
 
-type BulkImageUploadComponent = ComponentType<ArrayOfObjectsInputProps>
-
-interface BulkImageUploadTarget {
+interface FieldTarget {
   typeName: string
   fieldName: string
 }
@@ -15,13 +13,13 @@ interface BulkImageUploadTarget {
  * absent; any existing `components` on the field are preserved.
  *
  * Takes the scope as a parameter (unlike the fixed-target grafts it mirrors,
- * e.g. `applyRespondentPicker`) so promoting the bulk-upload input to another
- * image array later is one more apply line, never a rewrite (#2369).
+ * e.g. `applyRespondentPicker`), so a new custom input is one more apply line:
+ * the bulk image upload (#2369), the Matchbal match picker (#3920).
  */
-export const applyBulkImageUploadInput = (
+export const applyFieldInput = <Props,>(
   schemaTypes: readonly SchemaTypeDefinition[],
-  InputComponent: BulkImageUploadComponent,
-  {typeName, fieldName}: BulkImageUploadTarget,
+  InputComponent: ComponentType<Props>,
+  {typeName, fieldName}: FieldTarget,
 ): SchemaTypeDefinition[] => {
   return schemaTypes.map((schemaType) => {
     if (schemaType.name !== typeName) return schemaType

@@ -9,7 +9,7 @@ import type {
 import {schemaTypes as baseSchemaTypes} from '@kcvv/sanity-schemas'
 import {describe, expect, it} from 'vitest'
 import {applyArticleTagsInput} from './inputs/apply-article-tags-input'
-import {applyBulkImageUploadInput} from './inputs/apply-bulk-image-upload-input'
+import {applyFieldInput} from './inputs/apply-field-input'
 import {applyDecoratorComponents} from './inputs/apply-decorator-components'
 import {applyRespondentPicker} from './inputs/apply-respondent-picker'
 import {collectBlockDecoratorComponents} from './inputs/collect-block-decorator-components'
@@ -79,10 +79,10 @@ describe('schema-types graft targets resolve against the real schema (#2278)', (
     expect(key.components?.input).toBe(RespondentSentinel)
   })
 
-  it('applyBulkImageUploadInput lands on the real photoGallery.images field', () => {
+  it('applyFieldInput lands on the real photoGallery.images field', () => {
     expect(findField(findType(baseSchemaTypes, 'photoGallery'), 'images')).toBeDefined()
 
-    const grafted = applyBulkImageUploadInput(baseSchemaTypes, BulkUploadSentinel, {
+    const grafted = applyFieldInput(baseSchemaTypes, BulkUploadSentinel, {
       typeName: 'photoGallery',
       fieldName: 'images',
     })
@@ -90,6 +90,17 @@ describe('schema-types graft targets resolve against the real schema (#2278)', (
       components?: {input?: unknown}
     }
     expect(images.components?.input).toBe(BulkUploadSentinel)
+  })
+
+  it('applyFieldInput lands on the real matchbal.matchId field (#3920)', () => {
+    const grafted = applyFieldInput(baseSchemaTypes, BulkUploadSentinel, {
+      typeName: 'matchbal',
+      fieldName: 'matchId',
+    })
+    const matchId = findField(findType(grafted, 'matchbal'), 'matchId') as {
+      components?: {input?: unknown}
+    }
+    expect(matchId.components?.input).toBe(BulkUploadSentinel)
   })
 
   it('applyDecoratorComponents lands on the real pullquote + accent decorators', () => {
