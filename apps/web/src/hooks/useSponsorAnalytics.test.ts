@@ -36,20 +36,6 @@ describe("useSponsorAnalytics", () => {
     });
   });
 
-  it("fires sponsor_team_line_click with the hashed id and the team slug, no tier or source", () => {
-    const { result } = renderHook(() => useSponsorAnalytics());
-    act(() =>
-      result.current.trackSponsorTeamLineClick({
-        sponsorId: "abc-123",
-        teamSlug: "u15",
-      }),
-    );
-    expect(mockTrackEvent).toHaveBeenCalledWith("sponsor_team_line_click", {
-      sponsor_id: hashMemberId("abc-123"),
-      team_slug: "u15",
-    });
-  });
-
   it("never sends the raw sponsor id", () => {
     const { result } = renderHook(() => useSponsorAnalytics());
     act(() =>

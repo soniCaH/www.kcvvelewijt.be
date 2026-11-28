@@ -222,7 +222,6 @@ describe("TeamRepository", () => {
         teamImageFullUrl: "https://cdn.sanity.io/team-full.webp",
         body: null,
         contactInfo: null,
-        sponsors: [],
         players: [
           {
             _id: "player-1",
@@ -305,53 +304,6 @@ describe("TeamRepository", () => {
         imageUrl: "https://cdn.sanity.io/photo.webp",
       });
       expect(t.staff[0]?.href).toBeUndefined();
-    });
-
-    // Slice (b) of #3618: only active Sponsors that name this Team, A to Z.
-    it("projects the active Sponsors that name this team, ordered by name", () => {
-      const sponsors = TEAM_BY_SLUG_QUERY.match(/"sponsors":[^\n]*/)?.[0];
-      expect(sponsors).toContain('_type == "sponsor"');
-      expect(sponsors).toContain("active == true");
-      // A nameless Sponsor would leave "Gesteund door , Bakkerij Y".
-      expect(sponsors).toContain('defined(name) && name != ""');
-      expect(sponsors).toContain("^._id in teams[]._ref");
-      expect(sponsors).toContain("order(name asc)");
-    });
-
-    it("maps the supporting Sponsors, dropping a blank url to undefined", async () => {
-      mockFetch.mockResolvedValueOnce(
-        makeDetailRow({
-          sponsors: [
-            { id: "s-1", name: "Garage X", url: "https://garagex.example" },
-            { id: "s-2", name: "Bakkerij Y", url: null },
-          ],
-        }),
-      );
-
-      const team = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* TeamRepository;
-          return yield* repo.findBySlug("eerste-elftallen-a");
-        }),
-      );
-
-      expect(team!.sponsors).toEqual([
-        { id: "s-1", name: "Garage X", url: "https://garagex.example" },
-        { id: "s-2", name: "Bakkerij Y", url: undefined },
-      ]);
-    });
-
-    it("returns an empty sponsor list when none is linked", async () => {
-      mockFetch.mockResolvedValueOnce(makeDetailRow({ sponsors: [] }));
-
-      const team = await runWithRepo(
-        Effect.gen(function* () {
-          const repo = yield* TeamRepository;
-          return yield* repo.findBySlug("eerste-elftallen-a");
-        }),
-      );
-
-      expect(team!.sponsors).toEqual([]);
     });
 
     it("links a staff card to /staf/{psdId} when the member has a psdId and is not archived", async () => {

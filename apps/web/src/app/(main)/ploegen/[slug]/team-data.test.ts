@@ -33,16 +33,13 @@ import { fetchTeamOrNull } from "./team-data";
 describe("fetchTeamOrNull", () => {
   beforeEach(() => mockFindBySlug.mockReset());
 
-  // The detail read carries the Sponsors that name the Team, so a Sponsor
-  // publish must be able to refresh it: only the `sponsors` tag, never `teams`
-  // (a team publish does not rebuild every `/ploegen/<slug>`).
-  it("tags the detail read with the sponsors tag only", async () => {
+  // Untagged (#3483, #3915): no `teams` tag, so a team publish does not
+  // rebuild every `/ploegen/<slug>`; no `sponsors` tag, the read holds no Sponsor.
+  it("reads the team untagged", async () => {
     mockFindBySlug.mockReturnValue(Effect.succeed(null));
 
     await fetchTeamOrNull("kcvv-elewijt-u13");
 
-    expect(mockFindBySlug).toHaveBeenCalledWith("kcvv-elewijt-u13", {
-      tags: ["sponsors"],
-    });
+    expect(mockFindBySlug).toHaveBeenCalledWith("kcvv-elewijt-u13");
   });
 });

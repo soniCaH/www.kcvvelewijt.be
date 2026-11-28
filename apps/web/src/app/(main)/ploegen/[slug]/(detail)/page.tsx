@@ -78,7 +78,6 @@ import { SquadGrid } from "@/components/team/SquadGrid";
 import { TeamEnrolmentCta } from "@/components/team/TeamEnrolmentCta";
 import { TeamStaff } from "@/components/team/TeamStaff";
 import { TeamEditorial } from "@/components/team/TeamEditorial";
-import { TeamSponsorLine } from "@/components/team/TeamSponsorLine";
 import { SponsorsSection } from "@/components/home/SponsorsSection";
 import { RelatedRow } from "@/components/related/RelatedRow";
 import { mergeRelatedRow } from "@/components/related/mergeRelatedRow";
@@ -768,15 +767,6 @@ const TeamPage = async ({ params }: TeamPageProps) => {
           body={teamBody}
           contactInfo={teamContact}
           teamLabel={trainingRoutingLabel}
-        />
-        {/* "Gesteund door A, B en C" (#3652): one quiet line directly below
-            the editorial block, inside this section, so it never sits between
-            a visitor and the fixtures, results or squad. Renders nothing for
-            a team no active Sponsor names. */}
-        <TeamSponsorLine
-          sponsors={team.sponsors}
-          teamSlug={slug}
-          className="mt-12"
         />
       </PageContainer>
 

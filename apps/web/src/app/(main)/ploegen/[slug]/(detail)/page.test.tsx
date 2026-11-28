@@ -161,7 +161,6 @@ const teamFixture = (psdId: string): TeamDetailVM => {
     teamImageFullUrl: null,
     body: null,
     contactInfo: null,
-    sponsors: [],
     players: [],
     staff: [],
   };
@@ -311,7 +310,6 @@ const headingSweepTeamFixture = (): TeamDetailVM => {
     teamImageFullUrl: null,
     body: null,
     contactInfo: null,
-    sponsors: [],
     players: [
       { id: "p1", firstName: "Jef", lastName: "Peeters", position: "Keeper" },
     ],
@@ -623,49 +621,5 @@ describe("/ploegen/[slug] subscribe panel (#3644)", () => {
     expect(
       screen.queryByRole("link", { name: /Meer ploegen/, hidden: true }),
     ).toBeNull();
-  });
-});
-
-describe("/ploegen/[slug] sponsor line (#3652)", () => {
-  beforeEach(() => {
-    mockFindBySlug.mockReset();
-    mockGetMatches.mockReset();
-    mockGetRanking.mockReset();
-    mockGetMatches.mockReturnValue(Effect.succeed([]));
-    mockGetRanking.mockReturnValue(Effect.succeed([]));
-  });
-
-  it("renders no line for a team no Sponsor names", async () => {
-    mockFindBySlug.mockReturnValue(Effect.succeed(teamFixture("9401")));
-    render(
-      await TeamPage({ params: Promise.resolve({ slug: "kcvv-elewijt-u13" }) }),
-    );
-    expect(screen.queryByTestId("team-sponsor-line")).toBeNull();
-    expect(screen.queryByText(/Gesteund door/)).toBeNull();
-  });
-
-  it("puts the line inside #info, directly below the editorial block", async () => {
-    mockFindBySlug.mockReturnValue(
-      Effect.succeed({
-        ...teamFixture("9401"),
-        sponsors: [
-          { id: "s-1", name: "Garage X", url: "https://garagex.example" },
-          { id: "s-2", name: "Bakkerij Y", url: undefined },
-        ],
-      }),
-    );
-    render(
-      await TeamPage({ params: Promise.resolve({ slug: "kcvv-elewijt-u13" }) }),
-    );
-
-    const info = document.getElementById("info")!;
-    const line = screen.getByTestId("team-sponsor-line");
-    expect(info).toContainElement(line);
-    expect(
-      screen.getByTestId("team-editorial").compareDocumentPosition(line) &
-        Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy();
-    expect(line).toHaveTextContent("Gesteund door Garage X");
-    expect(line).toHaveTextContent("en Bakkerij Y");
   });
 });
