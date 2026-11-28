@@ -164,6 +164,26 @@ describe("BffService", () => {
     expect(result[0]?.id).toBe(1);
   });
 
+  it("getUpcomingMatches calls /matches/upcoming", async () => {
+    mockFetchWith([sampleMatch]);
+
+    const result = await Effect.runPromise(
+      Effect.gen(function* () {
+        const bff = yield* BffService;
+        return yield* bff.getUpcomingMatches();
+      }).pipe(Effect.provide(BffServiceLive)),
+    );
+
+    expect(vi.mocked(fetch)).toHaveBeenCalledWith(
+      expect.objectContaining({
+        href: expect.stringContaining("/matches/upcoming"),
+      }),
+      expect.any(Object),
+    );
+    expect(result).toHaveLength(1);
+    expect(result[0]?.id).toBe(1);
+  });
+
   it("getMatchDetail calls /match/:matchId/detail", async () => {
     const sampleDetail = {
       ...sampleMatch,

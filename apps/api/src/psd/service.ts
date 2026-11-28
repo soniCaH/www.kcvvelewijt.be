@@ -515,10 +515,10 @@ export const PsdServiceLive = Layer.effect(
         return ids;
       });
 
-    // The club-wide fan-outs (getNextMatches, getMatchesWindow) fetch matches
-    // per visible team: Sanity's visible ids first, then the cached team map
-    // (#3631) — they need only id, name and age, so a warm map costs no PSD
-    // call. A failed `/teams` on a cold map still fails the fan-out.
+    // The club-wide fan-outs (getNextMatches, getMatchesWindow,
+    // getUpcomingMatches) fetch matches per visible team: Sanity's visible ids
+    // first, then the cached team map (#3631) — they need only id, name and
+    // age, so a warm map costs no PSD call. A failed `/teams` on a cold map still fails the fan-out.
     const getVisibleTeams = () =>
       Effect.gen(function* () {
         const visiblePsdIds = yield* getVisibleTeamIds();

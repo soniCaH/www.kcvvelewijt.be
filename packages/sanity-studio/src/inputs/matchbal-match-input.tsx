@@ -65,6 +65,7 @@ export const MatchbalMatchInput = (props: StringInputProps): JSX.Element => {
           value=""
           loading={list.status === 'loading'}
           disabled={readOnly || list.status !== 'ready'}
+          aria-label="Zoek een wedstrijd"
           openButton
           placeholder="Zoek een wedstrijd: ploeg, tegenstander of datum"
           filterOption={(query, option) =>

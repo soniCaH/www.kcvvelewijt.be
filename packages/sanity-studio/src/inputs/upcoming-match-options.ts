@@ -33,9 +33,13 @@ const toOption = (raw: unknown): MatchOption[] => {
 
 /**
  * The web's `/api/matches/upcoming` body → one picker option per match (#3920):
+ * a match between two KCVV teams is in both teams' lists, so a repeated id is
+ * kept once.
  * "za 30 nov · 15:00 · U21 · KCVV Elewijt – Racing Mechelen". It comes over the
  * network, so a row it cannot read is skipped, and a body that is not a list
  * gives no options.
  */
 export const toMatchOptions = (raw: unknown): MatchOption[] =>
-  Array.isArray(raw) ? raw.flatMap(toOption) : []
+  Array.isArray(raw)
+    ? raw.flatMap(toOption).filter((o, i, all) => all.findIndex((p) => p.value === o.value) === i)
+    : []

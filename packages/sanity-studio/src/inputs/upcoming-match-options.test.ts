@@ -37,6 +37,10 @@ describe('toMatchOptions (#3920)', () => {
     )
   })
 
+  it('keeps a match between two KCVV teams once', () => {
+    expect(toMatchOptions([row, {...row, kcvv_team_label: 'U21B'}])).toHaveLength(1)
+  })
+
   it('skips a row it cannot read, and anything that is not a list', () => {
     expect(toMatchOptions([row, {id: 'x'}, null])).toHaveLength(1)
     expect(toMatchOptions({error: 'down'})).toEqual([])
