@@ -422,7 +422,7 @@ The matchday sponsor of one Match: the Sponsor that offered the match ball (#391
 
 **One per Match:** the Studio refuses a second `matchbal` with the same `matchId` (`validateMatchbalMatchId`). Named writer: the sponsor coordinator, by hand in the Studio.
 
-**Render rule:** the Match page shows `<MatchdaySponsor>` under the score box when a `matchbal` names it, before and after kick-off. No `matchbal`, or a failed read: no card. The read (`SponsorRepository.findMatchbal`) is tagged `matchbal` and `sponsors`: a `matchbal` save busts only `matchbal`, and a Sponsor edit still reaches the card.
+**Render rule:** the Match page shows `<MatchdaySponsor>` under the score box when a `matchbal` names it and its Sponsor is `active`, before and after kick-off. No `matchbal`, an inactive Sponsor, or a failed read: no card. Should two `matchbal` documents name one Match anyway, the newest wins. The read (`SponsorRepository.findMatchbal`) is tagged `matchbal` and `sponsors`: a `matchbal` save busts only `matchbal`, and a Sponsor edit still reaches the card.
 
 **Tracking:** `sponsor_impression` and `sponsor_click` with `source: "match"`; the season report counts it as its own surface.
 

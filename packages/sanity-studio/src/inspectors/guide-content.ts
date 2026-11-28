@@ -151,4 +151,14 @@ export const guideContent: Record<string, GuideEntry> = {
       'Koppel onder "Staf" de trainers/afgevaardigden en voeg onder "Trainingen" de trainingsmomenten toe.',
     ],
   },
+  matchbal: {
+    intro:
+      'Een Matchbal koppelt één wedstrijd aan de sponsor die de matchbal aanbiedt. Per wedstrijd kan er maar één Matchbal zijn.',
+    placement:
+      'De wedstrijdpagina `/wedstrijd/{id}` toont onder het scorebord "Matchbal aangeboden door", met de naam en het logo van de sponsor. Dat blijft staan na de wedstrijd.',
+    tips: [
+      'Kopieer het wedstrijd-id uit de link van de wedstrijdpagina: kcvvelewijt.be/wedstrijd/3414 geeft 3414.',
+      'Een sponsor die op "Active" uit staat, toont niet op de wedstrijdpagina.',
+    ],
+  },
 }

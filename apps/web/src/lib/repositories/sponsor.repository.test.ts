@@ -126,7 +126,9 @@ describe("SponsorRepository", () => {
 
       expect(await find("3414")).toEqual(row);
       expect(mockFetch).toHaveBeenLastCalledWith(
-        expect.stringContaining('_type == "matchbal"'),
+        expect.stringMatching(
+          /_type == "matchbal"[\s\S]*sponsor->active == true[\s\S]*order\(_updatedAt desc\)\[0\]/,
+        ),
         { matchId: "3414" },
         { next: { revalidate: 60 * 60 * 24, tags: ["matchbal", "sponsors"] } },
       );

@@ -1,4 +1,5 @@
 import type {ValidationContext} from 'sanity'
+import {normalizeDocumentId} from './document-id'
 
 /**
  * Cycle guards for `organigramNode.parentNode` (#3478). A node inside a parent
@@ -25,9 +26,7 @@ const ALL_NODES_QUERY = `*[_type == "organigramNode"]{_id, "parent": parentNode.
 const PUBLISHED_NODES_QUERY = `*[_type == "organigramNode" && !(_id in path("drafts.**")) && !(_id in path("versions.**"))]{_id, "parent": parentNode._ref}`
 
 /** `drafts.x` / `versions.<release>.x` → `x`. */
-export const normalizeOrganigramId = (id: string): string => {
-  return id.replace(/^drafts\./, '').replace(/^versions\.[^.]+\./, '')
-}
+export const normalizeOrganigramId = normalizeDocumentId
 
 /** Normalised child → parent map. Later rows win, so a draft (sorted last) overrides its published twin. */
 const parentMap = (rows: ParentRow[]): Map<string, string | undefined> => {

@@ -16,11 +16,12 @@ export const SPONSORS_QUERY =
 }`);
 
 /**
- * The matchday sponsor of one Match (#3917): at most one `matchbal` names it,
- * the Studio refuses a second. `null` when the Match has none.
+ * The matchday sponsor of one Match (#3917), when that Sponsor is active.
+ * The Studio refuses a second `matchbal` per Match; should two slip through
+ * (two saves at once, a script), the newest wins. `null` when there is none.
  */
 export const MATCHBAL_BY_MATCH_QUERY =
-  defineQuery(`*[_type == "matchbal" && matchId == $matchId && defined(sponsor->_id)][0].sponsor->{
+  defineQuery(`*[_type == "matchbal" && matchId == $matchId && sponsor->active == true] | order(_updatedAt desc)[0].sponsor->{
   "id": _id, "name": coalesce(name, ""), url,
   "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"
 }`);
