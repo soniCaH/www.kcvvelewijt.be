@@ -69,7 +69,7 @@ export const sponsor = defineType({
       group: 'weergave',
       of: [{type: 'reference', to: [{type: 'team'}]}],
       description:
-        'Vul in als het contract een ploeg noemt. De sponsor staat dan als "Gesteund door" op de pagina van die ploeg (enkel zolang de sponsor actief is). Leeg = clubbreed.',
+        'Vul in als het contract een ploeg noemt. Geen pagina toont dit: het seizoensrapport van de sponsor vermeldt de ploeg. Leeg = clubbreed.',
     }),
     defineField({
       name: 'active',

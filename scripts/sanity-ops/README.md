@@ -97,4 +97,5 @@ counts those as `/sponsors` clicks. Impressions only exist from that deploy, so
 the click-through rate counts the clicks from the first day impressions were
 measured on that surface; the raw click counts cover the whole range. Clicks on
 a Sponsor's name in "Gesteund door" (`sponsor_team_line_click`) are a separate
-line, shown only for a Sponsor with a linked Team, and are not in the rate.
+line, shown only when the range has such clicks, and are not in the rate. The
+line was removed from the team page in #3915, so ranges after that show none.

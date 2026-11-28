@@ -76,7 +76,8 @@ export interface SponsorReport {
   /**
    * Clicks on the Sponsor's name in the "Gesteund door" line on a Team page
    * (`sponsor_team_line_click`, no `source`). Its own figure: not a wall click,
-   * not in the rate. Present only for a Sponsor with a linked Team.
+   * not in the rate. Present only when the range has such clicks: the line was
+   * removed in #3915, so a later range would only ever show 0.
    */
   teamLineClicks?: number;
   /** False when GA4 holds no event for this Sponsor in the range. */
@@ -225,7 +226,7 @@ export const buildReport = ({
         teams: sponsor.teams,
         spotlightWeeks: spotlightWeeks[sponsor.name] ?? [],
         surfaces,
-        ...(sponsor.teams.length > 0 && { teamLineClicks: lineClicks }),
+        ...(lineClicks > 0 && { teamLineClicks: lineClicks }),
         hasData:
           lineClicks > 0 || surfaces.some((s) => s.impressions + s.clicks > 0),
         range,

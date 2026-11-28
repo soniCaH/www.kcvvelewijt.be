@@ -105,11 +105,8 @@ const targets = (
         paths: psdId ? [`/staf/${psdId}`] : [],
         tags: [SANITY_TAGS.staff],
       };
-    // A Sponsor's `teams` field names it on those team pages ("Gesteund door",
-    // #3652). The team detail read carries the `sponsors` tag (`team-data.ts`),
-    // so the `sponsors` tag alone refreshes `/sponsors` and those pages. The
-    // `teams` tag is not busted: it would also rebuild /kalender, /inhoud and
-    // every /tegenstander page, none of which show a Sponsor.
+    // The `teams` tag is not busted: it would also rebuild /kalender, /inhoud
+    // and every /tegenstander page, none of which show a Sponsor.
     case "sponsor":
       return { paths: ["/sponsors"], tags: [SANITY_TAGS.sponsors] };
     // The homepage read (HOMEPAGE_QUERY — banners + the off-season placeholder,

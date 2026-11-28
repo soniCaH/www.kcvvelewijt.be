@@ -58,12 +58,12 @@ describe("renderReportPage", () => {
     expect(plain).not.toContain("In de kijker");
   });
 
-  it("shows the team-line clicks line only for a Sponsor with Teams", () => {
+  it("shows the team-line clicks line only when there are clicks", () => {
     const clicks = [row("sponsor_team_line_click", "(not set)", 4)];
     expect(render(clicks, ["U15"])).toContain(
       "Klikken op de naam bij de ploeg: 4",
     );
-    expect(render(clicks)).not.toContain("Klikken op de naam");
+    expect(render([], ["U15"])).not.toContain("Klikken op de naam");
   });
 
   it("carries the minimum-not-estimate footer and no raw id", () => {

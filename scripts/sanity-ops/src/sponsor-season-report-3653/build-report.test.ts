@@ -173,15 +173,13 @@ describe("buildReport", () => {
       expect(surface(report, "team").clickThroughRate).toBeCloseTo(0.05);
     });
 
-    it("is absent for a Sponsor without a linked Team", () => {
-      const [report] = build({
-        rows: [row("garage", "sponsor_team_line_click", "(not set)", 3)],
-      });
-      expect(report.teamLineClicks).toBeUndefined();
+    it("is absent when the range has no clicks (the line is gone since #3915)", () => {
+      expect(
+        build({ sponsors: withTeams(["U15"]) })[0].teamLineClicks,
+      ).toBeUndefined();
     });
 
-    it("is zero for a linked Sponsor without clicks, and counts as data when there are some", () => {
-      expect(build({ sponsors: withTeams(["U15"]) })[0].teamLineClicks).toBe(0);
+    it("counts as data when there are some", () => {
       const [report] = build({
         sponsors: withTeams(["U15"]),
         rows: [row("garage", "sponsor_team_line_click", "(not set)", 1)],
@@ -194,7 +192,7 @@ describe("buildReport", () => {
         sponsors: withTeams(["U15"]),
         rows: [row("other", "sponsor_team_line_click", "(not set)", 4)],
       });
-      expect(report.teamLineClicks).toBe(0);
+      expect(report.teamLineClicks).toBeUndefined();
     });
   });
 
