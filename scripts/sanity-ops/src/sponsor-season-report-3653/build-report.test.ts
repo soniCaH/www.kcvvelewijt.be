@@ -155,12 +155,10 @@ describe("buildReport", () => {
   });
 
   describe("team-line clicks (#3652)", () => {
-    const withTeams = (teams: string[]) => [sponsor("garage", { teams })];
-
     it("counts them as their own figure, whatever the source", () => {
       // The event has no `source`: GA4 shows "(not set)", and it stays unmapped.
       const [report] = build({
-        sponsors: withTeams(["U15"]),
+        sponsors: [sponsor("garage")],
         rows: [
           row("garage", "sponsor_team_line_click", "(not set)", 3, "20261001"),
           row("garage", "sponsor_team_line_click", "", 2),
@@ -175,13 +173,13 @@ describe("buildReport", () => {
 
     it("is absent when the range has no clicks (the line is gone since #3915)", () => {
       expect(
-        build({ sponsors: withTeams(["U15"]) })[0].teamLineClicks,
+        build({ sponsors: [sponsor("garage")] })[0].teamLineClicks,
       ).toBeUndefined();
     });
 
     it("counts as data when there are some", () => {
       const [report] = build({
-        sponsors: withTeams(["U15"]),
+        sponsors: [sponsor("garage")],
         rows: [row("garage", "sponsor_team_line_click", "(not set)", 1)],
       });
       expect(report.hasData).toBe(true);
@@ -189,7 +187,7 @@ describe("buildReport", () => {
 
     it("ignores rows of an unknown Sponsor", () => {
       const [report] = build({
-        sponsors: withTeams(["U15"]),
+        sponsors: [sponsor("garage")],
         rows: [row("other", "sponsor_team_line_click", "(not set)", 4)],
       });
       expect(report.teamLineClicks).toBeUndefined();

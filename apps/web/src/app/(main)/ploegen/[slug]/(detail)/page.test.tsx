@@ -623,22 +623,3 @@ describe("/ploegen/[slug] subscribe panel (#3644)", () => {
     ).toBeNull();
   });
 });
-
-describe("/ploegen/[slug] no sponsor line (#3915)", () => {
-  beforeEach(() => {
-    mockFindBySlug.mockReset();
-    mockGetMatches.mockReset();
-    mockGetRanking.mockReset();
-    mockGetMatches.mockReturnValue(Effect.succeed([]));
-    mockGetRanking.mockReturnValue(Effect.succeed([]));
-  });
-
-  // The "Gesteund door" line repeated the sponsor wall below it (#3915).
-  it("renders no Gesteund door line", async () => {
-    mockFindBySlug.mockReturnValue(Effect.succeed(teamFixture("9401")));
-    render(
-      await TeamPage({ params: Promise.resolve({ slug: "kcvv-elewijt-u13" }) }),
-    );
-    expect(screen.queryByText(/Gesteund door/)).toBeNull();
-  });
-});

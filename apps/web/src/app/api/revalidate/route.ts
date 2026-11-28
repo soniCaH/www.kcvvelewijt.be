@@ -105,8 +105,6 @@ const targets = (
         paths: psdId ? [`/staf/${psdId}`] : [],
         tags: [SANITY_TAGS.staff],
       };
-    // The `teams` tag is not busted: it would also rebuild /kalender, /inhoud
-    // and every /tegenstander page, none of which show a Sponsor.
     case "sponsor":
       return { paths: ["/sponsors"], tags: [SANITY_TAGS.sponsors] };
     // The homepage read (HOMEPAGE_QUERY — banners + the off-season placeholder,
