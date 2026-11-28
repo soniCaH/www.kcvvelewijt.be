@@ -105,4 +105,36 @@ describe("SponsorRepository", () => {
       expect(s.type).toBeNull();
     });
   });
+
+  describe("findMatchbal", () => {
+    const find = (matchId: string) =>
+      runWithRepo(
+        Effect.gen(function* () {
+          const repo = yield* SponsorRepository;
+          return yield* repo.findMatchbal(matchId);
+        }),
+      );
+
+    it("asks for the Match by id, tagged sponsors, and returns the Sponsor", async () => {
+      const row = {
+        id: "sponsor-1",
+        name: "Alupoort",
+        url: "https://www.alupoort.be",
+        logoUrl: "https://cdn.sanity.io/logo.webp",
+      };
+      mockFetch.mockResolvedValueOnce(row);
+
+      expect(await find("3414")).toEqual(row);
+      expect(mockFetch).toHaveBeenLastCalledWith(
+        expect.stringContaining('_type == "matchbal"'),
+        { matchId: "3414" },
+        { next: { revalidate: 60 * 60 * 24, tags: ["sponsors"] } },
+      );
+    });
+
+    it("returns null for a Match without a Matchbal", async () => {
+      mockFetch.mockResolvedValueOnce(null);
+      expect(await find("3415")).toBeNull();
+    });
+  });
 });

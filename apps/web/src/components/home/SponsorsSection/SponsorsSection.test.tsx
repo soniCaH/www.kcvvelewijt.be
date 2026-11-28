@@ -25,6 +25,7 @@ vi.mock("@/lib/repositories/sponsor.repository", async (importOriginal) => {
     ...mod,
     SponsorRepositoryLive: Layer.succeed(mod.SponsorRepository, {
       findAll: mockFindAll,
+      findMatchbal: () => Effect.die("not used by this suite"),
     }),
   };
 });

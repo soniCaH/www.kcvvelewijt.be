@@ -2,13 +2,26 @@ import { Context, Effect, Layer } from "effect";
 import { defineQuery } from "groq";
 import { fetchGroq, type SanityReadError } from "../sanity/fetch-groq";
 import { SANITY_LIST_REVALIDATE, SANITY_TAGS } from "../sanity/cache-tags";
-import type { SPONSORS_QUERY_RESULT } from "../sanity/sanity.types";
+import type {
+  MATCHBAL_BY_MATCH_QUERY_RESULT,
+  SPONSORS_QUERY_RESULT,
+} from "../sanity/sanity.types";
 
 // ─── GROQ Queries ────────────────────────────────────────────────────────────
 
 export const SPONSORS_QUERY =
   defineQuery(`*[_type == "sponsor" && active == true] | order(name asc) {
   "id": _id, "name": coalesce(name, ""), url, type, tier, "featured": coalesce(featured, false), description,
+  "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"
+}`);
+
+/**
+ * The matchday sponsor of one Match (#3917): at most one `matchbal` names it,
+ * the Studio refuses a second. `null` when the Match has none.
+ */
+export const MATCHBAL_BY_MATCH_QUERY =
+  defineQuery(`*[_type == "matchbal" && matchId == $matchId && defined(sponsor->_id)][0].sponsor->{
+  "id": _id, "name": coalesce(name, ""), url,
   "logoUrl": logo.asset->url + "?w=400&q=80&fm=webp&fit=max"
 }`);
 
@@ -24,10 +37,16 @@ export type SponsorVM = Omit<
   featured: boolean;
 };
 
+/** The matchday sponsor's name, link and logo; `coalesce` keeps `name` a string. */
+export type MatchbalSponsorVM = NonNullable<MATCHBAL_BY_MATCH_QUERY_RESULT>;
+
 // ─── Service ─────────────────────────────────────────────────────────────────
 
 export interface SponsorRepositoryInterface {
   readonly findAll: () => Effect.Effect<SponsorVM[], SanityReadError>;
+  readonly findMatchbal: (
+    matchId: string,
+  ) => Effect.Effect<MatchbalSponsorVM | null, SanityReadError>;
 }
 
 export class SponsorRepository extends Context.Tag("SponsorRepository")<
@@ -41,4 +60,11 @@ export const SponsorRepositoryLive = Layer.succeed(SponsorRepository, {
       revalidate: SANITY_LIST_REVALIDATE,
       tags: [SANITY_TAGS.sponsors],
     }),
+  // Tagged `sponsors`: a `matchbal` save busts that tag too (revalidate route).
+  findMatchbal: (matchId) =>
+    fetchGroq<MATCHBAL_BY_MATCH_QUERY_RESULT>(
+      MATCHBAL_BY_MATCH_QUERY,
+      { matchId },
+      { revalidate: SANITY_LIST_REVALIDATE, tags: [SANITY_TAGS.sponsors] },
+    ),
 });

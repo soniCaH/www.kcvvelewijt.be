@@ -32,6 +32,7 @@ describe("renderReportPage", () => {
       row("sponsor_click", "team", 9),
     ]);
     expect(html).toContain("2,5 %");
+    expect(html).toContain("<td>Wedstrijdpagina (matchbal)</td>");
     expect(html).not.toContain("9,1 %"); // 9 / 99
     expect(html).toContain("pas vanaf 100 vertoningen");
     expect(html).toContain("sinds de vertoningen gemeten worden");

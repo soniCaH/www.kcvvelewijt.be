@@ -38,7 +38,7 @@ const build = (overrides: Partial<ReportInput> = {}) =>
 
 const surface = (
   report: ReturnType<typeof build>[number],
-  name: "homepage" | "team" | "sponsors",
+  name: "homepage" | "team" | "sponsors" | "match",
 ) => report.surfaces.find((s) => s.surface === name)!;
 
 describe("buildReport", () => {
@@ -50,12 +50,15 @@ describe("buildReport", () => {
         row("garage", "sponsor_impression", "team", 25),
         row("garage", "sponsor_impression", "sponsors", 10),
         row("garage", "sponsor_click", "sponsors", 2),
+        row("garage", "sponsor_impression", "match", 7),
+        row("garage", "sponsor_click", "match", 1),
       ],
     });
     expect(report.surfaces.map((s) => s.surface)).toEqual([
       "homepage",
       "team",
       "sponsors",
+      "match",
     ]);
     expect(surface(report, "homepage")).toMatchObject({
       impressions: 40,
@@ -68,6 +71,10 @@ describe("buildReport", () => {
     expect(surface(report, "sponsors")).toMatchObject({
       impressions: 10,
       clicks: 2,
+    });
+    expect(surface(report, "match")).toMatchObject({
+      impressions: 7,
+      clicks: 1,
     });
     expect(report.hasData).toBe(true);
   });

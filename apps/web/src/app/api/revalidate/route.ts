@@ -144,6 +144,11 @@ const targets = (
     // type filter must include `shortLink` (ops step, #3608).
     case "shortLink":
       return { paths: [], tags: [SANITY_TAGS.shortLinks] };
+    // The matchday sponsor (#3917): the Match page's read is tagged `sponsors`,
+    // so that tag alone refreshes it. The webhook's type filter must include
+    // `matchbal` (ops step on #3917).
+    case "matchbal":
+      return { paths: [], tags: [SANITY_TAGS.sponsors] };
     default:
       return null;
   }

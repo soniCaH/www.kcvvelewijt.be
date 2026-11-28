@@ -11,6 +11,7 @@ const SURFACE_LABEL: Record<Surface, string> = {
   homepage: "Homepage",
   team: "Ploegpagina's",
   sponsors: "Sponsorpagina",
+  match: "Wedstrijdpagina (matchbal)",
 };
 
 const escapeHtml = (text: string) =>
