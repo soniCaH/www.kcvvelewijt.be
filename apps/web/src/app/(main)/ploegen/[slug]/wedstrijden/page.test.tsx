@@ -102,7 +102,6 @@ const teamFixture = (psdId: string): TeamDetailVM => {
     teamImageFullUrl: null,
     body: null,
     contactInfo: null,
-    sponsors: [],
     players: [],
     staff: [],
   };
