@@ -45,6 +45,13 @@ export const structure: StructureResolver = (S) =>
         .title('Sponsors')
         .child(S.documentTypeList('sponsor').title('Sponsors')),
       S.listItem()
+        .title('Matchballen')
+        .child(
+          S.documentTypeList('matchbal')
+            .title('Matchballen')
+            .defaultOrdering([{field: '_createdAt', direction: 'desc'}]),
+        ),
+      S.listItem()
         .title('Events')
         .child(S.documentTypeList('event').title('Events')),
       S.listItem()

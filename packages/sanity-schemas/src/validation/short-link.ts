@@ -1,21 +1,10 @@
 import {RESERVED_SHORT_LINK_NAMES} from '../reserved-short-link-names'
+import {isTakenElsewhere, type UniqueFieldContext} from './unique-field'
 
 /** One lowercase URL-safe word: the whole short link is `/<name>`. */
 export const SHORT_LINK_NAME_PATTERN = /^[a-z0-9-]+$/
 
-interface FetchClient {
-  fetch: <T>(query: string, params?: Record<string, unknown>) => Promise<T>
-}
-
-export interface ShortLinkNameContext {
-  document?: {_id?: string}
-  getClient?: (options: {apiVersion: string}) => FetchClient
-}
-
-const API_VERSION = '2024-01-01'
-
-/** Another short link (published or draft) already uses the name. */
-const DUPLICATE_QUERY = `count(*[_type == "shortLink" && name == $name && !(_id in [$id, "drafts." + $id])])`
+export type ShortLinkNameContext = UniqueFieldContext
 
 /**
  * Validation for `shortLink.name` (#3573). Shape first, then the clash guard
@@ -36,12 +25,8 @@ export const validateShortLinkName = async (
     return `"${value}" is al een pagina van de site. Een echte pagina wint altijd van een korte link, dus deze naam zou nooit werken. Kies een andere naam.`
   }
 
-  if (context.getClient) {
-    const id = (context.document?._id ?? '').replace(/^drafts\./, '').replace(/^versions\.[^.]+\./, '')
-    const taken = await context
-      .getClient({apiVersion: API_VERSION})
-      .fetch<number>(DUPLICATE_QUERY, {name: value, id})
-    if (taken > 0) return `Er bestaat al een korte link "${value}". Elke naam kan maar één keer gebruikt worden.`
+  if (await isTakenElsewhere(context, 'shortLink', 'name', value)) {
+    return `Er bestaat al een korte link "${value}". Elke naam kan maar één keer gebruikt worden.`
   }
   return true
 }

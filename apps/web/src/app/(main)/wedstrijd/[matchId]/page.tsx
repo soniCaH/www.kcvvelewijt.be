@@ -5,6 +5,7 @@
  *
  *   MatchStripSlot                 ← top only, mounted by ./layout.tsx (#3027)
  *   <MatchHero>                    ← state-aware; never auto-hides
+ *   <MatchdaySponsor>              ← only when a Matchbal names this Match (#3917)
  *   <StripedSeam>                  ← only when a body section will render
  *   <MatchLineupSection>           ← auto-hides on empty (typically upcoming)
  *   <StripedSeam>                  ← only when both Lineup + Events render
@@ -53,6 +54,10 @@ import {
   type TeamNavVM,
 } from "@/lib/repositories/team.repository";
 import {
+  SponsorRepository,
+  type MatchbalSponsorVM,
+} from "@/lib/repositories/sponsor.repository";
+import {
   PhotoGalleryRepository,
   type GalleryCardVM,
 } from "@/lib/repositories/photoGallery.repository";
@@ -69,6 +74,7 @@ import {
 } from "@/lib/seo/jsonld";
 import { MatchHero } from "@/components/match/MatchHero";
 import { MatchPracticalAnalytics } from "@/components/match/MatchPracticalAnalytics";
+import { MatchdaySponsor } from "@/components/match/MatchdaySponsor";
 import { MatchLineupSection } from "@/components/match/MatchLineupSection";
 import { MatchEventsSection } from "@/components/match/MatchEventsSection";
 import { MatchStandingsSection } from "@/components/match/MatchStandingsSection";
@@ -364,6 +370,23 @@ const MatchPage = async ({ params }: MatchPageProps) => {
 
   const match = await fetchMatchOrNotFound(numericId);
 
+  // The matchday sponsor (Matchbal, #3917), started before the wave below so
+  // it runs in parallel with it. Resilient: a Sanity outage degrades to "no card".
+  const matchbalSponsorPromise = runPromise(
+    Effect.gen(function* () {
+      const repo = yield* SponsorRepository;
+      return yield* repo.findMatchbal(matchId);
+    }).pipe(
+      Effect.catchAllCause((cause) => {
+        console.warn(
+          "[wedstrijd/[matchId]] matchbal lookup failed; rendering without the matchday sponsor.",
+          { cause },
+        );
+        return Effect.succeed<MatchbalSponsorVM | null>(null);
+      }),
+    ),
+  );
+
   // These five depend only on `match` / `matchId` and never on each other, so
   // they run as one wave instead of five serialized round-trips — `max()`
   // latency rather than `sum()` (#2441). Each keeps its own fallback: none of
@@ -449,6 +472,8 @@ const MatchPage = async ({ params }: MatchPageProps) => {
         ),
       ),
     ]);
+
+  const matchbalSponsor = await matchbalSponsorPromise;
 
   // The fourth adapter's output (#2802 review) — `<MatchHero>` renders this
   // directly, and everything gated below it reads `heroRow.kind` rather
@@ -643,6 +668,9 @@ const MatchPage = async ({ params }: MatchPageProps) => {
               Parking · inkom · kantine
             </EditorialLink>
           </MatchPracticalAnalytics>
+        )}
+        {matchbalSponsor && (
+          <MatchdaySponsor sponsor={matchbalSponsor} className="mt-8" />
         )}
       </PageContainer>
 

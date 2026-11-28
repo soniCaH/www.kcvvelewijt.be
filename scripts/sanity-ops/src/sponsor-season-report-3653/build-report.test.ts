@@ -5,6 +5,7 @@ import {
   type Ga4Row,
   type ReportInput,
   type SponsorInput,
+  type Surface,
 } from "./build-report";
 import { hashMemberId } from "./hash-member-id";
 
@@ -36,10 +37,8 @@ const build = (overrides: Partial<ReportInput> = {}) =>
     ...overrides,
   });
 
-const surface = (
-  report: ReturnType<typeof build>[number],
-  name: "homepage" | "team" | "sponsors",
-) => report.surfaces.find((s) => s.surface === name)!;
+const surface = (report: ReturnType<typeof build>[number], name: Surface) =>
+  report.surfaces.find((s) => s.surface === name)!;
 
 describe("buildReport", () => {
   it("groups impressions and clicks by source", () => {
@@ -50,12 +49,15 @@ describe("buildReport", () => {
         row("garage", "sponsor_impression", "team", 25),
         row("garage", "sponsor_impression", "sponsors", 10),
         row("garage", "sponsor_click", "sponsors", 2),
+        row("garage", "sponsor_impression", "match", 7),
+        row("garage", "sponsor_click", "match", 1),
       ],
     });
     expect(report.surfaces.map((s) => s.surface)).toEqual([
       "homepage",
       "team",
       "sponsors",
+      "match",
     ]);
     expect(surface(report, "homepage")).toMatchObject({
       impressions: 40,
@@ -68,6 +70,10 @@ describe("buildReport", () => {
     expect(surface(report, "sponsors")).toMatchObject({
       impressions: 10,
       clicks: 2,
+    });
+    expect(surface(report, "match")).toMatchObject({
+      impressions: 7,
+      clicks: 1,
     });
     expect(report.hasData).toBe(true);
   });

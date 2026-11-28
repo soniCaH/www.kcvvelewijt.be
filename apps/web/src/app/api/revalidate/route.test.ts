@@ -322,6 +322,15 @@ describe("POST /api/revalidate", () => {
     expect(revalidatePath).not.toHaveBeenCalled();
   });
 
+  it("busts only the matchbal tag on a matchbal change, and no path (#3917)", async () => {
+    // Only the Match page's matchday-sponsor read carries it.
+    const res = await post({ _type: "matchbal" });
+    expect(res.status).toBe(200);
+    expect(revalidateTag).toHaveBeenCalledTimes(1);
+    expect(revalidateTag).toHaveBeenCalledWith("matchbal", "max");
+    expect(revalidatePath).not.toHaveBeenCalled();
+  });
+
   it("acks unknown types with 200 and revalidates nothing", async () => {
     const res = await post({ _type: "mysteryType" });
     expect(res.status).toBe(200);

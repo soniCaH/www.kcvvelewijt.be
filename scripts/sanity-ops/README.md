@@ -33,8 +33,8 @@ with a reason next to the call, `draftAwareClient`) from
 ## Sponsor season report
 
 One printable Dutch HTML page per active Sponsor: impressions and clicks per
-surface (homepage, team pages, `/sponsors`), click-through rate from 100
-impressions, linked Teams and spotlight weeks. Raw counts, a minimum and not an
+surface (homepage, team pages, `/sponsors`, the Matchbal card on a Match page),
+click-through rate from 100 impressions, linked Teams and spotlight weeks. Raw counts, a minimum and not an
 estimate. The board mails the pages; they never go on the site. The pure core
 (`build-report.ts`) is tested; `run.ts` is the thin shell.
 

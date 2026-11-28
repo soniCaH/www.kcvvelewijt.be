@@ -13,6 +13,7 @@ export const SANITY_TAGS = {
   banners: "banners",
   galleries: "galleries",
   shortLinks: "shortLinks",
+  matchbal: "matchbal",
 } as const;
 
 /**

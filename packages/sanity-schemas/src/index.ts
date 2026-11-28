@@ -87,6 +87,12 @@ export {
   validateShortLinkTarget,
 } from './validation/short-link'
 export type {ShortLinkNameContext} from './validation/short-link'
+export {matchbal} from './matchbal'
+export {matchbalPreviewSelect, prepareMatchbalPreview} from './preview/matchbal-preview'
+export {validateMatchbalMatchId} from './validation/matchbal'
+export {normalizeDocumentId} from './validation/document-id'
+export {isTakenElsewhere} from './validation/unique-field'
+export type {UniqueFieldContext} from './validation/unique-field'
 
 import {player} from './player'
 import {team} from './team'
@@ -116,6 +122,7 @@ import {membershipApplication} from './membershipApplication'
 import {dartsSignup} from './dartsSignup'
 import {formRoutingConfig} from './formRoutingConfig'
 import {shortLink} from './shortLink'
+import {matchbal} from './matchbal'
 
 export const schemaTypes = [
   player,
@@ -148,4 +155,5 @@ export const schemaTypes = [
   formRoutingConfig,
   shortLink,
   dartsSignup,
+  matchbal,
 ]

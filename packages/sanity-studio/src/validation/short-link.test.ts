@@ -48,7 +48,7 @@ describe('validateShortLinkName', () => {
     await validateShortLinkName('stage', context)
     expect(fetch).toHaveBeenCalledTimes(1)
     expect(fetch.mock.calls[0][0]).toContain('!(_id in [$id, "drafts." + $id])')
-    expect(fetch.mock.calls[0][1]).toEqual({name: 'stage', id: 'shortLink-stage'})
+    expect(fetch.mock.calls[0][1]).toEqual({type: 'shortLink', value: 'stage', id: 'shortLink-stage'})
   })
 
   it('does not hit Sanity for a name it already refuses', async () => {

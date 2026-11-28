@@ -128,6 +128,9 @@ A club event or announcement. _Evenement_.
 **Sponsor**:
 A partner of the club.
 
+**Matchbal**:
+The Sponsor that offered the match ball for one Match; the Match page names it. _Matchbal_. [Details](docs/domain-reference.md#matchbal).
+
 **Sponsor Package**:
 What a sponsor bought; a name, not a rank. [Values](docs/domain-reference.md#sponsor).
 

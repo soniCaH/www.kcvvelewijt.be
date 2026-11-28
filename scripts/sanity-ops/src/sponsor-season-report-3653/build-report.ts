@@ -5,7 +5,8 @@
  */
 import { hashMemberId } from "./hash-member-id";
 
-export const SURFACES = ["homepage", "team", "sponsors"] as const;
+/** `match`: the matchday sponsor (Matchbal) card on a Match page (#3917). */
+export const SURFACES = ["homepage", "team", "sponsors", "match"] as const;
 export type Surface = (typeof SURFACES)[number];
 
 /** A rate on a handful of impressions is noise: omitted below this. */

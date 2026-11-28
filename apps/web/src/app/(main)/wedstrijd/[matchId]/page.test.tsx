@@ -28,14 +28,17 @@ vi.mock("next/navigation", async (importOriginal) => ({
   },
 }));
 
-const { mockGetMatchDetail, mockTrackEvent } = vi.hoisted(() => ({
-  mockGetMatchDetail: vi.fn(),
-  mockTrackEvent: vi.fn(),
-}));
+const { mockGetMatchDetail, mockTrackEvent, mockFindMatchbal } = vi.hoisted(
+  () => ({
+    mockGetMatchDetail: vi.fn(),
+    mockTrackEvent: vi.fn(),
+    mockFindMatchbal: vi.fn(),
+  }),
+);
 
 vi.mock("@/lib/analytics/track-event", () => ({ trackEvent: mockTrackEvent }));
 
-// The page's four Sanity reads each degrade on failure; stubbing them keeps
+// The page's five Sanity reads each degrade on failure; stubbing them keeps
 // the whole-page render off the network.
 vi.mock("@/lib/repositories/player.repository", async (importOriginal) => {
   const mod =
@@ -76,6 +79,18 @@ vi.mock(
     };
   },
 );
+vi.mock("@/lib/repositories/sponsor.repository", async (importOriginal) => {
+  const mod =
+    await importOriginal<
+      typeof import("@/lib/repositories/sponsor.repository")
+    >();
+  return {
+    ...mod,
+    SponsorRepositoryLive: Layer.succeed(mod.SponsorRepository, {
+      findMatchbal: mockFindMatchbal,
+    } as never),
+  };
+});
 vi.mock("@/lib/repositories/team.repository", async (importOriginal) => {
   const mod =
     await importOriginal<typeof import("@/lib/repositories/team.repository")>();
@@ -176,6 +191,7 @@ describe("/wedstrijd/[matchId] practical link (#3634)", () => {
   });
 
   const renderPage = async (overrides = {}) => {
+    mockFindMatchbal.mockReturnValue(Effect.succeed(null));
     mockGetMatchDetail.mockReturnValue(
       Effect.succeed(createMatchDetail({ id: 3602, ...overrides })),
     );
@@ -212,5 +228,51 @@ describe("/wedstrijd/[matchId] practical link (#3634)", () => {
         { match_id: 3602, status: "scheduled", destination: "/club/contact" },
       ],
     ]);
+  });
+});
+
+describe("/wedstrijd/[matchId] matchday sponsor (#3917)", () => {
+  beforeEach(() => {
+    mockGetMatchDetail.mockReset();
+    mockFindMatchbal.mockReset();
+    mockGetMatchDetail.mockReturnValue(
+      Effect.succeed(createMatchDetail({ id: 3602 })),
+    );
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("names the Matchbal Sponsor of this Match", async () => {
+    mockFindMatchbal.mockReturnValue(
+      Effect.succeed({
+        id: "sponsor-1",
+        name: "Alupoort",
+        url: "https://www.alupoort.be",
+        logoUrl: null,
+      }),
+    );
+    render(await MatchPage({ params: params("3602") }));
+
+    expect(mockFindMatchbal).toHaveBeenCalledWith("3602");
+    expect(screen.getByTestId("matchday-sponsor")).toHaveTextContent(
+      "Matchbal aangeboden doorAlupoort",
+    );
+  });
+
+  it("shows nothing for a Match without a Matchbal", async () => {
+    mockFindMatchbal.mockReturnValue(Effect.succeed(null));
+    render(await MatchPage({ params: params("3602") }));
+
+    expect(screen.queryByTestId("matchday-sponsor")).toBeNull();
+  });
+
+  it("shows nothing when the read fails, and the page still renders", async () => {
+    mockFindMatchbal.mockReturnValue(Effect.die(new Error("sanity down")));
+    render(await MatchPage({ params: params("3602") }));
+
+    expect(screen.queryByTestId("matchday-sponsor")).toBeNull();
+    expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
   });
 });
