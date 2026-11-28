@@ -153,3 +153,7 @@ revise them. The AWS and Drupal documents are cut down; the full versions are ke
 ## Code audits
 
 Standalone audits of this codebase, dated and frozen: cite them, do not revise them. [`parse-dont-validate.md`](./parse-dont-validate.md) (2026-11-25): where untrusted input enters, whether it is decoded at the edge with Effect Schema, and ten ranked gaps.
+
+## Content questions
+
+Dated and frozen like the rest. [`jeugd-grid-twelfth-tile.md`](./jeugd-grid-twelfth-tile.md) (2026-11-28, #3911): how the `/jeugd` grid reaches 11 tiles, and which tile makes it 12.

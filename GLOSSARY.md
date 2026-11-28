@@ -50,6 +50,10 @@ _Avoid_: return round
 **Season**:
 The football year a match or team belongs to, written `’25/’26`. _Seizoen_.
 
+**Sportsite**:
+The club's grounds in the Driesstraat in Elewijt: the pitches, the kleedkamers and the kantine. _Sportsite_.
+_Avoid_: stadion, complex
+
 ### Teams
 
 **Team**:
@@ -203,7 +207,7 @@ The club's own API between the website and its data sources (Backend For Fronten
 _Avoid_: Footbalisto, Drupal API
 
 **PSD**:
-ProSoccerData, the outside provider that owns matches, rankings, statistics, players, teams and staff membership.
+ProSoccerData, the outside provider that owns matches, rankings, statistics, players, teams and staff membership. For members and parents it is also the club's official channel: announcements, match and training schedules and their changes, and afmelden.
 _Avoid_: Footbalisto
 
 **Sanity**:
