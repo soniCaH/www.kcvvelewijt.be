@@ -38,6 +38,7 @@ export class BffService extends Context.Tag("BffService")<
     getMatches: (teamId: number) => Effect.Effect<readonly Match[], BffError>;
     getNextMatches: () => Effect.Effect<readonly Match[], BffError>;
     getMatchesWindow: () => Effect.Effect<readonly Match[], BffError>;
+    getUpcomingMatches: () => Effect.Effect<readonly Match[], BffError>;
     getMatchDetail: (matchId: number) => Effect.Effect<MatchDetail, BffError>;
     getRanking: (
       teamId: number,
@@ -113,6 +114,10 @@ export const BffServiceLive = Layer.effect(
       getMatchesWindow: () =>
         client.matches
           .getMatchesWindow({})
+          .pipe(Effect.timeout(DEFAULT_TIMEOUT)),
+      getUpcomingMatches: () =>
+        client.matches
+          .getUpcomingMatches({})
           .pipe(Effect.timeout(DEFAULT_TIMEOUT)),
       getMatchDetail: (matchId: number) =>
         client.matches

@@ -101,6 +101,17 @@ export const getNextMatchesHandler = (): Effect.Effect<
     );
 };
 
+/**
+ * Serve-time filter (#3629): a list's lower bound (start of the Brussels day)
+ * is fixed at fetch time, and a cached list can outlive its day, so
+ * yesterday's matches would keep showing. Applied on every serve (fresh,
+ * stale or just fetched).
+ */
+const dropBeforeToday = (matches: readonly Match[]): readonly Match[] => {
+  const startOfToday = startOfBrusselsDayMs(Date.now());
+  return matches.filter((m) => kickoffMs(m.date) >= startOfToday);
+};
+
 export const getMatchesWindowHandler = (): Effect.Effect<
   readonly Match[],
   BffError,
@@ -118,15 +129,9 @@ export const getMatchesWindowHandler = (): Effect.Effect<
       isPartial: isPartialFanout,
     })
     .pipe(
-      // Serve-time filter (#3629): the window's lower bound (start of the
-      // Brussels day) is fixed at fetch time, and the 12 h tier lets a list
-      // outlive its day: yesterday's matches would keep showing. Drop them on
-      // every serve (fresh, stale or just fetched). The stored value stays
-      // unfiltered, so `matchesWindowTtl` still sees it.
-      Effect.map((matches) => {
-        const startOfToday = startOfBrusselsDayMs(Date.now());
-        return matches.filter((m) => kickoffMs(m.date) >= startOfToday);
-      }),
+      // Serve-time filter (#3629): the stored value stays unfiltered, so
+      // `matchesWindowTtl` still sees it.
+      Effect.map(dropBeforeToday),
     );
 };
 
@@ -152,14 +157,7 @@ export const getUpcomingMatchesHandler = (): Effect.Effect<
       shouldServeStale,
       isPartial: isPartialFanout,
     })
-    .pipe(
-      // Same serve-time filter as `getMatchesWindowHandler` (#3629): a list
-      // fetched yesterday still holds yesterday's matches.
-      Effect.map((matches) => {
-        const startOfToday = startOfBrusselsDayMs(Date.now());
-        return matches.filter((m) => kickoffMs(m.date) >= startOfToday);
-      }),
-    );
+    .pipe(Effect.map(dropBeforeToday));
 };
 
 const HOUR_MS = 60 * 60 * 1000;

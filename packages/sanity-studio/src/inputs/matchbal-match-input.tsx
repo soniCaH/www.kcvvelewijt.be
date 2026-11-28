@@ -38,7 +38,7 @@ export const MatchbalMatchInput = (props: StringInputProps): JSX.Element => {
   }, [])
 
   const options = list.status === 'ready' ? list.options : []
-  const current = value ? options.find((o) => o.value === value) : undefined
+  const current = options.find((o) => o.value === value)
 
   return (
     <Stack gap={3}>
@@ -75,7 +75,6 @@ export const MatchbalMatchInput = (props: StringInputProps): JSX.Element => {
               <Text size={1}>{option.line}</Text>
             </Card>
           )}
-          renderValue={(id, option) => option?.line ?? id}
           onSelect={(id) => onChange(PatchEvent.from(set(id)))}
         />
       )}

@@ -55,6 +55,7 @@ vi.mock("@/lib/effect/services/BffService", async (importOriginal) => {
       getMatches: () => Effect.succeed([]),
       getNextMatches: mockGetNextMatches,
       getMatchesWindow: () => Effect.die("not used by this suite"),
+      getUpcomingMatches: () => Effect.die("not used by this suite"),
       getMatchDetail: () => Effect.die("not used by this suite"),
       getRanking: () => Effect.die("not used by this suite"),
       getRelated: () => Effect.die("not used by this suite"),

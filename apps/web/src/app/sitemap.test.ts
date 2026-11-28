@@ -26,6 +26,7 @@ vi.mock("@/lib/effect/services/BffService", async (importOriginal) => {
       getMatches: mockGetMatches,
       getNextMatches: () => Effect.succeed([]),
       getMatchesWindow: () => Effect.succeed([]),
+      getUpcomingMatches: () => Effect.succeed([]),
       getMatchDetail: () => Effect.die("not used by the sitemap"),
       getRanking: () => Effect.succeed([]),
       getRelated: () => Effect.succeed([]),
